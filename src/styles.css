@@ -355,9 +355,10 @@ a:hover {
     width: 100%;
     border-collapse: collapse;
     margin: 1.5rem 0;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     overflow-x: auto;
-    display: block;
+    display: table;
+    table-layout: auto;
 }
 
 .content thead {
@@ -366,15 +367,23 @@ a:hover {
 
 .content th,
 .content td {
-    padding: 0.7rem 1rem;
+    padding: 0.75rem 1.2rem;
     border: 1px solid var(--border);
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* 左端の列（項目名）は左揃え・幅広 */
+.content th:first-child,
+.content td:first-child {
     text-align: left;
+    min-width: 140px;
+    white-space: nowrap;
 }
 
 .content th {
     font-weight: 600;
     color: var(--accent);
-    white-space: nowrap;
 }
 
 .content td {
