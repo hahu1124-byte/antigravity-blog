@@ -43,7 +43,7 @@ if (existsSync(cssSrc)) {
 // 共通HTMLテンプレート
 // ==========================================
 
-function htmlHead(title, description) {
+function htmlHead(title, description, cssRelPath = 'styles.css') {
     return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -51,7 +51,7 @@ function htmlHead(title, description) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapeHtml(title)} | Gravity Portal</title>
     <meta name="description" content="${escapeHtml(description)}">
-    <link rel="stylesheet" href="/blog/styles.css">
+    <link rel="stylesheet" href="${cssRelPath}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -133,7 +133,11 @@ function buildArticlePages() {
                 <span class="post-nav-title">${escapeHtml(prev.title)}</span>
             </a>` : '';
 
-        const html = `${htmlHead(post.title, post.excerpt)}
+        // CSSへの相対パスを計算（slugの階層分だけ..を重ねる）
+        const depth = post.slug.split('/').length;
+        const cssRelPath = '../'.repeat(depth) + 'styles.css';
+
+        const html = `${htmlHead(post.title, post.excerpt, cssRelPath)}
     <div class="article-page">
         <nav class="breadcrumb">
             <a href="https://antigravity-portal.com/">トップ</a>
