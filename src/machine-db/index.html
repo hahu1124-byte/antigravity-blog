@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>機種データベース | Gravity Portal</title>
+    <link rel="stylesheet" href="machine-db.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- フィルターバー -->
+        <div class="filter-bar">
+            <div class="filter-row">
+                <div class="filter-group search-group">
+                    <label for="search-input">🔍 機種名検索</label>
+                    <input type="text" id="search-input" placeholder="機種名を入力..." autocomplete="off">
+                </div>
+                <div class="filter-group">
+                    <label for="type-filter">タイプ</label>
+                    <select id="type-filter">
+                        <option value="all">すべて</option>
+                        <option value="ハイミドル">ハイミドル</option>
+                        <option value="ミドル">ミドル</option>
+                        <option value="ライトミドル">ライトミドル</option>
+                        <option value="ライト(甘デジ)">甘デジ</option>
+                        <option value="その他">その他</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="yutime-filter">遊タイム</label>
+                    <select id="yutime-filter">
+                        <option value="all">すべて</option>
+                        <option value="yes">搭載機のみ</option>
+                        <option value="no">非搭載のみ</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="year-filter">年代</label>
+                    <select id="year-filter">
+                        <option value="2022" selected>2022年以降</option>
+                        <option value="2024">2024年以降</option>
+                        <option value="2025">2025年以降</option>
+                        <option value="all">すべて</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-row filter-tags" id="active-filters"></div>
+        </div>
+
+        <!-- 統計バー + 列表示切替 -->
+        <div class="stats-bar">
+            <div class="stats-left">
+                <span id="machine-count" class="stat-badge">0 機種</span>
+                <span id="filtered-info" class="stat-info"></span>
+                <button id="col-toggle-btn" class="col-toggle-btn" title="表示列の切替">⚙ 列設定</button>
+                <button id="col-reset-btn" class="col-reset-btn" title="列設定を初期状態に戻す">↺ リセット</button>
+            </div>
+            <div class="stats-right">
+                <span id="last-updated" class="stat-date">更新: --</span>
+                <span class="stat-credit">
+                    データ: <a href="https://pachinko-spec.info/" target="_blank" rel="noopener">pachinko-spec.info</a>
+                    / Posted by まつげ
+                </span>
+            </div>
+        </div>
+
+        <!-- 列表示設定パネル -->
+        <div id="col-settings" class="col-settings hidden">
+            <div class="col-settings-inner" id="col-settings-list">
+                <label draggable="true" data-col-order="type"><span class="drag-handle">☰</span><input type="checkbox"
+                        data-col="type" checked> タイプ</label>
+                <label draggable="true" data-col-order="baseProb"><span class="drag-handle">☰</span><input
+                        type="checkbox" data-col="baseProb" checked> 大当り確率</label>
+                <label draggable="true" data-col-order="prob"><span class="drag-handle">☰</span><input type="checkbox"
+                        data-col="prob" checked> トータル確率</label>
+                <label draggable="true" data-col-order="border"><span class="drag-handle">☰</span><input type="checkbox"
+                        data-col="border" checked> ボーダー</label>
+                <label draggable="true" data-col-order="rb"><span class="drag-handle">☰</span><input type="checkbox"
+                        data-col="rb"> 想定1R出玉</label>
+                <label draggable="true" data-col-order="chain"><span class="drag-handle">☰</span><input type="checkbox"
+                        data-col="chain"> 平均連荘</label>
+                <label draggable="true" data-col-order="avg"><span class="drag-handle">☰</span><input type="checkbox"
+                        data-col="avg" checked> 平均獲得</label>
+                <label draggable="true" data-col-order="entry"><span class="drag-handle">☰</span><input type="checkbox"
+                        data-col="entry" checked> 突入率</label>
+                <label draggable="true" data-col-order="cont"><span class="drag-handle">☰</span><input type="checkbox"
+                        data-col="cont" checked> 継続率(継続)</label>
+                <label draggable="true" data-col-order="yutime"><span class="drag-handle">☰</span><input type="checkbox"
+                        data-col="yutime" checked> 遊タイム</label>
+                <label draggable="true" data-col-order="release"><span class="drag-handle">☰</span><input
+                        type="checkbox" data-col="release" checked> 導入日</label>
+            </div>
+        </div>
+
+        <!-- テーブル -->
+        <div class="table-container">
+            <div class="table-scroll" id="table-scroll">
+                <table id="machine-table">
+                    <thead>
+                        <tr id="header-row">
+                            <!-- ヘッダーはJSで動的生成（列順序対応） -->
+                        </tr>
+                    </thead>
+                    <tbody id="machine-tbody"></tbody>
+                </table>
+                <div id="no-results" class="hidden">検索結果がありません</div>
+                <div id="loading">⏳ 機種データを読み込み中...</div>
+            </div>
+            <div class="scroll-indicator" id="scroll-indicator"></div>
+        </div>
+
+        <!-- ページング -->
+        <div class="paging-bar" id="paging-bar">
+            <button id="prev-btn" class="page-btn" disabled>← 前へ</button>
+            <span id="page-info" class="page-info">1 / 1</span>
+            <button id="next-btn" class="page-btn">次へ →</button>
+            <select id="per-page" class="per-page-select" title="表示件数">
+                <option value="10">10件</option>
+                <option value="20" selected>20件</option>
+                <option value="50">50件</option>
+            </select>
+        </div>
+
+        <!-- 詳細モーダル -->
+        <div id="detail-modal" class="modal hidden">
+            <div class="modal-backdrop"></div>
+            <div class="modal-content">
+                <button class="modal-close" id="modal-close">✕</button>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+    </div>
+    <script src="machine-db.js"></script>
+</body>
+
+</html>

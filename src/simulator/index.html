@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EVANGELION Sim -2025 Final-</title>
+    <!-- 分割したCSSを読み込み -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header>
+        <button class="header-btn">機種選択</button>
+        <button class="header-btn btn-graph" onclick="openModal()">データグラフ</button>
+        <button class="header-btn" onclick="resetData()">リセット</button>
+        <div id="max-hamari-box" class="max-hamari-display">最大ハマリ: 0</div>
+        <!-- ダーク・ライトモード切替ボタン追加 -->
+        <button class="header-btn" id="btn-theme" onclick="toggleTheme()" style="margin-left: auto;">ライト☀️</button>
+    </header>
+
+    <div id="modal-overlay">
+        <div id="modal-content">
+            <span style="float:right; cursor:pointer; font-size:1.5rem;" onclick="closeModal()">×</span>
+            <h3 style="font-size: 0.9rem; margin: 0 0 10px 0; color: #8a2be2;">差玉スランプグラフ</h3>
+            <div class="graph-area"><canvas id="slumpChart"></canvas></div>
+            <h3 style="font-size: 0.9rem; margin: 0 0 10px 0; color: #8a2be2;">連荘履歴</h3>
+            <div class="graph-area"><canvas id="historyChart"></canvas></div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="machine" id="machine">
+            <div id="lamp" class="hidden-lamp"></div>
+            <div class="screen" id="screen">
+                <div id="effect-overlay" class="effect-text"></div>
+                <div class="digit-container">
+                    <div id="d1" class="digit odd">3</div>
+                    <div id="d2" class="digit odd">5</div>
+                    <div id="d3" class="digit odd">7</div>
+                </div>
+                <div id="v-stock" class="v-stock-anim" style="display: none;">V</div>
+                <div id="sub-display" class="mode-display">通常:0</div>
+                <div id="stock-count-display"
+                    style="position: absolute; bottom: 5px; left: 10px; font-size: 0.75rem; color: #fff; background: rgba(0,0,0,0.5); padding: 2px 5px; border-radius: 3px; border-left: 3px solid #ff4444; z-index: 10;">
+                    0 / 0</div>
+                <div id="heso-area" class="heso-overlay">
+                    <div id="h0" class="heso-ball heso-current"></div>
+                    <div id="h1" class="heso-ball"></div>
+                    <div id="h2" class="heso-ball"></div>
+                    <div id="h3" class="heso-ball"></div>
+                    <div id="h4" class="heso-ball"></div>
+                </div>
+                <div id="denchu-area" class="heso-overlay right-mode" style="display: none;">
+                    <div id="d_h0" class="heso-ball heso-current"></div>
+                    <div id="d_h1" class="heso-ball"></div>
+                    <div id="d_h2" class="heso-ball"></div>
+                    <div id="d_h3" class="heso-ball"></div>
+                    <div id="d_h4" class="heso-ball"></div>
+                </div>
+            </div>
+            <div class="stat-grid">
+                <div class="stat-item"><span class="stat-label">大当り</span><span id="hits" class="stat-val">0</span>
+                </div>
+                <div class="stat-item"><span class="stat-label">連チャン</span><span id="rush-count"
+                        class="stat-val">0</span></div>
+                <div class="stat-item"><span class="stat-label">現在回転</span><span id="current-rot"
+                        class="stat-val">0</span></div>
+                <div class="stat-item"><span class="stat-label">累計回転</span><span id="total-rot"
+                        class="stat-val">0</span></div>
+                <div class="stat-item"><span class="stat-label">差玉数</span><span id="balance" class="stat-val">0</span>
+                </div>
+            </div>
+            <div class="control-panel">
+                <div class="side-btns">
+                    <button id="btn-all" class="side-btn" onclick="toggleOpt('all')">全</button>
+                    <button id="btn-kokuchi" class="side-btn" onclick="toggleOpt('kokuchi')">告知</button>
+                </div>
+                <button class="btn-auto" id="btn-slow" onclick="toggleAuto('slow')">低速オート</button>
+                <button class="btn-auto" id="btn-fast" onclick="toggleAuto('fast')">高速オート</button>
+            </div>
+        </div>
+        <div class="log" id="log">> システム起動完了</div>
+    </div>
+
+    <!-- Chart.js ライブラリ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 分割したJSを読み込み -->
+    <script src="js/script.js"></script>
+</body>
+
+</html>

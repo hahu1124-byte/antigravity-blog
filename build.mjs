@@ -39,6 +39,18 @@ if (existsSync(cssSrc)) {
     console.log('🎨 CSSコピー完了');
 }
 
+// 静的ツールをコピー（convergence, simulator, machine-db等）
+const staticTools = ['convergence', 'simulator', 'machine-db', 'data'];
+for (const tool of staticTools) {
+    const toolSrc = join(__dirname, 'src', tool);
+    const toolDst = join(OUTPUT_DIR, tool);
+    if (existsSync(toolSrc)) {
+        mkdirSync(toolDst, { recursive: true });
+        cpSync(toolSrc, toolDst, { recursive: true });
+        console.log(`🔧 ${tool} コピー完了`);
+    }
+}
+
 // ==========================================
 // 共通HTMLテンプレート
 // ==========================================

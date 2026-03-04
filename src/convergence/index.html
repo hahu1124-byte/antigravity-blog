@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>確率収束シミュレーター | Gravity Portal</title>
+    <link rel="stylesheet" href="convergence.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- コントロールパネル -->
+        <div class="control-panel">
+            <div class="input-row">
+                <div class="input-group">
+                    <label for="prob-input">大当り確率 (1/X)</label>
+                    <input type="number" id="prob-input" value="319.6" step="0.1" min="1" max="9999">
+                </div>
+                <div class="input-group">
+                    <label for="trial-count">試行回転数</label>
+                    <select id="trial-count">
+                        <option value="1000">1,000回転</option>
+                        <option value="3000">3,000回転</option>
+                        <option value="5000">5,000回転</option>
+                        <option value="10000" selected>10,000回転</option>
+                        <option value="30000">30,000回転</option>
+                        <option value="50000">50,000回転</option>
+                        <option value="100000">100,000回転</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="sim-count">シミュレーション回数</label>
+                    <select id="sim-count">
+                        <option value="10">10回</option>
+                        <option value="50" selected>50回</option>
+                        <option value="100">100回</option>
+                        <option value="200">200回</option>
+                    </select>
+                </div>
+                <button id="run-btn" class="run-button">▶ シミュレーション実行</button>
+            </div>
+        </div>
+
+        <!-- メイングラフ -->
+        <div class="chart-container">
+            <canvas id="main-chart"></canvas>
+            <div id="chart-placeholder" class="chart-placeholder">
+                <div class="placeholder-icon">📊</div>
+                <p>「シミュレーション実行」を押すとグラフが表示されます</p>
+                <p class="placeholder-sub">各試行の確率推移と95%信頼区間を可視化します</p>
+            </div>
+        </div>
+
+        <!-- 統計サマリー -->
+        <div id="stats-panel" class="stats-panel hidden">
+            <div class="stat-card">
+                <div class="stat-label">理論確率</div>
+                <div class="stat-value" id="stat-theoretical">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">平均実確率</div>
+                <div class="stat-value" id="stat-avg">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">最も偏った試行</div>
+                <div class="stat-value" id="stat-worst">--</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">95%信頼区間に収まった割合</div>
+                <div class="stat-value" id="stat-in-range">--</div>
+            </div>
+            <div class="stat-card full-width">
+                <div class="stat-label">収束の目安</div>
+                <div class="stat-value" id="stat-convergence">--</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="convergence.js"></script>
+</body>
+
+</html>

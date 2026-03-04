@@ -1,0 +1,232 @@
+/* 確率収束シミュレーター - スタイル */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0a0b10;
+    color: #e0e0e8;
+    min-height: 100vh;
+}
+
+#app {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* コントロールパネル */
+.control-panel {
+    background: rgba(30, 32, 48, 0.8);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+.input-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+    min-width: 140px;
+}
+
+.input-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #8b8fa0;
+}
+
+.input-group input,
+.input-group select {
+    background: #12131a;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    color: #e0e0e8;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    border-color: #7c7ff2;
+}
+
+.run-button {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border: none;
+    border-radius: 10px;
+    padding: 0.6rem 1.5rem;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+    min-width: 180px;
+}
+
+.run-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+}
+
+.run-button:active {
+    transform: translateY(0);
+}
+
+.run-button.running {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+/* グラフコンテナ */
+.chart-container {
+    position: relative;
+    background: rgba(18, 19, 26, 0.9);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    min-height: 400px;
+}
+
+canvas {
+    width: 100% !important;
+    height: 400px !important;
+}
+
+.chart-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #6b6f80;
+    gap: 0.5rem;
+}
+
+.placeholder-icon {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.placeholder-sub {
+    font-size: 0.8rem;
+    opacity: 0.6;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* 統計パネル */
+.stats-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.75rem;
+}
+
+.stat-card {
+    background: rgba(30, 32, 48, 0.8);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.stat-card.full-width {
+    grid-column: 1 / -1;
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #8b8fa0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    font-family: 'SF Mono', 'Consolas', monospace;
+    color: #e8e8f0;
+}
+
+.stat-value.positive {
+    color: #22c55e;
+}
+
+.stat-value.warning {
+    color: #eab308;
+}
+
+.stat-value.negative {
+    color: #ef4444;
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+    .input-row {
+        flex-direction: column;
+    }
+
+    canvas {
+        height: 300px !important;
+    }
+
+    .chart-container {
+        min-height: 300px;
+    }
+
+    .stats-panel {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ライトモード */
+[data-theme="light"] body {
+    background: #f5f6fa;
+    color: #1a1b2e;
+}
+
+[data-theme="light"] .control-panel,
+[data-theme="light"] .stat-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .chart-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .input-group input,
+[data-theme="light"] .input-group select {
+    background: #fff;
+    border-color: rgba(0, 0, 0, 0.15);
+    color: #1a1b2e;
+}
+
+[data-theme="light"] .stat-value {
+    color: #1a1b2e;
+}
