@@ -22,6 +22,11 @@ console.log(`📝 ${posts.length} 記事を処理中...`);
 mkdirSync(OUTPUT_DIR, { recursive: true });
 mkdirSync(join(OUTPUT_DIR, 'blog'), { recursive: true });
 
+// blog-data.json（メタデータのみ版）をdistに出力（Vercel側からfetch用）
+const metaOnly = posts.map(({ slug, title, date, excerpt, tags }) => ({ slug, title, date, excerpt, tags }));
+writeFileSync(join(OUTPUT_DIR, 'blog-data.json'), JSON.stringify(metaOnly), 'utf-8');
+console.log('📦 blog-data.json (メタデータ版) 出力完了');
+
 // 画像をコピー
 const imgSrc = join(__dirname, 'src', 'images');
 const imgDst = join(OUTPUT_DIR, 'blog', 'images');
