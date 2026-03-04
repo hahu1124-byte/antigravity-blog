@@ -74,7 +74,7 @@ function escapeHtml(text) {
 
 function buildIndexPage() {
     const cards = posts.map(post => `
-        <a href="/blog/${post.slug}" class="article-card">
+        <a href="${post.slug}/" class="article-card">
             <div class="card-header">
                 <time class="date">${post.date}</time>
                 <div class="tags">
@@ -122,28 +122,34 @@ function buildArticlePages() {
         const prev = index > 0 ? posts[index - 1] : null;
         const next = index < posts.length - 1 ? posts[index + 1] : null;
 
+        // 相対パスのベースを計算（slugの階層分だけ../を重ねる）
+        const depth = post.slug.split('/').length;
+        const toRoot = '../'.repeat(depth);  // blog/ ルートへの相対パス
+
+        // 前後記事の相対リンクを計算
         const prevNav = next ? `
-            <a href="/blog/${next.slug}" class="post-nav-link">
+            <a href="${toRoot}${next.slug}/" class="post-nav-link">
                 <span class="post-nav-label">← 前の記事</span>
                 <span class="post-nav-title">${escapeHtml(next.title)}</span>
             </a>` : '';
 
         const nextNav = prev ? `
-            <a href="/blog/${prev.slug}" class="post-nav-link">
+            <a href="${toRoot}${prev.slug}/" class="post-nav-link">
                 <span class="post-nav-label">次の記事 →</span>
                 <span class="post-nav-title">${escapeHtml(prev.title)}</span>
             </a>` : '';
 
-        // CSSへの相対パスを計算（slugの階層分だけ..を重ねる）
-        const depth = post.slug.split('/').length;
-        const cssRelPath = '../'.repeat(depth) + 'styles.css';
+        const cssRelPath = toRoot + 'styles.css';
+
+        // 記事content内の絶対画像パスを相対パスに変換
+        const content = post.content.replace(/src="\/blog\/images\//g, `src="${toRoot}images/`);
 
         const html = `${htmlHead(post.title, post.excerpt, cssRelPath)}
     <div class="article-page">
         <nav class="breadcrumb">
             <a href="https://antigravity-portal.com/">トップ</a>
             <span class="separator">/</span>
-            <a href="/blog">ブログ</a>
+            <a href="${toRoot}">ブログ</a>
             <span class="separator">/</span>
             <span class="current">${escapeHtml(post.title)}</span>
         </nav>
@@ -160,7 +166,7 @@ function buildArticlePages() {
             </header>
 
             <div class="content">
-                ${post.content}
+                ${content}
             </div>
         </article>
 
@@ -171,7 +177,7 @@ function buildArticlePages() {
 
         <nav class="back-nav">
             <a href="https://antigravity-portal.com/" class="back-link">🏠 TOPに戻る</a>
-            <a href="/blog" class="back-link">← 記事一覧に戻る</a>
+            <a href="${toRoot}" class="back-link">← 記事一覧に戻る</a>
         </nav>
     </div>
 </body>
