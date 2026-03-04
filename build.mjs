@@ -44,6 +44,7 @@ if (existsSync(cssSrc)) {
 // ==========================================
 
 function htmlHead(title, description, cssRelPath = 'styles.css') {
+    const cacheBust = Date.now();
     return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -51,7 +52,7 @@ function htmlHead(title, description, cssRelPath = 'styles.css') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapeHtml(title)} | Gravity Portal</title>
     <meta name="description" content="${escapeHtml(description)}">
-    <link rel="stylesheet" href="${cssRelPath}">
+    <link rel="stylesheet" href="${cssRelPath}?v=${cacheBust}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
