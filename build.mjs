@@ -77,7 +77,23 @@ function htmlHead(title, description, cssRelPath = 'styles.css') {
         (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
     </script>
 </head>
-<body>`;
+<body>
+    <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
+    <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>`;
 }
 
 function escapeHtml(text) {
@@ -86,6 +102,87 @@ function escapeHtml(text) {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+}
+
+// ==========================================
+// Amazon アフィリエイト広告（記事末尾挿入）
+// ==========================================
+
+const AMAZON_TAG = 'gravity063-22';
+
+/** Uber配達で使うもの一覧（記事1-2・週報向け） */
+const UBER_GEAR_ADS = [
+    { title: 'モバイルバッテリー', search: 'モバイルバッテリー 大容量 急速充電', emoji: '🔋' },
+    { title: 'スマホホルダー（車用）', search: 'スマホホルダー 車 エアコン吹き出し口', emoji: '📱' },
+    { title: '保温・保冷バッグ', search: 'デリバリー 保温バッグ 配達', emoji: '🧊' },
+    { title: 'USB充電ケーブル', search: 'USB-C 充電ケーブル 車用 急速', emoji: '🔌' },
+    { title: '腰痛対策クッション', search: '車用 腰痛 クッション シートクッション', emoji: '💺' },
+    { title: '飲み物ホルダー（保温）', search: 'タンブラー 保温 ドリンクホルダー 車', emoji: '☕' },
+];
+
+/** Uber日報向け（コンパクト版） */
+const UBER_DAILY_ADS = [
+    { title: 'モバイルバッテリー', search: 'モバイルバッテリー 大容量', emoji: '🔋' },
+    { title: 'スマホホルダー', search: 'スマホホルダー 車用', emoji: '📱' },
+    { title: '保温バッグ', search: 'デリバリー 保温バッグ', emoji: '🧊' },
+];
+
+/** パチンコ記事向け */
+const PACHINKO_ADS = [
+    { title: 'パチンコ攻略マガジン', search: 'パチンコ攻略マガジン', emoji: '📖' },
+    { title: 'パチンコ攻略年鑑 2026', search: 'パチンコ必勝ガイド 攻略年鑑 2026', emoji: '📕' },
+    { title: '確率論入門', search: '確率論 入門 数学', emoji: '📐' },
+];
+
+function amazonSearchUrl(keyword) {
+    return `https://www.amazon.co.jp/s?k=${encodeURIComponent(keyword)}&tag=${AMAZON_TAG}`;
+}
+
+function getAmazonAdsHtml(post) {
+    const tags = post.tags || [];
+    const isWeekly = tags.includes('週報');
+    const isUber = tags.includes('Uber');
+    const isPachinko = tags.includes('パチンコ');
+
+    // 広告商品を選択
+    let items;
+    let sectionTitle;
+    if (isWeekly || (isUber && isPachinko)) {
+        items = UBER_GEAR_ADS;
+        sectionTitle = '🚗 Uber配達で使うもの一覧';
+    } else if (isUber) {
+        items = UBER_DAILY_ADS;
+        sectionTitle = '🚗 配達に役立つアイテム';
+    } else if (isPachinko) {
+        items = PACHINKO_ADS;
+        sectionTitle = '📚 パチンコ攻略に役立つ本';
+    } else {
+        items = UBER_DAILY_ADS;
+        sectionTitle = '📦 おすすめアイテム';
+    }
+
+    const itemCards = items.map(item => `
+        <a href="${amazonSearchUrl(item.search)}" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">${item.emoji}</span>
+            <span class="amazon-ad-title">${escapeHtml(item.title)}</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>`).join('\n');
+
+    return `
+        <div class="amazon-ads-section">
+            <h3 class="amazon-ads-heading">${sectionTitle}</h3>
+            <div class="amazon-ads-grid">
+                ${itemCards}
+            </div>
+            <div class="amazon-search-box">
+                <p class="amazon-search-label">🔍 Amazonで探す</p>
+                <form onsubmit="window.open('https://www.amazon.co.jp/s?k='+encodeURIComponent(this.q.value)+'&tag=${AMAZON_TAG}','_blank');return false;" class="amazon-search-form">
+                    <input type="text" name="q" placeholder="キーワードを入力..." class="amazon-search-input" />
+                    <button type="submit" class="amazon-search-btn">検索</button>
+                </form>
+            </div>
+            <p class="amazon-ads-note">※ 上記リンクはAmazonアソシエイトリンクです</p>
+        </div>`;
 }
 
 // ==========================================
@@ -188,6 +285,8 @@ function buildArticlePages() {
             <div class="content">
                 ${content}
             </div>
+
+            ${getAmazonAdsHtml(post)}
         </article>
 
         <nav class="post-nav">

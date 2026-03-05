@@ -592,3 +592,183 @@ html[data-theme="light"] .content img {
         grid-template-columns: 1fr;
     }
 }
+
+/* --- テーマ切替ボタン（フローティング） --- */
+.blog-theme-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1.5rem;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    transition: all var(--transition-fast);
+}
+
+.blog-theme-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+    box-shadow: var(--shadow-glow);
+    transform: scale(1.1);
+}
+
+/* ============================================================
+   Amazon アフィリエイト広告セクション
+   ============================================================ */
+
+.amazon-ads-section {
+    margin-top: 2.5rem;
+    padding: 1.75rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.amazon-ads-heading {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    color: var(--text-primary);
+}
+
+.amazon-ads-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.amazon-ad-card {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all var(--transition-spring);
+}
+
+.amazon-ad-card:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.15);
+    transform: translateY(-2px) scale(1.02);
+    color: var(--text-primary);
+}
+
+.amazon-ad-card:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.amazon-ad-emoji {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.amazon-ad-title {
+    flex: 1;
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.amazon-ad-badge {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    padding: 0.2rem 0.5rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* --- Amazon 検索ボックス --- */
+.amazon-search-box {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.amazon-search-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.amazon-search-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.amazon-search-input {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-family: var(--font-sans);
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+
+.amazon-search-input::placeholder {
+    color: var(--text-muted);
+}
+
+.amazon-search-input:focus {
+    border-color: var(--accent);
+}
+
+.amazon-search-btn {
+    padding: 0.5rem 1.25rem;
+    background: #f59e0b;
+    color: #000;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.amazon-search-btn:hover {
+    background: #d97706;
+    transform: scale(1.05);
+}
+
+.amazon-ads-note {
+    margin-top: 0.75rem;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+/* --- レスポンシブ --- */
+@media (max-width: 768px) {
+    .amazon-ads-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .amazon-ads-section {
+        padding: 1.25rem;
+    }
+}
