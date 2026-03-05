@@ -30,6 +30,25 @@
     color-scheme: dark;
 }
 
+/* --- ライトテーマ --- */
+html[data-theme="light"] {
+    --bg-primary: #f5f5fa;
+    --bg-secondary: #eeeef5;
+    --bg-card: #ffffff;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a5568;
+    --text-muted: #718096;
+    --accent: #6366f1;
+    --accent-hover: #4f46e5;
+    --accent-glow: rgba(99, 102, 241, 0.12);
+    --border: rgba(0, 0, 0, 0.1);
+    --border-hover: rgba(0, 0, 0, 0.2);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.12);
+    color-scheme: light;
+}
+
 /* --- リセット & ベース --- */
 *,
 *::before,
@@ -441,6 +460,33 @@ a:hover {
 
 .content blockquote p {
     margin: 0.5rem 0;
+}
+
+/* --- ライトモード固有の調整 --- */
+html[data-theme="light"] .content thead {
+    background: rgba(99, 102, 241, 0.06);
+}
+
+html[data-theme="light"] .content tr:nth-child(even) {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+html[data-theme="light"] .content code {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--accent);
+}
+
+html[data-theme="light"] .content pre {
+    background: #f0f0f6;
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="light"] .content blockquote {
+    background: rgba(99, 102, 241, 0.04);
+}
+
+html[data-theme="light"] .content img {
+    border-color: rgba(0, 0, 0, 0.08);
 }
 
 /* --- 前後記事ナビゲーション --- */
