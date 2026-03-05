@@ -1,43 +1,64 @@
 #!/usr/bin/env node
 /**
  * Bluesky 自動投稿スクリプト
- * ブログ記事デプロイ後に、新しく追加された記事のみを Bluesky に投稿する
+ * ブログ記事 + Note記事の新着を検出し、Blueskyに自動投稿する
  *
- * 新着検出方法:
- *   git diff で前回のコミットと blog-data.json を比較し、
- *   新しく追加されたスラッグを検出する（post-to-x.mjs と同じロジック）
+ * 対象ソース:
+ *   1. ブログ記事 — src/blog-data.json から取得
+ *   2. Note記事 — Note.com RSSフィードから取得
+ *
+ * 投稿済み管理:
+ *   posted-items.json に投稿済みURLを記録。
+ *   次回実行時にスキップする。
  *
  * 環境変数:
- *   BLUESKY_IDENTIFIER — Blueskyハンドル（例: yourname.bsky.social）
- *   BLUESKY_APP_PASSWORD — アプリパスワード（Bluesky設定画面で生成）
+ *   BLUESKY_IDENTIFIER — Blueskyハンドル（例: hahu1124.bsky.social）
+ *   BLUESKY_APP_PASSWORD — アプリパスワード
+ *   NOTE_USERNAME — Note.comユーザー名（例: hahu1124）
  *
  * 使い方:
  *   node scripts/post-to-bluesky.mjs
  */
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
 import https from 'https';
+import http from 'http';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
 // 設定
 const BLOG_DATA_PATH = join(ROOT, 'src', 'blog-data.json');
-const SITE_URL = 'https://www.antigravity-portal.com/blog';
+const POSTED_ITEMS_PATH = join(ROOT, 'posted-items.json');
+const BLOG_URL = 'https://www.antigravity-portal.com/blog';
 const BLUESKY_API = 'bsky.social';
 
 // 環境変数チェック
 const IDENTIFIER = process.env.BLUESKY_IDENTIFIER;
 const APP_PASSWORD = process.env.BLUESKY_APP_PASSWORD;
+const NOTE_USERNAME = process.env.NOTE_USERNAME || 'hahu1124';
 
 if (!IDENTIFIER || !APP_PASSWORD) {
     console.log('⚠️ Bluesky認証情報が設定されていません。スキップします。');
     process.exit(0);
 }
 
-// --- ユーティリティ: HTTPS リクエスト ---
+// --- 投稿済みアイテム管理 ---
+function loadPostedItems() {
+    if (!existsSync(POSTED_ITEMS_PATH)) return [];
+    try {
+        return JSON.parse(readFileSync(POSTED_ITEMS_PATH, 'utf-8'));
+    } catch {
+        return [];
+    }
+}
+
+function savePostedItems(items) {
+    writeFileSync(POSTED_ITEMS_PATH, JSON.stringify(items, null, 2) + '\n', 'utf-8');
+}
+
+// --- HTTPリクエストユーティリティ ---
 function httpsRequest(options, body = null) {
     return new Promise((resolve, reject) => {
         const req = https.request(options, (res) => {
@@ -57,13 +78,73 @@ function httpsRequest(options, body = null) {
     });
 }
 
-// --- Bluesky API: セッション作成（ログイン）---
-async function createSession() {
-    const body = JSON.stringify({
-        identifier: IDENTIFIER,
-        password: APP_PASSWORD,
+function fetchUrl(url) {
+    return new Promise((resolve, reject) => {
+        const mod = url.startsWith('https') ? https : http;
+        mod.get(url, { headers: { 'User-Agent': 'AntigravityBot/1.0' } }, (res) => {
+            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                return fetchUrl(res.headers.location).then(resolve).catch(reject);
+            }
+            let data = '';
+            res.on('data', chunk => data += chunk);
+            res.on('end', () => resolve(data));
+        }).on('error', reject);
     });
+}
 
+// --- ソース1: ブログ記事の新着を取得 ---
+function getNewBlogPosts(postedUrls) {
+    if (!existsSync(BLOG_DATA_PATH)) {
+        console.log('📝 blog-data.json が見つかりません。ブログチェックをスキップ。');
+        return [];
+    }
+    const posts = JSON.parse(readFileSync(BLOG_DATA_PATH, 'utf-8'));
+    return posts
+        .map(p => ({
+            title: p.title,
+            url: `${BLOG_URL}/${p.slug}/`,
+            tags: (p.tags || []).slice(0, 3),
+            source: 'blog',
+        }))
+        .filter(p => !postedUrls.includes(p.url));
+}
+
+// --- ソース2: Note記事の新着をRSSから取得 ---
+async function getNewNotePosts(postedUrls) {
+    try {
+        const rssUrl = `https://note.com/${NOTE_USERNAME}/rss`;
+        const xml = await fetchUrl(rssUrl);
+
+        // 簡易XMLパース（<item>を抽出）
+        const items = [];
+        const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+        let match;
+        while ((match = itemRegex.exec(xml)) !== null) {
+            const itemXml = match[1];
+            const title = itemXml.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1]
+                || itemXml.match(/<title>(.*?)<\/title>/)?.[1]
+                || '';
+            const link = itemXml.match(/<link>(.*?)<\/link>/)?.[1] || '';
+            if (title && link && !postedUrls.includes(link)) {
+                items.push({
+                    title,
+                    url: link,
+                    tags: ['Note'],
+                    source: 'note',
+                });
+            }
+        }
+        console.log(`📰 Note RSS: ${items.length} 件の未投稿記事を検出`);
+        return items;
+    } catch (err) {
+        console.error(`⚠️ Note RSSの取得に失敗: ${err.message}`);
+        return [];
+    }
+}
+
+// --- Bluesky API: セッション作成 ---
+async function createSession() {
+    const body = JSON.stringify({ identifier: IDENTIFIER, password: APP_PASSWORD });
     const res = await httpsRequest({
         hostname: BLUESKY_API,
         path: '/xrpc/com.atproto.server.createSession',
@@ -77,110 +158,63 @@ async function createSession() {
     if (res.status !== 200) {
         throw new Error(`Blueskyログイン失敗 (${res.status}): ${JSON.stringify(res.data)}`);
     }
-
-    return {
-        accessJwt: res.data.accessJwt,
-        did: res.data.did,
-    };
+    return { accessJwt: res.data.accessJwt, did: res.data.did };
 }
 
-// --- リンクカード用: URLからOGPメタデータ取得 ---
+// --- OGPメタデータ取得（リンクカード用）---
 async function fetchOgpMeta(url) {
-    return new Promise((resolve) => {
-        const urlObj = new URL(url);
-        https.get({
-            hostname: urlObj.hostname,
-            path: urlObj.pathname + urlObj.search,
-            headers: { 'User-Agent': 'AntigravityBot/1.0' },
-        }, (res) => {
-            // リダイレクト対応
-            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-                return fetchOgpMeta(res.headers.location).then(resolve);
-            }
-            let html = '';
-            res.on('data', chunk => html += chunk);
-            res.on('end', () => {
-                const title = html.match(/<meta\s+property="og:title"\s+content="([^"]*?)"/i)?.[1]
-                    || html.match(/<title>([^<]*?)<\/title>/i)?.[1]
-                    || '';
-                const description = html.match(/<meta\s+property="og:description"\s+content="([^"]*?)"/i)?.[1]
-                    || html.match(/<meta\s+name="description"\s+content="([^"]*?)"/i)?.[1]
-                    || '';
-                resolve({ title, description, uri: url });
-            });
-        }).on('error', () => resolve({ title: '', description: '', uri: url }));
-    });
+    try {
+        const html = await fetchUrl(url);
+        const title = html.match(/<meta\s+property="og:title"\s+content="([^"]*?)"/i)?.[1]
+            || html.match(/<title>([^<]*?)<\/title>/i)?.[1] || '';
+        const description = html.match(/<meta\s+property="og:description"\s+content="([^"]*?)"/i)?.[1]
+            || html.match(/<meta\s+name="description"\s+content="([^"]*?)"/i)?.[1] || '';
+        return { title, description, uri: url };
+    } catch {
+        return { title: '', description: '', uri: url };
+    }
 }
 
-// --- テキスト内のURLのバイト位置を検出してfacets生成 ---
-function detectLinkFacets(text) {
+// --- テキスト内のURL/ハッシュタグのfacets生成 ---
+function detectFacets(text) {
     const facets = [];
+
+    // URL
     const urlRegex = /https?:\/\/[^\s]+/g;
     let match;
     while ((match = urlRegex.exec(text)) !== null) {
-        const beforeBytes = Buffer.byteLength(text.slice(0, match.index), 'utf-8');
-        const urlBytes = Buffer.byteLength(match[0], 'utf-8');
+        const byteStart = Buffer.byteLength(text.slice(0, match.index), 'utf-8');
         facets.push({
-            index: {
-                byteStart: beforeBytes,
-                byteEnd: beforeBytes + urlBytes,
-            },
-            features: [{
-                $type: 'app.bsky.richtext.facet#link',
-                uri: match[0],
-            }],
+            index: { byteStart, byteEnd: byteStart + Buffer.byteLength(match[0], 'utf-8') },
+            features: [{ $type: 'app.bsky.richtext.facet#link', uri: match[0] }],
         });
     }
-    return facets;
-}
 
-// --- テキスト内のハッシュタグのバイト位置を検出してfacets生成 ---
-function detectHashtagFacets(text) {
-    const facets = [];
+    // ハッシュタグ
     const tagRegex = /#([^\s#]+)/g;
-    let match;
     while ((match = tagRegex.exec(text)) !== null) {
-        const beforeBytes = Buffer.byteLength(text.slice(0, match.index), 'utf-8');
-        const tagBytes = Buffer.byteLength(match[0], 'utf-8');
+        const byteStart = Buffer.byteLength(text.slice(0, match.index), 'utf-8');
         facets.push({
-            index: {
-                byteStart: beforeBytes,
-                byteEnd: beforeBytes + tagBytes,
-            },
-            features: [{
-                $type: 'app.bsky.richtext.facet#tag',
-                tag: match[1],
-            }],
+            index: { byteStart, byteEnd: byteStart + Buffer.byteLength(match[0], 'utf-8') },
+            features: [{ $type: 'app.bsky.richtext.facet#tag', tag: match[1] }],
         });
     }
+
     return facets;
 }
 
 // --- Bluesky API: ポスト作成 ---
 async function createPost(session, text, articleUrl) {
-    // facets（リンク + ハッシュタグのリッチテキスト）
-    const facets = [
-        ...detectLinkFacets(text),
-        ...detectHashtagFacets(text),
-    ];
-
-    // リンクカード（external embed）
     const ogp = await fetchOgpMeta(articleUrl);
-    const embed = {
-        $type: 'app.bsky.embed.external',
-        external: {
-            uri: ogp.uri,
-            title: ogp.title,
-            description: ogp.description,
-        },
-    };
-
     const record = {
         $type: 'app.bsky.feed.post',
         text,
         createdAt: new Date().toISOString(),
-        facets,
-        embed,
+        facets: detectFacets(text),
+        embed: {
+            $type: 'app.bsky.embed.external',
+            external: { uri: ogp.uri, title: ogp.title, description: ogp.description },
+        },
         langs: ['ja'],
     };
 
@@ -204,101 +238,82 @@ async function createPost(session, text, articleUrl) {
     if (res.status !== 200) {
         throw new Error(`Bluesky投稿失敗 (${res.status}): ${JSON.stringify(res.data)}`);
     }
-
     return res.data;
 }
 
-// --- git diff で前回コミットのスラッグ一覧を取得 ---
-function getPreviousSlugs() {
-    try {
-        const prev = execSync('git show HEAD~1:src/blog-data.json', {
-            cwd: ROOT,
-            encoding: 'utf-8',
-            stdio: ['pipe', 'pipe', 'pipe'],
-        });
-        return JSON.parse(prev).map(p => p.slug);
-    } catch {
-        console.log('📝 前回のblog-data.jsonが見つかりません（初回 or ファイル未存在）。全記事を既存として扱います。');
-        return null;
-    }
+// --- 投稿テキスト生成（300文字制限対応）---
+function buildPostText(item) {
+    const prefix = item.source === 'note' ? '📝 Note更新' : '📝 新着記事';
+    const tags = item.tags.map(t => `#${t.replace(/\s/g, '')}`).join(' ');
+    const text = `${prefix}: ${item.title}\n\n${item.url}\n\n${tags}`;
+
+    if (text.length <= 300) return text;
+
+    // タイトルを短縮
+    const maxLen = 300 - `${prefix}: \n\n${item.url}\n\n${tags}`.length - 3;
+    return `${prefix}: ${item.title.slice(0, maxLen)}…\n\n${item.url}\n\n${tags}`;
 }
 
 // --- メイン処理 ---
 async function main() {
-    // 現在の記事一覧
-    const currentPosts = JSON.parse(readFileSync(BLOG_DATA_PATH, 'utf-8'));
-    const currentSlugs = currentPosts.map(p => p.slug);
+    const postedItems = loadPostedItems();
+    const postedUrls = postedItems.map(i => i.url);
 
-    // 前回のスラッグ一覧を取得
-    const previousSlugs = getPreviousSlugs();
+    // 新着記事を両ソースから取得
+    const newBlogPosts = getNewBlogPosts(postedUrls);
+    const newNotePosts = await getNewNotePosts(postedUrls);
+    const allNewPosts = [...newBlogPosts, ...newNotePosts];
 
-    // 前回データが取得できない場合（初回デプロイ等）→ 投稿しない
-    if (previousSlugs === null) {
-        console.log('📝 初回デプロイのためBluesky投稿をスキップします。');
+    if (allNewPosts.length === 0) {
+        console.log('📝 新しい記事はありません。スキップします。');
         return;
     }
 
-    // 新しく追加されたスラッグを検出
-    const newSlugs = currentSlugs.filter(s => !previousSlugs.includes(s));
+    console.log(`🦋 ${allNewPosts.length} 件の新着を Bluesky に投稿します...`);
+    console.log(`   ブログ: ${newBlogPosts.length} 件 / Note: ${newNotePosts.length} 件`);
 
-    if (newSlugs.length === 0) {
-        console.log('📝 新しい記事はありません。Bluesky投稿をスキップします。');
-        return;
-    }
-
-    // 新しい記事の詳細を取得
-    const newPosts = currentPosts.filter(p => newSlugs.includes(p.slug));
-
-    console.log(`🦋 ${newPosts.length} 件の新しい記事を Bluesky に投稿します...`);
-
-    // Blueskyにログイン
+    // Blueskyログイン
     const session = await createSession();
     console.log(`✅ Blueskyログイン成功 (${IDENTIFIER})`);
 
-    // 最大3件まで投稿（大量追加時の制限）
-    const toPost = newPosts.slice(0, 3);
+    // 最大5件まで投稿（安全制限）
+    const toPost = allNewPosts.slice(0, 5);
+    const newlyPosted = [];
 
-    for (const post of toPost) {
-        const articleUrl = `${SITE_URL}/${post.slug}/`;
-        const tags = post.tags.slice(0, 3).map(t => `#${t.replace(/\s/g, '')}`).join(' ');
-
-        // Blueskyは300文字制限 — タイトル・URL・タグで構成
-        const postText = `📝 新着記事: ${post.title}\n\n${articleUrl}\n\n${tags}`;
-
-        // 300文字超過チェック
-        if (postText.length > 300) {
-            // タイトルを短縮
-            const maxTitleLen = 300 - `📝 新着記事: \n\n${articleUrl}\n\n${tags}`.length - 3;
-            const shortTitle = post.title.slice(0, maxTitleLen) + '…';
-            const shortText = `📝 新着記事: ${shortTitle}\n\n${articleUrl}\n\n${tags}`;
-            try {
-                const result = await createPost(session, shortText, articleUrl);
-                console.log(`✅ 投稿成功: ${shortTitle} (URI: ${result.uri})`);
-            } catch (err) {
-                console.error(`❌ 投稿失敗: ${post.title} — ${err.message}`);
-            }
-        } else {
-            try {
-                const result = await createPost(session, postText, articleUrl);
-                console.log(`✅ 投稿成功: ${post.title} (URI: ${result.uri})`);
-            } catch (err) {
-                console.error(`❌ 投稿失敗: ${post.title} — ${err.message}`);
-            }
+    for (const item of toPost) {
+        const postText = buildPostText(item);
+        try {
+            const result = await createPost(session, postText, item.url);
+            console.log(`✅ [${item.source}] 投稿成功: ${item.title} (URI: ${result.uri})`);
+            newlyPosted.push({
+                url: item.url,
+                title: item.title,
+                source: item.source,
+                postedAt: new Date().toISOString(),
+            });
+        } catch (err) {
+            console.error(`❌ [${item.source}] 投稿失敗: ${item.title} — ${err.message}`);
         }
 
-        // レート制限対策: 2秒間隔
-        if (toPost.indexOf(post) < toPost.length - 1) {
-            await new Promise(r => setTimeout(r, 2000));
+        // レート制限対策: 3秒間隔
+        if (toPost.indexOf(item) < toPost.length - 1) {
+            await new Promise(r => setTimeout(r, 3000));
         }
     }
 
-    if (newPosts.length > 3) {
-        console.log(`⚠️ ${newPosts.length - 3} 件の記事は投稿上限(3件)により省略されました`);
+    // 投稿済みリストを更新・保存
+    if (newlyPosted.length > 0) {
+        const updated = [...postedItems, ...newlyPosted];
+        savePostedItems(updated);
+        console.log(`💾 posted-items.json を更新しました（${newlyPosted.length} 件追加、合計 ${updated.length} 件）`);
+    }
+
+    if (allNewPosts.length > 5) {
+        console.log(`⚠️ ${allNewPosts.length - 5} 件は投稿上限(5件/回)により次回に持ち越し`);
     }
 }
 
 main().catch(err => {
     console.error('❌ エラー:', err.message);
-    // Bluesky投稿の失敗でデプロイ自体を失敗させない
     process.exit(0);
 });
