@@ -1,9 +1,12 @@
 name: Bluesky 自動投稿
 
 on:
-  schedule:
-    # 毎日 9:00 / 15:00 / 21:00 JST（UTC: 0:00 / 6:00 / 12:00）に実行
-    - cron: '0 0,6,12 * * *'
+  # cron無効化（2026-03-06: posted-items.json push漏れにより5件誤投稿が発生したため）
+  # 今後はblog-data.json更新時の自動投稿 + 手動実行のみ
+  push:
+    branches: [main]
+    paths:
+      - 'src/blog-data.json'
   workflow_dispatch:  # 手動実行にも対応
 
 permissions:
