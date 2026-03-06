@@ -80,7 +80,10 @@ function htmlHead(title, description, cssRelPath = 'styles.css') {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <script src="${ADMAX_SCRIPT_URL}" type="text/javascript" charset="utf-8" async></script>
+    <link rel="preconnect" href="https://adm.shinobi.jp">
+    <link rel="preconnect" href="https://cnobi.jp">
+    <link rel="dns-prefetch" href="https://adm.shinobi.jp">
+    <link rel="dns-prefetch" href="https://cnobi.jp">
     <script>
         (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
     </script>
@@ -169,9 +172,7 @@ function getAdVisibilityScript() {
             window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
         });
 
-        // 2. SDKを再ロード（既存のt.jsを削除→再追加で再実行）
-        var old = document.querySelector('script[src="' + SDK_URL + '"]');
-        if(old) old.remove();
+        // 2. SDKをロード（body末尾で1回だけ実行）
         var s = document.createElement('script');
         s.type = 'text/javascript';
         s.charset = 'utf-8';
