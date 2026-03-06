@@ -116,16 +116,16 @@ function escapeHtml(text) {
 // 忍者AdMax 広告HTML生成
 // ==========================================
 
-/** 記事内インライン広告（中間・末尾用） */
+/** 記事内インライン広告（中間・末尾用）— 広告未返却時は非表示 */
 function getNinjaAdHtml() {
     return `
-        <div class="ninja-ad-slot">
+        <div class="ninja-ad-slot" style="display:none;">
             <span class="ninja-ad-label">PR</span>
             <div class="admax-switch" data-admax-id="${NINJA_AD_ID}" style="display:inline-block;"></div>
         </div>`;
 }
 
-/** スライドイン広告（左から出現、×で閉じる） */
+/** スライドイン広告（左から出現、×で閉じる）— 広告未返却時は表示しない */
 function getSlideInAdHtml() {
     return `
     <div id="slideInAd" class="ninja-slide-ad" style="display:none;">
@@ -136,14 +136,41 @@ function getSlideInAdHtml() {
     <script>
     (function(){
         if(sessionStorage.getItem('slideAdClosed')) return;
-        setTimeout(function(){
+        // 広告が読み込まれたかチェックしてから表示
+        function tryShow(){
             var ad=document.getElementById('slideInAd');
-            if(ad) ad.style.display='block';
-        }, 5000);
+            if(!ad) return;
+            var sw=ad.querySelector('.admax-switch');
+            if(sw && sw.children.length > 0){
+                ad.style.display='block';
+            }
+        }
+        setTimeout(tryShow, 5000);
+        setTimeout(tryShow, 8000);
         document.getElementById('slideInClose').addEventListener('click',function(){
             document.getElementById('slideInAd').style.display='none';
             sessionStorage.setItem('slideAdClosed','1');
         });
+    })()
+    </script>`;
+}
+
+/** 広告表示チェックスクリプト（忍者AdMaxが返らなかった場合にスロット非表示） */
+function getAdVisibilityScript() {
+    return `
+    <script>
+    (function(){
+        function checkAdSlots(){
+            document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                var ad = slot.querySelector('.admax-switch');
+                if(ad && ad.children.length > 0){
+                    slot.style.display = '';
+                }
+            });
+        }
+        setTimeout(checkAdSlots, 3000);
+        setTimeout(checkAdSlots, 6000);
+        setTimeout(checkAdSlots, 10000);
     })()
     </script>`;
 }
@@ -178,6 +205,13 @@ const PACHINKO_ADS = [
     { title: '確率論入門', search: '確率論 入門 数学', emoji: '📐' },
 ];
 
+/** AI/開発記事向け */
+const AI_DEV_ADS = [
+    { title: 'AIプログラミング入門', search: 'AI プログラミング 入門 Python', emoji: '🤖' },
+    { title: 'Next.js実践ガイド', search: 'Next.js React TypeScript 入門', emoji: '📘' },
+    { title: 'Webアプリ開発入門', search: 'Webアプリケーション 開発 入門', emoji: '💻' },
+];
+
 function amazonSearchUrl(keyword) {
     return `https://www.amazon.co.jp/s?k=${encodeURIComponent(keyword)}&tag=${AMAZON_TAG}`;
 }
@@ -187,11 +221,16 @@ function getAmazonAdsHtml(post) {
     const isWeekly = tags.includes('週報');
     const isUber = tags.includes('Uber');
     const isPachinko = tags.includes('パチンコ');
+    const isAI = tags.includes('AI');
+    const isDev = tags.includes('開発');
 
-    // 広告商品を選択
+    // 広告商品を選択（記事のタグに基づく）
     let items;
     let sectionTitle;
-    if (isWeekly || (isUber && isPachinko)) {
+    if (isAI || isDev) {
+        items = AI_DEV_ADS;
+        sectionTitle = '💻 技術書・開発に役立つ本';
+    } else if (isWeekly || (isUber && isPachinko)) {
         items = UBER_GEAR_ADS;
         sectionTitle = '🚗 Uber配達で使うもの一覧';
     } else if (isUber) {
@@ -358,6 +397,7 @@ function buildArticlePages() {
         </nav>
     </div>
     ${getSlideInAdHtml()}
+    ${getAdVisibilityScript()}
 </body>
 </html>`;
 
