@@ -295,8 +295,19 @@ function getAmazonAdsHtml(post) {
 // ==========================================
 
 function buildIndexPage() {
-    const cards = posts.map(post => `
-        <a href="${post.slug}/" class="article-card">
+    // タグを動的に収集（重複なし、出現頻度順）
+    const tagCounts = {};
+    posts.forEach(post => {
+        post.tags.forEach(tag => {
+            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+    });
+    const allTags = Object.entries(tagCounts)
+        .sort((a, b) => b[1] - a[1])
+        .map(([tag]) => tag);
+
+    const cards = posts.map((post, i) => `
+        <a href="${post.slug}/" class="article-card" data-tags="${post.tags.map(t => escapeHtml(t)).join(',')}" data-index="${i}">
             <div class="card-header">
                 <time class="date">${post.date}</time>
                 <div class="tags">
@@ -307,6 +318,10 @@ function buildIndexPage() {
             <p class="card-excerpt">${escapeHtml(post.excerpt)}</p>
         </a>`).join('\n');
 
+    const tagButtons = allTags.map(tag =>
+        `<button class="tag" data-filter="${escapeHtml(tag)}">${escapeHtml(tag)}</button>`
+    ).join('\n            ');
+
     const html = `${htmlHead('ブログ', '日記・レポート・技術記事の一覧')}
     <div class="blog-page">
         <header class="header">
@@ -316,25 +331,90 @@ function buildIndexPage() {
         </header>
 
         <div class="tag-filter">
-            <span class="tag tag-active">すべて</span>
-            <span class="tag">Uber</span>
-            <span class="tag">日報</span>
-            <span class="tag">週報</span>
-            <span class="tag">パチンコ</span>
-            <span class="tag">AI</span>
-            <span class="tag">開発</span>
+            <button class="tag tag-active" data-filter="all">すべて</button>
+            ${tagButtons}
         </div>
 
         <section class="article-grid">
             ${cards}
         </section>
+
+        <nav class="pagination" id="pagination"></nav>
     </div>
+    <script>
+    (function() {
+        var PER_PAGE = 10;
+        var currentTag = 'all';
+        var currentPage = 1;
+        var cards = Array.from(document.querySelectorAll('.article-card'));
+        var pagination = document.getElementById('pagination');
+        var tagBtns = document.querySelectorAll('.tag-filter .tag');
+
+        function getFiltered() {
+            if (currentTag === 'all') return cards;
+            return cards.filter(function(c) {
+                return c.dataset.tags.split(',').indexOf(currentTag) !== -1;
+            });
+        }
+
+        function render() {
+            var filtered = getFiltered();
+            var totalPages = Math.ceil(filtered.length / PER_PAGE);
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+            var start = (currentPage - 1) * PER_PAGE;
+            var end = start + PER_PAGE;
+
+            cards.forEach(function(c) { c.style.display = 'none'; });
+            filtered.forEach(function(c, i) {
+                c.style.display = (i >= start && i < end) ? '' : 'none';
+            });
+
+            // ページネーション描画
+            var html = '';
+            if (totalPages > 1) {
+                if (currentPage > 1) {
+                    html += '<button class="page-btn" data-page="' + (currentPage - 1) + '">← 前</button>';
+                }
+                for (var p = 1; p <= totalPages; p++) {
+                    html += '<button class="page-btn' + (p === currentPage ? ' page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
+                }
+                if (currentPage < totalPages) {
+                    html += '<button class="page-btn" data-page="' + (currentPage + 1) + '">次 →</button>';
+                }
+            }
+            pagination.innerHTML = html;
+        }
+
+        // タグフィルタ
+        tagBtns.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                tagBtns.forEach(function(b) { b.classList.remove('tag-active'); });
+                btn.classList.add('tag-active');
+                currentTag = btn.dataset.filter;
+                currentPage = 1;
+                render();
+            });
+        });
+
+        // ページネーションクリック
+        pagination.addEventListener('click', function(e) {
+            if (e.target.dataset.page) {
+                currentPage = parseInt(e.target.dataset.page);
+                render();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        render();
+    })();
+    </script>
 </body>
 </html>`;
 
     writeFileSync(join(OUTPUT_DIR, 'blog', 'index.html'), html, 'utf-8');
     console.log('📄 一覧ページ生成完了');
 }
+
 
 // ==========================================
 // 個別記事ページ生成 (/blog/<slug>/index.html)

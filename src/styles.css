@@ -619,6 +619,56 @@ html[data-theme="light"] .content img {
     }
 }
 
+/* --- ページネーション --- */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+}
+
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 0.6rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.page-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+}
+
+.page-active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.page-active:hover {
+    background: var(--accent-hover);
+}
+
+/* タグフィルタのbuttonリセット */
+.tag-filter button.tag {
+    font-family: var(--font-sans);
+}
+
 /* --- テーマ切替ボタン（フローティング） --- */
 .blog-theme-toggle {
     position: fixed;
