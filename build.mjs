@@ -67,15 +67,46 @@ const ADMAX_SCRIPT_URL = 'https://adm.shinobi.jp/st/t.js';
 // 共通HTMLテンプレート
 // ==========================================
 
-function htmlHead(title, description, cssRelPath = 'styles.css') {
+const SITE_URL = 'https://www.antigravity-portal.com';
+const DEFAULT_OG_IMAGE = `${SITE_URL}/blog/images/ai_dev_day1.png`;
+
+/**
+ * 共通HTMLヘッド生成
+ * @param {string} title - ページタイトル
+ * @param {string} description - ページ説明
+ * @param {string} cssRelPath - CSSの相対パス
+ * @param {Object} [ogp] - OGP/Twitter Card情報
+ * @param {string} [ogp.url] - ページURL
+ * @param {string} [ogp.image] - OG画像の絶対URL
+ * @param {string} [ogp.type] - og:type ('article' or 'website')
+ */
+function htmlHead(title, description, cssRelPath = 'styles.css', ogp = {}) {
     const cacheBust = Date.now();
+    const ogTitle = escapeHtml(title);
+    const ogDesc = escapeHtml(description);
+    const ogUrl = ogp.url || SITE_URL;
+    const ogImage = ogp.image || DEFAULT_OG_IMAGE;
+    const ogType = ogp.type || 'website';
     return `<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${escapeHtml(title)} | Gravity Portal</title>
-    <meta name="description" content="${escapeHtml(description)}">
+    <title>${ogTitle} | Gravity Portal</title>
+    <meta name="description" content="${ogDesc}">
+    <!-- OGP -->
+    <meta property="og:title" content="${ogTitle}">
+    <meta property="og:description" content="${ogDesc}">
+    <meta property="og:image" content="${ogImage}">
+    <meta property="og:url" content="${ogUrl}">
+    <meta property="og:type" content="${ogType}">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${ogTitle}">
+    <meta name="twitter:description" content="${ogDesc}">
+    <meta name="twitter:image" content="${ogImage}">
     <link rel="stylesheet" href="${cssRelPath}?v=${cacheBust}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -322,7 +353,11 @@ function buildIndexPage() {
         `<button class="tag" data-filter="${escapeHtml(tag)}">${escapeHtml(tag)} (${tagCounts[tag]})</button>`
     ).join('\n            ');
 
-    const html = `${htmlHead('ブログ', '日記・レポート・技術記事の一覧')}
+    const html = `${htmlHead('ブログ', '日記・レポート・技術記事の一覧', 'styles.css', {
+        url: `${SITE_URL}/blog/`,
+        image: DEFAULT_OG_IMAGE,
+        type: 'website'
+    })}
     <div class="blog-page">
         <header class="header">
             <a href="https://antigravity-portal.com/" class="back-link">← トップに戻る</a>
@@ -445,6 +480,13 @@ function buildArticlePages() {
 
         const cssRelPath = toRoot + 'styles.css';
 
+        // OGP用: 記事のヒーロー画像をcontentから抽出
+        const heroMatch = post.content.match(/src="\/blog\/images\/([^"]+)"/);
+        const ogImage = heroMatch
+            ? `${SITE_URL}/blog/images/${heroMatch[1]}`
+            : DEFAULT_OG_IMAGE;
+        const ogUrl = `${SITE_URL}/blog/${post.slug}/`;
+
         // 記事content内の絶対画像パスを相対パスに変換
         let content = post.content.replace(/src="\/blog\/images\//g, `src="${toRoot}images/`);
 
@@ -459,7 +501,11 @@ function buildArticlePages() {
             content = content.slice(0, insertPos) + getNinjaAdHtml() + content.slice(insertPos);
         }
 
-        const html = `${htmlHead(post.title, post.excerpt, cssRelPath)}
+        const html = `${htmlHead(post.title, post.excerpt, cssRelPath, {
+            url: ogUrl,
+            image: ogImage,
+            type: 'article'
+        })}
     <div class="article-page">
         <nav class="breadcrumb">
             <a href="https://antigravity-portal.com/">トップ</a>
