@@ -369,47 +369,60 @@ a:hover {
     color: var(--accent);
 }
 
-/* テーブル */
-.content table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1.5rem 0;
-    font-size: 0.95rem;
+/* テーブル横スクロール用ラッパー */
+.table-scroll {
     overflow-x: auto;
-    display: table;
-    table-layout: auto;
+    margin: 1.5rem 0;
+    border-radius: var(--radius-sm);
 }
 
-.content thead {
+.content table,
+.table-scroll table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    table-layout: auto;
+    margin: 0;
+}
+
+.content thead,
+.table-scroll thead {
     background: rgba(99, 102, 241, 0.08);
 }
 
 .content th,
-.content td {
-    padding: 0.75rem 1.2rem;
+.content td,
+.table-scroll th,
+.table-scroll td {
+    padding: 0.6rem 0.8rem;
     border: 1px solid var(--border);
     text-align: center;
     white-space: nowrap;
 }
 
-/* 左端の列（項目名）は左揃え・幅広 */
+/* 左端の列（項目名）は左揃え・折り返し可 */
 .content th:first-child,
-.content td:first-child {
+.content td:first-child,
+.table-scroll th:first-child,
+.table-scroll td:first-child {
     text-align: left;
-    min-width: 140px;
-    white-space: nowrap;
+    white-space: normal;
+    min-width: 80px;
 }
 
-.content th {
+.content th,
+.table-scroll th {
     font-weight: 600;
     color: var(--accent);
 }
 
-.content td {
+.content td,
+.table-scroll td {
     color: var(--text-secondary);
 }
 
-.content tr:nth-child(even) {
+.content tr:nth-child(even),
+.table-scroll tr:nth-child(even) {
     background: rgba(255, 255, 255, 0.02);
 }
 
@@ -578,6 +591,19 @@ html[data-theme="light"] .content img {
 
     .content h3 {
         font-size: 1.05rem;
+    }
+
+    /* テーブル: スマホ用調整 */
+    .content table,
+    .table-scroll table {
+        font-size: 0.8rem;
+    }
+
+    .content th,
+    .content td,
+    .table-scroll th,
+    .table-scroll td {
+        padding: 0.4rem 0.5rem;
     }
 
     .blog-page {

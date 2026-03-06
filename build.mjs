@@ -259,7 +259,11 @@ function buildArticlePages() {
         const cssRelPath = toRoot + 'styles.css';
 
         // 記事content内の絶対画像パスを相対パスに変換
-        const content = post.content.replace(/src="\/blog\/images\//g, `src="${toRoot}images/`);
+        let content = post.content.replace(/src="\/blog\/images\//g, `src="${toRoot}images/`);
+
+        // テーブルをスクロール可能なラッパーで囲む（スマホ対応）
+        content = content.replace(/<table/g, '<div class="table-scroll"><table');
+        content = content.replace(/<\/table>/g, '</table></div>');
 
         const html = `${htmlHead(post.title, post.excerpt, cssRelPath)}
     <div class="article-page">
