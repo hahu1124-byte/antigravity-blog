@@ -417,7 +417,6 @@ function buildArticlePages() {
             <a href="${toRoot}" class="back-link">← 記事一覧に戻る</a>
         </nav>
     </div>
-    ${getSlideInAdHtml()}
     ${getAdVisibilityScript()}
 </body>
 </html>`;
