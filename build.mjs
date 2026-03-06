@@ -116,10 +116,10 @@ function escapeHtml(text) {
 // 忍者AdMax 広告HTML生成
 // ==========================================
 
-/** 記事内インライン広告（中間・末尾用）— 広告未返却時は非表示 */
+/** 記事内インライン広告（中間・末尾用）— 広告未返却時は後から非表示 */
 function getNinjaAdHtml() {
     return `
-        <div class="ninja-ad-slot" style="display:none;">
+        <div class="ninja-ad-slot">
             <span class="ninja-ad-label">PR</span>
             <div class="admax-switch" data-admax-id="${NINJA_AD_ID}" style="display:inline-block;"></div>
         </div>`;
@@ -155,22 +155,23 @@ function getSlideInAdHtml() {
     </script>`;
 }
 
-/** 広告表示チェックスクリプト（忍者AdMaxが返らなかった場合にスロット非表示） */
+/** 広告非表示チェックスクリプト（忍者AdMaxが広告を返さなかった場合にスロットを非表示） */
 function getAdVisibilityScript() {
     return `
     <script>
     (function(){
-        function checkAdSlots(){
+        function hideEmptyAdSlots(){
             document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
                 var ad = slot.querySelector('.admax-switch');
-                if(ad && ad.children.length > 0){
-                    slot.style.display = '';
+                // 広告が返らなかった（子要素なし）→ 非表示
+                if(!ad || ad.children.length === 0){
+                    slot.style.display = 'none';
                 }
             });
         }
-        setTimeout(checkAdSlots, 3000);
-        setTimeout(checkAdSlots, 6000);
-        setTimeout(checkAdSlots, 10000);
+        // SDKが広告を読み込むのを十分待ってからチェック
+        setTimeout(hideEmptyAdSlots, 5000);
+        setTimeout(hideEmptyAdSlots, 10000);
     })()
     </script>`;
 }
