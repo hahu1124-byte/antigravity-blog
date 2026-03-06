@@ -798,3 +798,91 @@ html[data-theme="light"] .content img {
         padding: 1.25rem;
     }
 }
+
+/* ============================================================
+   忍者AdMax 広告スロット（ブログ記事内）
+   ============================================================ */
+
+/* --- 記事内インライン広告（中間・末尾） --- */
+.ninja-ad-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    margin: 2rem 0;
+    padding: 1rem;
+    text-align: center;
+}
+
+.ninja-ad-label {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    opacity: 0.6;
+}
+
+/* --- スライドイン広告（左から出現） --- */
+.ninja-slide-ad {
+    position: fixed;
+    left: 0;
+    bottom: 80px;
+    z-index: 998;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    padding: 1rem 1rem 0.75rem;
+    box-shadow: var(--shadow-md);
+    animation: slideInFromLeft 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    max-width: 340px;
+}
+
+.ninja-slide-close {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all var(--transition-fast);
+}
+
+.ninja-slide-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+html[data-theme="light"] .ninja-slide-close:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+@keyframes slideInFromLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* --- レスポンシブ: スライドイン広告 --- */
+@media (max-width: 768px) {
+    .ninja-slide-ad {
+        bottom: 60px;
+        max-width: 280px;
+        padding: 0.75rem 0.75rem 0.5rem;
+    }
+}

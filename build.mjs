@@ -57,6 +57,13 @@ for (const tool of staticTools) {
 }
 
 // ==========================================
+// 忍者AdMax 設定
+// ==========================================
+
+const NINJA_AD_ID = '06dfeeba49e20207a86cd5f651221d50';
+const ADMAX_SCRIPT_URL = 'https://adm.shinobi.jp/st/t.js';
+
+// ==========================================
 // 共通HTMLテンプレート
 // ==========================================
 
@@ -73,6 +80,7 @@ function htmlHead(title, description, cssRelPath = 'styles.css') {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="${ADMAX_SCRIPT_URL}" type="text/javascript" charset="utf-8" async></script>
     <script>
         (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
     </script>
@@ -102,6 +110,42 @@ function escapeHtml(text) {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
+}
+
+// ==========================================
+// 忍者AdMax 広告HTML生成
+// ==========================================
+
+/** 記事内インライン広告（中間・末尾用） */
+function getNinjaAdHtml() {
+    return `
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="${NINJA_AD_ID}" style="display:inline-block;"></div>
+        </div>`;
+}
+
+/** スライドイン広告（左から出現、×で閉じる） */
+function getSlideInAdHtml() {
+    return `
+    <div id="slideInAd" class="ninja-slide-ad" style="display:none;">
+        <button id="slideInClose" class="ninja-slide-close" aria-label="閉じる">×</button>
+        <span class="ninja-ad-label">PR</span>
+        <div class="admax-switch" data-admax-id="${NINJA_AD_ID}" style="display:inline-block;"></div>
+    </div>
+    <script>
+    (function(){
+        if(sessionStorage.getItem('slideAdClosed')) return;
+        setTimeout(function(){
+            var ad=document.getElementById('slideInAd');
+            if(ad) ad.style.display='block';
+        }, 5000);
+        document.getElementById('slideInClose').addEventListener('click',function(){
+            document.getElementById('slideInAd').style.display='none';
+            sessionStorage.setItem('slideAdClosed','1');
+        });
+    })()
+    </script>`;
 }
 
 // ==========================================
@@ -216,6 +260,8 @@ function buildIndexPage() {
             <span class="tag">日報</span>
             <span class="tag">週報</span>
             <span class="tag">パチンコ</span>
+            <span class="tag">AI</span>
+            <span class="tag">開発</span>
         </div>
 
         <section class="article-grid">
@@ -265,6 +311,13 @@ function buildArticlePages() {
         content = content.replace(/<table/g, '<div class="table-scroll"><table');
         content = content.replace(/<\/table>/g, '</table></div>');
 
+        // 記事中間に忍者AdMax挿入（最初の<hr>の後）
+        const hrIndex = content.indexOf('<hr>');
+        if (hrIndex !== -1) {
+            const insertPos = hrIndex + '<hr>'.length;
+            content = content.slice(0, insertPos) + getNinjaAdHtml() + content.slice(insertPos);
+        }
+
         const html = `${htmlHead(post.title, post.excerpt, cssRelPath)}
     <div class="article-page">
         <nav class="breadcrumb">
@@ -290,6 +343,7 @@ function buildArticlePages() {
                 ${content}
             </div>
 
+            ${getNinjaAdHtml()}
             ${getAmazonAdsHtml(post)}
         </article>
 
@@ -303,6 +357,7 @@ function buildArticlePages() {
             <a href="${toRoot}" class="back-link">← 記事一覧に戻る</a>
         </nav>
     </div>
+    ${getSlideInAdHtml()}
 </body>
 </html>`;
 
