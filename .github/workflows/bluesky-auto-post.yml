@@ -24,11 +24,11 @@ jobs:
         with:
           node-version: '20'
 
-      - name: GitHub Pagesデプロイ完了を待機（3分）
+      - name: GitHub Pagesデプロイ完了を待機（1分）
         run: |
-          echo "⏳ GitHub Pagesデプロイ完了を待機中（180秒）..."
+          echo "⏳ GitHub Pagesデプロイ完了を待機中（60秒）..."
           echo "   OGPカードが正しく生成されるようにデプロイ完了後に投稿します"
-          sleep 180
+          sleep 60
 
       - name: ブログ + Note 新着を Bluesky に投稿
         env:
