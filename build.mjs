@@ -189,7 +189,7 @@ function getSlideInAdHtml() {
     </script>`;
 }
 
-/** 広告初期化スクリプト（admaxads配列にpush→SDKリロードで広告を表示） */
+/** 広告初期化スクリプト（課金チェック→未課金のみSDKロード） */
 function getAdVisibilityScript() {
     return `
     <script>
@@ -197,33 +197,57 @@ function getAdVisibilityScript() {
         var AD_ID = '${NINJA_AD_ID}';
         var SDK_URL = '${ADMAX_SCRIPT_URL}';
 
-        // 1. admaxads配列にスロットを登録
-        if(!window.admaxads) window.admaxads = [];
-        document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
-            window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
-        });
-
-        // 2. SDKをロード（body末尾で1回だけ実行）
-        var s = document.createElement('script');
-        s.type = 'text/javascript';
-        s.charset = 'utf-8';
-        s.src = SDK_URL;
-        s.async = true;
-        document.body.appendChild(s);
-
-        // 3. 広告が返らなかったスロットを非表示に（遅延チェック）
-        function checkAdSlots(){
+        // 課金チェック → 課金済みなら広告を全て非表示にしてSDKも読み込まない
+        function hideAllAds(){
             document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
-                var ad = slot.querySelector('.admax-switch');
-                if(ad && ad.children.length > 0){
-                    slot.classList.add('ad-loaded');
-                } else {
-                    slot.style.display = 'none';
-                }
+                slot.style.display = 'none';
             });
         }
-        setTimeout(checkAdSlots, 5000);
-        setTimeout(checkAdSlots, 10000);
+
+        function initAds(){
+            // 1. admaxads配列にスロットを登録
+            if(!window.admaxads) window.admaxads = [];
+            document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
+                window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
+            });
+
+            // 2. SDKをロード（body末尾で1回だけ実行）
+            var s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.charset = 'utf-8';
+            s.src = SDK_URL;
+            s.async = true;
+            document.body.appendChild(s);
+
+            // 3. 広告が返らなかったスロットを非表示に（遅延チェック）
+            function checkAdSlots(){
+                document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                    var ad = slot.querySelector('.admax-switch');
+                    if(ad && ad.children.length > 0){
+                        slot.classList.add('ad-loaded');
+                    } else {
+                        slot.style.display = 'none';
+                    }
+                });
+            }
+            setTimeout(checkAdSlots, 5000);
+            setTimeout(checkAdSlots, 10000);
+        }
+
+        // 課金状態をチェック（同一ドメインのAPI）
+        fetch('/api/subscription-status')
+            .then(function(res){ return res.json(); })
+            .then(function(data){
+                if(data && data.isPaid){
+                    hideAllAds();
+                } else {
+                    initAds();
+                }
+            })
+            .catch(function(){
+                // エラー時は広告を表示（未課金扱い）
+                initAds();
+            });
     })()
     </script>`;
 }
