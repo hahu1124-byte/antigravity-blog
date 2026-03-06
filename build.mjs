@@ -319,7 +319,7 @@ function buildIndexPage() {
         </a>`).join('\n');
 
     const tagButtons = allTags.map(tag =>
-        `<button class="tag" data-filter="${escapeHtml(tag)}">${escapeHtml(tag)}</button>`
+        `<button class="tag" data-filter="${escapeHtml(tag)}">${escapeHtml(tag)} (${tagCounts[tag]})</button>`
     ).join('\n            ');
 
     const html = `${htmlHead('ブログ', '日記・レポート・技術記事の一覧')}
@@ -331,7 +331,7 @@ function buildIndexPage() {
         </header>
 
         <div class="tag-filter">
-            <button class="tag tag-active" data-filter="all">すべて</button>
+            <button class="tag tag-active" data-filter="all">すべて (${posts.length})</button>
             ${tagButtons}
         </div>
 
