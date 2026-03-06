@@ -155,25 +155,41 @@ function getSlideInAdHtml() {
     </script>`;
 }
 
-/** 広告表示チェックスクリプト（広告が返ったらad-loadedクラス追加、返らなかったら非表示） */
+/** 広告初期化スクリプト（admaxads配列にpush→SDKリロードで広告を表示） */
 function getAdVisibilityScript() {
     return `
     <script>
     (function(){
+        var AD_ID = '${NINJA_AD_ID}';
+        var SDK_URL = '${ADMAX_SCRIPT_URL}';
+
+        // 1. admaxads配列にスロットを登録
+        if(!window.admaxads) window.admaxads = [];
+        document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
+            window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
+        });
+
+        // 2. SDKを再ロード（既存のt.jsを削除→再追加で再実行）
+        var old = document.querySelector('script[src="' + SDK_URL + '"]');
+        if(old) old.remove();
+        var s = document.createElement('script');
+        s.type = 'text/javascript';
+        s.charset = 'utf-8';
+        s.src = SDK_URL;
+        s.async = true;
+        document.body.appendChild(s);
+
+        // 3. 広告が返らなかったスロットを非表示に（遅延チェック）
         function checkAdSlots(){
             document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
                 var ad = slot.querySelector('.admax-switch');
                 if(ad && ad.children.length > 0){
-                    // 広告が返った → 展開表示
                     slot.classList.add('ad-loaded');
                 } else {
-                    // 広告が返らなかった → 完全非表示
                     slot.style.display = 'none';
                 }
             });
         }
-        // SDKが広告を読み込むのを十分待ってからチェック
-        setTimeout(checkAdSlots, 3000);
         setTimeout(checkAdSlots, 5000);
         setTimeout(checkAdSlots, 10000);
     })()
