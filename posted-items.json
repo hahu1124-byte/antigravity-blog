@@ -106,5 +106,17 @@
     "title": "🤖 AIと1週間でWebポータルを作った記録 — Day 1: 構想とNext.jsセットアップ",
     "source": "blog",
     "postedAt": "2026-03-06T03:43:14.782Z"
+  },
+  {
+    "url": "https://www.antigravity-portal.com/blog/202603/20260306_ai_web_dev_day3/",
+    "title": "🤖 AIと1週間でWebポータルを作った記録 — Day 3: ブログ機能と収益化（Stripe + 広告）",
+    "source": "blog",
+    "postedAt": "2026-03-06T05:57:29.117Z"
+  },
+  {
+    "url": "https://www.antigravity-portal.com/blog/202603/20260306_ai_web_dev_day2/",
+    "title": "🤖 AIと1週間でWebポータルを作った記録 — Day 2: パチンコ期待値計算ツールの実装",
+    "source": "blog",
+    "postedAt": "2026-03-06T05:57:32.419Z"
   }
 ]
