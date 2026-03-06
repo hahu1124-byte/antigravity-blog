@@ -151,6 +151,23 @@ body {
     color: #f87171;
 }
 
+/* お気に入り一括削除ボタン */
+.fav-clear-btn {
+    background: rgba(250, 204, 21, 0.08);
+    border: 1px solid rgba(250, 204, 21, 0.2);
+    border-radius: 6px;
+    padding: 0.25rem 0.6rem;
+    color: #8b8fa0;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.fav-clear-btn:hover {
+    background: rgba(250, 204, 21, 0.18);
+    color: #facc15;
+}
+
 /* 列設定パネル */
 .col-settings {
     background: rgba(30, 32, 48, 0.95);
@@ -400,10 +417,25 @@ thead th {
     white-space: nowrap;
 }
 
-/* 機種名カラム固定（ヘッダー） */
-thead th:first-child {
+/* ★列ヘッダー固定 */
+.fav-header {
     position: sticky;
     left: 0;
+    z-index: 21;
+    background: rgba(30, 32, 48, 0.98);
+    width: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    text-align: center;
+    padding: 0.75rem 0.3rem !important;
+    font-size: 0.85rem;
+    color: #facc15;
+}
+
+/* 機種名カラム固定（ヘッダー） */
+thead th:nth-child(2) {
+    position: sticky;
+    left: 36px;
     z-index: 20;
     background: rgba(30, 32, 48, 0.98);
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
@@ -473,6 +505,52 @@ tbody td {
     font-size: 0.88rem;
 }
 
+/* ★お気に入りセル */
+.fav-cell {
+    position: sticky;
+    left: 0;
+    z-index: 6;
+    background: rgba(18, 19, 26, 0.98);
+    width: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    padding: 0.4rem 0.2rem !important;
+    text-align: center;
+}
+
+tbody tr:nth-child(even) .fav-cell {
+    background: rgba(20, 21, 30, 0.98);
+}
+
+tbody tr:hover .fav-cell {
+    background: rgba(30, 32, 55, 0.98);
+}
+
+.fav-btn {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: #4a4d5e;
+    transition: color 0.2s, transform 0.15s;
+    padding: 0;
+    line-height: 1;
+}
+
+.fav-btn:hover {
+    color: #facc15;
+    transform: scale(1.2);
+}
+
+.fav-btn.fav-active {
+    color: #facc15;
+}
+
+.fav-btn.fav-active:hover {
+    color: #fbbf24;
+    transform: scale(1.2);
+}
+
 /* 機種名カラム */
 .machine-name {
     font-weight: 600;
@@ -481,9 +559,9 @@ tbody td {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    /* 機種名カラム固定 */
+    /* 機種名カラム固定（★列の右横） */
     position: sticky;
-    left: 0;
+    left: 36px;
     z-index: 5;
     background: rgba(18, 19, 26, 0.98);
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);

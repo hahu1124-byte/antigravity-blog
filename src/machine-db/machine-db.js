@@ -11,6 +11,59 @@
     let sortKey = 'release';
     let sortDir = 'desc';
 
+    // お気に入り管理
+    let favoriteNames = new Set();
+
+    function isFavorite(name) {
+        return favoriteNames.has(name);
+    }
+
+    function toggleFavorite(machine) {
+        parent.postMessage({
+            type: 'favorite-toggle',
+            machine: {
+                name: machine.name,
+                type: machine.type,
+                prob: machine.prob,
+                baseProbability: machine.baseProbability,
+                borderEquiv: machine.borderEquiv,
+                rb: machine.rb,
+                avgChain: machine.avgChain,
+                avgAcquired: machine.avgAcquired,
+                entryRate: machine.entryRate,
+                realContRate: machine.realContRate,
+                rushRate: machine.rushRate,
+                yutimeTrigger: machine.yutimeTrigger,
+                yutimeSpins: machine.yutimeSpins,
+                releaseDate: machine.releaseDate,
+            }
+        }, '*');
+    }
+
+    // 親フレームからのお気に入り一覧を受信
+    window.addEventListener('message', (e) => {
+        if (e.data?.type === 'favorite-list') {
+            favoriteNames = new Set(e.data.names || []);
+            updateFavoriteStars();
+        }
+        if (e.data?.type === 'favorite-updated') {
+            favoriteNames = new Set(e.data.names || []);
+            updateFavoriteStars();
+        }
+        if (e.data?.type === 'favorite-limit') {
+            alert(e.data.message || 'お気に入りの上限に達しました');
+        }
+    });
+
+    function updateFavoriteStars() {
+        document.querySelectorAll('.fav-btn').forEach(btn => {
+            const name = btn.dataset.name;
+            const active = favoriteNames.has(name);
+            btn.textContent = active ? '★' : '☆';
+            btn.classList.toggle('fav-active', active);
+        });
+    }
+
     // 列定義（デフォルト順序）
     const COLUMN_DEFS = {
         type: { label: 'タイプ', sortKey: 'type' },
@@ -132,6 +185,12 @@
         filteredMachines.sort((a, b) => {
             let cmp = 0;
             switch (sortKey) {
+                case 'fav': {
+                    const aFav = favoriteNames.has(a.name) ? 1 : 0;
+                    const bFav = favoriteNames.has(b.name) ? 1 : 0;
+                    cmp = bFav - aFav;
+                    break;
+                }
                 case 'name': cmp = a.name.localeCompare(b.name, 'ja'); break;
                 case 'type': cmp = getTypeOrder(a.type) - getTypeOrder(b.type); break;
                 case 'baseProb': cmp = (a.baseProbability || 9999) - (b.baseProbability || 9999); break;
@@ -171,7 +230,8 @@
     function renderHeader() {
         const v = columnVisibility;
         const widthStyle = nameColWidth ? `style="width:${nameColWidth}px;min-width:${nameColWidth}px;max-width:${nameColWidth}px;position:relative"` : 'style="position:relative"';
-        let html = `<th class="sortable" data-sort="name" ${widthStyle}>機種名 <span class="sort-icon">${sortKey === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}</span><div class="resize-handle" id="name-resize-handle"></div></th>`;
+        let html = `<th class="fav-header sortable" data-sort="fav" title="お気に入りで並び替え">★ <span class="sort-icon">${sortKey === 'fav' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}</span></th>`;
+        html += `<th class="sortable" data-sort="name" ${widthStyle}>機種名 <span class="sort-icon">${sortKey === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}</span><div class="resize-handle" id="name-resize-handle"></div></th>`;
         for (const col of columnOrder) {
             if (!v[col]) continue;
             const def = COLUMN_DEFS[col];
@@ -264,7 +324,10 @@
         const v = columnVisibility;
         const html = pageData.map((m, i) => {
             const globalIdx = start + i;
-            let cells = `<td class="machine-name" title="${esc(m.name)}">${esc(m.name)}</td>`;
+            const favClass = isFavorite(m.name) ? 'fav-active' : '';
+            const favStar = isFavorite(m.name) ? '★' : '☆';
+            let cells = `<td class="fav-cell"><button class="fav-btn ${favClass}" data-name="${esc(m.name)}" title="お気に入り">${favStar}</button></td>`;
+            cells += `<td class="machine-name" title="${esc(m.name)}">${esc(m.name)}</td>`;
             for (const col of columnOrder) {
                 if (!v[col]) continue;
                 cells += renderCell(col, m);
@@ -500,7 +563,7 @@
             searchInput.value = '';
             typeFilter.value = 'all';
             yutimeFilter.value = 'all';
-            yearFilter.value = 'all';
+            yearFilter.value = '2022';
             sortKey = 'release';
             sortDir = 'desc';
             currentPage = 1;
@@ -548,7 +611,7 @@
     prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
     nextBtn.addEventListener('click', () => { if (currentPage < Math.ceil(filteredMachines.length / perPage)) { currentPage++; renderTable(); } });
     perPageSelect.addEventListener('change', () => { perPage = parseInt(perPageSelect.value); currentPage = 1; renderTable(); });
-    tbody.addEventListener('click', (e) => { const row = e.target.closest('tr'); if (row?.dataset.index !== undefined) showDetail(filteredMachines[parseInt(row.dataset.index)]); });
+    tbody.addEventListener('click', (e) => { if (e.target.closest('.fav-btn, .fav-cell')) return; const row = e.target.closest('tr'); if (row?.dataset.index !== undefined) showDetail(filteredMachines[parseInt(row.dataset.index)]); });
     modalClose.addEventListener('click', hideDetail);
     modal.querySelector('.modal-backdrop').addEventListener('click', hideDetail);
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideDetail(); });
@@ -557,6 +620,35 @@
 
     applyColumnVisibility();
     loadData();
+
+    // ★ボタンクリックイベント（イベント委譲）
+    tbody.addEventListener('click', (e) => {
+        const btn = e.target.closest('.fav-btn');
+        if (btn) {
+            e.stopPropagation();
+            const name = btn.dataset.name;
+            const machine = allMachines.find(m => m.name === name);
+            if (machine) toggleFavorite(machine);
+            return;
+        }
+    });
+
+    // 親フレームにお気に入り一覧を要求
+    parent.postMessage({ type: 'get-favorites' }, '*');
+
+    // お気に入り一括削除ボタン
+    const favClearBtn = $('fav-clear-btn');
+    if (favClearBtn) {
+        favClearBtn.addEventListener('click', () => {
+            if (favoriteNames.size === 0) {
+                alert('お気に入りが登録されていません');
+                return;
+            }
+            if (confirm('お気に入りを全て削除しますか？')) {
+                parent.postMessage({ type: 'clear-favorites' }, '*');
+            }
+        });
+    }
 
     // スクロールインジケーター制御
     const tableScroll = $('table-scroll');
