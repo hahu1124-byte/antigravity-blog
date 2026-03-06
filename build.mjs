@@ -155,23 +155,27 @@ function getSlideInAdHtml() {
     </script>`;
 }
 
-/** 広告非表示チェックスクリプト（忍者AdMaxが広告を返さなかった場合にスロットを非表示） */
+/** 広告表示チェックスクリプト（広告が返ったらad-loadedクラス追加、返らなかったら非表示） */
 function getAdVisibilityScript() {
     return `
     <script>
     (function(){
-        function hideEmptyAdSlots(){
+        function checkAdSlots(){
             document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
                 var ad = slot.querySelector('.admax-switch');
-                // 広告が返らなかった（子要素なし）→ 非表示
-                if(!ad || ad.children.length === 0){
+                if(ad && ad.children.length > 0){
+                    // 広告が返った → 展開表示
+                    slot.classList.add('ad-loaded');
+                } else {
+                    // 広告が返らなかった → 完全非表示
                     slot.style.display = 'none';
                 }
             });
         }
         // SDKが広告を読み込むのを十分待ってからチェック
-        setTimeout(hideEmptyAdSlots, 5000);
-        setTimeout(hideEmptyAdSlots, 10000);
+        setTimeout(checkAdSlots, 3000);
+        setTimeout(checkAdSlots, 5000);
+        setTimeout(checkAdSlots, 10000);
     })()
     </script>`;
 }
