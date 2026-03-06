@@ -346,6 +346,27 @@ function getAmazonAdsHtml(post) {
 }
 
 // ==========================================
+// Note有料記事 導線バナー（AI開発シリーズ専用）
+// ==========================================
+
+const NOTE_ARTICLE_URL = 'https://note.com/hahu1124/n/n499b03461f85';
+
+/** AI開発シリーズ記事にNote導線バナーを挿入 */
+function getNoteBannerHtml(post) {
+    // タイトルに「AIと1週間で」を含む記事のみ
+    if (!post.title.includes('AIと1週間で')) return '';
+    return `
+        <div class="note-banner">
+            <div class="note-banner-icon">📖</div>
+            <div class="note-banner-body">
+                <p class="note-banner-title">この記事の<strong>完全版</strong>をNoteで公開中</p>
+                <p class="note-banner-desc">ブログでは書けなかった裏話・具体的な設定値・失敗のリカバリー手順まで、全5章5,500文字超の詳細版です。</p>
+                <a href="${NOTE_ARTICLE_URL}" target="_blank" rel="noopener noreferrer" class="note-banner-link">📝 Noteで完全版を読む（¥500）</a>
+            </div>
+        </div>`;
+}
+
+// ==========================================
 // 記事一覧ページ生成 (/blog/index.html)
 // ==========================================
 
@@ -554,6 +575,7 @@ function buildArticlePages() {
                 ${content}
             </div>
 
+            ${getNoteBannerHtml(post)}
             ${getNinjaAdHtml()}
             ${getAmazonAdsHtml(post)}
         </article>

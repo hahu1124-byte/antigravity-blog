@@ -949,3 +949,98 @@ html[data-theme="light"] .ninja-slide-close:hover {
         padding: 0.75rem 0.75rem 0.5rem;
     }
 }
+
+/* ============================================================
+   Note有料記事 導線バナー
+   ============================================================ */
+
+.note-banner {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+    margin: 2.5rem 0;
+    padding: 1.5rem 1.75rem;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.08));
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-normal);
+}
+
+.note-banner:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.12);
+}
+
+.note-banner-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.note-banner-body {
+    flex: 1;
+}
+
+.note-banner-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 0.5rem;
+    line-height: 1.4;
+}
+
+.note-banner-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 0 0 1rem;
+    line-height: 1.6;
+}
+
+.note-banner-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1.5rem;
+    background: linear-gradient(135deg, var(--accent), #a855f7);
+    color: #fff !important;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    text-decoration: none !important;
+    transition: all var(--transition-spring);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.note-banner-link:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+    color: #fff !important;
+}
+
+.note-banner-link:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* ライトモード調整 */
+html[data-theme="light"] .note-banner {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.05));
+}
+
+/* レスポンシブ */
+@media (max-width: 768px) {
+    .note-banner {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1.25rem;
+    }
+
+    .note-banner-icon {
+        font-size: 1.5rem;
+    }
+
+    .note-banner-link {
+        width: 100%;
+        justify-content: center;
+    }
+}
