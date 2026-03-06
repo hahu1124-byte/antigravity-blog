@@ -1,8 +1,9 @@
 name: Bluesky 自動投稿
 
 on:
-  # cron無効化（2026-03-06: posted-items.json push漏れにより5件誤投稿が発生したため）
-  # 今後はblog-data.json更新時の自動投稿 + 手動実行のみ
+  # Note記事の自動検出用に毎日1回チェック（JST 21:00）
+  schedule:
+    - cron: '0 12 * * *'
   push:
     branches: [main]
     paths:
