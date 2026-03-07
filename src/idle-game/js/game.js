@@ -100,6 +100,11 @@ const MACHINES = [
 
 const YEN_PER_BALL = 4;  // 1玉 = ¥4
 
+const DEBT_UNIT_YEN = 1000;          // 借金単位: ¥1,000
+const DEBT_UNIT_BALLS = DEBT_UNIT_YEN / YEN_PER_BALL; // = 250玉
+const DEBT_INTEREST_RATE = 0.05;     // 1分あたり複利5%
+const DEBT_INTERVAL_MS = 60000;      // 利息計算間隔: 60秒
+
 const DEFAULT_STATE = {
     balls: 2500,
     totalBalls: 0,
@@ -112,6 +117,10 @@ const DEFAULT_STATE = {
     costPerSpin: 2,           // 甘デジ初期値
     sinceLastJackpot: 0,
     autoInvest: false,
+
+    // 借金システム
+    debt: 0,                  // 借金額（玉単位）
+    lastDebtTime: 0,          // 最後に利息計算した時刻
 
     // Phase 2: モード
     mode: MODE_NORMAL,
@@ -260,7 +269,7 @@ function applyMachineSpecs() {
     // 基本確率（アップグレード反映）
     state.jackpotProb = m.prob * Math.pow(1.1, state.upgrades.jackpotProb);
     // 基本出玉（アップグレード反映）
-    state.jackpotPayout = m.payout + state.upgrades.jackpotPayout * 200;
+    state.jackpotPayout = m.payout + state.upgrades.jackpotPayout * 20;
     // コスト
     state.costPerSpin = m.cost;
 }
@@ -311,21 +320,21 @@ const UPGRADES = [
     {
         id: 'jackpotPayout',
         name: '💰 出玉UP',
-        desc: '大当たり時の獲得玉を+200',
+        desc: '大当たり時の獲得玉を+20',
         icon: '💰',
         baseCost: 500,
         costMultiplier: 1.8,
         maxLevel: 50,
         apply: (s) => {
             const m = getCurrentMachine();
-            s.jackpotPayout = m.payout + s.upgrades.jackpotPayout * 200;
+            s.jackpotPayout = m.payout + s.upgrades.jackpotPayout * 20;
         },
         effectText: (s) => `${formatNum(s.jackpotPayout)}玉`,
     },
     {
         id: 'autoInvest',
         name: '🤖 オート投資',
-        desc: '玉がなくても自動で回転を継続',
+        desc: '玉が無くても自動で収支から補充（借金可能）',
         icon: '🤖',
         baseCost: 5000,
         costMultiplier: 1,
@@ -336,7 +345,7 @@ const UPGRADES = [
     {
         id: 'kakuhenBoost',
         name: '🔥 確変倍率UP',
-        desc: '確変/ST中の確率をさらに10%改善',
+        desc: '確変/ST中の確率をさらに1%改善',
         icon: '🔥',
         baseCost: 2000,
         costMultiplier: 2.5,
@@ -347,7 +356,7 @@ const UPGRADES = [
     {
         id: 'stSpins',
         name: '⏱️ ST回転数UP',
-        desc: 'STモードの回転数上限を+10',
+        desc: 'STモードの回転数上限を+2',
         icon: '⏱️',
         baseCost: 1500,
         costMultiplier: 2.0,
@@ -440,6 +449,12 @@ const dom = {
     // Phase 3
     machineGrid: $('machineGrid'),
     machineName: $('machineName'),
+    // 借金
+    debtSection: $('debtSection'),
+    debtAmount: $('debtAmount'),
+    debtInterest: $('debtInterest'),
+    repayBtn: $('repayBtn'),
+    loanBtn: $('loanBtn'),
 };
 
 // ============================================================
@@ -474,11 +489,11 @@ function getPrestigeMultiplier() {
 }
 
 function getKakuhenProb() {
-    return BASE_KAKUHEN_PROB * Math.pow(1.1, state.upgrades.kakuhenBoost) * getPrestigeMultiplier();
+    return BASE_KAKUHEN_PROB * Math.pow(1.01, state.upgrades.kakuhenBoost) * getPrestigeMultiplier();
 }
 
 function getMaxStSpins() {
-    return BASE_ST_SPINS + state.upgrades.stSpins * 10;
+    return BASE_ST_SPINS + state.upgrades.stSpins * 2;
 }
 
 function getCriticalChance() {
@@ -664,6 +679,45 @@ function showYutimeBanner() {
 }
 
 // ============================================================
+// 借金システム
+// ============================================================
+
+function takeLoan() {
+    state.debt += DEBT_UNIT_BALLS;
+    state.balls += DEBT_UNIT_BALLS;
+    if (state.lastDebtTime === 0) {
+        state.lastDebtTime = Date.now();
+    }
+}
+
+function processDebtInterest() {
+    if (state.debt <= 0) return;
+    const now = Date.now();
+    if (state.lastDebtTime === 0) state.lastDebtTime = now;
+    const elapsed = now - state.lastDebtTime;
+    if (elapsed >= DEBT_INTERVAL_MS) {
+        const periods = Math.floor(elapsed / DEBT_INTERVAL_MS);
+        state.debt = state.debt * Math.pow(1 + DEBT_INTEREST_RATE, periods);
+        state.lastDebtTime = now - (elapsed % DEBT_INTERVAL_MS);
+    }
+}
+
+function repayDebt() {
+    if (state.debt <= 0) return;
+    const debtBalls = Math.ceil(state.debt);
+    if (state.balls >= debtBalls) {
+        state.balls -= debtBalls;
+        state.debt = 0;
+        state.lastDebtTime = 0;
+    } else {
+        // 持ち玉全額で部分返済
+        state.debt -= state.balls;
+        state.balls = 0;
+    }
+    saveGame();
+}
+
+// ============================================================
 // 自動化 (Phase 3)
 // ============================================================
 
@@ -769,7 +823,13 @@ function gameLoop(now) {
                 }
             }
 
-            if (state.balls < 0) state.balls = 0;
+            // 玉が0以下になったら自動借金
+            if (state.balls < 0 && state.autoInvest) {
+                state.balls = 0;
+                takeLoan();
+            } else if (state.balls < 0) {
+                state.balls = 0;
+            }
 
             const prob = getCurrentProb();
             if (Math.random() < prob) {
@@ -803,6 +863,9 @@ function gameLoop(now) {
     // Phase 3: 自動化処理
     processAutoBuyer(dt);
     processAutoPrestige();
+
+    // 借金利息計算
+    processDebtInterest();
 
     updateUI();
     requestAnimationFrame(gameLoop);
@@ -882,6 +945,19 @@ function updateUI() {
         ? `1/${Math.round(state.spins / Math.max(state.jackpots, 1))}`
         : '-';
     dom.playTimeStat.textContent = formatTime(state.playTime);
+
+    // 借金表示
+    if (state.debt > 0) {
+        dom.debtSection.classList.remove('hidden');
+        dom.debtAmount.textContent = formatYen(state.debt);
+        const minutesElapsed = state.lastDebtTime > 0
+            ? Math.floor((Date.now() - state.lastDebtTime) / 60000)
+            : 0;
+        dom.debtInterest.textContent = `複利5%/分 (経過${minutesElapsed}分)`;
+        dom.repayBtn.disabled = state.balls <= 0;
+    } else {
+        dom.debtSection.classList.add('hidden');
+    }
 
     // プレステージ
     const pThreshold = getPrestigeThreshold();
@@ -1185,6 +1261,8 @@ function init() {
 
     dom.resetBtn.addEventListener('click', resetGame);
     dom.prestigeBtn.addEventListener('click', doPrestige);
+    dom.repayBtn.addEventListener('click', repayDebt);
+    dom.loanBtn.addEventListener('click', takeLoan);
 
     dom.rushSummaryClose.addEventListener('click', () => {
         dom.rushSummary.classList.add('hidden');

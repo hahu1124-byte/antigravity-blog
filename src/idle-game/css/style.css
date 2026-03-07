@@ -1099,3 +1099,93 @@ body {
         box-shadow: 0 0 12px rgba(167, 139, 250, 0.4);
     }
 }
+
+/* --- 借金セクション --- */
+#debtSection {
+    margin-top: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(255, 51, 102, 0.08), rgba(255, 136, 0, 0.05));
+    border: 1px solid rgba(255, 51, 102, 0.3);
+    border-radius: var(--radius);
+    animation: debtPulse 2s ease-in-out infinite alternate;
+}
+
+#debtSection.hidden {
+    display: none;
+}
+
+@keyframes debtPulse {
+    0% {
+        border-color: rgba(255, 51, 102, 0.3);
+    }
+
+    100% {
+        border-color: rgba(255, 51, 102, 0.6);
+        box-shadow: 0 0 10px rgba(255, 51, 102, 0.15);
+    }
+}
+
+.debt-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.debt-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+}
+
+.debt-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.debt-value {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+}
+
+.debt-value.danger {
+    color: var(--accent-red);
+    text-shadow: 0 0 6px rgba(255, 51, 102, 0.4);
+}
+
+.debt-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.debt-btn {
+    padding: 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+}
+
+.debt-btn:active {
+    transform: scale(0.95);
+}
+
+.debt-btn.repay {
+    background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+    color: #000;
+}
+
+.debt-btn.loan {
+    background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+    color: #fff;
+}
+
+.debt-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}

@@ -165,6 +165,25 @@
             <div id="shopGrid"></div>
         </section>
 
+        <!-- 借金セクション -->
+        <section id="debtSection" class="hidden">
+            <h2 class="shop-title">💸 借金</h2>
+            <div class="debt-info">
+                <div class="debt-row">
+                    <span class="debt-label">借金額</span>
+                    <span class="debt-value danger" id="debtAmount">¥0</span>
+                </div>
+                <div class="debt-row">
+                    <span class="debt-label">利息</span>
+                    <span class="debt-value" id="debtInterest">複利5%/分</span>
+                </div>
+                <div class="debt-buttons">
+                    <button id="repayBtn" class="debt-btn repay">💰 返済する</button>
+                    <button id="loanBtn" class="debt-btn loan">💸 ¥1,000借りる</button>
+                </div>
+            </div>
+        </section>
+
         <!-- 統計 -->
         <section id="statsSection">
             <h2 class="shop-title">📊 統計</h2>
