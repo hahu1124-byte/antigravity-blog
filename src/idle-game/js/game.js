@@ -927,8 +927,13 @@ function renderShop() {
         const card = document.createElement('div');
         card.className = 'shop-card';
         card.dataset.upgradeId = upg.id;
-        card.addEventListener('click', () => buyUpgrade(upg.id));
         dom.shopGrid.appendChild(card);
+    });
+    // イベント委譲: innerHTML更新でリスナーが消えない
+    dom.shopGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('[data-upgrade-id]');
+        if (!card) return;
+        buyUpgrade(card.dataset.upgradeId);
     });
     updateShopUI();
 }
