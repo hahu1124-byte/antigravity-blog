@@ -341,7 +341,7 @@ const UPGRADES = [
     {
         id: 'stSpins',
         name: '⏱️ ST回転数UP',
-        desc: 'STモードの回転数上限を+20',
+        desc: 'STモードの回転数上限を+10',
         icon: '⏱️',
         baseCost: 1500,
         costMultiplier: 2.0,
@@ -465,7 +465,7 @@ function getKakuhenProb() {
 }
 
 function getMaxStSpins() {
-    return BASE_ST_SPINS + state.upgrades.stSpins * 20;
+    return BASE_ST_SPINS + state.upgrades.stSpins * 10;
 }
 
 function getCriticalChance() {
