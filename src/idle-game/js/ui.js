@@ -57,6 +57,7 @@ const dom = {
     debtAmount: $('debtAmount'),
     debtInterest: $('debtInterest'),
     repayBtn: $('repayBtn'),
+    repayPartialBtn: $('repayPartialBtn'),
     loanBtn: $('loanBtn'),
     // レート選択
     rateSection: $('rateSection'),
@@ -207,8 +208,10 @@ function updateUI() {
             : 0;
         dom.debtInterest.textContent = state.debt > 0 ? `複利5%/分 (経過${minutesElapsed}分)` : '借金なし';
         dom.repayBtn.disabled = state.balls <= 0 || state.debt <= 0;
-        const loanYen = DEBT_UNIT_BALLS * YEN_PER_BALL;
-        dom.loanBtn.textContent = `💸 ¥${loanYen.toLocaleString('ja-JP')}借りる`;
+        const repayBalls = getDebtRepayBalls();
+        dom.repayPartialBtn.disabled = state.balls < repayBalls || state.debt <= 0;
+        dom.repayPartialBtn.textContent = `💴 ¥${DEBT_REPAY_UNIT_YEN.toLocaleString('ja-JP')}返済`;
+        dom.loanBtn.textContent = `💸 ¥${DEBT_UNIT_YEN.toLocaleString('ja-JP')}借りる`;
     } else {
         dom.debtSection.classList.add('hidden');
     }

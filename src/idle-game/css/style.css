@@ -1156,7 +1156,7 @@ body {
 
 .debt-buttons {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 8px;
     margin-top: 4px;
 }
@@ -1188,6 +1188,11 @@ body {
 .debt-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+
+.debt-btn.repay-partial {
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+    color: #000;
 }
 
 /* --- バージョン表示 --- */

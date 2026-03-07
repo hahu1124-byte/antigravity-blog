@@ -138,7 +138,8 @@ function calculateOffline() {
 
     const maxOffline = 24 * 3600;
     const offlineSeconds = Math.min(elapsed, maxOffline);
-    const offlineSpins = Math.floor(state.spinRate * offlineSeconds);
+    const effectiveRate = isPremium ? state.spinRate * PREMIUM_SPEED_MULTIPLIER : state.spinRate;
+    const offlineSpins = Math.floor(effectiveRate * offlineSeconds);
 
     if (offlineSpins <= 0) return;
 
@@ -178,9 +179,10 @@ function calculateOffline() {
 
     checkMachineUnlocks();
 
+    const premiumLabel = isPremium ? ' 💎x2' : '';
     dom.offlineDetail.innerHTML = `
         ${formatTime(offlineSeconds)}の間に…<br>
-        🎰 ${formatNum(offlineSpins)}回転<br>
+        🎰 ${formatNum(offlineSpins)}回転${premiumLabel}<br>
         🎉 大当たり ${actualJackpots}回<br>
         💰 収支: ${netGain >= 0 ? '+' : ''}${formatYen(netGain)}
     `;

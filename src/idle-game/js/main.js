@@ -21,6 +21,7 @@ function init() {
     dom.resetBtn.addEventListener('click', resetGame);
     dom.prestigeBtn.addEventListener('click', doPrestige);
     dom.repayBtn.addEventListener('click', repayDebt);
+    dom.repayPartialBtn.addEventListener('click', repayPartial);
     dom.loanBtn.addEventListener('click', takeLoan);
 
     // ショップクリックイベント（イベント委譲、初回のみ）

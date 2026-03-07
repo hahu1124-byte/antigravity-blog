@@ -21,8 +21,9 @@ const PRESTIGE_BONUS_RATE = 0.05;
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.5.1';
-const DEBT_UNIT_BALLS = 250;
+const GAME_VERSION = 'v0.6';
+const DEBT_UNIT_YEN = 1000;
+const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
 const DEBT_INTERVAL_MS = 60000;
 const PREMIUM_SPEED_MULTIPLIER = 2.0;
