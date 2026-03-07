@@ -56,6 +56,8 @@ const DEFAULT_STATE = {
         autoInvest: 0,
         kakuhenBoost: 0,
         stSpins: 0,
+        kakuhenCont: 0,
+        costReduction: 0,
         autoBuyer: 0,
         autoPrestige: 0,
         critical: 0,

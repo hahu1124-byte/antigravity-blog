@@ -21,7 +21,7 @@ const PRESTIGE_BONUS_RATE = 0.05;
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.9.9';
+const GAME_VERSION = 'v0.10.0';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -224,6 +224,24 @@ const UPGRADES = [
         maxLevel: 10,
         apply: () => { },
         effectText: () => `${getCriticalChance()}%`,
+    },
+    {
+        id: 'costReduction',
+        name: '💸 コスト削減',
+        desc: '1回転あたりのコストを5%削減（累乗）',
+        icon: '💸',
+        baseCost: 2000,
+        costMultiplier: 2.0,
+        maxLevel: 10,
+        apply: (s) => {
+            const m = getCurrentMachine();
+            const lv = s.upgrades.costReduction || 0;
+            s.costPerSpin = m.cost * Math.pow(0.95, lv);
+        },
+        effectText: (s) => {
+            const lv = s.upgrades.costReduction || 0;
+            return lv > 0 ? `-${Math.round((1 - Math.pow(0.95, lv)) * 100)}%` : '0%';
+        },
     },
     {
         id: 'autoBuyer',

@@ -99,7 +99,7 @@ function applyMachineSpecs() {
     const denom = Math.round(1 / m.prob);
     const hiddenRate = Math.pow(denom, 0.1) / 100;
     state.jackpotPayout = Math.floor(m.payout * (1 + lv * (0.05 + hiddenRate)));
-    state.costPerSpin = m.cost;
+    state.costPerSpin = m.cost * Math.pow(0.95, state.upgrades.costReduction || 0);
 }
 
 function switchMachine(machineId) {
