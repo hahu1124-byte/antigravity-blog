@@ -216,10 +216,11 @@
     // 機種名カラム幅の永続化
     const NAME_COL_WIDTH_KEY = 'machineDB_nameColWidth';
     let nameColWidth = parseInt(localStorage.getItem(NAME_COL_WIDTH_KEY)) || 0;
+    let isResizing = false; // リサイズ中フラグ（ソート発火防止用）
 
     function applyNameColWidth(w) {
         if (!w) return;
-        document.querySelectorAll('thead th:first-child, .machine-name').forEach(el => {
+        document.querySelectorAll('thead th:nth-child(2), .machine-name').forEach(el => {
             el.style.width = w + 'px';
             el.style.minWidth = w + 'px';
             el.style.maxWidth = w + 'px';
@@ -229,7 +230,7 @@
     // ヘッダーを動的生成（列順序対応）
     function renderHeader() {
         const v = columnVisibility;
-        const widthStyle = nameColWidth ? `style="width:${nameColWidth}px;min-width:${nameColWidth}px;max-width:${nameColWidth}px;position:relative"` : 'style="position:relative"';
+        const widthStyle = nameColWidth ? `style="width:${nameColWidth}px;min-width:${nameColWidth}px;max-width:${nameColWidth}px"` : '';
         let html = `<th class="fav-header sortable" data-sort="fav" title="お気に入りで並び替え">★ <span class="sort-icon">${sortKey === 'fav' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}</span></th>`;
         html += `<th class="sortable" data-sort="name" ${widthStyle}>機種名 <span class="sort-icon">${sortKey === 'name' ? (sortDir === 'asc' ? '▲' : '▼') : '⇅'}</span><div class="resize-handle" id="name-resize-handle"></div></th>`;
         for (const col of columnOrder) {
@@ -244,6 +245,7 @@
         // ソートイベント再バインド
         headerRow.querySelectorAll('th.sortable').forEach(th => {
             th.addEventListener('click', () => {
+                if (isResizing) return; // リサイズ操作直後はソートしない
                 const key = th.dataset.sort;
                 if (sortKey === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
                 else { sortKey = key; sortDir = 'asc'; }
@@ -263,6 +265,7 @@
                 const startX = e.clientX;
                 const startW = th.offsetWidth;
                 handle.classList.add('active');
+                isResizing = true;
                 document.body.style.cursor = 'col-resize';
                 document.body.style.userSelect = 'none';
 
@@ -279,6 +282,8 @@
                     document.body.style.cursor = '';
                     document.body.style.userSelect = '';
                     if (nameColWidth) localStorage.setItem(NAME_COL_WIDTH_KEY, nameColWidth);
+                    // clickイベントが発火するのを防ぐため遅延リセット
+                    requestAnimationFrame(() => { isResizing = false; });
                 }
                 document.addEventListener('mousemove', onMove);
                 document.addEventListener('mouseup', onUp);
@@ -292,6 +297,7 @@
                 const startX = e.touches[0].clientX;
                 const startW = th.offsetWidth;
                 handle.classList.add('active');
+                isResizing = true;
 
                 function onTouchMove(ev) {
                     const diff = ev.touches[0].clientX - startX;
@@ -304,6 +310,7 @@
                     document.removeEventListener('touchend', onTouchEnd);
                     handle.classList.remove('active');
                     if (nameColWidth) localStorage.setItem(NAME_COL_WIDTH_KEY, nameColWidth);
+                    requestAnimationFrame(() => { isResizing = false; });
                 }
                 document.addEventListener('touchmove', onTouchMove, { passive: false });
                 document.addEventListener('touchend', onTouchEnd);
@@ -570,7 +577,7 @@
             // 機種名カラム幅もリセット
             nameColWidth = 0;
             localStorage.removeItem(NAME_COL_WIDTH_KEY);
-            document.querySelectorAll('thead th:first-child, .machine-name').forEach(el => {
+            document.querySelectorAll('thead th:nth-child(2), .machine-name').forEach(el => {
                 el.style.width = '';
                 el.style.minWidth = '';
                 el.style.maxWidth = '';

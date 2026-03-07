@@ -427,7 +427,7 @@ thead th {
     min-width: 36px;
     max-width: 36px;
     text-align: center;
-    padding: 0.75rem 0.3rem !important;
+    padding: 0.75rem 0.2rem !important;
     font-size: 0.85rem;
     color: #facc15;
 }
@@ -440,6 +440,10 @@ thead th:nth-child(2) {
     background: rgba(30, 32, 48, 0.98);
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
     overflow: visible;
+    padding-left: 0.3rem;
+    width: 200px;
+    min-width: 120px;
+    max-width: 320px;
 }
 
 /* リサイズハンドル */
@@ -514,7 +518,7 @@ tbody td {
     width: 36px;
     min-width: 36px;
     max-width: 36px;
-    padding: 0.4rem 0.2rem !important;
+    padding: 0.4rem 0.15rem !important;
     text-align: center;
 }
 
@@ -555,6 +559,8 @@ tbody tr:hover .fav-cell {
 .machine-name {
     font-weight: 600;
     color: #e8e8f0;
+    width: 200px;
+    min-width: 120px;
     max-width: 320px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -565,6 +571,7 @@ tbody tr:hover .fav-cell {
     z-index: 5;
     background: rgba(18, 19, 26, 0.98);
     box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+    padding-left: 0.3rem;
 }
 
 tbody tr:nth-child(even) .machine-name {
