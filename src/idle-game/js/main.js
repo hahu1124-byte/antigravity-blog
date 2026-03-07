@@ -20,6 +20,34 @@ function init() {
 
     dom.resetBtn.addEventListener('click', resetGame);
     dom.prestigeBtn.addEventListener('click', doPrestige);
+
+    // 統計ポップアップ
+    document.getElementById('statsToggle').addEventListener('click', () => {
+        document.getElementById('statsPopup').classList.remove('hidden');
+    });
+    document.getElementById('statsPopupClose').addEventListener('click', () => {
+        document.getElementById('statsPopup').classList.add('hidden');
+    });
+    document.getElementById('statsPopup').addEventListener('click', (e) => {
+        if (e.target.id === 'statsPopup') {
+            e.target.classList.add('hidden');
+        }
+    });
+
+    // 機種情報ポップアップ
+    document.getElementById('machineInfoBtn').addEventListener('click', () => {
+        renderMachineInfoPopup();
+        document.getElementById('machineInfoPopup').classList.remove('hidden');
+    });
+    document.getElementById('machineInfoClose').addEventListener('click', () => {
+        document.getElementById('machineInfoPopup').classList.add('hidden');
+    });
+    document.getElementById('machineInfoPopup').addEventListener('click', (e) => {
+        if (e.target.id === 'machineInfoPopup') {
+            e.target.classList.add('hidden');
+        }
+    });
+
     dom.repayBtn.addEventListener('click', repayDebt);
     dom.repayPartialBtn.addEventListener('click', repayPartial);
     dom.loanBtn.addEventListener('click', takeLoan);

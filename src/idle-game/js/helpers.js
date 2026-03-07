@@ -112,6 +112,7 @@ function switchMachine(machineId) {
     state.currentMachineId = machineId;
     applyMachineSpecs();
     state.sinceLastJackpot = 0;
+    state.yutimeGauge = 0;
     state.yutimeTriggered = false;
     renderMachineSelector();
     saveGame();

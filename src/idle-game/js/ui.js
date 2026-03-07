@@ -88,9 +88,9 @@ function updateReels(dt, isJackpot) {
         dom.reel1.textContent = REEL_SYMBOLS[Math.floor(Math.random() * 10)];
         dom.reel2.textContent = REEL_SYMBOLS[Math.floor(Math.random() * 10)];
         dom.reel3.textContent = REEL_SYMBOLS[Math.floor(Math.random() * 10)];
-        dom.reel1.className = 'reel spinning';
-        dom.reel2.className = 'reel spinning';
-        dom.reel3.className = 'reel spinning';
+        dom.reel1.className = 'reel';
+        dom.reel2.className = 'reel';
+        dom.reel3.className = 'reel';
     }
 }
 
@@ -175,7 +175,7 @@ function updateUI() {
     }
 
     // 台情報
-    dom.probDisplay.textContent = `1/${Math.round(1 / getCurrentProb())}`;
+    dom.probDisplay.textContent = `1/${(1 / getCurrentProb()).toFixed(3)}`;
     dom.payoutDisplay.textContent = `${formatNum(state.jackpotPayout)}玉`;
     dom.rateDisplay.textContent = `${state.spinRate.toFixed(1)}回/秒`;
     dom.costDisplay.textContent = `${state.costPerSpin}玉`;
@@ -241,41 +241,106 @@ function updateUI() {
 
 function renderMachineSelector() {
     dom.machineGrid.innerHTML = '';
+
+    // 解放済み機種がある場合はセクションを表示
+    const unlockedCount = state.unlockedMachines.length;
+    const machineSection = document.getElementById('machineSection');
+    if (unlockedCount >= 1) {
+        machineSection.classList.remove('hidden');
+    } else {
+        machineSection.classList.add('hidden');
+    }
+
     MACHINES.forEach(m => {
         const isUnlocked = state.unlockedMachines.includes(m.id);
         const isActive = state.currentMachineId === m.id;
-        const isRush = state.mode !== MODE_NORMAL && state.mode !== MODE_JITAN;
+        if (!isUnlocked || !isActive) return; // 選択中の機種のみ表示
 
         const card = document.createElement('div');
-        card.className = `machine-card${isActive ? ' active' : ''}${!isUnlocked ? ' locked' : ''}${isRush && !isActive ? ' rush-disabled' : ''}`;
+        card.className = 'machine-card active';
 
-        if (isUnlocked) {
-            card.innerHTML = `
-                <div class="machine-header">
-                    <span class="machine-title">${m.name}</span>
-                    ${isActive ? '<span class="machine-active-badge">稼働中</span>' : ''}
-                </div>
-                <div class="machine-specs">
-                    <span>確率 1/${Math.round(1 / m.prob)}</span>
-                    <span>出玉 ${formatNum(m.payout)}</span>
-                    <span>コスト ${m.cost}玉</span>
-                </div>
-                <div class="machine-desc">${m.desc}</div>
-            `;
-            if (!isActive && !isRush) {
-                card.addEventListener('click', () => switchMachine(m.id));
-            }
-        } else {
-            card.innerHTML = `
-                <div class="machine-header">
-                    <span class="machine-title">🔒 ???</span>
-                </div>
-                <div class="machine-unlock-text">${m.unlockText}で解放</div>
-            `;
-        }
+        card.innerHTML = `
+            <div class="machine-header">
+                <span class="machine-title">${m.name}</span>
+                <span class="machine-active-badge">稼働中</span>
+            </div>
+            <div class="machine-specs">
+                <span>確率 1/${(1 / m.prob).toFixed(3)}</span>
+                <span>出玉 ${formatNum(m.payout)}</span>
+                <span>コスト ${m.cost}玉</span>
+            </div>
+            <div class="machine-desc">${m.desc}</div>
+        `;
 
         dom.machineGrid.appendChild(card);
     });
+
+    // 機種情報ポップアップの中身を生成
+    renderMachineInfoPopup();
+}
+
+function renderMachineInfoPopup() {
+    const list = document.getElementById('machineInfoList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const lockedCount = MACHINES.length - state.unlockedMachines.length;
+
+    MACHINES.forEach(m => {
+        const isUnlocked = state.unlockedMachines.includes(m.id);
+        const item = document.createElement('div');
+        item.className = `machine-info-item${isUnlocked ? '' : ' locked'}`;
+
+        if (isUnlocked) {
+            const isActive = state.currentMachineId === m.id;
+            item.innerHTML = `
+                <div class="machine-info-name">${m.name}${isActive ? ' <span class="machine-active-badge">稼働中</span>' : ''}</div>
+                <div class="machine-info-desc">${m.desc}</div>
+                <div class="machine-info-specs">
+                    <span>確率 1/${(1 / m.prob).toFixed(3)}</span>
+                    <span>出玉 ${formatNum(m.payout)}</span>
+                    <span>コスト ${m.cost}玉</span>
+                </div>
+                <div class="machine-info-specs">
+                    <span>確変率 ${Math.round(m.kakuhenRate * 100)}%</span>
+                    <span>ST率 ${Math.round(m.stRate * 100)}%</span>
+                    <span>時短率 ${Math.round(m.jitanRate * 100)}%</span>
+                </div>
+                <div class="machine-info-specs">
+                    <span>ST回転 ${m.baseStSpins}</span>
+                    <span>継続率 ${Math.round(m.kakuhenContinueRate * 100)}%</span>
+                    <span>遊タイム ${m.yutimeThreshold}回転</span>
+                </div>
+            `;
+            if (!isActive) {
+                item.classList.add('selectable');
+                item.addEventListener('click', () => {
+                    const isRush = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
+                    if (isRush) {
+                        alert('RUSH中は台変更できません');
+                        return;
+                    }
+                    if (confirm('変更する場合は回転数が初期化されますがよろしいですか？')) {
+                        switchMachine(m.id);
+                        document.getElementById('machineInfoPopup').classList.add('hidden');
+                    }
+                });
+            }
+        } else {
+            item.innerHTML = `
+                <div class="machine-info-name">🔒 ???</div>
+                <div class="machine-info-desc">${m.unlockText}で解放</div>
+            `;
+        }
+        list.appendChild(item);
+    });
+
+    if (lockedCount > 0) {
+        const footer = document.createElement('div');
+        footer.className = 'machine-info-footer';
+        footer.textContent = `🔒 残り ${lockedCount} 機種が隠されています`;
+        list.appendChild(footer);
+    }
 }
 
 // ============================================================
@@ -305,8 +370,8 @@ function renderShop() {
                 <div class="shop-desc">${upg.desc}</div>
                 <div class="shop-level"></div>
             </div>
-            <div class="shop-cost"></div>
             <div class="shop-spent"></div>
+            <div class="shop-cost"></div>
         `;
         dom.shopGrid.appendChild(card);
     });

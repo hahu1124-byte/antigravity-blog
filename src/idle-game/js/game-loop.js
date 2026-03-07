@@ -121,7 +121,7 @@ function processJackpot() {
 // ============================================================
 
 function getYutimeThreshold(m) {
-    return Math.floor((1 / m.prob) * m.yutimeMult);
+    return m.yutimeThreshold;
 }
 
 function checkYutime() {
@@ -244,8 +244,8 @@ function gameLoop(now) {
             // 回転数: 全モードで常にカウント
             state.sinceLastJackpot++;
 
-            // 遊タイムゲージ: 通常モードのみカウント
-            if (state.mode === MODE_NORMAL) {
+            // 遊タイムゲージ: 通常+時短中にカウント（確変/ST中は停止）
+            if (state.mode === MODE_NORMAL || state.mode === MODE_JITAN) {
                 state.yutimeGauge++;
             }
 

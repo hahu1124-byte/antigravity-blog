@@ -72,13 +72,30 @@ body {
 /* --- ステータスバー --- */
 #statusBar {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: auto 1fr 1.3fr 0.7fr 1fr;
     gap: 6px;
     padding: 12px 0;
     background: rgba(10, 10, 26, 0.95);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--border-color);
+    align-items: center;
+}
+
+.stats-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    transition: color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.stats-toggle-btn:hover {
+    color: var(--accent-cyan);
 }
 
 .status-item {
@@ -461,7 +478,9 @@ body {
 
 /* --- ハマりゲージ (遊タイムゲージ) --- */
 #hamariMeter {
-    margin-top: 10px;
+    margin: 0;
+    padding: 6px 4px 4px;
+    background: var(--bg-primary);
 }
 
 .meter-label {
@@ -860,11 +879,17 @@ body {
 
 .shop-spent {
     font-family: var(--font-mono);
-    font-size: 0.6rem;
-    color: var(--text-muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--accent-orange);
     white-space: nowrap;
     flex-shrink: 0;
     text-align: right;
+    min-width: 52px;
+}
+
+.shop-spent:empty {
+    min-width: 52px;
 }
 
 .shop-total-summary {
@@ -908,11 +933,92 @@ body {
     margin: 0;
 }
 
-/* --- 統計 --- */
+/* --- 統計ポップアップ --- */
+#statsPopup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+#statsPopup.hidden {
+    display: none;
+}
+
+.stats-popup-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--accent-cyan);
+    border-radius: var(--radius);
+    padding: 20px;
+    max-width: 340px;
+    width: 100%;
+    box-shadow: var(--glow-cyan);
+    animation: statsPopupIn 0.25s ease-out;
+}
+
+@keyframes statsPopupIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.stats-popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.stats-popup-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.stats-popup-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    transition: color 0.15s;
+}
+
+.stats-popup-close:hover {
+    color: var(--accent-red);
+}
+
 #statsGrid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
+}
+
+.popup-prestige {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.stats-popup-subtitle {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 10px;
 }
 
 .stat-card {
@@ -1017,10 +1123,105 @@ body {
     margin-top: 20px;
 }
 
+#machineSection.hidden {
+    display: none;
+}
+
+.info-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0 4px;
+    vertical-align: middle;
+    transition: transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.info-icon-btn:hover {
+    transform: scale(1.2);
+}
+
 #machineGrid {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+/* --- 機種情報ポップアップ --- */
+#machineInfoPopup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+#machineInfoPopup.hidden {
+    display: none;
+}
+
+.machine-info-popup {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.machine-info-item {
+    padding: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+}
+
+.machine-info-item.locked {
+    opacity: 0.4;
+}
+
+.machine-info-item.selectable {
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.machine-info-item.selectable:hover {
+    border-color: var(--accent-cyan);
+    background: var(--bg-card-hover);
+}
+
+.machine-info-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.machine-info-desc {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.machine-info-specs {
+    display: flex;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--accent-cyan);
+    margin-top: 3px;
+}
+
+.machine-info-footer {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 10px;
 }
 
 .machine-card {
@@ -1146,13 +1347,11 @@ body {
     }
 }
 
-/* --- 借金セクション --- */
+/* --- 借金セクション（スティッキーバー） --- */
 #debtSection {
-    margin-top: 20px;
-    padding: 16px;
-    background: linear-gradient(135deg, rgba(255, 51, 102, 0.08), rgba(255, 136, 0, 0.05));
-    border: 1px solid rgba(255, 51, 102, 0.3);
-    border-radius: var(--radius);
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid rgba(255, 51, 102, 0.3);
     animation: debtPulse 2s ease-in-out infinite alternate;
 }
 
@@ -1167,31 +1366,33 @@ body {
 
     100% {
         border-color: rgba(255, 51, 102, 0.6);
-        box-shadow: 0 0 10px rgba(255, 51, 102, 0.15);
     }
 }
 
-.debt-info {
+.debt-sticky-bar {
+    padding: 6px 4px;
+    background: linear-gradient(135deg, rgba(255, 51, 102, 0.08), rgba(255, 136, 0, 0.05));
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 4px;
 }
 
-.debt-row {
+.debt-sticky-info {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 6px 0;
+    gap: 8px;
+    justify-content: center;
 }
 
-.debt-label {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
+.debt-sticky-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent-red);
 }
 
 .debt-value {
     font-family: var(--font-mono);
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 700;
 }
 
@@ -1200,45 +1401,51 @@ body {
     text-shadow: 0 0 6px rgba(255, 51, 102, 0.4);
 }
 
-.debt-buttons {
+.debt-sticky-interest {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--text-muted);
+}
+
+.debt-sticky-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-    margin-top: 4px;
+    gap: 4px;
 }
 
-.debt-btn {
-    padding: 10px;
-    font-size: 0.8rem;
+.debt-btn-mini {
+    padding: 5px 4px;
+    font-size: 0.65rem;
     font-weight: 700;
     border: none;
-    border-radius: var(--radius-sm);
+    border-radius: 6px;
     cursor: pointer;
     transition: transform 0.1s, opacity 0.2s;
+    white-space: nowrap;
 }
 
-.debt-btn:active {
+.debt-btn-mini:active {
     transform: scale(0.95);
 }
 
-.debt-btn.repay {
+.debt-btn-mini.repay-partial {
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+    color: #000;
+}
+
+.debt-btn-mini.repay {
     background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
     color: #000;
 }
 
-.debt-btn.loan {
+.debt-btn-mini.loan {
     background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
     color: #fff;
 }
 
-.debt-btn:disabled {
+.debt-btn-mini:disabled {
     opacity: 0.4;
     cursor: not-allowed;
-}
-
-.debt-btn.repay-partial {
-    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
-    color: #000;
 }
 
 /* --- バージョン表示 --- */
