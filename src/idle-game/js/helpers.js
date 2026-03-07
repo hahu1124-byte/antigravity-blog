@@ -194,9 +194,15 @@ function executePrestige(isAuto = false) {
     if (state.jackpots < threshold) return;
 
     if (!isAuto) {
+        // 確認ポップアップ中はゲームループを一時停止
+        prestigePaused = true;
         const startBalls = getStartingBalls() + 500;
         const nextMultiplier = Math.pow(1.03, state.prestiges + 1);
-        if (!confirm(`プレステージを実行しますか？\n\n・アップグレード・玉数・回転数がリセットされます\n・収支と借金は引き継がれます\n・出玉ボーナス x${nextMultiplier.toFixed(2)} になります\n・次回初期持玉: ${startBalls}玉（${formatYen(startBalls)}）\n・現在: ${state.prestiges} → ${state.prestiges + 1}`)) return;
+        if (!confirm(`プレステージを実行しますか？\n\n・アップグレード・玉数・回転数がリセットされます\n・収支と借金は引き継がれます\n・出玉ボーナス x${nextMultiplier.toFixed(2)} になります\n・次回初期持玉: ${startBalls}玉（${formatYen(startBalls)}）\n・現在: ${state.prestiges} → ${state.prestiges + 1}`)) {
+            // キャンセル → 即座に再開
+            prestigePaused = false;
+            return;
+        }
     }
 
 
@@ -251,6 +257,10 @@ function executePrestige(isAuto = false) {
     renderShop();
     renderMachineSelector();
     saveGame();
+
+    // プレステージ完了後3秒間はゲームループを一時停止
+    prestigePaused = true;
+    prestigePauseTimer = PRESTIGE_PAUSE_DURATION;
 }
 
 function doPrestige() {

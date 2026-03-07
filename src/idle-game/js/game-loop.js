@@ -193,9 +193,26 @@ let spinAccumulator = 0;
 let jackpotOccurred = false;
 let lastJackpotType = null;
 
+// プレステージ一時停止フラグ（確認〜完了後3秒）
+let prestigePaused = false;
+let prestigePauseTimer = 0;
+const PRESTIGE_PAUSE_DURATION = 3.0;
+
 function gameLoop(now) {
     const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
     lastFrameTime = now;
+
+    // プレステージ一時停止中: タイマー消化のみ
+    if (prestigePaused) {
+        prestigePauseTimer -= dt;
+        if (prestigePauseTimer <= 0) {
+            prestigePaused = false;
+            prestigePauseTimer = 0;
+        }
+        updateUI();
+        requestAnimationFrame(gameLoop);
+        return;
+    }
 
     state.playTime += dt;
 
