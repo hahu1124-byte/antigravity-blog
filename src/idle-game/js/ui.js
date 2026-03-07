@@ -154,7 +154,7 @@ function updateUI() {
     const isJitan = state.mode === MODE_JITAN;
     const modeLabels = {
         [MODE_NORMAL]: `通常 ${formatNum(state.sinceLastJackpot)}回転`,
-        [MODE_KAKUHEN]: `確変 ${formatNum(state.kakuhenSpins)}回転`,
+        [MODE_KAKUHEN]: `確変 ${formatNum(state.sinceLastJackpot)}回転`,
         [MODE_ST]: `ST(残${state.stRemaining})`,
         [MODE_JITAN]: state.yutimeTriggered
             ? `遊タイム(残${formatNum(state.jitanRemaining)})`
@@ -182,14 +182,14 @@ function updateUI() {
 
     // ハマりゲージ
     const yutimeThreshold = getYutimeThreshold(m);
-    const hamariPct = Math.min((state.sinceLastJackpot / yutimeThreshold) * 100, 100);
-    dom.hamariCount.textContent = formatNum(state.sinceLastJackpot);
+    const hamariPct = Math.min((state.yutimeGauge / yutimeThreshold) * 100, 100);
+    dom.hamariCount.textContent = formatNum(state.yutimeGauge);
     dom.hamariTarget.textContent = formatNum(yutimeThreshold);
     dom.hamariBar.style.width = `${hamariPct}%`;
 
-    if (state.sinceLastJackpot >= yutimeThreshold) {
+    if (state.yutimeGauge >= yutimeThreshold) {
         dom.hamariBar.className = 'meter-fill yutime';
-    } else if (state.sinceLastJackpot >= Math.round(1 / m.prob)) {
+    } else if (state.yutimeGauge >= Math.round(1 / m.prob)) {
         dom.hamariBar.className = 'meter-fill danger';
     } else {
         dom.hamariBar.className = 'meter-fill';

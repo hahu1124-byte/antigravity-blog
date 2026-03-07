@@ -9,6 +9,19 @@
 function rollJackpotType() {
     const m = getCurrentMachine();
     const r = Math.random();
+
+    // ST中: 当たったら常にST継続
+    if (state.mode === MODE_ST) {
+        return MODE_ST;
+    }
+
+    // 確変中: 確変 or 時短のみ（通常・STなし）
+    if (state.mode === MODE_KAKUHEN) {
+        if (r < m.jitanRate) return MODE_JITAN;
+        return MODE_KAKUHEN;
+    }
+
+    // 通常/時短/遊タイム: 4種振分
     if (r < m.kakuhenRate) return MODE_KAKUHEN;
     if (r < m.kakuhenRate + m.stRate) return MODE_ST;
     if (r < m.kakuhenRate + m.stRate + m.jitanRate) return MODE_JITAN;
@@ -42,6 +55,7 @@ function processJackpot() {
     state.jackpots++;
     state.totalLifetimeJackpots++;
     state.sinceLastJackpot = 0;
+    state.yutimeGauge = 0;
     state.yutimeTriggered = false;
 
     if (type === MODE_KAKUHEN) {
@@ -53,7 +67,6 @@ function processJackpot() {
             state.currentRushPayout += payout;
         }
         state.mode = MODE_KAKUHEN;
-        state.kakuhenSpins = 0;
         state.stRemaining = 0;
         state.jitanRemaining = 0;
     } else if (type === MODE_ST) {
@@ -118,7 +131,7 @@ function checkYutime() {
 
     const m = getCurrentMachine();
     const threshold = getYutimeThreshold(m);
-    if (state.sinceLastJackpot >= threshold) {
+    if (state.yutimeGauge >= threshold) {
         state.yutimeTriggered = true;
         // 遊タイム → 無限時短（通常確率で10000回転）
         state.mode = MODE_JITAN;
@@ -228,14 +241,12 @@ function gameLoop(now) {
             state.totalInvest += actualCost;
             state.spins++;
 
-            // 確変回転数カウント
-            if (state.mode === MODE_KAKUHEN) {
-                state.kakuhenSpins++;
-            }
+            // 回転数: 全モードで常にカウント
+            state.sinceLastJackpot++;
 
-            // 遊タイムゲージ: 確変/ST中は凍結、通常/時短中は増加
-            if (!isRushMode) {
-                state.sinceLastJackpot++;
+            // 遊タイムゲージ: 通常モードのみカウント
+            if (state.mode === MODE_NORMAL) {
+                state.yutimeGauge++;
             }
 
             // ST消化
@@ -249,6 +260,8 @@ function gameLoop(now) {
                         }
                     }
                     state.mode = MODE_NORMAL;
+                    state.yutimeGauge = 0;
+                    state.yutimeTriggered = false;
                     state.rushChain = 0;
                     state.currentRushPayout = 0;
                 }
@@ -260,6 +273,8 @@ function gameLoop(now) {
                 if (state.jitanRemaining <= 0) {
                     state.mode = MODE_NORMAL;
                     state.jitanRemaining = 0;
+                    state.yutimeGauge = 0;
+                    state.yutimeTriggered = false;
                 }
             }
 
