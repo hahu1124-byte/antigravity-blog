@@ -32,7 +32,7 @@ const MACHINES = [
         cost: 2,
         kakuhenRate: 0.50,
         stRate: 0.30,
-        yutimeMult: 3.0,  // 遊タイム倍率（甘いので甘め）
+        yutimeThreshold: 250,  // 遊タイム発動回転数（固定値）
         unlockCondition: () => true, // 初期台
         unlockText: '初期台',
     },
@@ -45,6 +45,7 @@ const MACHINES = [
         cost: 3,
         kakuhenRate: 0.55,
         stRate: 0.25,
+        yutimeThreshold: 0,  // ライトミドル: 遊タイムなし（yutimeMultで計算）
         yutimeMult: 2.5,
         unlockCondition: (s) => s.totalLifetimeJackpots >= 30,
         unlockText: '累計大当たり30回',
@@ -58,6 +59,7 @@ const MACHINES = [
         cost: 4,
         kakuhenRate: 0.60,
         stRate: 0.25,
+        yutimeThreshold: 0,
         yutimeMult: 2.5,
         unlockCondition: (s) => s.totalLifetimeJackpots >= 80,
         unlockText: '累計大当たり80回',
@@ -71,6 +73,7 @@ const MACHINES = [
         cost: 5,
         kakuhenRate: 0.65,
         stRate: 0.20,
+        yutimeThreshold: 0,
         yutimeMult: 2.0,
         unlockCondition: (s) => s.prestiges >= 1,
         unlockText: 'プレステージ1回',
@@ -84,6 +87,7 @@ const MACHINES = [
         cost: 6,
         kakuhenRate: 0.70,
         stRate: 0.15,
+        yutimeThreshold: 0,
         yutimeMult: 1.8,
         unlockCondition: (s) => s.prestiges >= 3,
         unlockText: 'プレステージ3回',
@@ -94,8 +98,10 @@ const MACHINES = [
 // ゲームステート
 // ============================================================
 
+const YEN_PER_BALL = 4;  // 1玉 = ¥4
+
 const DEFAULT_STATE = {
-    balls: 500,
+    balls: 2500,
     totalBalls: 0,
     totalInvest: 0,
     spins: 0,
@@ -447,6 +453,13 @@ function formatNum(n) {
     return Math.floor(n).toLocaleString('ja-JP');
 }
 
+function formatYen(balls) {
+    const yen = Math.floor(balls * YEN_PER_BALL);
+    if (Math.abs(yen) >= 1e6) return '¥' + (yen / 1e6).toFixed(1) + 'M';
+    if (Math.abs(yen) >= 1e4) return '¥' + (yen / 1e4).toFixed(1) + '万';
+    return '¥' + yen.toLocaleString('ja-JP');
+}
+
 function formatTime(seconds) {
     seconds = Math.floor(seconds);
     if (seconds < 60) return `${seconds}秒`;
@@ -477,7 +490,7 @@ function getPrestigeThreshold() {
 }
 
 function getStartingBalls() {
-    return 500 + state.prestiges * 200;
+    return 2500 + state.prestiges * 500;
 }
 
 function getCurrentProb() {
@@ -597,12 +610,18 @@ function processJackpot() {
 // 遊タイム
 // ============================================================
 
+function getYutimeThreshold(m) {
+    // 固定値が設定されていればそちらを使用、なければ従来の計算
+    if (m.yutimeThreshold > 0) return m.yutimeThreshold;
+    return Math.round((1 / m.prob) * m.yutimeMult);
+}
+
 function checkYutime() {
     if (state.mode !== MODE_NORMAL) return;
     if (state.yutimeTriggered) return;
 
     const m = getCurrentMachine();
-    const threshold = Math.round((1 / m.prob) * m.yutimeMult);
+    const threshold = getYutimeThreshold(m);
     if (state.sinceLastJackpot >= threshold) {
         state.yutimeTriggered = true;
         state.mode = MODE_ST;
@@ -726,8 +745,11 @@ function gameLoop(now) {
         let frameJackpotType = null;
 
         for (let i = 0; i < spinsThisFrame; i++) {
-            state.balls -= state.costPerSpin;
-            state.totalInvest += state.costPerSpin;
+            // 確変/ST中はコスト1/10（50回転でcostPerSpin*5程度）
+            const isRushMode = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
+            const actualCost = isRushMode ? state.costPerSpin * 0.1 : state.costPerSpin;
+            state.balls -= actualCost;
+            state.totalInvest += actualCost;
             state.spins++;
             state.sinceLastJackpot++;
 
@@ -807,7 +829,8 @@ function updateUI() {
     dom.jackpotCount.textContent = formatNum(state.jackpots);
 
     const profit = state.totalBalls - state.totalInvest;
-    dom.profitDisplay.textContent = profit >= 0 ? `+${formatNum(profit)}` : `-${formatNum(Math.abs(profit))}`;
+    const profitYen = formatYen(profit);
+    dom.profitDisplay.textContent = profit >= 0 ? `+${profitYen}` : profitYen;
     dom.profitDisplay.className = `status-value ${profit >= 0 ? 'positive' : 'negative'}`;
 
     // モードインジケーター
@@ -838,7 +861,7 @@ function updateUI() {
     dom.costDisplay.textContent = `${state.costPerSpin}玉`;
 
     // ハマりゲージ
-    const yutimeThreshold = Math.round((1 / m.prob) * m.yutimeMult);
+    const yutimeThreshold = getYutimeThreshold(m);
     const hamariPct = Math.min((state.sinceLastJackpot / yutimeThreshold) * 100, 100);
     dom.hamariCount.textContent = formatNum(state.sinceLastJackpot);
     dom.hamariTarget.textContent = formatNum(yutimeThreshold);
@@ -995,8 +1018,8 @@ function executePrestige(isAuto = false) {
     if (state.jackpots < threshold) return;
 
     if (!isAuto) {
-        const startBalls = getStartingBalls() + 200; // 次回分
-        if (!confirm(`プレステージを実行しますか？\n\n・全アップグレード・玉数・回転数がリセットされます\n・永続ボーナス +${PRESTIGE_BONUS_RATE * 100}% が付与されます\n・次回初期持玉: ${startBalls}玉\n・現在: ${state.prestiges} → ${state.prestiges + 1}`)) return;
+        const startBalls = getStartingBalls() + 500; // 次回分
+        if (!confirm(`プレステージを実行しますか？\n\n・全アップグレード・玉数・回転数がリセットされます\n・永続ボーナス +${PRESTIGE_BONUS_RATE * 100}% が付与されます\n・次回初期持玉: ${startBalls}玉（${formatYen(startBalls)}）\n・現在: ${state.prestiges} → ${state.prestiges + 1}`)) return;
     }
 
     const newPrestiges = state.prestiges + 1;
@@ -1005,7 +1028,7 @@ function executePrestige(isAuto = false) {
 
     state = {
         ...DEFAULT_STATE,
-        balls: 500 + newPrestiges * 200,
+        balls: 2500 + newPrestiges * 500,
         prestiges: newPrestiges,
         totalLifetimeJackpots: lifetimeJackpots,
         unlockedMachines: unlockedMachines,
@@ -1109,7 +1132,9 @@ function calculateOffline() {
         lastMode = (type === MODE_NORMAL) ? MODE_NORMAL : type;
     }
 
-    const totalCost = offlineSpins * state.costPerSpin;
+    // オフライン中は平均して半分がRUSH状態と仮定してコスト軽減
+    const avgCostRate = 0.55; // 通常コスト55%相当（RUSH中1/10考慮）
+    const totalCost = offlineSpins * state.costPerSpin * avgCostRate;
     const netGain = totalPayout - totalCost;
 
     state.balls += netGain;
@@ -1130,12 +1155,11 @@ function calculateOffline() {
 
     checkMachineUnlocks();
 
-    const sign = netGain >= 0 ? '+' : '';
     dom.offlineDetail.innerHTML = `
         ${formatTime(offlineSeconds)}の間に…<br>
         🎰 ${formatNum(offlineSpins)}回転<br>
         🎉 大当たり ${actualJackpots}回<br>
-        💰 収支: ${sign}${formatNum(netGain)}玉
+        💰 収支: ${netGain >= 0 ? '+' : ''}${formatYen(netGain)}
     `;
     dom.offlineBanner.classList.remove('hidden');
 }
