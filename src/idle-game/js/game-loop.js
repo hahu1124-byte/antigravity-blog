@@ -123,6 +123,7 @@ function processAutoBuyer(dt) {
     let cheapestCost = Infinity;
 
     UPGRADES.forEach(upg => {
+        if (state.autoBuyerExcludes.includes(upg.id)) return;
         if (state.upgrades[upg.id] >= upg.maxLevel) return;
         const cost = getUpgradeCost(upg);
         if (cost < cheapestCost && state.balls >= cost) {
@@ -133,6 +134,7 @@ function processAutoBuyer(dt) {
 
     if (cheapest) {
         state.balls -= cheapestCost;
+        state.totalInvest += cheapestCost;
         state.upgrades[cheapest.id]++;
         cheapest.apply(state);
         applyAllUpgrades();

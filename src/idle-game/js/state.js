@@ -44,6 +44,7 @@ const DEFAULT_STATE = {
 
     // Phase 3: 自動化
     autoBuyer: false,
+    autoBuyerExcludes: [],
     autoPrestige: false,
 
     upgrades: {

@@ -145,6 +145,7 @@ function buyUpgrade(id) {
     if (state.balls < cost) return;
 
     state.balls -= cost;
+    state.totalInvest += cost;
     state.upgrades[upg.id] = level + 1;
     upg.apply(state);
     applyAllUpgrades();

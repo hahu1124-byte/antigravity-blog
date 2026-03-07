@@ -862,6 +862,25 @@ body {
     font-size: 0.75rem;
 }
 
+/* --- オートバイヤーチェックボックス --- */
+.shop-autobuy-check {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.shop-autobuy-check.hidden {
+    display: none;
+}
+
+.autobuy-cb {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent-cyan);
+    cursor: pointer;
+    margin: 0;
+}
+
 /* --- 統計 --- */
 #statsGrid {
     display: grid;

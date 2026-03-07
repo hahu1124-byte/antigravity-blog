@@ -284,6 +284,10 @@ function renderShop() {
         card.className = 'shop-card';
         card.dataset.upgradeId = upg.id;
         card.innerHTML = `
+            <div class="shop-autobuy-check ${state.autoBuyer ? '' : 'hidden'}">
+                <input type="checkbox" class="autobuy-cb" data-upg-id="${upg.id}"
+                    ${!state.autoBuyerExcludes.includes(upg.id) ? 'checked' : ''}>
+            </div>
             <div class="shop-icon">${upg.icon}</div>
             <div class="shop-info">
                 <div class="shop-name">${upg.name}</div>
@@ -294,6 +298,17 @@ function renderShop() {
         `;
         dom.shopGrid.appendChild(card);
     });
+
+    // チェックボックスのイベント（カードクリックと分離）
+    dom.shopGrid.querySelectorAll('.autobuy-cb').forEach(cb => {
+        cb.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        cb.addEventListener('change', (e) => {
+            toggleAutoBuyTarget(e.target.dataset.upgId, e.target.checked);
+        });
+    });
+
     updateShopUI();
 }
 
@@ -313,5 +328,26 @@ function updateShopUI() {
         const costEl = card.querySelector('.shop-cost');
         if (levelEl) levelEl.textContent = `Lv.${level}${upg.maxLevel > 1 ? `/${upg.maxLevel}` : ''} → ${upg.effectText(state)}`;
         if (costEl) costEl.textContent = isMaxed ? '✅ MAX' : `${formatNum(cost)}玉`;
+
+        // オートバイヤーチェックボックスの表示/非表示
+        const cbWrap = card.querySelector('.shop-autobuy-check');
+        if (cbWrap) {
+            if (state.autoBuyer) {
+                cbWrap.classList.remove('hidden');
+            } else {
+                cbWrap.classList.add('hidden');
+            }
+        }
     });
+}
+
+function toggleAutoBuyTarget(upgId, isChecked) {
+    if (isChecked) {
+        state.autoBuyerExcludes = state.autoBuyerExcludes.filter(id => id !== upgId);
+    } else {
+        if (!state.autoBuyerExcludes.includes(upgId)) {
+            state.autoBuyerExcludes.push(upgId);
+        }
+    }
+    saveGame();
 }
