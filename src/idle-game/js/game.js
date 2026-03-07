@@ -98,7 +98,7 @@ const MACHINES = [
 // ゲームステート
 // ============================================================
 
-const GAME_VERSION = 'v0.5';
+const GAME_VERSION = 'v0.5.1';
 let YEN_PER_BALL = 1;  // 初期: 1円パチ（全機種開放後にレート選択可能）
 
 const DEBT_UNIT_YEN = 1000;          // 借金単位: ¥1,000
@@ -122,6 +122,7 @@ const DEFAULT_STATE = {
     // 借金システム
     debt: 0,                  // 借金額（玉単位）
     lastDebtTime: 0,          // 最後に利息計算した時刻
+    debtStartTime: 0,         // 借金開始時刻（表示用）
 
     // Phase 2: モード
     mode: MODE_NORMAL,
@@ -751,6 +752,9 @@ function takeLoan() {
     if (state.lastDebtTime === 0) {
         state.lastDebtTime = Date.now();
     }
+    if (state.debtStartTime === 0) {
+        state.debtStartTime = Date.now();
+    }
 }
 
 function processDebtInterest() {
@@ -772,6 +776,7 @@ function repayDebt() {
         state.balls -= debtBalls;
         state.debt = 0;
         state.lastDebtTime = 0;
+        state.debtStartTime = 0;
     } else {
         // 持ち玉全額で部分返済
         state.debt -= state.balls;
@@ -1015,11 +1020,15 @@ function updateUI() {
     if (showDebt) {
         dom.debtSection.classList.remove('hidden');
         dom.debtAmount.textContent = state.debt > 0 ? formatYen(state.debt) : '¥0';
-        const minutesElapsed = state.lastDebtTime > 0
-            ? Math.floor((Date.now() - state.lastDebtTime) / 60000)
+        // 借金開始からの経過時間を表示
+        const minutesElapsed = state.debtStartTime > 0
+            ? Math.floor((Date.now() - state.debtStartTime) / 60000)
             : 0;
         dom.debtInterest.textContent = state.debt > 0 ? `複利5%/分 (経過${minutesElapsed}分)` : '借金なし';
         dom.repayBtn.disabled = state.balls <= 0 || state.debt <= 0;
+        // 借入ボタンの金額をレートに応じて更新
+        const loanYen = DEBT_UNIT_BALLS * YEN_PER_BALL;
+        dom.loanBtn.textContent = `💸 ¥${loanYen.toLocaleString('ja-JP')}借りる`;
     } else {
         dom.debtSection.classList.add('hidden');
     }
@@ -1106,12 +1115,6 @@ function renderShop() {
             <div class="shop-cost"></div>
         `;
         dom.shopGrid.appendChild(card);
-    });
-    // イベント委譲: innerHTML更新でリスナーが消えない
-    dom.shopGrid.addEventListener('click', (e) => {
-        const card = e.target.closest('[data-upgrade-id]');
-        if (!card) return;
-        buyUpgrade(card.dataset.upgradeId);
     });
     updateShopUI();
 }
@@ -1344,6 +1347,13 @@ function init() {
     dom.prestigeBtn.addEventListener('click', doPrestige);
     dom.repayBtn.addEventListener('click', repayDebt);
     dom.loanBtn.addEventListener('click', takeLoan);
+
+    // ショップクリックイベント（初回のみ登録、renderShopでは登録しない）
+    dom.shopGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('[data-upgrade-id]');
+        if (!card) return;
+        buyUpgrade(card.dataset.upgradeId);
+    });
 
     // レート選択イベント
     dom.rateGrid.addEventListener('click', (e) => {
