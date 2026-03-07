@@ -33,12 +33,12 @@ function formatTime(seconds) {
 // ============================================================
 
 function getPrestigeMultiplier() {
-    return 1 + state.prestiges * PRESTIGE_BONUS_RATE;
+    return Math.pow(1.03, state.prestiges);
 }
 
 function getKakuhenProb() {
     const m = getCurrentMachine();
-    return m.prob * KAKUHEN_PROB_MULTIPLIER * Math.pow(1.01, state.upgrades.kakuhenBoost) * getPrestigeMultiplier();
+    return m.prob * KAKUHEN_PROB_MULTIPLIER * Math.pow(1.01, state.upgrades.kakuhenBoost);
 }
 
 function getMaxStSpins() {
@@ -68,7 +68,7 @@ function getCriticalChance() {
 }
 
 function getPrestigeThreshold() {
-    return PRESTIGE_BASE_THRESHOLD + state.prestiges * PRESTIGE_THRESHOLD_STEP;
+    return Math.round(50 + Math.pow(state.prestiges, 1.1));
 }
 
 function getStartingBalls() {
@@ -80,7 +80,7 @@ function getCurrentProb() {
         return getKakuhenProb();
     }
     // 時短モードは通常確率を使用
-    return state.jackpotProb * getPrestigeMultiplier();
+    return state.jackpotProb;
 }
 
 // ============================================================
@@ -195,13 +195,21 @@ function executePrestige(isAuto = false) {
 
     if (!isAuto) {
         const startBalls = getStartingBalls() + 500;
-        if (!confirm(`プレステージを実行しますか？\n\n・全アップグレード・玉数・回転数がリセットされます\n・永続ボーナス +${PRESTIGE_BONUS_RATE * 100}% が付与されます\n・次回初期持玉: ${startBalls}玉（${formatYen(startBalls)}）\n・現在: ${state.prestiges} → ${state.prestiges + 1}`)) return;
+        const nextMultiplier = Math.pow(1.03, state.prestiges + 1);
+        if (!confirm(`プレステージを実行しますか？\n\n・アップグレード・玉数・回転数がリセットされます\n・収支と借金は引き継がれます\n・出玉ボーナス x${nextMultiplier.toFixed(2)} になります\n・次回初期持玉: ${startBalls}玉（${formatYen(startBalls)}）\n・現在: ${state.prestiges} → ${state.prestiges + 1}`)) return;
     }
 
 
     const newPrestiges = state.prestiges + 1;
     const lifetimeJackpots = state.totalLifetimeJackpots;
     const unlockedMachines = [...state.unlockedMachines];
+
+    // 収支・借金を引き継ぐ
+    const keepTotalBalls = state.totalBalls;
+    const keepTotalInvest = state.totalInvest;
+    const keepDebt = state.debt;
+    const keepDebtStartTime = state.debtStartTime;
+    const keepLastDebtTime = state.lastDebtTime;
 
     // 自動化系アップグレードをプレステージ後も引き継ぐ
     const keepAutoBuyer = state.upgrades.autoBuyer || 0;
@@ -218,6 +226,14 @@ function executePrestige(isAuto = false) {
         currentMachineId: 'amadeji',
         lastSave: Date.now(),
         startedAt: Date.now(),
+        // 収支引き継ぎ
+        totalBalls: keepTotalBalls,
+        totalInvest: keepTotalInvest,
+        // 借金引き継ぎ
+        debt: keepDebt,
+        debtStartTime: keepDebtStartTime,
+        lastDebtTime: keepLastDebtTime,
+        // 自動化引き継ぎ
         autoBuyer: keepAutoBuyer >= 1,
         autoPrestige: keepAutoPrestige >= 1,
         autoInvest: keepAutoInvest >= 1,

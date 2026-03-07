@@ -224,7 +224,7 @@ function updateUI() {
     // プレステージ（統計ポップアップ: 回数とボーナスのみ）
     const pThreshold = getPrestigeThreshold();
     dom.prestigeCount.textContent = state.prestiges;
-    dom.prestigeBonus.textContent = `+${(state.prestiges * PRESTIGE_BONUS_RATE * 100).toFixed(0)}%`;
+    dom.prestigeBonus.textContent = `x${Math.pow(1.03, state.prestiges).toFixed(2)}`;
 
     // プレステージセクション（機種選択〜ショップ間: 条件達成時のみ表示）
     const canPrestige = state.jackpots >= pThreshold;
