@@ -267,7 +267,7 @@ function switchMachine(machineId) {
 function applyMachineSpecs() {
     const m = getCurrentMachine();
     // 基本確率（アップグレード反映）
-    state.jackpotProb = m.prob * Math.pow(1.1, state.upgrades.jackpotProb);
+    state.jackpotProb = m.prob * Math.pow(1.05, state.upgrades.jackpotProb);
     // 基本出玉（アップグレード反映）
     state.jackpotPayout = m.payout + state.upgrades.jackpotPayout * 20;
     // コスト
@@ -306,14 +306,14 @@ const UPGRADES = [
     {
         id: 'jackpotProb',
         name: '🎯 大当たり確率UP',
-        desc: '大当たり確率を10%改善',
+        desc: '大当たり確率を5%改善',
         icon: '🎯',
         baseCost: 800,
         costMultiplier: 2.0,
         maxLevel: 30,
         apply: (s) => {
             const m = getCurrentMachine();
-            s.jackpotProb = m.prob * Math.pow(1.1, s.upgrades.jackpotProb);
+            s.jackpotProb = m.prob * Math.pow(1.05, s.upgrades.jackpotProb);
         },
         effectText: (s) => `1/${Math.round(1 / s.jackpotProb)}`,
     },
