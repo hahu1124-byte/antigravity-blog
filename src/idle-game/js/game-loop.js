@@ -108,8 +108,7 @@ function processJackpot() {
 // ============================================================
 
 function getYutimeThreshold(m) {
-    if (m.yutimeThreshold > 0) return m.yutimeThreshold;
-    return Math.round((1 / m.prob) * m.yutimeMult);
+    return Math.floor((1 / m.prob) * m.yutimeMult);
 }
 
 function checkYutime() {

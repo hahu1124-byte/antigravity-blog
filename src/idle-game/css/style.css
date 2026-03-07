@@ -855,6 +855,16 @@ body {
     color: var(--accent-gold);
     white-space: nowrap;
     flex-shrink: 0;
+    text-align: right;
+}
+
+.shop-spent {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-align: right;
 }
 
 .shop-card.maxed .shop-cost {

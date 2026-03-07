@@ -300,6 +300,7 @@ function renderShop() {
                 <div class="shop-level"></div>
             </div>
             <div class="shop-cost"></div>
+            <div class="shop-spent"></div>
         `;
         dom.shopGrid.appendChild(card);
     });
@@ -333,6 +334,12 @@ function updateShopUI() {
         const costEl = card.querySelector('.shop-cost');
         if (levelEl) levelEl.textContent = `Lv.${level}${upg.maxLevel > 1 ? `/${upg.maxLevel}` : ''} → ${upg.effectText(state)}`;
         if (costEl) costEl.textContent = isMaxed ? '✅ MAX' : `${formatNum(cost)}玉`;
+
+        const spentEl = card.querySelector('.shop-spent');
+        if (spentEl) {
+            const totalSpent = getUpgradeTotalSpent(upg);
+            spentEl.textContent = totalSpent > 0 ? `投資${formatNum(totalSpent)}玉` : '';
+        }
 
         // オートバイヤーチェックボックスの表示/非表示
         const cbWrap = card.querySelector('.shop-autobuy-check');

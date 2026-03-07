@@ -50,6 +50,13 @@ function getJitanSpins() {
     return Math.round(JITAN_BASE_SPINS / (m.prob * JITAN_REF_DENOM));
 }
 
+function getUpgradeTotalSpent(upg) {
+    const level = state.upgrades[upg.id] || 0;
+    if (level === 0) return 0;
+    if (upg.costMultiplier === 1) return upg.baseCost * level;
+    return Math.floor(upg.baseCost * (Math.pow(upg.costMultiplier, level) - 1) / (upg.costMultiplier - 1));
+}
+
 function getCriticalChance() {
     return state.upgrades.critical * 10;
 }
