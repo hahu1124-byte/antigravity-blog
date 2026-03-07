@@ -1499,3 +1499,47 @@ body {
     color: var(--accent-cyan);
     box-shadow: var(--glow-cyan);
 }
+
+/* --- 機種選択ボタン --- */
+.info-icon-btn {
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 255, 136, 0.15));
+    border: 1px solid var(--accent-cyan);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 0 8px rgba(0, 229, 255, 0.2);
+}
+
+.info-icon-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.35), rgba(0, 255, 136, 0.25));
+    box-shadow: var(--glow-cyan);
+    transform: translateY(-1px);
+}
+
+/* --- 機種情報ポップアップ: ロック機種 --- */
+.machine-info-item.locked {
+    opacity: 0.8;
+    border: 1px solid rgba(144, 144, 176, 0.3);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: rgba(26, 26, 53, 0.6);
+}
+
+.machine-info-item.locked .machine-info-name {
+    color: var(--text-secondary);
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.machine-info-item.locked .machine-info-desc {
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 4px;
+}
