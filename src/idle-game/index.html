@@ -99,6 +99,10 @@
                     <span class="info-label">コスト</span>
                     <span class="info-value" id="costDisplay">2玉</span>
                 </div>
+                <div class="info-row version-row">
+                    <span></span>
+                    <span class="info-version" id="versionDisplay">v0.3</span>
+                </div>
             </div>
 
             <!-- 遊タイムゲージ -->
@@ -132,6 +136,16 @@
                 <button id="rushSummaryClose" class="rush-summary-close">OK</button>
             </div>
         </div>
+
+        <!-- レート選択（全機種開放後に表示） -->
+        <section id="rateSection" class="hidden">
+            <h2 class="shop-title">💴 投資金額選択</h2>
+            <div id="rateGrid">
+                <button class="rate-btn active" data-rate="1">¥1パチ</button>
+                <button class="rate-btn" data-rate="2">¥2パチ</button>
+                <button class="rate-btn" data-rate="4">¥4パチ</button>
+            </div>
+        </section>
 
         <!-- 機種選択 (Phase 3) -->
         <section id="machineSection">

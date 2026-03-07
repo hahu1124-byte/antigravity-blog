@@ -1189,3 +1189,55 @@ body {
     opacity: 0.4;
     cursor: not-allowed;
 }
+
+/* --- バージョン表示 --- */
+.version-row {
+    border: none;
+    background: transparent;
+}
+
+.info-version {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-align: right;
+}
+
+/* --- レート選択 --- */
+#rateSection {
+    margin-top: 20px;
+}
+
+#rateSection.hidden {
+    display: none;
+}
+
+#rateGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.rate-btn {
+    padding: 12px 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.rate-btn:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-cyan);
+}
+
+.rate-btn.active {
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(0, 255, 136, 0.1));
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    box-shadow: var(--glow-cyan);
+}

@@ -98,10 +98,11 @@ const MACHINES = [
 // ゲームステート
 // ============================================================
 
-const YEN_PER_BALL = 4;  // 1玉 = ¥4
+const GAME_VERSION = 'v0.4';
+let YEN_PER_BALL = 1;  // 初期: 1円パチ（全機種開放後にレート選択可能）
 
 const DEBT_UNIT_YEN = 1000;          // 借金単位: ¥1,000
-const DEBT_UNIT_BALLS = DEBT_UNIT_YEN / YEN_PER_BALL; // = 250玉
+const DEBT_UNIT_BALLS = 250;          // 借金単位: 250玉固定（¥はレートに比例）
 const DEBT_INTEREST_RATE = 0.05;     // 1分あたり複利5%
 const DEBT_INTERVAL_MS = 60000;      // 利息計算間隔: 60秒
 
@@ -285,6 +286,29 @@ function checkMachineUnlocks() {
     if (newUnlock) {
         renderMachineSelector();
     }
+    // 全機種開放チェック→レート選択表示
+    checkRateUnlock();
+}
+
+// ============================================================
+// レート選択（全機種開放後に解放）
+// ============================================================
+
+function checkRateUnlock() {
+    const allUnlocked = MACHINES.every(m => state.unlockedMachines.includes(m.id));
+    if (allUnlocked) {
+        dom.rateSection.classList.remove('hidden');
+    }
+}
+
+function switchRate(rate) {
+    if (state.mode !== MODE_NORMAL) return; // RUSH中は変更不可
+    YEN_PER_BALL = rate;
+    // ボタンのアクティブ状態を更新
+    dom.rateGrid.querySelectorAll('.rate-btn').forEach(btn => {
+        btn.classList.toggle('active', Number(btn.dataset.rate) === rate);
+    });
+    saveGame();
 }
 
 // ============================================================
@@ -455,6 +479,10 @@ const dom = {
     debtInterest: $('debtInterest'),
     repayBtn: $('repayBtn'),
     loanBtn: $('loanBtn'),
+    // レート選択
+    rateSection: $('rateSection'),
+    rateGrid: $('rateGrid'),
+    versionDisplay: $('versionDisplay'),
 };
 
 // ============================================================
@@ -1133,6 +1161,7 @@ const SAVE_INTERVAL = 30000;
 
 function saveGame() {
     state.lastSave = Date.now();
+    state.yenPerBall = YEN_PER_BALL;  // レートも保存
     try {
         localStorage.setItem(SAVE_KEY, JSON.stringify(state));
         showSaveStatus('保存済み ✓');
@@ -1163,6 +1192,10 @@ function loadGame() {
         };
         applyAllUpgrades();
         checkMachineUnlocks();
+        // レート復元
+        if (saved.yenPerBall) {
+            YEN_PER_BALL = saved.yenPerBall;
+        }
         return true;
     } catch (e) {
         console.warn('ロード失敗:', e);
@@ -1263,6 +1296,21 @@ function init() {
     dom.prestigeBtn.addEventListener('click', doPrestige);
     dom.repayBtn.addEventListener('click', repayDebt);
     dom.loanBtn.addEventListener('click', takeLoan);
+
+    // レート選択イベント
+    dom.rateGrid.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-rate]');
+        if (!btn) return;
+        switchRate(Number(btn.dataset.rate));
+    });
+
+    // バージョン表示
+    dom.versionDisplay.textContent = GAME_VERSION;
+
+    // レートボタン初期状態を同期
+    dom.rateGrid.querySelectorAll('.rate-btn').forEach(btn => {
+        btn.classList.toggle('active', Number(btn.dataset.rate) === YEN_PER_BALL);
+    });
 
     dom.rushSummaryClose.addEventListener('click', () => {
         dom.rushSummary.classList.add('hidden');
