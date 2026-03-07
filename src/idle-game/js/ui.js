@@ -105,6 +105,7 @@ function showJackpotBanner(type, payout) {
     const typeIcons = {
         [MODE_KAKUHEN]: '🔥',
         [MODE_ST]: '⚡',
+        [MODE_JITAN]: '🕐',
         [MODE_NORMAL]: '🎉',
     };
     lastJackpotInfo = `${typeIcons[type] || '🎉'} +${formatNum(payout)}`;
@@ -150,10 +151,12 @@ function updateUI() {
 
     // モードインジケーター
     const isRush = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
+    const isJitan = state.mode === MODE_JITAN;
     const modeLabels = {
         [MODE_NORMAL]: '通常',
         [MODE_KAKUHEN]: '確変',
         [MODE_ST]: `ST(残${state.stRemaining})`,
+        [MODE_JITAN]: `時短(残${formatNum(state.jitanRemaining)})`,
     };
     dom.modeIndicator.textContent = modeLabels[state.mode] || '通常';
     dom.modeIndicator.className = `mode-badge mode-${state.mode}`;
@@ -163,6 +166,11 @@ function updateUI() {
         dom.rushBanner.classList.remove('hidden');
         dom.rushChainDisplay.textContent = `${state.rushChain}連荘中`;
         dom.rushProbDisplay.textContent = `確率 1/${Math.round(1 / getKakuhenProb())}`;
+        dom.lcdScreen.classList.add('rush-active');
+    } else if (isJitan) {
+        dom.rushBanner.classList.remove('hidden');
+        dom.rushChainDisplay.textContent = '🕐 時短中';
+        dom.rushProbDisplay.textContent = `確率 1/${Math.round(1 / getCurrentProb())} (通常)`;
         dom.lcdScreen.classList.add('rush-active');
     } else {
         dom.rushBanner.classList.add('hidden');
@@ -239,7 +247,7 @@ function renderMachineSelector() {
     MACHINES.forEach(m => {
         const isUnlocked = state.unlockedMachines.includes(m.id);
         const isActive = state.currentMachineId === m.id;
-        const isRush = state.mode !== MODE_NORMAL;
+        const isRush = state.mode !== MODE_NORMAL && state.mode !== MODE_JITAN;
 
         const card = document.createElement('div');
         card.className = `machine-card${isActive ? ' active' : ''}${!isUnlocked ? ' locked' : ''}${isRush && !isActive ? ' rush-disabled' : ''}`;

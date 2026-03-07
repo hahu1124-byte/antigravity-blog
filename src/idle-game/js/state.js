@@ -9,7 +9,7 @@
 let YEN_PER_BALL = 1;
 
 const DEFAULT_STATE = {
-    balls: 2500,
+    balls: 500,
     totalBalls: 0,
     totalInvest: 0,
     spins: 0,
@@ -30,6 +30,7 @@ const DEFAULT_STATE = {
     mode: MODE_NORMAL,
     rushChain: 0,
     stRemaining: 0,
+    jitanRemaining: 0,
     totalRushChains: 0,
     currentRushPayout: 0,
     yutimeTriggered: false,

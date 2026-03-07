@@ -9,6 +9,7 @@
 const MODE_NORMAL = 'normal';
 const MODE_KAKUHEN = 'kakuhen';
 const MODE_ST = 'st';
+const MODE_JITAN = 'jitan';
 
 const BASE_KAKUHEN_PROB = 1 / 39;
 const BASE_ST_SPINS = 100;
@@ -21,12 +22,14 @@ const PRESTIGE_BONUS_RATE = 0.05;
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.6.1';
+const GAME_VERSION = 'v0.7';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
 const DEBT_INTERVAL_MS = 60000;
 const PREMIUM_SPEED_MULTIPLIER = 2.0;
+const JITAN_SPINS = 10000;
+const JITAN_COST_MULTIPLIER = 0.5;
 
 const SAVE_KEY = 'gp-idle-game-save';
 const SAVE_INTERVAL = 30000;
@@ -44,8 +47,9 @@ const MACHINES = [
         prob: 1 / 99,
         payout: 465,
         cost: 2,
-        kakuhenRate: 0.50,
-        stRate: 0.30,
+        kakuhenRate: 0.25,
+        stRate: 0.25,
+        jitanRate: 0.20,
         yutimeThreshold: 250,
         unlockCondition: () => true,
         unlockText: '初期台',
@@ -57,8 +61,9 @@ const MACHINES = [
         prob: 1 / 199,
         payout: 936,
         cost: 3,
-        kakuhenRate: 0.55,
+        kakuhenRate: 0.30,
         stRate: 0.25,
+        jitanRate: 0.20,
         yutimeThreshold: 0,
         yutimeMult: 2.5,
         unlockCondition: (s) => s.totalLifetimeJackpots >= 30,
@@ -71,8 +76,9 @@ const MACHINES = [
         prob: 1 / 319,
         payout: 1500,
         cost: 4,
-        kakuhenRate: 0.60,
+        kakuhenRate: 0.35,
         stRate: 0.25,
+        jitanRate: 0.20,
         yutimeThreshold: 0,
         yutimeMult: 2.5,
         unlockCondition: (s) => s.totalLifetimeJackpots >= 80,
@@ -85,8 +91,9 @@ const MACHINES = [
         prob: 1 / 399,
         payout: 1876,
         cost: 5,
-        kakuhenRate: 0.65,
-        stRate: 0.20,
+        kakuhenRate: 0.40,
+        stRate: 0.25,
+        jitanRate: 0.20,
         yutimeThreshold: 0,
         yutimeMult: 2.0,
         unlockCondition: (s) => s.prestiges >= 1,
@@ -99,8 +106,9 @@ const MACHINES = [
         prob: 1 / 499,
         payout: 2347,
         cost: 6,
-        kakuhenRate: 0.70,
-        stRate: 0.15,
+        kakuhenRate: 0.45,
+        stRate: 0.25,
+        jitanRate: 0.20,
         yutimeThreshold: 0,
         yutimeMult: 1.8,
         unlockCondition: (s) => s.prestiges >= 3,

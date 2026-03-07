@@ -54,13 +54,14 @@ function getPrestigeThreshold() {
 }
 
 function getStartingBalls() {
-    return 2500 + state.prestiges * 500;
+    return 500 + state.prestiges * 500;
 }
 
 function getCurrentProb() {
     if (state.mode === MODE_KAKUHEN || state.mode === MODE_ST) {
         return getKakuhenProb();
     }
+    // 時短モードは通常確率を使用
     return state.jackpotProb * getPrestigeMultiplier();
 }
 
@@ -80,7 +81,8 @@ function applyMachineSpecs() {
 }
 
 function switchMachine(machineId) {
-    if (state.mode !== MODE_NORMAL) return;
+    // 確変/ST中は台変更不可、通常/時短中は可能
+    if (state.mode === MODE_KAKUHEN || state.mode === MODE_ST) return;
     const machine = MACHINES.find(m => m.id === machineId);
     if (!machine) return;
     if (!state.unlockedMachines.includes(machineId)) return;
@@ -115,7 +117,7 @@ function checkRateUnlock() {
 }
 
 function switchRate(rate) {
-    if (state.mode !== MODE_NORMAL) return;
+    if (state.mode === MODE_KAKUHEN || state.mode === MODE_ST) return;
     YEN_PER_BALL = rate;
     dom.rateGrid.querySelectorAll('.rate-btn').forEach(btn => {
         btn.classList.toggle('active', Number(btn.dataset.rate) === rate);
@@ -170,13 +172,14 @@ function executePrestige(isAuto = false) {
         if (!confirm(`プレステージを実行しますか？\n\n・全アップグレード・玉数・回転数がリセットされます\n・永続ボーナス +${PRESTIGE_BONUS_RATE * 100}% が付与されます\n・次回初期持玉: ${startBalls}玉（${formatYen(startBalls)}）\n・現在: ${state.prestiges} → ${state.prestiges + 1}`)) return;
     }
 
+
     const newPrestiges = state.prestiges + 1;
     const lifetimeJackpots = state.totalLifetimeJackpots;
     const unlockedMachines = [...state.unlockedMachines];
 
     state = {
         ...DEFAULT_STATE,
-        balls: 2500 + newPrestiges * 500,
+        balls: 500 + newPrestiges * 500,
         prestiges: newPrestiges,
         totalLifetimeJackpots: lifetimeJackpots,
         unlockedMachines: unlockedMachines,

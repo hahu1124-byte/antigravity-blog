@@ -11,6 +11,7 @@ function rollJackpotType() {
     const r = Math.random();
     if (r < m.kakuhenRate) return MODE_KAKUHEN;
     if (r < m.kakuhenRate + m.stRate) return MODE_ST;
+    if (r < m.kakuhenRate + m.stRate + m.jitanRate) return MODE_JITAN;
     return MODE_NORMAL;
 }
 
@@ -53,6 +54,7 @@ function processJackpot() {
         }
         state.mode = MODE_KAKUHEN;
         state.stRemaining = 0;
+        state.jitanRemaining = 0;
     } else if (type === MODE_ST) {
         if (!wasRush) {
             state.rushChain = 1;
@@ -63,7 +65,24 @@ function processJackpot() {
         }
         state.mode = MODE_ST;
         state.stRemaining = getMaxStSpins();
+        state.jitanRemaining = 0;
+    } else if (type === MODE_JITAN) {
+        // 時短: RUSH中なら終了サマリー表示
+        if (wasRush) {
+            state.rushChain++;
+            state.currentRushPayout += payout;
+            showRushSummary(state.rushChain, state.currentRushPayout);
+            if (state.rushChain > state.totalRushChains) {
+                state.totalRushChains = state.rushChain;
+            }
+        }
+        state.mode = MODE_JITAN;
+        state.jitanRemaining = JITAN_SPINS;
+        state.rushChain = 0;
+        state.currentRushPayout = 0;
+        state.stRemaining = 0;
     } else {
+        // 純通常: RUSH終了
         if (wasRush) {
             state.rushChain++;
             state.currentRushPayout += payout;
@@ -76,6 +95,7 @@ function processJackpot() {
         state.rushChain = 0;
         state.currentRushPayout = 0;
         state.stRemaining = 0;
+        state.jitanRemaining = 0;
     }
 
     checkMachineUnlocks();
@@ -92,6 +112,7 @@ function getYutimeThreshold(m) {
 }
 
 function checkYutime() {
+    // 遊タイムは通常モードでのみ発動（時短・確変・ST中は発動しない）
     if (state.mode !== MODE_NORMAL) return;
     if (state.yutimeTriggered) return;
 
@@ -99,10 +120,12 @@ function checkYutime() {
     const threshold = getYutimeThreshold(m);
     if (state.sinceLastJackpot >= threshold) {
         state.yutimeTriggered = true;
-        state.mode = MODE_ST;
-        state.stRemaining = getMaxStSpins();
+        // 遊タイム → 無限時短（通常確率で10000回転）
+        state.mode = MODE_JITAN;
+        state.jitanRemaining = JITAN_SPINS;
         state.rushChain = 0;
         state.currentRushPayout = 0;
+        state.stRemaining = 0;
         showYutimeBanner();
     }
 }
@@ -192,11 +215,23 @@ function gameLoop(now) {
 
         for (let i = 0; i < spinsThisFrame; i++) {
             const isRushMode = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
-            const actualCost = isRushMode ? state.costPerSpin * 0.1 : state.costPerSpin;
+            const isJitan = state.mode === MODE_JITAN;
+            let actualCost;
+            if (isRushMode) {
+                actualCost = state.costPerSpin * 0.1;
+            } else if (isJitan) {
+                actualCost = state.costPerSpin * JITAN_COST_MULTIPLIER;
+            } else {
+                actualCost = state.costPerSpin;
+            }
             state.balls -= actualCost;
             state.totalInvest += actualCost;
             state.spins++;
-            state.sinceLastJackpot++;
+
+            // 遊タイムゲージ: 確変/ST中は凍結、通常/時短中は増加
+            if (!isRushMode) {
+                state.sinceLastJackpot++;
+            }
 
             // ST消化
             if (state.mode === MODE_ST) {
@@ -211,6 +246,15 @@ function gameLoop(now) {
                     state.mode = MODE_NORMAL;
                     state.rushChain = 0;
                     state.currentRushPayout = 0;
+                }
+            }
+
+            // 時短消化
+            if (state.mode === MODE_JITAN) {
+                state.jitanRemaining--;
+                if (state.jitanRemaining <= 0) {
+                    state.mode = MODE_NORMAL;
+                    state.jitanRemaining = 0;
                 }
             }
 
