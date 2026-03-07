@@ -1,0 +1,608 @@
+/* ============================================================
+   パチンコ放置ゲーム — スタイル
+   ダークテーマ + ネオンカラー + 液晶風デザイン
+   ============================================================ */
+
+/* --- リセット & ベース --- */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --bg-primary: #0a0a1a;
+    --bg-secondary: #12122b;
+    --bg-card: #1a1a35;
+    --bg-card-hover: #222250;
+    --text-primary: #e8e8f0;
+    --text-secondary: #9090b0;
+    --text-muted: #606080;
+    --accent-gold: #ffd700;
+    --accent-cyan: #00e5ff;
+    --accent-magenta: #ff00ff;
+    --accent-green: #00ff88;
+    --accent-red: #ff3366;
+    --accent-orange: #ff8800;
+    --border-color: #2a2a50;
+    --glow-gold: 0 0 20px rgba(255, 215, 0, 0.4);
+    --glow-cyan: 0 0 20px rgba(0, 229, 255, 0.3);
+    --glow-magenta: 0 0 20px rgba(255, 0, 255, 0.3);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-sans: 'Inter', sans-serif;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(0, 229, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(255, 0, 255, 0.03) 0%, transparent 50%);
+}
+
+#app {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 12px;
+}
+
+/* --- ステータスバー --- */
+#statusBar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 12px 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 10, 26, 0.95);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.status-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.status-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-value {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+#profitDisplay.positive {
+    color: var(--accent-green);
+}
+
+#profitDisplay.negative {
+    color: var(--accent-red);
+}
+
+/* --- 台エリア: 液晶画面 --- */
+#machineArea {
+    margin-top: 12px;
+}
+
+#lcdScreen {
+    position: relative;
+    background: linear-gradient(135deg, #0d0d2b 0%, #1a0a30 50%, #0d0d2b 100%);
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 24px 16px;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5), var(--glow-cyan);
+}
+
+#lcdOverlay {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg,
+            transparent 0px,
+            transparent 2px,
+            rgba(0, 0, 0, 0.08) 2px,
+            rgba(0, 0, 0, 0.08) 4px);
+    pointer-events: none;
+    z-index: 1;
+}
+
+#spinDisplay {
+    position: relative;
+    z-index: 2;
+}
+
+#reelContainer {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.reel {
+    font-family: var(--font-mono);
+    font-size: 3rem;
+    font-weight: 900;
+    width: 64px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    transition: color 0.15s, text-shadow 0.15s;
+}
+
+.reel.spinning {
+    animation: reelSpin 0.1s infinite;
+    color: var(--text-secondary);
+}
+
+.reel.jackpot {
+    color: var(--accent-gold);
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    animation: jackpotPulse 0.5s ease-in-out 3;
+}
+
+@keyframes reelSpin {
+    0% {
+        transform: translateY(-2px);
+    }
+
+    50% {
+        transform: translateY(2px);
+    }
+
+    100% {
+        transform: translateY(-2px);
+    }
+}
+
+@keyframes jackpotPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+/* 大当たりバナー */
+#jackpotBanner {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, rgba(10, 10, 26, 0.95) 70%);
+    animation: jackpotFlash 0.3s ease-out;
+}
+
+#jackpotBanner.hidden {
+    display: none;
+}
+
+.jackpot-text {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--accent-gold);
+    text-shadow: var(--glow-gold);
+    animation: jackpotTextPulse 0.5s ease-in-out infinite alternate;
+}
+
+.jackpot-payout {
+    font-family: var(--font-mono);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent-green);
+    margin-top: 8px;
+}
+
+@keyframes jackpotFlash {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes jackpotTextPulse {
+    0% {
+        text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+
+    100% {
+        text-shadow: 0 0 30px rgba(255, 215, 0, 0.9), 0 0 60px rgba(255, 215, 0, 0.4);
+    }
+}
+
+/* --- 台情報 --- */
+#machineInfo {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+}
+
+.info-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.info-value {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-cyan);
+}
+
+/* --- ハマりゲージ --- */
+#hamariMeter {
+    margin-top: 10px;
+}
+
+.meter-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.meter-bar {
+    height: 8px;
+    background: var(--bg-card);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+.meter-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta));
+    border-radius: 4px;
+    transition: width 0.2s ease-out;
+}
+
+.meter-fill.danger {
+    background: linear-gradient(90deg, var(--accent-orange), var(--accent-red));
+    animation: dangerPulse 1s ease-in-out infinite;
+}
+
+@keyframes dangerPulse {
+
+    0%,
+    100% {
+        opacity: 0.8;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* --- オフライン差分バナー --- */
+#offlineBanner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+#offlineBanner.hidden {
+    display: none;
+}
+
+.offline-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--accent-gold);
+    border-radius: var(--radius);
+    padding: 24px;
+    text-align: center;
+    max-width: 320px;
+    box-shadow: var(--glow-gold);
+}
+
+.offline-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 12px;
+}
+
+.offline-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    display: block;
+    margin-bottom: 8px;
+}
+
+.offline-detail {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: block;
+    line-height: 1.6;
+}
+
+.offline-close {
+    margin-top: 16px;
+    padding: 10px 32px;
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange));
+    color: #000;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: transform 0.1s;
+}
+
+.offline-close:active {
+    transform: scale(0.95);
+}
+
+/* --- ショップ --- */
+#shopSection,
+#statsSection {
+    margin-top: 20px;
+}
+
+.shop-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--text-primary);
+}
+
+#shopGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.shop-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.shop-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent-cyan);
+}
+
+.shop-card:active {
+    transform: scale(0.98);
+}
+
+.shop-card.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.shop-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 229, 255, 0.1);
+    border-radius: var(--radius-sm);
+    flex-shrink: 0;
+}
+
+.shop-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.shop-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.shop-desc {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.shop-level {
+    font-size: 0.65rem;
+    color: var(--accent-cyan);
+    font-family: var(--font-mono);
+}
+
+.shop-cost {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.shop-card.maxed .shop-cost {
+    color: var(--accent-green);
+    font-size: 0.75rem;
+}
+
+/* --- 統計 --- */
+#statsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.stat-card {
+    padding: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* --- フッター --- */
+#gameFooter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0 32px;
+    margin-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.footer-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.footer-btn.danger:hover {
+    background: rgba(255, 51, 102, 0.15);
+    border-color: var(--accent-red);
+    color: var(--accent-red);
+}
+
+.footer-info {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+#saveStatus {
+    color: var(--accent-green);
+}
+
+/* --- 玉数増加アニメーション --- */
+.ball-popup {
+    position: fixed;
+    z-index: 500;
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-green);
+    pointer-events: none;
+    animation: popUp 1s ease-out forwards;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+@keyframes popUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-60px);
+    }
+}
+
+/* --- レスポンシブ --- */
+@media (min-width: 520px) {
+    #app {
+        padding: 0 20px;
+    }
+
+    .reel {
+        font-size: 3.5rem;
+        width: 72px;
+        height: 80px;
+    }
+
+    #statusBar {
+        gap: 10px;
+    }
+
+    .status-value {
+        font-size: 1.1rem;
+    }
+}

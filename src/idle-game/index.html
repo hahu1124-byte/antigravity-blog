@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>パチンコ放置ゲーム | Gravity Portal</title>
+    <meta name="description" content="パチンコの確率・連荘メカニクスを活かした放置ゲーム。回転を回して大当たりを引き、出玉でアップグレード！">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <!-- ヘッダー: ステータスバー -->
+        <header id="statusBar">
+            <div class="status-item">
+                <span class="status-label">所持玉</span>
+                <span class="status-value" id="ballCount">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">回転数</span>
+                <span class="status-value" id="spinCount">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">大当たり</span>
+                <span class="status-value" id="jackpotCount">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">収支</span>
+                <span class="status-value" id="profitDisplay">±0</span>
+            </div>
+        </header>
+
+        <!-- メイン: 台エリア -->
+        <main id="machineArea">
+            <!-- 台の液晶画面 -->
+            <div id="lcdScreen">
+                <div id="lcdOverlay"></div>
+                <div id="spinDisplay">
+                    <div id="reelContainer">
+                        <span class="reel" id="reel1">7</span>
+                        <span class="reel" id="reel2">7</span>
+                        <span class="reel" id="reel3">7</span>
+                    </div>
+                </div>
+                <div id="jackpotBanner" class="hidden">
+                    <span class="jackpot-text">🎉 大当たり！！</span>
+                    <span class="jackpot-payout" id="jackpotPayoutDisplay">+1,500玉</span>
+                </div>
+            </div>
+
+            <!-- 台情報 -->
+            <div id="machineInfo">
+                <div class="info-row">
+                    <span class="info-label">大当たり確率</span>
+                    <span class="info-value" id="probDisplay">1/319</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">出玉</span>
+                    <span class="info-value" id="payoutDisplay">1,500玉</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">回転速度</span>
+                    <span class="info-value" id="rateDisplay">1.0回/秒</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">1回転コスト</span>
+                    <span class="info-value" id="costDisplay">4玉</span>
+                </div>
+            </div>
+
+            <!-- 回転数メーター (ハマりゲージ) -->
+            <div id="hamariMeter">
+                <div class="meter-label">ハマりゲージ <span id="hamariCount">0</span> / <span id="hamariTarget">319</span>
+                </div>
+                <div class="meter-bar">
+                    <div class="meter-fill" id="hamariBar"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- オフライン差分バナー -->
+        <div id="offlineBanner" class="hidden">
+            <div class="offline-content">
+                <span class="offline-icon">⏰</span>
+                <div class="offline-info">
+                    <span class="offline-title">オフライン報酬</span>
+                    <span class="offline-detail" id="offlineDetail"></span>
+                </div>
+                <button id="offlineClose" class="offline-close">OK</button>
+            </div>
+        </div>
+
+        <!-- フッター: アップグレードショップ -->
+        <section id="shopSection">
+            <h2 class="shop-title">🛠️ アップグレード</h2>
+            <div id="shopGrid">
+                <!-- JSで動的生成 -->
+            </div>
+        </section>
+
+        <!-- 統計情報 -->
+        <section id="statsSection">
+            <h2 class="shop-title">📊 統計</h2>
+            <div id="statsGrid">
+                <div class="stat-card">
+                    <span class="stat-label">累計獲得玉</span>
+                    <span class="stat-value" id="totalBallsStat">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">累計投資</span>
+                    <span class="stat-value" id="totalInvestStat">0</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">大当たり率</span>
+                    <span class="stat-value" id="jackpotRateStat">-</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">プレイ時間</span>
+                    <span class="stat-value" id="playTimeStat">0秒</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- フッター -->
+        <footer id="gameFooter">
+            <button id="resetBtn" class="footer-btn danger">🗑️ データリセット</button>
+            <span class="footer-info">自動セーブ: <span id="saveStatus">待機中</span></span>
+        </footer>
+    </div>
+
+    <script src="js/game.js"></script>
+</body>
+
+</html>
