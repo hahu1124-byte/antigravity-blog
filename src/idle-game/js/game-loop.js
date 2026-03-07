@@ -15,10 +15,10 @@ function rollJackpotType() {
         return MODE_ST;
     }
 
-    // 確変中: 確変 or 時短のみ（通常・STなし）
+    // 確変中: 継続率で確変維持 or 時短落ち
     if (state.mode === MODE_KAKUHEN) {
-        if (r < m.jitanRate) return MODE_JITAN;
-        return MODE_KAKUHEN;
+        if (r < getKakuhenContinueRate()) return MODE_KAKUHEN;
+        return MODE_JITAN;
     }
 
     // 通常/時短/遊タイム: 4種振分

@@ -11,8 +11,7 @@ const MODE_KAKUHEN = 'kakuhen';
 const MODE_ST = 'st';
 const MODE_JITAN = 'jitan';
 
-const BASE_KAKUHEN_PROB = 1 / 39;
-const BASE_ST_SPINS = 100;
+const KAKUHEN_PROB_MULTIPLIER = 10;
 const YUTIME_MULTIPLIER = 2.5;
 const PRESTIGE_BASE_THRESHOLD = 100;
 const PRESTIGE_THRESHOLD_STEP = 50;
@@ -22,7 +21,7 @@ const PRESTIGE_BONUS_RATE = 0.05;
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.8.0';
+const GAME_VERSION = 'v0.9.0';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -45,13 +44,15 @@ const MACHINES = [
     {
         id: 'amadeji',
         name: '🟢 甘デジ',
-        desc: '低リスク・安定型',
+        desc: 'ST偏重・安定連荘型',
         prob: 1 / 99,
         payout: 465,
         cost: 2,
-        kakuhenRate: 0.25,
-        stRate: 0.25,
+        kakuhenRate: 0.15,
+        stRate: 0.40,
         jitanRate: 0.20,
+        kakuhenContinueRate: 0.65,
+        baseStSpins: 10,
         yutimeThreshold: 0,
         yutimeMult: 2.5,
         unlockCondition: () => true,
@@ -64,9 +65,11 @@ const MACHINES = [
         prob: 1 / 199,
         payout: 936,
         cost: 3,
-        kakuhenRate: 0.30,
-        stRate: 0.25,
+        kakuhenRate: 0.25,
+        stRate: 0.30,
         jitanRate: 0.20,
+        kakuhenContinueRate: 0.65,
+        baseStSpins: 21,
         yutimeThreshold: 0,
         yutimeMult: 2.5,
         unlockCondition: (s) => s.totalLifetimeJackpots >= 30,
@@ -82,6 +85,8 @@ const MACHINES = [
         kakuhenRate: 0.35,
         stRate: 0.25,
         jitanRate: 0.20,
+        kakuhenContinueRate: 0.65,
+        baseStSpins: 33,
         yutimeThreshold: 0,
         yutimeMult: 3.0,
         unlockCondition: (s) => s.totalLifetimeJackpots >= 80,
@@ -90,13 +95,15 @@ const MACHINES = [
     {
         id: 'max',
         name: '🔴 MAXタイプ',
-        desc: 'ハイリスク・爆裂型',
+        desc: '確変ループ特化型',
         prob: 1 / 399,
         payout: 1876,
         cost: 5,
-        kakuhenRate: 0.40,
-        stRate: 0.25,
-        jitanRate: 0.20,
+        kakuhenRate: 0.50,
+        stRate: 0.15,
+        jitanRate: 0.15,
+        kakuhenContinueRate: 0.65,
+        baseStSpins: 41,
         yutimeThreshold: 0,
         yutimeMult: 3.0,
         unlockCondition: (s) => s.prestiges >= 1,
@@ -105,13 +112,15 @@ const MACHINES = [
     {
         id: 'supermax',
         name: '🌟 超MAX',
-        desc: '最高リスク・超爆裂',
+        desc: '確変ループ全振り・ロマン型',
         prob: 1 / 499,
         payout: 2347,
         cost: 6,
-        kakuhenRate: 0.45,
-        stRate: 0.25,
-        jitanRate: 0.20,
+        kakuhenRate: 0.60,
+        stRate: 0.10,
+        jitanRate: 0.10,
+        kakuhenContinueRate: 0.65,
+        baseStSpins: 52,
         yutimeThreshold: 0,
         yutimeMult: 3.0,
         unlockCondition: (s) => s.prestiges >= 3,
@@ -152,14 +161,17 @@ const UPGRADES = [
     {
         id: 'jackpotPayout',
         name: '💰 出玉UP',
-        desc: '大当たり時の獲得玉を+20',
+        desc: '大当たり時の出玉を+5%改善',
         icon: '💰',
         baseCost: 500,
         costMultiplier: 1.8,
         maxLevel: 50,
         apply: (s) => {
             const m = getCurrentMachine();
-            s.jackpotPayout = m.payout + s.upgrades.jackpotPayout * 20;
+            const lv = s.upgrades.jackpotPayout || 0;
+            const denom = Math.round(1 / m.prob);
+            const hiddenRate = Math.pow(denom, 0.1) / 100;
+            s.jackpotPayout = Math.floor(m.payout * (1 + lv * (0.05 + hiddenRate)));
         },
         effectText: (s) => `${formatNum(s.jackpotPayout)}玉`,
     },
@@ -188,13 +200,24 @@ const UPGRADES = [
     {
         id: 'stSpins',
         name: '⏱️ ST回転数UP',
-        desc: 'STモードの回転数上限を+2',
+        desc: 'STモードの回転数を+5%改善',
         icon: '⏱️',
         baseCost: 1500,
         costMultiplier: 2.0,
         maxLevel: 20,
         apply: () => { },
         effectText: () => `${getMaxStSpins()}回転`,
+    },
+    {
+        id: 'kakuhenCont',
+        name: '🔁 確変継続率UP',
+        desc: '確変モードの継続率を+2%改善',
+        icon: '🔁',
+        baseCost: 2500,
+        costMultiplier: 2.2,
+        maxLevel: 10,
+        apply: () => { },
+        effectText: () => `${Math.round(getKakuhenContinueRate() * 100)}%`,
     },
     {
         id: 'critical',

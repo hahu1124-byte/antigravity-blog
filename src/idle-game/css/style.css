@@ -867,6 +867,23 @@ body {
     text-align: right;
 }
 
+.shop-total-summary {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-magenta);
+    text-align: right;
+    padding: 6px 12px;
+    background: rgba(189, 0, 255, 0.06);
+    border: 1px solid rgba(189, 0, 255, 0.15);
+    border-radius: var(--radius-sm);
+    min-height: 0;
+}
+
+.shop-total-summary:empty {
+    display: none;
+}
+
 .shop-card.maxed .shop-cost {
     color: var(--accent-green);
     font-size: 0.75rem;

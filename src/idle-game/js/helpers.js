@@ -38,11 +38,18 @@ function getPrestigeMultiplier() {
 }
 
 function getKakuhenProb() {
-    return BASE_KAKUHEN_PROB * Math.pow(1.01, state.upgrades.kakuhenBoost) * getPrestigeMultiplier();
+    const m = getCurrentMachine();
+    return m.prob * KAKUHEN_PROB_MULTIPLIER * Math.pow(1.01, state.upgrades.kakuhenBoost) * getPrestigeMultiplier();
 }
 
 function getMaxStSpins() {
-    return BASE_ST_SPINS + state.upgrades.stSpins * 2;
+    const m = getCurrentMachine();
+    return Math.round(m.baseStSpins * (1 + (state.upgrades.stSpins || 0) * 0.05));
+}
+
+function getKakuhenContinueRate() {
+    const m = getCurrentMachine();
+    return Math.min(m.kakuhenContinueRate + (state.upgrades.kakuhenCont || 0) * 0.02, 0.95);
 }
 
 function getJitanSpins() {
@@ -88,7 +95,10 @@ function getCurrentMachine() {
 function applyMachineSpecs() {
     const m = getCurrentMachine();
     state.jackpotProb = m.prob * Math.pow(1.05, state.upgrades.jackpotProb);
-    state.jackpotPayout = m.payout + state.upgrades.jackpotPayout * 20;
+    const lv = state.upgrades.jackpotPayout || 0;
+    const denom = Math.round(1 / m.prob);
+    const hiddenRate = Math.pow(denom, 0.1) / 100;
+    state.jackpotPayout = Math.floor(m.payout * (1 + lv * (0.05 + hiddenRate)));
     state.costPerSpin = m.cost;
 }
 

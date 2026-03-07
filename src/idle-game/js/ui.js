@@ -284,6 +284,12 @@ function renderMachineSelector() {
 
 function renderShop() {
     dom.shopGrid.innerHTML = '';
+    // 総投資額サマリー
+    const summaryEl = document.createElement('div');
+    summaryEl.className = 'shop-total-summary';
+    summaryEl.id = 'shopTotalSummary';
+    summaryEl.textContent = '';
+    dom.shopGrid.appendChild(summaryEl);
     getAllUpgrades().forEach(upg => {
         const card = document.createElement('div');
         card.className = 'shop-card';
@@ -340,8 +346,22 @@ function updateShopUI() {
             const totalSpent = getUpgradeTotalSpent(upg);
             spentEl.textContent = totalSpent > 0 ? `投資${formatNum(totalSpent)}玉` : '';
         }
+    });
 
-        // オートバイヤーチェックボックスの表示/非表示
+    // 総投資額サマリー更新
+    const summaryEl = document.getElementById('shopTotalSummary');
+    if (summaryEl) {
+        let grandTotal = 0;
+        getAllUpgrades().forEach(upg => {
+            grandTotal += getUpgradeTotalSpent(upg);
+        });
+        summaryEl.textContent = grandTotal > 0 ? `💎 総アップグレード投資: ${formatNum(grandTotal)}玉` : '';
+    }
+
+    // オートバイヤーチェックボックスの表示/非表示
+    getAllUpgrades().forEach(upg => {
+        const card = dom.shopGrid.querySelector(`[data-upgrade-id="${upg.id}"]`);
+        if (!card) return;
         const cbWrap = card.querySelector('.shop-autobuy-check');
         if (cbWrap) {
             if (state.autoBuyer) {
