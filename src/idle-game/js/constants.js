@@ -21,7 +21,7 @@ const PRESTIGE_BONUS_RATE = 0.05;
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.10.4';
+const GAME_VERSION = 'v0.10.5';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -248,7 +248,7 @@ const UPGRADES = [
         name: '🛒 オートバイヤー',
         desc: '最安のアップグレードを自動購入',
         icon: '🛒',
-        baseCost: 100000,
+        baseCost: 500000,
         costMultiplier: 1,
         maxLevel: 1,
         apply: (s) => { s.autoBuyer = s.upgrades.autoBuyer >= 1; },
@@ -257,11 +257,12 @@ const UPGRADES = [
     {
         id: 'autoPrestige',
         name: '🔄 オートプレステージ',
-        desc: '条件達成で自動プレステージ',
+        desc: '条件達成で自動プレステージ（転生50回で解放）',
         icon: '🔄',
         baseCost: 10000000,
         costMultiplier: 1,
         maxLevel: 1,
+        hidden: true,
         apply: (s) => { s.autoPrestige = s.upgrades.autoPrestige >= 1; },
         effectText: (s) => s.autoPrestige ? 'ON' : 'OFF',
     },

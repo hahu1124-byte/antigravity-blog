@@ -7,15 +7,14 @@
 // ============================================================
 
 function formatNum(n) {
-    if (n >= 1e9) return (n / 1e9).toFixed(1) + 'B';
-    if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
+    if (n >= 1e8) return (n / 1e8).toFixed(1) + '億';
     if (n >= 1e4) return (n / 1e4).toFixed(1) + '万';
     return Math.floor(n).toLocaleString('ja-JP');
 }
 
 function formatYen(balls) {
     const yen = Math.floor(balls * YEN_PER_BALL);
-    if (Math.abs(yen) >= 1e6) return '¥' + (yen / 1e6).toFixed(1) + 'M';
+    if (Math.abs(yen) >= 1e8) return '¥' + (yen / 1e8).toFixed(1) + '億';
     if (Math.abs(yen) >= 1e4) return '¥' + (yen / 1e4).toFixed(1) + '万';
     return '¥' + yen.toLocaleString('ja-JP');
 }
@@ -153,7 +152,11 @@ function switchRate(rate) {
 // ============================================================
 
 function getAllUpgrades() {
-    return isPremium ? [...UPGRADES, ...PREMIUM_UPGRADES] : UPGRADES;
+    const base = isPremium ? [...UPGRADES, ...PREMIUM_UPGRADES] : UPGRADES;
+    return base.filter(upg => {
+        if (upg.hidden && state.prestiges < 50) return false;
+        return true;
+    });
 }
 
 function getUpgradeCost(upg) {
