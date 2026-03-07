@@ -14,6 +14,7 @@ function takeLoan() {
     const loanBalls = getDebtLoanBalls();
     state.debt += loanBalls;
     state.balls += loanBalls;
+    state.totalInvest += loanBalls; // 借金を収支に反映
     if (state.lastDebtTime === 0) {
         state.lastDebtTime = Date.now();
     }

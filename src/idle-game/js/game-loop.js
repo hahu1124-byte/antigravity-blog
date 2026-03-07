@@ -273,8 +273,7 @@ function gameLoop(now) {
                 if (state.jitanRemaining <= 0) {
                     state.mode = MODE_NORMAL;
                     state.jitanRemaining = 0;
-                    state.yutimeGauge = 0;
-                    state.yutimeTriggered = false;
+                    // 遊タイムゲージは引き継ぐ（リセットしない）
                 }
             }
 
