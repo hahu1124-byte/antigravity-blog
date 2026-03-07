@@ -117,6 +117,7 @@
     const typeFilter = $('type-filter');
     const yutimeFilter = $('yutime-filter');
     const yearFilter = $('year-filter');
+    const makerFilter = $('maker-filter');
     const tbody = $('machine-tbody');
     const machineCount = $('machine-count');
     const filteredInfo = $('filtered-info');
@@ -146,10 +147,26 @@
                 const d = new Date(data.lastUpdated);
                 lastUpdated.textContent = `更新: ${d.toLocaleDateString('ja-JP')} ${d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`;
             }
+            buildMakerOptions();
             loading.classList.add('hidden');
             applyFilters();
         } catch (e) {
             loading.textContent = `❌ データ読込エラー: ${e.message}`;
+        }
+    }
+
+    function buildMakerOptions() {
+        const makers = new Map();
+        for (const m of allMachines) {
+            if (m.maker) makers.set(m.maker, (makers.get(m.maker) || 0) + 1);
+        }
+        const sorted = [...makers.entries()].sort((a, b) => b[1] - a[1]);
+        makerFilter.innerHTML = '<option value="all">すべて</option>';
+        for (const [name, count] of sorted) {
+            const opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = `${name} (${count})`;
+            makerFilter.appendChild(opt);
         }
     }
 
@@ -172,6 +189,8 @@
             if (yutime === 'no' && (m.yutimeTrigger > 0)) return false;
             const year = yearFilter.value;
             if (year !== 'all' && m.releaseDate && m.releaseDate < year + '-01-01') return false;
+            const maker = makerFilter.value;
+            if (maker !== 'all' && m.maker !== maker) return false;
             return true;
         });
         applySorting();
@@ -425,6 +444,7 @@
         if (typeFilter.value !== 'all') tags.push({ label: `タイプ: ${typeFilter.options[typeFilter.selectedIndex].text}`, action: () => { typeFilter.value = 'all'; applyFilters(); } });
         if (yutimeFilter.value !== 'all') tags.push({ label: yutimeFilter.value === 'yes' ? '遊タイム搭載' : '遊タイム非搭載', action: () => { yutimeFilter.value = 'all'; applyFilters(); } });
         if (yearFilter.value !== 'all') tags.push({ label: yearFilter.value + '年以降', action: () => { yearFilter.value = 'all'; applyFilters(); } });
+        if (makerFilter.value !== 'all') tags.push({ label: 'メーカー: ' + makerFilter.value, action: () => { makerFilter.value = 'all'; applyFilters(); } });
         if (tags.length === 0) { activeFilters.classList.add('hidden'); return; }
         activeFilters.classList.remove('hidden');
         activeFilters.innerHTML = tags.map((t, i) => `<span class="filter-tag" data-idx="${i}">${t.label} <span class="tag-close">✕</span></span>`).join('');
@@ -571,6 +591,7 @@
             typeFilter.value = 'all';
             yutimeFilter.value = 'all';
             yearFilter.value = '2022';
+            makerFilter.value = 'all';
             sortKey = 'release';
             sortDir = 'desc';
             currentPage = 1;
@@ -590,7 +611,7 @@
         const m = machine;
         modalBody.innerHTML = `
             <h2 class="modal-title">${esc(m.name)}</h2>
-            <div class="modal-type"><span class="type-badge ${getTypeClass(m.type)}">${esc(m.type || '不明')}</span></div>
+            <div class="modal-type"><span class="type-badge ${getTypeClass(m.type)}">${esc(m.type || '不明')}</span>${m.maker ? ' <span class="modal-maker">' + esc(m.maker) + '</span>' : ''}</div>
             <div class="modal-specs">
                 <div class="spec-card"><div class="spec-label">大当り確率</div><div class="spec-value">${m.baseProbability > 0 ? '1/' + m.baseProbability : '—'}</div></div>
                 <div class="spec-card"><div class="spec-label">トータル確率</div><div class="spec-value">1/${m.prob}</div></div>
@@ -614,6 +635,7 @@
     typeFilter.addEventListener('change', applyFilters);
     yutimeFilter.addEventListener('change', applyFilters);
     yearFilter.addEventListener('change', applyFilters);
+    makerFilter.addEventListener('change', applyFilters);
 
     prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
     nextBtn.addEventListener('click', () => { if (currentPage < Math.ceil(filteredMachines.length / perPage)) { currentPage++; renderTable(); } });

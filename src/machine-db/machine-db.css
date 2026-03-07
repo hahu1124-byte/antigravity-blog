@@ -862,6 +862,14 @@ tbody tr:hover .machine-name {
     margin-bottom: 1.5rem;
 }
 
+.modal-maker {
+    display: inline-block;
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+    color: #8b8fa0;
+    vertical-align: middle;
+}
+
 .modal-specs {
     display: grid;
     grid-template-columns: 1fr 1fr;
