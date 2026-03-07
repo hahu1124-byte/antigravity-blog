@@ -42,7 +42,12 @@
             <div id="lcdScreen">
                 <div id="lcdOverlay"></div>
 
-                <!-- RUSHバナー（確変/ST中に表示） -->
+                <!-- 台名表示 -->
+                <div id="machineNameBadge">
+                    <span id="machineName">🟢 甘デジ</span>
+                </div>
+
+                <!-- RUSHバナー -->
                 <div id="rushBanner" class="hidden">
                     <span class="rush-label">🔥 RUSH</span>
                     <span class="rush-chain" id="rushChainDisplay">0連荘中</span>
@@ -74,11 +79,11 @@
             <div id="machineInfo">
                 <div class="info-row">
                     <span class="info-label">大当たり確率</span>
-                    <span class="info-value" id="probDisplay">1/319</span>
+                    <span class="info-value" id="probDisplay">1/99</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">出玉</span>
-                    <span class="info-value" id="payoutDisplay">1,500玉</span>
+                    <span class="info-value" id="payoutDisplay">800玉</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">回転速度</span>
@@ -90,9 +95,9 @@
                 </div>
             </div>
 
-            <!-- 回転数メーター (ハマりゲージ → 遊タイムゲージ) -->
+            <!-- 遊タイムゲージ -->
             <div id="hamariMeter">
-                <div class="meter-label">遊タイムゲージ <span id="hamariCount">0</span> / <span id="hamariTarget">798</span>
+                <div class="meter-label">遊タイムゲージ <span id="hamariCount">0</span> / <span id="hamariTarget">297</span>
                 </div>
                 <div class="meter-bar">
                     <div class="meter-fill" id="hamariBar"></div>
@@ -122,7 +127,15 @@
             </div>
         </div>
 
-        <!-- プレステージセクション -->
+        <!-- 機種選択 (Phase 3) -->
+        <section id="machineSection">
+            <h2 class="shop-title">🎰 機種選択</h2>
+            <div id="machineGrid">
+                <!-- JSで動的生成 -->
+            </div>
+        </section>
+
+        <!-- プレステージ -->
         <section id="prestigeSection">
             <h2 class="shop-title">⭐ プレステージ（転生）</h2>
             <div class="prestige-info">
@@ -143,12 +156,10 @@
         <!-- アップグレードショップ -->
         <section id="shopSection">
             <h2 class="shop-title">🛠️ アップグレード</h2>
-            <div id="shopGrid">
-                <!-- JSで動的生成 -->
-            </div>
+            <div id="shopGrid"></div>
         </section>
 
-        <!-- 統計情報 -->
+        <!-- 統計 -->
         <section id="statsSection">
             <h2 class="shop-title">📊 統計</h2>
             <div id="statsGrid">

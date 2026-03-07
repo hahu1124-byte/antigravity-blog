@@ -1,6 +1,6 @@
 /**
  * パチンコ放置ゲーム — コアロジック
- * Phase 2: 確変/ST/RUSH + 遊タイム + プレステージ
+ * Phase 3: 機種解放ツリー + 自動化 + バランス調整
  */
 
 // ============================================================
@@ -11,62 +11,189 @@ const MODE_NORMAL = 'normal';
 const MODE_KAKUHEN = 'kakuhen';
 const MODE_ST = 'st';
 
-// 大当たり振分け（通常時の大当たりに対して）
-const JACKPOT_DIST = {
-    kakuhen: 0.60,  // 確変: 60%
-    st: 0.25,       // ST: 25%
-    normal: 0.15,   // 通常: 15%
-};
+const BASE_KAKUHEN_PROB = 1 / 39;
+const BASE_ST_SPINS = 100;
+const YUTIME_MULTIPLIER = 2.5;
+const PRESTIGE_BASE_THRESHOLD = 100;
+const PRESTIGE_THRESHOLD_STEP = 50;   // Phase 3: 段階的増加
+const PRESTIGE_BONUS_RATE = 0.05;
 
-const BASE_KAKUHEN_PROB = 1 / 39;  // 確変/ST中の確率
-const BASE_ST_SPINS = 100;         // STモードの回転数上限
-const YUTIME_MULTIPLIER = 2.5;     // 遊タイム発動条件（確率分母 × この倍率）
-const PRESTIGE_THRESHOLD = 100;    // プレステージ解放に必要な累計大当たり数
-const PRESTIGE_BONUS_RATE = 0.05;  // プレステージ1回あたりの永続ボーナス(5%)
+// ============================================================
+// 機種データ (Phase 3)
+// ============================================================
+
+const MACHINES = [
+    {
+        id: 'amadeji',
+        name: '🟢 甘デジ',
+        desc: '低リスク・安定型',
+        prob: 1 / 99,
+        payout: 800,
+        cost: 2,
+        kakuhenRate: 0.50,
+        stRate: 0.30,
+        yutimeMult: 3.0,  // 遊タイム倍率（甘いので甘め）
+        unlockCondition: () => true, // 初期台
+        unlockText: '初期台',
+    },
+    {
+        id: 'lightmiddle',
+        name: '🔵 ライトミドル',
+        desc: 'バランス型',
+        prob: 1 / 199,
+        payout: 1200,
+        cost: 3,
+        kakuhenRate: 0.55,
+        stRate: 0.25,
+        yutimeMult: 2.5,
+        unlockCondition: (s) => s.totalLifetimeJackpots >= 30,
+        unlockText: '累計大当たり30回',
+    },
+    {
+        id: 'middle',
+        name: '🟣 ミドル',
+        desc: 'スタンダード',
+        prob: 1 / 319,
+        payout: 1500,
+        cost: 4,
+        kakuhenRate: 0.60,
+        stRate: 0.25,
+        yutimeMult: 2.5,
+        unlockCondition: (s) => s.totalLifetimeJackpots >= 80,
+        unlockText: '累計大当たり80回',
+    },
+    {
+        id: 'max',
+        name: '🔴 MAXタイプ',
+        desc: 'ハイリスク・爆裂型',
+        prob: 1 / 399,
+        payout: 3000,
+        cost: 5,
+        kakuhenRate: 0.65,
+        stRate: 0.20,
+        yutimeMult: 2.0,
+        unlockCondition: (s) => s.prestiges >= 1,
+        unlockText: 'プレステージ1回',
+    },
+    {
+        id: 'supermax',
+        name: '🌟 超MAX',
+        desc: '最高リスク・超爆裂',
+        prob: 1 / 499,
+        payout: 5000,
+        cost: 6,
+        kakuhenRate: 0.70,
+        stRate: 0.15,
+        yutimeMult: 1.8,
+        unlockCondition: (s) => s.prestiges >= 3,
+        unlockText: 'プレステージ3回',
+    },
+];
 
 // ============================================================
 // ゲームステート
 // ============================================================
 
 const DEFAULT_STATE = {
-    balls: 500,              // 所持玉数（初期500玉 = パチ屋1000円分）
-    totalBalls: 0,           // 累計獲得玉数
-    totalInvest: 0,          // 累計投資玉数
-    spins: 0,                // 累計回転数
-    jackpots: 0,             // 累計大当たり回数
-    spinRate: 1,             // 毎秒回転数
-    jackpotProb: 1 / 319,    // 通常時大当たり確率
-    jackpotPayout: 1500,     // 大当たり時獲得玉数
-    costPerSpin: 4,          // 1回転あたりコスト
-    sinceLastJackpot: 0,     // 前回大当たりからの回転数
-    autoInvest: false,       // オート投資フラグ
+    balls: 500,
+    totalBalls: 0,
+    totalInvest: 0,
+    spins: 0,
+    jackpots: 0,
+    spinRate: 1,
+    jackpotProb: 1 / 99,     // 甘デジ初期値
+    jackpotPayout: 800,       // 甘デジ初期値
+    costPerSpin: 2,           // 甘デジ初期値
+    sinceLastJackpot: 0,
+    autoInvest: false,
 
-    // Phase 2: モードシステム
-    mode: MODE_NORMAL,       // 現在のモード
-    rushChain: 0,            // 現在のRUSH連荘数
-    stRemaining: 0,          // ST残り回転数
-    totalRushChains: 0,      // 累計最大連荘数（統計用）
-    currentRushPayout: 0,    // 現在のRUSH中累計出玉（サマリー用）
-    yutimeTriggered: false,  // 遊タイム発動中フラグ
+    // Phase 2: モード
+    mode: MODE_NORMAL,
+    rushChain: 0,
+    stRemaining: 0,
+    totalRushChains: 0,
+    currentRushPayout: 0,
+    yutimeTriggered: false,
 
     // Phase 2: プレステージ
-    prestiges: 0,            // プレステージ回数
-    totalLifetimeJackpots: 0, // 全プレステージ通しての累計大当たり
+    prestiges: 0,
+    totalLifetimeJackpots: 0,
+
+    // Phase 3: 機種
+    currentMachineId: 'amadeji',
+    unlockedMachines: ['amadeji'],
+
+    // Phase 3: 自動化
+    autoBuyer: false,
+    autoPrestige: false,
 
     upgrades: {
         spinRate: 0,
         jackpotProb: 0,
         jackpotPayout: 0,
         autoInvest: 0,
-        kakuhenBoost: 0,     // Phase 2: 確変倍率UP
-        stSpins: 0,          // Phase 2: ST回転数UP
+        kakuhenBoost: 0,
+        stSpins: 0,
+        autoBuyer: 0,       // Phase 3
+        autoPrestige: 0,    // Phase 3
+        critical: 0,        // Phase 3
     },
     lastSave: Date.now(),
-    playTime: 0,             // プレイ時間（秒）
+    playTime: 0,
     startedAt: Date.now(),
 };
 
 let state = { ...DEFAULT_STATE };
+
+// ============================================================
+// 機種ヘルパー
+// ============================================================
+
+function getCurrentMachine() {
+    return MACHINES.find(m => m.id === state.currentMachineId) || MACHINES[0];
+}
+
+function switchMachine(machineId) {
+    // RUSH中は切替不可
+    if (state.mode !== MODE_NORMAL) return;
+
+    const machine = MACHINES.find(m => m.id === machineId);
+    if (!machine) return;
+    if (!state.unlockedMachines.includes(machineId)) return;
+
+    state.currentMachineId = machineId;
+    // 台スペックを反映
+    applyMachineSpecs();
+    // ハマリゲージリセット
+    state.sinceLastJackpot = 0;
+    state.yutimeTriggered = false;
+
+    renderMachineSelector();
+    saveGame();
+}
+
+function applyMachineSpecs() {
+    const m = getCurrentMachine();
+    // 基本確率（アップグレード反映）
+    state.jackpotProb = m.prob * Math.pow(1.1, state.upgrades.jackpotProb);
+    // 基本出玉（アップグレード反映）
+    state.jackpotPayout = m.payout + state.upgrades.jackpotPayout * 200;
+    // コスト
+    state.costPerSpin = m.cost;
+}
+
+function checkMachineUnlocks() {
+    let newUnlock = false;
+    MACHINES.forEach(m => {
+        if (!state.unlockedMachines.includes(m.id) && m.unlockCondition(state)) {
+            state.unlockedMachines.push(m.id);
+            newUnlock = true;
+        }
+    });
+    if (newUnlock) {
+        renderMachineSelector();
+    }
+}
 
 // ============================================================
 // アップグレード定義
@@ -92,7 +219,10 @@ const UPGRADES = [
         baseCost: 800,
         costMultiplier: 2.0,
         maxLevel: 30,
-        apply: (s) => { s.jackpotProb = (1 / 319) * Math.pow(1.1, s.upgrades.jackpotProb); },
+        apply: (s) => {
+            const m = getCurrentMachine();
+            s.jackpotProb = m.prob * Math.pow(1.1, s.upgrades.jackpotProb);
+        },
         effectText: (s) => `1/${Math.round(1 / s.jackpotProb)}`,
     },
     {
@@ -103,7 +233,10 @@ const UPGRADES = [
         baseCost: 500,
         costMultiplier: 1.8,
         maxLevel: 50,
-        apply: (s) => { s.jackpotPayout = 1500 + s.upgrades.jackpotPayout * 200; },
+        apply: (s) => {
+            const m = getCurrentMachine();
+            s.jackpotPayout = m.payout + s.upgrades.jackpotPayout * 200;
+        },
         effectText: (s) => `${formatNum(s.jackpotPayout)}玉`,
     },
     {
@@ -125,11 +258,8 @@ const UPGRADES = [
         baseCost: 2000,
         costMultiplier: 2.5,
         maxLevel: 20,
-        apply: () => { /* 動的計算で使用 */ },
-        effectText: (s) => {
-            const prob = getKakuhenProb();
-            return `1/${Math.round(1 / prob)}`;
-        },
+        apply: () => { },
+        effectText: () => `1/${Math.round(1 / getKakuhenProb())}`,
     },
     {
         id: 'stSpins',
@@ -139,8 +269,41 @@ const UPGRADES = [
         baseCost: 1500,
         costMultiplier: 2.0,
         maxLevel: 20,
-        apply: () => { /* 動的計算で使用 */ },
-        effectText: (s) => `${getMaxStSpins()}回転`,
+        apply: () => { },
+        effectText: () => `${getMaxStSpins()}回転`,
+    },
+    {
+        id: 'critical',
+        name: '💎 クリティカル',
+        desc: '大当たり時10%で出玉2倍',
+        icon: '💎',
+        baseCost: 3000,
+        costMultiplier: 2.0,
+        maxLevel: 10,
+        apply: () => { },
+        effectText: () => `${getCriticalChance()}%`,
+    },
+    {
+        id: 'autoBuyer',
+        name: '🛒 オートバイヤー',
+        desc: '最安のアップグレードを自動購入',
+        icon: '🛒',
+        baseCost: 10000,
+        costMultiplier: 1,
+        maxLevel: 1,
+        apply: (s) => { s.autoBuyer = s.upgrades.autoBuyer >= 1; },
+        effectText: (s) => s.autoBuyer ? 'ON' : 'OFF',
+    },
+    {
+        id: 'autoPrestige',
+        name: '🔄 オートプレステージ',
+        desc: '条件達成で自動プレステージ',
+        icon: '🔄',
+        baseCost: 50000,
+        costMultiplier: 1,
+        maxLevel: 1,
+        apply: (s) => { s.autoPrestige = s.upgrades.autoPrestige >= 1; },
+        effectText: (s) => s.autoPrestige ? 'ON' : 'OFF',
     },
 ];
 
@@ -178,7 +341,7 @@ const dom = {
     playTimeStat: $('playTimeStat'),
     resetBtn: $('resetBtn'),
     saveStatus: $('saveStatus'),
-    // Phase 2 DOM
+    // Phase 2
     modeIndicator: $('modeIndicator'),
     rushBanner: $('rushBanner'),
     rushChainDisplay: $('rushChainDisplay'),
@@ -187,11 +350,13 @@ const dom = {
     prestigeBtn: $('prestigeBtn'),
     prestigeCount: $('prestigeCount'),
     prestigeBonus: $('prestigeBonus'),
-    prestigeSection: $('prestigeSection'),
     rushSummary: $('rushSummary'),
     rushSummaryDetail: $('rushSummaryDetail'),
     rushSummaryClose: $('rushSummaryClose'),
     yutimeBanner: $('yutimeBanner'),
+    // Phase 3
+    machineGrid: $('machineGrid'),
+    machineName: $('machineName'),
 };
 
 // ============================================================
@@ -214,24 +379,30 @@ function formatTime(seconds) {
     return `${h}時間${m}分`;
 }
 
-/** プレステージボーナス倍率を取得 */
 function getPrestigeMultiplier() {
     return 1 + state.prestiges * PRESTIGE_BONUS_RATE;
 }
 
-/** 確変/ST中の確率を取得（アップグレード + プレステージボーナス反映） */
 function getKakuhenProb() {
-    const base = BASE_KAKUHEN_PROB;
-    const upgBoost = Math.pow(1.1, state.upgrades.kakuhenBoost);
-    return base * upgBoost * getPrestigeMultiplier();
+    return BASE_KAKUHEN_PROB * Math.pow(1.1, state.upgrades.kakuhenBoost) * getPrestigeMultiplier();
 }
 
-/** ST最大回転数を取得 */
 function getMaxStSpins() {
     return BASE_ST_SPINS + state.upgrades.stSpins * 20;
 }
 
-/** 現在の実効確率を取得（モードに応じて） */
+function getCriticalChance() {
+    return state.upgrades.critical * 10; // 10%刻み
+}
+
+function getPrestigeThreshold() {
+    return PRESTIGE_BASE_THRESHOLD + state.prestiges * PRESTIGE_THRESHOLD_STEP;
+}
+
+function getStartingBalls() {
+    return 500 + state.prestiges * 200;
+}
+
 function getCurrentProb() {
     if (state.mode === MODE_KAKUHEN || state.mode === MODE_ST) {
         return getKakuhenProb();
@@ -240,7 +411,7 @@ function getCurrentProb() {
 }
 
 // ============================================================
-// リール表示 (ランダム数字)
+// リール表示
 // ============================================================
 
 const REEL_SYMBOLS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
@@ -269,40 +440,34 @@ function updateReels(dt, isJackpot) {
 }
 
 // ============================================================
-// 大当たり処理 (Phase 2: 振分け + モード遷移)
+// 大当たり処理 (機種スペック参照)
 // ============================================================
 
-/**
- * 大当たりの種類を抽選する
- * - 確変/ST中の大当たりも同じ振分けを使用
- */
 function rollJackpotType() {
+    const m = getCurrentMachine();
     const r = Math.random();
-    if (r < JACKPOT_DIST.kakuhen) return MODE_KAKUHEN;
-    if (r < JACKPOT_DIST.kakuhen + JACKPOT_DIST.st) return MODE_ST;
+    if (r < m.kakuhenRate) return MODE_KAKUHEN;
+    if (r < m.kakuhenRate + m.stRate) return MODE_ST;
     return MODE_NORMAL;
 }
 
-/**
- * 大当たり時の出玉を計算
- * - 確変大当たり: 1.5倍
- * - ST/通常: 1.0倍
- */
 function getJackpotPayout(type) {
-    const base = state.jackpotPayout * getPrestigeMultiplier();
-    if (type === MODE_KAKUHEN) return Math.floor(base * 1.5);
+    let base = state.jackpotPayout * getPrestigeMultiplier();
+    if (type === MODE_KAKUHEN) base = Math.floor(base * 1.5);
+
+    // クリティカル判定
+    if (Math.random() * 100 < getCriticalChance()) {
+        base = Math.floor(base * 2);
+    }
+
     return Math.floor(base);
 }
 
-/**
- * 大当たりを処理し、モード遷移を実行
- */
 function processJackpot() {
     const type = rollJackpotType();
     const payout = getJackpotPayout(type);
     const wasRush = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
 
-    // 出玉加算
     state.balls += payout;
     state.totalBalls += payout;
     state.jackpots++;
@@ -310,9 +475,7 @@ function processJackpot() {
     state.sinceLastJackpot = 0;
     state.yutimeTriggered = false;
 
-    // モード遷移
     if (type === MODE_KAKUHEN) {
-        // 確変突入
         if (!wasRush) {
             state.rushChain = 1;
             state.currentRushPayout = payout;
@@ -323,7 +486,6 @@ function processJackpot() {
         state.mode = MODE_KAKUHEN;
         state.stRemaining = 0;
     } else if (type === MODE_ST) {
-        // ST突入
         if (!wasRush) {
             state.rushChain = 1;
             state.currentRushPayout = payout;
@@ -334,13 +496,10 @@ function processJackpot() {
         state.mode = MODE_ST;
         state.stRemaining = getMaxStSpins();
     } else {
-        // 通常大当たり → RUSH終了
         if (wasRush) {
             state.rushChain++;
             state.currentRushPayout += payout;
-            // RUSH結果サマリー表示
             showRushSummary(state.rushChain, state.currentRushPayout);
-            // 最大連荘記録更新
             if (state.rushChain > state.totalRushChains) {
                 state.totalRushChains = state.rushChain;
             }
@@ -351,41 +510,40 @@ function processJackpot() {
         state.stRemaining = 0;
     }
 
+    // 機種解放チェック
+    checkMachineUnlocks();
+
     return { type, payout };
 }
 
 // ============================================================
-// 遊タイム判定
+// 遊タイム
 // ============================================================
 
 function checkYutime() {
     if (state.mode !== MODE_NORMAL) return;
     if (state.yutimeTriggered) return;
 
-    const threshold = Math.round((1 / state.jackpotProb) * YUTIME_MULTIPLIER);
+    const m = getCurrentMachine();
+    const threshold = Math.round((1 / m.prob) * m.yutimeMult);
     if (state.sinceLastJackpot >= threshold) {
-        // 遊タイム発動！→ ST突入
         state.yutimeTriggered = true;
         state.mode = MODE_ST;
         state.stRemaining = getMaxStSpins();
         state.rushChain = 0;
         state.currentRushPayout = 0;
-
-        // 遊タイムバナー表示
         showYutimeBanner();
     }
 }
 
 // ============================================================
-// 演出: 大当たりバナー / RUSHサマリー / 遊タイム
+// 演出
 // ============================================================
 
 let jackpotAnimTimer = 0;
 
 function showJackpotBanner(type, payout) {
     dom.jackpotPayoutDisplay.textContent = `+${formatNum(payout)}玉`;
-
-    // 大当たりタイプ表示
     const typeLabels = {
         [MODE_KAKUHEN]: '🔥 確変大当たり！',
         [MODE_ST]: '⚡ ST大当たり！',
@@ -394,7 +552,6 @@ function showJackpotBanner(type, payout) {
     dom.jackpotTypeDisplay.textContent = typeLabels[type] || '🎉 大当たり！';
     dom.jackpotBanner.classList.remove('hidden');
     jackpotAnimTimer = 2.0;
-
     showBallPopup(payout);
 }
 
@@ -431,6 +588,46 @@ function showYutimeBanner() {
 }
 
 // ============================================================
+// 自動化 (Phase 3)
+// ============================================================
+
+let autoBuyTimer = 0;
+
+function processAutoBuyer(dt) {
+    if (!state.autoBuyer) return;
+    autoBuyTimer += dt;
+    if (autoBuyTimer < 1.0) return; // 1秒間隔
+    autoBuyTimer = 0;
+
+    // 購入可能な最安アップグレードを探す
+    let cheapest = null;
+    let cheapestCost = Infinity;
+
+    UPGRADES.forEach(upg => {
+        if (state.upgrades[upg.id] >= upg.maxLevel) return;
+        const cost = getUpgradeCost(upg);
+        if (cost < cheapestCost && state.balls >= cost) {
+            cheapest = upg;
+            cheapestCost = cost;
+        }
+    });
+
+    if (cheapest) {
+        state.balls -= cheapestCost;
+        state.upgrades[cheapest.id]++;
+        cheapest.apply(state);
+        applyAllUpgrades();
+    }
+}
+
+function processAutoPrestige() {
+    if (!state.autoPrestige) return;
+    if (state.jackpots >= getPrestigeThreshold()) {
+        executePrestige(true); // 自動
+    }
+}
+
+// ============================================================
 // コアゲームループ
 // ============================================================
 
@@ -443,10 +640,9 @@ function gameLoop(now) {
     const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
     lastFrameTime = now;
 
-    // プレイ時間更新
     state.playTime += dt;
 
-    // 大当たりバナーのタイマー
+    // バナータイマー
     if (jackpotAnimTimer > 0) {
         jackpotAnimTimer -= dt;
         if (jackpotAnimTimer <= 0) {
@@ -454,8 +650,6 @@ function gameLoop(now) {
             jackpotOccurred = false;
         }
     }
-
-    // 遊タイムバナーのタイマー
     if (yutimeAnimTimer > 0) {
         yutimeAnimTimer -= dt;
         if (yutimeAnimTimer <= 0) {
@@ -463,11 +657,9 @@ function gameLoop(now) {
         }
     }
 
-    // 回転可能チェック
     const canSpin = state.balls >= state.costPerSpin || state.autoInvest;
 
     if (canSpin && jackpotAnimTimer <= 0) {
-        // 回転蓄積
         spinAccumulator += state.spinRate * dt;
         const spinsThisFrame = Math.floor(spinAccumulator);
         spinAccumulator -= spinsThisFrame;
@@ -477,17 +669,15 @@ function gameLoop(now) {
         let frameJackpotType = null;
 
         for (let i = 0; i < spinsThisFrame; i++) {
-            // コスト消費
             state.balls -= state.costPerSpin;
             state.totalInvest += state.costPerSpin;
             state.spins++;
             state.sinceLastJackpot++;
 
-            // ST回転数消化
+            // ST消化
             if (state.mode === MODE_ST) {
                 state.stRemaining--;
                 if (state.stRemaining <= 0) {
-                    // ST終了 → RUSH結果表示
                     if (state.rushChain > 0) {
                         showRushSummary(state.rushChain, state.currentRushPayout);
                         if (state.rushChain > state.totalRushChains) {
@@ -500,10 +690,8 @@ function gameLoop(now) {
                 }
             }
 
-            // オート投資: 玉がマイナスになった場合0にクランプ
             if (state.balls < 0) state.balls = 0;
 
-            // 大当たり判定（モードに応じた確率）
             const prob = getCurrentProb();
             if (Math.random() < prob) {
                 const result = processJackpot();
@@ -512,24 +700,20 @@ function gameLoop(now) {
                 frameJackpotType = result.type;
             }
 
-            // 遊タイム判定（通常モード時のみ）
             checkYutime();
 
-            // 玉切れでオート投資なし → 停止
             if (state.balls < state.costPerSpin && !state.autoInvest) {
                 spinAccumulator = 0;
                 break;
             }
         }
 
-        // 大当たりがあったらアニメーション
         if (frameJackpots > 0) {
             jackpotOccurred = true;
             lastJackpotType = frameJackpotType;
             showJackpotBanner(frameJackpotType, framePayout);
         }
 
-        // リール更新
         updateReels(dt, jackpotOccurred);
     } else if (!canSpin) {
         dom.reel1.className = 'reel';
@@ -537,9 +721,11 @@ function gameLoop(now) {
         dom.reel3.className = 'reel';
     }
 
-    // UI更新
-    updateUI();
+    // Phase 3: 自動化処理
+    processAutoBuyer(dt);
+    processAutoPrestige();
 
+    updateUI();
     requestAnimationFrame(gameLoop);
 }
 
@@ -552,6 +738,8 @@ let uiUpdateTimer = 0;
 function updateUI() {
     uiUpdateTimer++;
     if (uiUpdateTimer % 3 !== 0) return;
+
+    const m = getCurrentMachine();
 
     // ステータスバー
     dom.ballCount.textContent = formatNum(state.balls);
@@ -584,24 +772,22 @@ function updateUI() {
     }
 
     // 台情報
-    const currentProb = getCurrentProb();
-    dom.probDisplay.textContent = `1/${Math.round(1 / currentProb)}`;
+    dom.probDisplay.textContent = `1/${Math.round(1 / getCurrentProb())}`;
     dom.payoutDisplay.textContent = `${formatNum(state.jackpotPayout)}玉`;
     dom.rateDisplay.textContent = `${state.spinRate.toFixed(1)}回/秒`;
     dom.costDisplay.textContent = `${state.costPerSpin}玉`;
+    dom.machineName.textContent = m.name;
 
     // ハマりゲージ
-    const target = Math.round(1 / state.jackpotProb);
-    const yutimeThreshold = Math.round(target * YUTIME_MULTIPLIER);
+    const yutimeThreshold = Math.round((1 / m.prob) * m.yutimeMult);
     const hamariPct = Math.min((state.sinceLastJackpot / yutimeThreshold) * 100, 100);
     dom.hamariCount.textContent = formatNum(state.sinceLastJackpot);
     dom.hamariTarget.textContent = formatNum(yutimeThreshold);
     dom.hamariBar.style.width = `${hamariPct}%`;
 
-    // ハマリゲージの色（通常→警告→遊タイム）
     if (state.sinceLastJackpot >= yutimeThreshold) {
         dom.hamariBar.className = 'meter-fill yutime';
-    } else if (state.sinceLastJackpot >= target) {
+    } else if (state.sinceLastJackpot >= Math.round(1 / m.prob)) {
         dom.hamariBar.className = 'meter-fill danger';
     } else {
         dom.hamariBar.className = 'meter-fill';
@@ -615,19 +801,61 @@ function updateUI() {
         : '-';
     dom.playTimeStat.textContent = formatTime(state.playTime);
 
-    // プレステージセクション
+    // プレステージ
+    const pThreshold = getPrestigeThreshold();
     dom.prestigeCount.textContent = state.prestiges;
     dom.prestigeBonus.textContent = `+${(state.prestiges * PRESTIGE_BONUS_RATE * 100).toFixed(0)}%`;
 
-    // プレステージボタンの有効/無効
-    const canPrestige = state.jackpots >= PRESTIGE_THRESHOLD;
+    const canPrestige = state.jackpots >= pThreshold;
     dom.prestigeBtn.disabled = !canPrestige;
     dom.prestigeBtn.textContent = canPrestige
-        ? `⭐ プレステージ（${state.jackpots}/${PRESTIGE_THRESHOLD}）`
-        : `🔒 大当たり ${state.jackpots}/${PRESTIGE_THRESHOLD} でプレステージ解放`;
+        ? `⭐ プレステージ（${state.jackpots}/${pThreshold}）`
+        : `🔒 大当たり ${state.jackpots}/${pThreshold} でプレステージ解放`;
 
-    // ショップのコスト表示更新
     updateShopUI();
+}
+
+// ============================================================
+// 機種選択UI (Phase 3)
+// ============================================================
+
+function renderMachineSelector() {
+    dom.machineGrid.innerHTML = '';
+    MACHINES.forEach(m => {
+        const isUnlocked = state.unlockedMachines.includes(m.id);
+        const isActive = state.currentMachineId === m.id;
+        const isRush = state.mode !== MODE_NORMAL;
+
+        const card = document.createElement('div');
+        card.className = `machine-card${isActive ? ' active' : ''}${!isUnlocked ? ' locked' : ''}${isRush && !isActive ? ' rush-disabled' : ''}`;
+
+        if (isUnlocked) {
+            card.innerHTML = `
+                <div class="machine-header">
+                    <span class="machine-title">${m.name}</span>
+                    ${isActive ? '<span class="machine-active-badge">稼働中</span>' : ''}
+                </div>
+                <div class="machine-specs">
+                    <span>確率 1/${Math.round(1 / m.prob)}</span>
+                    <span>出玉 ${formatNum(m.payout)}</span>
+                    <span>コスト ${m.cost}玉</span>
+                </div>
+                <div class="machine-desc">${m.desc}</div>
+            `;
+            if (!isActive && !isRush) {
+                card.addEventListener('click', () => switchMachine(m.id));
+            }
+        } else {
+            card.innerHTML = `
+                <div class="machine-header">
+                    <span class="machine-title">🔒 ???</span>
+                </div>
+                <div class="machine-unlock-text">${m.unlockText}で解放</div>
+            `;
+        }
+
+        dom.machineGrid.appendChild(card);
+    });
 }
 
 // ============================================================
@@ -677,9 +905,7 @@ function getUpgradeCost(upg) {
 function buyUpgrade(id) {
     const upg = UPGRADES.find(u => u.id === id);
     if (!upg) return;
-
-    const level = state.upgrades[upg.id];
-    if (level >= upg.maxLevel) return;
+    if (state.upgrades[upg.id] >= upg.maxLevel) return;
 
     const cost = getUpgradeCost(upg);
     if (state.balls < cost) return;
@@ -687,37 +913,52 @@ function buyUpgrade(id) {
     state.balls -= cost;
     state.upgrades[upg.id]++;
     upg.apply(state);
-
     applyAllUpgrades();
     saveGame();
 }
 
 function applyAllUpgrades() {
     UPGRADES.forEach(upg => upg.apply(state));
+    applyMachineSpecs();
 }
 
 // ============================================================
 // プレステージ
 // ============================================================
 
-function doPrestige() {
-    if (state.jackpots < PRESTIGE_THRESHOLD) return;
-    if (!confirm(`プレステージを実行しますか？\n\n・全アップグレード・玉数・回転数がリセットされます\n・永続ボーナス +${PRESTIGE_BONUS_RATE * 100}% が付与されます\n・現在のプレステージ: ${state.prestiges} → ${state.prestiges + 1}`)) return;
+function executePrestige(isAuto = false) {
+    const threshold = getPrestigeThreshold();
+    if (state.jackpots < threshold) return;
+
+    if (!isAuto) {
+        const startBalls = getStartingBalls() + 200; // 次回分
+        if (!confirm(`プレステージを実行しますか？\n\n・全アップグレード・玉数・回転数がリセットされます\n・永続ボーナス +${PRESTIGE_BONUS_RATE * 100}% が付与されます\n・次回初期持玉: ${startBalls}玉\n・現在: ${state.prestiges} → ${state.prestiges + 1}`)) return;
+    }
 
     const newPrestiges = state.prestiges + 1;
     const lifetimeJackpots = state.totalLifetimeJackpots;
+    const unlockedMachines = [...state.unlockedMachines];
 
-    // リセット（プレステージ回数と累計大当たりは保持）
     state = {
         ...DEFAULT_STATE,
+        balls: 500 + newPrestiges * 200,
         prestiges: newPrestiges,
         totalLifetimeJackpots: lifetimeJackpots,
+        unlockedMachines: unlockedMachines,
+        currentMachineId: 'amadeji', // 甘デジに戻る
         lastSave: Date.now(),
         startedAt: Date.now(),
     };
 
+    applyMachineSpecs();
+    checkMachineUnlocks();
     renderShop();
+    renderMachineSelector();
     saveGame();
+}
+
+function doPrestige() {
+    executePrestige(false);
 }
 
 // ============================================================
@@ -744,13 +985,15 @@ function loadGame() {
         if (!raw) return false;
 
         const saved = JSON.parse(raw);
-        // デフォルト値で欠損を補完（Phase 1→2移行時の互換性）
         state = {
             ...DEFAULT_STATE,
             ...saved,
             upgrades: { ...DEFAULT_STATE.upgrades, ...saved.upgrades },
+            unlockedMachines: saved.unlockedMachines || ['amadeji'],
+            currentMachineId: saved.currentMachineId || 'amadeji',
         };
         applyAllUpgrades();
+        checkMachineUnlocks();
         return true;
     } catch (e) {
         console.warn('ロード失敗:', e);
@@ -763,6 +1006,7 @@ function resetGame() {
     localStorage.removeItem(SAVE_KEY);
     state = { ...DEFAULT_STATE, lastSave: Date.now(), startedAt: Date.now() };
     renderShop();
+    renderMachineSelector();
 }
 
 // ============================================================
@@ -781,13 +1025,11 @@ function calculateOffline() {
 
     if (offlineSpins <= 0) return;
 
-    // オフライン中の確率（モードに応じて）
     const prob = getCurrentProb();
     const expectedJackpots = offlineSpins * prob;
     const randomFactor = 1 + (Math.random() - 0.5) * 0.4;
     const actualJackpots = Math.max(0, Math.round(expectedJackpots * randomFactor));
 
-    // 大当たりごとに振分け（簡易版：平均出玉で計算）
     let totalPayout = 0;
     let lastMode = state.mode;
     for (let i = 0; i < actualJackpots; i++) {
@@ -800,7 +1042,6 @@ function calculateOffline() {
     const totalCost = offlineSpins * state.costPerSpin;
     const netGain = totalPayout - totalCost;
 
-    // ステートに反映
     state.balls += netGain;
     if (state.balls < 0 && !state.autoInvest) state.balls = 0;
     state.totalBalls += totalPayout;
@@ -810,7 +1051,6 @@ function calculateOffline() {
     state.totalLifetimeJackpots += actualJackpots;
     state.playTime += offlineSeconds;
 
-    // オフライン後のモードはリセット（簡易処理）
     if (actualJackpots > 0) {
         state.mode = lastMode;
         if (lastMode === MODE_ST) {
@@ -818,7 +1058,8 @@ function calculateOffline() {
         }
     }
 
-    // オフラインバナー表示
+    checkMachineUnlocks();
+
     const sign = netGain >= 0 ? '+' : '';
     dom.offlineDetail.innerHTML = `
         ${formatTime(offlineSeconds)}の間に…<br>
@@ -840,38 +1081,32 @@ function init() {
         calculateOffline();
     }
 
-    // ショップ描画
     renderShop();
+    renderMachineSelector();
 
-    // イベントリスナー
     dom.offlineClose.addEventListener('click', () => {
         dom.offlineBanner.classList.add('hidden');
         saveGame();
     });
 
     dom.resetBtn.addEventListener('click', resetGame);
-
     dom.prestigeBtn.addEventListener('click', doPrestige);
 
     dom.rushSummaryClose.addEventListener('click', () => {
         dom.rushSummary.classList.add('hidden');
     });
 
-    // 自動セーブ
     setInterval(saveGame, SAVE_INTERVAL);
 
-    // ページ離脱時セーブ
     window.addEventListener('beforeunload', saveGame);
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'hidden') saveGame();
     });
 
-    // ゲームループ開始
     lastFrameTime = performance.now();
     requestAnimationFrame(gameLoop);
 }
 
-// DOM準備完了で初期化
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
