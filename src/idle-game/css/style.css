@@ -1,5 +1,6 @@
 /* ============================================================
    パチンコ放置ゲーム — スタイル
+   Phase 2: RUSH演出 + モードインジケーター + プレステージUI
    ダークテーマ + ネオンカラー + 液晶風デザイン
    ============================================================ */
 
@@ -30,6 +31,7 @@
     --glow-gold: 0 0 20px rgba(255, 215, 0, 0.4);
     --glow-cyan: 0 0 20px rgba(0, 229, 255, 0.3);
     --glow-magenta: 0 0 20px rgba(255, 0, 255, 0.3);
+    --glow-red: 0 0 20px rgba(255, 51, 102, 0.4);
     --radius: 12px;
     --radius-sm: 8px;
     --font-mono: 'JetBrains Mono', monospace;
@@ -103,6 +105,49 @@ body {
     color: var(--accent-red);
 }
 
+/* --- モードインジケーター --- */
+.mode-badge {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.mode-normal {
+    color: var(--text-secondary);
+    background: rgba(144, 144, 176, 0.15);
+    border: 1px solid rgba(144, 144, 176, 0.3);
+}
+
+.mode-kakuhen {
+    color: var(--accent-red);
+    background: rgba(255, 51, 102, 0.15);
+    border: 1px solid rgba(255, 51, 102, 0.5);
+    animation: modePulse 1s ease-in-out infinite alternate;
+    text-shadow: 0 0 8px rgba(255, 51, 102, 0.5);
+}
+
+.mode-st {
+    color: var(--accent-orange);
+    background: rgba(255, 136, 0, 0.15);
+    border: 1px solid rgba(255, 136, 0, 0.5);
+    animation: modePulse 1.5s ease-in-out infinite alternate;
+    text-shadow: 0 0 8px rgba(255, 136, 0, 0.5);
+}
+
+@keyframes modePulse {
+    0% {
+        opacity: 0.8;
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+}
+
 /* --- 台エリア: 液晶画面 --- */
 #machineArea {
     margin-top: 12px;
@@ -121,6 +166,27 @@ body {
     justify-content: center;
     overflow: hidden;
     box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.5), var(--glow-cyan);
+    transition: border-color 0.5s, box-shadow 0.5s, background 0.5s;
+}
+
+/* RUSH中の液晶画面 */
+#lcdScreen.rush-active {
+    background: linear-gradient(135deg, #1a0505 0%, #2a0a0a 30%, #1a0505 60%, #201005 100%);
+    border-color: rgba(255, 51, 102, 0.6);
+    box-shadow: inset 0 0 40px rgba(255, 0, 0, 0.15), var(--glow-red);
+    animation: rushScreenPulse 2s ease-in-out infinite;
+}
+
+@keyframes rushScreenPulse {
+
+    0%,
+    100% {
+        box-shadow: inset 0 0 40px rgba(255, 0, 0, 0.1), 0 0 15px rgba(255, 51, 102, 0.3);
+    }
+
+    50% {
+        box-shadow: inset 0 0 60px rgba(255, 0, 0, 0.2), 0 0 25px rgba(255, 51, 102, 0.5);
+    }
 }
 
 #lcdOverlay {
@@ -133,6 +199,56 @@ body {
             rgba(0, 0, 0, 0.08) 4px);
     pointer-events: none;
     z-index: 1;
+}
+
+/* --- RUSHバナー --- */
+#rushBanner {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    padding: 6px 14px;
+    background: linear-gradient(90deg, rgba(255, 51, 102, 0.25), rgba(255, 215, 0, 0.15));
+    border: 1px solid rgba(255, 51, 102, 0.4);
+    border-radius: 20px;
+    animation: rushBannerGlow 1.5s ease-in-out infinite alternate;
+}
+
+#rushBanner.hidden {
+    display: none;
+}
+
+.rush-label {
+    font-size: 0.85rem;
+    font-weight: 900;
+    color: var(--accent-red);
+    text-shadow: 0 0 10px rgba(255, 51, 102, 0.6);
+}
+
+.rush-chain {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.rush-prob {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-left: auto;
+}
+
+@keyframes rushBannerGlow {
+    0% {
+        box-shadow: 0 0 8px rgba(255, 51, 102, 0.2);
+    }
+
+    100% {
+        box-shadow: 0 0 16px rgba(255, 51, 102, 0.4), 0 0 4px rgba(255, 215, 0, 0.2);
+    }
 }
 
 #spinDisplay {
@@ -199,7 +315,7 @@ body {
     }
 }
 
-/* 大当たりバナー */
+/* --- 大当たりバナー --- */
 #jackpotBanner {
     position: absolute;
     inset: 0;
@@ -216,8 +332,8 @@ body {
     display: none;
 }
 
-.jackpot-text {
-    font-size: 1.8rem;
+.jackpot-type {
+    font-size: 1.4rem;
     font-weight: 900;
     color: var(--accent-gold);
     text-shadow: var(--glow-gold);
@@ -254,6 +370,60 @@ body {
     }
 }
 
+/* --- 遊タイムバナー --- */
+#yutimeBanner {
+    position: absolute;
+    inset: 0;
+    z-index: 12;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle, rgba(0, 229, 255, 0.25) 0%, rgba(10, 10, 26, 0.95) 70%);
+    animation: yutimeFlash 0.4s ease-out;
+}
+
+#yutimeBanner.hidden {
+    display: none;
+}
+
+.yutime-text {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 20px rgba(0, 229, 255, 0.8);
+    animation: yutimePulse 0.6s ease-in-out infinite alternate;
+}
+
+.yutime-sub {
+    font-size: 0.9rem;
+    color: var(--accent-green);
+    margin-top: 8px;
+    font-weight: 600;
+}
+
+@keyframes yutimeFlash {
+    0% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes yutimePulse {
+    0% {
+        text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+    }
+
+    100% {
+        text-shadow: 0 0 30px rgba(0, 229, 255, 0.9), 0 0 60px rgba(0, 229, 255, 0.4);
+    }
+}
+
 /* --- 台情報 --- */
 #machineInfo {
     display: grid;
@@ -284,7 +454,7 @@ body {
     color: var(--accent-cyan);
 }
 
-/* --- ハマりゲージ --- */
+/* --- ハマりゲージ (遊タイムゲージ) --- */
 #hamariMeter {
     margin-top: 10px;
 }
@@ -319,6 +489,11 @@ body {
     animation: dangerPulse 1s ease-in-out infinite;
 }
 
+.meter-fill.yutime {
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+    animation: yutimeBarPulse 0.8s ease-in-out infinite;
+}
+
 @keyframes dangerPulse {
 
     0%,
@@ -328,6 +503,19 @@ body {
 
     50% {
         opacity: 1;
+    }
+}
+
+@keyframes yutimeBarPulse {
+
+    0%,
+    100% {
+        opacity: 0.7;
+    }
+
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
     }
 }
 
@@ -396,6 +584,180 @@ body {
 
 .offline-close:active {
     transform: scale(0.95);
+}
+
+/* --- RUSH結果サマリー --- */
+#rushSummary {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+#rushSummary.hidden {
+    display: none;
+}
+
+.rush-summary-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--accent-red);
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    text-align: center;
+    max-width: 320px;
+    box-shadow: var(--glow-red);
+    animation: rushSummaryIn 0.4s ease-out;
+}
+
+@keyframes rushSummaryIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8) translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.rush-summary-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.rush-summary-title {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--accent-red);
+    display: block;
+    margin-bottom: 16px;
+    text-shadow: 0 0 10px rgba(255, 51, 102, 0.4);
+}
+
+.rush-summary-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.rush-summary-stat:last-child {
+    border-bottom: none;
+}
+
+.rush-summary-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.rush-summary-value {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.rush-summary-value.rush-payout {
+    color: var(--accent-green);
+}
+
+.rush-summary-close {
+    margin-top: 20px;
+    padding: 10px 32px;
+    background: linear-gradient(135deg, var(--accent-red), var(--accent-magenta));
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: transform 0.1s;
+}
+
+.rush-summary-close:active {
+    transform: scale(0.95);
+}
+
+/* --- プレステージセクション --- */
+#prestigeSection {
+    margin-top: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 0, 255, 0.03));
+    border: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: var(--radius);
+}
+
+.prestige-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.prestige-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-sm);
+}
+
+.prestige-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+}
+
+.prestige-value {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.prestige-bonus-text {
+    color: var(--accent-green);
+}
+
+.prestige-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 0, 255, 0.1));
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: var(--radius-sm);
+    color: var(--accent-gold);
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.prestige-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 0, 255, 0.15));
+    border-color: var(--accent-gold);
+    box-shadow: var(--glow-gold);
+    transform: translateY(-1px);
+}
+
+.prestige-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    color: var(--text-muted);
+}
+
+.prestige-btn:active:not(:disabled) {
+    transform: scale(0.98);
 }
 
 /* --- ショップ --- */

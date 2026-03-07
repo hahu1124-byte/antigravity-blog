@@ -23,8 +23,8 @@
                 <span class="status-value" id="ballCount">0</span>
             </div>
             <div class="status-item">
-                <span class="status-label">回転数</span>
-                <span class="status-value" id="spinCount">0</span>
+                <span class="status-label">モード</span>
+                <span class="mode-badge mode-normal" id="modeIndicator">通常</span>
             </div>
             <div class="status-item">
                 <span class="status-label">大当たり</span>
@@ -41,6 +41,14 @@
             <!-- 台の液晶画面 -->
             <div id="lcdScreen">
                 <div id="lcdOverlay"></div>
+
+                <!-- RUSHバナー（確変/ST中に表示） -->
+                <div id="rushBanner" class="hidden">
+                    <span class="rush-label">🔥 RUSH</span>
+                    <span class="rush-chain" id="rushChainDisplay">0連荘中</span>
+                    <span class="rush-prob" id="rushProbDisplay">確率 1/39</span>
+                </div>
+
                 <div id="spinDisplay">
                     <div id="reelContainer">
                         <span class="reel" id="reel1">7</span>
@@ -48,9 +56,17 @@
                         <span class="reel" id="reel3">7</span>
                     </div>
                 </div>
+
+                <!-- 大当たりバナー -->
                 <div id="jackpotBanner" class="hidden">
-                    <span class="jackpot-text">🎉 大当たり！！</span>
+                    <span class="jackpot-type" id="jackpotTypeDisplay">🎉 大当たり！</span>
                     <span class="jackpot-payout" id="jackpotPayoutDisplay">+1,500玉</span>
+                </div>
+
+                <!-- 遊タイムバナー -->
+                <div id="yutimeBanner" class="hidden">
+                    <span class="yutime-text">⏰ 遊タイム発動！</span>
+                    <span class="yutime-sub">自動でST突入！</span>
                 </div>
             </div>
 
@@ -69,14 +85,14 @@
                     <span class="info-value" id="rateDisplay">1.0回/秒</span>
                 </div>
                 <div class="info-row">
-                    <span class="info-label">1回転コスト</span>
-                    <span class="info-value" id="costDisplay">4玉</span>
+                    <span class="info-label">回転数</span>
+                    <span class="info-value" id="spinCount">0</span>
                 </div>
             </div>
 
-            <!-- 回転数メーター (ハマりゲージ) -->
+            <!-- 回転数メーター (ハマりゲージ → 遊タイムゲージ) -->
             <div id="hamariMeter">
-                <div class="meter-label">ハマりゲージ <span id="hamariCount">0</span> / <span id="hamariTarget">319</span>
+                <div class="meter-label">遊タイムゲージ <span id="hamariCount">0</span> / <span id="hamariTarget">798</span>
                 </div>
                 <div class="meter-bar">
                     <div class="meter-fill" id="hamariBar"></div>
@@ -96,7 +112,35 @@
             </div>
         </div>
 
-        <!-- フッター: アップグレードショップ -->
+        <!-- RUSH結果サマリー -->
+        <div id="rushSummary" class="hidden">
+            <div class="rush-summary-content">
+                <span class="rush-summary-icon">🏆</span>
+                <span class="rush-summary-title">RUSH終了！</span>
+                <div id="rushSummaryDetail"></div>
+                <button id="rushSummaryClose" class="rush-summary-close">OK</button>
+            </div>
+        </div>
+
+        <!-- プレステージセクション -->
+        <section id="prestigeSection">
+            <h2 class="shop-title">⭐ プレステージ（転生）</h2>
+            <div class="prestige-info">
+                <div class="prestige-stat">
+                    <span class="prestige-label">転生回数</span>
+                    <span class="prestige-value" id="prestigeCount">0</span>
+                </div>
+                <div class="prestige-stat">
+                    <span class="prestige-label">永続ボーナス</span>
+                    <span class="prestige-value prestige-bonus-text" id="prestigeBonus">+0%</span>
+                </div>
+            </div>
+            <button id="prestigeBtn" class="prestige-btn" disabled>
+                🔒 大当たり 0/100 でプレステージ解放
+            </button>
+        </section>
+
+        <!-- アップグレードショップ -->
         <section id="shopSection">
             <h2 class="shop-title">🛠️ アップグレード</h2>
             <div id="shopGrid">
