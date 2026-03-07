@@ -12,16 +12,12 @@ const MODE_ST = 'st';
 const MODE_JITAN = 'jitan';
 
 const KAKUHEN_PROB_MULTIPLIER = 10;
-const YUTIME_MULTIPLIER = 2.5;
-const PRESTIGE_BASE_THRESHOLD = 100;
-const PRESTIGE_THRESHOLD_STEP = 50;
-const PRESTIGE_BONUS_RATE = 0.05;
 
 // ============================================================
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.11.00';
+const GAME_VERSION = 'v0.11.01';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;

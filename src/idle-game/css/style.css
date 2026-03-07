@@ -4,6 +4,17 @@
    ダークテーマ + ネオンカラー + 液晶風デザイン
    ============================================================ */
 
+/* --- αテストバナー --- */
+.alpha-banner {
+    background: linear-gradient(90deg, #f59e0b, #ef4444);
+    color: #fff;
+    text-align: center;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
 /* --- リセット & ベース --- */
 *,
 *::before,
@@ -1104,20 +1115,6 @@ body {
     }
 }
 
-/* --- 台名バッジ (Phase 3) --- */
-#machineNameBadge {
-    position: relative;
-    z-index: 3;
-    margin-bottom: 6px;
-    padding: 3px 12px;
-    background: rgba(255, 215, 0, 0.1);
-    border: 1px solid rgba(255, 215, 0, 0.25);
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: var(--accent-gold);
-}
-
 /* --- 機種選択 (Phase 3) --- */
 #machineSection {
     margin-top: 20px;
@@ -1125,21 +1122,6 @@ body {
 
 #machineSection.hidden {
     display: none;
-}
-
-.info-icon-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 0.9rem;
-    padding: 0 4px;
-    vertical-align: middle;
-    transition: transform 0.15s;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.info-icon-btn:hover {
-    transform: scale(1.2);
 }
 
 #machineGrid {
