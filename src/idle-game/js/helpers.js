@@ -45,6 +45,11 @@ function getMaxStSpins() {
     return BASE_ST_SPINS + state.upgrades.stSpins * 2;
 }
 
+function getJitanSpins() {
+    const m = getCurrentMachine();
+    return Math.round(JITAN_BASE_SPINS / (m.prob * JITAN_REF_DENOM));
+}
+
 function getCriticalChance() {
     return state.upgrades.critical * 10;
 }

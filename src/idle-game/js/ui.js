@@ -156,7 +156,9 @@ function updateUI() {
         [MODE_NORMAL]: `通常 ${formatNum(state.sinceLastJackpot)}回転`,
         [MODE_KAKUHEN]: `確変 ${formatNum(state.kakuhenSpins)}回転`,
         [MODE_ST]: `ST(残${state.stRemaining})`,
-        [MODE_JITAN]: `時短(残${formatNum(state.jitanRemaining)})`,
+        [MODE_JITAN]: state.yutimeTriggered
+            ? `遊タイム(残${formatNum(state.jitanRemaining)})`
+            : `時短(残${formatNum(state.jitanRemaining)})`,
     };
     dom.modeIndicator.textContent = modeLabels[state.mode] || '通常';
     dom.modeIndicator.className = `mode-badge mode-${state.mode}`;

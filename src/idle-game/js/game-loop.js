@@ -78,7 +78,7 @@ function processJackpot() {
             }
         }
         state.mode = MODE_JITAN;
-        state.jitanRemaining = JITAN_SPINS;
+        state.jitanRemaining = getJitanSpins();
         state.rushChain = 0;
         state.currentRushPayout = 0;
         state.stRemaining = 0;
