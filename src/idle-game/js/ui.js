@@ -221,16 +221,23 @@ function updateUI() {
         dom.debtSection.classList.add('hidden');
     }
 
-    // プレステージ
+    // プレステージ（統計ポップアップ: 回数とボーナスのみ）
     const pThreshold = getPrestigeThreshold();
     dom.prestigeCount.textContent = state.prestiges;
     dom.prestigeBonus.textContent = `+${(state.prestiges * PRESTIGE_BONUS_RATE * 100).toFixed(0)}%`;
 
+    // プレステージセクション（機種選択〜ショップ間: 条件達成時のみ表示）
     const canPrestige = state.jackpots >= pThreshold;
-    dom.prestigeBtn.disabled = !canPrestige;
-    dom.prestigeBtn.textContent = canPrestige
-        ? `⭐ プレステージ（${state.jackpots}/${pThreshold}）`
-        : `🔒 大当たり ${state.jackpots}/${pThreshold} でプレステージ解放`;
+    const prestigeSection = document.getElementById('prestigeSection');
+    if (canPrestige) {
+        prestigeSection.classList.remove('hidden');
+        dom.prestigeBtn.disabled = false;
+        dom.prestigeBtn.textContent = `⭐ プレステージ実行（${state.jackpots}/${pThreshold}）`;
+    } else {
+        prestigeSection.classList.add('hidden');
+        dom.prestigeBtn.disabled = true;
+        dom.prestigeBtn.textContent = `🔒 大当たり ${state.jackpots}/${pThreshold} でプレステージ解放`;
+    }
 
     updateShopUI();
 }

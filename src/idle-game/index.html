@@ -184,6 +184,13 @@
             </div>
         </div>
 
+        <!-- プレステージ発動セクション（条件達成時のみ表示） -->
+        <section id="prestigeSection" class="hidden">
+            <h2 class="shop-title">⭐ プレステージ</h2>
+            <button id="prestigeBtn" class="prestige-btn" disabled>
+                🔒 大当たり 0/100 でプレステージ解放
+            </button>
+        </section>
 
         <!-- アップグレードショップ -->
         <section id="shopSection">
@@ -217,7 +224,7 @@
                     </div>
                 </div>
 
-                <!-- プレステージ -->
+                <!-- プレステージ情報（現在回数のみ） -->
                 <div class="popup-prestige">
                     <div class="stats-popup-subtitle">⭐ プレステージ（転生）</div>
                     <div class="prestige-info">
@@ -230,9 +237,6 @@
                             <span class="prestige-value prestige-bonus-text" id="prestigeBonus">+0%</span>
                         </div>
                     </div>
-                    <button id="prestigeBtn" class="prestige-btn" disabled>
-                        🔒 大当たり 0/100 でプレステージ解放
-                    </button>
                 </div>
             </div>
         </div>
