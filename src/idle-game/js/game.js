@@ -98,7 +98,7 @@ const MACHINES = [
 // ゲームステート
 // ============================================================
 
-const GAME_VERSION = 'v0.4';
+const GAME_VERSION = 'v0.5';
 let YEN_PER_BALL = 1;  // 初期: 1円パチ（全機種開放後にレート選択可能）
 
 const DEBT_UNIT_YEN = 1000;          // 借金単位: ¥1,000
@@ -168,6 +168,7 @@ let state = { ...DEFAULT_STATE };
 let isPremium = false;
 let cloudSaveTimer = 0;
 const CLOUD_SAVE_INTERVAL = 60000; // クラウドセーブ間隔（60秒）
+const PREMIUM_SPEED_MULTIPLIER = 2.0; // 有料ユーザーの回転速度倍率
 
 function handlePortalMessage(e) {
     if (!e.data?.type) return;
@@ -423,6 +424,35 @@ const UPGRADES = [
     },
 ];
 
+// Premium限定アップグレード
+const PREMIUM_UPGRADES = [
+    {
+        id: 'luckyPayout',
+        name: '🍀 ラッキーペイアウト',
+        desc: '大当たり出玉+15%（有料限定）',
+        icon: '🍀',
+        baseCost: 2000,
+        costMultiplier: 2.2,
+        maxLevel: 10,
+        apply: () => { },
+        effectText: (s) => `+${(s.upgrades.luckyPayout || 0) * 15}%`,
+    },
+    {
+        id: 'hyperShooter',
+        name: '🚀 ハイパーシューター',
+        desc: '回転速度+1.0/Lv（有料限定）',
+        icon: '🚀',
+        baseCost: 1500,
+        costMultiplier: 1.8,
+        maxLevel: 20,
+        apply: (s) => {
+            const base = 1 + s.upgrades.spinRate * 0.5;
+            s.spinRate = base + (s.upgrades.hyperShooter || 0) * 1.0;
+        },
+        effectText: (s) => `+${(s.upgrades.hyperShooter || 0) * 1.0}回/秒`,
+    },
+];
+
 // ============================================================
 // DOM要素キャッシュ
 // ============================================================
@@ -586,6 +616,11 @@ function rollJackpotType() {
 
 function getJackpotPayout(type) {
     let base = state.jackpotPayout * getPrestigeMultiplier();
+    // Premiumアップグレード: ラッキーペイアウト
+    const luckyLv = state.upgrades.luckyPayout || 0;
+    if (luckyLv > 0) {
+        base = base * (1 + luckyLv * 0.15);
+    }
     if (type === MODE_KAKUHEN) base = Math.floor(base * 1.5);
 
     // クリティカル判定
@@ -818,7 +853,8 @@ function gameLoop(now) {
     const canSpin = state.balls >= state.costPerSpin || state.autoInvest;
 
     if (canSpin) {
-        spinAccumulator += state.spinRate * dt;
+        const effectiveSpinRate = isPremium ? state.spinRate * PREMIUM_SPEED_MULTIPLIER : state.spinRate;
+        spinAccumulator += effectiveSpinRate * dt;
         const spinsThisFrame = Math.floor(spinAccumulator);
         spinAccumulator -= spinsThisFrame;
 
@@ -974,15 +1010,16 @@ function updateUI() {
         : '-';
     dom.playTimeStat.textContent = formatTime(state.playTime);
 
-    // 借金表示
-    if (state.debt > 0) {
+    // 借金表示：借金中 OR (玉がコスト未満 AND 収支マイナス) で表示
+    const showDebt = state.debt > 0 || (state.balls < state.costPerSpin && profit < 0);
+    if (showDebt) {
         dom.debtSection.classList.remove('hidden');
-        dom.debtAmount.textContent = formatYen(state.debt);
+        dom.debtAmount.textContent = state.debt > 0 ? formatYen(state.debt) : '¥0';
         const minutesElapsed = state.lastDebtTime > 0
             ? Math.floor((Date.now() - state.lastDebtTime) / 60000)
             : 0;
-        dom.debtInterest.textContent = `複利5%/分 (経過${minutesElapsed}分)`;
-        dom.repayBtn.disabled = state.balls <= 0;
+        dom.debtInterest.textContent = state.debt > 0 ? `複利5%/分 (経過${minutesElapsed}分)` : '借金なし';
+        dom.repayBtn.disabled = state.balls <= 0 || state.debt <= 0;
     } else {
         dom.debtSection.classList.add('hidden');
     }
@@ -1048,12 +1085,26 @@ function renderMachineSelector() {
 // ショップUI
 // ============================================================
 
+function getAllUpgrades() {
+    return isPremium ? [...UPGRADES, ...PREMIUM_UPGRADES] : UPGRADES;
+}
+
 function renderShop() {
     dom.shopGrid.innerHTML = '';
-    UPGRADES.forEach(upg => {
+    getAllUpgrades().forEach(upg => {
         const card = document.createElement('div');
         card.className = 'shop-card';
         card.dataset.upgradeId = upg.id;
+        // 初回だけ要素構造を構築（以降はtextContentのみ更新）
+        card.innerHTML = `
+            <div class="shop-icon">${upg.icon}</div>
+            <div class="shop-info">
+                <div class="shop-name">${upg.name}</div>
+                <div class="shop-desc">${upg.desc}</div>
+                <div class="shop-level"></div>
+            </div>
+            <div class="shop-cost"></div>
+        `;
         dom.shopGrid.appendChild(card);
     });
     // イベント委譲: innerHTML更新でリスナーが消えない
@@ -1066,26 +1117,22 @@ function renderShop() {
 }
 
 function updateShopUI() {
-    UPGRADES.forEach(upg => {
+    getAllUpgrades().forEach(upg => {
         const card = dom.shopGrid.querySelector(`[data-upgrade-id="${upg.id}"]`);
         if (!card) return;
 
-        const level = state.upgrades[upg.id];
+        const level = state.upgrades[upg.id] || 0;
         const isMaxed = level >= upg.maxLevel;
         const cost = getUpgradeCost(upg);
         const canAfford = state.balls >= cost && !isMaxed;
 
         card.className = `shop-card${!canAfford ? ' disabled' : ''}${isMaxed ? ' maxed' : ''}`;
 
-        card.innerHTML = `
-            <div class="shop-icon">${upg.icon}</div>
-            <div class="shop-info">
-                <div class="shop-name">${upg.name}</div>
-                <div class="shop-desc">${upg.desc}</div>
-                <div class="shop-level">Lv.${level}${upg.maxLevel > 1 ? `/${upg.maxLevel}` : ''} → ${upg.effectText(state)}</div>
-            </div>
-            <div class="shop-cost">${isMaxed ? '✅ MAX' : `${formatNum(cost)}玉`}</div>
-        `;
+        // textContentのみ更新（DOM再構築なし→クリック安定性向上）
+        const levelEl = card.querySelector('.shop-level');
+        const costEl = card.querySelector('.shop-cost');
+        if (levelEl) levelEl.textContent = `Lv.${level}${upg.maxLevel > 1 ? `/${upg.maxLevel}` : ''} → ${upg.effectText(state)}`;
+        if (costEl) costEl.textContent = isMaxed ? '✅ MAX' : `${formatNum(cost)}玉`;
     });
 }
 
@@ -1094,22 +1141,23 @@ function getUpgradeCost(upg) {
 }
 
 function buyUpgrade(id) {
-    const upg = UPGRADES.find(u => u.id === id);
+    const upg = getAllUpgrades().find(u => u.id === id);
     if (!upg) return;
-    if (state.upgrades[upg.id] >= upg.maxLevel) return;
+    const level = state.upgrades[upg.id] || 0;
+    if (level >= upg.maxLevel) return;
 
     const cost = getUpgradeCost(upg);
     if (state.balls < cost) return;
 
     state.balls -= cost;
-    state.upgrades[upg.id]++;
+    state.upgrades[upg.id] = level + 1;
     upg.apply(state);
     applyAllUpgrades();
     saveGame();
 }
 
 function applyAllUpgrades() {
-    UPGRADES.forEach(upg => upg.apply(state));
+    getAllUpgrades().forEach(upg => upg.apply(state));
     applyMachineSpecs();
 }
 
