@@ -618,29 +618,17 @@ function checkYutime() {
 // ============================================================
 
 let jackpotAnimTimer = 0;
+let lastJackpotInfo = null;
 
 function showJackpotBanner(type, payout) {
-    dom.jackpotPayoutDisplay.textContent = `+${formatNum(payout)}玉`;
-    const typeLabels = {
-        [MODE_KAKUHEN]: '🔥 確変大当たり！',
-        [MODE_ST]: '⚡ ST大当たり！',
-        [MODE_NORMAL]: '🎉 大当たり！',
+    // ステータスバーの所持玉横に一時表示するだけ
+    const typeIcons = {
+        [MODE_KAKUHEN]: '🔥',
+        [MODE_ST]: '⚡',
+        [MODE_NORMAL]: '🎉',
     };
-    dom.jackpotTypeDisplay.textContent = typeLabels[type] || '🎉 大当たり！';
-    dom.jackpotBanner.classList.remove('hidden');
-    jackpotAnimTimer = 2.0;
-    showBallPopup(payout);
-}
-
-function showBallPopup(amount) {
-    const popup = document.createElement('div');
-    popup.className = 'ball-popup';
-    popup.textContent = `+${formatNum(amount)}`;
-    popup.style.left = '50%';
-    popup.style.top = '30%';
-    popup.style.transform = 'translateX(-50%)';
-    document.body.appendChild(popup);
-    setTimeout(() => popup.remove(), 1000);
+    lastJackpotInfo = `${typeIcons[type] || '🎉'} +${formatNum(payout)}`;
+    jackpotAnimTimer = 1.5;
 }
 
 function showRushSummary(chains, totalPayout) {
@@ -719,11 +707,11 @@ function gameLoop(now) {
 
     state.playTime += dt;
 
-    // バナータイマー
+    // 大当たり表示タイマー
     if (jackpotAnimTimer > 0) {
         jackpotAnimTimer -= dt;
         if (jackpotAnimTimer <= 0) {
-            dom.jackpotBanner.classList.add('hidden');
+            lastJackpotInfo = null;
             jackpotOccurred = false;
         }
     }
@@ -736,7 +724,7 @@ function gameLoop(now) {
 
     const canSpin = state.balls >= state.costPerSpin || state.autoInvest;
 
-    if (canSpin && jackpotAnimTimer <= 0) {
+    if (canSpin) {
         spinAccumulator += state.spinRate * dt;
         const spinsThisFrame = Math.floor(spinAccumulator);
         spinAccumulator -= spinsThisFrame;
@@ -819,7 +807,10 @@ function updateUI() {
     const m = getCurrentMachine();
 
     // ステータスバー
-    dom.ballCount.textContent = formatNum(state.balls);
+    const ballText = formatNum(state.balls);
+    dom.ballCount.textContent = lastJackpotInfo
+        ? `${ballText}  ${lastJackpotInfo}`
+        : ballText;
     dom.spinCount.textContent = formatNum(state.spins);
     dom.jackpotCount.textContent = formatNum(state.jackpots);
 
