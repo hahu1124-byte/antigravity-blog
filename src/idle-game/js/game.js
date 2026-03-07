@@ -632,17 +632,9 @@ function showJackpotBanner(type, payout) {
 }
 
 function showRushSummary(chains, totalPayout) {
-    dom.rushSummaryDetail.innerHTML = `
-        <div class="rush-summary-stat">
-            <span class="rush-summary-label">連荘数</span>
-            <span class="rush-summary-value">${chains}連荘</span>
-        </div>
-        <div class="rush-summary-stat">
-            <span class="rush-summary-label">RUSH出玉合計</span>
-            <span class="rush-summary-value rush-payout">+${formatNum(totalPayout)}玉</span>
-        </div>
-    `;
-    dom.rushSummary.classList.remove('hidden');
+    // ステータスバーにインライン表示（ポップアップなし）
+    lastJackpotInfo = `🏆 ${chains}連荘 +${formatNum(totalPayout)}`;
+    jackpotAnimTimer = 3.0;
 }
 
 let yutimeAnimTimer = 0;
