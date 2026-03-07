@@ -61,15 +61,20 @@ body {
     padding: 0 12px;
 }
 
+/* --- 固定表示エリア（ステータスバー＋LCD） --- */
+#stickyTop {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg-primary);
+}
+
 /* --- ステータスバー --- */
 #statusBar {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 6px;
     padding: 12px 0;
-    position: sticky;
-    top: 0;
-    z-index: 100;
     background: rgba(10, 10, 26, 0.95);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);

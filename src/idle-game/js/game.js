@@ -836,7 +836,6 @@ function updateUI() {
     dom.payoutDisplay.textContent = `${formatNum(state.jackpotPayout)}玉`;
     dom.rateDisplay.textContent = `${state.spinRate.toFixed(1)}回/秒`;
     dom.costDisplay.textContent = `${state.costPerSpin}玉`;
-    dom.machineName.textContent = m.name;
 
     // ハマりゲージ
     const yutimeThreshold = Math.round((1 / m.prob) * m.yutimeMult);

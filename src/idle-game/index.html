@@ -19,36 +19,32 @@
         style="background:linear-gradient(90deg,#f59e0b,#ef4444);color:#fff;text-align:center;padding:6px 12px;font-size:0.85rem;font-weight:700;letter-spacing:0.05em;">
         ⚠️ αテスト中 — データがリセットされる場合があります</div>
     <div id="app">
-        <!-- ヘッダー: ステータスバー -->
-        <header id="statusBar">
-            <div class="status-item">
-                <span class="status-label">所持玉</span>
-                <span class="status-value" id="ballCount">0</span>
-            </div>
-            <div class="status-item">
-                <span class="status-label">モード</span>
-                <span class="mode-badge mode-normal" id="modeIndicator">通常</span>
-            </div>
-            <div class="status-item">
-                <span class="status-label">大当たり</span>
-                <span class="status-value" id="jackpotCount">0</span>
-            </div>
-            <div class="status-item">
-                <span class="status-label">収支</span>
-                <span class="status-value" id="profitDisplay">±0</span>
-            </div>
-        </header>
+        <!-- 固定表示エリア（ステータスバー＋液晶） -->
+        <div id="stickyTop">
+            <header id="statusBar">
+                <div class="status-item">
+                    <span class="status-label">所持玉</span>
+                    <span class="status-value" id="ballCount">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">モード</span>
+                    <span class="mode-badge mode-normal" id="modeIndicator">通常</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">大当たり</span>
+                    <span class="status-value" id="jackpotCount">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">収支</span>
+                    <span class="status-value" id="profitDisplay">±0</span>
+                </div>
+            </header>
 
-        <!-- メイン: 台エリア -->
-        <main id="machineArea">
             <!-- 台の液晶画面 -->
             <div id="lcdScreen">
                 <div id="lcdOverlay"></div>
 
-                <!-- 台名表示 -->
-                <div id="machineNameBadge">
-                    <span id="machineName">🟢 甘デジ</span>
-                </div>
+
 
                 <!-- RUSHバナー -->
                 <div id="rushBanner" class="hidden">
@@ -77,7 +73,10 @@
                     <span class="yutime-sub">自動でST突入！</span>
                 </div>
             </div>
+        </div><!-- /stickyTop -->
 
+        <!-- メイン: 台エリア -->
+        <main id="machineArea">
             <!-- 台情報 -->
             <div id="machineInfo">
                 <div class="info-row">
