@@ -204,7 +204,7 @@ function updateUI() {
     dom.playTimeStat.textContent = formatTime(state.playTime);
 
     // 借金表示
-    const showDebt = state.debt > 0 || (state.balls < state.costPerSpin && profit < 0);
+    const showDebt = state.debt > 0 || state.autoInvest || (state.balls < state.costPerSpin && profit < 0);
     if (showDebt) {
         dom.debtSection.classList.remove('hidden');
         dom.debtAmount.textContent = state.debt > 0 ? formatYen(state.debt) : '¥0';
