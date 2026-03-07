@@ -329,7 +329,7 @@ function renderMachineInfoPopup() {
         } else {
             item.innerHTML = `
                 <div class="machine-info-name">🔒 ???</div>
-                <div class="machine-info-desc">${m.unlockText}で解放</div>
+                <div class="machine-info-desc">解放条件: ${m.unlockText}</div>
             `;
         }
         list.appendChild(item);
