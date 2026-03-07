@@ -214,7 +214,7 @@ function gameLoop(now) {
         }
     }
 
-    const canSpin = state.balls >= state.costPerSpin || state.autoInvest;
+    const canSpin = true; // 常時自動購入: 玉不足時は自動借金で補充
 
     if (canSpin) {
         const effectiveSpinRate = isPremium ? state.spinRate * PREMIUM_SPEED_MULTIPLIER : state.spinRate;
@@ -277,12 +277,10 @@ function gameLoop(now) {
                 }
             }
 
-            // 玉が0以下になったら自動借金
-            if (state.balls < 0 && state.autoInvest) {
+            // 玉が0以下になったら自動で持玉購入（¥1,000単位）
+            if (state.balls < 0) {
                 state.balls = 0;
                 takeLoan();
-            } else if (state.balls < 0) {
-                state.balls = 0;
             }
 
             const prob = getCurrentProb();
@@ -295,10 +293,7 @@ function gameLoop(now) {
 
             checkYutime();
 
-            if (state.balls < state.costPerSpin && !state.autoInvest) {
-                spinAccumulator = 0;
-                break;
-            }
+
         }
 
         if (frameJackpots > 0) {

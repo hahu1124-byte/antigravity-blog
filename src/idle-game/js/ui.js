@@ -58,7 +58,7 @@ const dom = {
     debtInterest: $('debtInterest'),
     repayBtn: $('repayBtn'),
     repayPartialBtn: $('repayPartialBtn'),
-    loanBtn: $('loanBtn'),
+
     // レート選択
     rateSection: $('rateSection'),
     rateGrid: $('rateGrid'),
@@ -203,20 +203,18 @@ function updateUI() {
         : '-';
     dom.playTimeStat.textContent = formatTime(state.playTime);
 
-    // 借金表示
-    const showDebt = state.debt > 0 || state.autoInvest || (state.balls < state.costPerSpin && profit < 0);
-    if (showDebt) {
+    // 借金表示: 収支がマイナスの時だけ表示
+    if (profit < 0) {
         dom.debtSection.classList.remove('hidden');
         dom.debtAmount.textContent = state.debt > 0 ? formatYen(state.debt) : '¥0';
         const minutesElapsed = state.debtStartTime > 0
             ? Math.floor((Date.now() - state.debtStartTime) / 60000)
             : 0;
-        dom.debtInterest.textContent = state.debt > 0 ? `複利5%/分 (経過${minutesElapsed}分)` : '借金なし';
+        dom.debtInterest.textContent = state.debt > 0 ? `複利5%/分 (経過${minutesElapsed}分)` : '利息なし';
         dom.repayBtn.disabled = state.balls <= 0 || state.debt <= 0;
         const repayBalls = getDebtRepayBalls();
         dom.repayPartialBtn.disabled = state.balls < repayBalls || state.debt <= 0;
         dom.repayPartialBtn.textContent = `💴 ¥${DEBT_REPAY_UNIT_YEN.toLocaleString('ja-JP')}返済`;
-        dom.loanBtn.textContent = `💸 ¥${DEBT_UNIT_YEN.toLocaleString('ja-JP')}借りる`;
     } else {
         dom.debtSection.classList.add('hidden');
     }

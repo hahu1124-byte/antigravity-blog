@@ -19,7 +19,7 @@ const DEFAULT_STATE = {
     jackpotPayout: 800,
     costPerSpin: 2,
     sinceLastJackpot: 0,
-    autoInvest: false,
+
 
     // 借金システム
     debt: 0,
@@ -53,7 +53,7 @@ const DEFAULT_STATE = {
         spinRate: 0,
         jackpotProb: 0,
         jackpotPayout: 0,
-        autoInvest: 0,
+
         kakuhenBoost: 0,
         stSpins: 0,
         kakuhenCont: 0,
@@ -167,7 +167,7 @@ function calculateOffline() {
     const netGain = totalPayout - totalCost;
 
     state.balls += netGain;
-    if (state.balls < 0 && !state.autoInvest) state.balls = 0;
+    if (state.balls < 0) state.balls = 0;
     state.totalBalls += totalPayout;
     state.totalInvest += totalCost;
     state.spins += offlineSpins;

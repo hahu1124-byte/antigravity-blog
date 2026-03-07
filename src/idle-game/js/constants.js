@@ -17,7 +17,7 @@ const KAKUHEN_PROB_MULTIPLIER = 10;
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.11.01';
+const GAME_VERSION = 'v0.12.00';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -166,17 +166,7 @@ const UPGRADES = [
         },
         effectText: (s) => `${formatNum(s.jackpotPayout)}玉`,
     },
-    {
-        id: 'autoInvest',
-        name: '🤖 オート投資',
-        desc: '玉が無くても自動で収支から補充（借金可能）',
-        icon: '🤖',
-        baseCost: 5000,
-        costMultiplier: 1,
-        maxLevel: 1,
-        apply: (s) => { s.autoInvest = s.upgrades.autoInvest >= 1; },
-        effectText: (s) => s.autoInvest ? 'ON' : 'OFF',
-    },
+
     {
         id: 'kakuhenBoost',
         name: '🔥 確変倍率UP',

@@ -50,7 +50,6 @@ function init() {
 
     dom.repayBtn.addEventListener('click', repayDebt);
     dom.repayPartialBtn.addEventListener('click', repayPartial);
-    dom.loanBtn.addEventListener('click', takeLoan);
 
     // ショップクリックイベント（イベント委譲、初回のみ）
     dom.shopGrid.addEventListener('click', (e) => {
