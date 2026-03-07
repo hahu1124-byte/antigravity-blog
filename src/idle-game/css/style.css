@@ -1305,6 +1305,319 @@ body {
     }
 }
 
+/* --- PC向け: タブレット --- */
+@media (min-width: 768px) {
+    html {
+        font-size: 18px;
+    }
+
+    #app {
+        max-width: 600px;
+        padding: 0 24px;
+    }
+
+    .reel {
+        font-size: 4rem;
+        width: 84px;
+        height: 92px;
+    }
+
+    #reelContainer {
+        gap: 20px;
+    }
+
+    #lcdScreen {
+        padding: 32px 20px;
+        min-height: 200px;
+    }
+
+    #statusBar {
+        padding: 14px 0;
+        gap: 12px;
+    }
+
+    .status-label {
+        font-size: 0.7rem;
+    }
+
+    .status-value {
+        font-size: 1.2rem;
+    }
+
+    .mode-badge {
+        font-size: 0.85rem;
+        padding: 3px 10px;
+    }
+
+    .shop-card {
+        padding: 14px;
+        gap: 14px;
+    }
+
+    .shop-name {
+        font-size: 0.95rem;
+    }
+
+    .shop-desc {
+        font-size: 0.8rem;
+    }
+
+    .shop-level {
+        font-size: 0.75rem;
+    }
+
+    .shop-cost {
+        font-size: 0.95rem;
+    }
+
+    .shop-icon {
+        font-size: 1.8rem;
+        width: 46px;
+        height: 46px;
+    }
+
+    .shop-title {
+        font-size: 1.15rem;
+    }
+
+    .info-label {
+        font-size: 0.8rem;
+    }
+
+    .info-value {
+        font-size: 0.9rem;
+    }
+
+    .info-row {
+        padding: 8px 12px;
+    }
+
+    .meter-label {
+        font-size: 0.85rem;
+    }
+
+    .meter-bar {
+        height: 10px;
+    }
+
+    .rush-label {
+        font-size: 0.95rem;
+    }
+
+    .rush-chain {
+        font-size: 0.9rem;
+    }
+
+    .rush-prob {
+        font-size: 0.8rem;
+    }
+
+    .jackpot-type {
+        font-size: 1.6rem;
+    }
+
+    .jackpot-payout {
+        font-size: 1.6rem;
+    }
+
+    .yutime-text {
+        font-size: 1.8rem;
+    }
+
+    .yutime-sub {
+        font-size: 1rem;
+    }
+
+    .prestige-label {
+        font-size: 0.75rem;
+    }
+
+    .prestige-value {
+        font-size: 1.2rem;
+    }
+
+    .prestige-btn {
+        font-size: 0.95rem;
+        padding: 14px;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+
+    .stat-value {
+        font-size: 1rem;
+    }
+
+    .stat-card {
+        padding: 12px;
+    }
+
+    .footer-btn {
+        font-size: 0.85rem;
+        padding: 10px 20px;
+    }
+
+    .footer-info {
+        font-size: 0.8rem;
+    }
+
+    .machine-title {
+        font-size: 1rem;
+    }
+
+    .machine-specs {
+        font-size: 0.8rem;
+    }
+
+    .machine-desc {
+        font-size: 0.75rem;
+    }
+
+    .machine-card {
+        padding: 14px;
+    }
+
+    .rate-btn {
+        font-size: 0.95rem;
+        padding: 14px 10px;
+    }
+
+    .debt-sticky-label {
+        font-size: 0.8rem;
+    }
+
+    .debt-value {
+        font-size: 0.95rem;
+    }
+
+    .debt-sticky-interest {
+        font-size: 0.7rem;
+    }
+
+    .debt-btn-mini {
+        font-size: 0.75rem;
+        padding: 6px 6px;
+    }
+
+    .offline-content {
+        max-width: 400px;
+        padding: 28px;
+    }
+
+    .offline-title {
+        font-size: 1.2rem;
+    }
+
+    .offline-detail {
+        font-size: 0.95rem;
+    }
+
+    .rush-summary-content {
+        max-width: 380px;
+        padding: 32px 28px;
+    }
+
+    .rush-summary-title {
+        font-size: 1.3rem;
+    }
+
+    .rush-summary-label {
+        font-size: 0.95rem;
+    }
+
+    .rush-summary-value {
+        font-size: 1.1rem;
+    }
+
+    .stats-popup-content {
+        max-width: 420px;
+        padding: 24px;
+    }
+
+    .stats-popup-title {
+        font-size: 1.15rem;
+    }
+
+    .premium-badge {
+        font-size: 0.75rem;
+        padding: 3px 10px;
+    }
+
+    .alpha-banner {
+        font-size: 0.95rem;
+        padding: 8px 16px;
+    }
+
+    .machine-info-name {
+        font-size: 1rem;
+    }
+
+    .machine-info-desc {
+        font-size: 0.8rem;
+    }
+
+    .machine-info-specs {
+        font-size: 0.75rem;
+    }
+
+    .info-icon-btn {
+        font-size: 0.9rem;
+        padding: 5px 14px;
+    }
+
+    .shop-total-summary {
+        font-size: 0.9rem;
+    }
+
+    .shop-spent {
+        font-size: 0.8rem;
+    }
+
+    .machine-unlock-text {
+        font-size: 0.85rem;
+    }
+
+    .info-version {
+        font-size: 0.75rem;
+    }
+}
+
+/* --- PC向け: デスクトップ --- */
+@media (min-width: 1024px) {
+    html {
+        font-size: 19px;
+    }
+
+    #app {
+        max-width: 680px;
+        padding: 0 32px;
+    }
+
+    .reel {
+        font-size: 4.5rem;
+        width: 96px;
+        height: 104px;
+    }
+
+    #reelContainer {
+        gap: 24px;
+    }
+
+    #lcdScreen {
+        padding: 36px 24px;
+        min-height: 220px;
+    }
+
+    .status-value {
+        font-size: 1.3rem;
+    }
+
+    .shop-card {
+        padding: 16px;
+    }
+}
+
 /* --- Phase 4: プレミアムバッジ --- */
 .premium-badge {
     font-family: var(--font-mono);
