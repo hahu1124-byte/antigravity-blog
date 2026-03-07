@@ -53,6 +53,7 @@ function processJackpot() {
             state.currentRushPayout += payout;
         }
         state.mode = MODE_KAKUHEN;
+        state.kakuhenSpins = 0;
         state.stRemaining = 0;
         state.jitanRemaining = 0;
     } else if (type === MODE_ST) {
@@ -227,6 +228,11 @@ function gameLoop(now) {
             state.balls -= actualCost;
             state.totalInvest += actualCost;
             state.spins++;
+
+            // 確変回転数カウント
+            if (state.mode === MODE_KAKUHEN) {
+                state.kakuhenSpins++;
+            }
 
             // 遊タイムゲージ: 確変/ST中は凍結、通常/時短中は増加
             if (!isRushMode) {

@@ -31,6 +31,7 @@ const DEFAULT_STATE = {
     rushChain: 0,
     stRemaining: 0,
     jitanRemaining: 0,
+    kakuhenSpins: 0,
     totalRushChains: 0,
     currentRushPayout: 0,
     yutimeTriggered: false,

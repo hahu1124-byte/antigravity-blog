@@ -153,8 +153,8 @@ function updateUI() {
     const isRush = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
     const isJitan = state.mode === MODE_JITAN;
     const modeLabels = {
-        [MODE_NORMAL]: '通常',
-        [MODE_KAKUHEN]: '確変',
+        [MODE_NORMAL]: `通常 ${formatNum(state.sinceLastJackpot)}回転`,
+        [MODE_KAKUHEN]: `確変 ${formatNum(state.kakuhenSpins)}回転`,
         [MODE_ST]: `ST(残${state.stRemaining})`,
         [MODE_JITAN]: `時短(残${formatNum(state.jitanRemaining)})`,
     };
@@ -166,11 +166,6 @@ function updateUI() {
         dom.rushBanner.classList.remove('hidden');
         dom.rushChainDisplay.textContent = `${state.rushChain}連荘中`;
         dom.rushProbDisplay.textContent = `確率 1/${Math.round(1 / getKakuhenProb())}`;
-        dom.lcdScreen.classList.add('rush-active');
-    } else if (isJitan) {
-        dom.rushBanner.classList.remove('hidden');
-        dom.rushChainDisplay.textContent = '🕐 時短中';
-        dom.rushProbDisplay.textContent = `確率 1/${Math.round(1 / getCurrentProb())} (通常)`;
         dom.lcdScreen.classList.add('rush-active');
     } else {
         dom.rushBanner.classList.add('hidden');
