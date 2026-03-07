@@ -146,6 +146,83 @@ const DEFAULT_STATE = {
 let state = { ...DEFAULT_STATE };
 
 // ============================================================
+// Phase 4: Gravity Portal連携（postMessage）
+// ============================================================
+
+let isPremium = false;
+let cloudSaveTimer = 0;
+const CLOUD_SAVE_INTERVAL = 60000; // クラウドセーブ間隔（60秒）
+
+function handlePortalMessage(e) {
+    if (!e.data?.type) return;
+
+    switch (e.data.type) {
+        case 'premium-status':
+            isPremium = !!e.data.isPaid;
+            updatePremiumUI();
+            if (isPremium) {
+                // 有料ユーザーはクラウドセーブ読み込みをリクエスト
+                window.parent.postMessage({ type: 'load-cloud-save' }, '*');
+            }
+            break;
+
+        case 'cloud-save-data':
+            if (e.data.data) {
+                // クラウドデータがローカルより新しい場合のみ適用
+                const cloudSave = e.data.data;
+                if (cloudSave.lastSave && cloudSave.lastSave > state.lastSave) {
+                    state = {
+                        ...DEFAULT_STATE,
+                        ...cloudSave,
+                        upgrades: { ...DEFAULT_STATE.upgrades, ...cloudSave.upgrades },
+                        unlockedMachines: cloudSave.unlockedMachines || ['amadeji'],
+                        currentMachineId: cloudSave.currentMachineId || 'amadeji',
+                    };
+                    applyAllUpgrades();
+                    checkMachineUnlocks();
+                    renderShop();
+                    renderMachineSelector();
+                    console.log('☁️ クラウドセーブを復元しました');
+                }
+            }
+            break;
+
+        case 'cloud-save-result':
+            if (e.data.success) {
+                showSaveStatus('☁️ 同期済み');
+            }
+            break;
+    }
+}
+
+function updatePremiumUI() {
+    let badge = document.getElementById('premiumBadge');
+    if (isPremium) {
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = 'premiumBadge';
+            badge.className = 'premium-badge';
+            badge.textContent = '💎 プレミアム';
+            const statusBar = document.querySelector('.status-bar');
+            if (statusBar) statusBar.appendChild(badge);
+        }
+        badge.style.display = '';
+    } else if (badge) {
+        badge.style.display = 'none';
+    }
+}
+
+function showSaveStatus(text) {
+    dom.saveStatus.textContent = text;
+    setTimeout(() => { dom.saveStatus.textContent = '待機中'; }, 2000);
+}
+
+function sendCloudSave() {
+    if (!isPremium) return;
+    window.parent.postMessage({ type: 'save-game', data: state }, '*');
+}
+
+// ============================================================
 // 機種ヘルパー
 // ============================================================
 
@@ -972,10 +1049,16 @@ function saveGame() {
     state.lastSave = Date.now();
     try {
         localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-        dom.saveStatus.textContent = '保存済み ✓';
-        setTimeout(() => { dom.saveStatus.textContent = '待機中'; }, 2000);
+        showSaveStatus('保存済み ✓');
     } catch (e) {
         console.warn('セーブ失敗:', e);
+    }
+
+    // クラウドセーブ（有料ユーザーのみ、間隔制限付き）
+    const now = Date.now();
+    if (isPremium && now - cloudSaveTimer >= CLOUD_SAVE_INTERVAL) {
+        cloudSaveTimer = now;
+        sendCloudSave();
     }
 }
 
@@ -1095,6 +1178,13 @@ function init() {
     dom.rushSummaryClose.addEventListener('click', () => {
         dom.rushSummary.classList.add('hidden');
     });
+
+    // Phase 4: Gravity Portal postMessage連携
+    window.addEventListener('message', handlePortalMessage);
+    // 親ウィンドウにプレミアムステータスを要求
+    if (window.parent !== window) {
+        window.parent.postMessage({ type: 'get-premium-status' }, '*');
+    }
 
     setInterval(saveGame, SAVE_INTERVAL);
 

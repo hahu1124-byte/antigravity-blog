@@ -1071,3 +1071,27 @@ body {
         font-size: 1.1rem;
     }
 }
+
+/* --- Phase 4: プレミアムバッジ --- */
+.premium-badge {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #a78bfa;
+    background: rgba(167, 139, 250, 0.15);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    border-radius: 4px;
+    padding: 2px 8px;
+    text-align: center;
+    animation: premiumGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes premiumGlow {
+    0% {
+        box-shadow: 0 0 4px rgba(167, 139, 250, 0.2);
+    }
+
+    100% {
+        box-shadow: 0 0 12px rgba(167, 139, 250, 0.4);
+    }
+}
