@@ -200,6 +200,12 @@ function executePrestige(isAuto = false) {
     const lifetimeJackpots = state.totalLifetimeJackpots;
     const unlockedMachines = [...state.unlockedMachines];
 
+    // 自動化系アップグレードをプレステージ後も引き継ぐ
+    const keepAutoBuyer = state.upgrades.autoBuyer || 0;
+    const keepAutoPrestige = state.upgrades.autoPrestige || 0;
+    const keepAutoInvest = state.upgrades.autoInvest || 0;
+    const keepExcludes = [...state.autoBuyerExcludes];
+
     state = {
         ...DEFAULT_STATE,
         balls: 500 + newPrestiges * 500,
@@ -209,6 +215,16 @@ function executePrestige(isAuto = false) {
         currentMachineId: 'amadeji',
         lastSave: Date.now(),
         startedAt: Date.now(),
+        autoBuyer: keepAutoBuyer >= 1,
+        autoPrestige: keepAutoPrestige >= 1,
+        autoInvest: keepAutoInvest >= 1,
+        autoBuyerExcludes: keepExcludes,
+        upgrades: {
+            ...DEFAULT_STATE.upgrades,
+            autoBuyer: keepAutoBuyer,
+            autoPrestige: keepAutoPrestige,
+            autoInvest: keepAutoInvest,
+        },
     };
 
     applyMachineSpecs();
