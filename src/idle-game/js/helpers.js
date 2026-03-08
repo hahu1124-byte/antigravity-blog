@@ -39,7 +39,8 @@ function formatTime(seconds) {
 // ============================================================
 
 function getPrestigeMultiplier() {
-    return Math.pow(1.03, state.prestiges);
+    const n = state.prestiges;
+    return Math.pow(1.03, 1.03 * n * Math.sqrt(n));
 }
 
 function getKakuhenProb() {

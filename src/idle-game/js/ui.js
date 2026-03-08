@@ -260,8 +260,8 @@ function updateUI() {
     // 借金表示: 常時表示
     dom.debtAmount.textContent = state.debt > 0 ? formatYenRaw(state.debt) : '¥0';
     if (state.debt > 0) {
-        const lastYen = (state.lastInterest * YEN_PER_BALL).toFixed(2);
-        const totalYen = (state.accumulatedInterest * YEN_PER_BALL).toFixed(2);
+        const lastYen = (state.lastInterest * YEN_PER_BALL).toFixed(0);
+        const totalYen = (state.accumulatedInterest * YEN_PER_BALL).toFixed(0);
         dom.debtInterest.textContent = `複利5%/分 (利息: +¥${lastYen} / 累計: +¥${totalYen})`;
     } else {
         dom.debtInterest.textContent = '利息なし';
@@ -274,7 +274,8 @@ function updateUI() {
     // プレステージ（統計ポップアップ: 回数とボーナスのみ）
     const pThreshold = getPrestigeThreshold();
     dom.prestigeCount.textContent = state.prestiges;
-    const pMult = Math.pow(1.03, state.prestiges);
+    const pN = state.prestiges;
+    const pMult = Math.pow(1.03, 1.03 * pN * Math.sqrt(pN));
     dom.prestigeBonus.textContent = `x${pMult.toFixed(2)}`;
     // ボーナス詳細表示
     const bonusDetail = document.getElementById('prestigeBonusDetail');
@@ -390,6 +391,7 @@ function renderMachineInfoPopup() {
                 </div>
                 <div class="machine-info-specs">
                     <span>ST回転 ${m.baseStSpins}</span>
+                    <span>時短 ${Math.round(JITAN_BASE_SPINS / (m.prob * JITAN_REF_DENOM))}回転</span>
                     <span>継続率 ${(m.kakuhenContinueRate * 100).toFixed(2)}%</span>
                     <span>遊タイム ${m.yutimeThreshold}回転</span>
                 </div>
