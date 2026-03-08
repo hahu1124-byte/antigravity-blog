@@ -1270,6 +1270,12 @@ body {
     display: none;
 }
 
+.rate-btn.locked-rate {
+    opacity: 0.35;
+    cursor: not-allowed;
+    position: relative;
+}
+
 .popup-prestige {
     margin-top: 16px;
     padding-top: 16px;

@@ -85,7 +85,7 @@ function getCriticalChance() {
 }
 
 function getPrestigeThreshold() {
-    return Math.round(50 + Math.pow(state.prestiges, 1.1));
+    return Math.round(20 + Math.pow(state.prestiges, 1.15));
 }
 
 function getStartingBalls() {
@@ -155,14 +155,35 @@ function checkMachineUnlocks() {
 }
 
 function checkRateUnlock() {
-    const allUnlocked = MACHINES.every(m => state.unlockedMachines.includes(m.id));
-    if (allUnlocked) {
-        dom.rateSection.classList.remove('hidden');
+    // レート個別解放: ¥2=P15, ¥4=P30
+    dom.rateSection.classList.remove('hidden');
+    const rate2Btn = dom.rateGrid.querySelector('[data-rate="2"]');
+    const rate4Btn = dom.rateGrid.querySelector('[data-rate="4"]');
+    if (rate2Btn) {
+        if (state.prestiges >= 15) {
+            rate2Btn.classList.remove('locked-rate');
+            rate2Btn.disabled = false;
+        } else {
+            rate2Btn.classList.add('locked-rate');
+            rate2Btn.disabled = true;
+        }
+    }
+    if (rate4Btn) {
+        if (state.prestiges >= 30) {
+            rate4Btn.classList.remove('locked-rate');
+            rate4Btn.disabled = false;
+        } else {
+            rate4Btn.classList.add('locked-rate');
+            rate4Btn.disabled = true;
+        }
     }
 }
 
 function switchRate(rate) {
     if (state.mode === MODE_KAKUHEN || state.mode === MODE_ST) return;
+    // ロックされたレートは選択不可
+    if (rate >= 2 && state.prestiges < 15) return;
+    if (rate >= 4 && state.prestiges < 30) return;
     YEN_PER_BALL = rate;
     dom.rateGrid.querySelectorAll('.rate-btn').forEach(btn => {
         btn.classList.toggle('active', Number(btn.dataset.rate) === rate);
