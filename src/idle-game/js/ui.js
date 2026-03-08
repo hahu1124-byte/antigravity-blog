@@ -412,7 +412,8 @@ function updateShopUI() {
         const level = state.upgrades[upg.id] || 0;
         const isMaxed = level >= upg.maxLevel;
         const cost = getUpgradeCost(upg);
-        const canAfford = state.balls >= cost && !isMaxed;
+        const profit = state.totalBalls - state.totalInvest;
+        const canAfford = (state.balls >= cost || profit > 0) && !isMaxed;
 
         card.className = `shop-card${!canAfford ? ' disabled' : ''}${isMaxed ? ' maxed' : ''}`;
 

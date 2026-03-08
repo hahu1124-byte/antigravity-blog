@@ -186,7 +186,14 @@ function buyUpgrade(id) {
     if (level >= upg.maxLevel) return;
 
     const cost = getUpgradeCost(upg);
-    if (state.balls < cost) return;
+    const profit = state.totalBalls - state.totalInvest;
+    // 収支プラスなら借金で購入可能
+    if (state.balls < cost) {
+        if (profit <= 0) return;
+        while (state.balls < cost) {
+            takeLoan();
+        }
+    }
 
     state.balls -= cost;
     state.totalInvest += cost;
