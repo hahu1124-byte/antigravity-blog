@@ -11,13 +11,13 @@ const MODE_KAKUHEN = 'kakuhen';
 const MODE_ST = 'st';
 const MODE_JITAN = 'jitan';
 
-const KAKUHEN_PROB_MULTIPLIER = 10;
+// 高確率は機種ごとにhighProbで定義（ST当選率65%ベース）
 
 // ============================================================
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.12.28';
+const GAME_VERSION = 'v0.13.0';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -42,13 +42,14 @@ const MACHINES = [
         name: '🟢 甘デジ',
         desc: 'ST偏重・安定連荘型',
         prob: 656 / 65536,  // 1/99.902
+        highProb: 2261 / 65536,  // 1/29.0 → ST30回転で65%
         payout: 465,
         cost: 10,
         kakuhenRate: 0.15,
         stRate: 0.40,
         jitanRate: 0.20,
         kakuhenContinueRate: 0.65,
-        baseStSpins: 10,
+        baseStSpins: 30,
         yutimeThreshold: 249,
         unlockCondition: () => true,
         unlockText: '初期台',
@@ -58,13 +59,14 @@ const MACHINES = [
         name: '🔵 ライトミドル',
         desc: 'バランス型',
         prob: 328 / 65536,  // 1/199.805
+        highProb: 1725 / 65536,  // 1/38.0 → ST40回転で65%
         payout: 936,
         cost: 12.5,
         kakuhenRate: 0.25,
         stRate: 0.30,
         jitanRate: 0.20,
         kakuhenContinueRate: 0.65,
-        baseStSpins: 21,
+        baseStSpins: 40,
         yutimeThreshold: 499,
         unlockCondition: (s) => s.prestiges >= 1,
         unlockText: 'プレステージ1回',
@@ -74,13 +76,14 @@ const MACHINES = [
         name: '🟣 ミドル',
         desc: 'スタンダード',
         prob: 205 / 65536,  // 1/319.688
+        highProb: 1365 / 65536,  // 1/48.0 → ST50回転で65%
         payout: 1500,
         cost: 15,
         kakuhenRate: 0.35,
         stRate: 0.25,
         jitanRate: 0.20,
         kakuhenContinueRate: 0.65,
-        baseStSpins: 33,
+        baseStSpins: 50,
         yutimeThreshold: 959,
         unlockCondition: (s) => s.prestiges >= 3,
         unlockText: 'プレステージ3回',
@@ -90,13 +93,14 @@ const MACHINES = [
         name: '🔴 MAXタイプ',
         desc: '確変ループ特化型',
         prob: 164 / 65536,  // 1/399.610
+        highProb: 1150 / 65536,  // 1/57.0 → ST60回転で65%
         payout: 1876,
         cost: 17.5,
         kakuhenRate: 0.50,
         stRate: 0.15,
         jitanRate: 0.15,
         kakuhenContinueRate: 0.65,
-        baseStSpins: 41,
+        baseStSpins: 60,
         yutimeThreshold: 1198,
         unlockCondition: (s) => s.prestiges >= 7,
         unlockText: 'プレステージ7回',
@@ -106,13 +110,14 @@ const MACHINES = [
         name: '🌟 超MAX',
         desc: '確変ループ全振り・ロマン型',
         prob: 131 / 65536,  // 1/500.275
+        highProb: 978 / 65536,  // 1/67.0 → ST70回転で65%
         payout: 2347,
         cost: 20,
         kakuhenRate: 0.60,
         stRate: 0.10,
         jitanRate: 0.10,
         kakuhenContinueRate: 0.65,
-        baseStSpins: 52,
+        baseStSpins: 70,
         yutimeThreshold: 1500,
         unlockCondition: (s) => s.prestiges >= 15,
         unlockText: 'プレステージ15回',
@@ -161,7 +166,7 @@ const UPGRADES = [
     {
         id: 'kakuhenBoost',
         name: '🔥 確変倍率UP',
-        desc: '確変/ST中の確率をさらに1%改善',
+        desc: '確変/ST中の確率をさらに1.5%改善',
         icon: '🔥',
         baseCost: 2000,
         costMultiplier: 2.5,
@@ -172,7 +177,7 @@ const UPGRADES = [
     {
         id: 'stSpins',
         name: '⏱️ ST回転数UP',
-        desc: 'STモードの回転数を+5%改善',
+        desc: 'STモードの回転数を+6%改善',
         icon: '⏱️',
         baseCost: 1500,
         costMultiplier: 2.0,
@@ -183,7 +188,7 @@ const UPGRADES = [
     {
         id: 'kakuhenCont',
         name: '🔁 確変継続率UP',
-        desc: '確変モードの継続率を+2%改善',
+        desc: '確変モードの継続率を+2.5%改善',
         icon: '🔁',
         baseCost: 2500,
         costMultiplier: 2.2,

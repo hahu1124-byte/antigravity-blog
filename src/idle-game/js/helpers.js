@@ -44,17 +44,17 @@ function getPrestigeMultiplier() {
 
 function getKakuhenProb() {
     const m = getCurrentMachine();
-    return m.prob * KAKUHEN_PROB_MULTIPLIER * Math.pow(1.01, state.upgrades.kakuhenBoost);
+    return m.highProb * Math.pow(1.015, state.upgrades.kakuhenBoost);
 }
 
 function getMaxStSpins() {
     const m = getCurrentMachine();
-    return Math.round(m.baseStSpins * (1 + (state.upgrades.stSpins || 0) * 0.05));
+    return Math.round(m.baseStSpins * (1 + (state.upgrades.stSpins || 0) * 0.06));
 }
 
 function getKakuhenContinueRate() {
     const m = getCurrentMachine();
-    return Math.min(m.kakuhenContinueRate + (state.upgrades.kakuhenCont || 0) * 0.02, 0.95);
+    return Math.min(m.kakuhenContinueRate + (state.upgrades.kakuhenCont || 0) * 0.025, 0.95);
 }
 
 function getJitanSpins() {
