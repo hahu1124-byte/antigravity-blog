@@ -74,15 +74,10 @@ body {
 
 /* --- 大当たり通知（フローティング） --- */
 .jackpot-notify {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 50;
     text-align: center;
-    padding: 8px 8px;
+    padding: 6px 8px;
     font-family: var(--font-mono);
-    font-size: 1.1rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--accent-green);
     background: rgba(0, 255, 136, 0.12);
