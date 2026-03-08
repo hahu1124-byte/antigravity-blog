@@ -17,7 +17,7 @@ const KAKUHEN_PROB_MULTIPLIER = 10;
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.12.03';
+const GAME_VERSION = 'v0.12.04';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -66,8 +66,8 @@ const MACHINES = [
         kakuhenContinueRate: 0.65,
         baseStSpins: 21,
         yutimeThreshold: 497,
-        unlockCondition: (s) => s.totalLifetimeJackpots >= 30,
-        unlockText: '累計大当たり30回',
+        unlockCondition: (s) => s.prestiges >= 1,
+        unlockText: 'プレステージ1回',
     },
     {
         id: 'middle',
@@ -82,8 +82,8 @@ const MACHINES = [
         kakuhenContinueRate: 0.65,
         baseStSpins: 33,
         yutimeThreshold: 957,
-        unlockCondition: (s) => s.totalLifetimeJackpots >= 80,
-        unlockText: '累計大当たり80回',
+        unlockCondition: (s) => s.prestiges >= 3,
+        unlockText: 'プレステージ3回',
     },
     {
         id: 'max',
@@ -98,8 +98,8 @@ const MACHINES = [
         kakuhenContinueRate: 0.65,
         baseStSpins: 41,
         yutimeThreshold: 1197,
-        unlockCondition: (s) => s.prestiges >= 1,
-        unlockText: 'プレステージ1回',
+        unlockCondition: (s) => s.prestiges >= 7,
+        unlockText: 'プレステージ7回',
     },
     {
         id: 'supermax',
@@ -114,8 +114,8 @@ const MACHINES = [
         kakuhenContinueRate: 0.65,
         baseStSpins: 52,
         yutimeThreshold: 1497,
-        unlockCondition: (s) => s.prestiges >= 3,
-        unlockText: 'プレステージ3回',
+        unlockCondition: (s) => s.prestiges >= 15,
+        unlockText: 'プレステージ15回',
     },
 ];
 
