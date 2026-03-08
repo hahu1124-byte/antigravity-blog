@@ -129,15 +129,15 @@ const QUESTIONS = [
     },
     {
         category: "機種知識",
-        question: "P機（従来のパチンコ）と e機（スマートパチンコ / スマパチ）の違いとして正しいのは？",
+        question: "P機（従来のパチンコ）と e機（スマパチ）の違いとして正しいのは？",
         choices: [
-            "e機は大当たり確率が2倍になる",
-            "e機は玉が機械内部に封入され、出玉はデジタル管理される",
+            "e機は大当たり確率がP機の2倍になる",
+            "e機は出玉の払い出しがデジタル管理になった",
             "P機には設定機能がなく、e機にだけある",
-            "e機は4円パチンコ専用の規格"
+            "e機は遊タイムが搭載できない"
         ],
         answer: 1,
-        explanation: "e機（スマパチ）は2023年から導入された次世代パチンコで、玉が遊技機内部に封入され循環する『封入式』を採用。出玉はデジタル管理され、物理的な玉に触れません。大当たり確率の下限も緩和（P機の1/320→e機は1/350）され、Cタイムやコンプリート機能（1日最大95,000発で終了）等の新機能もあります。"
+        explanation: "e機（スマパチ）は2023年から導入された次世代パチンコです。最大の違いは出玉の払い出しがデジタル管理になった点で、遊技の基本的な仕組みはP機と大きく変わりません。大当たり確率の下限が1/320→1/350に緩和され、Cタイムやラッキートリガーなどの新機能も搭載可能になりましたが、打ち方や確率の考え方はP機と同じです。"
     },
     {
         category: "実践",
@@ -157,11 +157,13 @@ const QUESTIONS = [
 // ランク判定
 // ========================================
 
+const QUIZ_COUNT = 10; // 表示する問題数（プールからランダム抽出）
+
 const RANKS = [
-    { min: 15, icon: "👑", title: "確率マスター", rank: "S", message: "パーフェクト！パチンコの確率を完全に理解しています。" },
-    { min: 12, icon: "🏆", title: "上級者", rank: "A", message: "素晴らしい！ほとんどの問題を正解しました。" },
-    { min: 9, icon: "📚", title: "中級者", rank: "B", message: "よく勉強しています。もう少しで上級者です！" },
-    { min: 6, icon: "🔰", title: "初心者", rank: "C", message: "基本は押さえています。解説を読んで知識を深めましょう。" },
+    { min: 10, icon: "👑", title: "確率マスター", rank: "S", message: "パーフェクト！パチンコの確率を完全に理解しています。" },
+    { min: 8, icon: "🏆", title: "上級者", rank: "A", message: "素晴らしい！ほとんどの問題を正解しました。" },
+    { min: 6, icon: "📚", title: "中級者", rank: "B", message: "よく勉強しています。もう少しで上級者です！" },
+    { min: 4, icon: "🔰", title: "初心者", rank: "C", message: "基本は押さえています。解説を読んで知識を深めましょう。" },
     { min: 0, icon: "📖", title: "見習い", rank: "D", message: "まだまだこれから！解説を読んで再チャレンジしてみましょう。" }
 ];
 
@@ -218,7 +220,7 @@ function startQuiz() {
     correctCount = 0;
     wrongCount = 0;
     results = [];
-    shuffledQuestions = shuffle(QUESTIONS);
+    shuffledQuestions = shuffle(QUESTIONS).slice(0, QUIZ_COUNT);
 
     $("correct-count").textContent = "0";
     $("wrong-count").textContent = "0";
