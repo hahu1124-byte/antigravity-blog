@@ -213,6 +213,13 @@ body {
     text-shadow: 0 0 8px rgba(255, 136, 0, 0.5);
 }
 
+.mode-jitan {
+    color: var(--accent-cyan);
+    background: rgba(0, 229, 255, 0.15);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+}
+
 @keyframes modePulse {
     0% {
         opacity: 0.8;

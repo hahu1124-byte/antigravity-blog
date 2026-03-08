@@ -111,7 +111,7 @@ function showJackpotBanner(type, payout) {
         [MODE_NORMAL]: '🎉',
     };
     lastJackpotInfo = `🎉 +${formatNum(payout)}`;
-    jackpotAnimTimer = 1.5;
+    jackpotAnimTimer = 1.0;
     // フローティング通知に表示
     dom.jackpotNotify.textContent = lastJackpotInfo;
     dom.jackpotNotify.className = 'jackpot-notify';
@@ -120,7 +120,7 @@ function showJackpotBanner(type, payout) {
 
 function showRushSummary(chains, totalPayout) {
     lastJackpotInfo = `🏆 ${chains}連荘 +${formatNum(totalPayout)}`;
-    jackpotAnimTimer = 3.0;
+    jackpotAnimTimer = 1.0;
     // フローティング通知に表示
     dom.jackpotNotify.textContent = lastJackpotInfo;
     dom.jackpotNotify.className = 'jackpot-notify rush-notify';
@@ -131,7 +131,7 @@ let yutimeAnimTimer = 0;
 
 function showYutimeBanner() {
     dom.yutimeBanner.classList.remove('hidden');
-    yutimeAnimTimer = 3.0;
+    yutimeAnimTimer = 1.5;
 }
 
 // ============================================================

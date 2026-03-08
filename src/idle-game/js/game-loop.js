@@ -151,7 +151,7 @@ let autoBuyTimer = 0;
 function processAutoBuyer(dt) {
     if (!state.autoBuyer) return;
     autoBuyTimer += dt;
-    if (autoBuyTimer < 1.0) return;
+    if (autoBuyTimer < 0.5) return;
     autoBuyTimer = 0;
 
     let cheapest = null;
@@ -199,10 +199,10 @@ let spinAccumulator = 0;
 let jackpotOccurred = false;
 let lastJackpotType = null;
 
-// プレステージ一時停止フラグ（確認〜完了後3秒）
+// プレステージ一時停止フラグ（確認〜完了後0.5秒）
 let prestigePaused = false;
 let prestigePauseTimer = 0;
-const PRESTIGE_PAUSE_DURATION = 1.0;
+const PRESTIGE_PAUSE_DURATION = 0.5;
 
 function gameLoop(now) {
     const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
@@ -238,101 +238,92 @@ function gameLoop(now) {
         }
     }
 
-    const canSpin = true; // 常時自動購入: 玉不足時は自動借金で補充
+    // 回転処理（常時自動購入: 玉不足時は自動借金で補充）
+    const effectiveSpinRate = isPremium ? state.spinRate * PREMIUM_SPEED_MULTIPLIER : state.spinRate;
+    spinAccumulator += effectiveSpinRate * dt;
+    const spinsThisFrame = Math.floor(spinAccumulator);
+    spinAccumulator -= spinsThisFrame;
 
-    if (canSpin) {
-        const effectiveSpinRate = isPremium ? state.spinRate * PREMIUM_SPEED_MULTIPLIER : state.spinRate;
-        spinAccumulator += effectiveSpinRate * dt;
-        const spinsThisFrame = Math.floor(spinAccumulator);
-        spinAccumulator -= spinsThisFrame;
+    let frameJackpots = 0;
+    let framePayout = 0;
+    let frameJackpotType = null;
 
-        let frameJackpots = 0;
-        let framePayout = 0;
-        let frameJackpotType = null;
+    for (let i = 0; i < spinsThisFrame; i++) {
+        const isRushMode = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
+        const isJitan = state.mode === MODE_JITAN;
+        let actualCost;
+        if (isRushMode || isJitan) {
+            actualCost = 0.1 + Math.random() * 0.4;
+        } else {
+            actualCost = state.costPerSpin;
+        }
+        state.balls -= actualCost;
+        state.totalInvest += actualCost;
+        state.spins++;
 
-        for (let i = 0; i < spinsThisFrame; i++) {
-            const isRushMode = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
-            const isJitan = state.mode === MODE_JITAN;
-            let actualCost;
-            if (isRushMode || isJitan) {
-                actualCost = 0.1 + Math.random() * 0.4;
-            } else {
-                actualCost = state.costPerSpin;
+        // 回転数: 全モードで常にカウント
+        state.sinceLastJackpot++;
+
+        // 遊タイムゲージ: 通常+時短中にカウント（確変/ST中は停止、MAX到達後は増やさない）
+        if (state.mode === MODE_NORMAL || state.mode === MODE_JITAN) {
+            const threshold = getEffectiveYutimeThreshold();
+            if (state.yutimeGauge < threshold) {
+                state.yutimeGauge++;
             }
-            state.balls -= actualCost;
-            state.totalInvest += actualCost;
-            state.spins++;
+        }
 
-            // 回転数: 全モードで常にカウント
-            state.sinceLastJackpot++;
-
-            // 遊タイムゲージ: 通常+時短中にカウント（確変/ST中は停止、MAX到達後は増やさない）
-            if (state.mode === MODE_NORMAL || state.mode === MODE_JITAN) {
-                const threshold = getEffectiveYutimeThreshold();
-                if (state.yutimeGauge < threshold) {
-                    state.yutimeGauge++;
-                }
-            }
-
-            // ST消化
-            if (state.mode === MODE_ST) {
-                state.stRemaining--;
-                if (state.stRemaining <= 0) {
-                    if (state.rushChain > 0) {
-                        showRushSummary(state.rushChain, state.currentRushPayout);
-                        if (state.rushChain > state.totalRushChains) {
-                            state.totalRushChains = state.rushChain;
-                        }
+        // ST消化
+        if (state.mode === MODE_ST) {
+            state.stRemaining--;
+            if (state.stRemaining <= 0) {
+                if (state.rushChain > 0) {
+                    showRushSummary(state.rushChain, state.currentRushPayout);
+                    if (state.rushChain > state.totalRushChains) {
+                        state.totalRushChains = state.rushChain;
                     }
-                    state.mode = MODE_NORMAL;
-                    state.yutimeGauge = 0;
-                    state.yutimeTriggered = false;
-                    state.rushChain = 0;
-                    state.currentRushPayout = 0;
                 }
+                state.mode = MODE_NORMAL;
+                state.yutimeGauge = 0;
+                state.yutimeTriggered = false;
+                state.rushChain = 0;
+                state.currentRushPayout = 0;
             }
-
-            // 時短消化
-            if (state.mode === MODE_JITAN) {
-                state.jitanRemaining--;
-                if (state.jitanRemaining <= 0) {
-                    state.mode = MODE_NORMAL;
-                    state.jitanRemaining = 0;
-                    // 遊タイムゲージは引き継ぐ（リセットしない）
-                }
-            }
-
-            // 玉が0以下になったら自動で持玉購入（¥1,000単位）
-            if (state.balls < 0) {
-                state.balls = 0;
-                takeLoan();
-            }
-
-            const prob = getCurrentProb();
-            if (Math.random() < prob) {
-                const result = processJackpot();
-                frameJackpots++;
-                framePayout += result.payout;
-                frameJackpotType = result.type;
-            }
-
-            checkYutime();
-
-
         }
 
-        if (frameJackpots > 0) {
-            jackpotOccurred = true;
-            lastJackpotType = frameJackpotType;
-            showJackpotBanner(frameJackpotType, framePayout);
+        // 時短消化
+        if (state.mode === MODE_JITAN) {
+            state.jitanRemaining--;
+            if (state.jitanRemaining <= 0) {
+                state.mode = MODE_NORMAL;
+                state.jitanRemaining = 0;
+                // 遊タイムゲージは引き継ぐ（リセットしない）
+            }
         }
 
-        updateReels(dt, jackpotOccurred);
-    } else if (!canSpin) {
-        dom.reel1.className = 'reel';
-        dom.reel2.className = 'reel';
-        dom.reel3.className = 'reel';
+        // 玉が0以下になったら自動で持玉購入（¥1,000単位）
+        if (state.balls < 0) {
+            state.balls = 0;
+            takeLoan();
+        }
+
+        const prob = getCurrentProb();
+        if (Math.random() < prob) {
+            const result = processJackpot();
+            frameJackpots++;
+            framePayout += result.payout;
+            frameJackpotType = result.type;
+        }
+
+        checkYutime();
     }
+
+    if (frameJackpots > 0) {
+        jackpotOccurred = true;
+        lastJackpotType = frameJackpotType;
+        showJackpotBanner(frameJackpotType, framePayout);
+    }
+
+    updateReels(dt, jackpotOccurred);
 
     // 自動化処理
     processAutoBuyer(dt);
