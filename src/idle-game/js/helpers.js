@@ -330,6 +330,12 @@ function executePrestige(isAuto = false) {
         },
     };
 
+    // 収支基準点: 初期500玉を超える分を収支プラスとして反映
+    const bonusBalls = state.balls - 500;
+    if (bonusBalls > 0) {
+        state.totalBalls = bonusBalls;
+    }
+
     applyMachineSpecs();
     checkMachineUnlocks();
     renderShop();
