@@ -118,7 +118,7 @@ function showJackpotBanner(type, payout) {
     // フローティング通知に表示
     dom.jackpotNotify.textContent = lastJackpotInfo;
     dom.jackpotNotify.className = 'jackpot-notify';
-    dom.jackpotNotify.classList.remove('hidden');
+    dom.jackpotNotify.classList.remove('hidden', 'closing');
 }
 
 function showRushSummary(chains, totalPayout) {
@@ -127,7 +127,7 @@ function showRushSummary(chains, totalPayout) {
     // フローティング通知に表示
     dom.jackpotNotify.textContent = lastJackpotInfo;
     dom.jackpotNotify.className = 'jackpot-notify rush-notify';
-    dom.jackpotNotify.classList.remove('hidden');
+    dom.jackpotNotify.classList.remove('hidden', 'closing');
 }
 
 let yutimeAnimTimer = 0;
@@ -138,7 +138,7 @@ let prevClaimableTotal = -1; // 初回スキップ用
 
 function showAchNotify(text) {
     dom.achNotify.textContent = text;
-    dom.achNotify.classList.remove('hidden');
+    dom.achNotify.classList.remove('hidden', 'closing');
     achNotifyTimer = 1.5;
 }
 

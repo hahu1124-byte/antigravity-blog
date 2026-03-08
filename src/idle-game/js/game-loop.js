@@ -228,7 +228,10 @@ function gameLoop(now) {
         if (jackpotAnimTimer <= 0) {
             lastJackpotInfo = null;
             jackpotOccurred = false;
+            dom.jackpotNotify.classList.remove('closing');
             dom.jackpotNotify.classList.add('hidden');
+        } else if (jackpotAnimTimer <= 0.3) {
+            dom.jackpotNotify.classList.add('closing');
         }
     }
     if (yutimeAnimTimer > 0) {
@@ -241,7 +244,10 @@ function gameLoop(now) {
     if (achNotifyTimer > 0) {
         achNotifyTimer -= dt;
         if (achNotifyTimer <= 0) {
+            dom.achNotify.classList.remove('closing');
             dom.achNotify.classList.add('hidden');
+        } else if (achNotifyTimer <= 0.3) {
+            dom.achNotify.classList.add('closing');
         }
     }
     checkAchNotify();

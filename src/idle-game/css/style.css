@@ -88,7 +88,7 @@ body {
     font-weight: 700;
     color: var(--accent-green);
     background: rgba(0, 255, 136, 0.12);
-    animation: notifyFadeIn 0.2s ease-out;
+    animation: notifyZoomIn 0.25s ease-out;
     text-shadow:
         -1px -1px 0 #fff, 0 -1px 0 #fff, 1px -1px 0 #fff,
         -1px 0 0 #fff, 1px 0 0 #fff,
@@ -109,15 +109,37 @@ body {
     display: none;
 }
 
-@keyframes notifyFadeIn {
+@keyframes notifyZoomIn {
     0% {
         opacity: 0;
-        transform: translateY(-100%);
+        transform: scale(0.3);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale(1.05);
     }
 
     100% {
         opacity: 1;
-        transform: translateY(0);
+        transform: scale(1);
+    }
+}
+
+.jackpot-notify.closing,
+.ach-notify.closing {
+    animation: notifyZoomOut 0.3s ease-in forwards;
+}
+
+@keyframes notifyZoomOut {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.3);
     }
 }
 
@@ -1586,7 +1608,7 @@ body {
     font-weight: 700;
     color: var(--accent-gold);
     background: rgba(255, 215, 0, 0.1);
-    animation: notifyFadeIn 0.2s ease-out;
+    animation: notifyZoomIn 0.25s ease-out;
     text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
