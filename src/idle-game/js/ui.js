@@ -379,6 +379,7 @@ function renderMachineInfoPopup() {
             // 計算値
             const stCont = 1 - Math.pow(1 - m.highProb, m.baseStSpins);
             const jitanSpins = Math.round(JITAN_BASE_SPINS / (m.prob * JITAN_REF_DENOM));
+            const jitanCont = m.jitanRate > 0 ? (1 - Math.pow(1 - m.prob, jitanSpins)) : 0;
             const normalRate = Math.max(0, 1 - m.kakuhenRate - m.stRate - m.jitanRate);
             item.innerHTML = `
                 <div class="machine-info-name">${m.name}${isActive ? ' <span class="machine-active-badge">稼働中</span>' : ''}</div>
@@ -401,9 +402,10 @@ function renderMachineInfoPopup() {
                 <div class="machine-info-specs">
                     <span>時短率 ${(m.jitanRate * 100).toFixed(2)}%</span>
                     <span>時短 ${jitanSpins}回転</span>
-                    <span>遊タイム ${m.yutimeThreshold}回転</span>
+                    <span>引戻率 ${(jitanCont * 100).toFixed(2)}%</span>
                 </div>
                 <div class="machine-info-specs">
+                    <span>遊タイム ${m.yutimeThreshold}回転</span>
                     <span>時短無 ${(normalRate * 100).toFixed(2)}%</span>
                 </div>
             `;
