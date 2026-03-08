@@ -69,7 +69,7 @@ function getEffectiveYutimeThreshold() {
     const baseDenom = 1 / m.prob; // 機種の元々の分母
     const upgradedDenom = 1 / state.jackpotProb; // アップグレード後の分母
     // 確率が上がった分、遊タイム到達回転数を比例的に下げる
-    return Math.round(baseThreshold * (upgradedDenom / baseDenom));
+    return Math.floor(baseThreshold * (upgradedDenom / baseDenom));
 }
 
 function getUpgradeTotalSpent(upg) {
