@@ -71,6 +71,7 @@ const DEFAULT_STATE = {
     // アチーブメント（プレステージで初期化しない永続データ）
     achievements: {},
     reelClicks: 0,
+    lifetimeMaxUpgrades: {},
 };
 
 let state = { ...DEFAULT_STATE };
@@ -118,6 +119,7 @@ function loadGame() {
             currentMachineId: saved.currentMachineId || 'amadeji',
             achievements: saved.achievements || {},
             reelClicks: saved.reelClicks || 0,
+            lifetimeMaxUpgrades: saved.lifetimeMaxUpgrades || {},
         };
         applyAllUpgrades();
         checkMachineUnlocks();

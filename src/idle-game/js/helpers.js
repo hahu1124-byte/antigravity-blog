@@ -212,6 +212,9 @@ function buyUpgrade(id) {
     state.balls -= cost;
     state.totalInvest += cost;
     state.upgrades[upg.id] = level + 1;
+    // 生涯最高レベルをトラッキング（アチーブメント用）
+    if (!state.lifetimeMaxUpgrades) state.lifetimeMaxUpgrades = {};
+    state.lifetimeMaxUpgrades[upg.id] = Math.max(state.lifetimeMaxUpgrades[upg.id] || 0, state.upgrades[upg.id]);
     upg.apply(state);
     applyAllUpgrades();
     saveGame();
@@ -259,9 +262,10 @@ function executePrestige(isAuto = false) {
 
     const keepExcludes = [...state.autoBuyerExcludes];
 
-    // アチーブメント・リールクリックは永続
+    // アチーブメント・リールクリック・生涯最高レベルは永続
     const keepAchievements = { ...state.achievements };
     const keepReelClicks = state.reelClicks || 0;
+    const keepLifetimeMax = { ...(state.lifetimeMaxUpgrades || {}) };
 
     state = {
         ...DEFAULT_STATE,
@@ -283,6 +287,7 @@ function executePrestige(isAuto = false) {
         autoBuyerExcludes: keepExcludes,
         // アチーブメント永続
         achievements: keepAchievements,
+        lifetimeMaxUpgrades: keepLifetimeMax,
         reelClicks: keepReelClicks,
         upgrades: {
             ...DEFAULT_STATE.upgrades,
