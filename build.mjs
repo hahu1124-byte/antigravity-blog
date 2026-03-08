@@ -502,6 +502,12 @@ function buildIndexPage() {
 
 function buildArticlePages() {
     posts.forEach((post, index) => {
+        // contentがない記事（メタデータのみ）はスキップ
+        if (!post.content) {
+            console.log(`⏭️  ${post.slug} — contentなし、スキップ`);
+            return;
+        }
+
         // 前後の記事（postsは新しい順）
         const prev = index > 0 ? posts[index - 1] : null;
         const next = index < posts.length - 1 ? posts[index + 1] : null;
