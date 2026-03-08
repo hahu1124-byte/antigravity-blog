@@ -14,8 +14,12 @@ function init() {
 
     // イベントリスナー登録（全て初回のみ）
     dom.offlineClose.addEventListener('click', () => {
-        dom.offlineBanner.classList.add('hidden');
-        saveGame();
+        dom.offlineBanner.classList.add('closing');
+        dom.offlineBanner.addEventListener('animationend', () => {
+            dom.offlineBanner.classList.add('hidden');
+            dom.offlineBanner.classList.remove('closing');
+            saveGame();
+        }, { once: true });
     });
 
     dom.resetBtn.addEventListener('click', resetGame);
@@ -111,7 +115,11 @@ function init() {
     });
 
     dom.rushSummaryClose.addEventListener('click', () => {
-        dom.rushSummary.classList.add('hidden');
+        dom.rushSummary.classList.add('closing');
+        dom.rushSummary.addEventListener('animationend', () => {
+            dom.rushSummary.classList.add('hidden');
+            dom.rushSummary.classList.remove('closing');
+        }, { once: true });
     });
 
     // Portal postMessage連携

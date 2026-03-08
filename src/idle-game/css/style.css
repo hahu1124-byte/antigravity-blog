@@ -696,10 +696,39 @@ body {
     align-items: center;
     justify-content: center;
     padding: 20px;
+    animation: offlineFlashIn 0.6s ease-out;
 }
 
 #offlineBanner.hidden {
     display: none;
+}
+
+#offlineBanner.closing {
+    animation: offlineFlashOut 0.3s ease-in forwards;
+}
+
+@keyframes offlineFlashIn {
+    0% {
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    30% {
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    100% {
+        background: rgba(0, 0, 0, 0.8);
+    }
+}
+
+@keyframes offlineFlashOut {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
 }
 
 .offline-content {
@@ -710,6 +739,19 @@ body {
     text-align: center;
     max-width: 320px;
     box-shadow: var(--glow-gold);
+    animation: offlineContentIn 0.5s 0.15s ease-out both;
+}
+
+@keyframes offlineContentIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .offline-icon {
@@ -780,15 +822,36 @@ body {
     animation: rushSummaryIn 0.4s ease-out;
 }
 
+#rushSummary.closing .rush-summary-content {
+    animation: rushSummaryOut 0.3s ease-in forwards;
+}
+
 @keyframes rushSummaryIn {
     0% {
         opacity: 0;
-        transform: scale(0.8) translateY(20px);
+        transform: scale(0.3);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale(1.05);
     }
 
     100% {
         opacity: 1;
-        transform: scale(1) translateY(0);
+        transform: scale(1);
+    }
+}
+
+@keyframes rushSummaryOut {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(0.3);
     }
 }
 
