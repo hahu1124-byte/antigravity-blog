@@ -379,9 +379,7 @@ function renderMachineInfoPopup() {
             // 計算値
             const stCont = 1 - Math.pow(1 - m.highProb, m.baseStSpins);
             const jitanSpins = Math.round(JITAN_BASE_SPINS / (m.prob * JITAN_REF_DENOM));
-            const jitanCont = m.jitanRate > 0 ? (1 - Math.pow(1 - m.prob, jitanSpins)) : 0;
             const normalRate = Math.max(0, 1 - m.kakuhenRate - m.stRate - m.jitanRate);
-            const effectiveCont = m.kakuhenRate * m.kakuhenContinueRate + m.stRate * stCont + m.jitanRate * jitanCont;
             item.innerHTML = `
                 <div class="machine-info-name">${m.name}${isActive ? ' <span class="machine-active-badge">稼働中</span>' : ''}</div>
                 <div class="machine-info-desc">${m.desc}</div>
@@ -392,18 +390,21 @@ function renderMachineInfoPopup() {
                 </div>
                 <div class="machine-info-specs">
                     <span>確変率 ${(m.kakuhenRate * 100).toFixed(2)}%</span>
-                    <span>継続率 ${(effectiveCont * 100).toFixed(2)}%</span>
+                    <span>継続率 ${(m.kakuhenContinueRate * 100).toFixed(2)}%</span>
                     <span>ST率 ${(m.stRate * 100).toFixed(2)}%</span>
                 </div>
                 <div class="machine-info-specs">
                     <span>ST回転 ${m.baseStSpins}</span>
-                    <span>継続率 ${(m.kakuhenContinueRate * 100).toFixed(2)}%</span>
-                    <span>時短無 ${(normalRate * 100).toFixed(2)}%</span>
+                    <span>高確率 1/${(1 / m.highProb).toFixed(2)}</span>
+                    <span>継続率 ${(stCont * 100).toFixed(2)}%</span>
                 </div>
                 <div class="machine-info-specs">
                     <span>時短率 ${(m.jitanRate * 100).toFixed(2)}%</span>
                     <span>時短 ${jitanSpins}回転</span>
                     <span>遊タイム ${m.yutimeThreshold}回転</span>
+                </div>
+                <div class="machine-info-specs">
+                    <span>時短無 ${(normalRate * 100).toFixed(2)}%</span>
                 </div>
             `;
             if (!isActive) {
