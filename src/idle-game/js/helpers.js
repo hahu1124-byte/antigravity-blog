@@ -109,12 +109,18 @@ function getCurrentMachine() {
 
 function applyMachineSpecs() {
     const m = getCurrentMachine();
+    const pMult = getPrestigeMultiplier();
     state.jackpotProb = m.prob * Math.pow(1.05, state.upgrades.jackpotProb);
     const lv = state.upgrades.jackpotPayout || 0;
     const denom = Math.round(1 / m.prob);
     const hiddenRate = Math.pow(denom, 0.1) / 100;
-    state.jackpotPayout = Math.floor(m.payout * (1 + lv * (0.05 + hiddenRate)));
+    state.jackpotPayout = Math.floor(m.payout * (1 + lv * (0.05 + hiddenRate)) * pMult);
     state.costPerSpin = m.cost * Math.pow(0.95, state.upgrades.costReduction || 0);
+    // 回転速度: ベース + アップグレード の全体にプレステージ乗算
+    const spinLv = state.upgrades.spinRate || 0;
+    const spinBonus = spinLv > 0 ? 0.5 * (Math.pow(1.05, spinLv) - 1) / 0.05 : 0;
+    const hyperLv = state.upgrades.hyperShooter || 0;
+    state.spinRate = (1 + spinBonus + hyperLv * 1.0) * pMult;
 }
 
 function switchMachine(machineId) {

@@ -29,7 +29,7 @@ function rollJackpotType() {
 }
 
 function getJackpotPayout(type) {
-    let base = state.jackpotPayout * getPrestigeMultiplier();
+    let base = state.jackpotPayout;
     // Premiumアップグレード: ラッキーペイアウト
     const luckyLv = state.upgrades.luckyPayout || 0;
     if (luckyLv > 0) {
@@ -255,7 +255,7 @@ function gameLoop(now) {
             const isJitan = state.mode === MODE_JITAN;
             let actualCost;
             if (isRushMode || isJitan) {
-                actualCost = state.costPerSpin * 0.1;
+                actualCost = 0.1 + Math.random() * 0.4;
             } else {
                 actualCost = state.costPerSpin;
             }

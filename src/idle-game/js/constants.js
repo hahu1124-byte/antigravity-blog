@@ -17,7 +17,7 @@ const KAKUHEN_PROB_MULTIPLIER = 10;
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.12.25';
+const GAME_VERSION = 'v0.12.26';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -59,7 +59,7 @@ const MACHINES = [
         desc: 'バランス型',
         prob: 328 / 65536,  // 1/199.805
         payout: 936,
-        cost: 10.75,
+        cost: 12.5,
         kakuhenRate: 0.25,
         stRate: 0.30,
         jitanRate: 0.20,
@@ -75,7 +75,7 @@ const MACHINES = [
         desc: 'スタンダード',
         prob: 205 / 65536,  // 1/319.688
         payout: 1500,
-        cost: 11.5,
+        cost: 15,
         kakuhenRate: 0.35,
         stRate: 0.25,
         jitanRate: 0.20,
@@ -91,7 +91,7 @@ const MACHINES = [
         desc: '確変ループ特化型',
         prob: 164 / 65536,  // 1/399.610
         payout: 1876,
-        cost: 12.25,
+        cost: 17.5,
         kakuhenRate: 0.50,
         stRate: 0.15,
         jitanRate: 0.15,
@@ -107,7 +107,7 @@ const MACHINES = [
         desc: '確変ループ全振り・ロマン型',
         prob: 131 / 65536,  // 1/500.275
         payout: 2347,
-        cost: 13,
+        cost: 20,
         kakuhenRate: 0.60,
         stRate: 0.10,
         jitanRate: 0.10,
@@ -132,11 +132,7 @@ const UPGRADES = [
         baseCost: 300,
         costMultiplier: 1.15,
         maxLevel: Infinity,
-        apply: (s) => {
-            const lv = s.upgrades.spinRate || 0;
-            const bonus = lv > 0 ? 0.5 * (Math.pow(1.05, lv) - 1) / 0.05 : 0;
-            s.spinRate = 1 + bonus * Math.pow(1.03, s.prestiges);
-        },
+        apply: () => { },
         effectText: (s) => `${s.spinRate.toFixed(1)}回/秒`,
     },
     {
@@ -147,10 +143,7 @@ const UPGRADES = [
         baseCost: 800,
         costMultiplier: 2.0,
         maxLevel: 30,
-        apply: (s) => {
-            const m = getCurrentMachine();
-            s.jackpotProb = m.prob * Math.pow(1.05, s.upgrades.jackpotProb);
-        },
+        apply: () => { },
         effectText: (s) => `1/${Math.round(1 / s.jackpotProb)}`,
     },
     {
@@ -161,13 +154,7 @@ const UPGRADES = [
         baseCost: 500,
         costMultiplier: 1.8,
         maxLevel: 50,
-        apply: (s) => {
-            const m = getCurrentMachine();
-            const lv = s.upgrades.jackpotPayout || 0;
-            const denom = Math.round(1 / m.prob);
-            const hiddenRate = Math.pow(denom, 0.1) / 100;
-            s.jackpotPayout = Math.floor(m.payout * (1 + lv * (0.05 + hiddenRate)));
-        },
+        apply: () => { },
         effectText: (s) => `${formatNum(s.jackpotPayout)}玉`,
     },
 
@@ -223,11 +210,7 @@ const UPGRADES = [
         baseCost: 2000,
         costMultiplier: 2.0,
         maxLevel: 10,
-        apply: (s) => {
-            const m = getCurrentMachine();
-            const lv = s.upgrades.costReduction || 0;
-            s.costPerSpin = m.cost * Math.pow(0.95, lv);
-        },
+        apply: () => { },
         effectText: (s) => {
             const lv = s.upgrades.costReduction || 0;
             return lv > 0 ? `-${Math.round((1 - Math.pow(0.95, lv)) * 100)}%` : '0%';
@@ -279,10 +262,7 @@ const PREMIUM_UPGRADES = [
         baseCost: 1500,
         costMultiplier: 1.8,
         maxLevel: 20,
-        apply: (s) => {
-            const lv = s.upgrades.hyperShooter || 0;
-            if (lv > 0) s.spinRate += lv * 1.0;
-        },
+        apply: () => { },
         effectText: (s) => `+${(s.upgrades.hyperShooter || 0) * 1.0}回/秒`,
     },
 ];
