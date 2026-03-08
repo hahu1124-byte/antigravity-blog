@@ -17,7 +17,7 @@ const KAKUHEN_PROB_MULTIPLIER = 10;
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.12.22';
+const GAME_VERSION = 'v0.12.23';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -49,7 +49,7 @@ const MACHINES = [
         jitanRate: 0.20,
         kakuhenContinueRate: 0.65,
         baseStSpins: 10,
-        yutimeThreshold: 247,
+        yutimeThreshold: 250,
         unlockCondition: () => true,
         unlockText: '初期台',
     },
@@ -65,7 +65,7 @@ const MACHINES = [
         jitanRate: 0.20,
         kakuhenContinueRate: 0.65,
         baseStSpins: 21,
-        yutimeThreshold: 497,
+        yutimeThreshold: 500,
         unlockCondition: (s) => s.prestiges >= 1,
         unlockText: 'プレステージ1回',
     },
@@ -81,7 +81,7 @@ const MACHINES = [
         jitanRate: 0.20,
         kakuhenContinueRate: 0.65,
         baseStSpins: 33,
-        yutimeThreshold: 957,
+        yutimeThreshold: 959,
         unlockCondition: (s) => s.prestiges >= 3,
         unlockText: 'プレステージ3回',
     },
@@ -97,7 +97,7 @@ const MACHINES = [
         jitanRate: 0.15,
         kakuhenContinueRate: 0.65,
         baseStSpins: 41,
-        yutimeThreshold: 1197,
+        yutimeThreshold: 1199,
         unlockCondition: (s) => s.prestiges >= 7,
         unlockText: 'プレステージ7回',
     },
@@ -113,7 +113,7 @@ const MACHINES = [
         jitanRate: 0.10,
         kakuhenContinueRate: 0.65,
         baseStSpins: 52,
-        yutimeThreshold: 1497,
+        yutimeThreshold: 1501,
         unlockCondition: (s) => s.prestiges >= 15,
         unlockText: 'プレステージ15回',
     },
