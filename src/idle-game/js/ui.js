@@ -392,10 +392,12 @@ function renderMachineInfoPopup() {
                 <div class="machine-info-specs">
                     <span>確変率 ${(m.kakuhenRate * 100).toFixed(2)}%</span>
                     <span>確変継続率 ${(m.kakuhenContinueRate * 100).toFixed(2)}%</span>
-                    <span>ST率 ${(m.stRate * 100).toFixed(2)}%</span>
                 </div>
                 <div class="machine-info-specs">
+                    <span>ST率 ${(m.stRate * 100).toFixed(2)}%</span>
                     <span>ST回転 ${m.baseStSpins}</span>
+                </div>
+                <div class="machine-info-specs">
                     <span>高確率 1/${(1 / m.highProb).toFixed(2)}</span>
                     <span>ST継続率 ${(stCont * 100).toFixed(2)}%</span>
                 </div>

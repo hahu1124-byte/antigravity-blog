@@ -1431,7 +1431,7 @@ body {
     flex-wrap: wrap;
     gap: 6px 10px;
     font-family: var(--font-mono);
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     color: var(--accent-cyan);
     margin-top: 3px;
 }
