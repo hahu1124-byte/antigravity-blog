@@ -17,7 +17,7 @@ const KAKUHEN_PROB_MULTIPLIER = 10;
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.12.06';
+const GAME_VERSION = 'v0.12.07';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;

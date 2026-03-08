@@ -15,13 +15,11 @@
 </head>
 
 <body>
-    <div id="alphaBanner" class="alpha-banner">
-        ⚠️ αテスト中 — データがリセットされる場合があります</div>
+    <!-- 大当たり通知（固定フローティング） -->
+    <div id="jackpotNotify" class="jackpot-notify hidden"></div>
     <div id="app">
         <!-- 固定表示エリア（ステータスバー＋液晶） -->
         <div id="stickyTop">
-            <!-- 大当たり通知（フローティング） -->
-            <div id="jackpotNotify" class="jackpot-notify hidden"></div>
             <header id="statusBar">
                 <button id="statsToggle" class="stats-toggle-btn" aria-label="統計">☰</button>
                 <div class="status-item">

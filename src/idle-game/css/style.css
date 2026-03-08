@@ -74,14 +74,19 @@ body {
 
 /* --- 大当たり通知（フローティング） --- */
 .jackpot-notify {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
     text-align: center;
-    padding: 4px 8px;
+    padding: 6px 8px;
     font-family: var(--font-mono);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     font-weight: 700;
     color: var(--accent-green);
-    background: rgba(0, 255, 136, 0.1);
-    border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+    background: rgba(0, 255, 136, 0.12);
+    border-bottom: 1px solid rgba(0, 255, 136, 0.25);
     animation: notifyFadeIn 0.2s ease-out;
     text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
 }
@@ -1735,8 +1740,10 @@ body {
 
 .debt-sticky-interest {
     font-family: var(--font-mono);
-    font-size: 0.6rem;
-    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--accent-orange);
+    text-shadow: 0 0 4px rgba(255, 136, 0, 0.3);
 }
 
 .debt-sticky-buttons {
