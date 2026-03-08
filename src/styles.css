@@ -617,6 +617,14 @@ html[data-theme="light"] .content img {
     .post-nav {
         grid-template-columns: 1fr;
     }
+
+    .amazon-ads-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .amazon-search-form {
+        flex-direction: column;
+    }
 }
 
 /* --- ページネーション --- */
@@ -719,7 +727,7 @@ html[data-theme="light"] .content img {
 
 .amazon-ads-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 0.75rem;
     margin-bottom: 1.25rem;
 }

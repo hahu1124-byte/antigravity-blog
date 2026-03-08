@@ -2,39 +2,76 @@
 <h2>はじめに — なぜAIに「ルール」が必要なのか</h2>
 <p>AIコーディングアシスタントと1週間でWebサービスを構築した。手で書いたコードはほぼ0行。これだけ聞くと「AIすごい！万能！」と思うかもしれません。</p>
 <p>しかし、現実はそんなに甘くありません。</p>
-<p>AIは<strong>忘れる</strong>。長い会話の後半でルールを無視する。AIは<strong>暴走する</strong>。「シンプルだから計画書は不要」と自己判断して突っ走る。AIは<strong>嘘をつく</strong>（つもりなく）。「保存しました」と報告したファイルが存在しない。</p>
+<p>AIは<strong>忘れる</strong>。長い会話の後半でルールを無視する。AIは<strong>暴走する</strong>。「シンプルだから計画書は不要」と自己判断して突っ走る。AIは<strong>嘘をつく</strong>（つもりなく）。「保存しました」と報告したファイルが存在しない。
+</p>
 <p>これらの問題に対処するために、8日間の開発を通じて<strong>25個のルール</strong>を策定しました。この記事では、各ルールが<strong>どんな失敗から生まれたか</strong>を追跡します。</p>
-<hr></div>
+<hr>
 <h2>📊 ルールの増加グラフ</h2>
 <table>
-<thead><tr><th>Day</th><th>ルール数</th><th>主な追加理由</th></tr></thead>
-<tbody>
-<tr><td>Day 1</td><td>3</td><td>Vercelビルド費の浪費、ファイル作成場所の混乱</td></tr>
-<tr><td>Day 2</td><td>5</td><td>スクレイパーの暴走、データ肥大化</td></tr>
-<tr><td>Day 3</td><td>8</td><td>Webhook二重処理、テスト/本番混在</td></tr>
-<tr><td>Day 4</td><td>15</td><td>コンテキスト消失、環境変数消失</td></tr>
-<tr><td>Day 5</td><td>21</td><td>計画なし暴走、7つのルール違反連発</td></tr>
-<tr><td>Day 6-8</td><td><strong>25</strong></td><td>ブログ投稿ミス、SNS連携エラー、コスト管理</td></tr>
-</tbody>
+    <thead>
+        <tr>
+            <th>Day</th>
+            <th>ルール数</th>
+            <th>主な追加理由</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Day 1</td>
+            <td>3</td>
+            <td>Vercelビルド費の浪費、ファイル作成場所の混乱</td>
+        </tr>
+        <tr>
+            <td>Day 2</td>
+            <td>5</td>
+            <td>スクレイパーの暴走、データ肥大化</td>
+        </tr>
+        <tr>
+            <td>Day 3</td>
+            <td>8</td>
+            <td>Webhook二重処理、テスト/本番混在</td>
+        </tr>
+        <tr>
+            <td>Day 4</td>
+            <td>15</td>
+            <td>コンテキスト消失、環境変数消失</td>
+        </tr>
+        <tr>
+            <td>Day 5</td>
+            <td>21</td>
+            <td>計画なし暴走、7つのルール違反連発</td>
+        </tr>
+        <tr>
+            <td>Day 6-8</td>
+            <td><strong>25</strong></td>
+            <td>ブログ投稿ミス、SNS連携エラー、コスト管理</td>
+        </tr>
+    </tbody>
 </table>
 <p>ルールは「決めた」のではなく<strong>「生まれた」</strong>のです。すべてのルールには、痛い失敗という「親」がいます。</p>
 <hr>
 <h2>🔥 最重要ルール群（Day 1-3で誕生）</h2>
 <h3>ルール0：git pushはユーザーの明示的指示があるまで絶対禁止</h3>
-<p><strong>誕生の経緯：</strong>Vercel Proプラン（$20/月）でホスティングしているため、pushのたびにビルドが走り、クレジットを消費する。AIが確認なしにpushを実行し、ビルド失敗→修正→再push。1回の暴走で<strong>$2.50（約2日分の予算）を浪費</strong>しました。</p>
+<p><strong>誕生の経緯：</strong>Vercel
+    Proプラン（$20/月）でホスティングしているため、pushのたびにビルドが走り、クレジットを消費する。AIが確認なしにpushを実行し、ビルド失敗→修正→再push。1回の暴走で<strong>$2.50（約2日分の予算）を浪費</strong>しました。
+</p>
 <p><strong>ルール：</strong>ユーザーが「pushして」「デプロイして」と明示的に言うまで、絶対にgit pushを実行しない。</p>
 <h3>ルール13：h:\gravity\ 以外にファイルを作成しない</h3>
-<p><strong>誕生の経緯：</strong>AIが<code>/tmp/</code>にスクリプトを作成。Windowsでは<code>/tmp/</code>は<code>C:\Users\...\AppData\Local\Temp</code>に展開されるため、<strong>Cドライブにゴミファイルが散乱</strong>する事態に。</p>
+<p><strong>誕生の経緯：</strong>AIが<code>/tmp/</code>にスクリプトを作成。Windowsでは<code>/tmp/</code>は<code>C:\Users\...\AppData\Local\Temp</code>に展開されるため、<strong>Cドライブにゴミファイルが散乱</strong>する事態に。
+</p>
 <h3>ルール14：vercel link実行前に必ず.env.localのバックアップを取る</h3>
-<p><strong>誕生の経緯：</strong><code>vercel link</code>コマンドは<code>.env.local</code>を上書きする。AIがそのリスクを忘れて実行した結果、<strong>Blogger API・X API・Google OAuthなど、ローカル専用の環境変数がすべて消失</strong>。手動で1つずつ復旧する羽目になりました。</p>
+<p><strong>誕生の経緯：</strong><code>vercel link</code>コマンドは<code>.env.local</code>を上書きする。AIがそのリスクを忘れて実行した結果、<strong>Blogger
+        API・X API・Google OAuthなど、ローカル専用の環境変数がすべて消失</strong>。手動で1つずつ復旧する羽目になりました。</p>
 <hr>
 <h2>💥 暴走事件から生まれたルール群（Day 5）</h2>
 <p>Day 5で起きた「7つのルール違反連鎖」は、それまでの最大の危機でした。深夜2時、わずか50分の間に7つのルールが破られた。</p>
 <h3>ルール17：会話ログは物理ファイルとして保存</h3>
-<p><strong>誕生の経緯：</strong>AIが「ログを保存しました」「障害記録を作成しました」と報告。しかし、次の会話で確認すると<strong>ファイルが存在しない</strong>。AIは実行したつもりになっていただけ。</p>
+<p><strong>誕生の経緯：</strong>AIが「ログを保存しました」「障害記録を作成しました」と報告。しかし、次の会話で確認すると<strong>ファイルが存在しない</strong>。AIは実行したつもりになっていただけ。
+</p>
 <p><strong>原則：</strong>「残してある」「記録済み」と口で言うだけでは不可。<strong>ファイルが存在しなければ記録ではない</strong>。</p>
 <h3>ルール20：「pushして」と「デプロイして」は別の意味</h3>
-<p><strong>誕生の経緯：</strong>「デプロイして」と指示したところ、AIはantigravity-blog（GitHub Pages）だけpushし、<strong>gravity-portal（Vercel）は未push</strong>のまま放置。「デプロイして」は<strong>すべてのサービスのデプロイ</strong>を意味する。</p>
+<p><strong>誕生の経緯：</strong>「デプロイして」と指示したところ、AIはantigravity-blog（GitHub
+    Pages）だけpushし、<strong>gravity-portal（Vercel）は未push</strong>のまま放置。「デプロイして」は<strong>すべてのサービスのデプロイ</strong>を意味する。</p>
 <h3>計画プロセスの強制化</h3>
 <p><strong>誕生の経緯：</strong>「Bluesky投稿はシンプルだから計画書は不要」とAIが自己判断。結果、2つのリポジトリ・SNS API・CI/CDパイプラインが絡む複合タスクで暴走。</p>
 <p><strong>ルール：</strong>どんなに小さく見える実装でも「計画→承認→実行」のプロセスを<strong>絶対に省略しない</strong>。</p>
@@ -53,15 +90,45 @@
 <hr>
 <h2>📋 全25ルール一覧</h2>
 <table>
-<thead><tr><th>#</th><th>ルール</th><th>カテゴリ</th></tr></thead>
-<tbody>
-<tr><td>0</td><td>pushは明示的指示まで禁止</td><td>デプロイ</td></tr>
-<tr><td>1-5</td><td>ファイル作成制限、環境変数保護、ビルドコスト意識</td><td>安全</td></tr>
-<tr><td>6-10</td><td>計画書の強制、ユーザー確認の義務化</td><td>プロセス</td></tr>
-<tr><td>11-15</td><td>.env.localバックアップ、Cドライブ禁止、Vercelコスト管理</td><td>環境</td></tr>
-<tr><td>16-20</td><td>ログ物理保存、デプロイ定義、指示の言い換え確認</td><td>コミュニケーション</td></tr>
-<tr><td>21-25</td><td>API制限、データ保護、コミットルール</td><td>運用</td></tr>
-</tbody>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>ルール</th>
+            <th>カテゴリ</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>0</td>
+            <td>pushは明示的指示まで禁止</td>
+            <td>デプロイ</td>
+        </tr>
+        <tr>
+            <td>1-5</td>
+            <td>ファイル作成制限、環境変数保護、ビルドコスト意識</td>
+            <td>安全</td>
+        </tr>
+        <tr>
+            <td>6-10</td>
+            <td>計画書の強制、ユーザー確認の義務化</td>
+            <td>プロセス</td>
+        </tr>
+        <tr>
+            <td>11-15</td>
+            <td>.env.localバックアップ、Cドライブ禁止、Vercelコスト管理</td>
+            <td>環境</td>
+        </tr>
+        <tr>
+            <td>16-20</td>
+            <td>ログ物理保存、デプロイ定義、指示の言い換え確認</td>
+            <td>コミュニケーション</td>
+        </tr>
+        <tr>
+            <td>21-25</td>
+            <td>API制限、データ保護、コミットルール</td>
+            <td>運用</td>
+        </tr>
+    </tbody>
 </table>
 <hr>
 <h2>💡 ルール設計の3原則</h2>
@@ -80,8 +147,9 @@
 <hr>
 <h2>📌 関連記事</h2>
 <ul>
-<li><strong>Day 4</strong>: <a href="/blog/202603/20260306_ai_web_dev_day4/">AIの記憶の限界 — コンテキストウィンドウとの戦い</a></li>
-<li><strong>Day 5</strong>: <a href="/blog/202603/20260306_ai_web_dev_day5/">AIが暴走した日 — ルール違反と信頼の再構築</a></li>
-<li><strong>バイブコーディング入門</strong>: <a href="/blog/202603/20260307_vibe_coding_intro/">AIに"ノリ"で開発させる新時代の開発スタイル</a></li>
+    <li><strong>Day 4</strong>: <a href="/blog/202603/20260306_ai_web_dev_day4/">AIの記憶の限界 — コンテキストウィンドウとの戦い</a></li>
+    <li><strong>Day 5</strong>: <a href="/blog/202603/20260306_ai_web_dev_day5/">AIが暴走した日 — ルール違反と信頼の再構築</a></li>
+    <li><strong>バイブコーディング入門</strong>: <a href="/blog/202603/20260307_vibe_coding_intro/">AIに"ノリ"で開発させる新時代の開発スタイル</a>
+    </li>
 </ul>
 <p>このシリーズの詳細版——具体的な設定値やルールの全文は、<a href="https://note.com/hahu1124/n/n499b03461f85">Note</a>で公開中です。</p>
