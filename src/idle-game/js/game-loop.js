@@ -202,7 +202,7 @@ let lastJackpotType = null;
 // プレステージ一時停止フラグ（確認〜完了後3秒）
 let prestigePaused = false;
 let prestigePauseTimer = 0;
-const PRESTIGE_PAUSE_DURATION = 3.0;
+const PRESTIGE_PAUSE_DURATION = 1.0;
 
 function gameLoop(now) {
     const dt = Math.min((now - lastFrameTime) / 1000, 0.1);

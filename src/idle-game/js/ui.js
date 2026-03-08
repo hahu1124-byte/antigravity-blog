@@ -420,7 +420,7 @@ function updateShopUI() {
 
         const levelEl = card.querySelector('.shop-level');
         const costEl = card.querySelector('.shop-cost');
-        if (levelEl) levelEl.textContent = `Lv.${level}${upg.maxLevel > 1 ? `/${upg.maxLevel}` : ''} → ${upg.effectText(state)}`;
+        if (levelEl) levelEl.textContent = `Lv.${level}${upg.maxLevel !== Infinity && upg.maxLevel > 1 ? `/${upg.maxLevel}` : ''} → ${upg.effectText(state)}`;
         if (costEl) costEl.textContent = isMaxed ? '✅ MAX' : `${formatNum(cost)}玉`;
 
         const spentEl = card.querySelector('.shop-spent');

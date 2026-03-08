@@ -17,7 +17,7 @@ const KAKUHEN_PROB_MULTIPLIER = 10;
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.12.10';
+const GAME_VERSION = 'v0.12.11';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -127,12 +127,16 @@ const UPGRADES = [
     {
         id: 'spinRate',
         name: '⚡ 回転速度UP',
-        desc: '毎秒の回転数を+0.5増加',
+        desc: '毎秒の回転数を指数的に増加',
         icon: '⚡',
         baseCost: 300,
-        costMultiplier: 1.5,
-        maxLevel: 50,
-        apply: (s) => { s.spinRate = 1 + s.upgrades.spinRate * 0.5; },
+        costMultiplier: 1.15,
+        maxLevel: Infinity,
+        apply: (s) => {
+            const lv = s.upgrades.spinRate || 0;
+            const bonus = lv > 0 ? 0.5 * (Math.pow(1.05, lv) - 1) / 0.05 : 0;
+            s.spinRate = 1 + bonus * Math.pow(1.03, s.prestiges);
+        },
         effectText: (s) => `${s.spinRate.toFixed(1)}回/秒`,
     },
     {

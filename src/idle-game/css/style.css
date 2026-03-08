@@ -75,21 +75,20 @@ body {
 /* --- 大当たり通知（フローティング） --- */
 .jackpot-notify {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     right: 0;
     z-index: 50;
     text-align: center;
-    padding: 10px 8px;
+    padding: 8px 8px;
     font-family: var(--font-mono);
     font-size: 1.1rem;
     font-weight: 700;
     color: var(--accent-green);
-    background: rgba(0, 20, 8, 0.95);
-    border-top: 1px solid rgba(0, 255, 136, 0.3);
-    border-bottom: 1px solid rgba(0, 255, 136, 0.3);
+    background: rgba(0, 255, 136, 0.12);
+    border-bottom: 1px solid rgba(0, 255, 136, 0.25);
     animation: notifyFadeIn 0.2s ease-out;
-    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+    text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
 }
 
 .jackpot-notify.rush-notify {
