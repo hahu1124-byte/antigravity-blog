@@ -15,8 +15,6 @@
 </head>
 
 <body>
-    <!-- 大当たり通知（固定フローティング） -->
-    <div id="jackpotNotify" class="jackpot-notify hidden"></div>
     <div id="app">
         <!-- 固定表示エリア（ステータスバー＋液晶） -->
         <div id="stickyTop">
@@ -82,8 +80,8 @@
                 </div>
             </div>
 
-            <!-- 借金セクション（スティッキー固定） -->
-            <section id="debtSection" class="hidden">
+            <!-- 借金セクション（スティッキー固定・常時表示） -->
+            <section id="debtSection">
                 <div class="debt-sticky-bar">
                     <div class="debt-sticky-info">
                         <span class="debt-sticky-label">💸 借金</span>
@@ -96,6 +94,8 @@
                     </div>
                 </div>
             </section>
+            <!-- 大当たり通知（遊タイムゲージ～借金UIにオーバーレイ） -->
+            <div id="jackpotNotify" class="jackpot-notify hidden"></div>
         </div><!-- /stickyTop -->
 
         <!-- メイン: 台エリア -->

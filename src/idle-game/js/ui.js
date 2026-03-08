@@ -210,31 +210,24 @@ function updateUI() {
         : '-';
     dom.playTimeStat.textContent = formatTime(state.playTime);
 
-    // 借金表示: 収支がマイナスの時だけ表示
-    if (profit < 0) {
-        dom.debtSection.classList.remove('hidden');
-        dom.debtAmount.textContent = state.debt > 0 ? formatYenRaw(state.debt) : '¥0';
-        const minutesElapsed = state.debtStartTime > 0
-            ? Math.floor((Date.now() - state.debtStartTime) / 60000)
+    // 借金表示: 常時表示
+    dom.debtAmount.textContent = state.debt > 0 ? formatYenRaw(state.debt) : '¥0';
+    const minutesElapsed = state.debtStartTime > 0
+        ? Math.floor((Date.now() - state.debtStartTime) / 60000)
+        : 0;
+    if (state.debt > 0) {
+        const periods = minutesElapsed;
+        const interestGrown = periods > 0
+            ? Math.floor(state.debt - state.debt / Math.pow(1 + DEBT_INTEREST_RATE, periods))
             : 0;
-        if (state.debt > 0) {
-            // 複利で増えた分を計算（借金合計 - 元本 = 利息分）
-            // 元本 = debt / (1+r)^periods だが、正確な追跡は難しいので累計と現在の差で表示
-            const periods = minutesElapsed;
-            const interestGrown = periods > 0
-                ? Math.floor(state.debt - state.debt / Math.pow(1 + DEBT_INTEREST_RATE, periods))
-                : 0;
-            dom.debtInterest.textContent = `複利5%/分(+${formatYenRaw(interestGrown)})`;
-        } else {
-            dom.debtInterest.textContent = '利息なし';
-        }
-        dom.repayBtn.disabled = state.balls <= 0 || state.debt <= 0;
-        const repayBalls = getDebtRepayBalls();
-        dom.repayPartialBtn.disabled = state.balls < repayBalls || state.debt <= 0;
-        dom.repayPartialBtn.textContent = `💴 ¥${DEBT_REPAY_UNIT_YEN.toLocaleString('ja-JP')}返済`;
+        dom.debtInterest.textContent = `複利5%/分(+${formatYenRaw(interestGrown)})`;
     } else {
-        dom.debtSection.classList.add('hidden');
+        dom.debtInterest.textContent = '利息なし';
     }
+    dom.repayBtn.disabled = state.balls <= 0 || state.debt <= 0;
+    const repayBalls = getDebtRepayBalls();
+    dom.repayPartialBtn.disabled = state.balls < repayBalls || state.debt <= 0;
+    dom.repayPartialBtn.textContent = `💴 ¥${DEBT_REPAY_UNIT_YEN.toLocaleString('ja-JP')}返済`;
 
     // プレステージ（統計ポップアップ: 回数とボーナスのみ）
     const pThreshold = getPrestigeThreshold();
