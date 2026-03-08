@@ -1363,6 +1363,8 @@ body {
 }
 
 .machine-info-popup {
+    max-width: 420px;
+    width: 95vw;
     max-height: 80vh;
     overflow-y: auto;
 }
@@ -1404,9 +1406,10 @@ body {
 
 .machine-info-specs {
     display: flex;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 6px 10px;
     font-family: var(--font-mono);
-    font-size: 0.65rem;
+    font-size: 0.6rem;
     color: var(--accent-cyan);
     margin-top: 3px;
 }
