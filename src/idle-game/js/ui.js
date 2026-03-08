@@ -392,7 +392,7 @@ function renderShop() {
             </div>
             <div class="shop-icon">${upg.icon}</div>
             <div class="shop-info">
-                <div class="shop-name">${upg.name}</div>
+                <div class="shop-name">${upg.name}${upg.maxLevel > 1 ? `（${upg.maxLevel === Infinity ? '∞' : upg.maxLevel}）` : ''}</div>
                 <div class="shop-desc">${upg.desc}</div>
                 <div class="shop-level"></div>
             </div>
