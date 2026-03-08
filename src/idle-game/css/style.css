@@ -74,14 +74,20 @@ body {
 
 /* --- 大当たり通知（フローティング） --- */
 .jackpot-notify {
-    text-align: center;
-    padding: 6px 8px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-family: var(--font-mono);
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     font-weight: 700;
     color: var(--accent-green);
     background: rgba(0, 255, 136, 0.12);
-    border-bottom: 1px solid rgba(0, 255, 136, 0.25);
     animation: notifyFadeIn 0.2s ease-out;
     text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
 }
@@ -526,6 +532,7 @@ body {
 
 /* --- ハマりゲージ (遊タイムゲージ) --- */
 #hamariMeter {
+    position: relative;
     margin: 0;
     padding: 6px 4px 4px;
     background: var(--bg-primary);
@@ -774,6 +781,14 @@ body {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
     margin-bottom: 12px;
+}
+
+.prestige-bonus-detail {
+    font-size: 0.7rem;
+    color: var(--accent-cyan);
+    text-align: center;
+    padding: 4px 0;
+    font-weight: 600;
 }
 
 .prestige-stat {

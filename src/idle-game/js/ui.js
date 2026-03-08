@@ -233,7 +233,17 @@ function updateUI() {
     // プレステージ（統計ポップアップ: 回数とボーナスのみ）
     const pThreshold = getPrestigeThreshold();
     dom.prestigeCount.textContent = state.prestiges;
-    dom.prestigeBonus.textContent = `x${Math.pow(1.03, state.prestiges).toFixed(2)}`;
+    const pMult = Math.pow(1.03, state.prestiges);
+    dom.prestigeBonus.textContent = `x${pMult.toFixed(2)}`;
+    // ボーナス詳細表示
+    const bonusDetail = document.getElementById('prestigeBonusDetail');
+    if (bonusDetail) {
+        if (state.prestiges > 0) {
+            bonusDetail.textContent = `出玉 x${pMult.toFixed(2)} / 回転速度 x${pMult.toFixed(2)}`;
+        } else {
+            bonusDetail.textContent = '出玉・回転速度に乗算';
+        }
+    }
 
     // プレステージセクション（機種選択〜ショップ間: 条件達成時のみ表示）
     const canPrestige = state.jackpots >= pThreshold;
