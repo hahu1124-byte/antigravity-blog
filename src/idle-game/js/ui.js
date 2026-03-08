@@ -110,7 +110,7 @@ function showJackpotBanner(type, payout) {
         [MODE_JITAN]: '🕐',
         [MODE_NORMAL]: '🎉',
     };
-    lastJackpotInfo = `${typeIcons[type] || '🎉'} +${formatNum(payout)}`;
+    lastJackpotInfo = `+${formatNum(payout)}`;
     jackpotAnimTimer = 1.5;
     // フローティング通知に表示
     dom.jackpotNotify.textContent = lastJackpotInfo;
