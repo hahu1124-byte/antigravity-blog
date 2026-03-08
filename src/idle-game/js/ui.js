@@ -63,6 +63,7 @@ const dom = {
     rateSection: $('rateSection'),
     rateGrid: $('rateGrid'),
     versionDisplay: $('versionDisplay'),
+    jackpotNotify: $('jackpotNotify'),
 };
 
 // ============================================================
@@ -110,11 +111,19 @@ function showJackpotBanner(type, payout) {
     };
     lastJackpotInfo = `${typeIcons[type] || '🎉'} +${formatNum(payout)}`;
     jackpotAnimTimer = 1.5;
+    // フローティング通知に表示
+    dom.jackpotNotify.textContent = lastJackpotInfo;
+    dom.jackpotNotify.className = 'jackpot-notify';
+    dom.jackpotNotify.classList.remove('hidden');
 }
 
 function showRushSummary(chains, totalPayout) {
     lastJackpotInfo = `🏆 ${chains}連荘 +${formatNum(totalPayout)}`;
     jackpotAnimTimer = 3.0;
+    // フローティング通知に表示
+    dom.jackpotNotify.textContent = lastJackpotInfo;
+    dom.jackpotNotify.className = 'jackpot-notify rush-notify';
+    dom.jackpotNotify.classList.remove('hidden');
 }
 
 let yutimeAnimTimer = 0;
@@ -138,9 +147,7 @@ function updateUI() {
 
     // ステータスバー
     const ballText = formatNum(state.balls);
-    dom.ballCount.textContent = lastJackpotInfo
-        ? `${ballText}  ${lastJackpotInfo}`
-        : ballText;
+    dom.ballCount.textContent = ballText;
     dom.spinCount.textContent = formatNum(state.spins);
     dom.jackpotCount.textContent = formatNum(state.jackpots);
 

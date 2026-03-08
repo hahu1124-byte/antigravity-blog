@@ -72,6 +72,43 @@ body {
     padding: 0 12px;
 }
 
+/* --- 大当たり通知（フローティング） --- */
+.jackpot-notify {
+    text-align: center;
+    padding: 4px 8px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-green);
+    background: rgba(0, 255, 136, 0.1);
+    border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+    animation: notifyFadeIn 0.2s ease-out;
+    text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+}
+
+.jackpot-notify.rush-notify {
+    color: var(--accent-gold);
+    background: rgba(255, 215, 0, 0.1);
+    border-bottom-color: rgba(255, 215, 0, 0.2);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+
+.jackpot-notify.hidden {
+    display: none;
+}
+
+@keyframes notifyFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* --- 固定表示エリア（ステータスバー＋LCD） --- */
 #stickyTop {
     position: sticky;

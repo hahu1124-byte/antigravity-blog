@@ -228,6 +228,7 @@ function gameLoop(now) {
         if (jackpotAnimTimer <= 0) {
             lastJackpotInfo = null;
             jackpotOccurred = false;
+            dom.jackpotNotify.classList.add('hidden');
         }
     }
     if (yutimeAnimTimer > 0) {
