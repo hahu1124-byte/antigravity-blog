@@ -420,7 +420,22 @@ function updateShopUI() {
 
         const levelEl = card.querySelector('.shop-level');
         const costEl = card.querySelector('.shop-cost');
-        if (levelEl) levelEl.textContent = `Lv.${level}${upg.maxLevel !== Infinity && upg.maxLevel > 1 ? `/${upg.maxLevel}` : ''} → ${upg.effectText(state)}`;
+        if (levelEl) {
+            if (isMaxed) {
+                levelEl.textContent = `Lv.${level} (${upg.effectText(state)}) ✅ MAX`;
+            } else {
+                const currentEffect = upg.effectText(state);
+                // 次Lvの効果を一時計算
+                state.upgrades[upg.id] = level + 1;
+                upg.apply(state);
+                const nextEffect = upg.effectText(state);
+                // 元に戻す
+                state.upgrades[upg.id] = level;
+                upg.apply(state);
+                const maxLabel = upg.maxLevel !== Infinity ? `/${upg.maxLevel}` : '';
+                levelEl.textContent = `Lv.${level}${maxLabel} (${currentEffect}) → Lv.${level + 1} (${nextEffect})`;
+            }
+        }
         if (costEl) costEl.textContent = isMaxed ? '✅ MAX' : `${formatNum(cost)}玉`;
 
         const spentEl = card.querySelector('.shop-spent');

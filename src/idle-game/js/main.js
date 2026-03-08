@@ -54,8 +54,17 @@ function init() {
 
     // ショップクリックイベント（イベント委譲、初回のみ）
     dom.shopGrid.addEventListener('click', (e) => {
+        // チェックボックスクリック時はスキップ（change側で処理）
+        if (e.target.classList.contains('autobuy-cb')) return;
         const card = e.target.closest('[data-upgrade-id]');
         if (!card) return;
+        // オートバイヤーがONの場合はクリックでオン/オフ切り替え
+        if (state.autoBuyer) {
+            state.autoBuyer = false;
+            saveGame();
+            updateShopUI();
+            return;
+        }
         buyUpgrade(card.dataset.upgradeId);
     });
 
