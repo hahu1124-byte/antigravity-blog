@@ -75,7 +75,7 @@ body {
 /* --- 大当たり通知（フローティング） --- */
 .jackpot-notify {
     position: absolute;
-    top: 50%;
+    top: 0;
     left: 0;
     right: 0;
     bottom: 0;
@@ -84,13 +84,13 @@ body {
     align-items: center;
     justify-content: center;
     font-family: var(--font-mono);
-    font-size: 1.6rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--accent-green);
     background: rgba(0, 255, 136, 0.12);
     animation: notifyFadeIn 0.2s ease-out;
     text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
-    border-radius: 0 0 var(--radius) var(--radius);
+    border-radius: var(--radius);
 }
 
 .jackpot-notify.rush-notify {
@@ -1437,6 +1437,56 @@ body {
     background: rgba(255, 215, 0, 0.06);
     border: 1px solid rgba(255, 215, 0, 0.15);
     border-radius: var(--radius-sm);
+}
+
+/* --- アチーブメントボタン活性/非活性 --- */
+.ach-btn {
+    transition: opacity 0.3s, filter 0.3s;
+}
+
+.ach-btn.ach-inactive {
+    opacity: 0.4;
+    filter: grayscale(1);
+}
+
+.ach-btn.ach-active {
+    opacity: 1;
+    filter: none;
+    animation: achBtnPulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes achBtnPulse {
+    0% {
+        text-shadow: none;
+    }
+
+    100% {
+        text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+    }
+}
+
+/* --- アチーブメント解放通知（スティッキーエリア） --- */
+.ach-notify {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    background: rgba(255, 215, 0, 0.1);
+    animation: notifyFadeIn 0.2s ease-out;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.ach-notify.hidden {
+    display: none;
 }
 
 .ach-item {

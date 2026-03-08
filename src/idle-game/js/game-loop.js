@@ -237,6 +237,14 @@ function gameLoop(now) {
             dom.yutimeBanner.classList.add('hidden');
         }
     }
+    // アチーブメント解放通知タイマー
+    if (achNotifyTimer > 0) {
+        achNotifyTimer -= dt;
+        if (achNotifyTimer <= 0) {
+            dom.achNotify.classList.add('hidden');
+        }
+    }
+    checkAchNotify();
 
     // 回転処理（常時自動購入: 玉不足時は自動借金で補充）
     const effectiveSpinRate = isPremium ? state.spinRate * PREMIUM_SPEED_MULTIPLIER : state.spinRate;

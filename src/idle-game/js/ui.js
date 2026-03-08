@@ -66,6 +66,8 @@ const dom = {
     rateGrid: $('rateGrid'),
     versionDisplay: $('versionDisplay'),
     jackpotNotify: $('jackpotNotify'),
+    achNotify: $('achNotify'),
+    achievementBtn: $('achievementBtn'),
 };
 
 // ============================================================
@@ -129,6 +131,27 @@ function showRushSummary(chains, totalPayout) {
 }
 
 let yutimeAnimTimer = 0;
+
+// アチーブメント解放通知
+let achNotifyTimer = 0;
+let prevClaimableTotal = -1; // 初回スキップ用
+
+function showAchNotify(text) {
+    dom.achNotify.textContent = text;
+    dom.achNotify.classList.remove('hidden');
+    achNotifyTimer = 1.5;
+}
+
+function checkAchNotify() {
+    let total = 0;
+    ACHIEVEMENT_DEFS.forEach(def => {
+        total += getAchClaimableCount(def);
+    });
+    if (prevClaimableTotal >= 0 && total > prevClaimableTotal) {
+        showAchNotify('🏆 アチーブメント解放！');
+    }
+    prevClaimableTotal = total;
+}
 
 function showYutimeBanner() {
     dom.yutimeBanner.classList.remove('hidden');
@@ -277,6 +300,21 @@ function updateUI() {
     }
 
     updateShopUI();
+
+    // アチーブメントボタン活性/非活性
+    if (dom.achievementBtn) {
+        let hasClaimable = false;
+        ACHIEVEMENT_DEFS.forEach(def => {
+            if (getAchClaimableCount(def) > 0) hasClaimable = true;
+        });
+        if (hasClaimable) {
+            dom.achievementBtn.classList.remove('ach-inactive');
+            dom.achievementBtn.classList.add('ach-active');
+        } else {
+            dom.achievementBtn.classList.remove('ach-active');
+            dom.achievementBtn.classList.add('ach-inactive');
+        }
+    }
 }
 
 // ============================================================
