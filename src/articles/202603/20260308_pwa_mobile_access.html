@@ -1,0 +1,114 @@
+<p><img src="/blog/images/pwa_mobile_access.png" alt="PWAでスマホアクセスが変わった"></p>
+<h2>はじめに — 「ブックマークしてるけど、毎回ブラウザ開くのだるい」</h2>
+<p>Gravity Portalを公開して数日。Google Analyticsを確認すると、アクセスの<strong>約60%がスマートフォン</strong>からでした。</p>
+<p>パチンコの期待値を計算するユーザーの多くは、<strong>パチンコ店にいる時にスマホでアクセス</strong>しています。店内で台のスペックを確認し、回転率を入力し、打つべきかどうかを即座に判断する——そんな使い方です。</p>
+<p>しかし、通常のWebサイトでは：</p>
+<ul>
+<li>ブラウザを開く → ブックマークを探す → タップ → ページ読み込み待ち</li>
+<li>URLを手入力する → 面倒でやめる</li>
+</ul>
+<p>この「アクセスまでの摩擦」を限りなくゼロにする技術が<strong>PWA（Progressive Web App）</strong>です。</p>
+<hr></div>
+<h2>📱 PWAとは何か</h2>
+<h3>一言で言うと</h3>
+<p>PWAは、<strong>Webサイトをネイティブアプリのように使えるようにする技術</strong>です。</p>
+<table>
+<thead><tr><th>機能</th><th>通常のWebサイト</th><th>PWA</th><th>ネイティブアプリ</th></tr></thead>
+<tbody>
+<tr><td>ホーム画面に追加</td><td>❌</td><td>✅</td><td>✅</td></tr>
+<tr><td>オフライン動作</td><td>❌</td><td>✅（キャッシュ）</td><td>✅</td></tr>
+<tr><td>フルスクリーン</td><td>❌</td><td>✅</td><td>✅</td></tr>
+<tr><td>アプリストア不要</td><td>✅</td><td>✅</td><td>❌</td></tr>
+<tr><td>更新の即時反映</td><td>✅</td><td>✅</td><td>❌（審査あり）</td></tr>
+<tr><td>開発コスト</td><td>低</td><td>低〜中</td><td>高</td></tr>
+</tbody>
+</table>
+<p>要するに、<strong>Webの手軽さとアプリの体験を両立</strong>できる技術です。</p>
+<hr>
+<h2>🛠️ 実装手順 — Next.jsにPWAを導入</h2>
+<h3>Step 1: Web Manifest の作成</h3>
+<p><code>manifest.json</code>はPWAの「名刺」です。アプリ名、アイコン、テーマカラーなどを定義します。</p>
+<pre><code>{
+  "name": "Gravity Portal",
+  "short_name": "Gravity",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1017",
+  "theme_color": "#7c7ff2",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "sizes": "512x512" }
+  ]
+}</code></pre>
+<h3>Step 2: Service Worker の登録</h3>
+<p>Service Workerは、ブラウザとサーバーの間に立つ「代理人」です。リクエストをキャッシュし、オフライン時にもコンテンツを返す役割を担います。</p>
+<p>Next.jsでは、<code>next-pwa</code>パッケージを使うのが定番でしたが、私はあえて<strong>手書きのService Worker</strong>を採用しました。理由は：</p>
+<ul>
+<li>キャッシュ戦略を細かくコントロールしたい</li>
+<li>機種データ（13MB）は積極的にキャッシュして高速化したい</li>
+<li>計算ロジックはキャッシュせず、常に最新版を使いたい</li>
+</ul>
+<h3>Step 3: キャッシュ戦略の選択</h3>
+<table>
+<thead><tr><th>リソース</th><th>戦略</th><th>理由</th></tr></thead>
+<tbody>
+<tr><td>HTML/CSS/JS</td><td>Network First</td><td>常に最新版を優先</td></tr>
+<tr><td>機種データJSON</td><td>Cache First</td><td>頻繁に変わらない、サイズ大</td></tr>
+<tr><td>画像</td><td>Cache First</td><td>変更されない</td></tr>
+<tr><td>API（計算）</td><td>Network Only</td><td>リアルタイム性が必要</td></tr>
+</tbody>
+</table>
+<hr>
+<h2>📊 導入前後の比較</h2>
+<h3>アクセス体験の変化</h3>
+<table>
+<thead><tr><th>指標</th><th>PWA導入前</th><th>PWA導入後</th></tr></thead>
+<tbody>
+<tr><td>初回読み込み</td><td>約2.5秒</td><td>約2.5秒（変わらず）</td></tr>
+<tr><td>2回目以降の読み込み</td><td>約1.8秒</td><td><strong>約0.5秒</strong></td></tr>
+<tr><td>アクセス手順</td><td>ブラウザ→ブックマーク→タップ</td><td><strong>ホーム画面アイコンをタップ</strong></td></tr>
+<tr><td>アドレスバー</td><td>表示される</td><td><strong>非表示（フルスクリーン）</strong></td></tr>
+<tr><td>オフライン時</td><td>エラー画面</td><td><strong>キャッシュから表示</strong></td></tr>
+</tbody>
+</table>
+<p>特に<strong>2回目以降の読み込みが3.6倍高速化</strong>したのは大きい。パチンコ店で「ちょっと確認したい」時に、0.5秒でツールが開くのは体験として全く別物です。</p>
+<h3>ユーザー行動の変化</h3>
+<ul>
+<li>ホーム画面に追加してくれるユーザーが増加</li>
+<li>「アプリはないの？」という問い合わせが減少</li>
+<li>滞在時間が平均20%増加（ストレスなく使い続けられるため）</li>
+</ul>
+<hr>
+<h2>⚠️ PWA導入の注意点</h2>
+<h3>1. iOSのPWAサポートは限定的</h3>
+<p>Androidでは完全なPWA体験を提供できますが、iOSでは：</p>
+<ul>
+<li>プッシュ通知が使えない（iOS 16.4以降で一部対応）</li>
+<li>バックグラウンド同期が動かない</li>
+<li>「ホームに追加」の導線が分かりにくい</li>
+</ul>
+<p>Gravity Portalでは、iOS対応として<strong>Service Workerのフォールバック</strong>を実装。Service Workerが動かない環境でもWebサイトとして正常に機能するよう設計しています。</p>
+<h3>2. キャッシュの更新問題</h3>
+<p>古いキャッシュが残り続けると、ユーザーが最新版のサイトを見られない問題が発生します。Service Workerの<strong>バージョン管理</strong>と<strong>キャッシュの自動クリア</strong>の仕組みが必須です。</p>
+<h3>3. HTTPS必須</h3>
+<p>Service WorkerはHTTPSでのみ動作します。ローカル開発時は<code>localhost</code>が例外として許可されますが、本番環境では必ずSSL証明書が必要です。Vercelを使っていれば自動で対応されます。</p>
+<hr>
+<h2>💡 まとめ：PWAは「コスパ最強」のモバイル対応</h2>
+<p>ネイティブアプリを開発するには、iOS/Androidそれぞれの知識が必要で、ストアの審査もあります。個人開発者にとって、この負担は大きすぎる。</p>
+<p>PWAなら：</p>
+<ul>
+<li>✅ 既存のWebサイトに<strong>数ファイル追加するだけ</strong></li>
+<li>✅ ストア審査<strong>不要</strong></li>
+<li>✅ 更新は即時反映</li>
+<li>✅ ホーム画面にアイコンが出る</li>
+<li>✅ オフラインでも動く</li>
+</ul>
+<p>個人開発サイトのモバイル対応として、PWAは<strong>コスパ最強の選択肢</strong>です。特にツール系サイト（計算ツール、データベース検索など）との相性は抜群。</p>
+<p>「アプリを作るほどではないけど、スマホからの体験を良くしたい」——そんな方にはPWAを強くおすすめします。</p>
+<hr>
+<h2>📌 関連記事</h2>
+<ul>
+<li><strong>Day 1</strong>: <a href="/blog/202603/20260306_ai_web_dev_day1/">構想とNext.jsセットアップ</a></li>
+<li><strong>バイブコーディング入門</strong>: <a href="/blog/202603/20260307_vibe_coding_intro/">AIに"ノリ"で開発させる新時代の開発スタイル</a></li>
+<li><a href="https://www.antigravity-portal.com">Gravity Portal</a> — PWA対応済みのパチンコ分析プラットフォーム</li>
+</ul>

@@ -11,12 +11,19 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ソースパス
 const BLOG_DATA_PATH = join(__dirname, 'src', 'blog-data.json');
+const ARTICLES_DIR = join(__dirname, 'src', 'articles');
 const OUTPUT_DIR = join(__dirname, 'dist');
 
-// blog-data.json 読み込み
-const posts = JSON.parse(readFileSync(BLOG_DATA_PATH, 'utf-8'));
+// blog-data.json 読み込み（メタデータ）+ 個別HTMLファイルからcontent結合
+const posts = JSON.parse(readFileSync(BLOG_DATA_PATH, 'utf-8')).map(post => {
+    const articlePath = join(ARTICLES_DIR, `${post.slug}.html`);
+    if (existsSync(articlePath)) {
+        post.content = readFileSync(articlePath, 'utf-8');
+    }
+    return post;
+});
 
-console.log(`📝 ${posts.length} 記事を処理中...`);
+console.log(`📝 ${posts.length} 記事を処理中（content: ${posts.filter(p => p.content).length} 件）...`);
 
 // 出力ディレクトリ作成
 mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -300,11 +307,12 @@ function getAmazonAdsHtml(post) {
     const isPachinko = tags.includes('パチンコ');
     const isAI = tags.includes('AI');
     const isDev = tags.includes('開発');
+    const isTech = tags.includes('技術') || tags.includes('PWA');
 
     // 広告商品を選択（記事のタグに基づく）
     let items;
     let sectionTitle;
-    if (isAI || isDev) {
+    if (isAI || isDev || isTech) {
         items = AI_DEV_ADS;
         sectionTitle = '💻 技術書・開発に役立つ本';
     } else if (isWeekly || (isUber && isPachinko)) {
