@@ -65,6 +65,10 @@ const DEFAULT_STATE = {
     lastSave: Date.now(),
     playTime: 0,
     startedAt: Date.now(),
+
+    // アチーブメント（プレステージで初期化しない永続データ）
+    achievements: {},
+    reelClicks: 0,
 };
 
 let state = { ...DEFAULT_STATE };
@@ -110,6 +114,8 @@ function loadGame() {
             upgrades: { ...DEFAULT_STATE.upgrades, ...saved.upgrades },
             unlockedMachines: saved.unlockedMachines || ['amadeji'],
             currentMachineId: saved.currentMachineId || 'amadeji',
+            achievements: saved.achievements || {},
+            reelClicks: saved.reelClicks || 0,
         };
         applyAllUpgrades();
         checkMachineUnlocks();

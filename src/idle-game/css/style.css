@@ -1387,6 +1387,151 @@ body {
     margin-top: 4px;
 }
 
+/* --- アチーブメントボタン --- */
+.ach-btn {
+    float: right;
+    font-size: 1rem;
+    padding: 2px 10px;
+}
+
+/* --- アチーブメントポップアップ --- */
+#achievementPopup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+#achievementPopup.hidden {
+    display: none;
+}
+
+.ach-popup {
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.ach-bonus-summary {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-gold);
+    text-align: center;
+    padding: 8px;
+    margin-bottom: 12px;
+    background: rgba(255, 215, 0, 0.06);
+    border: 1px solid rgba(255, 215, 0, 0.15);
+    border-radius: var(--radius-sm);
+}
+
+.ach-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.ach-item.ach-claimable {
+    border-color: var(--accent-gold);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 215, 0, 0.02));
+    cursor: pointer;
+    animation: achPulse 2s ease-in-out infinite alternate;
+}
+
+.ach-item.ach-claimable:active {
+    transform: scale(0.98);
+}
+
+.ach-item.ach-hidden {
+    opacity: 0.35;
+}
+
+.ach-item.ach-locked {
+    opacity: 0.6;
+}
+
+.ach-item.ach-complete {
+    opacity: 0.8;
+    border-color: var(--accent-green);
+}
+
+.ach-icon {
+    font-size: 1.4rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ach-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ach-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.ach-desc {
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    margin-top: 1px;
+}
+
+.ach-progress {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--accent-cyan);
+    margin-top: 2px;
+}
+
+.ach-reward {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 2px;
+}
+
+.ach-reward-text {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+}
+
+.ach-claim-label {
+    font-size: 0.55rem;
+    color: var(--accent-green);
+    font-weight: 600;
+}
+
+@keyframes achPulse {
+    0% {
+        box-shadow: 0 0 4px rgba(255, 215, 0, 0.1);
+    }
+
+    100% {
+        box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+    }
+}
+
 /* --- レスポンシブ --- */
 @media (min-width: 520px) {
     #app {

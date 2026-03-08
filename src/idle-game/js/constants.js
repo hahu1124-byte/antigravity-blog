@@ -17,7 +17,7 @@ const MODE_JITAN = 'jitan';
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.13.0';
+const GAME_VERSION = 'v0.14.00';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -45,6 +45,7 @@ const MACHINES = [
         highProb: 2261 / 65536,  // 1/29.0 → ST30回転で65%
         payout: 465,
         cost: 10,
+        costScale: 1.0,
         kakuhenRate: 0.15,
         stRate: 0.40,
         jitanRate: 0.20,
@@ -62,6 +63,7 @@ const MACHINES = [
         highProb: 1725 / 65536,  // 1/38.0 → ST40回転で65%
         payout: 936,
         cost: 12.5,
+        costScale: 1.5,
         kakuhenRate: 0.25,
         stRate: 0.30,
         jitanRate: 0.20,
@@ -79,6 +81,7 @@ const MACHINES = [
         highProb: 1365 / 65536,  // 1/48.0 → ST50回転で65%
         payout: 1500,
         cost: 15,
+        costScale: 2.0,
         kakuhenRate: 0.35,
         stRate: 0.25,
         jitanRate: 0.20,
@@ -96,6 +99,7 @@ const MACHINES = [
         highProb: 1150 / 65536,  // 1/57.0 → ST60回転で65%
         payout: 1876,
         cost: 17.5,
+        costScale: 3.0,
         kakuhenRate: 0.50,
         stRate: 0.15,
         jitanRate: 0.15,
@@ -113,6 +117,7 @@ const MACHINES = [
         highProb: 978 / 65536,  // 1/67.0 → ST70回転で65%
         payout: 2347,
         cost: 20,
+        costScale: 5.0,
         kakuhenRate: 0.60,
         stRate: 0.10,
         jitanRate: 0.10,
@@ -134,8 +139,8 @@ const UPGRADES = [
         name: '⚡ 回転速度UP',
         desc: '毎秒の回転数を指数的に増加',
         icon: '⚡',
-        baseCost: 300,
-        costMultiplier: 1.15,
+        baseCost: 500,
+        costMultiplier: 1.25,
         maxLevel: Infinity,
         apply: () => { },
         effectText: (s) => `${s.spinRate.toFixed(1)}回/秒`,
@@ -145,8 +150,8 @@ const UPGRADES = [
         name: '🎯 大当たり確率UP',
         desc: '大当たり確率を5%改善',
         icon: '🎯',
-        baseCost: 800,
-        costMultiplier: 2.0,
+        baseCost: 600,
+        costMultiplier: 1.6,
         maxLevel: 30,
         apply: () => { },
         effectText: (s) => `1/${Math.round(1 / s.jackpotProb)}`,
@@ -168,8 +173,8 @@ const UPGRADES = [
         name: '🔥 確変倍率UP',
         desc: '確変/ST中の確率をさらに1.5%改善',
         icon: '🔥',
-        baseCost: 2000,
-        costMultiplier: 2.5,
+        baseCost: 1500,
+        costMultiplier: 1.8,
         maxLevel: 20,
         apply: () => { },
         effectText: () => `1/${Math.round(1 / getKakuhenProb())}`,
@@ -179,8 +184,8 @@ const UPGRADES = [
         name: '⏱️ ST回転数UP',
         desc: 'STモードの回転数を+6%改善',
         icon: '⏱️',
-        baseCost: 1500,
-        costMultiplier: 2.0,
+        baseCost: 1200,
+        costMultiplier: 1.6,
         maxLevel: 20,
         apply: () => { },
         effectText: () => `${getMaxStSpins()}回転`,
@@ -190,8 +195,8 @@ const UPGRADES = [
         name: '🔁 確変継続率UP',
         desc: '確変モードの継続率を+2.5%改善',
         icon: '🔁',
-        baseCost: 2500,
-        costMultiplier: 2.2,
+        baseCost: 2000,
+        costMultiplier: 2.0,
         maxLevel: 10,
         apply: () => { },
         effectText: () => `${Math.round(getKakuhenContinueRate() * 100)}%`,
@@ -212,8 +217,8 @@ const UPGRADES = [
         name: '💸 コスト削減',
         desc: '1回転あたりのコストを5%削減（累乗）',
         icon: '💸',
-        baseCost: 2000,
-        costMultiplier: 2.0,
+        baseCost: 1500,
+        costMultiplier: 1.8,
         maxLevel: 10,
         apply: () => { },
         effectText: (s) => {
@@ -269,5 +274,77 @@ const PREMIUM_UPGRADES = [
         maxLevel: 20,
         apply: () => { },
         effectText: (s) => `+${(s.upgrades.hyperShooter || 0) * 1.0}回/秒`,
+    },
+];
+
+// ============================================================
+// アチーブメント定義
+// ============================================================
+
+// マイルストーン閾値を返す（n=0から）
+function achThresholdJackpot(n) { return (n + 1) * 5; }
+function achThresholdUpgrade(n) { return n === 0 ? 1 : n * 5; }
+
+const ACHIEVEMENT_DEFS = [
+    {
+        id: 'jackpots', name: '🎉 大当たり回数', icon: '🎉',
+        getValue: (s) => s.totalLifetimeJackpots,
+        getThreshold: achThresholdJackpot,
+        maxMilestones: Infinity, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_spinRate', name: '⚡ 回転速度UP Lv', icon: '⚡',
+        getValue: (s) => s.upgrades.spinRate || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: Infinity, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_jackpotProb', name: '🎯 大当たり確率UP Lv', icon: '🎯',
+        getValue: (s) => s.upgrades.jackpotProb || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: Infinity, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_jackpotPayout', name: '💰 出玉UP Lv', icon: '💰',
+        getValue: (s) => s.upgrades.jackpotPayout || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: Infinity, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_kakuhenBoost', name: '🔥 確変倍率UP Lv', icon: '🔥',
+        getValue: (s) => s.upgrades.kakuhenBoost || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: Infinity, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_stSpins', name: '⏱️ ST回転数UP Lv', icon: '⏱️',
+        getValue: (s) => s.upgrades.stSpins || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: Infinity, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_kakuhenCont', name: '🔁 確変継続率UP Lv', icon: '🔁',
+        getValue: (s) => s.upgrades.kakuhenCont || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: Infinity, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_critical', name: '💎 クリティカル Lv', icon: '💎',
+        getValue: (s) => s.upgrades.critical || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: Infinity, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_costReduction', name: '💸 コスト削減 Lv', icon: '💸',
+        getValue: (s) => s.upgrades.costReduction || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: Infinity, reward: 100, hidden: false,
+    },
+    // 隠しアチーブメント
+    {
+        id: 'reelClick', name: '🎰 リールマスター', icon: '🎰',
+        getValue: (s) => s.reelClicks || 0,
+        getThreshold: (n) => [10, 50, 100][n] ?? null,
+        maxMilestones: 3, reward: 300, hidden: true,
     },
 ];

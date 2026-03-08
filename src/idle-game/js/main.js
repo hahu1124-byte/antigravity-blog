@@ -48,6 +48,25 @@ function init() {
         }
     });
 
+    // アチーブメントポップアップ
+    document.getElementById('achievementBtn').addEventListener('click', () => {
+        renderAchievementPopup();
+        document.getElementById('achievementPopup').classList.remove('hidden');
+    });
+    document.getElementById('achievementClose').addEventListener('click', () => {
+        document.getElementById('achievementPopup').classList.add('hidden');
+    });
+    document.getElementById('achievementPopup').addEventListener('click', (e) => {
+        if (e.target.id === 'achievementPopup') {
+            e.target.classList.add('hidden');
+        }
+    });
+
+    // リールクリック（隠しアチーブメント用）
+    document.getElementById('reelContainer').addEventListener('click', () => {
+        state.reelClicks = (state.reelClicks || 0) + 1;
+    });
+
     dom.repayBtn.addEventListener('click', repayDebt);
     dom.repayPartialBtn.addEventListener('click', repayPartial);
     dom.loanBtn.addEventListener('click', takeLoan);

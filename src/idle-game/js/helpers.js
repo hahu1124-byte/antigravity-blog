@@ -88,7 +88,7 @@ function getPrestigeThreshold() {
 }
 
 function getStartingBalls() {
-    return 500 + state.prestiges * 500;
+    return 500 + state.prestiges * 500 + getAchievementBonusBalls();
 }
 
 function getCurrentProb() {
@@ -182,7 +182,8 @@ function getAllUpgrades() {
 }
 
 function getUpgradeCost(upg) {
-    return Math.floor(upg.baseCost * Math.pow(upg.costMultiplier, state.upgrades[upg.id] || 0));
+    const m = getCurrentMachine();
+    return Math.floor(upg.baseCost * Math.pow(upg.costMultiplier, state.upgrades[upg.id] || 0) * (m.costScale || 1));
 }
 
 function buyUpgrade(id) {
@@ -233,7 +234,7 @@ function executePrestige(isAuto = false) {
         prestigePaused = true;
         const startBalls = getStartingBalls() + 500;
         const nextMultiplier = Math.pow(1.03, state.prestiges + 1);
-        if (!confirm(`プレステージを実行しますか？\n\n・アップグレード・玉数・回転数がリセットされます\n・収支と借金は引き継がれます\n・出玉ボーナス x${nextMultiplier.toFixed(2)} になります\n・次回初期持玉: ${startBalls}玉（${formatYen(startBalls)}）\n・現在: ${state.prestiges} → ${state.prestiges + 1}`)) {
+        if (!confirm(`プレステージを実行しますか？\n\n・アップグレード・玉数・回転数がリセットされます\n・収支がリセットされます（借金は引き継ぎ）\n・出玉ボーナス x${nextMultiplier.toFixed(2)} になります\n・次回初期持玉: ${startBalls}玉（${formatYen(startBalls)}）\n・現在: ${state.prestiges} → ${state.prestiges + 1}`)) {
             // キャンセル → 即座に再開
             prestigePaused = false;
             return;
@@ -245,9 +246,7 @@ function executePrestige(isAuto = false) {
     const lifetimeJackpots = state.totalLifetimeJackpots;
     const unlockedMachines = [...state.unlockedMachines];
 
-    // 収支・借金を引き継ぐ
-    const keepTotalBalls = state.totalBalls;
-    const keepTotalInvest = state.totalInvest;
+    // 収支リセット、借金は引き継ぐ
     const keepDebt = state.debt;
     const keepDebtStartTime = state.debtStartTime;
     const keepLastDebtTime = state.lastDebtTime;
@@ -258,18 +257,20 @@ function executePrestige(isAuto = false) {
 
     const keepExcludes = [...state.autoBuyerExcludes];
 
+    // アチーブメント・リールクリックは永続
+    const keepAchievements = { ...state.achievements };
+    const keepReelClicks = state.reelClicks || 0;
+
     state = {
         ...DEFAULT_STATE,
-        balls: 500 + newPrestiges * 500,
+        balls: 500 + newPrestiges * 500 + getAchievementBonusBalls(),
         prestiges: newPrestiges,
         totalLifetimeJackpots: lifetimeJackpots,
         unlockedMachines: unlockedMachines,
         currentMachineId: 'amadeji',
         lastSave: Date.now(),
         startedAt: Date.now(),
-        // 収支引き継ぎ
-        totalBalls: keepTotalBalls,
-        totalInvest: keepTotalInvest,
+        // 収支リセット（totalBalls/totalInvestは初期値0に戻る）
         // 借金引き継ぎ
         debt: keepDebt,
         debtStartTime: keepDebtStartTime,
@@ -277,13 +278,14 @@ function executePrestige(isAuto = false) {
         // 自動化引き継ぎ
         autoBuyer: keepAutoBuyer >= 1,
         autoPrestige: keepAutoPrestige >= 1,
-
         autoBuyerExcludes: keepExcludes,
+        // アチーブメント永続
+        achievements: keepAchievements,
+        reelClicks: keepReelClicks,
         upgrades: {
             ...DEFAULT_STATE.upgrades,
             autoBuyer: keepAutoBuyer,
             autoPrestige: keepAutoPrestige,
-
         },
     };
 
@@ -300,4 +302,52 @@ function executePrestige(isAuto = false) {
 
 function doPrestige() {
     executePrestige(false);
+}
+
+// ============================================================
+// アチーブメントヘルパー
+// ============================================================
+
+function getAchClaimableCount(def) {
+    const claimed = state.achievements[def.id] || 0;
+    const value = def.getValue(state);
+    let count = 0;
+    let i = claimed;
+    while (i < (def.maxMilestones || Infinity)) {
+        const threshold = def.getThreshold(i);
+        if (threshold === null || threshold === undefined) break;
+        if (value >= threshold) {
+            count++;
+            i++;
+        } else {
+            break;
+        }
+    }
+    return count;
+}
+
+function getAchNextThreshold(def) {
+    const claimed = state.achievements[def.id] || 0;
+    return def.getThreshold(claimed);
+}
+
+function claimAchievement(defId) {
+    const def = ACHIEVEMENT_DEFS.find(d => d.id === defId);
+    if (!def) return 0;
+    const count = getAchClaimableCount(def);
+    if (count <= 0) return 0;
+    const totalReward = count * def.reward;
+    state.achievements[def.id] = (state.achievements[def.id] || 0) + count;
+    state.balls += totalReward;
+    saveGame();
+    return totalReward;
+}
+
+function getAchievementBonusBalls() {
+    let bonus = 0;
+    ACHIEVEMENT_DEFS.forEach(def => {
+        const claimed = state.achievements[def.id] || 0;
+        bonus += claimed * def.reward;
+    });
+    return bonus;
 }

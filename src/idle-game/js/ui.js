@@ -519,3 +519,83 @@ function toggleAutoBuyTarget(upgId, isChecked) {
     }
     saveGame();
 }
+
+// ============================================================
+// アチーブメントポップアップ
+// ============================================================
+
+function renderAchievementPopup() {
+    const list = document.getElementById('achievementList');
+    const summary = document.getElementById('achBonusSummary');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const totalBonus = getAchievementBonusBalls();
+    summary.textContent = `初期所持玉ボーナス: +${formatNum(totalBonus)}玉`;
+
+    let totalClaimable = 0;
+
+    ACHIEVEMENT_DEFS.forEach(def => {
+        const claimed = state.achievements[def.id] || 0;
+        const claimable = getAchClaimableCount(def);
+        const value = def.getValue(state);
+        const nextThreshold = getAchNextThreshold(def);
+        const isRevealed = !def.hidden || claimed > 0 || claimable > 0;
+
+        const item = document.createElement('div');
+
+        if (!isRevealed) {
+            // 隠しアチーブメント（未発見）
+            item.className = 'ach-item ach-hidden';
+            item.innerHTML = `
+                <div class="ach-icon">❓</div>
+                <div class="ach-info">
+                    <div class="ach-name">？？？</div>
+                    <div class="ach-desc">隠しアチーブメント</div>
+                </div>
+            `;
+        } else if (claimable > 0) {
+            // クレーム可能
+            totalClaimable += claimable;
+            const reward = claimable * def.reward;
+            item.className = 'ach-item ach-claimable';
+            item.innerHTML = `
+                <div class="ach-icon">${def.icon}</div>
+                <div class="ach-info">
+                    <div class="ach-name">${def.name}</div>
+                    <div class="ach-desc">${def.hidden ? '隠し' : ''} 達成${claimed}回 → ${claimed + claimable}回</div>
+                    <div class="ach-progress">現在: ${formatNum(value)}</div>
+                </div>
+                <div class="ach-reward">
+                    <span class="ach-reward-text">+${formatNum(reward)}玉</span>
+                    <span class="ach-claim-label">タップで獲得</span>
+                </div>
+            `;
+            item.addEventListener('click', () => {
+                const r = claimAchievement(def.id);
+                if (r > 0) {
+                    renderAchievementPopup();
+                }
+            });
+        } else {
+            // ロック中 or 全達成済み
+            const nextTh = nextThreshold;
+            item.className = 'ach-item ach-locked';
+            const progressText = nextTh !== null && nextTh !== undefined
+                ? `${formatNum(value)} / ${formatNum(nextTh)}`
+                : '全マイルストーン達成 ✅';
+            const isComplete = nextTh === null || nextTh === undefined;
+            if (isComplete) item.classList.add('ach-complete');
+            item.innerHTML = `
+                <div class="ach-icon">${def.icon}</div>
+                <div class="ach-info">
+                    <div class="ach-name">${def.name}</div>
+                    <div class="ach-desc">達成${claimed}回 (報酬: ${def.hidden ? '各+300玉' : '各+100玉'})</div>
+                    <div class="ach-progress">${progressText}</div>
+                </div>
+            `;
+        }
+
+        list.appendChild(item);
+    });
+}

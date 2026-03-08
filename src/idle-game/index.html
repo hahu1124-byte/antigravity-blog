@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pachinko Idle | Gravity Portal</title>
     <meta name="description" content="パチンコの確率・連荘メカニクスを活かした放置ゲーム。5台を打ち分けて大当たりを引こう！">
-    <link rel="stylesheet" href="css/style.css?v=20260308c">
+    <link rel="stylesheet" href="css/style.css?v=20260308d">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -169,7 +169,8 @@
 
         <!-- 機種選択 (Phase 3) -->
         <section id="machineSection" class="hidden">
-            <h2 class="shop-title">🎰 機種選択 <button id="machineInfoBtn" class="info-icon-btn">ℹ️ 選択はこちら</button></h2>
+            <h2 class="shop-title">🎰 機種選択 <button id="machineInfoBtn" class="info-icon-btn">ℹ️ 選択はこちら</button> <button
+                    id="achievementBtn" class="info-icon-btn ach-btn">🏆</button></h2>
             <div id="machineGrid">
                 <!-- JSで動的生成 -->
             </div>
@@ -183,6 +184,20 @@
                     <button id="machineInfoClose" class="stats-popup-close">✕</button>
                 </div>
                 <div id="machineInfoList">
+                    <!-- JSで動的生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- アチーブメントポップアップ -->
+        <div id="achievementPopup" class="hidden">
+            <div class="stats-popup-content ach-popup">
+                <div class="stats-popup-header">
+                    <span class="stats-popup-title">🏆 アチーブメント</span>
+                    <button id="achievementClose" class="stats-popup-close">✕</button>
+                </div>
+                <div class="ach-bonus-summary" id="achBonusSummary">初期所持玉ボーナス: +0玉</div>
+                <div id="achievementList">
                     <!-- JSで動的生成 -->
                 </div>
             </div>
@@ -254,14 +269,14 @@
     </div>
 
     <!-- JS: 依存順で読み込み -->
-    <script src="js/constants.js?v=20260308c"></script>
-    <script src="js/state.js?v=20260308c"></script>
-    <script src="js/helpers.js?v=20260308c"></script>
-    <script src="js/debt.js?v=20260308c"></script>
-    <script src="js/premium.js?v=20260308c"></script>
-    <script src="js/ui.js?v=20260308c"></script>
-    <script src="js/game-loop.js?v=20260308c"></script>
-    <script src="js/main.js?v=20260308c"></script>
+    <script src="js/constants.js?v=20260308d"></script>
+    <script src="js/state.js?v=20260308d"></script>
+    <script src="js/helpers.js?v=20260308d"></script>
+    <script src="js/debt.js?v=20260308d"></script>
+    <script src="js/premium.js?v=20260308d"></script>
+    <script src="js/ui.js?v=20260308d"></script>
+    <script src="js/game-loop.js?v=20260308d"></script>
+    <script src="js/main.js?v=20260308d"></script>
 </body>
 
 </html>
