@@ -58,6 +58,7 @@ const dom = {
     debtInterest: $('debtInterest'),
     repayBtn: $('repayBtn'),
     repayPartialBtn: $('repayPartialBtn'),
+    loanBtn: $('loanBtn'),
 
     // レート選択
     rateSection: $('rateSection'),

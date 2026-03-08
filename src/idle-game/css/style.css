@@ -80,16 +80,16 @@ body {
     right: 0;
     z-index: 50;
     text-align: center;
-    padding: 6px 8px;
+    padding: 10px 8px;
     font-family: var(--font-mono);
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: var(--accent-green);
-    background: rgba(0, 20, 8, 0.92);
+    background: rgba(0, 20, 8, 0.95);
     border-top: 1px solid rgba(0, 255, 136, 0.3);
     border-bottom: 1px solid rgba(0, 255, 136, 0.3);
     animation: notifyFadeIn 0.2s ease-out;
-    text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
 }
 
 .jackpot-notify.rush-notify {
@@ -1749,7 +1749,7 @@ body {
 
 .debt-sticky-buttons {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 4px;
 }
 
