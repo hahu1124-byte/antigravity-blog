@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-07T16:36:36.266Z",
+  "lastUpdated": "2026-03-08T16:37:06.190Z",
   "source": "pachinko-spec.info",
   "totalMachines": 1064,
   "machines": [
@@ -851,10 +851,10 @@
       "borderEquiv": 17,
       "rb": 134.29,
       "singleSpinPayout": 14.71,
-      "avgAcquired": 2354.4,
+      "avgAcquired": 2353.37,
       "avgChain": 3.49,
-      "realContRate": 76.58,
-      "entryRate": 76.57,
+      "realContRate": 76.57,
+      "entryRate": 76.58,
       "rushRate": 0,
       "rushType": "",
       "yutimeTrigger": 0,
