@@ -187,11 +187,17 @@ function buyUpgrade(id) {
 
     const cost = getUpgradeCost(upg);
     const profit = state.totalBalls - state.totalInvest;
-    // 収支プラスなら借金で購入可能
-    if (state.balls < cost) {
-        if (profit <= 0) return;
-        while (state.balls < cost) {
-            takeLoan();
+
+    // 高額単発アイテム（maxLevel=1）は借金購入不可
+    if (upg.maxLevel === 1) {
+        if (state.balls < cost) return;
+    } else {
+        // 収支プラスなら借金で購入可能
+        if (state.balls < cost) {
+            if (profit <= 0) return;
+            while (state.balls < cost) {
+                takeLoan();
+            }
         }
     }
 
