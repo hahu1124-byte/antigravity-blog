@@ -531,8 +531,11 @@ body {
 }
 
 /* --- ハマりゲージ (遊タイムゲージ) --- */
-#hamariMeter {
+#gaugeDebtWrapper {
     position: relative;
+}
+
+#hamariMeter {
     margin: 0;
     padding: 6px 4px 4px;
     background: var(--bg-primary);

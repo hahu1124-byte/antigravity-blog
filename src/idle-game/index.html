@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pachinko Idle | Gravity Portal</title>
     <meta name="description" content="パチンコの確率・連荘メカニクスを活かした放置ゲーム。5台を打ち分けて大当たりを引こう！">
-    <link rel="stylesheet" href="css/style.css?v=20260308">
+    <link rel="stylesheet" href="css/style.css?v=20260308b">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -71,32 +71,37 @@
                 </div>
             </div>
 
-            <!-- 遊タイムゲージ（スティッキー固定） -->
-            <div id="hamariMeter">
-                <div class="meter-label">遊タイムゲージ <span id="hamariCount">0</span> / <span id="hamariTarget">297</span>
+            <!-- 遊タイム〜借金ラッパー（通知オーバーレイ用） -->
+            <div id="gaugeDebtWrapper">
+                <!-- 遊タイムゲージ（スティッキー固定） -->
+                <div id="hamariMeter">
+                    <div class="meter-label">遊タイムゲージ <span id="hamariCount">0</span> / <span
+                            id="hamariTarget">297</span>
+                    </div>
+                    <div class="meter-bar">
+                        <div class="meter-fill" id="hamariBar"></div>
+                    </div>
                 </div>
-                <div class="meter-bar">
-                    <div class="meter-fill" id="hamariBar"></div>
-                </div>
-                <!-- 大当たり通知（遊タイムゲージにオーバーレイ） -->
+
+                <!-- 借金セクション（スティッキー固定・常時表示） -->
+                <section id="debtSection">
+                    <div class="debt-sticky-bar">
+                        <div class="debt-sticky-info">
+                            <span class="debt-sticky-label">💸 借金</span>
+                            <span class="debt-value danger" id="debtAmount">¥0</span>
+                            <span class="debt-sticky-interest" id="debtInterest">複利5%/分</span>
+                        </div>
+                        <div class="debt-sticky-buttons">
+                            <button id="repayPartialBtn" class="debt-btn-mini repay-partial">💴 ¥500返済</button>
+                            <button id="repayBtn" class="debt-btn-mini repay">💰 全額</button>
+                            <button id="loanBtn" class="debt-btn-mini loan">💸 ¥1,000借入</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 大当たり通知（遊タイム〜借金全体にオーバーレイ） -->
                 <div id="jackpotNotify" class="jackpot-notify hidden"></div>
             </div>
-
-            <!-- 借金セクション（スティッキー固定・常時表示） -->
-            <section id="debtSection">
-                <div class="debt-sticky-bar">
-                    <div class="debt-sticky-info">
-                        <span class="debt-sticky-label">💸 借金</span>
-                        <span class="debt-value danger" id="debtAmount">¥0</span>
-                        <span class="debt-sticky-interest" id="debtInterest">複利5%/分</span>
-                    </div>
-                    <div class="debt-sticky-buttons">
-                        <button id="repayPartialBtn" class="debt-btn-mini repay-partial">💴 ¥500返済</button>
-                        <button id="repayBtn" class="debt-btn-mini repay">💰 全額</button>
-                        <button id="loanBtn" class="debt-btn-mini loan">💸 ¥1,000借入</button>
-                    </div>
-                </div>
-            </section>
         </div><!-- /stickyTop -->
 
         <!-- メイン: 台エリア -->
@@ -249,14 +254,14 @@
     </div>
 
     <!-- JS: 依存順で読み込み -->
-    <script src="js/constants.js?v=20260308"></script>
-    <script src="js/state.js?v=20260308"></script>
-    <script src="js/helpers.js?v=20260308"></script>
-    <script src="js/debt.js?v=20260308"></script>
-    <script src="js/premium.js?v=20260308"></script>
-    <script src="js/ui.js?v=20260308"></script>
-    <script src="js/game-loop.js?v=20260308"></script>
-    <script src="js/main.js?v=20260308"></script>
+    <script src="js/constants.js?v=20260308b"></script>
+    <script src="js/state.js?v=20260308b"></script>
+    <script src="js/helpers.js?v=20260308b"></script>
+    <script src="js/debt.js?v=20260308b"></script>
+    <script src="js/premium.js?v=20260308b"></script>
+    <script src="js/ui.js?v=20260308b"></script>
+    <script src="js/game-loop.js?v=20260308b"></script>
+    <script src="js/main.js?v=20260308b"></script>
 </body>
 
 </html>

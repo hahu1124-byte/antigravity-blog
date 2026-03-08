@@ -58,14 +58,22 @@ function init() {
         if (e.target.classList.contains('autobuy-cb')) return;
         const card = e.target.closest('[data-upgrade-id]');
         if (!card) return;
-        // オートバイヤーがONの場合はクリックでオン/オフ切り替え
-        if (state.autoBuyer) {
-            state.autoBuyer = false;
+        const upgId = card.dataset.upgradeId;
+        // オートバイヤー購入済み: autoBuyerカードクリックでON/OFFトグル
+        if (upgId === 'autoBuyer' && state.upgrades.autoBuyer >= 1) {
+            state.autoBuyer = !state.autoBuyer;
+            if (state.autoBuyer) {
+                // ON: 全チェックボックスをON（excludes クリア）
+                state.autoBuyerExcludes = [];
+            } else {
+                // OFF: 全チェックボックスをOFF（全アップグレードを除外）
+                state.autoBuyerExcludes = getAllUpgrades().map(u => u.id);
+            }
             saveGame();
-            updateShopUI();
+            renderShop();
             return;
         }
-        buyUpgrade(card.dataset.upgradeId);
+        buyUpgrade(upgId);
     });
 
     // レート選択イベント

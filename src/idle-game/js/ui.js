@@ -386,7 +386,7 @@ function renderShop() {
         card.className = 'shop-card';
         card.dataset.upgradeId = upg.id;
         card.innerHTML = `
-            <div class="shop-autobuy-check ${state.autoBuyer ? '' : 'hidden'}">
+            <div class="shop-autobuy-check ${state.upgrades.autoBuyer >= 1 ? '' : 'hidden'}">
                 <input type="checkbox" class="autobuy-cb" data-upg-id="${upg.id}"
                     ${!state.autoBuyerExcludes.includes(upg.id) ? 'checked' : ''}>
             </div>
@@ -465,17 +465,32 @@ function updateShopUI() {
         summaryEl.textContent = `💎 総アップグレード投資: ${formatNum(grandTotal)}玉`;
     }
 
-    // オートバイヤーチェックボックスの表示/非表示
+    // オートバイヤーチェックボックスの表示/非表示（購入済みなら常時表示）
+    const autoBuyerPurchased = state.upgrades.autoBuyer >= 1;
     getAllUpgrades().forEach(upg => {
         const card = dom.shopGrid.querySelector(`[data-upgrade-id="${upg.id}"]`);
         if (!card) return;
         const cbWrap = card.querySelector('.shop-autobuy-check');
         if (cbWrap) {
-            if (state.autoBuyer) {
+            if (autoBuyerPurchased) {
                 cbWrap.classList.remove('hidden');
+                // チェックボックスの状態を同期
+                const cb = cbWrap.querySelector('.autobuy-cb');
+                if (cb) cb.checked = !state.autoBuyerExcludes.includes(upg.id);
             } else {
                 cbWrap.classList.add('hidden');
             }
+        }
+
+        // autoBuyerカード自体のレベル表示を更新
+        if (upg.id === 'autoBuyer' && autoBuyerPurchased) {
+            const levelEl = card.querySelector('.shop-level');
+            if (levelEl) {
+                levelEl.textContent = state.autoBuyer ? '🛒 ON（タップでOFF）' : '🛒 OFF（タップでON）';
+            }
+            const costEl = card.querySelector('.shop-cost');
+            if (costEl) costEl.textContent = state.autoBuyer ? '✅ ON' : '❌ OFF';
+            card.className = `shop-card${state.autoBuyer ? ' maxed' : ''}`;
         }
     });
 }
