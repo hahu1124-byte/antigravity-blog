@@ -171,15 +171,29 @@ function updateUI() {
     dom.modeIndicator.textContent = modeLabels[state.mode] || '通常';
     dom.modeIndicator.className = `mode-badge mode-${state.mode}`;
 
-    // RUSH バナー
+    // RUSH バナー（確変/ST区別）
     if (isRush) {
         dom.rushBanner.classList.remove('hidden');
+        if (state.mode === MODE_KAKUHEN) {
+            dom.rushBanner.className = 'rush-kakuhen';
+            document.getElementById('rushLabel').textContent = '🔥 確変RUSH';
+        } else {
+            dom.rushBanner.className = 'rush-st';
+            document.getElementById('rushLabel').textContent = '⚡ ST RUSH';
+        }
         dom.rushChainDisplay.textContent = `${state.rushChain}連荘中`;
         dom.rushProbDisplay.textContent = `確率 1/${Math.round(1 / getKakuhenProb())}`;
         dom.lcdScreen.classList.add('rush-active');
     } else {
         dom.rushBanner.classList.add('hidden');
         dom.lcdScreen.classList.remove('rush-active');
+    }
+
+    // 時短中の液晶演出
+    if (isJitan) {
+        dom.lcdScreen.classList.add('jitan-active');
+    } else {
+        dom.lcdScreen.classList.remove('jitan-active');
     }
 
     // 台情報
@@ -221,14 +235,14 @@ function updateUI() {
         const interestGrown = periods > 0
             ? Math.floor(state.debt - state.debt / Math.pow(1 + DEBT_INTEREST_RATE, periods))
             : 0;
-        dom.debtInterest.textContent = `複利5%/分(+${formatYenRaw(interestGrown)})`;
+        dom.debtInterest.textContent = `複利5%/分 ${minutesElapsed}分経過(+${formatYenRaw(interestGrown)})`;
     } else {
         dom.debtInterest.textContent = '利息なし';
     }
     dom.repayBtn.disabled = state.balls <= 0 || state.debt <= 0;
     const repayBalls = getDebtRepayBalls();
     dom.repayPartialBtn.disabled = state.balls < repayBalls || state.debt <= 0;
-    dom.repayPartialBtn.textContent = `💴 ¥${DEBT_REPAY_UNIT_YEN.toLocaleString('ja-JP')}返済`;
+    dom.repayPartialBtn.textContent = `💴 ${formatNum(repayBalls)}玉返済`;
 
     // プレステージ（統計ポップアップ: 回数とボーナスのみ）
     const pThreshold = getPrestigeThreshold();
