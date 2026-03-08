@@ -1254,6 +1254,18 @@ body {
     gap: 8px;
 }
 
+#currentStatsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.popup-prestige-stats {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
 .popup-prestige {
     margin-top: 16px;
     padding-top: 16px;

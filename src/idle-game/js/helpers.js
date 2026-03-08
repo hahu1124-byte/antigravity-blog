@@ -267,6 +267,13 @@ function executePrestige(isAuto = false) {
     const keepReelClicks = state.reelClicks || 0;
     const keepLifetimeMax = { ...(state.lifetimeMaxUpgrades || {}) };
 
+    // 生涯統計に現在のプレステージ分を加算
+    const keepLifetimeTotalBalls = (state.lifetimeTotalBalls || 0) + state.totalBalls;
+    const keepLifetimeTotalInvest = (state.lifetimeTotalInvest || 0) + state.totalInvest;
+    const keepLifetimeSpins = (state.lifetimeSpins || 0) + state.spins;
+    const keepLifetimeJackpots = (state.lifetimeJackpots || 0) + state.jackpots;
+    const keepLifetimePlayTime = (state.lifetimePlayTime || 0) + state.playTime;
+
     state = {
         ...DEFAULT_STATE,
         balls: 500 + newPrestiges * 500 + getAchievementBonusBalls(),
@@ -288,6 +295,12 @@ function executePrestige(isAuto = false) {
         // アチーブメント永続
         achievements: keepAchievements,
         lifetimeMaxUpgrades: keepLifetimeMax,
+        // 生涯統計保持
+        lifetimeTotalBalls: keepLifetimeTotalBalls,
+        lifetimeTotalInvest: keepLifetimeTotalInvest,
+        lifetimeSpins: keepLifetimeSpins,
+        lifetimeJackpots: keepLifetimeJackpots,
+        lifetimePlayTime: keepLifetimePlayTime,
         reelClicks: keepReelClicks,
         upgrades: {
             ...DEFAULT_STATE.upgrades,

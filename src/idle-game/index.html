@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pachinko Idle | Gravity Portal</title>
     <meta name="description" content="パチンコの確率・連荘メカニクスを活かした放置ゲーム。5台を打ち分けて大当たりを引こう！">
-    <link rel="stylesheet" href="css/style.css?v=20260308p">
+    <link rel="stylesheet" href="css/style.css?v=20260308q">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -228,26 +228,50 @@
                     <span class="stats-popup-title">📊 統計</span>
                     <button id="statsPopupClose" class="stats-popup-close">✕</button>
                 </div>
+                <div class="stats-popup-subtitle">📊 通算</div>
                 <div id="statsGrid">
                     <div class="stat-card">
                         <span class="stat-label">累計獲得玉</span>
-                        <span class="stat-value" id="totalBallsStat">0</span>
+                        <span class="stat-value" id="lifetimeBallsStat">0</span>
                     </div>
                     <div class="stat-card">
                         <span class="stat-label">累計投資</span>
-                        <span class="stat-value" id="totalInvestStat">0</span>
+                        <span class="stat-value" id="lifetimeInvestStat">0</span>
                     </div>
                     <div class="stat-card">
                         <span class="stat-label">大当たり率</span>
-                        <span class="stat-value" id="jackpotRateStat">-</span>
+                        <span class="stat-value" id="lifetimeJackpotRateStat">-</span>
                     </div>
                     <div class="stat-card">
                         <span class="stat-label">プレイ時間</span>
-                        <span class="stat-value" id="playTimeStat">0秒</span>
+                        <span class="stat-value" id="lifetimePlayTimeStat">0秒</span>
                     </div>
                 </div>
 
-                <!-- プレステージ情報（現在回数のみ） -->
+                <!-- 今回の転生 -->
+                <div class="popup-prestige-stats">
+                    <div class="stats-popup-subtitle">🔄 今回の転生</div>
+                    <div id="currentStatsGrid">
+                        <div class="stat-card">
+                            <span class="stat-label">獲得玉</span>
+                            <span class="stat-value" id="totalBallsStat">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">投資</span>
+                            <span class="stat-value" id="totalInvestStat">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">大当たり率</span>
+                            <span class="stat-value" id="jackpotRateStat">-</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">プレイ時間</span>
+                            <span class="stat-value" id="playTimeStat">0秒</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- プレステージ情報 -->
                 <div class="popup-prestige">
                     <div class="stats-popup-subtitle">⭐ プレステージ（転生）</div>
                     <div class="prestige-info">

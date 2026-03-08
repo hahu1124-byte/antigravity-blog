@@ -34,6 +34,10 @@ const dom = {
     totalInvestStat: $('totalInvestStat'),
     jackpotRateStat: $('jackpotRateStat'),
     playTimeStat: $('playTimeStat'),
+    lifetimeBallsStat: $('lifetimeBallsStat'),
+    lifetimeInvestStat: $('lifetimeInvestStat'),
+    lifetimeJackpotRateStat: $('lifetimeJackpotRateStat'),
+    lifetimePlayTimeStat: $('lifetimePlayTimeStat'),
     resetBtn: $('resetBtn'),
     saveStatus: $('saveStatus'),
     // Phase 2
@@ -249,13 +253,26 @@ function updateUI() {
         dom.hamariBar.className = 'meter-fill';
     }
 
-    // 統計
+    // 統計（今回の転生）
     dom.totalBallsStat.textContent = formatNum(state.totalBalls);
     dom.totalInvestStat.textContent = formatNum(state.totalInvest);
     dom.jackpotRateStat.textContent = state.spins > 0
         ? `1/${Math.round(state.spins / Math.max(state.jackpots, 1))}`
         : '-';
     dom.playTimeStat.textContent = formatTime(state.playTime);
+
+    // 統計（通算 = 生涯統計 + 現在のプレステージ分）
+    const ltBalls = (state.lifetimeTotalBalls || 0) + state.totalBalls;
+    const ltInvest = (state.lifetimeTotalInvest || 0) + state.totalInvest;
+    const ltSpins = (state.lifetimeSpins || 0) + state.spins;
+    const ltJackpots = (state.lifetimeJackpots || 0) + state.jackpots;
+    const ltPlayTime = (state.lifetimePlayTime || 0) + state.playTime;
+    dom.lifetimeBallsStat.textContent = formatNum(ltBalls);
+    dom.lifetimeInvestStat.textContent = formatNum(ltInvest);
+    dom.lifetimeJackpotRateStat.textContent = ltSpins > 0
+        ? `1/${Math.round(ltSpins / Math.max(ltJackpots, 1))}`
+        : '-';
+    dom.lifetimePlayTimeStat.textContent = formatTime(ltPlayTime);
 
     // 借金表示: 常時表示
     dom.debtAmount.textContent = state.debt > 0 ? formatYenRaw(state.debt) : '¥0';

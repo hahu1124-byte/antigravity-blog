@@ -72,6 +72,13 @@ const DEFAULT_STATE = {
     achievements: {},
     reelClicks: 0,
     lifetimeMaxUpgrades: {},
+
+    // 生涯統計（プレステージでリセットしない）
+    lifetimeTotalBalls: 0,
+    lifetimeTotalInvest: 0,
+    lifetimeSpins: 0,
+    lifetimeJackpots: 0,
+    lifetimePlayTime: 0,
 };
 
 let state = { ...DEFAULT_STATE };
@@ -120,6 +127,11 @@ function loadGame() {
             achievements: saved.achievements || {},
             reelClicks: saved.reelClicks || 0,
             lifetimeMaxUpgrades: saved.lifetimeMaxUpgrades || {},
+            lifetimeTotalBalls: saved.lifetimeTotalBalls || 0,
+            lifetimeTotalInvest: saved.lifetimeTotalInvest || 0,
+            lifetimeSpins: saved.lifetimeSpins || 0,
+            lifetimeJackpots: saved.lifetimeJackpots || 0,
+            lifetimePlayTime: saved.lifetimePlayTime || 0,
         };
         applyAllUpgrades();
         checkMachineUnlocks();
