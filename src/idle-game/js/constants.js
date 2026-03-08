@@ -17,7 +17,7 @@ const KAKUHEN_PROB_MULTIPLIER = 10;
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.12.02';
+const GAME_VERSION = 'v0.12.03';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -26,7 +26,7 @@ const PREMIUM_SPEED_MULTIPLIER = 2.0;
 const JITAN_SPINS = 10000;
 const JITAN_BASE_SPINS = 100;
 const JITAN_REF_DENOM = 319;
-const JITAN_COST_MULTIPLIER = 0.5;
+
 
 const SAVE_KEY = 'gp-idle-game-save';
 const SAVE_INTERVAL = 30000;

@@ -19,6 +19,12 @@ function formatYen(balls) {
     return '¥' + yen.toLocaleString('ja-JP');
 }
 
+// 借金UI専用: 万表示しない円フォーマット
+function formatYenRaw(balls) {
+    const yen = Math.floor(balls * YEN_PER_BALL);
+    return '¥' + yen.toLocaleString('ja-JP');
+}
+
 function formatTime(seconds) {
     seconds = Math.floor(seconds);
     if (seconds < 60) return `${seconds}秒`;
@@ -54,6 +60,16 @@ function getKakuhenContinueRate() {
 function getJitanSpins() {
     const m = getCurrentMachine();
     return Math.round(JITAN_BASE_SPINS / (m.prob * JITAN_REF_DENOM));
+}
+
+// 遊タイム閾値: アップグレード後の確率を反映した回数
+function getEffectiveYutimeThreshold() {
+    const m = getCurrentMachine();
+    const baseThreshold = m.yutimeThreshold;
+    const baseDenom = 1 / m.prob; // 機種の元々の分母
+    const upgradedDenom = 1 / state.jackpotProb; // アップグレード後の分母
+    // 確率が上がった分、遊タイム到達回転数を比例的に下げる
+    return Math.round(baseThreshold * (upgradedDenom / baseDenom));
 }
 
 function getUpgradeTotalSpent(upg) {

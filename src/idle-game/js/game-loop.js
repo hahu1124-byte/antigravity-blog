@@ -129,8 +129,7 @@ function checkYutime() {
     if (state.mode !== MODE_NORMAL) return;
     if (state.yutimeTriggered) return;
 
-    const m = getCurrentMachine();
-    const threshold = getYutimeThreshold(m);
+    const threshold = getEffectiveYutimeThreshold();
     if (state.yutimeGauge >= threshold) {
         state.yutimeTriggered = true;
         // 遊タイム → 無限時短（通常確率で10000回転）
@@ -247,10 +246,8 @@ function gameLoop(now) {
             const isRushMode = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
             const isJitan = state.mode === MODE_JITAN;
             let actualCost;
-            if (isRushMode) {
+            if (isRushMode || isJitan) {
                 actualCost = state.costPerSpin * 0.1;
-            } else if (isJitan) {
-                actualCost = state.costPerSpin * JITAN_COST_MULTIPLIER;
             } else {
                 actualCost = state.costPerSpin;
             }
@@ -261,9 +258,12 @@ function gameLoop(now) {
             // 回転数: 全モードで常にカウント
             state.sinceLastJackpot++;
 
-            // 遊タイムゲージ: 通常+時短中にカウント（確変/ST中は停止）
+            // 遊タイムゲージ: 通常+時短中にカウント（確変/ST中は停止、MAX到達後は増やさない）
             if (state.mode === MODE_NORMAL || state.mode === MODE_JITAN) {
-                state.yutimeGauge++;
+                const threshold = getEffectiveYutimeThreshold();
+                if (state.yutimeGauge < threshold) {
+                    state.yutimeGauge++;
+                }
             }
 
             // ST消化

@@ -15,9 +15,9 @@ const DEFAULT_STATE = {
     spins: 0,
     jackpots: 0,
     spinRate: 1,
-    jackpotProb: 1 / 99,
-    jackpotPayout: 800,
-    costPerSpin: 2,
+    jackpotProb: 656 / 65536,
+    jackpotPayout: 465,
+    costPerSpin: 10,
     sinceLastJackpot: 0,
 
 
@@ -126,9 +126,18 @@ function loadGame() {
 function resetGame() {
     if (!confirm('本当にデータをリセットしますか？\nすべての進行状況が失われます。')) return;
     localStorage.removeItem(SAVE_KEY);
-    state = { ...DEFAULT_STATE, lastSave: Date.now(), startedAt: Date.now() };
+    YEN_PER_BALL = 1;
+    state = {
+        ...DEFAULT_STATE,
+        upgrades: { ...DEFAULT_STATE.upgrades },
+        unlockedMachines: ['amadeji'],
+        lastSave: Date.now(),
+        startedAt: Date.now(),
+    };
+    applyAllUpgrades();
     renderShop();
     renderMachineSelector();
+    saveGame();
 }
 
 // ============================================================

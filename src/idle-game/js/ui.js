@@ -180,8 +180,8 @@ function updateUI() {
     dom.rateDisplay.textContent = `${state.spinRate.toFixed(1)}回/秒`;
     dom.costDisplay.textContent = `${state.costPerSpin}玉`;
 
-    // ハマりゲージ
-    const yutimeThreshold = getYutimeThreshold(m);
+    // ハマりゲージ（遊タイム）
+    const yutimeThreshold = getEffectiveYutimeThreshold();
     const hamariPct = Math.min((state.yutimeGauge / yutimeThreshold) * 100, 100);
     dom.hamariCount.textContent = formatNum(state.yutimeGauge);
     dom.hamariTarget.textContent = formatNum(yutimeThreshold);
@@ -206,11 +206,21 @@ function updateUI() {
     // 借金表示: 収支がマイナスの時だけ表示
     if (profit < 0) {
         dom.debtSection.classList.remove('hidden');
-        dom.debtAmount.textContent = state.debt > 0 ? formatYen(state.debt) : '¥0';
+        dom.debtAmount.textContent = state.debt > 0 ? formatYenRaw(state.debt) : '¥0';
         const minutesElapsed = state.debtStartTime > 0
             ? Math.floor((Date.now() - state.debtStartTime) / 60000)
             : 0;
-        dom.debtInterest.textContent = state.debt > 0 ? `複利5%/分 (経過${minutesElapsed}分)` : '利息なし';
+        if (state.debt > 0) {
+            // 複利で増えた分を計算（借金合計 - 元本 = 利息分）
+            // 元本 = debt / (1+r)^periods だが、正確な追跡は難しいので累計と現在の差で表示
+            const periods = minutesElapsed;
+            const interestGrown = periods > 0
+                ? Math.floor(state.debt - state.debt / Math.pow(1 + DEBT_INTEREST_RATE, periods))
+                : 0;
+            dom.debtInterest.textContent = `複利5%/分(+${formatYenRaw(interestGrown)})`;
+        } else {
+            dom.debtInterest.textContent = '利息なし';
+        }
         dom.repayBtn.disabled = state.balls <= 0 || state.debt <= 0;
         const repayBalls = getDebtRepayBalls();
         dom.repayPartialBtn.disabled = state.balls < repayBalls || state.debt <= 0;
