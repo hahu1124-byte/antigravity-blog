@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>確率クイズ | Gravity Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="quiz.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- スタート画面 -->
+        <div id="start-screen" class="screen active">
+            <div class="start-hero">
+                <div class="start-icon">🎯</div>
+                <h1>パチンコ確率クイズ</h1>
+                <p class="start-desc">パチンコの確率・ボーダー・期待値にまつわる<br>10問のクイズに挑戦！</p>
+                <div class="start-info">
+                    <div class="info-item"><span class="info-icon">📝</span> 全10問（4択）</div>
+                    <div class="info-item"><span class="info-icon">⏱️</span> 所要時間 約3分</div>
+                    <div class="info-item"><span class="info-icon">🏆</span> ランク判定あり</div>
+                </div>
+                <button id="start-btn" class="primary-btn">クイズを始める</button>
+            </div>
+        </div>
+
+        <!-- クイズ画面 -->
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-header">
+                <div class="progress-info">
+                    <span id="question-counter">1 / 10</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <div id="score-display" class="score-display">
+                    <span class="score-correct">⭕ <span id="correct-count">0</span></span>
+                    <span class="score-wrong">❌ <span id="wrong-count">0</span></span>
+                </div>
+            </div>
+
+            <div id="question-card" class="question-card">
+                <div class="question-category" id="question-category">確率基礎</div>
+                <h2 class="question-text" id="question-text"></h2>
+                <div id="choices" class="choices"></div>
+            </div>
+
+            <div id="explanation-card" class="explanation-card hidden">
+                <div id="result-icon" class="result-icon"></div>
+                <div id="result-label" class="result-label"></div>
+                <div class="explanation-text" id="explanation-text"></div>
+                <button id="next-btn" class="primary-btn">次の問題へ</button>
+            </div>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="screen">
+            <div class="result-hero">
+                <div id="result-rank-icon" class="result-rank-icon"></div>
+                <h1 id="result-rank-title" class="result-rank-title"></h1>
+                <div id="result-score-display" class="result-score-big"></div>
+                <p id="result-message" class="result-message"></p>
+                <div id="result-breakdown" class="result-breakdown"></div>
+                <button id="retry-btn" class="primary-btn">もう一度挑戦する</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="quiz.js"></script>
+</body>
+
+</html>
