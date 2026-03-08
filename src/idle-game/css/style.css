@@ -1266,6 +1266,10 @@ body {
     border-top: 1px solid var(--border-color);
 }
 
+.popup-prestige-stats.hidden {
+    display: none;
+}
+
 .popup-prestige {
     margin-top: 16px;
     padding-top: 16px;

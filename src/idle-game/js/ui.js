@@ -253,7 +253,15 @@ function updateUI() {
         dom.hamariBar.className = 'meter-fill';
     }
 
-    // 統計（今回の転生）
+    // 統計（今回の転生）— プレステージ1回以上のときのみ表示
+    const currentStatsSection = document.querySelector('.popup-prestige-stats');
+    if (currentStatsSection) {
+        if (state.prestiges > 0) {
+            currentStatsSection.classList.remove('hidden');
+        } else {
+            currentStatsSection.classList.add('hidden');
+        }
+    }
     dom.totalBallsStat.textContent = formatNum(state.totalBalls);
     dom.totalInvestStat.textContent = formatNum(state.totalInvest);
     dom.jackpotRateStat.textContent = state.spins > 0
