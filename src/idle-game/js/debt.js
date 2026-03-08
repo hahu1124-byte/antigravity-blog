@@ -30,7 +30,10 @@ function processDebtInterest() {
     const elapsed = now - state.lastDebtTime;
     if (elapsed >= DEBT_INTERVAL_MS) {
         const periods = Math.floor(elapsed / DEBT_INTERVAL_MS);
+        const before = state.debt;
         state.debt = state.debt * Math.pow(1 + DEBT_INTEREST_RATE, periods);
+        state.lastInterest = state.debt - before;
+        state.accumulatedInterest += state.debt - before;
         state.lastDebtTime = now - (elapsed % DEBT_INTERVAL_MS);
     }
 }
@@ -43,6 +46,8 @@ function repayDebt() {
         state.debt = 0;
         state.lastDebtTime = 0;
         state.debtStartTime = 0;
+        state.lastInterest = 0;
+        state.accumulatedInterest = 0;
     } else {
         state.debt -= state.balls;
         state.balls = 0;

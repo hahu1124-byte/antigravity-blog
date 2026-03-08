@@ -17,7 +17,7 @@ const MODE_JITAN = 'jitan';
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.14.00';
+const GAME_VERSION = 'v0.14.01';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -143,7 +143,7 @@ const UPGRADES = [
         costMultiplier: 1.25,
         maxLevel: Infinity,
         apply: () => { },
-        effectText: (s) => `${s.spinRate.toFixed(1)}回/秒`,
+        effectText: (s) => `${s.spinRate.toFixed(2)}回/秒`,
     },
     {
         id: 'jackpotProb',
@@ -199,7 +199,7 @@ const UPGRADES = [
         costMultiplier: 2.0,
         maxLevel: 10,
         apply: () => { },
-        effectText: () => `${Math.round(getKakuhenContinueRate() * 100)}%`,
+        effectText: () => `${(getKakuhenContinueRate() * 100).toFixed(2)}%`,
     },
     {
         id: 'critical',
@@ -223,7 +223,7 @@ const UPGRADES = [
         apply: () => { },
         effectText: (s) => {
             const lv = s.upgrades.costReduction || 0;
-            return lv > 0 ? `-${Math.round((1 - Math.pow(0.95, lv)) * 100)}%` : '0%';
+            return lv > 0 ? `-${((1 - Math.pow(0.95, lv)) * 100).toFixed(2)}%` : '0.00%';
         },
     },
     {

@@ -25,6 +25,8 @@ const DEFAULT_STATE = {
     debt: 0,
     lastDebtTime: 0,
     debtStartTime: 0,
+    lastInterest: 0,
+    accumulatedInterest: 0,
 
     // Phase 2: モード
     mode: MODE_NORMAL,

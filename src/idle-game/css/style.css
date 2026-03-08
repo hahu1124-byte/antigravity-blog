@@ -75,7 +75,7 @@ body {
 /* --- 大当たり通知（フローティング） --- */
 .jackpot-notify {
     position: absolute;
-    top: 0;
+    top: 50%;
     left: 0;
     right: 0;
     bottom: 0;
@@ -84,12 +84,13 @@ body {
     align-items: center;
     justify-content: center;
     font-family: var(--font-mono);
-    font-size: 2rem;
+    font-size: 1.6rem;
     font-weight: 700;
     color: var(--accent-green);
     background: rgba(0, 255, 136, 0.12);
     animation: notifyFadeIn 0.2s ease-out;
     text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+    border-radius: 0 0 var(--radius) var(--radius);
 }
 
 .jackpot-notify.rush-notify {
@@ -353,6 +354,13 @@ body {
     font-size: 0.7rem;
     color: var(--text-secondary);
     margin-left: auto;
+}
+
+.rush-cont {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent-green);
 }
 
 @keyframes rushBannerGlow {

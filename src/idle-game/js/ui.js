@@ -41,6 +41,7 @@ const dom = {
     rushBanner: $('rushBanner'),
     rushChainDisplay: $('rushChainDisplay'),
     rushProbDisplay: $('rushProbDisplay'),
+    rushContDisplay: $('rushContDisplay'),
     lcdScreen: $('lcdScreen'),
     prestigeBtn: $('prestigeBtn'),
     prestigeCount: $('prestigeCount'),
@@ -183,6 +184,14 @@ function updateUI() {
         }
         dom.rushChainDisplay.textContent = `${state.rushChain}連荘中`;
         dom.rushProbDisplay.textContent = `確率 1/${Math.round(1 / getKakuhenProb())}`;
+        // 実質継続率: 確変=継続率、ST=ST回転内当選率
+        let contRate;
+        if (state.mode === MODE_KAKUHEN) {
+            contRate = getKakuhenContinueRate();
+        } else {
+            contRate = 1 - Math.pow(1 - getKakuhenProb(), getMaxStSpins());
+        }
+        dom.rushContDisplay.textContent = `継続 ${(contRate * 100).toFixed(2)}%`;
         dom.lcdScreen.classList.add('rush-active');
     } else {
         dom.rushBanner.classList.add('hidden');
@@ -199,7 +208,7 @@ function updateUI() {
     // 台情報
     dom.probDisplay.textContent = `1/${(1 / getCurrentProb()).toFixed(3)}`;
     dom.payoutDisplay.textContent = `${formatNum(state.jackpotPayout)}玉`;
-    dom.rateDisplay.textContent = `${state.spinRate.toFixed(1)}回/秒`;
+    dom.rateDisplay.textContent = `${state.spinRate.toFixed(2)}回/秒`;
     dom.costDisplay.textContent = `${state.costPerSpin}玉`;
 
     // ハマりゲージ（遊タイム）
@@ -227,15 +236,10 @@ function updateUI() {
 
     // 借金表示: 常時表示
     dom.debtAmount.textContent = state.debt > 0 ? formatYenRaw(state.debt) : '¥0';
-    const minutesElapsed = state.debtStartTime > 0
-        ? Math.floor((Date.now() - state.debtStartTime) / 60000)
-        : 0;
     if (state.debt > 0) {
-        const periods = minutesElapsed;
-        const interestGrown = periods > 0
-            ? Math.floor(state.debt - state.debt / Math.pow(1 + DEBT_INTEREST_RATE, periods))
-            : 0;
-        dom.debtInterest.textContent = `複利5%/分 ${minutesElapsed}分経過(+${formatYenRaw(interestGrown)})`;
+        const lastYen = (state.lastInterest * YEN_PER_BALL).toFixed(2);
+        const totalYen = (state.accumulatedInterest * YEN_PER_BALL).toFixed(2);
+        dom.debtInterest.textContent = `複利5%/分 (利息: +¥${lastYen} / 累計: +¥${totalYen})`;
     } else {
         dom.debtInterest.textContent = '利息なし';
     }
@@ -342,13 +346,13 @@ function renderMachineInfoPopup() {
                     <span>コスト ${m.cost}玉</span>
                 </div>
                 <div class="machine-info-specs">
-                    <span>確変率 ${Math.round(m.kakuhenRate * 100)}%</span>
-                    <span>ST率 ${Math.round(m.stRate * 100)}%</span>
-                    <span>時短率 ${Math.round(m.jitanRate * 100)}%</span>
+                    <span>確変率 ${(m.kakuhenRate * 100).toFixed(2)}%</span>
+                    <span>ST率 ${(m.stRate * 100).toFixed(2)}%</span>
+                    <span>時短率 ${(m.jitanRate * 100).toFixed(2)}%</span>
                 </div>
                 <div class="machine-info-specs">
                     <span>ST回転 ${m.baseStSpins}</span>
-                    <span>継続率 ${Math.round(m.kakuhenContinueRate * 100)}%</span>
+                    <span>継続率 ${(m.kakuhenContinueRate * 100).toFixed(2)}%</span>
                     <span>遊タイム ${m.yutimeThreshold}回転</span>
                 </div>
             `;
