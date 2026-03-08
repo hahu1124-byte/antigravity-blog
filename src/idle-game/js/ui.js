@@ -391,8 +391,10 @@ function renderMachineInfoPopup() {
                 </div>
                 <div class="machine-info-specs">
                     <span>ST回転 ${m.baseStSpins}</span>
-                    <span>時短 ${Math.round(JITAN_BASE_SPINS / (m.prob * JITAN_REF_DENOM))}回転</span>
                     <span>継続率 ${(m.kakuhenContinueRate * 100).toFixed(2)}%</span>
+                </div>
+                <div class="machine-info-specs">
+                    <span>時短 ${Math.round(JITAN_BASE_SPINS / (m.prob * JITAN_REF_DENOM))}回転</span>
                     <span>遊タイム ${m.yutimeThreshold}回転</span>
                 </div>
             `;
