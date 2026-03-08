@@ -443,7 +443,7 @@ function updateShopUI() {
         getAllUpgrades().forEach(upg => {
             grandTotal += getUpgradeTotalSpent(upg);
         });
-        summaryEl.textContent = grandTotal > 0 ? `💎 総アップグレード投資: ${formatNum(grandTotal)}玉` : '';
+        summaryEl.textContent = `💎 総アップグレード投資: ${formatNum(grandTotal)}玉`;
     }
 
     // オートバイヤーチェックボックスの表示/非表示

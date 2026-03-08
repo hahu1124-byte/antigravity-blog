@@ -79,6 +79,8 @@ body {
     left: 0;
     right: 0;
     z-index: 200;
+    max-width: 480px;
+    margin: 0 auto;
     text-align: center;
     padding: 6px 8px;
     font-family: var(--font-mono);
