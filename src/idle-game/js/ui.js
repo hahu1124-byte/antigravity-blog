@@ -262,7 +262,9 @@ function updateUI() {
     if (state.debt > 0) {
         const lastYen = (state.lastInterest * YEN_PER_BALL).toFixed(0);
         const totalYen = (state.accumulatedInterest * YEN_PER_BALL).toFixed(0);
-        dom.debtInterest.textContent = `複利5%/分 (利息: +¥${lastYen} / 累計: +¥${totalYen})`;
+        const elapsedSec = state.debtStartTime > 0 ? Math.floor((Date.now() - state.debtStartTime) / 1000) : 0;
+        const elapsedText = elapsedSec > 0 ? ` / 経過${formatTime(elapsedSec)}` : '';
+        dom.debtInterest.textContent = `複利5%/分 (利息: +¥${lastYen} / 累計: +¥${totalYen}${elapsedText})`;
     } else {
         dom.debtInterest.textContent = '利息なし';
     }

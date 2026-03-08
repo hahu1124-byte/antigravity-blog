@@ -246,6 +246,7 @@ function executePrestige(isAuto = false) {
     const newPrestiges = state.prestiges + 1;
     const lifetimeJackpots = state.totalLifetimeJackpots;
     const unlockedMachines = [...state.unlockedMachines];
+    const keepMachineId = state.currentMachineId;
 
     // 収支リセット、借金は引き継ぐ
     const keepDebt = state.debt;
@@ -268,7 +269,7 @@ function executePrestige(isAuto = false) {
         prestiges: newPrestiges,
         totalLifetimeJackpots: lifetimeJackpots,
         unlockedMachines: unlockedMachines,
-        currentMachineId: 'amadeji',
+        currentMachineId: keepMachineId,
         lastSave: Date.now(),
         startedAt: Date.now(),
         // 収支リセット（totalBalls/totalInvestは初期値0に戻る）
