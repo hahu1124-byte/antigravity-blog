@@ -435,13 +435,13 @@ function updateShopUI() {
                 levelEl.textContent = `Lv.${level} (${upg.effectText(state)}) ✅ MAX`;
             } else {
                 const currentEffect = upg.effectText(state);
-                // 次Lvの効果を一時計算
+                // 次Lvの効果を一時計算（全アップグレードを再適用して正確な値を出す）
                 state.upgrades[upg.id] = level + 1;
-                upg.apply(state);
+                applyAllUpgrades();
                 const nextEffect = upg.effectText(state);
                 // 元に戻す
                 state.upgrades[upg.id] = level;
-                upg.apply(state);
+                applyAllUpgrades();
                 const maxLabel = upg.maxLevel !== Infinity ? `/${upg.maxLevel}` : '';
                 levelEl.textContent = `Lv.${level}${maxLabel} (${currentEffect}) → Lv.${level + 1} (${nextEffect})`;
             }
