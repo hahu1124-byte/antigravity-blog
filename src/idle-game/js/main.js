@@ -86,8 +86,8 @@ function init() {
         if (upgId === 'autoBuyer' && state.upgrades.autoBuyer >= 1) {
             state.autoBuyer = !state.autoBuyer;
             if (state.autoBuyer) {
-                // ON: 全チェックボックスをON（excludes クリア）
-                state.autoBuyerExcludes = [];
+                // ON: autoBuyer/autoPrestige以外の全チェックボックスをON
+                state.autoBuyerExcludes = ['autoBuyer', 'autoPrestige'];
             } else {
                 // OFF: 全チェックボックスをOFF（全アップグレードを除外）
                 state.autoBuyerExcludes = getAllUpgrades().map(u => u.id);

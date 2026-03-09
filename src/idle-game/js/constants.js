@@ -17,7 +17,7 @@ const MODE_JITAN = 'jitan';
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.14.17';
+const GAME_VERSION = 'v0.14.18';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -240,7 +240,7 @@ const UPGRADES = [
     {
         id: 'autoPrestige',
         name: '🔄 オートプレステージ',
-        desc: '条件達成で自動プレステージ（転生50回で解放）',
+        desc: '条件達成で自動プレステージ（転生15回で解放）',
         icon: '🔄',
         baseCost: 10000000,
         costMultiplier: 1,

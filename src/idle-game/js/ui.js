@@ -583,7 +583,8 @@ function updateShopUI() {
         if (!card) return;
         const cbWrap = card.querySelector('.shop-autobuy-check');
         if (cbWrap) {
-            if (autoBuyerPurchased) {
+            // autoBuyer/autoPrestige自体にはチェックボックスを表示しない
+            if (autoBuyerPurchased && upg.id !== 'autoBuyer' && upg.id !== 'autoPrestige') {
                 cbWrap.classList.remove('hidden');
                 // チェックボックスの状態を同期
                 const cb = cbWrap.querySelector('.autobuy-cb');

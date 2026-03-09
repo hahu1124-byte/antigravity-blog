@@ -198,7 +198,7 @@ function switchRate(rate) {
 function getAllUpgrades() {
     const base = isPremium ? [...UPGRADES, ...PREMIUM_UPGRADES] : UPGRADES;
     return base.filter(upg => {
-        if (upg.hidden && state.prestiges < 50) return false;
+        if (upg.hidden && state.prestiges < 15) return false;
         return true;
     });
 }

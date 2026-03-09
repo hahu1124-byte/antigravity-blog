@@ -157,24 +157,19 @@ function processAutoBuyer(dt) {
     let cheapest = null;
     let cheapestCost = Infinity;
 
-    const profit = state.totalBalls - state.totalInvest;
-
     UPGRADES.forEach(upg => {
+        if (upg.id === 'autoBuyer' || upg.id === 'autoPrestige') return;
         if (state.autoBuyerExcludes.includes(upg.id)) return;
         if (state.upgrades[upg.id] >= upg.maxLevel) return;
         const cost = getUpgradeCost(upg);
-        const canAfford = state.balls >= cost || profit > 0;
-        if (cost < cheapestCost && canAfford) {
+        // 玉が足りない場合は購入しない（借金しない）
+        if (state.balls >= cost && cost < cheapestCost) {
             cheapest = upg;
             cheapestCost = cost;
         }
     });
 
     if (cheapest) {
-        // 玉不足なら借金で補填
-        while (state.balls < cheapestCost) {
-            takeLoan();
-        }
         state.balls -= cheapestCost;
         state.totalInvest += cheapestCost;
         state.upgrades[cheapest.id]++;
