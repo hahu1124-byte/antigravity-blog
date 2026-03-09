@@ -195,13 +195,13 @@ function updateUI() {
         [MODE_KAKUHEN]: `確変 ${formatNum(state.sinceLastJackpot)}回転`,
         [MODE_ST]: `ST(残${state.stRemaining})`,
         [MODE_JITAN]: state.yutimeTriggered
-            ? `遊タイム(残${formatNum(state.jitanRemaining)})`
-            : `時短(残${formatNum(state.jitanRemaining)})`,
+            ? `遊タイム ${formatNum(state.sinceLastJackpot)}回転`
+            : `時短 ${formatNum(state.sinceLastJackpot)}回転`,
     };
     dom.modeIndicator.textContent = modeLabels[state.mode] || '通常';
     dom.modeIndicator.className = `mode-badge mode-${state.mode}`;
 
-    // RUSH バナー（確変/ST区別）
+    // RUSH バナー / 遊タイム・時短バナー（確変/ST区別 + 遊タイム残回転）
     if (isRush) {
         dom.rushBanner.classList.remove('hidden');
         if (state.mode === MODE_KAKUHEN) {
@@ -222,6 +222,15 @@ function updateUI() {
         }
         dom.rushContDisplay.textContent = `継続 ${(contRate * 100).toFixed(2)}%`;
         dom.lcdScreen.classList.add('rush-active');
+    } else if (isJitan) {
+        // 遊タイム・時短中: バナー領域に残回転数を表示
+        dom.rushBanner.classList.remove('hidden');
+        dom.rushBanner.className = 'rush-jitan';
+        document.getElementById('rushLabel').textContent = state.yutimeTriggered ? '⏰ 遊タイム' : '🕐 時短';
+        dom.rushChainDisplay.textContent = `残${formatNum(state.jitanRemaining)}回転`;
+        dom.rushProbDisplay.textContent = `確率 1/${Math.round(1 / getCurrentProb())}`;
+        dom.rushContDisplay.textContent = '';
+        dom.lcdScreen.classList.remove('rush-active');
     } else {
         dom.rushBanner.classList.add('hidden');
         dom.lcdScreen.classList.remove('rush-active');

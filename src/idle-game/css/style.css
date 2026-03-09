@@ -369,6 +369,12 @@ body {
     animation: stBannerGlow 1.5s ease-in-out infinite alternate;
 }
 
+.rush-jitan {
+    background: linear-gradient(90deg, rgba(0, 229, 255, 0.2), rgba(0, 255, 136, 0.1));
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    animation: jitanBannerGlow 2s ease-in-out infinite alternate;
+}
+
 #rushBanner.hidden {
     visibility: hidden;
 }
@@ -378,6 +384,15 @@ body {
     font-weight: 900;
     color: var(--accent-red);
     text-shadow: 0 0 10px rgba(255, 51, 102, 0.6);
+}
+
+.rush-jitan .rush-label {
+    color: var(--accent-cyan);
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+}
+
+.rush-jitan .rush-chain {
+    color: var(--accent-cyan);
 }
 
 .rush-chain {
@@ -418,6 +433,16 @@ body {
 
     100% {
         box-shadow: 0 0 16px rgba(255, 136, 0, 0.4), 0 0 4px rgba(255, 215, 0, 0.2);
+    }
+}
+
+@keyframes jitanBannerGlow {
+    0% {
+        box-shadow: 0 0 6px rgba(0, 229, 255, 0.15);
+    }
+
+    100% {
+        box-shadow: 0 0 12px rgba(0, 229, 255, 0.3), 0 0 4px rgba(0, 255, 136, 0.15);
     }
 }
 
