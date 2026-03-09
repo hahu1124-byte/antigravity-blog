@@ -97,6 +97,7 @@ let cloudSaveTimer = 0;
 function saveGame() {
     state.lastSave = Date.now();
     state.yenPerBall = YEN_PER_BALL;
+    state.gameVersion = GAME_VERSION;
     try {
         localStorage.setItem(SAVE_KEY, JSON.stringify(state));
         showSaveStatus('保存済み ✓');
@@ -118,6 +119,14 @@ function loadGame() {
         if (!raw) return false;
 
         const saved = JSON.parse(raw);
+
+        // v0.14.17未満のデータは強制リセット（高速回転によるフリーズ対策）
+        if (!saved.gameVersion || saved.gameVersion < 'v0.14.17') {
+            console.warn('旧バージョンのセーブデータを検出 → 初期化');
+            localStorage.removeItem(SAVE_KEY);
+            return false;
+        }
+
         state = {
             ...DEFAULT_STATE,
             ...saved,
@@ -220,7 +229,9 @@ function calculateOffline() {
         ${formatTime(offlineSeconds)}の間に…<br>
         🎰 ${formatNum(offlineSpins)}回転${premiumLabel}<br>
         🎉 大当たり ${actualJackpots}回<br>
-        💰 収支: ${netGain >= 0 ? '+' : ''}${formatYen(netGain)}
+        💰 収支: ${netGain >= 0 ? '+' : ''}${formatYen(netGain)}<br>
+        ⚡ 回転速度: ${formatNum(effectiveRate)}回/秒<br>
+        🎰 モード: ${state.mode === 'kakuhen' ? '確変' : state.mode === 'st' ? 'ST' : state.mode === 'jitan' ? '時短' : '通常'}
     `;
     dom.offlineBanner.classList.remove('hidden');
 }

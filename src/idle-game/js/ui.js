@@ -246,8 +246,8 @@ function updateUI() {
     // 台情報
     dom.probDisplay.textContent = `1/${(1 / getCurrentProb()).toFixed(3)}`;
     dom.payoutDisplay.textContent = `${formatNum(state.jackpotPayout)}玉`;
-    dom.rateDisplay.textContent = `${state.spinRate.toFixed(2)}回/秒`;
-    dom.costDisplay.textContent = `${state.costPerSpin}玉`;
+    dom.rateDisplay.textContent = `${formatNum(state.spinRate)}回/秒`;
+    dom.costDisplay.textContent = `${state.costPerSpin.toFixed(3)}玉`;
 
     // ハマりゲージ（遊タイム）
     const yutimeThreshold = getEffectiveYutimeThreshold();

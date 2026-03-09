@@ -795,7 +795,7 @@ body {
     border-radius: var(--radius);
     padding: 24px;
     text-align: center;
-    max-width: 320px;
+    max-width: 400px;
     box-shadow: var(--glow-gold);
     animation: offlineContentIn 0.5s 0.15s ease-out both;
 }
