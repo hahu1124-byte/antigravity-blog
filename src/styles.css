@@ -796,6 +796,7 @@ html[data-theme="light"] .content img {
     color: var(--text-primary);
 }
 
+/* TODO: Amazonアソシエイト承認後に復元する（商標ロゴ模倣防止のため一時無効化）
 .amazon-logo-text::after {
     content: '';
     position: absolute;
@@ -807,6 +808,7 @@ html[data-theme="light"] .content img {
     border-radius: 0 0 4px 4px;
     clip-path: ellipse(50% 100% at 50% 0%);
 }
+*/
 
 .amazon-search-form {
     display: flex;

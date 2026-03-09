@@ -350,6 +350,7 @@ function getAmazonAdsHtml(post) {
                 </form>
             </div>
             <p class="amazon-ads-note">※ 上記リンクはAmazonアソシエイトリンクです</p>
+            <p class="amazon-ads-note">Amazonのアソシエイトとして、Gravity Portalは適格販売により収入を得ています。</p>
         </div>`;
 }
 
