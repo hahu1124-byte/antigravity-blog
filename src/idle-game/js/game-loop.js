@@ -204,7 +204,108 @@ let prestigePaused = false;
 let prestigePauseTimer = 0;
 const PRESTIGE_PAUSE_DURATION = 0.5;
 
+// パフォーマンス最適化: 30fps制限 + バッチ処理
+const FRAME_INTERVAL = 1000 / 30;  // 30fps（CPU負荷・スマホ発熱軽減）
+const MAX_SPINS_PER_FRAME = 200;   // 詳細ループ上限（超過分はバッチ計算）
+
+// 高速回転時のバッチ処理（超過分を確率ベースで一括計算）
+function processBatchSpins(count) {
+    let remaining = count;
+
+    // ST残回転の消化
+    if (state.mode === MODE_ST && state.stRemaining > 0) {
+        const consumed = Math.min(remaining, state.stRemaining);
+        state.stRemaining -= consumed;
+        state.spins += consumed;
+        state.sinceLastJackpot += consumed;
+        remaining -= consumed;
+        state.balls -= consumed * 0.3;
+        state.totalInvest += consumed * 0.3;
+
+        if (state.stRemaining <= 0) {
+            if (state.rushChain > 0) {
+                showRushSummary(state.rushChain, state.currentRushPayout);
+                if (state.rushChain > state.totalRushChains) state.totalRushChains = state.rushChain;
+            }
+            state.mode = MODE_NORMAL;
+            state.yutimeGauge = 0;
+            state.yutimeTriggered = false;
+            state.rushChain = 0;
+            state.currentRushPayout = 0;
+        }
+    }
+
+    // 時短残回転の消化
+    if (state.mode === MODE_JITAN && state.jitanRemaining > 0) {
+        const consumed = Math.min(remaining, state.jitanRemaining);
+        state.jitanRemaining -= consumed;
+        state.spins += consumed;
+        state.sinceLastJackpot += consumed;
+        remaining -= consumed;
+        state.balls -= consumed * 0.3;
+        state.totalInvest += consumed * 0.3;
+
+        const threshold = getEffectiveYutimeThreshold();
+        state.yutimeGauge = Math.min(state.yutimeGauge + consumed, threshold);
+
+        if (state.jitanRemaining <= 0) {
+            state.mode = MODE_NORMAL;
+            state.jitanRemaining = 0;
+        }
+    }
+
+    if (remaining <= 0) return { jackpots: 0, payout: 0, type: null };
+
+    // 残スピンを確率ベースで一括計算（calculateOfflineと同等の精度）
+    const prob = getCurrentProb();
+    const isRush = state.mode === MODE_KAKUHEN;
+    const costPerSpin = isRush ? 0.3 : state.costPerSpin;
+
+    state.spins += remaining;
+    state.balls -= remaining * costPerSpin;
+    state.totalInvest += remaining * costPerSpin;
+
+    // 遊タイムゲージ（通常/時短中のみカウント）
+    if (state.mode === MODE_NORMAL || state.mode === MODE_JITAN) {
+        const threshold = getEffectiveYutimeThreshold();
+        state.yutimeGauge = Math.min(state.yutimeGauge + remaining, threshold);
+    }
+
+    // 大当たり判定（確率 × 回転数 ± ランダム変動20%）
+    const expectedJackpots = remaining * prob;
+    const randomFactor = 1 + (Math.random() - 0.5) * 0.4;
+    const actualJackpots = Math.max(0, Math.round(expectedJackpots * randomFactor));
+
+    let totalPayout = 0;
+    let lastType = null;
+    for (let i = 0; i < actualJackpots; i++) {
+        const result = processJackpot();
+        totalPayout += result.payout;
+        lastType = result.type;
+    }
+
+    // sinceLastJackpot: 最後の当たり以降の推定スピン数
+    if (actualJackpots > 0) {
+        state.sinceLastJackpot = Math.floor(remaining / (actualJackpots + 1));
+    } else {
+        state.sinceLastJackpot += remaining;
+    }
+
+    checkYutime();
+
+    while (state.balls < 0) {
+        takeLoan();
+    }
+
+    return { jackpots: actualJackpots, payout: totalPayout, type: lastType };
+}
+
 function gameLoop(now) {
+    // 30fps制限: CPU負荷・スマホ発熱を軽減（視認性に影響なし）
+    if (now - lastFrameTime < FRAME_INTERVAL) {
+        requestAnimationFrame(gameLoop);
+        return;
+    }
     const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
     lastFrameTime = now;
 
@@ -262,7 +363,9 @@ function gameLoop(now) {
     let framePayout = 0;
     let frameJackpotType = null;
 
-    for (let i = 0; i < spinsThisFrame; i++) {
+    // 詳細ループ（上限MAX_SPINS_PER_FRAME回、残りはバッチ処理）
+    const detailedSpins = Math.min(spinsThisFrame, MAX_SPINS_PER_FRAME);
+    for (let i = 0; i < detailedSpins; i++) {
         const isRushMode = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
         const isJitan = state.mode === MODE_JITAN;
         let actualCost;
@@ -329,6 +432,15 @@ function gameLoop(now) {
         }
 
         checkYutime();
+    }
+
+    // 超過分のバッチ処理
+    const batchSpins = spinsThisFrame - detailedSpins;
+    if (batchSpins > 0) {
+        const batchResult = processBatchSpins(batchSpins);
+        frameJackpots += batchResult.jackpots;
+        framePayout += batchResult.payout;
+        if (batchResult.type) frameJackpotType = batchResult.type;
     }
 
     if (frameJackpots > 0) {
