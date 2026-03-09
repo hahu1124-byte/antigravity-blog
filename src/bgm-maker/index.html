@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web BGM Maker — ドラムマシン | Gravity Portal</title>
+    <meta name="description" content="ブラウザだけで動くドラムマシン。16ステップシーケンサーで直感的にビートを作成。インストール不要・Web Audio API駆動。">
+    <!-- OGP -->
+    <meta property="og:title" content="Web BGM Maker — ドラムマシン">
+    <meta property="og:description" content="ブラウザだけで動くドラムマシン。16ステップで直感的にビートを作成。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.antigravity-portal.com/bgm-maker/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a14;
+            --bg-card: #12122a;
+            --bg-step: #1a1a35;
+            --bg-step-on: rgba(99, 102, 241, 0.25);
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --green: #22c55e;
+            --green-glow: rgba(34, 197, 94, 0.3);
+            --orange: #f59e0b;
+            --red: #ef4444;
+            --text: #e8e8f0;
+            --text2: #9a9ab8;
+            --text-muted: #6a6a88;
+            --border: rgba(255, 255, 255, 0.08);
+            --radius: 12px;
+            --font-sans: 'Inter', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+            /* パートカラー */
+            --clr-kick: #ef4444;
+            --clr-snare: #f59e0b;
+            --clr-hihat-c: #22c55e;
+            --clr-hihat-o: #06b6d4;
+            --clr-clap: #a855f7;
+            --clr-tom: #ec4899;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 16px;
+            overscroll-behavior: none;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        /* --- ヘッダー --- */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 12px;
+            color: var(--text2);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #e8e8f0, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text2);
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .badge-phase {
+            display: inline-block;
+            padding: 2px 8px;
+            margin-top: 6px;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--orange);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        /* --- コントロールバー --- */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 8px 18px;
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: var(--text);
+        }
+
+        .btn:hover {
+            border-color: var(--accent);
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-play {
+            background: var(--green);
+            color: #000;
+            border-color: var(--green);
+        }
+
+        .btn-play:hover {
+            background: #16a34a;
+            border-color: #16a34a;
+            box-shadow: 0 0 16px var(--green-glow);
+        }
+
+        .btn-play.playing {
+            background: var(--red);
+            border-color: var(--red);
+        }
+
+        .btn-play.playing:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.3);
+        }
+
+        .bpm-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bpm-label {
+            font-size: 0.75rem;
+            color: var(--text2);
+            font-family: var(--font-mono);
+        }
+
+        .bpm-value {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--accent);
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .bpm-slider {
+            width: 100px;
+            accent-color: var(--accent);
+        }
+
+        .swing-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .swing-label {
+            font-size: 0.7rem;
+            color: var(--text2);
+        }
+
+        .swing-value {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--orange);
+            min-width: 28px;
+        }
+
+        .swing-slider {
+            width: 70px;
+            accent-color: var(--orange);
+        }
+
+        .master-vol-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: auto;
+        }
+
+        .vol-icon {
+            font-size: 0.85rem;
+        }
+
+        .master-vol-slider {
+            width: 70px;
+            accent-color: var(--accent);
+        }
+
+        /* --- シーケンサーグリッド --- */
+        .sequencer {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
+            overflow-x: auto;
+        }
+
+        .seq-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .seq-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .part-label {
+            width: 70px;
+            flex-shrink: 0;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text2);
+            text-align: right;
+            padding-right: 8px;
+        }
+
+        .part-vol {
+            width: 50px;
+            flex-shrink: 0;
+            accent-color: var(--text2);
+        }
+
+        .steps {
+            display: flex;
+            gap: 3px;
+            flex: 1;
+        }
+
+        .step {
+            flex: 1;
+            min-width: 28px;
+            aspect-ratio: 1;
+            max-height: 40px;
+            background: var(--bg-step);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.1s;
+            position: relative;
+        }
+
+        .step:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.08);
+        }
+
+        .step.on {
+            border-color: var(--part-color, var(--accent));
+            background: var(--bg-step-on);
+            box-shadow: 0 0 8px color-mix(in srgb, var(--part-color, var(--accent)) 30%, transparent);
+        }
+
+        .step.current {
+            border-color: var(--green);
+            box-shadow: 0 0 10px var(--green-glow);
+        }
+
+        .step.on.current {
+            background: color-mix(in srgb, var(--part-color, var(--accent)) 50%, var(--green) 50%);
+            border-color: var(--green);
+        }
+
+        /* ビートマーカー（1,5,9,13拍の上に薄いインジケータ） */
+        .beat-marker {
+            display: flex;
+            gap: 3px;
+            margin-left: 74px;
+            margin-bottom: 6px;
+            padding-left: 54px;
+        }
+
+        .beat-num {
+            flex: 1;
+            min-width: 28px;
+            text-align: center;
+            font-size: 0.55rem;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+        }
+
+        .beat-num.downbeat {
+            color: var(--text2);
+            font-weight: 700;
+        }
+
+        /* --- プリセット・アクションボタン --- */
+        .action-bar {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+
+        .preset-select {
+            padding: 8px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            font-family: var(--font-sans);
+            font-size: 0.8rem;
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .preset-select:hover {
+            border-color: var(--accent);
+        }
+
+        .preset-select:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        option {
+            background: var(--bg-card);
+            color: var(--text);
+        }
+
+        .btn-small {
+            padding: 6px 14px;
+            font-size: 0.75rem;
+        }
+
+        .btn-clear {
+            color: var(--red);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-clear:hover {
+            border-color: var(--red);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        .btn-random {
+            color: var(--orange);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-random:hover {
+            border-color: var(--orange);
+            background: rgba(245, 158, 11, 0.08);
+        }
+
+        /* --- 情報テキスト --- */
+        .info {
+            margin-top: 20px;
+            padding: 14px 18px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border-left: 3px solid var(--accent);
+            font-size: 0.75rem;
+            color: var(--text2);
+            line-height: 1.6;
+        }
+
+        /* --- レスポンシブ --- */
+        @media (max-width: 600px) {
+            .controls {
+                gap: 8px;
+                padding: 12px 14px;
+            }
+
+            .bpm-slider {
+                width: 80px;
+            }
+
+            .swing-slider {
+                width: 50px;
+            }
+
+            .master-vol-slider {
+                width: 50px;
+            }
+
+            .master-vol-group {
+                margin-left: 0;
+            }
+
+            .part-label {
+                width: 50px;
+                font-size: 0.6rem;
+            }
+
+            .part-vol {
+                width: 36px;
+            }
+
+            .step {
+                min-width: 20px;
+                max-height: 32px;
+            }
+
+            .beat-marker {
+                margin-left: 54px;
+                padding-left: 40px;
+            }
+
+            .sequencer {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="https://antigravity-portal.com/" class="back-link">← Gravity Portal</a>
+            <h1>🥁 Web BGM Maker <span class="badge-phase">v0.1.0</span></h1>
+            <p class="subtitle">ドラムマシン — 16ステップシーケンサー</p>
+        </div>
+
+        <!-- コントロールバー -->
+        <div class="controls">
+            <button class="btn btn-play" id="playBtn" onclick="togglePlay()">▶ Play</button>
+
+            <div class="bpm-group">
+                <span class="bpm-label">BPM</span>
+                <input type="range" min="60" max="200" value="120" class="bpm-slider" id="bpmSlider" title="BPM"
+                    oninput="setBPM(this.value)">
+                <span class="bpm-value" id="bpmValue">120</span>
+            </div>
+
+            <div class="swing-group">
+                <span class="swing-label">Swing</span>
+                <input type="range" min="0" max="100" value="0" class="swing-slider" id="swingSlider" title="Swing"
+                    oninput="setSwing(this.value)">
+                <span class="swing-value" id="swingValue">0%</span>
+            </div>
+
+            <div class="master-vol-group">
+                <span class="vol-icon">🔊</span>
+                <input type="range" min="0" max="100" value="80" class="master-vol-slider" id="masterVolSlider"
+                    title="マスター音量" oninput="setMasterVol(this.value)">
+            </div>
+        </div>
+
+        <!-- シーケンサーグリッド -->
+        <div class="sequencer">
+            <!-- ビートマーカー -->
+            <div class="beat-marker" id="beatMarker"></div>
+
+            <!-- パートごとの行（JSで生成） -->
+            <div id="grid"></div>
+        </div>
+
+        <!-- プリセット・アクション -->
+        <div class="action-bar">
+            <select class="preset-select" id="presetSelect" aria-label="プリセットパターン選択" onchange="loadPreset(this.value)">
+                <option value="">🎵 プリセット選択...</option>
+                <option value="rock">🎸 Rock</option>
+                <option value="hiphop">🎤 Hip Hop</option>
+                <option value="techno">🎧 Techno</option>
+                <option value="house">🏠 House</option>
+                <option value="bossa">🌴 Bossa Nova</option>
+                <option value="reggae">🇯🇲 Reggae</option>
+            </select>
+            <button class="btn btn-small btn-random" onclick="randomize()">🎲 ランダム</button>
+            <button class="btn btn-small btn-clear" onclick="clearAll()">🗑 クリア</button>
+        </div>
+
+        <div class="info">
+            💡 <b>すべての音がWeb Audio APIで生成されています。</b>音声ファイルは不要です。<br>
+            ステップをクリックして音を配置 → Play で再生。プリセットから始めるのもおすすめです。
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // 定数・状態
+        // ========================================
+        const STEPS = 16;
+        const PARTS = [
+            { id: 'kick', name: 'Kick', color: 'var(--clr-kick)' },
+            { id: 'snare', name: 'Snare', color: 'var(--clr-snare)' },
+            { id: 'hihatC', name: 'HH Close', color: 'var(--clr-hihat-c)' },
+            { id: 'hihatO', name: 'HH Open', color: 'var(--clr-hihat-o)' },
+            { id: 'clap', name: 'Clap', color: 'var(--clr-clap)' },
+            { id: 'tom', name: 'Tom', color: 'var(--clr-tom)' },
+        ];
+
+        // パターンデータ: parts[partId][stepIndex] = true/false
+        const pattern = {};
+        PARTS.forEach(p => { pattern[p.id] = new Array(STEPS).fill(false); });
+
+        // 各パートの音量 (0-1)
+        const partVolume = {};
+        PARTS.forEach(p => { partVolume[p.id] = 0.8; });
+
+        let bpm = 120;
+        let swing = 0;       // 0-100
+        let masterVol = 0.8;
+        let isPlaying = false;
+        let currentStep = -1;
+        let nextNoteTime = 0;
+        let timerID = null;
+
+        // Web Audio
+        let ctx;
+        function getCtx() {
+            if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+            if (ctx.state === 'suspended') ctx.resume();
+            return ctx;
+        }
+
+        // ========================================
+        // UI生成
+        // ========================================
+        function buildUI() {
+            // ビートマーカー
+            const marker = document.getElementById('beatMarker');
+            for (let i = 0; i < STEPS; i++) {
+                const el = document.createElement('span');
+                el.className = 'beat-num' + (i % 4 === 0 ? ' downbeat' : '');
+                el.textContent = i + 1;
+                marker.appendChild(el);
+            }
+
+            // グリッド
+            const grid = document.getElementById('grid');
+            PARTS.forEach((part) => {
+                const row = document.createElement('div');
+                row.className = 'seq-row';
+
+                // パート名
+                const label = document.createElement('div');
+                label.className = 'part-label';
+                label.textContent = part.name;
+                label.style.color = part.color;
+                row.appendChild(label);
+
+                // パート音量
+                const vol = document.createElement('input');
+                vol.type = 'range';
+                vol.min = '0';
+                vol.max = '100';
+                vol.value = '80';
+                vol.className = 'part-vol';
+                vol.style.accentColor = part.color;
+                vol.addEventListener('input', () => {
+                    partVolume[part.id] = vol.value / 100;
+                });
+                row.appendChild(vol);
+
+                // ステップ
+                const stepsDiv = document.createElement('div');
+                stepsDiv.className = 'steps';
+                for (let i = 0; i < STEPS; i++) {
+                    const step = document.createElement('div');
+                    step.className = 'step';
+                    step.style.setProperty('--part-color', part.color);
+                    step.dataset.part = part.id;
+                    step.dataset.step = i;
+
+                    // 4拍区切りの視覚分離
+                    if (i % 4 === 0 && i > 0) {
+                        step.style.marginLeft = '4px';
+                    }
+
+                    step.addEventListener('click', () => {
+                        pattern[part.id][i] = !pattern[part.id][i];
+                        step.classList.toggle('on', pattern[part.id][i]);
+                        // クリック時にプレビュー音を鳴らす
+                        if (pattern[part.id][i]) {
+                            playSound(part.id, getCtx().currentTime);
+                        }
+                    });
+
+                    stepsDiv.appendChild(step);
+                }
+                row.appendChild(stepsDiv);
+                grid.appendChild(row);
+            });
+        }
+
+        // ========================================
+        // ドラム合成
+        // ========================================
+        function playSound(partId, time) {
+            const c = getCtx();
+            const vol = partVolume[partId] * masterVol;
+
+            switch (partId) {
+                case 'kick': {
+                    const osc = c.createOscillator();
+                    const gain = c.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(160, time);
+                    osc.frequency.exponentialRampToValueAtTime(35, time + 0.12);
+                    gain.gain.setValueAtTime(vol * 0.9, time);
+                    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.35);
+                    osc.connect(gain).connect(c.destination);
+                    osc.start(time);
+                    osc.stop(time + 0.35);
+
+                    // クリック成分
+                    const click = c.createOscillator();
+                    const cGain = c.createGain();
+                    click.type = 'square';
+                    click.frequency.setValueAtTime(1200, time);
+                    click.frequency.exponentialRampToValueAtTime(200, time + 0.02);
+                    cGain.gain.setValueAtTime(vol * 0.15, time);
+                    cGain.gain.exponentialRampToValueAtTime(0.001, time + 0.03);
+                    click.connect(cGain).connect(c.destination);
+                    click.start(time);
+                    click.stop(time + 0.03);
+                    break;
+                }
+                case 'snare': {
+                    // トーン
+                    const osc = c.createOscillator();
+                    const oGain = c.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.value = 200;
+                    oGain.gain.setValueAtTime(vol * 0.4, time);
+                    oGain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+                    osc.connect(oGain).connect(c.destination);
+                    osc.start(time);
+                    osc.stop(time + 0.12);
+
+                    // ノイズ
+                    const bufLen = c.sampleRate * 0.15;
+                    const buf = c.createBuffer(1, bufLen, c.sampleRate);
+                    const data = buf.getChannelData(0);
+                    for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+                    const noise = c.createBufferSource();
+                    noise.buffer = buf;
+                    const nGain = c.createGain();
+                    nGain.gain.setValueAtTime(vol * 0.45, time);
+                    nGain.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
+                    const filter = c.createBiquadFilter();
+                    filter.type = 'bandpass';
+                    filter.frequency.value = 4000;
+                    filter.Q.value = 1.2;
+                    noise.connect(filter).connect(nGain).connect(c.destination);
+                    noise.start(time);
+                    break;
+                }
+                case 'hihatC': {
+                    const bufLen = c.sampleRate * 0.04;
+                    const buf = c.createBuffer(1, bufLen, c.sampleRate);
+                    const data = buf.getChannelData(0);
+                    for (let i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufLen);
+                    const noise = c.createBufferSource();
+                    noise.buffer = buf;
+                    const gain = c.createGain();
+                    gain.gain.setValueAtTime(vol * 0.3, time);
+                    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+                    const hp = c.createBiquadFilter();
+                    hp.type = 'highpass';
+                    hp.frequency.value = 8000;
+                    noise.connect(hp).connect(gain).connect(c.destination);
+                    noise.start(time);
+                    break;
+                }
+                case 'hihatO': {
+                    const bufLen = c.sampleRate * 0.2;
+                    const buf = c.createBuffer(1, bufLen, c.sampleRate);
+                    const data = buf.getChannelData(0);
+                    for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+                    const noise = c.createBufferSource();
+                    noise.buffer = buf;
+                    const gain = c.createGain();
+                    gain.gain.setValueAtTime(vol * 0.25, time);
+                    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.25);
+                    const hp = c.createBiquadFilter();
+                    hp.type = 'highpass';
+                    hp.frequency.value = 7000;
+                    noise.connect(hp).connect(gain).connect(c.destination);
+                    noise.start(time);
+                    break;
+                }
+                case 'clap': {
+                    // 3連打ノイズ
+                    for (let j = 0; j < 3; j++) {
+                        const bufLen = c.sampleRate * 0.015;
+                        const buf = c.createBuffer(1, bufLen, c.sampleRate);
+                        const data = buf.getChannelData(0);
+                        for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+                        const noise = c.createBufferSource();
+                        noise.buffer = buf;
+                        const gain = c.createGain();
+                        const t = time + j * 0.012;
+                        gain.gain.setValueAtTime(vol * 0.35, t);
+                        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+                        const bp = c.createBiquadFilter();
+                        bp.type = 'bandpass';
+                        bp.frequency.value = 2500;
+                        bp.Q.value = 2;
+                        noise.connect(bp).connect(gain).connect(c.destination);
+                        noise.start(t);
+                    }
+                    // テール
+                    const tailBufLen = c.sampleRate * 0.15;
+                    const tailBuf = c.createBuffer(1, tailBufLen, c.sampleRate);
+                    const tailData = tailBuf.getChannelData(0);
+                    for (let i = 0; i < tailBufLen; i++) tailData[i] = Math.random() * 2 - 1;
+                    const tailNoise = c.createBufferSource();
+                    tailNoise.buffer = tailBuf;
+                    const tailGain = c.createGain();
+                    tailGain.gain.setValueAtTime(vol * 0.25, time + 0.035);
+                    tailGain.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+                    const tailBp = c.createBiquadFilter();
+                    tailBp.type = 'bandpass';
+                    tailBp.frequency.value = 2000;
+                    tailNoise.connect(tailBp).connect(tailGain).connect(c.destination);
+                    tailNoise.start(time + 0.035);
+                    break;
+                }
+                case 'tom': {
+                    const osc = c.createOscillator();
+                    const gain = c.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(200, time);
+                    osc.frequency.exponentialRampToValueAtTime(80, time + 0.2);
+                    gain.gain.setValueAtTime(vol * 0.6, time);
+                    gain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
+                    osc.connect(gain).connect(c.destination);
+                    osc.start(time);
+                    osc.stop(time + 0.3);
+                    break;
+                }
+            }
+        }
+
+        // ========================================
+        // スケジューラー
+        // ========================================
+        const SCHEDULE_AHEAD = 0.1;  // 先読み秒数
+        const LOOK_AHEAD = 25;      // タイマー間隔 ms
+
+        function scheduler() {
+            const c = getCtx();
+            while (nextNoteTime < c.currentTime + SCHEDULE_AHEAD) {
+                scheduleStep(currentStep, nextNoteTime);
+                advanceStep();
+            }
+            timerID = setTimeout(scheduler, LOOK_AHEAD);
+        }
+
+        function scheduleStep(step, time) {
+            // UIハイライト更新
+            requestAnimationFrame(() => highlightStep(step));
+
+            // 各パートの音を鳴らす
+            PARTS.forEach(part => {
+                if (pattern[part.id][step]) {
+                    playSound(part.id, time);
+                }
+            });
+        }
+
+        function advanceStep() {
+            const secondsPerBeat = 60.0 / bpm;
+            const sixteenthNote = secondsPerBeat / 4;
+
+            currentStep = (currentStep + 1) % STEPS;
+
+            // スウィング: 偶数ステップ（裏拍）のタイミングを遅らせる
+            if (currentStep % 2 === 1 && swing > 0) {
+                nextNoteTime += sixteenthNote * (1 + swing / 100 * 0.66);
+            } else {
+                nextNoteTime += sixteenthNote;
+            }
+        }
+
+        function highlightStep(step) {
+            document.querySelectorAll('.step.current').forEach(el => el.classList.remove('current'));
+            document.querySelectorAll(`.step[data-step="${step}"]`).forEach(el => el.classList.add('current'));
+        }
+
+        // ========================================
+        // 再生制御
+        // ========================================
+        function togglePlay() {
+            const btn = document.getElementById('playBtn');
+            if (isPlaying) {
+                // 停止
+                isPlaying = false;
+                clearTimeout(timerID);
+                currentStep = -1;
+                document.querySelectorAll('.step.current').forEach(el => el.classList.remove('current'));
+                btn.textContent = '▶ Play';
+                btn.classList.remove('playing');
+            } else {
+                // 再生開始
+                isPlaying = true;
+                const c = getCtx();
+                currentStep = 0;
+                nextNoteTime = c.currentTime + 0.05;
+                btn.textContent = '⏹ Stop';
+                btn.classList.add('playing');
+                scheduler();
+            }
+        }
+
+        function setBPM(val) {
+            bpm = parseInt(val);
+            document.getElementById('bpmValue').textContent = bpm;
+        }
+
+        function setSwing(val) {
+            swing = parseInt(val);
+            document.getElementById('swingValue').textContent = swing + '%';
+        }
+
+        function setMasterVol(val) {
+            masterVol = parseInt(val) / 100;
+        }
+
+        // ========================================
+        // プリセット
+        // ========================================
+        const PRESETS = {
+            rock: {
+                kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0],
+                snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                hihatC: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+                hihatO: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                clap: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                tom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+            },
+            hiphop: {
+                kick: [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+                hihatC: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                hihatO: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                clap: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                tom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            },
+            techno: {
+                kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+                snare: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                hihatC: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+                hihatO: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+                clap: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                tom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            },
+            house: {
+                kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+                snare: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                hihatC: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+                hihatO: [0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+                clap: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                tom: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+            },
+            bossa: {
+                kick: [1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                snare: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                hihatC: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+                hihatO: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                clap: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+                tom: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            },
+            reggae: {
+                kick: [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                snare: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                hihatC: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+                hihatO: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                clap: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                tom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+            },
+        };
+
+        function loadPreset(name) {
+            if (!name || !PRESETS[name]) return;
+            const preset = PRESETS[name];
+            PARTS.forEach(part => {
+                const data = preset[part.id] || new Array(STEPS).fill(0);
+                for (let i = 0; i < STEPS; i++) {
+                    pattern[part.id][i] = !!data[i];
+                }
+            });
+            updateGridUI();
+        }
+
+        function clearAll() {
+            PARTS.forEach(part => {
+                for (let i = 0; i < STEPS; i++) pattern[part.id][i] = false;
+            });
+            updateGridUI();
+            document.getElementById('presetSelect').value = '';
+        }
+
+        function randomize() {
+            // パートごとに密度を変える
+            const densities = { kick: 0.25, snare: 0.15, hihatC: 0.4, hihatO: 0.1, clap: 0.1, tom: 0.08 };
+            PARTS.forEach(part => {
+                const density = densities[part.id] || 0.2;
+                for (let i = 0; i < STEPS; i++) {
+                    pattern[part.id][i] = Math.random() < density;
+                }
+            });
+            updateGridUI();
+            document.getElementById('presetSelect').value = '';
+        }
+
+        function updateGridUI() {
+            PARTS.forEach(part => {
+                for (let i = 0; i < STEPS; i++) {
+                    const el = document.querySelector(`.step[data-part="${part.id}"][data-step="${i}"]`);
+                    if (el) el.classList.toggle('on', pattern[part.id][i]);
+                }
+            });
+        }
+
+        // ========================================
+        // 初期化
+        // ========================================
+        buildUI();
+    </script>
+</body>
+
+</html>

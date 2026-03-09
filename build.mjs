@@ -52,7 +52,7 @@ if (existsSync(cssSrc)) {
 }
 
 // 静的ツールをコピー（convergence, simulator, machine-db等）
-const staticTools = ['convergence', 'simulator', 'machine-db', 'data', 'idle-game', 'quiz', 'general-quiz', 'lab'];
+const staticTools = ['convergence', 'simulator', 'machine-db', 'data', 'idle-game', 'quiz', 'general-quiz', 'lab', 'bgm-maker'];
 for (const tool of staticTools) {
     const toolSrc = join(__dirname, 'src', tool);
     const toolDst = join(OUTPUT_DIR, tool);
@@ -343,7 +343,7 @@ function getAmazonAdsHtml(post) {
                 ${itemCards}
             </div>
             <div class="amazon-search-box">
-                <p class="amazon-search-label">🔍 Amazonで探す</p>
+                <p class="amazon-search-label">🔍 <span class="amazon-logo-text">Amazon</span>で探す</p>
                 <form onsubmit="window.open('https://www.amazon.co.jp/s?k='+encodeURIComponent(this.q.value)+'&tag=${AMAZON_TAG}','_blank');return false;" class="amazon-search-form">
                     <input type="text" name="q" placeholder="キーワードを入力..." class="amazon-search-input" />
                     <button type="submit" class="amazon-search-btn">検索</button>

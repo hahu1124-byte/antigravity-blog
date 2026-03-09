@@ -788,6 +788,26 @@ html[data-theme="light"] .content img {
     margin-bottom: 0.5rem;
 }
 
+.amazon-logo-text {
+    display: inline-block;
+    position: relative;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+}
+
+.amazon-logo-text::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 15%;
+    width: 70%;
+    height: 4px;
+    background: #f59e0b;
+    border-radius: 0 0 4px 4px;
+    clip-path: ellipse(50% 100% at 50% 0%);
+}
+
 .amazon-search-form {
     display: flex;
     gap: 0.5rem;
