@@ -17,7 +17,7 @@ const MODE_JITAN = 'jitan';
 // ゲームバージョン・借金定数
 // ============================================================
 
-const GAME_VERSION = 'v0.14.18';
+const GAME_VERSION = 'v0.14.19';
 const DEBT_UNIT_YEN = 1000;
 const DEBT_REPAY_UNIT_YEN = 500;
 const DEBT_INTEREST_RATE = 0.05;
@@ -143,7 +143,7 @@ const UPGRADES = [
         costMultiplier: 1.25,
         maxLevel: Infinity,
         apply: () => { },
-        effectText: (s) => `${s.spinRate.toFixed(2)}回/秒`,
+        effectText: (s) => `${s.spinRate.toFixed(3)}回/秒`,
     },
     {
         id: 'jackpotProb',

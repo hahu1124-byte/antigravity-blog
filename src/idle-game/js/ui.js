@@ -60,7 +60,8 @@ const dom = {
     // 借金
     debtSection: $('debtSection'),
     debtAmount: $('debtAmount'),
-    debtInterest: $('debtInterest'),
+    debtInterestRate: $('debtInterestRate'),
+    debtInterestDetail: $('debtInterestDetail'),
     repayBtn: $('repayBtn'),
     repayPartialBtn: $('repayPartialBtn'),
     loanBtn: $('loanBtn'),
@@ -246,7 +247,7 @@ function updateUI() {
     // 台情報
     dom.probDisplay.textContent = `1/${(1 / getCurrentProb()).toFixed(3)}`;
     dom.payoutDisplay.textContent = `${formatNum(state.jackpotPayout)}玉`;
-    dom.rateDisplay.textContent = `${formatNum(state.spinRate)}回/秒`;
+    dom.rateDisplay.textContent = `${state.spinRate.toFixed(3)}回/秒`;
     dom.costDisplay.textContent = `${state.costPerSpin.toFixed(3)}玉`;
 
     // ハマりゲージ（遊タイム）
@@ -299,10 +300,12 @@ function updateUI() {
         const lastYen = (state.lastInterest * YEN_PER_BALL).toFixed(0);
         const totalYen = (state.accumulatedInterest * YEN_PER_BALL).toFixed(0);
         const elapsedSec = state.debtStartTime > 0 ? Math.floor((Date.now() - state.debtStartTime) / 1000) : 0;
-        const elapsedText = elapsedSec > 0 ? ` / 経過${formatTime(elapsedSec)}` : '';
-        dom.debtInterest.textContent = `複利5%/分 (利息: +¥${lastYen} / 累計: +¥${totalYen}${elapsedText})`;
+        const elapsedText = elapsedSec > 0 ? ` 経過${formatTime(elapsedSec)}` : '';
+        dom.debtInterestRate.textContent = `複利5%/分${elapsedText}`;
+        dom.debtInterestDetail.textContent = `利息: +¥${lastYen} / 累計: +¥${totalYen}`;
     } else {
-        dom.debtInterest.textContent = '利息なし';
+        dom.debtInterestRate.textContent = '利息なし';
+        dom.debtInterestDetail.textContent = '';
     }
     dom.repayBtn.disabled = state.balls <= 0 || state.debt <= 0;
     const repayBalls = getDebtRepayBalls();
