@@ -246,6 +246,34 @@
             accent-color: var(--accent);
         }
 
+        .track-vol-group {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .track-vol-label {
+            font-size: 0.7rem;
+            color: var(--text2);
+            white-space: nowrap;
+        }
+
+        .track-vol-slider {
+            width: 50px;
+        }
+
+        .drum-vol-color {
+            accent-color: var(--green);
+        }
+
+        .melody-vol-color {
+            accent-color: var(--accent);
+        }
+
         /* --- シーケンサーグリッド --- */
         .sequencer {
             background: var(--bg-card);
@@ -416,6 +444,189 @@
             line-height: 1.6;
         }
 
+        /* --- タブUI --- */
+        .tab-bar {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 16px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius) var(--radius) 0 0;
+            font-family: var(--font-sans);
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text2);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .tab-btn:hover {
+            color: var(--text);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .tab-btn.active {
+            background: var(--bg-card);
+            color: var(--accent);
+            border-color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        /* --- メロディエディタ --- */
+        .melody-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .synth-group,
+        .scale-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .synth-group label,
+        .scale-group label {
+            font-size: 0.7rem;
+            color: var(--text2);
+            white-space: nowrap;
+        }
+
+        .melody-select {
+            padding: 5px 10px;
+            background: var(--bg-step);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: var(--font-sans);
+            font-size: 0.75rem;
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .melody-select:hover,
+        .melody-select:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+
+        .melody-select option {
+            background: var(--bg-card);
+            color: var(--text);
+        }
+
+        /* ADSRコントロール */
+        .adsr-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 12px 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .adsr-group .adsr-title {
+            font-size: 0.7rem;
+            color: var(--text2);
+            font-weight: 600;
+            margin-right: 4px;
+        }
+
+        .adsr-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .adsr-item label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            min-width: 14px;
+        }
+
+        .adsr-slider {
+            width: 60px;
+            accent-color: var(--accent);
+        }
+
+        .adsr-val {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text2);
+            min-width: 28px;
+        }
+
+        /* ピアノロール */
+        .piano-roll-wrap {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 12px;
+            overflow-x: auto;
+        }
+
+        .piano-roll-container {
+            display: flex;
+            gap: 0;
+            min-width: 600px;
+        }
+
+        .piano-keys {
+            flex-shrink: 0;
+            width: 48px;
+        }
+
+        .piano-key {
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 6px;
+            font-size: 0.55rem;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .piano-key.black-key {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text2);
+        }
+
+        .piano-key.scale-note {
+            color: var(--accent);
+        }
+
+        #pianoCanvas {
+            cursor: crosshair;
+            border-radius: 4px;
+        }
+
         /* --- レスポンシブ --- */
         @media (max-width: 600px) {
             .controls {
@@ -461,6 +672,23 @@
             .sequencer {
                 padding: 10px;
             }
+
+            .adsr-slider {
+                width: 44px;
+            }
+
+            .piano-roll-container {
+                min-width: 480px;
+            }
+
+            .piano-keys {
+                width: 36px;
+            }
+
+            .piano-key {
+                font-size: 0.5rem;
+                height: 18px;
+            }
         }
     </style>
 </head>
@@ -469,8 +697,8 @@
     <div class="container">
         <div class="header">
             <a href="https://antigravity-portal.com/" class="back-link">← Gravity Portal</a>
-            <h1>🥁 Web BGM Maker <span class="badge-phase">v0.1.0</span></h1>
-            <p class="subtitle">ドラムマシン — 16ステップシーケンサー</p>
+            <h1>🎵 Web BGM Maker <span class="badge-phase">v0.2.0</span></h1>
+            <p class="subtitle">ドラムマシン + メロディエディタ</p>
         </div>
 
         <!-- コントロールバー -->
@@ -496,35 +724,163 @@
                 <input type="range" min="0" max="100" value="80" class="master-vol-slider" id="masterVolSlider"
                     title="マスター音量" oninput="setMasterVol(this.value)">
             </div>
+            <div class="track-vol-group">
+                <span class="track-vol-label">🥁</span>
+                <input type="range" min="0" max="100" value="80" class="track-vol-slider drum-vol-color"
+                    id="drumVolSlider" title="ドラム音量" oninput="drumVol = this.value / 100">
+            </div>
+            <div class="track-vol-group">
+                <span class="track-vol-label">🎹</span>
+                <input type="range" min="0" max="100" value="80" class="track-vol-slider melody-vol-color"
+                    id="melodyVolSlider" title="メロディ音量" oninput="melodyVol = this.value / 100">
+            </div>
         </div>
 
-        <!-- シーケンサーグリッド -->
-        <div class="sequencer">
-            <!-- ビートマーカー -->
-            <div class="beat-marker" id="beatMarker"></div>
-
-            <!-- パートごとの行（JSで生成） -->
-            <div id="grid"></div>
+        <!-- タブバー -->
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="drum" onclick="switchTab('drum')">🥁 ドラムマシン</button>
+            <button class="tab-btn" data-tab="melody" onclick="switchTab('melody')">🎹 メロディ</button>
         </div>
 
-        <!-- プリセット・アクション -->
-        <div class="action-bar">
-            <select class="preset-select" id="presetSelect" aria-label="プリセットパターン選択" onchange="loadPreset(this.value)">
-                <option value="">🎵 プリセット選択...</option>
-                <option value="rock">🎸 Rock</option>
-                <option value="hiphop">🎤 Hip Hop</option>
-                <option value="techno">🎧 Techno</option>
-                <option value="house">🏠 House</option>
-                <option value="bossa">🌴 Bossa Nova</option>
-                <option value="reggae">🇯🇲 Reggae</option>
-            </select>
-            <button class="btn btn-small btn-random" onclick="randomize()">🎲 ランダム</button>
-            <button class="btn btn-small btn-clear" onclick="clearAll()">🗑 クリア</button>
+        <!-- ドラムタブ -->
+        <div class="tab-panel active" id="tab-drum">
+            <!-- シーケンサーグリッド -->
+            <div class="sequencer">
+                <!-- ビートマーカー -->
+                <div class="beat-marker" id="beatMarker"></div>
+
+                <!-- パートごとの行（JSで生成） -->
+                <div id="grid"></div>
+            </div>
+
+            <!-- プリセット・アクション -->
+            <div class="action-bar">
+                <select class="preset-select" id="presetSelect" aria-label="プリセットパターン選択"
+                    onchange="loadPreset(this.value)">
+                    <option value="">🎵 プリセット選択...</option>
+                    <option value="rock">🎸 Rock</option>
+                    <option value="hiphop">🎤 Hip Hop</option>
+                    <option value="techno">🎧 Techno</option>
+                    <option value="house">🏠 House</option>
+                    <option value="bossa">🌴 Bossa Nova</option>
+                    <option value="reggae">🇯🇲 Reggae</option>
+                </select>
+                <button class="btn btn-small btn-random" onclick="randomize()">🎲 ランダム</button>
+                <button class="btn btn-small btn-clear" onclick="clearAll()">🗑 クリア</button>
+            </div>
+
+            <div class="info">
+                💡 <b>すべての音がWeb Audio APIで生成されています。</b>音声ファイルは不要です。<br>
+                ステップをクリックして音を配置 → Play で再生。プリセットから始めるのもおすすめです。
+            </div>
         </div>
 
-        <div class="info">
-            💡 <b>すべての音がWeb Audio APIで生成されています。</b>音声ファイルは不要です。<br>
-            ステップをクリックして音を配置 → Play で再生。プリセットから始めるのもおすすめです。
+        <!-- メロディタブ -->
+        <div class="tab-panel" id="tab-melody">
+            <!-- メロディコントロール -->
+            <div class="melody-controls">
+                <div class="synth-group">
+                    <label>波形</label>
+                    <select class="melody-select" id="melodyWaveform">
+                        <option value="sine">Sine（正弦波）</option>
+                        <option value="square">Square（矩形波）</option>
+                        <option value="sawtooth">Sawtooth（ノコギリ波）</option>
+                        <option value="triangle">Triangle（三角波）</option>
+                    </select>
+                </div>
+                <div class="scale-group">
+                    <label>スケール</label>
+                    <select class="melody-select" id="melodyScale" onchange="onScaleChange()">
+                        <option value="chromatic">Chromatic（半音階）</option>
+                        <option value="major" selected>Major（メジャー）</option>
+                        <option value="minor">Minor（マイナー）</option>
+                        <option value="pentatonic">Pentatonic（ペンタトニック）</option>
+                        <option value="blues">Blues（ブルース）</option>
+                        <option value="dorian">Dorian（ドリアン）</option>
+                    </select>
+                </div>
+                <div class="synth-group">
+                    <label>キー</label>
+                    <select class="melody-select" id="melodyKey" onchange="onScaleChange()">
+                        <option value="0">C</option>
+                        <option value="1">C#</option>
+                        <option value="2">D</option>
+                        <option value="3">D#</option>
+                        <option value="4">E</option>
+                        <option value="5">F</option>
+                        <option value="6">F#</option>
+                        <option value="7">G</option>
+                        <option value="8">G#</option>
+                        <option value="9">A</option>
+                        <option value="10">A#</option>
+                        <option value="11">B</option>
+                    </select>
+                </div>
+                <div class="synth-group">
+                    <label>Oct</label>
+                    <select class="melody-select" id="melodyOctave">
+                        <option value="3">3</option>
+                        <option value="4" selected>4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ADSRエンベロープ -->
+            <div class="adsr-group">
+                <span class="adsr-title">ADSR</span>
+                <div class="adsr-item">
+                    <label>A</label>
+                    <input type="range" min="0" max="500" value="10" class="adsr-slider" id="adsrA"
+                        oninput="updateADSRDisplay()">
+                    <span class="adsr-val" id="adsrAVal">10ms</span>
+                </div>
+                <div class="adsr-item">
+                    <label>D</label>
+                    <input type="range" min="0" max="500" value="100" class="adsr-slider" id="adsrD"
+                        oninput="updateADSRDisplay()">
+                    <span class="adsr-val" id="adsrDVal">100ms</span>
+                </div>
+                <div class="adsr-item">
+                    <label>S</label>
+                    <input type="range" min="0" max="100" value="60" class="adsr-slider" id="adsrS"
+                        oninput="updateADSRDisplay()">
+                    <span class="adsr-val" id="adsrSVal">60%</span>
+                </div>
+                <div class="adsr-item">
+                    <label>R</label>
+                    <input type="range" min="0" max="1000" value="200" class="adsr-slider" id="adsrR"
+                        oninput="updateADSRDisplay()">
+                    <span class="adsr-val" id="adsrRVal">200ms</span>
+                </div>
+            </div>
+
+            <!-- ピアノロール -->
+            <div class="piano-roll-wrap">
+                <div class="piano-roll-container">
+                    <div class="piano-keys" id="pianoKeys"></div>
+                    <canvas id="pianoCanvas" width="768" height="480"></canvas>
+                </div>
+            </div>
+
+            <!-- メロディアクション -->
+            <div class="action-bar">
+                <select class="preset-select" id="melodyPresetSelect" aria-label="メロディプリセット選択"
+                    onchange="loadMelodyPreset(this.value)">
+                    <option value="">🎵 メロディプリセット...</option>
+                    <option value="scale_up">📈 スケール上行</option>
+                    <option value="scale_down">📉 スケール下行</option>
+                    <option value="arpeggio">🎶 アルペジオ</option>
+                    <option value="twinkle">⭐ きらきら星</option>
+                </select>
+                <button class="btn btn-small btn-random" onclick="randomizeMelody()">🎲 ランダム</button>
+                <button class="btn btn-small btn-clear" onclick="clearMelody()">🗑 クリア</button>
+            </div>
+
+            <div class="info">
+                💡 ピアノロール上をクリックして音符を配置。右クリックで消去。<br>
+                スケールを選ぶとスケール内の音がハイライト表示されます。
+            </div>
         </div>
     </div>
 
@@ -553,6 +909,8 @@
         let bpm = 120;
         let swing = 0;       // 0-100
         let masterVol = 0.8;
+        let drumVol = 0.8;   // ドラムトラック音量
+        let melodyVol = 0.8; // メロディトラック音量
         let isPlaying = false;
         let currentStep = -1;
         let nextNoteTime = 0;
@@ -641,7 +999,7 @@
         // ========================================
         function playSound(partId, time) {
             const c = getCtx();
-            const vol = partVolume[partId] * masterVol;
+            const vol = partVolume[partId] * masterVol * drumVol;
 
             switch (partId) {
                 case 'kick': {
@@ -966,6 +1324,392 @@
                 }
             });
         }
+
+        // ========================================
+        // タブ切り替え
+        // ========================================
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabId);
+            });
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.toggle('active', panel.id === 'tab-' + tabId);
+            });
+            if (tabId === 'melody' && !melodyInitialized) {
+                initMelodyEditor();
+                melodyInitialized = true;
+            }
+        }
+
+        // ========================================
+        // メロディエディタ
+        // ========================================
+        let melodyInitialized = false;
+
+        // スケール定義（半音のオフセット）
+        const SCALES = {
+            chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+            major: [0, 2, 4, 5, 7, 9, 11],
+            minor: [0, 2, 3, 5, 7, 8, 10],
+            pentatonic: [0, 2, 4, 7, 9],
+            blues: [0, 3, 5, 6, 7, 10],
+            dorian: [0, 2, 3, 5, 7, 9, 10],
+        };
+
+        const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+        // メロディパターン: melodyNotes[step] = MIDIノート番号 or null
+        const melodyNotes = new Array(STEPS).fill(null);
+
+        // ピアノロール設定
+        const PR_ROWS = 24;        // 2オクターブ分
+        const PR_CELL_W = 48;      // ステップの幅 px
+        const PR_CELL_H = 20;      // 音程行の高さ px
+
+        let pianoCanvas, pianoCtx;
+
+        function getMelodyConfig() {
+            return {
+                waveform: document.getElementById('melodyWaveform').value,
+                scale: document.getElementById('melodyScale').value,
+                key: parseInt(document.getElementById('melodyKey').value),
+                octave: parseInt(document.getElementById('melodyOctave').value),
+                adsr: {
+                    a: parseInt(document.getElementById('adsrA').value) / 1000,
+                    d: parseInt(document.getElementById('adsrD').value) / 1000,
+                    s: parseInt(document.getElementById('adsrS').value) / 100,
+                    r: parseInt(document.getElementById('adsrR').value) / 1000,
+                },
+            };
+        }
+
+        // MIDIノート番号 → 周波数
+        function midiToFreq(midi) {
+            return 440 * Math.pow(2, (midi - 69) / 12);
+        }
+
+        // 現在のオクターブ範囲のMIDIノートリスト（高い音が上）
+        function getVisibleNotes() {
+            const cfg = getMelodyConfig();
+            const baseNote = (cfg.octave + 1) * 12; // C(oct+1) がベース
+            const notes = [];
+            for (let i = PR_ROWS - 1; i >= 0; i--) {
+                notes.push(baseNote + i);
+            }
+            return notes;
+        }
+
+        // 指定MIDIノートがスケール内か判定
+        function isInScale(midi) {
+            const cfg = getMelodyConfig();
+            const scaleNotes = SCALES[cfg.scale];
+            const noteClass = ((midi % 12) - cfg.key + 12) % 12;
+            return scaleNotes.includes(noteClass);
+        }
+
+        // MIDIノート番号 → 表示名
+        function midiToName(midi) {
+            return NOTE_NAMES[midi % 12] + Math.floor(midi / 12 - 1);
+        }
+
+        // ピアノキー列の生成
+        function buildPianoKeys() {
+            const container = document.getElementById('pianoKeys');
+            container.innerHTML = '';
+            const notes = getVisibleNotes();
+            notes.forEach(midi => {
+                const el = document.createElement('div');
+                el.className = 'piano-key';
+                const noteClass = midi % 12;
+                if ([1, 3, 6, 8, 10].includes(noteClass)) {
+                    el.classList.add('black-key');
+                }
+                if (isInScale(midi)) {
+                    el.classList.add('scale-note');
+                }
+                el.textContent = midiToName(midi);
+                // クリックで音のプレビュー
+                el.addEventListener('click', () => {
+                    playMelodyNote(midi, getCtx().currentTime, 0.3);
+                });
+                container.appendChild(el);
+            });
+        }
+
+        // ピアノロール Canvas の描画
+        function drawPianoRoll() {
+            if (!pianoCanvas) return;
+            const w = STEPS * PR_CELL_W;
+            const h = PR_ROWS * PR_CELL_H;
+            pianoCanvas.width = w;
+            pianoCanvas.height = h;
+            const c = pianoCtx;
+
+            const notes = getVisibleNotes();
+            const cfg = getMelodyConfig();
+            const scaleNotes = SCALES[cfg.scale];
+
+            // 背景
+            for (let row = 0; row < PR_ROWS; row++) {
+                const midi = notes[row];
+                const noteClass = ((midi % 12) - cfg.key + 12) % 12;
+                const inScale = scaleNotes.includes(noteClass);
+                const isBlack = [1, 3, 6, 8, 10].includes(midi % 12);
+
+                for (let col = 0; col < STEPS; col++) {
+                    const x = col * PR_CELL_W;
+                    const y = row * PR_CELL_H;
+
+                    // 背景色
+                    if (inScale) {
+                        c.fillStyle = isBlack ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.04)';
+                    } else {
+                        c.fillStyle = isBlack ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)';
+                    }
+                    c.fillRect(x, y, PR_CELL_W, PR_CELL_H);
+
+                    // グリッド線
+                    c.strokeStyle = col % 4 === 0 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.05)';
+                    c.strokeRect(x, y, PR_CELL_W, PR_CELL_H);
+                }
+            }
+
+            // ノートの描画
+            for (let col = 0; col < STEPS; col++) {
+                const midi = melodyNotes[col];
+                if (midi == null) continue;
+                const rowIdx = notes.indexOf(midi);
+                if (rowIdx === -1) continue;
+
+                const x = col * PR_CELL_W + 2;
+                const y = rowIdx * PR_CELL_H + 2;
+                const w2 = PR_CELL_W - 4;
+                const h2 = PR_CELL_H - 4;
+
+                // ノートブロック
+                c.fillStyle = 'rgba(99,102,241,0.7)';
+                c.beginPath();
+                c.roundRect(x, y, w2, h2, 3);
+                c.fill();
+
+                // グロー
+                c.shadowColor = 'rgba(99,102,241,0.5)';
+                c.shadowBlur = 8;
+                c.fill();
+                c.shadowBlur = 0;
+            }
+
+            // 再生位置ハイライト
+            if (isPlaying && currentStep >= 0) {
+                c.fillStyle = 'rgba(34,197,94,0.1)';
+                c.fillRect(currentStep * PR_CELL_W, 0, PR_CELL_W, h);
+            }
+        }
+
+        // Canvas クリックイベント
+        function onCanvasClick(e) {
+            const rect = pianoCanvas.getBoundingClientRect();
+            const scaleX = pianoCanvas.width / rect.width;
+            const scaleY = pianoCanvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
+
+            const col = Math.floor(mx / PR_CELL_W);
+            const row = Math.floor(my / PR_CELL_H);
+
+            if (col < 0 || col >= STEPS || row < 0 || row >= PR_ROWS) return;
+
+            const notes = getVisibleNotes();
+            const midi = notes[row];
+
+            if (e.button === 2 || e.ctrlKey) {
+                // 右クリック or Ctrl+クリック: 削除
+                melodyNotes[col] = null;
+            } else {
+                // 左クリック: 配置 (同じ位置なら削除)
+                if (melodyNotes[col] === midi) {
+                    melodyNotes[col] = null;
+                } else {
+                    melodyNotes[col] = midi;
+                    playMelodyNote(midi, getCtx().currentTime, 0.2);
+                }
+            }
+            drawPianoRoll();
+        }
+
+        // メロディ音の合成
+        function playMelodyNote(midi, time, duration) {
+            const c = getCtx();
+            const cfg = getMelodyConfig();
+            const freq = midiToFreq(midi);
+            const vol = masterVol * melodyVol * 0.5;
+
+            const osc = c.createOscillator();
+            const gainNode = c.createGain();
+
+            osc.type = cfg.waveform;
+            osc.frequency.setValueAtTime(freq, time);
+
+            // ADSRエンベロープ
+            const a = cfg.adsr.a;
+            const d = cfg.adsr.d;
+            const s = cfg.adsr.s;
+            const r = cfg.adsr.r;
+            const totalDur = duration + r;
+
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol, time + a);
+            gainNode.gain.linearRampToValueAtTime(vol * s, time + a + d);
+            gainNode.gain.setValueAtTime(vol * s, time + duration);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
+
+            osc.connect(gainNode).connect(c.destination);
+            osc.start(time);
+            osc.stop(time + totalDur + 0.01);
+        }
+
+        // スケール変更ハンドラ
+        function onScaleChange() {
+            buildPianoKeys();
+            drawPianoRoll();
+        }
+
+        // ADSR表示更新
+        function updateADSRDisplay() {
+            document.getElementById('adsrAVal').textContent = document.getElementById('adsrA').value + 'ms';
+            document.getElementById('adsrDVal').textContent = document.getElementById('adsrD').value + 'ms';
+            document.getElementById('adsrSVal').textContent = document.getElementById('adsrS').value + '%';
+            document.getElementById('adsrRVal').textContent = document.getElementById('adsrR').value + 'ms';
+        }
+
+        // メロディプリセット
+        const MELODY_PRESETS = {
+            scale_up: function () {
+                const cfg = getMelodyConfig();
+                const scaleNotes = SCALES[cfg.scale];
+                const base = (cfg.octave + 1) * 12 + cfg.key;
+                for (let i = 0; i < STEPS; i++) {
+                    const idx = i % scaleNotes.length;
+                    const oct = Math.floor(i / scaleNotes.length);
+                    melodyNotes[i] = base + scaleNotes[idx] + oct * 12;
+                }
+            },
+            scale_down: function () {
+                const cfg = getMelodyConfig();
+                const scaleNotes = SCALES[cfg.scale];
+                const base = (cfg.octave + 2) * 12 + cfg.key;
+                for (let i = 0; i < STEPS; i++) {
+                    const idx = (scaleNotes.length - 1) - (i % scaleNotes.length);
+                    const oct = Math.floor(i / scaleNotes.length);
+                    melodyNotes[i] = base - (12 - scaleNotes[idx]) - oct * 12 + 12;
+                }
+            },
+            arpeggio: function () {
+                const cfg = getMelodyConfig();
+                const base = (cfg.octave + 1) * 12 + cfg.key;
+                // 1-3-5-8パターン
+                const degrees = [0, 4, 7, 12, 7, 4, 0, -5];
+                for (let i = 0; i < STEPS; i++) {
+                    melodyNotes[i] = base + degrees[i % degrees.length];
+                }
+            },
+            twinkle: function () {
+                const cfg = getMelodyConfig();
+                const base = (cfg.octave + 1) * 12 + cfg.key;
+                // C C G G A A G - F F E E D D C -
+                const melody = [0, 0, 7, 7, 9, 9, 7, null, 5, 5, 4, 4, 2, 2, 0, null];
+                for (let i = 0; i < STEPS; i++) {
+                    melodyNotes[i] = melody[i] != null ? base + melody[i] : null;
+                }
+            },
+        };
+
+        function loadMelodyPreset(name) {
+            if (!name || !MELODY_PRESETS[name]) return;
+            MELODY_PRESETS[name]();
+            // ノートが表示範囲に入るよう調整
+            clampMelodyNotesToView();
+            drawPianoRoll();
+        }
+
+        function clampMelodyNotesToView() {
+            const notes = getVisibleNotes();
+            const minNote = Math.min(...notes);
+            const maxNote = Math.max(...notes);
+            for (let i = 0; i < STEPS; i++) {
+                if (melodyNotes[i] != null) {
+                    while (melodyNotes[i] < minNote) melodyNotes[i] += 12;
+                    while (melodyNotes[i] > maxNote) melodyNotes[i] -= 12;
+                }
+            }
+        }
+
+        function randomizeMelody() {
+            const cfg = getMelodyConfig();
+            const scaleNotes = SCALES[cfg.scale];
+            const base = (cfg.octave + 1) * 12 + cfg.key;
+            for (let i = 0; i < STEPS; i++) {
+                if (Math.random() < 0.7) {
+                    const deg = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
+                    const octShift = Math.floor(Math.random() * 2) * 12;
+                    melodyNotes[i] = base + deg + octShift;
+                } else {
+                    melodyNotes[i] = null; // 休符
+                }
+            }
+            clampMelodyNotesToView();
+            drawPianoRoll();
+            document.getElementById('melodyPresetSelect').value = '';
+        }
+
+        function clearMelody() {
+            for (let i = 0; i < STEPS; i++) melodyNotes[i] = null;
+            drawPianoRoll();
+            document.getElementById('melodyPresetSelect').value = '';
+        }
+
+        // メロディエディタ初期化
+        function initMelodyEditor() {
+            pianoCanvas = document.getElementById('pianoCanvas');
+            pianoCtx = pianoCanvas.getContext('2d');
+
+            pianoCanvas.addEventListener('click', onCanvasClick);
+            pianoCanvas.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                onCanvasClick(e);
+            });
+
+            // オクターブ変更時のリビルド
+            document.getElementById('melodyOctave').addEventListener('change', () => {
+                buildPianoKeys();
+                clampMelodyNotesToView();
+                drawPianoRoll();
+            });
+
+            // 波形変更は音色のみ変わるので再描画不要
+
+            buildPianoKeys();
+            drawPianoRoll();
+        }
+
+        // ========================================
+        // スケジューラー拡張 — メロディ再生統合
+        // ========================================
+        const origScheduleStep = scheduleStep;
+        scheduleStep = function (step, time) {
+            origScheduleStep(step, time);
+
+            // メロディの音を鳴らす
+            if (melodyNotes[step] != null) {
+                const sixteenthNote = 60.0 / bpm / 4;
+                playMelodyNote(melodyNotes[step], time, sixteenthNote * 0.9);
+            }
+
+            // ピアノロールの再生位置を更新
+            if (melodyInitialized) {
+                requestAnimationFrame(() => drawPianoRoll());
+            }
+        };
 
         // ========================================
         // 初期化
