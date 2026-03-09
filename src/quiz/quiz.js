@@ -1194,7 +1194,8 @@ function renderQuestion() {
     $("progress-fill").style.width = `${((currentQuestionIndex) / total) * 100}%`;
 
     // 問題カード
-    $("question-category").textContent = q.category;
+    const categoryText = q.category === "演者" ? `${q.category}　※2026年3月時点` : q.category;
+    $("question-category").textContent = categoryText;
     $("question-text").textContent = q.question;
 
     // 選択肢をシャッフル（位置暗記防止）

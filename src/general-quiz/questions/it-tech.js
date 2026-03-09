@@ -678,4 +678,310 @@ const QUESTIONS_IT_TECH = [
         answer: 1,
         explanation: "VPN（Virtual Private Network）はインターネット通信を暗号化し、プライバシーを保護する技術です。公共Wi-Fiでの安全な通信や、リモートワークでの社内ネットワーク接続に使われます。"
     },
+
+    // ========================================
+    // 追加問題（100問到達用）
+    // ========================================
+    {
+        category: "ネット史",
+        question: "「Wikipedia」が開始された年は？",
+        choices: ["1999年", "2001年", "2003年", "2005年"],
+        answer: 1,
+        explanation: "Wikipediaは2001年1月にジミー・ウェールズとラリー・サンガーが開始した無料のオンライン百科事典です。誰でも編集できるWiki形式が特徴で、300以上の言語版があります。"
+    },
+    {
+        category: "ネット史",
+        question: "「インフルエンサー」という言葉の意味は？",
+        choices: [
+            "インフルエンザの専門家",
+            "SNSで大きな影響力を持つ発信者",
+            "投資家のこと",
+            "プログラマーのこと"
+        ],
+        answer: 1,
+        explanation: "インフルエンサー（influencer）はSNSやブログで多くのフォロワーを持ち、消費行動や世論に大きな影響力を与える発信者のことです。マーケティングでも重要な存在です。"
+    },
+    {
+        category: "PC史",
+        question: "「Bluetooth」の名前の由来は？",
+        choices: [
+            "青い歯のロゴマーク",
+            "デンマークの王「ハーラル1世（青歯王）」",
+            "発明者の名前",
+            "Blue Toothという会社名"
+        ],
+        answer: 1,
+        explanation: "Bluetoothの名前は10世紀のデンマーク王ハーラル1世（通称「青歯王」）に由来します。彼がスカンジナビアを統一したことから、通信規格の統一を象徴しています。"
+    },
+    {
+        category: "プログラミング",
+        question: "「GitHub」とは何？",
+        choices: [
+            "プログラミング言語",
+            "Gitを使ったソースコードのホスティングサービス",
+            "ゲーム配信プラットフォーム",
+            "AIチャットボット"
+        ],
+        answer: 1,
+        explanation: "GitHubはGitベースのソースコードホスティングサービスで、2008年にサービス開始。2018年にMicrosoftが約75億ドルで買収しました。世界最大の開発者コミュニティです。"
+    },
+    {
+        category: "プログラミング",
+        question: "「フルスタックエンジニア」とは？",
+        choices: [
+            "特定の言語だけを使うエンジニア",
+            "フロントエンドからバックエンドまで幅広く開発できるエンジニア",
+            "ハードウェア専門のエンジニア",
+            "セキュリティ専門のエンジニア"
+        ],
+        answer: 1,
+        explanation: "フルスタックエンジニアは、UIのフロントエンドからサーバーサイドのバックエンド、データベース、インフラまで幅広い技術領域をカバーできるエンジニアのことです。"
+    },
+    {
+        category: "Web技術",
+        question: "「SPA（Single Page Application）」とは？",
+        choices: [
+            "1ページだけのウェブサイト",
+            "ページ遷移せずに画面内容を動的に書き換えるWebアプリ",
+            "スパムメールのこと",
+            "シンプルなプログラミング方式"
+        ],
+        answer: 1,
+        explanation: "SPAはページの全体リロードなしに、JavaScript で画面内容を動的に更新するWebアプリケーションの設計方式です。Gmail、Twitter(X)、Google Mapsなどが代表例です。"
+    },
+    {
+        category: "AI",
+        question: "「GPT」は何の略？",
+        choices: [
+            "General Purpose Technology",
+            "Generative Pre-trained Transformer",
+            "Global Processing Tool",
+            "Graphical Programming Terminal"
+        ],
+        answer: 1,
+        explanation: "GPTはGenerative Pre-trained Transformer（生成的事前学習済みトランスフォーマー）の略です。大量のテキストデータで事前学習し、テキスト生成が可能なAIモデルです。"
+    },
+    {
+        category: "AI",
+        question: "「ハルシネーション」とはAIの文脈で何を意味する？",
+        choices: [
+            "AIの処理速度が上がること",
+            "AIが事実に反する情報をもっともらしく生成すること",
+            "AIが幻覚を見ること",
+            "AIが停止すること"
+        ],
+        answer: 1,
+        explanation: "ハルシネーション（hallucination=幻覚）はAIが事実と異なる情報をあたかも正しいかのように生成してしまう現象です。LLMの最大の課題の一つとして知られています。"
+    },
+    {
+        category: "セキュリティ",
+        question: "「ゼロデイ攻撃」とは？",
+        choices: [
+            "0日で完了する高速な攻撃",
+            "修正パッチが公開される前の脆弱性を突いた攻撃",
+            "毎日0時に行われる攻撃",
+            "初心者が行う攻撃"
+        ],
+        answer: 1,
+        explanation: "ゼロデイ攻撃は、ソフトウェアの脆弱性が発見されてから修正パッチが提供されるまでの間（0日目）に、その脆弱性を悪用する攻撃です。防御が困難なため非常に危険です。"
+    },
+    {
+        category: "セキュリティ",
+        question: "「CAPTCHA」の主な目的は？",
+        choices: [
+            "パスワードを暗号化すること",
+            "人間とボット（自動プログラム）を区別すること",
+            "ウイルスを検出すること",
+            "通信速度を測定すること"
+        ],
+        answer: 1,
+        explanation: "CAPTCHA（Completely Automated Public Turing test to tell Computers and Humans Apart）は、歪んだ文字や画像認識テストで人間とボットを区別する仕組みです。"
+    },
+    {
+        category: "テクノロジー",
+        question: "「FinTech（フィンテック）」とは何の略？",
+        choices: [
+            "Final Technology",
+            "Finance + Technology",
+            "Financial Technique",
+            "Fine Technology"
+        ],
+        answer: 1,
+        explanation: "FinTechはFinance（金融）とTechnology（技術）を組み合わせた造語で、ITを活用した革新的な金融サービスを指します。モバイル決済、ロボアドバイザー、暗号通貨などが含まれます。"
+    },
+    {
+        category: "テクノロジー",
+        question: "「エッジコンピューティング」とは？",
+        choices: [
+            "崖っぷちの状態で計算すること",
+            "データの発生源に近い場所で処理を行う分散型コンピューティング",
+            "最先端のコンピュータのこと",
+            "端末を使わない計算方式"
+        ],
+        answer: 1,
+        explanation: "エッジコンピューティングはデータの発生源（エッジ）に近い場所で処理を行う技術です。クラウドへのデータ送信を減らし、遅延を最小化できるため、自動運転やIoTで重要です。"
+    },
+    {
+        category: "プログラミング",
+        question: "プログラミングの「デバッグ」とは？",
+        choices: [
+            "プログラムを削除すること",
+            "プログラムの不具合（バグ）を見つけて修正すること",
+            "プログラムを実行すること",
+            "プログラムをコピーすること"
+        ],
+        answer: 1,
+        explanation: "デバッグ（debug）はプログラムのバグ（不具合・誤り）を特定し修正する作業です。開発時間の大部分がデバッグに費やされると言われるほど、プログラミングにおいて重要な工程です。"
+    },
+    {
+        category: "プログラミング",
+        question: "「Docker」とは何？",
+        choices: [
+            "プログラミング言語",
+            "アプリケーションをコンテナ化して実行する技術",
+            "データベース管理システム",
+            "画像編集ソフト"
+        ],
+        answer: 1,
+        explanation: "Dockerはアプリケーションとその依存関係をコンテナという軽量な仮想環境にパッケージ化する技術です。「自分の環境では動く」問題を解決し、開発と運用の効率を大幅に向上させます。"
+    },
+    {
+        category: "Web技術",
+        question: "「CDN」とは何？",
+        choices: [
+            "Compact Disc Network",
+            "Content Delivery Network",
+            "Central Data Node",
+            "Cloud Database Navigator"
+        ],
+        answer: 1,
+        explanation: "CDN（Content Delivery Network）は世界各地にサーバーを配置し、ユーザーに最も近いサーバーからコンテンツを配信する仕組みです。Webサイトの表示速度向上に貢献します。"
+    },
+    {
+        category: "AI",
+        question: "「RAG」とはAIの文脈で何？",
+        choices: [
+            "Random Answer Generator",
+            "Retrieval-Augmented Generation（検索拡張生成）",
+            "Rapid AI Growth",
+            "Real-time AI Graphics"
+        ],
+        answer: 1,
+        explanation: "RAG（Retrieval-Augmented Generation）は外部データベースから関連情報を検索し、その情報を基にAIが回答を生成する技術です。LLMのハルシネーションを減らす効果があります。"
+    },
+    {
+        category: "テクノロジー",
+        question: "「デジタルツイン」とは？",
+        choices: [
+            "双子のデジタル版",
+            "物理的な対象をデジタル空間に忠実に再現した仮想モデル",
+            "2台のコンピュータを同期すること",
+            "デジタルカメラの2つ目のレンズ"
+        ],
+        answer: 1,
+        explanation: "デジタルツインは現実世界の物体やシステムをデジタル空間上に忠実に再現する技術です。工場の設備や都市のインフラをシミュレーションし、最適化や故障予測に活用されています。"
+    },
+    {
+        category: "ネット史",
+        question: "「Web3」とは何を指す概念？",
+        choices: [
+            "ウェブブラウザのバージョン3",
+            "ブロックチェーンを基盤とした分散型のインターネット",
+            "第3世代の携帯電話",
+            "HTMLバージョン3"
+        ],
+        answer: 1,
+        explanation: "Web3はブロックチェーン技術を活用した分散型インターネットの概念です。Web1.0（情報閲覧）、Web2.0（双方向SNS）に続く次の段階として提唱されています。"
+    },
+    {
+        category: "プログラミング",
+        question: "「TypeScript」と「JavaScript」の関係は？",
+        choices: [
+            "全く別の言語",
+            "TypeScriptはJavaScriptに型システムを追加した上位互換言語",
+            "TypeScriptはJavaScriptの前身",
+            "同じ言語の別名"
+        ],
+        answer: 1,
+        explanation: "TypeScriptはMicrosoftが開発したJavaScriptの上位互換（スーパーセット）言語です。静的型付けを追加し、大規模開発でのバグ防止や開発効率の向上に貢献します。"
+    },
+    {
+        category: "テクノロジー",
+        question: "「RPA」とは何？",
+        choices: [
+            "リアルプレイヤーアプリケーション",
+            "Robotic Process Automation（ソフトウェアロボットによる業務自動化）",
+            "Rapid Programming Architecture",
+            "Real-time Processing Algorithm"
+        ],
+        answer: 1,
+        explanation: "RPA（Robotic Process Automation）はソフトウェアロボットが人間の代わりにPC上の定型業務を自動実行する技術です。データ入力や帳票処理などの事務作業を効率化します。"
+    },
+    {
+        category: "セキュリティ",
+        question: "「パスキー（Passkey）」とは？",
+        choices: [
+            "強力なパスワードのこと",
+            "パスワードに代わる生体認証等を使った新しい認証方式",
+            "暗号化キーのこと",
+            "物理的な鍵のこと"
+        ],
+        answer: 1,
+        explanation: "パスキーはFIDO2規格に基づく新しい認証方式で、指紋や顔認証などの生体認証を使ってパスワードなしでログインできます。Apple、Google、Microsoftが対応を進めています。"
+    },
+    {
+        category: "AI",
+        question: "「ファインチューニング」とはAIの文脈で何を意味する？",
+        choices: [
+            "AIの音質を調整すること",
+            "事前学習済みモデルを特定の用途に合わせて追加学習すること",
+            "AIの動作を一時停止すること",
+            "AIのコストを最適化すること"
+        ],
+        answer: 1,
+        explanation: "ファインチューニング（fine-tuning）は大規模な事前学習済みAIモデルに、特定のタスクや分野のデータで追加学習を行い、性能を向上させる手法です。"
+    },
+    {
+        category: "Web技術",
+        question: "「WebSocket」とは何？",
+        choices: [
+            "Webサイトのプラグイン",
+            "サーバーとクライアント間でリアルタイム双方向通信を行うプロトコル",
+            "Web用の電源コネクタ",
+            "Webサイトの保存形式"
+        ],
+        answer: 1,
+        explanation: "WebSocketはHTTPとは異なり、クライアントとサーバー間で持続的な双方向通信を可能にするプロトコルです。チャットアプリやリアルタイム通知、オンラインゲームなどで使われます。"
+    },
+    {
+        category: "テクノロジー",
+        question: "「ゼロトラスト」とはセキュリティの文脈で何？",
+        choices: [
+            "誰も信頼しないこと",
+            "ネットワーク内部・外部を問わず、全てのアクセスを検証するセキュリティモデル",
+            "セキュリティソフトなしで運用すること",
+            "信頼できないサイトのこと"
+        ],
+        answer: 1,
+        explanation: "ゼロトラストは「何も信頼しない」を前提としたセキュリティモデルで、社内ネットワークからのアクセスであっても常に認証・認可を行います。リモートワーク普及に伴い注目されています。"
+    },
+    {
+        category: "ネット史",
+        question: "「コンピュータウイルス」が初めて確認されたのは約何年？",
+        choices: ["1971年", "1982年", "1995年", "2000年"],
+        answer: 1,
+        explanation: "最初のPCウイルスとされる「Elk Cloner」は1982年にApple IIで発見されました。フロッピーディスク経由で感染し、画面にメッセージを表示するもので、実害は少ないものでした。"
+    },
+    {
+        category: "プログラミング",
+        question: "「アジャイル開発」とは？",
+        choices: [
+            "一度に全ての機能を完成させる開発手法",
+            "小さな単位で反復的に開発を進める柔軟な手法",
+            "一人で全てを開発する手法",
+            "テストを行わない高速開発"
+        ],
+        answer: 1,
+        explanation: "アジャイル（agile=俊敏な）開発は、短い開発サイクルを繰り返しながら、顧客のフィードバックを反映して段階的に製品を改良していく開発手法です。従来のウォーターフォール型と対比されます。"
+    },
 ];

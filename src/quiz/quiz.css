@@ -97,6 +97,29 @@ body {
     transform: translateY(0);
 }
 
+.secondary-btn {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    margin: 12px auto 0;
+    padding: 14px 32px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font);
+    font-size: 0.95rem;
+    font-weight: 600;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.secondary-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-glow);
+}
+
 /* ========================================
    スタート画面
    ======================================== */
