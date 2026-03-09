@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web BGM Maker — ドラムマシン | Gravity Portal</title>
-    <meta name="description" content="ブラウザだけで動くドラムマシン。16ステップシーケンサーで直感的にビートを作成。インストール不要・Web Audio API駆動。">
+    <title>Web BGM Maker — ドラム・メロディ・ベース・エフェクト | Gravity Portal</title>
+    <meta name="description"
+        content="ブラウザだけで動くDAW。ドラムマシン+メロディ+ベースの3トラック同時再生、リバーブ・ディレイ・フィルター・ディストーション4種エフェクト搭載。インストール不要。">
     <!-- OGP -->
-    <meta property="og:title" content="Web BGM Maker — ドラムマシン">
-    <meta property="og:description" content="ブラウザだけで動くドラムマシン。16ステップで直感的にビートを作成。">
+    <meta property="og:title" content="Web BGM Maker — ドラム+メロディ+ベース+エフェクト">
+    <meta property="og:description" content="ブラウザ完結の簡易DAW。3トラック同時再生＋4種エフェクト搭載。">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.antigravity-portal.com/bgm-maker/">
     <meta property="og:image" content="https://www.antigravity-portal.com/bgm-maker/og-bgm-maker.png">
@@ -50,6 +51,7 @@
             --clr-hihat-o: #06b6d4;
             --clr-clap: #a855f7;
             --clr-tom: #ec4899;
+            --clr-bass: #f97316;
         }
 
         * {
@@ -627,6 +629,160 @@
             border-radius: 4px;
         }
 
+        /* --- ミュート/ソロ --- */
+        .track-ms-btns {
+            display: flex;
+            gap: 2px;
+        }
+
+        .ms-btn {
+            width: 22px;
+            height: 22px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            cursor: pointer;
+            transition: all 0.15s;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .ms-btn:hover {
+            border-color: rgba(255, 255, 255, 0.3);
+            color: var(--text);
+        }
+
+        .ms-btn.muted {
+            background: var(--red);
+            border-color: var(--red);
+            color: #fff;
+        }
+
+        .ms-btn.soloed {
+            background: var(--orange);
+            border-color: var(--orange);
+            color: #000;
+        }
+
+        /* --- エフェクトパネル --- */
+        .fx-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 16px;
+            overflow: hidden;
+        }
+
+        .fx-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .fx-header:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .fx-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text2);
+        }
+
+        .fx-toggle {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+        }
+
+        .fx-panel.open .fx-toggle {
+            transform: rotate(180deg);
+        }
+
+        .fx-body {
+            display: none;
+            padding: 0 16px 14px;
+        }
+
+        .fx-panel.open .fx-body {
+            display: block;
+        }
+
+        .fx-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            flex-wrap: wrap;
+        }
+
+        .fx-row:last-child {
+            border-bottom: none;
+        }
+
+        .fx-enable {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--green);
+            cursor: pointer;
+        }
+
+        .fx-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text);
+            min-width: 80px;
+        }
+
+        .fx-param {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .fx-param label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .fx-slider {
+            width: 70px;
+            accent-color: var(--accent);
+        }
+
+        .fx-param-val {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text2);
+            min-width: 32px;
+        }
+
+        .fx-select {
+            padding: 3px 8px;
+            background: var(--bg-step);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: var(--font-sans);
+            font-size: 0.7rem;
+            color: var(--text);
+            cursor: pointer;
+        }
+
+        .bass-vol-color {
+            accent-color: #f97316;
+        }
+
         /* --- レスポンシブ --- */
         @media (max-width: 600px) {
             .controls {
@@ -689,6 +845,15 @@
                 font-size: 0.5rem;
                 height: 18px;
             }
+
+            .fx-slider {
+                width: 50px;
+            }
+
+            .fx-name {
+                min-width: 60px;
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>
@@ -697,8 +862,8 @@
     <div class="container">
         <div class="header">
             <a href="https://antigravity-portal.com/" class="back-link">← Gravity Portal</a>
-            <h1>🎵 Web BGM Maker <span class="badge-phase">v0.2.0</span></h1>
-            <p class="subtitle">ドラムマシン + メロディエディタ</p>
+            <h1>🎵 Web BGM Maker <span class="badge-phase">v0.3.0</span></h1>
+            <p class="subtitle">ドラム + メロディ + ベース + エフェクト</p>
         </div>
 
         <!-- コントロールバー -->
@@ -727,19 +892,120 @@
             <div class="track-vol-group">
                 <span class="track-vol-label">🥁</span>
                 <input type="range" min="0" max="100" value="80" class="track-vol-slider drum-vol-color"
-                    id="drumVolSlider" title="ドラム音量" oninput="drumVol = this.value / 100">
+                    id="drumVolSlider" title="ドラム音量" oninput="setTrackVol('drum', this.value)">
+                <div class="track-ms-btns">
+                    <button class="ms-btn" id="muteDrum" onclick="toggleMute('drum')" title="ミュート">M</button>
+                    <button class="ms-btn" id="soloDrum" onclick="toggleSolo('drum')" title="ソロ">S</button>
+                </div>
             </div>
             <div class="track-vol-group">
                 <span class="track-vol-label">🎹</span>
                 <input type="range" min="0" max="100" value="80" class="track-vol-slider melody-vol-color"
-                    id="melodyVolSlider" title="メロディ音量" oninput="melodyVol = this.value / 100">
+                    id="melodyVolSlider" title="メロディ音量" oninput="setTrackVol('melody', this.value)">
+                <div class="track-ms-btns">
+                    <button class="ms-btn" id="muteMelody" onclick="toggleMute('melody')" title="ミュート">M</button>
+                    <button class="ms-btn" id="soloMelody" onclick="toggleSolo('melody')" title="ソロ">S</button>
+                </div>
+            </div>
+            <div class="track-vol-group">
+                <span class="track-vol-label">🎸</span>
+                <input type="range" min="0" max="100" value="80" class="track-vol-slider bass-vol-color"
+                    id="bassVolSlider" title="ベース音量" oninput="setTrackVol('bass', this.value)">
+                <div class="track-ms-btns">
+                    <button class="ms-btn" id="muteBass" onclick="toggleMute('bass')" title="ミュート">M</button>
+                    <button class="ms-btn" id="soloBass" onclick="toggleSolo('bass')" title="ソロ">S</button>
+                </div>
             </div>
         </div>
 
         <!-- タブバー -->
+        <!-- エフェクトパネル -->
+        <div class="fx-panel" id="fxPanel">
+            <div class="fx-header" onclick="toggleFxPanel()">
+                <span class="fx-title">🎛️ エフェクト</span>
+                <span class="fx-toggle">▼</span>
+            </div>
+            <div class="fx-body">
+                <!-- フィルター -->
+                <div class="fx-row">
+                    <input type="checkbox" class="fx-enable" id="fxFilterOn">
+                    <span class="fx-name">Filter</span>
+                    <select class="fx-select" id="fxFilterType">
+                        <option value="lowpass">Lowpass</option>
+                        <option value="highpass">Highpass</option>
+                        <option value="bandpass">Bandpass</option>
+                    </select>
+                    <div class="fx-param">
+                        <label>Cutoff</label>
+                        <input type="range" min="20" max="20000" value="8000" class="fx-slider" id="fxFilterCutoff"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxFilterCutoffVal">8000</span>
+                    </div>
+                    <div class="fx-param">
+                        <label>Q</label>
+                        <input type="range" min="1" max="200" value="10" class="fx-slider" id="fxFilterQ"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxFilterQVal">1.0</span>
+                    </div>
+                </div>
+                <!-- ディストーション -->
+                <div class="fx-row">
+                    <input type="checkbox" class="fx-enable" id="fxDistOn">
+                    <span class="fx-name">Distortion</span>
+                    <div class="fx-param">
+                        <label>Amount</label>
+                        <input type="range" min="0" max="100" value="30" class="fx-slider" id="fxDistAmount"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxDistAmountVal">30</span>
+                    </div>
+                </div>
+                <!-- ディレイ -->
+                <div class="fx-row">
+                    <input type="checkbox" class="fx-enable" id="fxDelayOn">
+                    <span class="fx-name">Delay</span>
+                    <div class="fx-param">
+                        <label>Time</label>
+                        <input type="range" min="50" max="1000" value="300" class="fx-slider" id="fxDelayTime"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxDelayTimeVal">300ms</span>
+                    </div>
+                    <div class="fx-param">
+                        <label>Feedback</label>
+                        <input type="range" min="0" max="90" value="40" class="fx-slider" id="fxDelayFB"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxDelayFBVal">40%</span>
+                    </div>
+                    <div class="fx-param">
+                        <label>Mix</label>
+                        <input type="range" min="0" max="100" value="30" class="fx-slider" id="fxDelayMix"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxDelayMixVal">30%</span>
+                    </div>
+                </div>
+                <!-- リバーブ -->
+                <div class="fx-row">
+                    <input type="checkbox" class="fx-enable" id="fxReverbOn">
+                    <span class="fx-name">Reverb</span>
+                    <div class="fx-param">
+                        <label>Decay</label>
+                        <input type="range" min="1" max="50" value="15" class="fx-slider" id="fxReverbDecay"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxReverbDecayVal">1.5s</span>
+                    </div>
+                    <div class="fx-param">
+                        <label>Mix</label>
+                        <input type="range" min="0" max="100" value="25" class="fx-slider" id="fxReverbMix"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxReverbMixVal">25%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="tab-bar">
-            <button class="tab-btn active" data-tab="drum" onclick="switchTab('drum')">🥁 ドラムマシン</button>
+            <button class="tab-btn active" data-tab="drum" onclick="switchTab('drum')">🥁 ドラム</button>
             <button class="tab-btn" data-tab="melody" onclick="switchTab('melody')">🎹 メロディ</button>
+            <button class="tab-btn" data-tab="bass" onclick="switchTab('bass')">🎸 ベース</button>
         </div>
 
         <!-- ドラムタブ -->
@@ -882,6 +1148,113 @@
                 スケールを選ぶとスケール内の音がハイライト表示されます。
             </div>
         </div>
+
+        <!-- ベースタブ -->
+        <div class="tab-panel" id="tab-bass">
+            <!-- ベースコントロール -->
+            <div class="melody-controls">
+                <div class="synth-group">
+                    <label>波形</label>
+                    <select class="melody-select" id="bassWaveform">
+                        <option value="sawtooth" selected>Sawtooth（ノコギリ波）</option>
+                        <option value="square">Square（矩形波）</option>
+                        <option value="sine">Sine（正弦波）</option>
+                        <option value="triangle">Triangle（三角波）</option>
+                    </select>
+                </div>
+                <div class="scale-group">
+                    <label>スケール</label>
+                    <select class="melody-select" id="bassScale" onchange="onBassScaleChange()">
+                        <option value="chromatic">Chromatic（半音階）</option>
+                        <option value="major" selected>Major（メジャー）</option>
+                        <option value="minor">Minor（マイナー）</option>
+                        <option value="pentatonic">Pentatonic（ペンタトニック）</option>
+                        <option value="blues">Blues（ブルース）</option>
+                        <option value="dorian">Dorian（ドリアン）</option>
+                    </select>
+                </div>
+                <div class="synth-group">
+                    <label>キー</label>
+                    <select class="melody-select" id="bassKey" onchange="onBassScaleChange()">
+                        <option value="0">C</option>
+                        <option value="1">C#</option>
+                        <option value="2">D</option>
+                        <option value="3">D#</option>
+                        <option value="4">E</option>
+                        <option value="5">F</option>
+                        <option value="6">F#</option>
+                        <option value="7">G</option>
+                        <option value="8">G#</option>
+                        <option value="9">A</option>
+                        <option value="10">A#</option>
+                        <option value="11">B</option>
+                    </select>
+                </div>
+                <div class="synth-group">
+                    <label>Oct</label>
+                    <select class="melody-select" id="bassOctave">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ベースADSR -->
+            <div class="adsr-group">
+                <span class="adsr-title">ADSR</span>
+                <div class="adsr-item">
+                    <label>A</label>
+                    <input type="range" min="0" max="500" value="5" class="adsr-slider" id="bassAdsrA"
+                        oninput="updateBassADSRDisplay()">
+                    <span class="adsr-val" id="bassAdsrAVal">5ms</span>
+                </div>
+                <div class="adsr-item">
+                    <label>D</label>
+                    <input type="range" min="0" max="500" value="80" class="adsr-slider" id="bassAdsrD"
+                        oninput="updateBassADSRDisplay()">
+                    <span class="adsr-val" id="bassAdsrDVal">80ms</span>
+                </div>
+                <div class="adsr-item">
+                    <label>S</label>
+                    <input type="range" min="0" max="100" value="70" class="adsr-slider" id="bassAdsrS"
+                        oninput="updateBassADSRDisplay()">
+                    <span class="adsr-val" id="bassAdsrSVal">70%</span>
+                </div>
+                <div class="adsr-item">
+                    <label>R</label>
+                    <input type="range" min="0" max="1000" value="150" class="adsr-slider" id="bassAdsrR"
+                        oninput="updateBassADSRDisplay()">
+                    <span class="adsr-val" id="bassAdsrRVal">150ms</span>
+                </div>
+            </div>
+
+            <!-- ベースピアノロール -->
+            <div class="piano-roll-wrap">
+                <div class="piano-roll-container">
+                    <div class="piano-keys" id="bassPianoKeys"></div>
+                    <canvas id="bassCanvas" width="768" height="480"></canvas>
+                </div>
+            </div>
+
+            <!-- ベースアクション -->
+            <div class="action-bar">
+                <select class="preset-select" id="bassPresetSelect" aria-label="ベースプリセット選択"
+                    onchange="loadBassPreset(this.value)">
+                    <option value="">🎵 ベースプリセット...</option>
+                    <option value="root_octave">🎸 ルート+オクターブ</option>
+                    <option value="walking">🚶 ウォーキング</option>
+                    <option value="eighth">🏃 8分ベース</option>
+                </select>
+                <button class="btn btn-small btn-random" onclick="randomizeBass()">🎲 ランダム</button>
+                <button class="btn btn-small btn-clear" onclick="clearBass()">🗑 クリア</button>
+            </div>
+
+            <div class="info">
+                💡 ピアノロール上をクリックしてベース音を配置。右クリックで消去。<br>
+                低音域（Oct 1〜3）に特化。ドラムとメロディと同時に再生されます。
+            </div>
+        </div>
     </div>
 
     <script>
@@ -909,19 +1282,245 @@
         let bpm = 120;
         let swing = 0;       // 0-100
         let masterVol = 0.8;
-        let drumVol = 0.8;   // ドラムトラック音量
-        let melodyVol = 0.8; // メロディトラック音量
         let isPlaying = false;
         let currentStep = -1;
         let nextNoteTime = 0;
         let timerID = null;
 
-        // Web Audio
+        // トラック音量・状態
+        const trackState = {
+            drum: { vol: 0.8, muted: false, soloed: false },
+            melody: { vol: 0.8, muted: false, soloed: false },
+            bass: { vol: 0.8, muted: false, soloed: false },
+        };
+
+        // ベースパターンデータ
+        const bassNotes = new Array(STEPS).fill(null);
+        let bassInitialized = false;
+
+        // Web Audio & Bus ノード
         let ctx;
+        let masterGain, drumBus, melodyBus, bassBus;
+        // エフェクトノード
+        let fxFilter, fxDistortion, fxDelayNode, fxDelayFeedback, fxDelayDry, fxDelayWet;
+        let fxReverbConvolver, fxReverbDry, fxReverbWet;
+        let fxInitialized = false;
+
         function getCtx() {
-            if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+            if (!ctx) {
+                ctx = new (window.AudioContext || window.webkitAudioContext)();
+                initAudioRouting();
+            }
             if (ctx.state === 'suspended') ctx.resume();
             return ctx;
+        }
+
+        // オーディオルーティング初期化
+        function initAudioRouting() {
+            const c = ctx;
+
+            // マスターゲイン
+            masterGain = c.createGain();
+            masterGain.gain.value = masterVol;
+
+            // トラックバス
+            drumBus = c.createGain();
+            drumBus.gain.value = trackState.drum.vol;
+            melodyBus = c.createGain();
+            melodyBus.gain.value = trackState.melody.vol;
+            bassBus = c.createGain();
+            bassBus.gain.value = trackState.bass.vol;
+
+            // Bus → masterGain
+            drumBus.connect(masterGain);
+            melodyBus.connect(masterGain);
+            bassBus.connect(masterGain);
+
+            // エフェクトチェーン構築
+            buildFxChain();
+        }
+
+        // エフェクトチェーン: masterGain → Filter → Distortion → Delay → Reverb → destination
+        function buildFxChain() {
+            const c = ctx;
+
+            // Filter
+            fxFilter = c.createBiquadFilter();
+            fxFilter.type = 'lowpass';
+            fxFilter.frequency.value = 8000;
+            fxFilter.Q.value = 1.0;
+
+            // Distortion
+            fxDistortion = c.createWaveShaper();
+            fxDistortion.curve = makeDistortionCurve(0);
+            fxDistortion.oversample = '4x';
+
+            // Delay (dry/wet パラレル)
+            fxDelayNode = c.createDelay(2.0);
+            fxDelayNode.delayTime.value = 0.3;
+            fxDelayFeedback = c.createGain();
+            fxDelayFeedback.gain.value = 0.4;
+            fxDelayDry = c.createGain();
+            fxDelayDry.gain.value = 1.0;
+            fxDelayWet = c.createGain();
+            fxDelayWet.gain.value = 0.0; // OFF by default
+
+            // Reverb (dry/wet パラレル)
+            fxReverbConvolver = c.createConvolver();
+            fxReverbConvolver.buffer = createReverbIR(c, 1.5);
+            fxReverbDry = c.createGain();
+            fxReverbDry.gain.value = 1.0;
+            fxReverbWet = c.createGain();
+            fxReverbWet.gain.value = 0.0; // OFF by default
+
+            // --- 接続 ---
+            // masterGain → Filter → Distortion → (Delay split) → (Reverb split) → destination
+            // Filter OFF = バイパス (高カットオフで音が変わらない)
+            masterGain.connect(fxFilter);
+            fxFilter.connect(fxDistortion);
+
+            // Delay: dry + wet (feedback loop)
+            fxDistortion.connect(fxDelayDry);
+            fxDistortion.connect(fxDelayNode);
+            fxDelayNode.connect(fxDelayFeedback);
+            fxDelayFeedback.connect(fxDelayNode); // feedback loop
+            fxDelayNode.connect(fxDelayWet);
+
+            // Delay out → Reverb merger (GainNode)
+            const delayMerge = c.createGain();
+            fxDelayDry.connect(delayMerge);
+            fxDelayWet.connect(delayMerge);
+
+            // Reverb: dry + wet
+            delayMerge.connect(fxReverbDry);
+            delayMerge.connect(fxReverbConvolver);
+            fxReverbConvolver.connect(fxReverbWet);
+
+            fxReverbDry.connect(c.destination);
+            fxReverbWet.connect(c.destination);
+
+            fxInitialized = true;
+        }
+
+        // ディストーションカーブ生成
+        function makeDistortionCurve(amount) {
+            const k = amount;
+            const samples = 44100;
+            const curve = new Float32Array(samples);
+            for (let i = 0; i < samples; i++) {
+                const x = (i * 2) / samples - 1;
+                curve[i] = k === 0 ? x : ((3 + k) * x * 20 * (Math.PI / 180)) / (Math.PI + k * Math.abs(x));
+            }
+            return curve;
+        }
+
+        // リバーブIR生成（指数減衰ノイズ）
+        function createReverbIR(c, decay) {
+            const sampleRate = c.sampleRate;
+            const length = sampleRate * decay;
+            const buf = c.createBuffer(2, length, sampleRate);
+            for (let ch = 0; ch < 2; ch++) {
+                const data = buf.getChannelData(ch);
+                for (let i = 0; i < length; i++) {
+                    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
+                }
+            }
+            return buf;
+        }
+
+        // エフェクトパラメータ更新
+        function updateFx() {
+            if (!fxInitialized) return;
+
+            // Filter
+            const filterOn = document.getElementById('fxFilterOn').checked;
+            const filterType = document.getElementById('fxFilterType').value;
+            const cutoff = parseInt(document.getElementById('fxFilterCutoff').value);
+            const q = parseInt(document.getElementById('fxFilterQ').value) / 10;
+            fxFilter.type = filterOn ? filterType : 'lowpass';
+            fxFilter.frequency.value = filterOn ? cutoff : 20000;
+            fxFilter.Q.value = filterOn ? q : 0.1;
+            document.getElementById('fxFilterCutoffVal').textContent = cutoff;
+            document.getElementById('fxFilterQVal').textContent = q.toFixed(1);
+
+            // Distortion
+            const distOn = document.getElementById('fxDistOn').checked;
+            const distAmount = parseInt(document.getElementById('fxDistAmount').value);
+            fxDistortion.curve = makeDistortionCurve(distOn ? distAmount : 0);
+            document.getElementById('fxDistAmountVal').textContent = distAmount;
+
+            // Delay
+            const delayOn = document.getElementById('fxDelayOn').checked;
+            const delayTime = parseInt(document.getElementById('fxDelayTime').value);
+            const delayFB = parseInt(document.getElementById('fxDelayFB').value);
+            const delayMix = parseInt(document.getElementById('fxDelayMix').value);
+            fxDelayNode.delayTime.value = delayTime / 1000;
+            fxDelayFeedback.gain.value = delayFB / 100;
+            fxDelayWet.gain.value = delayOn ? delayMix / 100 : 0;
+            fxDelayDry.gain.value = delayOn ? 1 - (delayMix / 200) : 1;
+            document.getElementById('fxDelayTimeVal').textContent = delayTime + 'ms';
+            document.getElementById('fxDelayFBVal').textContent = delayFB + '%';
+            document.getElementById('fxDelayMixVal').textContent = delayMix + '%';
+
+            // Reverb
+            const reverbOn = document.getElementById('fxReverbOn').checked;
+            const reverbDecay = parseInt(document.getElementById('fxReverbDecay').value) / 10;
+            const reverbMix = parseInt(document.getElementById('fxReverbMix').value);
+            if (reverbOn) {
+                fxReverbConvolver.buffer = createReverbIR(ctx, reverbDecay);
+                fxReverbWet.gain.value = reverbMix / 100;
+                fxReverbDry.gain.value = 1 - (reverbMix / 200);
+            } else {
+                fxReverbWet.gain.value = 0;
+                fxReverbDry.gain.value = 1;
+            }
+            document.getElementById('fxReverbDecayVal').textContent = reverbDecay.toFixed(1) + 's';
+            document.getElementById('fxReverbMixVal').textContent = reverbMix + '%';
+        }
+
+        // エフェクトパネル折りたたみ
+        function toggleFxPanel() {
+            document.getElementById('fxPanel').classList.toggle('open');
+        }
+
+        // トラック音量設定
+        function setTrackVol(track, val) {
+            trackState[track].vol = val / 100;
+            applyTrackStates();
+        }
+
+        // ミュート/ソロ
+        function toggleMute(track) {
+            trackState[track].muted = !trackState[track].muted;
+            applyTrackStates();
+        }
+
+        function toggleSolo(track) {
+            trackState[track].soloed = !trackState[track].soloed;
+            applyTrackStates();
+        }
+
+        function applyTrackStates() {
+            const tracks = ['drum', 'melody', 'bass'];
+            const buses = { drum: drumBus, melody: melodyBus, bass: bassBus };
+            const anySolo = tracks.some(t => trackState[t].soloed);
+
+            tracks.forEach(t => {
+                if (!buses[t]) return;
+                let gain = trackState[t].vol;
+                if (trackState[t].muted) gain = 0;
+                else if (anySolo && !trackState[t].soloed) gain = 0;
+                buses[t].gain.value = gain;
+
+                // UI更新
+                const cap = t.charAt(0).toUpperCase() + t.slice(1);
+                const muteBtn = document.getElementById('mute' + cap);
+                const soloBtn = document.getElementById('solo' + cap);
+                if (muteBtn) muteBtn.classList.toggle('muted', trackState[t].muted);
+                if (soloBtn) soloBtn.classList.toggle('soloed', trackState[t].soloed);
+            });
+
+            if (masterGain) masterGain.gain.value = masterVol;
         }
 
         // ========================================
@@ -999,7 +1598,7 @@
         // ========================================
         function playSound(partId, time) {
             const c = getCtx();
-            const vol = partVolume[partId] * masterVol * drumVol;
+            const vol = partVolume[partId];
 
             switch (partId) {
                 case 'kick': {
@@ -1010,7 +1609,7 @@
                     osc.frequency.exponentialRampToValueAtTime(35, time + 0.12);
                     gain.gain.setValueAtTime(vol * 0.9, time);
                     gain.gain.exponentialRampToValueAtTime(0.001, time + 0.35);
-                    osc.connect(gain).connect(c.destination);
+                    osc.connect(gain).connect(drumBus);
                     osc.start(time);
                     osc.stop(time + 0.35);
 
@@ -1022,7 +1621,7 @@
                     click.frequency.exponentialRampToValueAtTime(200, time + 0.02);
                     cGain.gain.setValueAtTime(vol * 0.15, time);
                     cGain.gain.exponentialRampToValueAtTime(0.001, time + 0.03);
-                    click.connect(cGain).connect(c.destination);
+                    click.connect(cGain).connect(drumBus);
                     click.start(time);
                     click.stop(time + 0.03);
                     break;
@@ -1035,7 +1634,7 @@
                     osc.frequency.value = 200;
                     oGain.gain.setValueAtTime(vol * 0.4, time);
                     oGain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
-                    osc.connect(oGain).connect(c.destination);
+                    osc.connect(oGain).connect(drumBus);
                     osc.start(time);
                     osc.stop(time + 0.12);
 
@@ -1053,7 +1652,7 @@
                     filter.type = 'bandpass';
                     filter.frequency.value = 4000;
                     filter.Q.value = 1.2;
-                    noise.connect(filter).connect(nGain).connect(c.destination);
+                    noise.connect(filter).connect(nGain).connect(drumBus);
                     noise.start(time);
                     break;
                 }
@@ -1070,7 +1669,7 @@
                     const hp = c.createBiquadFilter();
                     hp.type = 'highpass';
                     hp.frequency.value = 8000;
-                    noise.connect(hp).connect(gain).connect(c.destination);
+                    noise.connect(hp).connect(gain).connect(drumBus);
                     noise.start(time);
                     break;
                 }
@@ -1087,7 +1686,7 @@
                     const hp = c.createBiquadFilter();
                     hp.type = 'highpass';
                     hp.frequency.value = 7000;
-                    noise.connect(hp).connect(gain).connect(c.destination);
+                    noise.connect(hp).connect(gain).connect(drumBus);
                     noise.start(time);
                     break;
                 }
@@ -1108,7 +1707,7 @@
                         bp.type = 'bandpass';
                         bp.frequency.value = 2500;
                         bp.Q.value = 2;
-                        noise.connect(bp).connect(gain).connect(c.destination);
+                        noise.connect(bp).connect(gain).connect(drumBus);
                         noise.start(t);
                     }
                     // テール
@@ -1124,7 +1723,7 @@
                     const tailBp = c.createBiquadFilter();
                     tailBp.type = 'bandpass';
                     tailBp.frequency.value = 2000;
-                    tailNoise.connect(tailBp).connect(tailGain).connect(c.destination);
+                    tailNoise.connect(tailBp).connect(tailGain).connect(drumBus);
                     tailNoise.start(time + 0.035);
                     break;
                 }
@@ -1136,7 +1735,7 @@
                     osc.frequency.exponentialRampToValueAtTime(80, time + 0.2);
                     gain.gain.setValueAtTime(vol * 0.6, time);
                     gain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
-                    osc.connect(gain).connect(c.destination);
+                    osc.connect(gain).connect(drumBus);
                     osc.start(time);
                     osc.stop(time + 0.3);
                     break;
@@ -1227,6 +1826,7 @@
 
         function setMasterVol(val) {
             masterVol = parseInt(val) / 100;
+            if (masterGain) masterGain.gain.value = masterVol;
         }
 
         // ========================================
@@ -1338,6 +1938,10 @@
             if (tabId === 'melody' && !melodyInitialized) {
                 initMelodyEditor();
                 melodyInitialized = true;
+            }
+            if (tabId === 'bass' && !bassInitialized) {
+                initBassEditor();
+                bassInitialized = true;
             }
         }
 
@@ -1542,7 +2146,7 @@
             const c = getCtx();
             const cfg = getMelodyConfig();
             const freq = midiToFreq(midi);
-            const vol = masterVol * melodyVol * 0.5;
+            const vol = 0.5;
 
             const osc = c.createOscillator();
             const gainNode = c.createGain();
@@ -1563,7 +2167,7 @@
             gainNode.gain.setValueAtTime(vol * s, time + duration);
             gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
 
-            osc.connect(gainNode).connect(c.destination);
+            osc.connect(gainNode).connect(melodyBus);
             osc.start(time);
             osc.stop(time + totalDur + 0.01);
         }
@@ -1686,28 +2290,294 @@
                 drawPianoRoll();
             });
 
-            // 波形変更は音色のみ変わるので再描画不要
-
             buildPianoKeys();
             drawPianoRoll();
         }
 
         // ========================================
-        // スケジューラー拡張 — メロディ再生統合
+        // ベースエディタ
+        // ========================================
+        let bassCanvas, bassCtx;
+
+        function getBassConfig() {
+            return {
+                waveform: document.getElementById('bassWaveform').value,
+                scale: document.getElementById('bassScale').value,
+                key: parseInt(document.getElementById('bassKey').value),
+                octave: parseInt(document.getElementById('bassOctave').value),
+                adsr: {
+                    a: parseInt(document.getElementById('bassAdsrA').value) / 1000,
+                    d: parseInt(document.getElementById('bassAdsrD').value) / 1000,
+                    s: parseInt(document.getElementById('bassAdsrS').value) / 100,
+                    r: parseInt(document.getElementById('bassAdsrR').value) / 1000,
+                },
+            };
+        }
+
+        function getBassVisibleNotes() {
+            const cfg = getBassConfig();
+            const baseNote = (cfg.octave + 1) * 12;
+            const notes = [];
+            for (let i = PR_ROWS - 1; i >= 0; i--) {
+                notes.push(baseNote + i);
+            }
+            return notes;
+        }
+
+        function isBassInScale(midi) {
+            const cfg = getBassConfig();
+            const scaleNotes = SCALES[cfg.scale];
+            const noteClass = ((midi % 12) - cfg.key + 12) % 12;
+            return scaleNotes.includes(noteClass);
+        }
+
+        function buildBassPianoKeys() {
+            const container = document.getElementById('bassPianoKeys');
+            container.innerHTML = '';
+            const notes = getBassVisibleNotes();
+            notes.forEach(midi => {
+                const el = document.createElement('div');
+                el.className = 'piano-key';
+                const noteClass = midi % 12;
+                if ([1, 3, 6, 8, 10].includes(noteClass)) el.classList.add('black-key');
+                if (isBassInScale(midi)) el.classList.add('scale-note');
+                el.textContent = midiToName(midi);
+                el.addEventListener('click', () => {
+                    playBassNote(midi, getCtx().currentTime, 0.3);
+                });
+                container.appendChild(el);
+            });
+        }
+
+        function drawBassRoll() {
+            if (!bassCanvas) return;
+            const w = STEPS * PR_CELL_W;
+            const h = PR_ROWS * PR_CELL_H;
+            bassCanvas.width = w;
+            bassCanvas.height = h;
+            const c = bassCtx;
+            const notes = getBassVisibleNotes();
+            const cfg = getBassConfig();
+            const scaleNotes = SCALES[cfg.scale];
+
+            for (let row = 0; row < PR_ROWS; row++) {
+                const midi = notes[row];
+                const noteClass = ((midi % 12) - cfg.key + 12) % 12;
+                const inScale = scaleNotes.includes(noteClass);
+                const isBlack = [1, 3, 6, 8, 10].includes(midi % 12);
+                for (let col = 0; col < STEPS; col++) {
+                    const x = col * PR_CELL_W;
+                    const y = row * PR_CELL_H;
+                    if (inScale) {
+                        c.fillStyle = isBlack ? 'rgba(249,115,22,0.08)' : 'rgba(249,115,22,0.04)';
+                    } else {
+                        c.fillStyle = isBlack ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)';
+                    }
+                    c.fillRect(x, y, PR_CELL_W, PR_CELL_H);
+                    c.strokeStyle = col % 4 === 0 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.05)';
+                    c.strokeRect(x, y, PR_CELL_W, PR_CELL_H);
+                }
+            }
+
+            for (let col = 0; col < STEPS; col++) {
+                const midi = bassNotes[col];
+                if (midi == null) continue;
+                const rowIdx = notes.indexOf(midi);
+                if (rowIdx === -1) continue;
+                const x = col * PR_CELL_W + 2;
+                const y = rowIdx * PR_CELL_H + 2;
+                c.fillStyle = 'rgba(249,115,22,0.7)';
+                c.beginPath();
+                c.roundRect(x, y, PR_CELL_W - 4, PR_CELL_H - 4, 3);
+                c.fill();
+                c.shadowColor = 'rgba(249,115,22,0.5)';
+                c.shadowBlur = 8;
+                c.fill();
+                c.shadowBlur = 0;
+            }
+
+            if (isPlaying && currentStep >= 0) {
+                c.fillStyle = 'rgba(34,197,94,0.1)';
+                c.fillRect(currentStep * PR_CELL_W, 0, PR_CELL_W, h);
+            }
+        }
+
+        function onBassCanvasClick(e) {
+            const rect = bassCanvas.getBoundingClientRect();
+            const scaleX = bassCanvas.width / rect.width;
+            const scaleY = bassCanvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
+            const col = Math.floor(mx / PR_CELL_W);
+            const row = Math.floor(my / PR_CELL_H);
+            if (col < 0 || col >= STEPS || row < 0 || row >= PR_ROWS) return;
+            const notes = getBassVisibleNotes();
+            const midi = notes[row];
+            if (e.button === 2 || e.ctrlKey) {
+                bassNotes[col] = null;
+            } else {
+                if (bassNotes[col] === midi) {
+                    bassNotes[col] = null;
+                } else {
+                    bassNotes[col] = midi;
+                    playBassNote(midi, getCtx().currentTime, 0.2);
+                }
+            }
+            drawBassRoll();
+        }
+
+        function playBassNote(midi, time, duration) {
+            const c = getCtx();
+            const cfg = getBassConfig();
+            const freq = midiToFreq(midi);
+            const vol = 0.5;
+            const osc = c.createOscillator();
+            const gainNode = c.createGain();
+            osc.type = cfg.waveform;
+            osc.frequency.setValueAtTime(freq, time);
+            const a = cfg.adsr.a;
+            const d = cfg.adsr.d;
+            const s = cfg.adsr.s;
+            const r = cfg.adsr.r;
+            const totalDur = duration + r;
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol, time + a);
+            gainNode.gain.linearRampToValueAtTime(vol * s, time + a + d);
+            gainNode.gain.setValueAtTime(vol * s, time + duration);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
+            osc.connect(gainNode).connect(bassBus);
+            osc.start(time);
+            osc.stop(time + totalDur + 0.01);
+        }
+
+        function onBassScaleChange() {
+            buildBassPianoKeys();
+            drawBassRoll();
+        }
+
+        function updateBassADSRDisplay() {
+            document.getElementById('bassAdsrAVal').textContent = document.getElementById('bassAdsrA').value + 'ms';
+            document.getElementById('bassAdsrDVal').textContent = document.getElementById('bassAdsrD').value + 'ms';
+            document.getElementById('bassAdsrSVal').textContent = document.getElementById('bassAdsrS').value + '%';
+            document.getElementById('bassAdsrRVal').textContent = document.getElementById('bassAdsrR').value + 'ms';
+        }
+
+        // ベースプリセット
+        const BASS_PRESETS = {
+            root_octave: function () {
+                const cfg = getBassConfig();
+                const base = (cfg.octave + 1) * 12 + cfg.key;
+                for (let i = 0; i < STEPS; i++) {
+                    bassNotes[i] = (i % 2 === 0) ? base : base + 12;
+                }
+            },
+            walking: function () {
+                const cfg = getBassConfig();
+                const scaleNotes = SCALES[cfg.scale];
+                const base = (cfg.octave + 1) * 12 + cfg.key;
+                for (let i = 0; i < STEPS; i++) {
+                    if (i % 4 === 0) {
+                        bassNotes[i] = base; // ルート
+                    } else {
+                        const deg = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
+                        bassNotes[i] = base + deg;
+                    }
+                }
+            },
+            eighth: function () {
+                const cfg = getBassConfig();
+                const base = (cfg.octave + 1) * 12 + cfg.key;
+                // 8分音符パターン（全ステップにルートとオクターブ交互）
+                const pattern = [0, 0, 7, 7, 0, 0, 5, 5, 0, 0, 7, 7, 0, 0, 12, 12];
+                for (let i = 0; i < STEPS; i++) {
+                    bassNotes[i] = base + pattern[i % pattern.length];
+                }
+            },
+        };
+
+        function loadBassPreset(name) {
+            if (!name || !BASS_PRESETS[name]) return;
+            BASS_PRESETS[name]();
+            clampBassNotesToView();
+            drawBassRoll();
+        }
+
+        function clampBassNotesToView() {
+            const notes = getBassVisibleNotes();
+            const minNote = Math.min(...notes);
+            const maxNote = Math.max(...notes);
+            for (let i = 0; i < STEPS; i++) {
+                if (bassNotes[i] != null) {
+                    while (bassNotes[i] < minNote) bassNotes[i] += 12;
+                    while (bassNotes[i] > maxNote) bassNotes[i] -= 12;
+                }
+            }
+        }
+
+        function randomizeBass() {
+            const cfg = getBassConfig();
+            const scaleNotes = SCALES[cfg.scale];
+            const base = (cfg.octave + 1) * 12 + cfg.key;
+            for (let i = 0; i < STEPS; i++) {
+                if (Math.random() < 0.6) {
+                    const deg = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
+                    bassNotes[i] = base + deg;
+                } else {
+                    bassNotes[i] = null;
+                }
+            }
+            clampBassNotesToView();
+            drawBassRoll();
+            document.getElementById('bassPresetSelect').value = '';
+        }
+
+        function clearBass() {
+            for (let i = 0; i < STEPS; i++) bassNotes[i] = null;
+            drawBassRoll();
+            document.getElementById('bassPresetSelect').value = '';
+        }
+
+        function initBassEditor() {
+            bassCanvas = document.getElementById('bassCanvas');
+            bassCtx = bassCanvas.getContext('2d');
+            bassCanvas.addEventListener('click', onBassCanvasClick);
+            bassCanvas.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                onBassCanvasClick(e);
+            });
+            document.getElementById('bassOctave').addEventListener('change', () => {
+                buildBassPianoKeys();
+                clampBassNotesToView();
+                drawBassRoll();
+            });
+            buildBassPianoKeys();
+            drawBassRoll();
+        }
+
+        // ========================================
+        // スケジューラー拡張 — メロディ＋ベース再生統合
         // ========================================
         const origScheduleStep = scheduleStep;
         scheduleStep = function (step, time) {
             origScheduleStep(step, time);
+            const sixteenthNote = 60.0 / bpm / 4;
 
             // メロディの音を鳴らす
             if (melodyNotes[step] != null) {
-                const sixteenthNote = 60.0 / bpm / 4;
                 playMelodyNote(melodyNotes[step], time, sixteenthNote * 0.9);
+            }
+
+            // ベースの音を鳴らす
+            if (bassNotes[step] != null) {
+                playBassNote(bassNotes[step], time, sixteenthNote * 0.9);
             }
 
             // ピアノロールの再生位置を更新
             if (melodyInitialized) {
                 requestAnimationFrame(() => drawPianoRoll());
+            }
+            if (bassInitialized) {
+                requestAnimationFrame(() => drawBassRoll());
             }
         };
 
