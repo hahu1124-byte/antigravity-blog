@@ -1,0 +1,590 @@
+/* ============================================================
+   LAB セクション共通CSS
+   Gravity Portal — AI開発リサーチ
+   ============================================================ */
+
+/* --- CSS変数（ダーク/ライト） --- */
+:root {
+    --lab-bg: #0d1117;
+    --lab-bg-card: #161b22;
+    --lab-bg-table: #1c2128;
+    --lab-border: #30363d;
+    --lab-text: #e6edf3;
+    --lab-text-muted: #8b949e;
+    --lab-accent: #58a6ff;
+    --lab-accent-hover: #79c0ff;
+    --lab-green: #3fb950;
+    --lab-yellow: #d29922;
+    --lab-red: #f85149;
+    --lab-purple: #bc8cff;
+    --lab-orange: #f0883e;
+    --lab-radius: 12px;
+    --lab-radius-sm: 8px;
+    --lab-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    --lab-transition: 0.2s ease;
+}
+
+[data-theme="light"] {
+    --lab-bg: #f6f8fa;
+    --lab-bg-card: #ffffff;
+    --lab-bg-table: #f0f3f6;
+    --lab-border: #d0d7de;
+    --lab-text: #1f2328;
+    --lab-text-muted: #656d76;
+    --lab-accent: #0969da;
+    --lab-accent-hover: #0550ae;
+    --lab-green: #1a7f37;
+    --lab-yellow: #9a6700;
+    --lab-red: #cf222e;
+    --lab-purple: #8250df;
+    --lab-orange: #bc4c00;
+    --lab-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* --- リセット & ベース --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', 'Noto Sans JP', -apple-system, sans-serif;
+    background: var(--lab-bg);
+    color: var(--lab-text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    color: var(--lab-accent);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--lab-accent-hover);
+}
+
+/* --- テーマトグル --- */
+.theme-toggle {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 100;
+    background: var(--lab-bg-card);
+    border: 1px solid var(--lab-border);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all var(--lab-transition);
+}
+
+.theme-toggle:hover {
+    border-color: var(--lab-accent);
+    transform: scale(1.1);
+}
+
+/* --- ヘッダー / ナビ --- */
+.lab-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 1.5rem;
+    height: 52px;
+    background: var(--lab-bg-card);
+    border-bottom: 1px solid var(--lab-border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+}
+
+.lab-back {
+    font-size: 0.85rem;
+    color: var(--lab-text-muted);
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--lab-border);
+    border-radius: 9999px;
+    transition: all var(--lab-transition);
+    white-space: nowrap;
+}
+
+.lab-back:hover {
+    color: var(--lab-accent);
+    border-color: var(--lab-accent);
+}
+
+.lab-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--lab-text);
+}
+
+/* --- メインコンテンツ --- */
+.lab-content {
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+}
+
+/* --- ヒーローセクション --- */
+.lab-hero {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2.5rem 1.5rem;
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), rgba(188, 140, 255, 0.08));
+    border: 1px solid var(--lab-border);
+    border-radius: var(--lab-radius);
+}
+
+.lab-hero-icon {
+    font-size: 3.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.lab-hero h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.lab-hero p {
+    font-size: 0.92rem;
+    color: var(--lab-text-muted);
+    line-height: 1.6;
+}
+
+.lab-hero-meta {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: var(--lab-text-muted);
+}
+
+/* --- セクション --- */
+.lab-section {
+    margin-bottom: 3rem;
+}
+
+.lab-section h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--lab-accent);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.lab-section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 1.5rem 0 0.75rem;
+    color: var(--lab-text);
+}
+
+.lab-section p {
+    font-size: 0.9rem;
+    color: var(--lab-text-muted);
+    margin-bottom: 0.75rem;
+}
+
+/* --- 比較テーブル --- */
+.table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+    border-radius: var(--lab-radius);
+    border: 1px solid var(--lab-border);
+}
+
+.compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    min-width: 700px;
+}
+
+.compare-table thead {
+    background: var(--lab-bg-table);
+    position: sticky;
+    top: 0;
+}
+
+.compare-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--lab-text);
+    border-bottom: 2px solid var(--lab-border);
+    white-space: nowrap;
+}
+
+.compare-table td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--lab-border);
+    vertical-align: top;
+    color: var(--lab-text-muted);
+}
+
+.compare-table tbody tr:hover {
+    background: rgba(88, 166, 255, 0.05);
+}
+
+.compare-table .tool-name {
+    font-weight: 600;
+    color: var(--lab-text);
+    white-space: nowrap;
+}
+
+/* --- ツールカード --- */
+.tool-card {
+    background: var(--lab-bg-card);
+    border: 1px solid var(--lab-border);
+    border-radius: var(--lab-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all var(--lab-transition);
+}
+
+.tool-card:hover {
+    border-color: var(--lab-accent);
+    box-shadow: var(--lab-shadow);
+}
+
+.tool-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.tool-card-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+
+.tool-card-info h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--lab-text);
+    margin: 0;
+}
+
+.tool-card-info .tool-maker {
+    font-size: 0.8rem;
+    color: var(--lab-text-muted);
+    margin-top: 0.1rem;
+}
+
+.tool-card-badges {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.badge {
+    font-size: 0.72rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-free {
+    background: rgba(63, 185, 80, 0.15);
+    color: var(--lab-green);
+    border: 1px solid rgba(63, 185, 80, 0.3);
+}
+
+.badge-paid {
+    background: rgba(210, 153, 34, 0.15);
+    color: var(--lab-yellow);
+    border: 1px solid rgba(210, 153, 34, 0.3);
+}
+
+.badge-type {
+    background: rgba(88, 166, 255, 0.15);
+    color: var(--lab-accent);
+    border: 1px solid rgba(88, 166, 255, 0.3);
+}
+
+.badge-hot {
+    background: rgba(248, 81, 73, 0.15);
+    color: var(--lab-red);
+    border: 1px solid rgba(248, 81, 73, 0.3);
+}
+
+.tool-card-body p {
+    font-size: 0.88rem;
+    color: var(--lab-text-muted);
+    line-height: 1.7;
+}
+
+.tool-card-body ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0;
+}
+
+.tool-card-body li {
+    font-size: 0.85rem;
+    color: var(--lab-text-muted);
+    padding: 0.3rem 0;
+    padding-left: 1.2rem;
+    position: relative;
+}
+
+.tool-card-body li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--lab-accent);
+}
+
+.tool-pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.pros,
+.cons {
+    padding: 0.75rem 1rem;
+    border-radius: var(--lab-radius-sm);
+    font-size: 0.82rem;
+}
+
+.pros {
+    background: rgba(63, 185, 80, 0.08);
+    border: 1px solid rgba(63, 185, 80, 0.2);
+}
+
+.cons {
+    background: rgba(248, 81, 73, 0.08);
+    border: 1px solid rgba(248, 81, 73, 0.2);
+}
+
+.pros h4,
+.cons h4 {
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+}
+
+.pros h4 {
+    color: var(--lab-green);
+}
+
+.cons h4 {
+    color: var(--lab-red);
+}
+
+.pros li::before {
+    color: var(--lab-green);
+}
+
+.cons li::before {
+    color: var(--lab-red);
+}
+
+/* --- 開発者カード --- */
+.dev-card {
+    background: var(--lab-bg-card);
+    border: 1px solid var(--lab-border);
+    border-radius: var(--lab-radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: all var(--lab-transition);
+}
+
+.dev-card:hover {
+    border-color: var(--lab-purple);
+    box-shadow: var(--lab-shadow);
+}
+
+.dev-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dev-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--lab-accent), var(--lab-purple));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.dev-info h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--lab-text);
+    margin: 0;
+}
+
+.dev-info .dev-role {
+    font-size: 0.8rem;
+    color: var(--lab-text-muted);
+}
+
+.dev-links {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.dev-link {
+    font-size: 0.78rem;
+    padding: 0.25rem 0.6rem;
+    border: 1px solid var(--lab-border);
+    border-radius: 9999px;
+    color: var(--lab-text-muted);
+    transition: all var(--lab-transition);
+}
+
+.dev-link:hover {
+    border-color: var(--lab-accent);
+    color: var(--lab-accent);
+}
+
+/* --- まとめボックス --- */
+.summary-box {
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), rgba(188, 140, 255, 0.08));
+    border: 1px solid var(--lab-border);
+    border-radius: var(--lab-radius);
+    padding: 1.5rem;
+    margin-top: 2rem;
+}
+
+.summary-box h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: var(--lab-text);
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.summary-item {
+    padding: 1rem;
+    background: var(--lab-bg-card);
+    border: 1px solid var(--lab-border);
+    border-radius: var(--lab-radius-sm);
+}
+
+.summary-item .summary-label {
+    font-size: 0.78rem;
+    color: var(--lab-text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.summary-item .summary-value {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--lab-accent);
+}
+
+.summary-item p {
+    font-size: 0.78rem;
+    color: var(--lab-text-muted);
+    margin-top: 0.3rem;
+}
+
+/* --- フッター --- */
+.lab-footer {
+    text-align: center;
+    padding: 2rem 1rem;
+    border-top: 1px solid var(--lab-border);
+    margin-top: 2rem;
+}
+
+.lab-footer p {
+    font-size: 0.78rem;
+    color: var(--lab-text-muted);
+}
+
+.lab-footer-nav {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 0.75rem;
+}
+
+.lab-footer-nav a {
+    font-size: 0.82rem;
+    color: var(--lab-text-muted);
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--lab-border);
+    border-radius: 9999px;
+    transition: all var(--lab-transition);
+}
+
+.lab-footer-nav a:hover {
+    color: var(--lab-accent);
+    border-color: var(--lab-accent);
+}
+
+/* --- レスポンシブ --- */
+@media (max-width: 768px) {
+    .lab-content {
+        padding: 1.5rem 1rem 3rem;
+    }
+
+    .lab-hero h1 {
+        font-size: 1.3rem;
+    }
+
+    .lab-hero-meta {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .tool-pros-cons {
+        grid-template-columns: 1fr;
+    }
+
+    .summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .lab-header {
+        padding: 0 0.75rem;
+    }
+
+    .lab-content {
+        padding: 1rem 0.75rem 2rem;
+    }
+
+    .tool-card {
+        padding: 1rem;
+    }
+
+    .tool-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+}

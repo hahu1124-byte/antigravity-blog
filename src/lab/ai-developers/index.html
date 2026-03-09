@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発者ピックアップ | LAB | Gravity Portal</title>
+    <meta name="description" content="AIを活用した注目の開発者・オープンソースプロジェクトを紹介。個人開発から生まれた革新的なAIツールと、その開発者たちの物語。">
+    <meta property="og:title" content="AI開発者ピックアップ">
+    <meta property="og:description" content="注目のAI開発者・オープンソースプロジェクトを紹介。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-developers/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        (function () { try { var t = localStorage.getItem('gp-theme'); if (t) document.documentElement.setAttribute('data-theme', t) } catch (e) { } })()
+    </script>
+</head>
+
+<body>
+    <!-- テーマトグル -->
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+
+    <!-- ヘッダー -->
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">👤 AI開発者ピックアップ</h1>
+    </header>
+
+    <main class="lab-content">
+        <!-- ヒーロー -->
+        <section class="lab-hero">
+            <div class="lab-hero-icon">👤</div>
+            <h1>AI開発の最前線を走る人たち</h1>
+            <p>AIを活用した革新的なオープンソースプロジェクトと、<br>個人開発の可能性を押し広げる開発者たちを紹介します。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月時点</span>
+                <span>🔧 注目プロジェクト紹介</span>
+            </div>
+        </section>
+
+        <!-- ── セクション1: AI開発ツール系プロジェクト ── -->
+        <section class="lab-section">
+            <h2>🛠️ オープンソース AI開発ツール</h2>
+            <p>商用ツールに匹敵する機能を無料で提供するオープンソースプロジェクト。個人開発者にとって選択肢を広げる重要な存在です。</p>
+
+            <!-- OpenCode -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">💻</div>
+                    <div class="dev-info">
+                        <h3>OpenCode</h3>
+                        <div class="dev-role">オープンソース AIコーディングエージェント</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <p>Claude
+                        CodeやCopilotに匹敵するAIコーディングエージェントをオープンソースで実現。ベンダーロックインなしで75以上のAIモデルに対応し、ターミナル・デスクトップ・IDE拡張の3通りで利用可能。2026年3月時点で月間500万人以上の開発者が利用。
+                    </p>
+                    <ul>
+                        <li>75以上のAIモデル対応（ローカルモデル含む）</li>
+                        <li>ターミナル・デスクトップアプリ・IDE拡張で動作</li>
+                        <li>ベンダーロックインなし、プライバシー重視</li>
+                    </ul>
+                    <div class="dev-links">
+                        <a href="https://github.com/opencode-ai/opencode" target="_blank" rel="noopener noreferrer"
+                            class="dev-link">🐙 GitHub</a>
+                        <span class="badge badge-free">オープンソース</span>
+                        <span class="badge badge-hot">🔥 月間500万ユーザー</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Aider -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🔧</div>
+                    <div class="dev-info">
+                        <h3>Aider</h3>
+                        <div class="dev-role">ターミナルベース AIペアプログラマー</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <p>プロジェクトディレクトリに対して直接操作するターミナルベースのAIペアプログラマー。ファイル編集とGit自動コミットを組み合わせた実用的なワークフローが特徴。2026年時点で成熟したOSSとして広く利用されています。
+                    </p>
+                    <ul>
+                        <li>複数のAIモデルに対応（GPT-4、Claude、ローカルLLM）</li>
+                        <li>Git自動コミット機能で変更を自動追跡</li>
+                        <li>ファイル編集・リファクタリング・デバッグを対話的に実行</li>
+                    </ul>
+                    <div class="dev-links">
+                        <a href="https://github.com/Aider-AI/aider" target="_blank" rel="noopener noreferrer"
+                            class="dev-link">🐙 GitHub</a>
+                        <a href="https://aider.chat/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐
+                            公式サイト</a>
+                        <span class="badge badge-free">オープンソース</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Continue.dev -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🔌</div>
+                    <div class="dev-info">
+                        <h3>Continue.dev</h3>
+                        <div class="dev-role">ローカル AI Copilot エンジン</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <p>標準的なコードエディタをローカルAI環境に変換するオープンソースエンジン。GitHub
+                        Copilotの代替として、プライバシーを保ちながらAI補完・チャット・コード生成を実現。ローカルまたはリモートのOSSモデルに接続可能。</p>
+                    <ul>
+                        <li>VSCode / JetBrains の拡張機能として動作</li>
+                        <li>ローカルLLM（Ollama等）でプライバシー完全保護</li>
+                        <li>カスタマイズ可能なAI Copilot環境を構築</li>
+                    </ul>
+                    <div class="dev-links">
+                        <a href="https://github.com/continuedev/continue" target="_blank" rel="noopener noreferrer"
+                            class="dev-link">🐙 GitHub</a>
+                        <a href="https://continue.dev/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐
+                            公式サイト</a>
+                        <span class="badge badge-free">オープンソース</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── セクション2: AI創作ツール ── -->
+        <section class="lab-section">
+            <h2>🎨 AI創作プロジェクト</h2>
+            <p>画像生成・音楽生成など、AIを活用したクリエイティブツールの注目プロジェクト。</p>
+
+            <!-- Stable Diffusion -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🎨</div>
+                    <div class="dev-info">
+                        <h3>Stable Diffusion</h3>
+                        <div class="dev-role">Stability AI — オープンソース画像生成AI</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <p>AI画像生成の分野で最も影響力のあるオープンソースプロジェクト。テキストから高品質な画像を生成でき、AIアート全体の約80%がStable
+                        Diffusionベースのツールで制作されています。カスタマイズ性が高く、個人開発者のプロジェクトに自由に組み込める点が最大の強み。</p>
+                    <ul>
+                        <li>テキストから画像生成、画像編集、インペインティング</li>
+                        <li>LoRA / ControlNet等の拡張で細やかなカスタマイズ</li>
+                        <li>ローカルGPUで動作（クラウド不要）</li>
+                    </ul>
+                    <div class="dev-links">
+                        <a href="https://github.com/Stability-AI/stablediffusion" target="_blank"
+                            rel="noopener noreferrer" class="dev-link">🐙 GitHub</a>
+                        <span class="badge badge-free">オープンソース</span>
+                        <span class="badge badge-hot">🎨 AIアートの80%を占有</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FLUX.2 -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">⚡</div>
+                    <div class="dev-info">
+                        <h3>FLUX.2</h3>
+                        <div class="dev-role">Black Forest Labs — 次世代画像生成モデル</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <p>2025年11月にリリースされた次世代オープンソース画像生成モデル。プロダクショングレードの品質を実現しながら、コンシューマーGPUでの動作に対応。プロンプトへの忠実度とバリエーションの一貫性に優れています。
+                    </p>
+                    <ul>
+                        <li>プロダクションレベルの高品質生成</li>
+                        <li>コンシューマーGPUで動作可能</li>
+                        <li>生成と編集の両方に対応</li>
+                    </ul>
+                    <div class="dev-links">
+                        <a href="https://github.com/black-forest-labs/flux" target="_blank" rel="noopener noreferrer"
+                            class="dev-link">🐙 GitHub</a>
+                        <span class="badge badge-free">オープンソース</span>
+                        <span class="badge badge-type">2025年11月リリース</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACE-Step -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🎵</div>
+                    <div class="dev-info">
+                        <h3>ACE-Step</h3>
+                        <div class="dev-role">オープンソース AI音楽生成</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <p>生成速度・音楽的構造・制御性のトレードオフを克服したAI音楽生成モデル。4分の楽曲をわずか20秒で生成可能。ACE-Step 1.5ではVRAM
+                        4GB未満のGPUでもフル楽曲を生成でき、一部のクローズドソースモデルを上回る性能を実現。</p>
+                    <ul>
+                        <li>4分の楽曲を約20秒で生成</li>
+                        <li>VRAM 4GB未満で動作（v1.5）</li>
+                        <li>音楽的構造を保ちながら高速生成</li>
+                    </ul>
+                    <div class="dev-links">
+                        <a href="https://github.com/ace-step/ACE-Step" target="_blank" rel="noopener noreferrer"
+                            class="dev-link">🐙 GitHub</a>
+                        <span class="badge badge-free">オープンソース</span>
+                        <span class="badge badge-hot">🎵 4分の曲を20秒で生成</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── セクション3: 個人開発のトレンド ── -->
+        <section class="lab-section">
+            <h2>📈 AI × 個人開発のトレンド (2026)</h2>
+
+            <div class="tool-card">
+                <div class="tool-card-body">
+                    <h3>🤖 エージェント型AIの台頭</h3>
+                    <p>2026年、AIは「ツール」から「自律エージェント」に進化。開発者はコードを書く時間を減らし、AIへの指示とレビューが主な仕事になりつつあります。Antigravity・Claude
+                        Code・Cursorの3強を中心に、AIが計画→実装→テストを一気通貫で行う「エージェント・ファースト開発」が主流化。</p>
+
+                    <h3>🌐 オープンソースAIの民主化</h3>
+                    <p>OpenCode（月間500万ユーザー）やContinue.devの台頭により、商用ツールと同等の機能が無料で利用可能に。ベンダーロックインへの懸念から、ローカルLLM対応のOSSツールを選ぶ開発者が急増しています。
+                    </p>
+
+                    <h3>🎯 Vibe Coding の普及</h3>
+                    <p>「Vibe Coding」—
+                        AIと会話しながらアプリを作るスタイルが市民権を獲得。プログラミング経験がなくても、アイデアを言語化できれば誰でもアプリを作れる時代に。Antigravityがこのトレンドの中心的存在です。
+                    </p>
+
+                    <h3>🇯🇵 日本のAI開発環境</h3>
+                    <p>日本政府の「AI戦略2026」で年間5,000億円以上の投資。日本語特化LLMの開発競争が活発化し、大学発AIスタートアップも増加。個人開発者にとっても、APIの日本語対応やプラットフォームの充実が追い風になっています。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 この記事について</h2>
+            <p>本記事の情報は<strong>2026年3月時点</strong>のものです。紹介しているプロジェクトは公開情報に基づいています。掲載内容に誤りがある場合はお知らせください。</p>
+            <p>当サイトも<strong>AIペアプログラミング</strong>を活用した個人開発プロジェクトです。</p>
+        </section>
+    </main>
+
+    <!-- フッター -->
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-tools/">🛠️ ツール比較</a>
+            <a href="/blog/">📝 ブログ</a>
+        </nav>
+    </footer>
+
+    <!-- テーマトグルスクリプト -->
+    <script>
+            (function () {
+                var btn = document.getElementById('themeToggle');
+                function update() { var t = document.documentElement.getAttribute('data-theme'); btn.textContent = t === 'light' ? '🌙' : '☀️' }
+                update();
+                btn.addEventListener('click', function () {
+                    var cur = document.documentElement.getAttribute('data-theme');
+                    var next = cur === 'light' ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', next);
+                    try { localStorage.setItem('gp-theme', next) } catch (e) { }
+                    update();
+                });
+            })()
+    </script>
+</body>
+
+</html>
