@@ -62,7 +62,7 @@ const CATEGORIES = [
 // ランク判定（比率ベース）
 // ========================================
 
-const QUIZ_COUNT = 10;
+let quizCount = 10;
 
 const RANKS = [
     { min: 1.0, icon: "👑", title: "博識マスター", rank: "S", message: "パーフェクト！幅広い知識を完全に備えています。" },
@@ -135,17 +135,49 @@ function initCategoryGrid() {
             <span class="category-card-desc">${cat.desc}</span>
             <span class="category-card-count">${questions.length}問</span>
         `;
-        card.addEventListener("click", () => startQuiz(cat));
+        card.addEventListener("click", () => {
+            if (cat.id === "all") {
+                showCountModal(cat);
+            } else {
+                startQuiz(cat, 10);
+            }
+        });
         grid.appendChild(card);
     });
+}
+
+// ========================================
+// 問題数選択モーダル
+// ========================================
+
+function showCountModal(category) {
+    const modal = $("count-modal");
+    modal.classList.remove("hidden");
+
+    // 問題数ボタンのイベント
+    modal.querySelectorAll(".count-btn").forEach(btn => {
+        // クリーンアップして再登録
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        newBtn.addEventListener("click", () => {
+            const count = parseInt(newBtn.dataset.count);
+            modal.classList.add("hidden");
+            startQuiz(category, count);
+        });
+    });
+}
+
+function hideCountModal() {
+    $("count-modal").classList.add("hidden");
 }
 
 // ========================================
 // ゲーム開始
 // ========================================
 
-function startQuiz(category) {
+function startQuiz(category, count) {
     selectedCategory = category;
+    quizCount = count || 10;
     currentQuestionIndex = 0;
     correctCount = 0;
     wrongCount = 0;
@@ -157,7 +189,7 @@ function startQuiz(category) {
         return;
     }
 
-    shuffledQuestions = shuffle(pool).slice(0, QUIZ_COUNT);
+    shuffledQuestions = shuffle(pool).slice(0, quizCount);
 
     $("correct-count").textContent = "0";
     $("wrong-count").textContent = "0";
@@ -337,8 +369,20 @@ function backToCategory() {
 // ========================================
 
 $("next-btn").addEventListener("click", nextQuestion);
-$("retry-btn").addEventListener("click", () => startQuiz(selectedCategory));
+$("retry-btn").addEventListener("click", () => {
+    if (selectedCategory.id === "all") {
+        showCountModal(selectedCategory);
+    } else {
+        startQuiz(selectedCategory, 10);
+    }
+});
 $("back-category-btn").addEventListener("click", backToCategory);
+$("count-modal-close").addEventListener("click", hideCountModal);
+
+// モーダル背景クリックで閉じる
+$("count-modal").addEventListener("click", (e) => {
+    if (e.target === $("count-modal")) hideCountModal();
+});
 
 // 初期化
 initCategoryGrid();

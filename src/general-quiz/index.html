@@ -19,10 +19,23 @@
             <div class="start-hero">
                 <div class="start-icon">🧠</div>
                 <h1>一般常識クイズ</h1>
-                <p class="start-desc">5つのジャンルから選んで挑戦！<br>各カテゴリ100問からランダム10問を出題</p>
+                <p class="start-desc">5つのジャンルから選んで挑戦！<br>各カテゴリ100問からランダム出題<br>総合は10・20・30問から選べます</p>
             </div>
             <div class="category-grid" id="category-grid">
                 <!-- JSで動的生成 -->
+            </div>
+            <!-- 問題数選択モーダル -->
+            <div id="count-modal" class="count-modal hidden">
+                <div class="count-modal-content">
+                    <h2>🌐 総合 — 問題数を選択</h2>
+                    <p class="count-modal-desc">全400問からランダムに出題します</p>
+                    <div class="count-options">
+                        <button class="count-btn" data-count="10">10問<span class="count-sub">サクッと</span></button>
+                        <button class="count-btn" data-count="20">20問<span class="count-sub">じっくり</span></button>
+                        <button class="count-btn" data-count="30">30問<span class="count-sub">たっぷり</span></button>
+                    </div>
+                    <button id="count-modal-close" class="secondary-btn count-cancel">キャンセル</button>
+                </div>
             </div>
         </div>
 
