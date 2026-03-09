@@ -52,7 +52,7 @@ if (existsSync(cssSrc)) {
 }
 
 // 静的ツールをコピー（convergence, simulator, machine-db等）
-const staticTools = ['convergence', 'simulator', 'machine-db', 'data', 'idle-game', 'quiz'];
+const staticTools = ['convergence', 'simulator', 'machine-db', 'data', 'idle-game', 'quiz', 'general-quiz'];
 for (const tool of staticTools) {
     const toolSrc = join(__dirname, 'src', tool);
     const toolDst = join(OUTPUT_DIR, tool);
