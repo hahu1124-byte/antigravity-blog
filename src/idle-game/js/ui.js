@@ -149,6 +149,8 @@ function showAchNotify(text) {
 function checkAchNotify() {
     let total = 0;
     ACHIEVEMENT_DEFS.forEach(def => {
+        // 大当たり回数は頻繁すぎるため通知対象外
+        if (def.id === 'jackpots') return;
         total += getAchClaimableCount(def);
     });
     if (prevClaimableTotal >= 0 && total > prevClaimableTotal) {
