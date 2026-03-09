@@ -53,6 +53,7 @@ html {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    overscroll-behavior: none;
 }
 
 body {
@@ -61,6 +62,7 @@ body {
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
+    overscroll-behavior: none;
     background-image:
         radial-gradient(ellipse at 20% 50%, rgba(0, 229, 255, 0.03) 0%, transparent 50%),
         radial-gradient(ellipse at 80% 20%, rgba(255, 0, 255, 0.03) 0%, transparent 50%);
@@ -224,6 +226,7 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
+    min-width: 7.5em;
 }
 
 .mode-normal {
@@ -351,6 +354,7 @@ body {
     margin-bottom: 8px;
     padding: 6px 14px;
     border-radius: 20px;
+    min-height: 34px;
 }
 
 .rush-kakuhen {
@@ -366,7 +370,7 @@ body {
 }
 
 #rushBanner.hidden {
-    display: none;
+    visibility: hidden;
 }
 
 .rush-label {
