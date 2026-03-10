@@ -8,6 +8,7 @@
     <meta name="description" content="Gravity Portalの更新履歴。新機能の追加や改善の記録。">
     <link rel="stylesheet" href="/static-pages/styles.css">
     <link rel="stylesheet" href="updates.css">
+    <script>(function () { try { var t = localStorage.getItem('gp-theme'); if (t) document.documentElement.setAttribute('data-theme', t) } catch (e) { } })()</script>
 </head>
 
 <body>
@@ -24,70 +25,70 @@
     </div>
 
     <script>
-        (function () {
-            // 日付をフォーマット（例: 2026年3月10日）
-            function formatDate(dateStr) {
-                var d = new Date(dateStr + 'T00:00:00');
-                return d.toLocaleDateString('ja-JP', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-            }
-
-            // HTMLエスケープ
-            function esc(str) {
-                var div = document.createElement('div');
-                div.textContent = str;
-                return div.innerHTML;
-            }
-
-            // エントリーHTML生成
-            function renderEntry(update) {
-                var html = '<article class="update-entry">';
-                html += '<div class="date-badge"><time datetime="' + esc(update.date) + '">' + formatDate(update.date) + '</time></div>';
-                html += '<h2 class="update-title">' + esc(update.title) + '</h2>';
-
-                if (update.sections) {
-                    for (var s = 0; s < update.sections.length; s++) {
-                        var section = update.sections[s];
-                        html += '<div class="version-section">';
-                        html += '<h3 class="version-badge">' + esc(section.version) + '</h3>';
-                        html += '<ul class="update-items">';
-                        for (var j = 0; j < section.items.length; j++) {
-                            html += '<li>' + esc(section.items[j]) + '</li>';
-                        }
-                        html += '</ul></div>';
-                    }
-                } else if (update.items) {
-                    html += '<ul class="update-items">';
-                    for (var k = 0; k < update.items.length; k++) {
-                        html += '<li>' + esc(update.items[k]) + '</li>';
-                    }
-                    html += '</ul>';
+            (function () {
+                // 日付をフォーマット（例: 2026年3月10日）
+                function formatDate(dateStr) {
+                    var d = new Date(dateStr + 'T00:00:00');
+                    return d.toLocaleDateString('ja-JP', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
                 }
 
-                html += '</article>';
-                return html;
-            }
+                // HTMLエスケープ
+                function esc(str) {
+                    var div = document.createElement('div');
+                    div.textContent = str;
+                    return div.innerHTML;
+                }
 
-            // データ読み込み＆描画
-            fetch('updates-data.json')
-                .then(function (res) { return res.json(); })
-                .then(function (updates) {
-                    var timeline = document.getElementById('timeline');
-                    var html = '';
-                    for (var i = 0; i < updates.length; i++) {
-                        html += renderEntry(updates[i]);
+                // エントリーHTML生成
+                function renderEntry(update) {
+                    var html = '<article class="update-entry">';
+                    html += '<div class="date-badge"><time datetime="' + esc(update.date) + '">' + formatDate(update.date) + '</time></div>';
+                    html += '<h2 class="update-title">' + esc(update.title) + '</h2>';
+
+                    if (update.sections) {
+                        for (var s = 0; s < update.sections.length; s++) {
+                            var section = update.sections[s];
+                            html += '<div class="version-section">';
+                            html += '<h3 class="version-badge">' + esc(section.version) + '</h3>';
+                            html += '<ul class="update-items">';
+                            for (var j = 0; j < section.items.length; j++) {
+                                html += '<li>' + esc(section.items[j]) + '</li>';
+                            }
+                            html += '</ul></div>';
+                        }
+                    } else if (update.items) {
+                        html += '<ul class="update-items">';
+                        for (var k = 0; k < update.items.length; k++) {
+                            html += '<li>' + esc(update.items[k]) + '</li>';
+                        }
+                        html += '</ul>';
                     }
-                    timeline.innerHTML = html;
-                })
-                .catch(function (err) {
-                    document.getElementById('timeline').innerHTML =
-                        '<p style="color: var(--text-muted);">更新履歴の読み込みに失敗しました。</p>';
-                    console.error('Failed to load updates:', err);
-                });
-        })();
+
+                    html += '</article>';
+                    return html;
+                }
+
+                // データ読み込み＆描画
+                fetch('updates-data.json')
+                    .then(function (res) { return res.json(); })
+                    .then(function (updates) {
+                        var timeline = document.getElementById('timeline');
+                        var html = '';
+                        for (var i = 0; i < updates.length; i++) {
+                            html += renderEntry(updates[i]);
+                        }
+                        timeline.innerHTML = html;
+                    })
+                    .catch(function (err) {
+                        document.getElementById('timeline').innerHTML =
+                            '<p style="color: var(--text-muted);">更新履歴の読み込みに失敗しました。</p>';
+                        console.error('Failed to load updates:', err);
+                    });
+            })();
     </script>
 </body>
 
