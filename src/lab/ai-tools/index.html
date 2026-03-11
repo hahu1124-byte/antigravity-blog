@@ -1,461 +1,95 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI開発ツール比較 2026 | LAB | Gravity Portal</title>
-    <meta name="description"
-        content="Antigravity、Claude Code、Cursor、Windsurf、GitHub Copilotの5大AI開発ツールを徹底比較。価格・機能・特徴を2026年3月時点の最新情報でレビュー。">
-    <meta property="og:title" content="AI開発ツール比較 2026">
-    <meta property="og:description" content="5大AI開発ツールを徹底比較。価格・機能・特徴を最新情報でレビュー。">
-    <meta property="og:type" content="article">
-    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-tools/">
-    <meta property="og:site_name" content="Gravity Portal">
-    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-tools.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://www.antigravity-portal.com/og-lab-ai-tools.png">
+    <title>AI開発ツール比較 | LAB | Gravity Portal</title>
+    <meta name="description" content="Antigravity、Claude Code、Cursor、Windsurf、GitHub Copilotの5大AIコーディングツールを定期的に比較・追跡するシリーズ。">
+    <link rel="stylesheet" href="../styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script>
-        (function () { try { var t = localStorage.getItem('gp-theme'); if (t) document.documentElement.setAttribute('data-theme', t) } catch (e) { } })()
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
     </script>
 </head>
-
 <body>
-    <!-- テーマトグル -->
     <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
 
-    <!-- ヘッダー -->
     <header class="lab-header">
-        <a href="/lab/" class="lab-back">← LAB</a>
-        <h1 class="lab-title">🛠️ AI開発ツール比較</h1>
+        <a href="/lab/" class="lab-back">← LABに戻る</a>
+        <span class="lab-title">🛠️ AI開発ツール比較</span>
     </header>
 
     <main class="lab-content">
-        <!-- ヒーロー -->
-        <section class="lab-hero">
+        <div class="lab-hero">
             <div class="lab-hero-icon">🛠️</div>
-            <h1>AI開発ツール徹底比較 2026</h1>
-            <p>主要5ツールの機能・価格・特徴を比較。<br>実際の開発現場での使用感も交えてレビューします。</p>
-            <div class="lab-hero-meta">
-                <span>📅 2026年3月時点</span>
-                <span>🔧 5ツール比較</span>
-                <span>💰 価格帯: 無料〜$200/月</span>
-            </div>
-        </section>
+            <h1>AI開発ツール比較</h1>
+            <p>Antigravity、Claude Code、Cursor、Windsurf、GitHub Copilotの<br>5大AIコーディングツールを定期的に比較・追跡するシリーズです。</p>
+        </div>
 
-        <!-- 概要 -->
-        <section class="lab-section">
-            <h2>📋 AIコーディングツールとは</h2>
-            <p>AIコーディングツールは、大規模言語モデル（LLM）を活用してコードの自動補完・生成・リファクタリング・デバッグなどを支援するツールです。2026年現在、単純な補完を超えて「エージェント」として自律的にタスクを実行できるものが主流になりつつあります。
-            </p>
-            <p>本記事では、市場を代表する5つのツールを比較します。それぞれ異なるアプローチでAI開発を支援しており、用途や好みに応じた最適な選択肢が異なります。</p>
-        </section>
+        <div class="lab-section">
+            <h2>📚 バックナンバー</h2>
 
-        <!-- 比較表 -->
-        <section class="lab-section">
-            <h2>📊 スペック比較表</h2>
-            <div class="table-wrapper">
-                <table class="compare-table">
-                    <thead>
-                        <tr>
-                            <th>ツール</th>
-                            <th>開発元</th>
-                            <th>形態</th>
-                            <th>無料プラン</th>
-                            <th>有料プラン</th>
-                            <th>AIモデル</th>
-                            <th>エージェント</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="tool-name">Antigravity</td>
-                            <td>Google DeepMind</td>
-                            <td>IDE（VSCode fork）</td>
-                            <td>✅ パブリックプレビュー</td>
-                            <td>未定（企業向けあり）</td>
-                            <td>Gemini 3.1 Pro, Claude, GPT</td>
-                            <td>✅ フル自律</td>
-                        </tr>
-                        <tr>
-                            <td class="tool-name">Claude Code</td>
-                            <td>Anthropic</td>
-                            <td>ターミナルエージェント</td>
-                            <td>❌（Pro $20/月〜）</td>
-                            <td>$20〜$100/月</td>
-                            <td>Claude 4.5/4.6 Sonnet/Opus</td>
-                            <td>✅ フル自律</td>
-                        </tr>
-                        <tr>
-                            <td class="tool-name">Cursor</td>
-                            <td>Anysphere</td>
-                            <td>IDE（VSCode fork）</td>
-                            <td>✅ 制限付き</td>
-                            <td>$20〜$200/月</td>
-                            <td>GPT-4o, Claude, Gemini</td>
-                            <td>✅ Agent Mode</td>
-                        </tr>
-                        <tr>
-                            <td class="tool-name">Windsurf</td>
-                            <td>Codeium</td>
-                            <td>IDE</td>
-                            <td>✅ 基本機能</td>
-                            <td>$15〜$60/月</td>
-                            <td>独自 + マルチモデル</td>
-                            <td>✅ Cascade</td>
-                        </tr>
-                        <tr>
-                            <td class="tool-name">GitHub Copilot</td>
-                            <td>GitHub / OpenAI</td>
-                            <td>IDE拡張 + CLI</td>
-                            <td>✅ 月50リクエスト</td>
-                            <td>$10〜$39/月</td>
-                            <td>GPT-4o, Claude, Gemini</td>
-                            <td>✅ Workspace / CLI</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- 個別レビュー -->
-        <section class="lab-section">
-            <h2>🔍 各ツール詳細レビュー</h2>
-
-            <!-- Antigravity -->
-            <div class="tool-card" id="antigravity">
+            <a href="/lab/ai-tools/v2/" class="tool-card" style="text-decoration:none;display:block">
                 <div class="tool-card-header">
-                    <div class="tool-card-icon">🚀</div>
+                    <span class="tool-card-icon">🆕</span>
                     <div class="tool-card-info">
-                        <h3>Antigravity</h3>
-                        <div class="tool-maker">Google DeepMind — 2025年11月リリース</div>
+                        <h3>第2回 — 激動の1週間</h3>
+                        <span class="tool-maker">2026年3月11日</span>
                     </div>
-                </div>
-                <div class="tool-card-badges">
-                    <span class="badge badge-free">無料プレビュー</span>
-                    <span class="badge badge-type">エージェント型IDE</span>
-                    <span class="badge badge-hot">🔥 注目</span>
                 </div>
                 <div class="tool-card-body">
-                    <p>Gemini 3と同時発表された「エージェント・ファースト」のIDE。VSCode forkをベースに、AIエージェントがエディタ・ターミナル・ブラウザを横断してタスクを自律実行します。</p>
-                    <h3>主な特徴</h3>
-                    <ul>
-                        <li><strong>エージェント・ファースト設計</strong> — エージェントがファイル編集、コマンド実行、ブラウザ操作まで自動で行える</li>
-                        <li><strong>アーティファクト生成</strong> — タスクリスト・実装計画・スクリーンショット・録画で進捗を可視化</li>
-                        <li><strong>マルチモデル対応</strong> — Gemini 3.1 Pro、Claude Sonnet/Opus 4.6、GPT-OSS-120Bから選択可能</li>
-                        <li><strong>Vibe Coding</strong> — 会話でAIを導くスタイルの開発が可能</li>
-                        <li><strong>デュアルビューUI</strong> — エディタとエージェントマネージャーの2画面で操作</li>
-                    </ul>
-                    <h3>価格</h3>
-                    <p>パブリックプレビュー中は<strong>無料</strong>（Gemini 3.1 Proの寛大なレート制限付き）。エンタープライズ向けに「Google AI Ultra for
-                        Business」アドオンあり。</p>
-                    <div class="tool-pros-cons">
-                        <div class="pros">
-                            <h4>✅ メリット</h4>
-                            <ul>
-                                <li>プレビュー中は完全無料</li>
-                                <li>Gemini 3.1 Proの高性能モデルが使える</li>
-                                <li>エージェントの自律性が最も高い</li>
-                                <li>ブラウザ操作まで対応</li>
-                            </ul>
-                        </div>
-                        <div class="cons">
-                            <h4>⚠️ デメリット</h4>
-                            <ul>
-                                <li>プレビュー終了後の価格が未定</li>
-                                <li>エコシステム・プラグインがまだ未成熟</li>
-                                <li>一部ユーザーにレート制限の適用あり</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Claude Code -->
-            <div class="tool-card" id="claude-code">
-                <div class="tool-card-header">
-                    <div class="tool-card-icon">🤖</div>
-                    <div class="tool-card-info">
-                        <h3>Claude Code</h3>
-                        <div class="tool-maker">Anthropic — ターミナルファーストAIエージェント</div>
-                    </div>
+                    <p>Copilot CLI正式版、Claude Code Review登場、Windsurf買収劇、Cursorマルチエージェント。5大ツールの最新アップデートを比較。</p>
                 </div>
                 <div class="tool-card-badges">
-                    <span class="badge badge-paid">Pro $20/月</span>
-                    <span class="badge badge-type">ターミナルエージェント</span>
-                    <span class="badge badge-hot">🔥 注目</span>
+                    <span class="badge badge-hot">🔥 最新</span>
+                    <span class="badge badge-type">Copilot CLI</span>
+                    <span class="badge badge-type">Claude Code Review</span>
+                </div>
+            </a>
+
+            <a href="/lab/ai-tools/v1/" class="tool-card" style="text-decoration:none;display:block">
+                <div class="tool-card-header">
+                    <span class="tool-card-icon">📋</span>
+                    <div class="tool-card-info">
+                        <h3>第1回 — 5大ツール初期比較</h3>
+                        <span class="tool-maker">2026年3月9日</span>
+                    </div>
                 </div>
                 <div class="tool-card-body">
-                    <p>ターミナルから直接操作するAIコーディングエージェント。コードベース全体を解析し、複数ファイルを横断して自律的にタスクを実行します。</p>
-                    <h3>主な特徴</h3>
-                    <ul>
-                        <li><strong>ターミナルネイティブ</strong> — エディタを選ばず、CLIから直接操作</li>
-                        <li><strong>マルチエージェント</strong> — 複数エージェントが並行してタスクを処理（2026新機能）</li>
-                        <li><strong>100万トークンコンテキスト</strong> — Claude Opus 4.6で大規模コードベースに対応</li>
-                        <li><strong>音声モード</strong> — 自然な会話でコーディング可能</li>
-                        <li><strong>CI/CDパイプライン統合</strong> — ヘッドレスモードでGitHub連携</li>
-                    </ul>
-                    <h3>価格</h3>
-                    <p><strong>Pro $20/月</strong>（Sonnet/Opus利用可）、<strong>Max
-                            $100/月</strong>（5〜20倍のクォータ）。API利用時はトークン単価課金（Sonnet: $3/$15、Opus: $5/$25 per 1M tokens）。</p>
-                    <div class="tool-pros-cons">
-                        <div class="pros">
-                            <h4>✅ メリット</h4>
-                            <ul>
-                                <li>ターミナルから強力な自律操作</li>
-                                <li>100万トークンの巨大コンテキスト</li>
-                                <li>マルチエージェントで並列処理</li>
-                                <li>Claudeモデルの推論能力が高い</li>
-                            </ul>
-                        </div>
-                        <div class="cons">
-                            <h4>⚠️ デメリット</h4>
-                            <ul>
-                                <li>無料プランなし</li>
-                                <li>UIがターミナルのみで直感的でない</li>
-                                <li>ヘビーユーザーはMac $100/月が必要</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Cursor -->
-            <div class="tool-card" id="cursor">
-                <div class="tool-card-header">
-                    <div class="tool-card-icon">⚡</div>
-                    <div class="tool-card-info">
-                        <h3>Cursor</h3>
-                        <div class="tool-maker">Anysphere — AI統合型コードエディタ</div>
-                    </div>
+                    <p>Antigravity、Claude Code、Cursor、Windsurf、GitHub Copilotの機能・価格・特徴を初回比較。各ツールの強み・弱みを分析。</p>
                 </div>
                 <div class="tool-card-badges">
-                    <span class="badge badge-free">無料プランあり</span>
-                    <span class="badge badge-paid">Pro $20/月</span>
-                    <span class="badge badge-type">AIネイティブIDE</span>
+                    <span class="badge badge-type">5ツール比較</span>
+                    <span class="badge badge-free">初回</span>
                 </div>
-                <div class="tool-card-body">
-                    <p>VSCode forkをベースに、AIをエディタのコアに組み込んだIDE。プロジェクト全体をインデックスし、文脈を理解したコード生成・編集が可能です。</p>
-                    <h3>主な特徴</h3>
-                    <ul>
-                        <li><strong>Composer & Agent Mode</strong> — 複数ファイルを横断した編集、自律的なマルチステップワークフロー</li>
-                        <li><strong>インライン編集</strong> — コードを選択して自然言語で変更指示</li>
-                        <li><strong>Supermaven統合</strong> — 高速なマルチライン補完</li>
-                        <li><strong>マルチモデル対応</strong> — GPT-4o、Claude、Gemini Pro、GPT-5から選択</li>
-                        <li><strong>VSCode互換</strong> — 拡張機能・テーマ・キーバインドをそのまま利用可能</li>
-                    </ul>
-                    <h3>価格</h3>
-                    <p><strong>Hobby（無料）</strong>: 月2,000補完 + 50リクエスト。<strong>Pro $20/月</strong>: 無制限Tab補完 +
-                        $20分のクレジット。<strong>Ultra $200/月</strong>: 20倍の使用量。クレジットベースの課金システム。</p>
-                    <div class="tool-pros-cons">
-                        <div class="pros">
-                            <h4>✅ メリット</h4>
-                            <ul>
-                                <li>VSCodeの操作性をそのまま継承</li>
-                                <li>無料プランでお試し可能</li>
-                                <li>インライン編集が直感的</li>
-                                <li>モデル切り替えが簡単</li>
-                            </ul>
-                        </div>
-                        <div class="cons">
-                            <h4>⚠️ デメリット</h4>
-                            <ul>
-                                <li>クレジット制で使用量の見通しが難しい</li>
-                                <li>モデルにより消費速度が異なる</li>
-                                <li>ヘビーユーザーはUltra $200/月が必要</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Windsurf -->
-            <div class="tool-card" id="windsurf">
-                <div class="tool-card-header">
-                    <div class="tool-card-icon">🏄</div>
-                    <div class="tool-card-info">
-                        <h3>Windsurf</h3>
-                        <div class="tool-maker">Codeium — AI Flow型エディタ</div>
-                    </div>
-                </div>
-                <div class="tool-card-badges">
-                    <span class="badge badge-free">無料プランあり</span>
-                    <span class="badge badge-paid">Pro $15/月</span>
-                    <span class="badge badge-type">AIネイティブIDE</span>
-                </div>
-                <div class="tool-card-body">
-                    <p>「Cascade」エージェントが特徴的なAIネイティブIDE。開発者のフロー（没入感）を維持することに特化し、コードベース全体を文脈として理解します。</p>
-                    <h3>主な特徴</h3>
-                    <ul>
-                        <li><strong>Cascade</strong> — 先読みしてコーディング・修正・提案を行うエージェント</li>
-                        <li><strong>Supercomplete</strong> — 無制限の高速AIオートコンプリート</li>
-                        <li><strong>自然言語ターミナル</strong> — 日本語でCLIコマンドを生成</li>
-                        <li><strong>Memories機能</strong> — AIがプロジェクトの文脈を記憶</li>
-                        <li><strong>70言語・40エディタ対応</strong> — Codeium拡張としてJetBrains等でも利用可</li>
-                    </ul>
-                    <h3>価格</h3>
-                    <p><strong>Free</strong>: Cascade Baseモデル無制限 + 月25プレミアムクレジット。<strong>Professional $15/月</strong>:
-                        500クレジット。<strong>Ultimate $60/月</strong>: 無制限。業界でも<strong>最安クラス</strong>の価格設定。</p>
-                    <div class="tool-pros-cons">
-                        <div class="pros">
-                            <h4>✅ メリット</h4>
-                            <ul>
-                                <li>無料プランが業界最充実</li>
-                                <li>有料プランも最安クラス（$15/月〜）</li>
-                                <li>Cascade のフロー維持が快適</li>
-                                <li>プライバシー重視のポリシー</li>
-                            </ul>
-                        </div>
-                        <div class="cons">
-                            <h4>⚠️ デメリット</h4>
-                            <ul>
-                                <li>認知度がCursor等に比べてまだ低い</li>
-                                <li>プレミアムモデルの消費が早い場合がある</li>
-                                <li>独自モデルの性能は要検証</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- GitHub Copilot -->
-            <div class="tool-card" id="copilot">
-                <div class="tool-card-header">
-                    <div class="tool-card-icon">🐙</div>
-                    <div class="tool-card-info">
-                        <h3>GitHub Copilot</h3>
-                        <div class="tool-maker">GitHub / OpenAI — 世界最大シェアのAI補完ツール</div>
-                    </div>
-                </div>
-                <div class="tool-card-badges">
-                    <span class="badge badge-free">無料プランあり</span>
-                    <span class="badge badge-paid">Pro $10/月</span>
-                    <span class="badge badge-type">IDE拡張 + CLI</span>
-                </div>
-                <div class="tool-card-body">
-                    <p>最も広く使われているAIコーディングツール。VSCodeやJetBrains等の既存エディタの拡張機能として動作し、2026年にはエージェントモードやCLIも追加されました。</p>
-                    <h3>主な特徴</h3>
-                    <ul>
-                        <li><strong>Copilot Workspace</strong> — Issue説明→計画→実装→ビルドまで自律実行</li>
-                        <li><strong>Agent Skills</strong> — .github/skillsでドメイン固有の指示をカスタマイズ</li>
-                        <li><strong>Cross-Agent Memory</strong> — セッション間でコードベースの知識を記憶</li>
-                        <li><strong>Copilot CLI</strong> — ターミナルでPlan/Autopilotモード</li>
-                        <li><strong>30言語以上対応</strong> — VSCode、JetBrains、Visual Studio統合</li>
-                    </ul>
-                    <h3>価格</h3>
-                    <p><strong>Free</strong>: 月2,000補完 + 50プレミアムリクエスト。<strong>Pro $10/月</strong>: 無制限補完 +
-                        300リクエスト。<strong>Pro+ $39/月</strong>: 1,500リクエスト。<strong>既存エディタで使える手軽さ</strong>が最大の強み。</p>
-                    <div class="tool-pros-cons">
-                        <div class="pros">
-                            <h4>✅ メリット</h4>
-                            <ul>
-                                <li>Pro $10/月は業界最安の有料プラン</li>
-                                <li>既存のエディタにそのまま追加可能</li>
-                                <li>GitHub連携が最も自然</li>
-                                <li>30言語以上に対応</li>
-                            </ul>
-                        </div>
-                        <div class="cons">
-                            <h4>⚠️ デメリット</h4>
-                            <ul>
-                                <li>エージェント機能は後発で発展途上</li>
-                                <li>プラグインのため深い統合は限定的</li>
-                                <li>Premium requestの消費管理が必要</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- まとめ -->
-        <section class="lab-section">
-            <h2>🎯 目的別おすすめ</h2>
-            <div class="summary-box">
-                <h3>あなたに最適なツールは？</h3>
-                <div class="summary-grid">
-                    <div class="summary-item">
-                        <div class="summary-label">🆓 まず無料で始めたい</div>
-                        <div class="summary-value">Antigravity</div>
-                        <p>
-                            プレビュー中は完全無料で最高性能のエージェントが使える</p>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">💰 コスパ重視</div>
-                        <div class="summary-value">Windsurf ($15/月)</div>
-                        <p>
-                            業界最安クラスで充実した機能。無料プランも充実</p>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">⚡ VSCodeからの移行</div>
-                        <div class="summary-value">Cursor</div>
-                        <p>
-                            VSCodeの操作性そのままにAI機能を深く統合</p>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">🐙 気軽にAI補完を追加</div>
-                        <div class="summary-value">GitHub Copilot ($10/月)</div>
-                        <p>既存エディタに拡張として追加するだけ
-                        </p>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">🤖 CLI/ターミナル派</div>
-                        <div class="summary-value">Claude Code</div>
-                        <p>
-                            ターミナルからフルパワーのAIエージェントを操作</p>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">🏢 チーム・企業向け</div>
-                        <div class="summary-value">GitHub Copilot Enterprise</div>
-                        <p>組織管理・監査ログ・カスタムモデル対応
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 注意 -->
-        <section class="lab-section">
-            <h2>📝 調査にあたって</h2>
-            <p>本記事の情報は<strong>2026年3月時点</strong>のものです。AI開発ツールは急速に進化しており、価格改定や機能追加が頻繁に行われます。最新情報は各ツールの公式サイトをご確認ください。</p>
-            <p>当サイト「Gravity Portal」は <strong>Antigravity</strong> を使って開発されています。</p>
-        </section>
+            </a>
+        </div>
     </main>
 
-    <!-- フッター -->
     <footer class="lab-footer">
-        <p>© 2026 Gravity Portal — LAB</p>
-        <nav class="lab-footer-nav">
-            <a href="/">🏠 TOP</a>
-            <a href="/lab/">🔬 LAB</a>
-            <a href="/lab/ai-developers/">👤 AI開発者</a>
-            <a href="/blog/">📝 ブログ</a>
-        </nav>
+        <p>LAB — AI開発の最前線を探る</p>
+        <div class="lab-footer-nav">
+            <a href="/lab/">🔬 LABトップ</a>
+            <a href="/lab/ai-developers/">👤 開発者</a>
+            <a href="/lab/ai-trends/">📊 トレンド</a>
+            <a href="https://antigravity-portal.com/">🏠 TOP</a>
+        </div>
     </footer>
-
-    <!-- テーマトグルスクリプト -->
-    <script>
-            (function () {
-                var btn = document.getElementById('themeToggle');
-                function update() { var t = document.documentElement.getAttribute('data-theme'); btn.textContent = t === 'light' ? '🌙' : '☀️' }
-                update();
-                btn.addEventListener('click', function () {
-                    var cur = document.documentElement.getAttribute('data-theme');
-                    var next = cur === 'light' ? 'dark' : 'light';
-                    document.documentElement.setAttribute('data-theme', next);
-                    try { localStorage.setItem('gp-theme', next) } catch (e) { }
-                    update();
-                });
-            })()
-    </script>
 </body>
-
 </html>
