@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発ツール比較 2026 第2回 | LAB | Gravity Portal</title>
+    <meta name="description"
+        content="AI開発ツール比較の第2回。Antigravity、Claude Code、Cursor、Windsurf、GitHub Copilotの2026年3月最新アップデートを比較。前回からの変化点を徹底解説。">
+    <meta property="og:title" content="AI開発ツール比較 2026 第2回">
+    <meta property="og:description" content="5大AI開発ツールの2026年3月最新アップデートを比較。前回からの変化点を徹底解説。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-tools-v2/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-tools.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/og-lab-ai-tools.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        (function () { try { var t = localStorage.getItem('gp-theme'); if (t) document.documentElement.setAttribute('data-theme', t) } catch (e) { } })()
+    </script>
+</head>
+
+<body>
+    <!-- テーマトグル -->
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+
+    <!-- ヘッダー -->
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">🛠️ AI開発ツール比較 第2回</h1>
+    </header>
+
+    <main class="lab-content">
+        <!-- ヒーロー -->
+        <section class="lab-hero">
+            <div class="lab-hero-icon">🛠️</div>
+            <h1>AI開発ツール最新アップデート 2026年3月</h1>
+            <p>前回の比較から数週間、各ツールに大きな進化が。<br>第2回では最新のアップデートと変化点にフォーカスします。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月11日更新</span>
+                <span>🔧 5ツール + 新勢力</span>
+                <span>📝 <a href="/lab/ai-tools/" style="color:inherit;text-decoration:underline">第1回はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- 主要アップデートまとめ -->
+        <section class="lab-section">
+            <h2>🔥 前回からの主要変化</h2>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>ツール</th>
+                            <th>主なアップデート</th>
+                            <th>価格変更</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="tool-name">Antigravity</td>
+                            <td>Developer Plan追加、Google AI Pro/Ultra統合</td>
+                            <td>無料継続（有料プラン追加）</td>
+                        </tr>
+                        <tr>
+                            <td class="tool-name">Claude Code</td>
+                            <td>Code Review機能、Cowork（GUI版）、Sonnet/Opus 4.6リリース</td>
+                            <td>Max $100/月 追加</td>
+                        </tr>
+                        <tr>
+                            <td class="tool-name">Cursor</td>
+                            <td>マルチエージェント、JetBrains IDE対応、Mission Control</td>
+                            <td>Pro+ $60/月 新設</td>
+                        </tr>
+                        <tr>
+                            <td class="tool-name">Windsurf</td>
+                            <td>Cognitionが買収、Supercomplete、Code Integrity Layer</td>
+                            <td>変更なし</td>
+                        </tr>
+                        <tr>
+                            <td class="tool-name">GitHub Copilot</td>
+                            <td>CLI正式リリース、サードパーティエージェント、Pro+ $39/月</td>
+                            <td>Pro+ $39/月 新設</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 各ツール詳細 -->
+        <section class="lab-section">
+            <h2>🔍 各ツール最新アップデート詳細</h2>
+
+            <!-- Antigravity -->
+            <div class="tool-card" id="antigravity-v2">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🚀</div>
+                    <div class="tool-card-info">
+                        <h3>Antigravity</h3>
+                        <div class="tool-maker">Google DeepMind — 第2回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プレビュー継続</span>
+                    <span class="badge badge-type">Developer Plan追加</span>
+                    <span class="badge badge-hot">🔥 注目</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Developer Plan</strong> — Google AI Pro / Ultra サブスクリプションでレート制限を緩和。個人利用は引き続き無料</li>
+                        <li><strong>Gemini 3.1 Pro</strong> — メインモデルが安定版に。速度・精度が向上</li>
+                        <li><strong>設定画面リニューアル</strong> — モデル選択・ターミナル統合の新UIが追加</li>
+                        <li><strong>アーティファクト機能強化</strong> — ダウンロード対応、ブラウザ録画のWebP保存</li>
+                        <li><strong>クロスプラットフォーム安定化</strong> — Mac / Windows / Linux の全OSで品質向上</li>
+                    </ul>
+                    <h3>💰 価格体系（更新）</h3>
+                    <ul>
+                        <li><strong>Individual（無料）</strong>: 寛大なレート制限付きで全モデル利用可</li>
+                        <li><strong>Developer</strong>: Google AI Pro ($19.99/月) / Ultra ($49.99/月) で制限緩和</li>
+                        <li><strong>Team</strong>: Google Workspace AI Ultra for Business アドオン</li>
+                        <li><strong>Organization</strong>: Google Cloud 経由（近日公開）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Claude Code -->
+            <div class="tool-card" id="claude-code-v2">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🤖</div>
+                    <div class="tool-card-info">
+                        <h3>Claude Code</h3>
+                        <div class="tool-maker">Anthropic — 第2回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-paid">Pro $20/月</span>
+                    <span class="badge badge-type">Code Review 新機能</span>
+                    <span class="badge badge-hot">🔥 急成長</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Code Review（3月9日発表）</strong> — マルチエージェントAIがPRをスキャンし、ロジックエラーを検出・修正提案。レビューコメントの質が16%→54%に向上（社内テスト）</li>
+                        <li><strong>Claude Cowork（1月リリース）</strong> — 非コーダー向けGUI版。ビジネスプロフェッショナル向け「AIエンプロイヤー」</li>
+                        <li><strong>Claude Opus 4.6（2月5日）</strong> — 100万トークンコンテキスト、14.5時間のタスク完了ホライゾン</li>
+                        <li><strong>Claude Sonnet 4.6（2月17日）</strong> — Opusに近い性能でコスト効率が高い</li>
+                        <li><strong>Claude Code Security</strong> — オープンソースプロジェクトで数百の未検出脆弱性を発見</li>
+                        <li><strong>リモートコントロール</strong> — スマートフォンからQRコードで接続・操作可能に</li>
+                        <li><strong>新スラッシュコマンド</strong> — `/simplify`（コード簡素化）、`/batch`（バッチ操作）追加</li>
+                    </ul>
+                    <h3>💰 価格体系（更新）</h3>
+                    <ul>
+                        <li><strong>Pro $20/月</strong>: Sonnet/Opus利用可、週40-80時間のClaude Code利用</li>
+                        <li><strong>Max $100/月</strong>: Pro の5〜20倍のクォータ + 早期アクセス</li>
+                        <li><strong>Team $125/人/月</strong>（Premium seat、年間契約）</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Cursor -->
+            <div class="tool-card" id="cursor-v2">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">⚡</div>
+                    <div class="tool-card-info">
+                        <h3>Cursor</h3>
+                        <div class="tool-maker">Anysphere — 第2回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プランあり</span>
+                    <span class="badge badge-paid">Pro+ $60/月 新設</span>
+                    <span class="badge badge-type">マルチエージェント</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>マルチエージェントワークフロー</strong> — 並列コーディングタスクのオーケストレーション</li>
+                        <li><strong>Mission Control</strong> — 複数エージェントをグリッドビューで同時管理</li>
+                        <li><strong>JetBrains IDE対応（3月4日）</strong> — Agent Client Protocol (ACP) でJetBrains内でCursorエージェント動作</li>
+                        <li><strong>ビジュアルエディタ & デザインモード</strong> — ドラッグ&ドロップでUI調整</li>
+                        <li><strong>Bugbot</strong> — GitHub PRの自動AIコードレビュー（アドオン）</li>
+                        <li><strong>VSCodeからの独自進化</strong> — アップストリームVSCodeから大幅に乖離、独自アーキテクチャへ</li>
+                    </ul>
+                    <h3>💰 価格体系（更新）</h3>
+                    <ul>
+                        <li><strong>Hobby（無料）</strong>: 限定プレミアムリクエスト + 2週間Pro体験</li>
+                        <li><strong>Pro $20/月</strong>: 無制限Tab補完 + $20クレジット</li>
+                        <li><strong>Pro+ $60/月（新設）</strong>: 3倍のクレジットプール</li>
+                        <li><strong>Ultra $200/月</strong>: 20倍の使用量（~$4,000相当）</li>
+                        <li><strong>Teams $40/人/月</strong>: 共有チャット・ルール・SAML SSO</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Windsurf -->
+            <div class="tool-card" id="windsurf-v2">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🏄</div>
+                    <div class="tool-card-info">
+                        <h3>Windsurf</h3>
+                        <div class="tool-maker">Codeium → Cognition買収 — 第2回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プランあり</span>
+                    <span class="badge badge-paid">Pro $15/月</span>
+                    <span class="badge badge-type">⚠️ 買収による変化</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Cognitionが買収</strong> — OpenAIの$30億買収は不成立。代わりにCognition（Devin開発元）が買収、Googleも一部キースタッフを採用</li>
+                        <li><strong>Supercomplete</strong> — 次の行だけでなく「次の3ステップ」を予測する新しいオートコンプリート</li>
+                        <li><strong>Code Integrity Layer</strong> — AI生成コードの脆弱性を自動スキャン、セキュリティ基準の遵守を確保</li>
+                        <li><strong>新モデル追加</strong> — Gemini 3.1 Pro（2月19日）、Claude Sonnet 4.6（2月17日）、GLM-5、Minimax M2.5</li>
+                        <li><strong>Context API（ベータ）</strong> — Codeiumの推論エンジンを社内ツールに統合可能に</li>
+                    </ul>
+                    <h3>⚠️ 買収後の展望</h3>
+                    <p>CognitionがDevinの技術とWindsurfを統合する方向性が示唆されており、今後の大幅な変化が予想されます。Windsurf単体としてのロードマップは不透明になる可能性があります。</p>
+                </div>
+            </div>
+
+            <!-- GitHub Copilot -->
+            <div class="tool-card" id="copilot-v2">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🐙</div>
+                    <div class="tool-card-info">
+                        <h3>GitHub Copilot</h3>
+                        <div class="tool-maker">GitHub / OpenAI — 第2回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プランあり</span>
+                    <span class="badge badge-paid">Pro+ $39/月 新設</span>
+                    <span class="badge badge-type">CLI 正式リリース</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Copilot CLI 正式リリース</strong> — ターミナルネイティブのコーディングエージェント。Plan mode（計画）+ Autopilot mode（自律実行）搭載</li>
+                        <li><strong>サードパーティエージェント対応</strong> — Claude by Anthropic、OpenAI Codex をCopilotプラットフォーム内で利用可。共通のガバナンス・コンテキスト・メモリを共有</li>
+                        <li><strong>カスタムエージェント & MCP</strong> — Model Context Protocolで外部データベース・ドキュメント・デザインシステムに接続</li>
+                        <li><strong>AGENTS.md / CLAUDE.md サポート</strong> — エージェント動作の定義ファイル、初期指示の自動生成</li>
+                        <li><strong>モデル選択肢拡大</strong> — Claude Opus 4.6、GPT-5.3-Codex、Gemini 3 Pro、拡張推論パネル追加</li>
+                        <li><strong>Visual Studio 2026 Agent Mode</strong> — ファイル作成・プロジェクトビルド・テスト実行まで自律操作</li>
+                    </ul>
+                    <h3>💰 価格体系（更新）</h3>
+                    <ul>
+                        <li><strong>Free</strong>: 月2,000補完 + 50プレミアムリクエスト</li>
+                        <li><strong>Pro $10/月</strong>: 無制限補完 + 300リクエスト</li>
+                        <li><strong>Pro+ $39/月（新設）</strong>: 1,500リクエスト + 優先アクセス</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 第2回 おすすめ更新 -->
+        <section class="lab-section">
+            <h2>🎯 第2回時点のおすすめ（更新）</h2>
+            <div class="summary-box">
+                <h3>前回からの変化ポイント</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">🆓 無料で最高性能</div>
+                        <div class="summary-value">Antigravity（変わらず）</div>
+                        <p>Developer Planが追加されたが、無料でも十分に強力</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">⚠️ 注意が必要</div>
+                        <div class="summary-value">Windsurf</div>
+                        <p>Cognition買収で将来が不透明。現時点では使えるが要注視</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">📈 最も進化</div>
+                        <div class="summary-value">Claude Code</div>
+                        <p>Code Review、Cowork、新モデル2つと攻勢。Max $100プランも追加</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🐙 安定感No.1</div>
+                        <div class="summary-value">GitHub Copilot</div>
+                        <p>CLI正式版+サードパーティ統合で死角が減少。Pro+ $39で中間プランも</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 調査にあたって</h2>
+            <p>本記事の情報は<strong>2026年3月11日時点</strong>のものです。前回の調査は<a href="/lab/ai-tools/"
+                    style="color:var(--accent);text-decoration:underline">AI開発ツール比較（第1回）</a>をご覧ください。</p>
+            <p>当サイト「Gravity Portal」は <strong>Antigravity</strong> を使って開発されています。</p>
+        </section>
+    </main>
+
+    <!-- フッター -->
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-tools/">🛠️ 第1回</a>
+            <a href="/lab/ai-developers-v2/">👤 AI開発者 第2回</a>
+        </nav>
+    </footer>
+
+    <!-- テーマトグルスクリプト -->
+    <script>
+            (function () {
+                var btn = document.getElementById('themeToggle');
+                function update() { var t = document.documentElement.getAttribute('data-theme'); btn.textContent = t === 'light' ? '🌙' : '☀️' }
+                update();
+                btn.addEventListener('click', function () {
+                    var cur = document.documentElement.getAttribute('data-theme');
+                    var next = cur === 'light' ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', next);
+                    try { localStorage.setItem('gp-theme', next) } catch (e) { }
+                    update();
+                });
+            })()
+    </script>
+</body>
+
+</html>

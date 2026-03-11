@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発者ピックアップ 第2回 | LAB | Gravity Portal</title>
+    <meta name="description" content="AI開発者ピックアップ第2回。Roo Code、OpenHands、Cline など新たな注目OSSプロジェクトと、前回紹介プロジェクトの進展を紹介。">
+    <meta property="og:title" content="AI開発者ピックアップ 第2回">
+    <meta property="og:description" content="新たな注目OSSプロジェクトと前回からの進展を紹介。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-developers-v2/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-developers.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/og-lab-ai-developers.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../styles.css">
+    <script>
+        (function () { try { var t = localStorage.getItem('gp-theme'); if (t) document.documentElement.setAttribute('data-theme', t) } catch (e) { } })()
+    </script>
+</head>
+
+<body>
+    <!-- テーマトグル -->
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+
+    <!-- ヘッダー -->
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">👤 AI開発者ピックアップ 第2回</h1>
+    </header>
+
+    <main class="lab-content">
+        <!-- ヒーロー -->
+        <section class="lab-hero">
+            <div class="lab-hero-icon">👤</div>
+            <h1>AI開発の新星たち 2026年3月</h1>
+            <p>前回から急成長したプロジェクトと、<br>新たに注目を集めるオープンソースAIツールを紹介します。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月11日更新</span>
+                <span>🔧 新規3プロジェクト + 前回更新</span>
+                <span>📝 <a href="/lab/ai-developers/" style="color:inherit;text-decoration:underline">第1回はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- ── 新規プロジェクト ── -->
+        <section class="lab-section">
+            <h2>🆕 新たな注目プロジェクト</h2>
+            <p>前回には登場していなかった、2026年に入って急成長しているAI開発ツール。</p>
+
+            <!-- Roo Code -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🦘</div>
+                    <div class="dev-info">
+                        <h3>Roo Code</h3>
+                        <div class="dev-role">AI ソフトウェアエンジニアリングチーム</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <p>Clineのフォークとして誕生し、「AIソフトウェアエンジニアリングチーム」として急成長。
+                        IDE内でインタラクティブに動作するだけでなく、クラウド上で自律的にタスクを実行。
+                        ロール別モード（Architect / Code / Ask）でAIの「幻覚」を抑制し、精度を向上させる独自のアプローチを採用。</p>
+                    <ul>
+                        <li><strong>ロール別モード</strong> — Architect（設計）、Code（実装）、Ask（質問）で目的に特化</li>
+                        <li>OpenAI、Anthropic、ローカルLLM等、あらゆるモデルに対応</li>
+                        <li>VS Code拡張として動作、マルチファイル編集・テスト実行・ブラウザ操作可能</li>
+                    </ul>
+                    <div class="dev-links">
+                        <a href="https://github.com/RooVetGit/Roo-Code" target="_blank" rel="noopener noreferrer"
+                            class="dev-link">🐙 GitHub</a>
+                        <a href="https://roocode.com/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐
+                            公式サイト</a>
+                        <span class="badge badge-free">オープンソース</span>
+                        <span class="badge badge-hot">🔥 急成長</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OpenHands -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🤲</div>
+                    <div class="dev-info">
+                        <h3>OpenHands</h3>
+                        <div class="dev-role">クラウドコーディングエージェントプラットフォーム</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <p>旧名OpenDevin。クラウド上で動作するAIコーディングエージェントのためのオープンソースプラットフォーム。
+                        サンドボックス環境内でコード変更・コマンド実行・Web閲覧・API操作を安全に実行。
+                        GitHub、GitLab、Slack等の既存ツールとシームレスに統合可能。</p>
+                    <ul>
+                        <li>仮想開発者としてソフトウェア開発ライフサイクル全体を自動化</li>
+                        <li>SDK / CLI / Local GUI / Cloud デプロイ対応</li>
+                        <li>モデル非依存 — 任意のLLMで動作するスケーラブルなエージェント</li>
+                    </ul>
+                    <div class="dev-links">
+                        <a href="https://github.com/All-Hands-AI/OpenHands" target="_blank" rel="noopener noreferrer"
+                            class="dev-link">🐙 GitHub</a>
+                        <a href="https://openhands.dev/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐
+                            公式サイト</a>
+                        <span class="badge badge-free">オープンソース</span>
+                        <span class="badge badge-type">Enterprise版あり</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cline -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🔗</div>
+                    <div class="dev-info">
+                        <h3>Cline</h3>
+                        <div class="dev-role">自律型 VS Code エージェント</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <p>VS Code拡張として動作する自律型コーディングエージェント。
+                        「Plan and Act」ワークフローでタスクを計画してから実行するアプローチが特徴。
+                        Model Context Protocol (MCP) との深い統合により、エンタープライズチームでの採用が増加。</p>
+                    <ul>
+                        <li><strong>Plan and Act</strong> — 計画フェーズと実行フェーズを明確に分離</li>
+                        <li>MCP統合でエンタープライズ向けのデータソース接続に強い</li>
+                        <li>Roo Codeの元になったプロジェクト（Roo Codeとは異なる方向に進化中）</li>
+                    </ul>
+                    <div class="dev-links">
+                        <a href="https://github.com/cline/cline" target="_blank" rel="noopener noreferrer"
+                            class="dev-link">🐙 GitHub</a>
+                        <span class="badge badge-free">オープンソース</span>
+                        <span class="badge badge-type">MCP統合</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── 前回プロジェクトの進展 ── -->
+        <section class="lab-section">
+            <h2>📈 前回プロジェクトの進展</h2>
+            <p><a href="/lab/ai-developers/" style="color:var(--accent);text-decoration:underline">第1回</a>で紹介したプロジェクトの最新状況。</p>
+
+            <div class="tool-card">
+                <div class="tool-card-body">
+                    <h3>💻 OpenCode（旧名で掲載）</h3>
+                    <p>月間500万ユーザーから引き続き成長中。75以上のモデル対応とベンダーロックインなしの方針が、
+                        プライバシー重視の開発者コミュニティで支持を拡大。</p>
+
+                    <h3>🔧 Aider</h3>
+                    <p>成熟したOSSとして安定運用が続く。Git自動コミット機能が評価され、
+                        個人開発者のメインツールとして定着。ローカルLLM対応も継続強化中。</p>
+
+                    <h3>🔌 Continue.dev</h3>
+                    <p>ローカルAI Copilotエンジンとして、Ollama連携でのプライバシー完全保護環境を推進。
+                        VSCode / JetBrains対応の幅広いIDE統合が強み。</p>
+
+                    <h3>🎨 Stable Diffusion / FLUX.2</h3>
+                    <p>画像生成分野は引き続き活発。Stable Diffusionはカスタマイズ性で、
+                        FLUX.2はプロダクション品質での生成能力を武器に差別化。</p>
+
+                    <h3>🎵 ACE-Step</h3>
+                    <p>v1.5でVRAM 4GB未満対応を実現し、軽量環境でのAI音楽生成のハードルを大幅に引き下げ。
+                        4分の楽曲を20秒で生成する速度は競合を大きくリード。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 この記事について</h2>
+            <p>本記事の情報は<strong>2026年3月11日時点</strong>のものです。前回の調査は<a href="/lab/ai-developers/"
+                    style="color:var(--accent);text-decoration:underline">AI開発者ピックアップ（第1回）</a>をご覧ください。</p>
+            <p>当サイトも<strong>AIペアプログラミング</strong>を活用した個人開発プロジェクトです。</p>
+        </section>
+    </main>
+
+    <!-- フッター -->
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-developers/">👤 第1回</a>
+            <a href="/lab/ai-tools-v2/">🛠️ ツール比較 第2回</a>
+        </nav>
+    </footer>
+
+    <!-- テーマトグルスクリプト -->
+    <script>
+            (function () {
+                var btn = document.getElementById('themeToggle');
+                function update() { var t = document.documentElement.getAttribute('data-theme'); btn.textContent = t === 'light' ? '🌙' : '☀️' }
+                update();
+                btn.addEventListener('click', function () {
+                    var cur = document.documentElement.getAttribute('data-theme');
+                    var next = cur === 'light' ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', next);
+                    try { localStorage.setItem('gp-theme', next) } catch (e) { }
+                    update();
+                });
+            })()
+    </script>
+</body>
+
+</html>
