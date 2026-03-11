@@ -1,13 +1,9 @@
-name: Bluesky 自動投稿
+name: Bluesky 自動投稿（Note記事専用）
 
 on:
   # Note記事の自動検出用に毎日1回チェック（JST 21:00）
   schedule:
     - cron: '0 12 * * *'
-  push:
-    branches: [main]
-    paths:
-      - 'src/blog-data.json'
   workflow_dispatch:  # 手動実行にも対応
 
 permissions:
@@ -25,13 +21,13 @@ jobs:
         with:
           node-version: '20'
 
-      - name: GitHub Pagesデプロイ完了を待機（2分）
+      - name: GitHub Pagesデプロイ完了を待機（15分）
         run: |
           echo "⏳ GitHub Pagesデプロイ完了を待機中（900秒 = 15分）..."
           echo "   OGPカードが正しく生成されるようにデプロイ完了後に投稿します"
           sleep 900
 
-      - name: ブログ + Note 新着を Bluesky に投稿
+      - name: Note 新着を Bluesky に投稿
         env:
           BLUESKY_IDENTIFIER: ${{ secrets.BLUESKY_IDENTIFIER }}
           BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}

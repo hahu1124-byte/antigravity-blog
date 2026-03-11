@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 /**
- * Bluesky 自動投稿スクリプト
- * ブログ記事 + Note記事の新着を検出し、Blueskyに自動投稿する
+ * Bluesky 自動投稿スクリプト（Note記事専用）
+ * Note.com RSSフィードから新着記事を検出し、Blueskyに自動投稿する
  *
- * 対象ソース:
- *   1. ブログ記事 — src/blog-data.json から取得
- *   2. Note記事 — Note.com RSSフィードから取得
+ * ※ ブログ記事はXと同様に手動投稿に変更済み（2026-03-11）
  *
  * 投稿済み管理:
  *   posted-items.json に投稿済みURLを記録。
@@ -29,9 +27,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
 // 設定
-const BLOG_DATA_PATH = join(ROOT, 'src', 'blog-data.json');
 const POSTED_ITEMS_PATH = join(ROOT, 'posted-items.json');
-const BLOG_URL = 'https://www.antigravity-portal.com/blog';
 const BLUESKY_API = 'bsky.social';
 
 // 環境変数チェック
@@ -92,22 +88,6 @@ function fetchUrl(url) {
     });
 }
 
-// --- ソース1: ブログ記事の新着を取得 ---
-function getNewBlogPosts(postedUrls) {
-    if (!existsSync(BLOG_DATA_PATH)) {
-        console.log('📝 blog-data.json が見つかりません。ブログチェックをスキップ。');
-        return [];
-    }
-    const posts = JSON.parse(readFileSync(BLOG_DATA_PATH, 'utf-8'));
-    return posts
-        .map(p => ({
-            title: p.title,
-            url: `${BLOG_URL}/${p.slug}/`,
-            tags: (p.tags || []).slice(0, 3),
-            source: 'blog',
-        }))
-        .filter(p => !postedUrls.includes(p.url));
-}
 
 // --- ソース2: Note記事の新着をRSSから取得 ---
 async function getNewNotePosts(postedUrls) {
@@ -259,18 +239,15 @@ async function main() {
     const postedItems = loadPostedItems();
     const postedUrls = postedItems.map(i => i.url);
 
-    // 新着記事を両ソースから取得
-    const newBlogPosts = getNewBlogPosts(postedUrls);
-    const newNotePosts = await getNewNotePosts(postedUrls);
-    const allNewPosts = [...newBlogPosts, ...newNotePosts];
+    // Note記事の新着を取得（ブログ記事は手動投稿に移行済み）
+    const allNewPosts = await getNewNotePosts(postedUrls);
 
     if (allNewPosts.length === 0) {
-        console.log('📝 新しい記事はありません。スキップします。');
+        console.log('📝 新しいNote記事はありません。スキップします。');
         return;
     }
 
-    console.log(`🦋 ${allNewPosts.length} 件の新着を Bluesky に投稿します...`);
-    console.log(`   ブログ: ${newBlogPosts.length} 件 / Note: ${newNotePosts.length} 件`);
+    console.log(`🦋 ${allNewPosts.length} 件のNote新着を Bluesky に投稿します...`);
 
     // Blueskyログイン
     const session = await createSession();
