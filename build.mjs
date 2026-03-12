@@ -159,10 +159,23 @@ function escapeHtml(text) {
 
 const BUILD_DATE = new Date();
 
+/** 日付/日時文字列をフォーマット（時間があれば表示） */
+function formatDateTime(dateStr) {
+    if (!dateStr) return '';
+    // "YYYY-MM-DD HH:MM" 形式
+    if (dateStr.length > 10) {
+        const [datePart, timePart] = dateStr.split(' ');
+        return `${datePart} ${timePart}`;
+    }
+    // "YYYY-MM-DD" 形式
+    return dateStr;
+}
+
 /** dateModified > date の場合、更新バッジHTMLを返す */
 function getDateModifiedBadge(post) {
     if (!post.dateModified || post.dateModified === post.date) return '';
-    const mod = new Date(post.dateModified + 'T00:00:00+09:00');
+    const modStr = post.dateModified.length > 10 ? post.dateModified.slice(0, 10) : post.dateModified;
+    const mod = new Date(modStr + 'T00:00:00+09:00');
     const diffMs = BUILD_DATE - mod;
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     let label;
@@ -177,7 +190,7 @@ function getDateModifiedBadge(post) {
 /** 記事詳細ヘッダー用: 最終更新日テキスト */
 function getDateModifiedText(post) {
     if (!post.dateModified || post.dateModified === post.date) return '';
-    return `<time class="date-modified">最終更新: ${post.dateModified}</time>`;
+    return `<time class="date-modified">最終更新: ${formatDateTime(post.dateModified)}</time>`;
 }
 
 /** タグ収集ユーティリティ */
@@ -422,12 +435,12 @@ function buildArticleListHtml(postList, title, description, cssRelPath, baseUrl,
     const tagEntries = collectTags(posts);  // 全記事からタグ収集（全体カウント表示用）
 
     const cards = postList.map((post, i) => `
-        <a href="${activeTag ? '../' : ''}${activeTag ? `../${post.slug}/` : `${post.slug}/`}" class="article-card" data-tags="${post.tags.map(t => escapeHtml(t)).join(',')}" data-index="${i}">
+        <a href="${activeTag ? `../../${post.slug}/` : `${post.slug}/`}" class="article-card" data-tags="${post.tags.map(t => escapeHtml(t)).join(',')}" data-index="${i}">
             <div class="card-header">
-                <time class="date">${post.date}</time>
+                <time class="date">${formatDateTime(post.date)}</time>
                 ${getDateModifiedBadge(post)}
                 <div class="tags">
-                    ${post.tags.map(tag => `<a href="${activeTag ? './' : 'tag/'}${encodeURIComponent(tag)}/" class="tag" onclick="event.stopPropagation()">${escapeHtml(tag)}</a>`).join('')}
+                    ${post.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
                 </div>
             </div>
             <h2 class="card-title">${escapeHtml(post.title)}</h2>
@@ -603,7 +616,7 @@ function buildArticlePages() {
         <article class="article">
             <header class="article-header">
                 <div class="meta">
-                    <time class="date">${post.date}</time>
+                    <time class="date">${formatDateTime(post.date)}</time>
                     ${getDateModifiedText(post)}
                     <div class="tags">
                         ${post.tags.map(tag => `<a href="${toRoot}tag/${encodeURIComponent(tag)}/" class="tag">${escapeHtml(tag)}</a>`).join('')}
