@@ -453,7 +453,7 @@ function buildArticleListHtml(postList, title, description, cssRelPath, baseUrl,
         return `<a href="${href}" class="tag${isActive ? ' tag-active' : ''}">${escapeHtml(tag)} (${count})</a>`;
     }).join('\n            ');
 
-    const allHref = activeTag ? '../' : './';
+    const allHref = activeTag ? '../../' : './';
     const isAll = !activeTag;
 
     return `${htmlHead(title, description, cssRelPath, {
@@ -674,7 +674,7 @@ function buildTagPages() {
         <nav class="breadcrumb">
             <a href="https://antigravity-portal.com/">トップ</a>
             <span class="separator">/</span>
-            <a href="../">ブログ</a>
+            <a href="../../">ブログ</a>
             <span class="separator">/</span>
             <span class="current">${escapeHtml(tag)}</span>
         </nav>`;
@@ -683,7 +683,7 @@ function buildTagPages() {
             tagPosts,
             `${tag} の記事一覧`,
             `「${tag}」タグが付いた記事 ${count}件`,
-            '../styles.css',
+            '../../styles.css',
             `${SITE_URL}/blog/tag/${encodeURIComponent(tag)}/`,
             'website',
             breadcrumbHtml,
