@@ -1,0 +1,71 @@
+<p><img src="/blog/images/ai_lab_update_v3.png" alt="AI開発ツール最新動向 — LAB第3回レポート"></p>
+
+<h2>はじめに — 昨日の記事がもう「古い」</h2>
+<p>LAB第2回を公開したのは<strong>昨日（3月11日）</strong>です。たった24時間後、もうこれだけのことが起きました。</p>
+<p>GPT-5.4がPCを直接操作し始め、CursorのAIは24時間休まずコードを書き、Claude Codeは障害を乗り越えてHTTP Hooksを投入。そしてAI生成コードの<strong>45%に脆弱性がある</strong>ことが数値化されました。</p>
+<p>「光」だけでなく<strong>「影」</strong>にも正面から向き合った第3回をお届けします。</p>
+
+<hr>
+
+<h2>📊 衝撃の数字 — 73%使うが、29%しか信頼しない</h2>
+<p>今回のリサーチで最も衝撃的だったのが、<strong>業界全体の矛盾</strong>を示す数字です。</p>
+<ul>
+    <li><strong>73%</strong>のエンジニアリングチームがAIコーディングツールを毎日使用</li>
+    <li><strong>29%</strong>しかAI生成コードを信頼していない</li>
+    <li><strong>66%</strong>が「ほぼ正解だが微妙に違う」と感じている</li>
+    <li><strong>45%</strong>のAI生成コードに脆弱性の可能性（Veracode 2025調査）</li>
+    <li><strong>69%</strong>の頻繁利用者でデプロイ問題が増加</li>
+</ul>
+<p>「使わないと遅れる、使うと壊れる」——この矛盾こそが2026年3月の現実です。</p>
+
+<h2>🔥 GPT-5.4 — AIがPCを操作する時代</h2>
+<p>OpenAIが3月5日にリリースした<strong>GPT-5.4</strong>は、ネイティブPC操作に対応した初の汎用モデルです。マウスクリック、キーボード入力、スクリーンショット認識をPlaywrightと連携して自律実行。100万トークンコンテキストで大規模コードベース全体を一度に把握できます。</p>
+<p>GitHub Copilotに即日統合され、Jiraチケットから直接PRを作成するワークフローが可能になりました。ただし「間違ったボタンをクリック」する事例も報告されており、まだ完全ではありません。</p>
+
+<h2>⚡ Cursor Automations — 24時間眠らないAI</h2>
+<p>Cursorが投入した<strong>Automations</strong>は、「AIエージェントが常時オンで自律稼働する」というパラダイムシフト。Slack、GitHub PR、PagerDutyアラートなどのイベントトリガーで自動起動し、セキュリティレビューやインシデント対応を人間の操作なしで実行します。</p>
+<p>ただし注意点も。<strong>「常時オン」は「常時課金」</strong>の意味であり、Cursor Pro ($20/月) でも実質$60-80/月に達するユーザーが続出。$200のUltraプランですらレート制限にかかるとの報告もあります。</p>
+
+<h2>😤 開発者の本音 — 各ツールの不満と課題</h2>
+<p>今回は<strong>X（Twitter）、Reddit、開発者フォーラム</strong>から積極的にユーザーの声を収集しました。主な不満をまとめます：</p>
+<ul>
+    <li><strong>Antigravity</strong> — Pro版に突然「週間制限」が導入。5時間リフレッシュ→週間キャップに変更され、数日間ロックアウトされるユーザーが続出。「Pro版なのにFree版と変わらない」との声</li>
+    <li><strong>Claude Code</strong> — 3月に障害連発（3/2, 3/3, 3/11）。「most loved 46%」の支持を得ながらも信頼性リスクが急浮上。Code Reviewは1PRあたり$15-25と高額</li>
+    <li><strong>Cursor</strong> — クレジット制への移行で「community backlash」が継続中。CVE-2025-54135/54136でセキュリティ脆弱性も発覚</li>
+    <li><strong>GitHub Copilot</strong> — 市場シェア42%なのに「most loved」はわずか9%。「使われているが、好かれていない」の典型。Premium Request超過課金に混乱</li>
+    <li><strong>Windsurf</strong> — Cognition買収後、将来の方向性が不透明。ユーザーの離脱が増加中</li>
+</ul>
+
+<h2>👤 OSSコーディングエージェントの進化</h2>
+<p>オープンソース勢も急成長中です：</p>
+<ul>
+    <li><strong>OpenHands</strong> ⭐68,500 — SWE-Bench 50%突破。GitHub issue自動修正の最高峰</li>
+    <li><strong>Cline</strong> ⭐58,600 — BYOKモデルで透明な料金。Plan and Actの安全設計が支持</li>
+    <li><strong>Roo Code</strong> ⭐22,500 — 5モード分離（Architect/Code/Ask/Debug/Orchestrator）で急成長</li>
+</ul>
+<p>ただしOSSにも課題が。APIキー管理の煩雑さ、セットアップ障壁の高さ、BYOKゆえの予想外のAPI費用などが指摘されています。</p>
+
+<h2>🛡️ Vibe Codingの影 — 実際に起きた事件</h2>
+<p>「AIに任せてコードを書く」<strong>Vibe Coding</strong>の裏側で、深刻な事件が発生しています：</p>
+<ul>
+    <li><strong>MoltbookソーシャルネットワークでAPIキー150万件流出</strong> — AI生成コードがAPIキーをフロントエンドにハードコード</li>
+    <li><strong>Lovableプラットフォームでユーザーデータ漏洩</strong> — AI生成の認証コードに脆弱性</li>
+    <li><strong>Java生成コードの70%以上がセキュリティ失格</strong>（Veracode調査）</li>
+    <li><strong>ロジック・正確性エラーが人間の1.75倍</strong>（CodeRabbit分析）</li>
+</ul>
+<p>対策として「認証・決済・アクセス制御はVibe Codingで書かない」ことが業界の共通認識になりつつあります。</p>
+
+<hr>
+
+<h2>🔗 LAB第3回 各ページへのリンク</h2>
+<p>それぞれの詳細は以下のページでご覧いただけます：</p>
+<ul>
+    <li>🛠️ <a href="/lab/ai-tools/v3/">AI開発ツール比較 第3回</a> — 5大ツールの光と影、ユーザーの不満を徹底取材</li>
+    <li>👤 <a href="/lab/ai-developers/v3/">AI開発者ピックアップ 第3回</a> — OSSランキング、Cline vs Roo Code比較</li>
+    <li>📊 <a href="/lab/ai-trends/v3/">AI開発トレンド 第3回</a> — GPT-5.4、Automations、Vibe Codingの影</li>
+</ul>
+
+<h2>まとめ</h2>
+<p>第2回からたった1日。それなのに、GPT-5.4はPCを操作し始め、Cursorは24時間自律稼働AIを投入し、AI生成コードの45%に脆弱性があると数値化されました。</p>
+<p>「73%が使うのに29%しか信頼しない」——この矛盾の中で、私たち開発者はAIと共に進化し続けるしかありません。</p>
+<p>LABセクションでは今後も定期的に調査・更新を行っていきます。次回もお楽しみに。</p>

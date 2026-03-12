@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発トレンド 2026年3月 第3回 | LAB | Gravity Portal</title>
+    <meta name="description"
+        content="AI開発トレンド第3回。GPT-5.4ネイティブPC操作、Automationsの時代、Vibe Codingの光と影、SLMs台頭、統合プラットフォーム競争、開発者の役割変化を徹底解説。">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-trends/v3/">
+    <link rel="icon" href="/favicon.ico">
+    <meta property="og:title" content="AI開発トレンド 2026年3月 第3回 | Gravity Portal">
+    <meta property="og:description"
+        content="GPT-5.4ネイティブPC操作、Automationsの時代、Vibe Codingの光と影。2026年3月のAI開発トレンド第3回。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-trends/v3/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-trends.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/og-lab-ai-trends.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>
+        (function () { try { var t = localStorage.getItem('gp-theme'); if (t) document.documentElement.setAttribute('data-theme', t) } catch (e) { } })()
+    </script>
+</head>
+
+<body>
+    <!-- テーマトグル -->
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+
+    <!-- ヘッダー -->
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">📊 AI開発トレンド 第3回</h1>
+    </header>
+
+    <main class="lab-content">
+        <!-- ヒーロー -->
+        <section class="lab-hero">
+            <div class="lab-hero-icon">📊</div>
+            <h1>AI開発トレンド 2026年3月 — 第3回</h1>
+            <p><a href="/lab/ai-trends/v2/" style="color:inherit;text-decoration:underline">第2回（昨日）</a>で「Vibe Coding成熟」「90%がAI生成」と書いたばかり。<br>
+                <strong>たった24時間後</strong>に、GPT-5.4がPCを操作し始め、Cursor Automationsが常時オンAIを実現し、<br>
+                「そのAI生成コードの45%に脆弱性がある」という現実が突きつけられた。<br><br>
+                第3回では光だけでなく<strong>影</strong>にも踏み込み、開発者が今向き合うべき7つのトレンドを追います。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月12日更新</span>
+                <span>📰 7トピック</span>
+                <span>📝 <a href="/lab/ai-trends/v2/"
+                        style="color:inherit;text-decoration:underline">第2回（3/11）はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- 前回からの変化 -->
+        <section class="lab-section">
+            <h2>🔄 前回からの変化まとめ — 衝撃のデータ</h2>
+            <div class="market-overview">
+                <div class="market-stats">
+                    <div class="market-stat">
+                        <div class="market-stat-value">73%</div>
+                        <div class="market-stat-label">毎日AIコーディングツールを使用</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">29%</div>
+                        <div class="market-stat-label">AI生成コードを信頼</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">45%</div>
+                        <div class="market-stat-label">AI生成コードに脆弱性</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">69%</div>
+                        <div class="market-stat-label">頻繁利用者のデプロイ問題率</div>
+                    </div>
+                </div>
+                <p>「毎日使うが信頼しない」「速いが壊れやすい」—— この矛盾の中で、開発者は生き抜かなければならない。</p>
+            </div>
+        </section>
+
+        <!-- ===== トレンド ===== -->
+        <section class="lab-section">
+            <h2>🔥 注目トレンド TOP 7</h2>
+
+            <!-- トレンド 1: GPT-5.4とネイティブPC操作 -->
+            <div class="trend-card">
+                <div class="trend-card-header">
+                    <div class="trend-number">01</div>
+                    <div class="trend-info">
+                        <h3>GPT-5.4 — AIがPCを操作する時代</h3>
+                        <p class="trend-subtitle">ネイティブコンピューター操作がフロンティアモデルに標準搭載</p>
+                    </div>
+                    <span class="badge badge-hot">🔥 最重要</span>
+                </div>
+                <div class="trend-card-body">
+                    <p>3月5日リリースのGPT-5.4は、OpenAI初の<strong>「ネイティブPC操作」</strong>対応汎用モデル。
+                        マウスクリック、キーボード入力、スクリーンショット認識をPlaywright等のライブラリと連携して自律実行できます。</p>
+                    <ul>
+                        <li><strong>100万トークンコンテキスト</strong> — 大規模コードベース全体を一度に理解。プロジェクト横断的な変更が可能に</li>
+                        <li><strong>ハルシネーション33%削減</strong> — 先代比で虚偽情報が33%減少。「最も正確なモデル」とOpenAIが宣言</li>
+                        <li><strong>GPT-5.3-Codex統合</strong> — 業界トップクラスのコーディング能力を継承。エージェントタスクで約25%高速化</li>
+                        <li><strong>マルチアプリワークフロー</strong> — IDE→ブラウザ→ターミナル→外部ツールを跨いだ操作を1つのモデルで完結。Jiraチケットから直接PRを作成する企業ワークフローが現実に</li>
+                        <li><strong>GitHub Copilot即時統合</strong> — リリース当日からCopilotに組み込み。全有料プランで利用可能</li>
+                    </ul>
+                    <h4>⚠️ しかし現場では…</h4>
+                    <ul>
+                        <li>PC操作の精度はまだ完全ではなく、「間違ったボタンをクリック」「意図しないウィンドウを閉じる」事例が報告</li>
+                        <li>セキュリティリスク — AIにPC操作権限を渡すことへの懸念。Root権限やadmin権限での実行は厳禁との専門家警告</li>
+                        <li>コスト問題 — 100万トークンの処理は高額。大規模利用時のAPI費用が課題に</li>
+                        <li>「手段が目的化」の危険 — PC操作自体は手段であり、適切なAPI呼び出しで済む場合が多い</li>
+                    </ul>
+                    <div class="trend-impact">
+                        <span class="trend-impact-label">インパクト度</span>
+                        <div class="trend-impact-bar">
+                            <div class="trend-impact-fill trend-impact-100"></div>
+                        </div>
+                        <span class="trend-impact-score">★★★★★</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- トレンド 2: Automationsの時代 -->
+            <div class="trend-card">
+                <div class="trend-card-header">
+                    <div class="trend-number">02</div>
+                    <div class="trend-info">
+                        <h3>Automationsの時代 — 常時オンAIエージェント</h3>
+                        <p class="trend-subtitle">「呼んだ時だけ動く」から「24時間自律的に動く」へ</p>
+                    </div>
+                    <span class="badge badge-hot">🔥 パラダイムシフト</span>
+                </div>
+                <div class="trend-card-body">
+                    <p>CursorのAutomations、GitHub Copilot Agent Hooks、Claude Code Co-Workが示す新パラダイム。
+                        <strong>AIエージェントがイベント駆動で常時稼働</strong>し、人間のプロンプトなしに自律的にタスクを実行します。</p>
+                    <ul>
+                        <li><strong>イベントトリガー</strong> — Slack、Linear、GitHub PR、PagerDutyアラート、カスタムWebhookで自動起動</li>
+                        <li><strong>ユースケース（具体例）</strong>
+                            <ul>
+                                <li>GitHub PRごとの自動セキュリティレビュー</li>
+                                <li>インシデント発生→原因特定→修正提案の自動化</li>
+                                <li>毎週月曜朝のコードベース品質ダイジェスト自動生成</li>
+                                <li>新規issue→対応PR自動ドラフト→レビュー待ち</li>
+                            </ul>
+                        </li>
+                        <li><strong>クラウドサンドボックス</strong> — ローカル環境を汚さず安全に実行。Cursorはクラウドエージェント、OpenHandsはDocker隔離</li>
+                        <li><strong>学習能力</strong> — 繰り返しタスクから学習し、時間とともに精度が向上</li>
+                    </ul>
+                    <h4>⚠️ しかし現場では…</h4>
+                    <ul>
+                        <li>コスト管理が困難 — 「常時オン」は常時課金の意味。Cursor Automationsでクレジットが急消費される報告</li>
+                        <li>暴走リスク — Amazonでは自律エージェントが意図しない決定を行い障害が発生した実例あり</li>
+                        <li>監視の必要性 — 「完全放置」は危険。Claude Code Co-Workでもタスクがサイレントスキップされるバグが報告</li>
+                        <li>「AIファクトリー」の罠 — 大量のAI生成PRが作られても、レビュアーが追いつかなければ意味がない</li>
+                    </ul>
+                    <div class="trend-impact">
+                        <span class="trend-impact-label">インパクト度</span>
+                        <div class="trend-impact-bar">
+                            <div class="trend-impact-fill trend-impact-100"></div>
+                        </div>
+                        <span class="trend-impact-score">★★★★★</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- トレンド 3: Vibe Codingの光と影 -->
+            <div class="trend-card">
+                <div class="trend-card-header">
+                    <div class="trend-number">03</div>
+                    <div class="trend-info">
+                        <h3>Vibe Codingの光と影</h3>
+                        <p class="trend-subtitle">革命か、技術的負債の大量生産か</p>
+                    </div>
+                    <span class="badge badge-paid">⚠️ 論争中</span>
+                </div>
+                <div class="trend-card-body">
+                    <p>Andrej Karpathyが提唱した「Vibe Coding」は主流に定着しましたが、
+                        2026年3月、<strong>深刻なセキュリティ問題と品質への批判</strong>が噴出しています。</p>
+
+                    <h4>✅ 光の部分</h4>
+                    <ul>
+                        <li>プログラミング未経験者でもアプリが作れる民主化が実現</li>
+                        <li>プロトタイピング速度が10倍以上に向上</li>
+                        <li>教育分野でのプログラミング学習が根本的に変革</li>
+                        <li>スタートアップのMVP作成が数日→数時間に短縮</li>
+                    </ul>
+
+                    <h4>🔴 影の部分 — 具体的なデータと事件</h4>
+                    <ul>
+                        <li><strong>AI生成コードの45%に脆弱性</strong>（Veracode 2025レポート）— ハードコードAPIキー、SQLインジェクション、壊れた認証、不十分な入力バリデーション</li>
+                        <li><strong>Java生成コードの70%以上がセキュリティ失格</strong> — 言語別で最悪のセキュリティ失格率</li>
+                        <li><strong>ロジック・正確性エラーが人間の1.75倍</strong>（CodeRabbit分析）</li>
+                        <li><strong>セキュリティ所見が人間の1.57倍</strong></li>
+                        <li><strong>66%の開発者が「ほぼ正解だが微妙に違う」</strong> — 修正にかかる工数が新規作成より大きい場合も</li>
+                        <li><strong>45%がデバッグに余計な時間</strong> — AI生成コードのデバッグが手書きより時間がかかると報告</li>
+                        <li><strong>90%以上のAIコードベースに高い技術的負債</strong></li>
+                    </ul>
+
+                    <h4>🚨 実際の事件</h4>
+                    <ul>
+                        <li><strong>MoltbookソーシャルネットワークでAPIキー150万件流出</strong> — AI生成コードがAPIキーをフロントエンドにハードコード</li>
+                        <li><strong>Lovableプラットフォームでユーザーデータ漏洩</strong> — AI生成の認証コードに脆弱性</li>
+                        <li><strong>Amazonインシデント</strong> — AIツールの意図しない決定で障害発生、多大なリカバリ工数</li>
+                        <li><strong>「サイレントフェイル」の増加</strong> — テストに通るがデプロイ後に壊れる「見えないバグ」が増加傾向</li>
+                    </ul>
+
+                    <h4>🛡️ 業界が推奨する対策</h4>
+                    <ul>
+                        <li><strong>3層プロンプティング</strong> — コンテキスト・制約・例を明確に定義してプロダクション品質を確保</li>
+                        <li><strong>エージェントテスト</strong> — AIにAI生成コードをテストさせる「agentic testing」の導入</li>
+                        <li><strong>絶対禁止領域</strong> — 認証・決済・機密データ・アクセス制御はVibe Codingで書かない</li>
+                        <li><strong>AIに自己レビューさせる</strong> — 生成後にセキュリティ観点でのレビューをAI自身に要求</li>
+                        <li><strong>OSSへの貢献</strong> — Vibe CodingはOSSに依存するが、OSSへの貢献が不足。エコシステムの持続可能性を意識する</li>
+                    </ul>
+
+                    <div class="trend-impact">
+                        <span class="trend-impact-label">インパクト度</span>
+                        <div class="trend-impact-bar">
+                            <div class="trend-impact-fill trend-impact-100"></div>
+                        </div>
+                        <span class="trend-impact-score">★★★★★</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- トレンド 4: SLMsの台頭 -->
+            <div class="trend-card">
+                <div class="trend-card-header">
+                    <div class="trend-number">04</div>
+                    <div class="trend-info">
+                        <h3>SLMs（小規模言語モデル）の台頭</h3>
+                        <p class="trend-subtitle">「大きければいい」時代の終焉</p>
+                    </div>
+                    <span class="badge badge-type">💡 効率革命</span>
+                </div>
+                <div class="trend-card-body">
+                    <p>Gemini 3.1 Flash-Liteを筆頭に、<strong>特定タスクにはSLMs（小規模言語モデル）のほうが
+                        効率的かつ経済的</strong>であるという認識が広がっています。</p>
+                    <ul>
+                        <li><strong>Gemini 3.1 Flash-Lite（3/3リリース）</strong> — 大型モデルの数分の1のコストで翻訳・モデレーション・UI生成に最適。Antigravityでもサポート開始</li>
+                        <li><strong>arXivの研究結果</strong> — エージェントシステムのタスク分解において、各サブタスクにはSLMで十分なケースが多いことを実証</li>
+                        <li><strong>コスト効率</strong> — 大型LLMで全タスクを処理するより、タスクに応じてSLMとLLMを使い分けるほうが総コストが大幅に削減</li>
+                        <li><strong>レイテンシ改善</strong> — 小規模モデルは応答速度が速く、IDE補完やリアルタイム用途に適する</li>
+                    </ul>
+                    <h4>実用パターン</h4>
+                    <ul>
+                        <li><strong>ルーティング層</strong> — 簡単なタスク→SLM / 複雑なタスク→LLM を自動振り分け</li>
+                        <li><strong>IDE補完</strong> — Tab補完はSLM（高速）/ エージェント操作はLLM（高精度）</li>
+                        <li><strong>マルチモデルパイプライン</strong> — コード生成（LLM）→テスト生成（SLM）→リファクタ提案（SLM）</li>
+                    </ul>
+                    <div class="trend-impact">
+                        <span class="trend-impact-label">インパクト度</span>
+                        <div class="trend-impact-bar">
+                            <div class="trend-impact-fill trend-impact-85"></div>
+                        </div>
+                        <span class="trend-impact-score">★★★★☆</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- トレンド 5: 統合プラットフォーム競争 -->
+            <div class="trend-card">
+                <div class="trend-card-header">
+                    <div class="trend-number">05</div>
+                    <div class="trend-info">
+                        <h3>統合プラットフォーム戦争</h3>
+                        <p class="trend-subtitle">IDE・エージェント・ブラウザ・PM…全部入りを目指す各社</p>
+                    </div>
+                    <span class="badge badge-type">🏰 プラットフォーム</span>
+                </div>
+                <div class="trend-card-body">
+                    <p>各社が「全部入り」の統合開発プラットフォームを目指す競争が激化。
+                        <strong>単なるコード補完ツールから「AIネイティブな開発環境全体」</strong>へとシフトしています。</p>
+                    <div class="table-wrapper">
+                        <table class="compare-table">
+                            <thead>
+                                <tr>
+                                    <th>プレイヤー</th>
+                                    <th>IDE</th>
+                                    <th>エージェント</th>
+                                    <th>PM統合</th>
+                                    <th>独自モデル</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="tool-name">Cognition</td>
+                                    <td>Windsurf</td>
+                                    <td>Devin</td>
+                                    <td>Linear</td>
+                                    <td>独自</td>
+                                </tr>
+                                <tr>
+                                    <td class="tool-name">Cursor</td>
+                                    <td>独自IDE</td>
+                                    <td>Automations</td>
+                                    <td>Slack等</td>
+                                    <td>マルチ</td>
+                                </tr>
+                                <tr>
+                                    <td class="tool-name">GitHub</td>
+                                    <td>VS Code拡張</td>
+                                    <td>Copilot Agent</td>
+                                    <td>Jira</td>
+                                    <td>OpenAI</td>
+                                </tr>
+                                <tr>
+                                    <td class="tool-name">Google</td>
+                                    <td>Antigravity</td>
+                                    <td>組み込み</td>
+                                    <td>—</td>
+                                    <td>Gemini</td>
+                                </tr>
+                                <tr>
+                                    <td class="tool-name">Anthropic</td>
+                                    <td>VS Code統合</td>
+                                    <td>Claude Code</td>
+                                    <td>—</td>
+                                    <td>Claude</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <h4>⚠️ ユーザーの懸念</h4>
+                    <ul>
+                        <li>ベンダーロックインのリスク — 1つのプラットフォームに依存すると移行が困難に</li>
+                        <li>「全部入り」ゆえにどの機能も中途半端になる可能性</li>
+                        <li>OSSコミュニティの声: 「単機能で優れたツールを組み合わせるべき」</li>
+                        <li>価格競争ではなく「囲い込み競争」になるリスク</li>
+                    </ul>
+                    <div class="trend-impact">
+                        <span class="trend-impact-label">インパクト度</span>
+                        <div class="trend-impact-bar">
+                            <div class="trend-impact-fill trend-impact-90"></div>
+                        </div>
+                        <span class="trend-impact-score">★★★★☆</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- トレンド 6: AIコードセキュリティ -->
+            <div class="trend-card">
+                <div class="trend-card-header">
+                    <div class="trend-number">06</div>
+                    <div class="trend-info">
+                        <h3>AIコードセキュリティの本格化</h3>
+                        <p class="trend-subtitle">「生成されたコードは安全か?」が必須の問いに</p>
+                    </div>
+                    <span class="badge badge-paid">🔒 セキュリティ</span>
+                </div>
+                <div class="trend-card-body">
+                    <p>AI生成コードの増加に伴い、セキュリティスキャンの自動化が急務になっています。</p>
+                    <ul>
+                        <li><strong>Claude Code Security</strong> — 数百の未検出脆弱性をOSSプロジェクトで発見。コードレビュー機能にセキュリティ監査を統合</li>
+                        <li><strong>Windsurf Code Integrity Layer</strong> — AI生成コードの脆弱性を自動スキャン。セキュリティ基準の遵守を強制</li>
+                        <li><strong>Cursor MCPoison/CurXecute</strong> — CVE-2025-54135/54136の発覚で、AIツール自体のセキュリティも課題に</li>
+                        <li><strong>Prompt Injection攻撃</strong> — AIエージェントを操り、悪意あるコードを生成させる攻撃手法が進化中</li>
+                        <li><strong>Microsoft Autopilot自動承認リスク</strong> — AI生成コードの自動承認は、生成AIの非決定性と相まってセキュリティホールに</li>
+                    </ul>
+                    <h4>開発者がすべきこと</h4>
+                    <ul>
+                        <li>AI生成コードには<strong>必ず</strong>セキュリティレビューを実施する</li>
+                        <li>認証・決済・アクセス制御をAI任せにしない</li>
+                        <li>SAST/DAST（静的/動的解析）をCI/CDに組み込む</li>
+                        <li>依存関係の脆弱性スキャン（Dependabot, Snyk等）を自動化</li>
+                        <li>AIツール自体のセキュリティアップデートを確認する</li>
+                    </ul>
+                    <div class="trend-impact">
+                        <span class="trend-impact-label">インパクト度</span>
+                        <div class="trend-impact-bar">
+                            <div class="trend-impact-fill trend-impact-90"></div>
+                        </div>
+                        <span class="trend-impact-score">★★★★☆</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- トレンド 7: 開発者の役割変化 -->
+            <div class="trend-card">
+                <div class="trend-card-header">
+                    <div class="trend-number">07</div>
+                    <div class="trend-info">
+                        <h3>開発者の役割変化 — コーダーからオーケストレーターへ</h3>
+                        <p class="trend-subtitle">「コードを書く人」から「AIを指揮する人」へ</p>
+                    </div>
+                    <span class="badge badge-type">🎭 キャリア</span>
+                </div>
+                <div class="trend-card-body">
+                    <p>AIツールの急速な進化は、開発者の役割を根本的に変えつつあります。</p>
+                    <ul>
+                        <li><strong>要件アーキテクト</strong> — 「何を作るか」「なぜ作るか」を定義し、AIに実装を委任する新しい役割</li>
+                        <li><strong>レビュアーとしてのスキル</strong> — AI生成コードを正確にレビュー・評価する能力が最重要スキルに</li>
+                        <li><strong>マルチエージェント管理</strong> — 複数のAIエージェントを同時に管理・調整する能力が求められる</li>
+                        <li><strong>ドメイン知識の価値上昇</strong> — AIがコードを書ける以上、業界・ビジネスの深い理解がより重要に</li>
+                    </ul>
+                    <h4>📊 データで見る変化</h4>
+                    <ul>
+                        <li><strong>73%のチームが日常利用</strong> — もはやAIツールなしの開発は少数派</li>
+                        <li><strong>信頼率29%</strong> — 使っているが信頼していない。常にレビューが必要な「助手」</li>
+                        <li><strong>69%でデプロイ問題増加</strong> — AI頻繁利用者ほどデプロイトラブルが多い逆説</li>
+                        <li><strong>インシデント復旧時間の延長</strong> — AI特有のバグは原因追跡が困難</li>
+                        <li><strong>開発者バーンアウトの増加</strong> — AIのQA・レビュー・修正作業が新たなストレス源に</li>
+                    </ul>
+                    <h4>😤 開発者の本音（X・Reddit・コミュニティ）</h4>
+                    <ul>
+                        <li>「AIツールへの信頼は下がっているのに、使用量は増えている」という矛盾が顕在化</li>
+                        <li>「コードを書けない人がAIで作ったアプリが壊れても、直す能力がない」問題</li>
+                        <li>「シニアエンジニアの仕事がAIレビュアーに変わるのは、本当に進化なのか?」</li>
+                        <li>「ジュニア開発者がAIに頼りすぎると、システム設計・デバッグ・問題解決の基礎が育たない」</li>
+                        <li>一方で「AIと協業できるエンジニアの市場価値は過去最高」という好材料も</li>
+                        <li>「非決定性の苦しみ」 — 同じプロンプトで毎回違う結果が出ることへのフラストレーション</li>
+                        <li>「新しいモデルになるほど品質が落ちている気がする」 — 硬直的・画一的な出力への批判</li>
+                    </ul>
+                    <div class="trend-impact">
+                        <span class="trend-impact-label">インパクト度</span>
+                        <div class="trend-impact-bar">
+                            <div class="trend-impact-fill trend-impact-85"></div>
+                        </div>
+                        <span class="trend-impact-score">★★★★☆</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- まとめ -->
+        <section class="lab-section">
+            <h2>📝 第3回 まとめ — 光と影の共存</h2>
+            <div class="summary-box">
+                <h3>24時間で変わる世界を生き抜くために</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">最大の衝撃</div>
+                        <div class="summary-value">GPT-5.4 PC操作</div>
+                        <p>AIがマウスとキーボードを操る。便利だが怖い</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">最大の変化</div>
+                        <div class="summary-value">常時オンAI</div>
+                        <p>Automations/Hooksで24時間稼働。コストに注意</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">最大の懸念</div>
+                        <div class="summary-value">45%脆弱性</div>
+                        <p>AI生成コードのセキュリティリスクが数値化された</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">最大の効率化</div>
+                        <div class="summary-value">SLMsの台頭</div>
+                        <p>タスク別モデル使い分けでコストと速度を最適化</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">最大の競争</div>
+                        <div class="summary-value">5社のプラットフォーム戦</div>
+                        <p>Cognition/Cursor/GitHub/Google/Anthropicの全面戦争</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">最大の問い</div>
+                        <div class="summary-value">73%使う / 29%信頼</div>
+                        <p>使わないと遅れる。使うと壊れる。この矛盾が2026年</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 この記事について</h2>
+            <p>本記事の情報は<strong>2026年3月12日時点</strong>のものです。過去の調査は<a href="/lab/ai-trends/v1/"
+                    style="color:var(--accent);text-decoration:underline">第1回（3/9）</a>・<a href="/lab/ai-trends/v2/"
+                    style="color:var(--accent);text-decoration:underline">第2回（3/11）</a>をご覧ください。</p>
+            <p>統計データの出典: Veracode 2025, CodeRabbit, byteiota.com, prnewswire.com, dev.to 等。
+                ユーザーの声はX（Twitter）、Reddit、Hacker News、GitHub Issues、Stack Overflow、開発者ブログ等から収集。</p>
+            <p>当サイトも<strong>AIペアプログラミング（Antigravity）</strong>を活用した個人開発プロジェクトです。</p>
+        </section>
+    </main>
+
+    <!-- フッター -->
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-trends/v1/">📊 第1回</a>
+            <a href="/lab/ai-trends/v2/">📊 第2回</a>
+            <a href="/lab/ai-tools/v3/">🛠️ ツール比較 第3回</a>
+            <a href="/lab/ai-developers/v3/">👤 AI開発者 第3回</a>
+        </nav>
+    </footer>
+
+    <script>
+        // テーマトグル
+        const toggle = document.getElementById('themeToggle');
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            toggle.textContent = theme === 'light' ? '☀️' : '🌙';
+            localStorage.setItem('gp-theme', theme);
+        }
+        const saved = localStorage.getItem('gp-theme');
+        if (saved) applyTheme(saved);
+        toggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            applyTheme(current === 'light' ? 'dark' : 'light');
+        });
+    </script>
+</body>
+
+</html>
