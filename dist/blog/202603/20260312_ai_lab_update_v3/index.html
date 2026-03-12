@@ -7,7 +7,7 @@
     <meta name="description" content="GPT-5.4のPC操作、Cursor Automations、AI生成コードの45%に脆弱性。73%使うのに29%しか信頼しない——5大ツールの光と影を1ページで総まとめ。">
     <!-- OGP -->
     <meta property="og:title" content="📊 AI開発ツール最新動向 — LAB第3回レポート：光と影">
-    <meta property="og:description" content="GPT-5.4がPCを操作し、AI生成コードの45%に脆弱性。73%使うのに29%しか信頼しない——AI開発ツールの光と影を徹底レポート。">
+    <meta property="og:description" content="GPT-5.4のPC操作、Cursor Automations、AI生成コードの45%に脆弱性。73%使うのに29%しか信頼しない——5大ツールの光と影を1ページで総まとめ。">
     <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/ai_lab_update_v3.png">
     <meta property="og:url" content="https://www.antigravity-portal.com/blog/202603/20260312_ai_lab_update_v3/">
     <meta property="og:type" content="article">
@@ -16,9 +16,9 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="📊 AI開発ツール最新動向 — LAB第3回レポート：光と影">
-    <meta name="twitter:description" content="GPT-5.4がPCを操作し、AI生成コードの45%に脆弱性。73%使うのに29%しか信頼しない——光と影を徹底レポート。">
+    <meta name="twitter:description" content="GPT-5.4のPC操作、Cursor Automations、AI生成コードの45%に脆弱性。73%使うのに29%しか信頼しない——5大ツールの光と影を1ページで総まとめ。">
     <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/ai_lab_update_v3.png">
-    <link rel="stylesheet" href="../../styles.css?v=1773326800000">
+    <link rel="stylesheet" href="../../styles.css?v=1773331096755">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -189,12 +189,11 @@
 
         <nav class="post-nav">
             <div class="post-nav-prev">
-            <a href="../../202603/20260311_ai_lab_update_v2/" class="post-nav-link">
+            <a href="../../202603/20260312_pachinko_guide_advanced/" class="post-nav-link">
                 <span class="post-nav-label">← 前の記事</span>
-                <span class="post-nav-title">🔬 1週間で激変！AI開発ツール最新動向 — LAB第2回レポート</span>
+                <span class="post-nav-title">📖 パチンコで勝つための実践知識 — スペックの見方・台選び・収支管理・失敗パターン</span>
             </a></div>
-            <div class="post-nav-next">
-            </div>
+            <div class="post-nav-next"></div>
         </nav>
 
         <nav class="back-nav">
@@ -208,6 +207,7 @@
         var AD_ID = '06dfeeba49e20207a86cd5f651221d50';
         var SDK_URL = 'https://adm.shinobi.jp/st/t.js';
 
+        // 課金チェック → 課金済みなら広告を全て非表示にしてSDKも読み込まない
         function hideAllAds(){
             document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
                 slot.style.display = 'none';
@@ -215,11 +215,13 @@
         }
 
         function initAds(){
+            // 1. admaxads配列にスロットを登録
             if(!window.admaxads) window.admaxads = [];
             document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
                 window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
             });
 
+            // 2. SDKをロード（body末尾で1回だけ実行）
             var s = document.createElement('script');
             s.type = 'text/javascript';
             s.charset = 'utf-8';
@@ -227,6 +229,7 @@
             s.async = true;
             document.body.appendChild(s);
 
+            // 3. 広告が返らなかったスロットを非表示に（遅延チェック）
             function checkAdSlots(){
                 document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
                     var ad = slot.querySelector('.admax-switch');
@@ -241,6 +244,7 @@
             setTimeout(checkAdSlots, 10000);
         }
 
+        // 課金状態をチェック（同一ドメインのAPI）
         fetch('/api/subscription-status')
             .then(function(res){ return res.json(); })
             .then(function(data){
@@ -251,6 +255,7 @@
                 }
             })
             .catch(function(){
+                // エラー時は広告を表示（未課金扱い）
                 initAds();
             });
     })()

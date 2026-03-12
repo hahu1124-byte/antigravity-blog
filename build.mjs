@@ -619,10 +619,71 @@ function buildArticlePages() {
 }
 
 // ==========================================
+// RSSフィード生成 (dist/blog/feed.xml)
+// ==========================================
+
+function buildRssFeed() {
+    const FEED_TITLE = 'Gravity Portal ブログ';
+    const FEED_DESC = 'パチンコ分析・AI開発・Uber配達の個人開発ポータル Gravity Portal の最新記事';
+
+    function escapeXml(str) {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&apos;');
+    }
+
+    function toRfc822(dateStr) {
+        const d = new Date(`${dateStr}T00:00:00+09:00`);
+        return d.toUTCString();
+    }
+
+    const feedPosts = metaOnly.slice(0, 20);
+    const lastBuildDate = feedPosts.length > 0 ? toRfc822(feedPosts[0].date) : new Date().toUTCString();
+
+    const items = feedPosts.map(post => {
+        const url = `${SITE_URL}/blog/${post.slug}/`;
+        const categories = (post.tags || [])
+            .map(tag => `        <category>${escapeXml(tag)}</category>`)
+            .join('\n');
+        return `    <item>
+      <title>${escapeXml(post.title)}</title>
+      <link>${url}</link>
+      <guid isPermaLink="true">${url}</guid>
+      <pubDate>${toRfc822(post.date)}</pubDate>
+      <description>${escapeXml(post.excerpt)}</description>
+${categories}
+    </item>`;
+    }).join('\n');
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>${escapeXml(FEED_TITLE)}</title>
+    <link>${SITE_URL}/blog</link>
+    <description>${escapeXml(FEED_DESC)}</description>
+    <language>ja</language>
+    <lastBuildDate>${lastBuildDate}</lastBuildDate>
+    <managingEditor>hahu1124 (Gravity Portal)</managingEditor>
+    <atom:link href="${SITE_URL}/blog/feed.xml" rel="self" type="application/rss+xml" />
+${items}
+  </channel>
+</rss>
+`;
+
+    const feedPath = join(OUTPUT_DIR, 'blog', 'feed.xml');
+    writeFileSync(feedPath, xml, 'utf-8');
+    console.log(`📡 RSSフィード生成完了: ${feedPosts.length}件`);
+}
+
+// ==========================================
 // 実行
 // ==========================================
 
 buildIndexPage();
 buildArticlePages();
+buildRssFeed();
 
 console.log('✅ ビルド完了！ dist/ に出力されました');
