@@ -1066,3 +1066,67 @@ html[data-theme="light"] .note-banner {
         justify-content: center;
     }
 }
+
+/* ============================================================
+   更新日バッジ & 最終更新日表示
+   ============================================================ */
+
+.date-modified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 9999px;
+    white-space: nowrap;
+}
+
+html[data-theme="light"] .date-modified-badge {
+    color: #059669;
+    background: rgba(5, 150, 105, 0.08);
+    border-color: rgba(5, 150, 105, 0.2);
+}
+
+.date-modified {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    margin-left: 0.75rem;
+}
+
+/* タグフィルターのリンクスタイル（button→a変更対応） */
+.tag-filter a.tag {
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.tag-filter a.tag:hover {
+    color: var(--accent);
+}
+
+/* 記事カード内のタグリンク */
+.article-card .tags a.tag {
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.article-card .tags a.tag:hover {
+    background: rgba(99, 102, 241, 0.25);
+}
+
+/* 記事詳細ページのタグリンク */
+.article .tags a.tag {
+    text-decoration: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.article .tags a.tag:hover {
+    background: rgba(99, 102, 241, 0.25);
+    border-color: rgba(99, 102, 241, 0.45);
+}

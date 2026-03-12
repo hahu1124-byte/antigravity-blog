@@ -154,6 +154,45 @@ function escapeHtml(text) {
 }
 
 // ==========================================
+// 更新日表示ヘルパー
+// ==========================================
+
+const BUILD_DATE = new Date();
+
+/** dateModified > date の場合、更新バッジHTMLを返す */
+function getDateModifiedBadge(post) {
+    if (!post.dateModified || post.dateModified === post.date) return '';
+    const mod = new Date(post.dateModified + 'T00:00:00+09:00');
+    const diffMs = BUILD_DATE - mod;
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    let label;
+    if (diffDays <= 0) label = '今日更新';
+    else if (diffDays === 1) label = '昨日更新';
+    else if (diffDays <= 7) label = `${diffDays}日前に更新`;
+    else if (diffDays <= 30) label = `${Math.floor(diffDays / 7)}週間前に更新`;
+    else return '';
+    return `<span class="date-modified-badge">🔄 ${label}</span>`;
+}
+
+/** 記事詳細ヘッダー用: 最終更新日テキスト */
+function getDateModifiedText(post) {
+    if (!post.dateModified || post.dateModified === post.date) return '';
+    return `<time class="date-modified">最終更新: ${post.dateModified}</time>`;
+}
+
+/** タグ収集ユーティリティ */
+function collectTags(postList) {
+    const tagCounts = {};
+    postList.forEach(post => {
+        post.tags.forEach(tag => {
+            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+        });
+    });
+    return Object.entries(tagCounts)
+        .sort((a, b) => b[1] - a[1]);
+}
+
+// ==========================================
 // 忍者AdMax 広告HTML生成
 // ==========================================
 
@@ -379,49 +418,47 @@ function getNoteBannerHtml(post) {
 // 記事一覧ページ生成 (/blog/index.html)
 // ==========================================
 
-function buildIndexPage() {
-    // タグを動的に収集（重複なし、出現頻度順）
-    const tagCounts = {};
-    posts.forEach(post => {
-        post.tags.forEach(tag => {
-            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-        });
-    });
-    const allTags = Object.entries(tagCounts)
-        .sort((a, b) => b[1] - a[1])
-        .map(([tag]) => tag);
+function buildArticleListHtml(postList, title, description, cssRelPath, baseUrl, ogType, breadcrumbHtml, activeTag) {
+    const tagEntries = collectTags(posts);  // 全記事からタグ収集（全体カウント表示用）
 
-    const cards = posts.map((post, i) => `
-        <a href="${post.slug}/" class="article-card" data-tags="${post.tags.map(t => escapeHtml(t)).join(',')}" data-index="${i}">
+    const cards = postList.map((post, i) => `
+        <a href="${activeTag ? '../' : ''}${activeTag ? `../${post.slug}/` : `${post.slug}/`}" class="article-card" data-tags="${post.tags.map(t => escapeHtml(t)).join(',')}" data-index="${i}">
             <div class="card-header">
                 <time class="date">${post.date}</time>
+                ${getDateModifiedBadge(post)}
                 <div class="tags">
-                    ${post.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+                    ${post.tags.map(tag => `<a href="${activeTag ? './' : 'tag/'}${encodeURIComponent(tag)}/" class="tag" onclick="event.stopPropagation()">${escapeHtml(tag)}</a>`).join('')}
                 </div>
             </div>
             <h2 class="card-title">${escapeHtml(post.title)}</h2>
             <p class="card-excerpt">${escapeHtml(post.excerpt)}</p>
         </a>`).join('\n');
 
-    const tagButtons = allTags.map(tag =>
-        `<button class="tag" data-filter="${escapeHtml(tag)}">${escapeHtml(tag)} (${tagCounts[tag]})</button>`
-    ).join('\n            ');
+    const tagLinks = tagEntries.map(([tag, count]) => {
+        const isActive = tag === activeTag;
+        const href = activeTag ? `../${encodeURIComponent(tag)}/` : `tag/${encodeURIComponent(tag)}/`;
+        return `<a href="${href}" class="tag${isActive ? ' tag-active' : ''}">${escapeHtml(tag)} (${count})</a>`;
+    }).join('\n            ');
 
-    const html = `${htmlHead('ブログ', '日記・レポート・技術記事の一覧', 'styles.css', {
-        url: `${SITE_URL}/blog/`,
+    const allHref = activeTag ? '../' : './';
+    const isAll = !activeTag;
+
+    return `${htmlHead(title, description, cssRelPath, {
+        url: baseUrl,
         image: DEFAULT_OG_IMAGE,
-        type: 'website'
+        type: ogType
     })}
     <div class="blog-page">
+        ${breadcrumbHtml}
         <header class="header">
             <a href="https://antigravity-portal.com/" class="back-link">← トップに戻る</a>
-            <h1 class="page-title">ブログ</h1>
-            <p class="page-desc">日記・レポート・技術記事</p>
+            <h1 class="page-title">${escapeHtml(title)}</h1>
+            <p class="page-desc">${escapeHtml(description)}</p>
         </header>
 
         <div class="tag-filter">
-            <button class="tag tag-active" data-filter="all">すべて (${posts.length})</button>
-            ${tagButtons}
+            <a href="${allHref}" class="tag${isAll ? ' tag-active' : ''}">すべて (${posts.length})</a>
+            ${tagLinks}
         </div>
 
         <section class="article-grid">
@@ -433,32 +470,20 @@ function buildIndexPage() {
     <script>
     (function() {
         var PER_PAGE = 10;
-        var currentTag = 'all';
         var currentPage = 1;
         var cards = Array.from(document.querySelectorAll('.article-card'));
         var pagination = document.getElementById('pagination');
-        var tagBtns = document.querySelectorAll('.tag-filter .tag');
-
-        function getFiltered() {
-            if (currentTag === 'all') return cards;
-            return cards.filter(function(c) {
-                return c.dataset.tags.split(',').indexOf(currentTag) !== -1;
-            });
-        }
 
         function render() {
-            var filtered = getFiltered();
-            var totalPages = Math.ceil(filtered.length / PER_PAGE);
+            var totalPages = Math.ceil(cards.length / PER_PAGE);
             if (currentPage > totalPages) currentPage = totalPages || 1;
             var start = (currentPage - 1) * PER_PAGE;
             var end = start + PER_PAGE;
 
-            cards.forEach(function(c) { c.style.display = 'none'; });
-            filtered.forEach(function(c, i) {
+            cards.forEach(function(c, i) {
                 c.style.display = (i >= start && i < end) ? '' : 'none';
             });
 
-            // ページネーション描画
             var html = '';
             if (totalPages > 1) {
                 if (currentPage > 1) {
@@ -474,18 +499,6 @@ function buildIndexPage() {
             pagination.innerHTML = html;
         }
 
-        // タグフィルタ
-        tagBtns.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                tagBtns.forEach(function(b) { b.classList.remove('tag-active'); });
-                btn.classList.add('tag-active');
-                currentTag = btn.dataset.filter;
-                currentPage = 1;
-                render();
-            });
-        });
-
-        // ページネーションクリック
         pagination.addEventListener('click', function(e) {
             if (e.target.dataset.page) {
                 currentPage = parseInt(e.target.dataset.page);
@@ -499,7 +512,19 @@ function buildIndexPage() {
     </script>
 </body>
 </html>`;
+}
 
+function buildIndexPage() {
+    const html = buildArticleListHtml(
+        posts,
+        'ブログ',
+        '日記・レポート・技術記事の一覧',
+        'styles.css',
+        `${SITE_URL}/blog/`,
+        'website',
+        '',
+        null
+    );
     writeFileSync(join(OUTPUT_DIR, 'blog', 'index.html'), html, 'utf-8');
     console.log('📄 一覧ページ生成完了');
 }
@@ -579,8 +604,9 @@ function buildArticlePages() {
             <header class="article-header">
                 <div class="meta">
                     <time class="date">${post.date}</time>
+                    ${getDateModifiedText(post)}
                     <div class="tags">
-                        ${post.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join('')}
+                        ${post.tags.map(tag => `<a href="${toRoot}tag/${encodeURIComponent(tag)}/" class="tag">${escapeHtml(tag)}</a>`).join('')}
                     </div>
                 </div>
                 <h1 class="title">${escapeHtml(post.title)}</h1>
@@ -616,6 +642,43 @@ function buildArticlePages() {
     });
 
     console.log(`📄 ${posts.length} 記事ページ生成完了`);
+}
+
+// ==========================================
+// カテゴリ（タグ別）一覧ページ生成
+// ==========================================
+
+function buildTagPages() {
+    const tagEntries = collectTags(posts);
+    mkdirSync(join(OUTPUT_DIR, 'blog', 'tag'), { recursive: true });
+
+    for (const [tag, count] of tagEntries) {
+        const tagPosts = posts.filter(p => p.tags.includes(tag));
+        const tagDir = join(OUTPUT_DIR, 'blog', 'tag', tag);
+        mkdirSync(tagDir, { recursive: true });
+
+        const breadcrumbHtml = `
+        <nav class="breadcrumb">
+            <a href="https://antigravity-portal.com/">トップ</a>
+            <span class="separator">/</span>
+            <a href="../">ブログ</a>
+            <span class="separator">/</span>
+            <span class="current">${escapeHtml(tag)}</span>
+        </nav>`;
+
+        const html = buildArticleListHtml(
+            tagPosts,
+            `${tag} の記事一覧`,
+            `「${tag}」タグが付いた記事 ${count}件`,
+            '../styles.css',
+            `${SITE_URL}/blog/tag/${encodeURIComponent(tag)}/`,
+            'website',
+            breadcrumbHtml,
+            tag
+        );
+        writeFileSync(join(tagDir, 'index.html'), html, 'utf-8');
+    }
+    console.log(`🏷️  ${tagEntries.length} カテゴリページ生成完了`);
 }
 
 // ==========================================
@@ -683,6 +746,7 @@ ${items}
 // ==========================================
 
 buildIndexPage();
+buildTagPages();
 buildArticlePages();
 buildRssFeed();
 
