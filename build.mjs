@@ -930,17 +930,6 @@ ${m.yutimeTrigger>0?`<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回転</
     for (const [slug, name] of slugMap) { nameToSlug[name] = slug; }
     writeFileSync(join(OUTPUT_DIR, 'machine-db', 'slug-map.json'), JSON.stringify(nameToSlug), 'utf-8');
 
-    // machine-db.js にスラッグマップをインライン埋め込み
-    const jsPath = join(OUTPUT_DIR, 'machine-db', 'machine-db.js');
-    if (existsSync(jsPath)) {
-        let jsContent = readFileSync(jsPath, 'utf-8');
-        jsContent = jsContent.replace(
-            'let slugMap = {}; /* __SLUG_MAP_PLACEHOLDER__ */',
-            `let slugMap = ${JSON.stringify(nameToSlug)};`
-        );
-        writeFileSync(jsPath, jsContent, 'utf-8');
-        console.log(`📎 スラッグマップ (${Object.keys(nameToSlug).length}件) をmachine-db.jsに埋め込み完了`);
-    }
 
     console.log(`🎰 ${generated} 機種SEOページ生成完了${dupes ? ` (重複回避: ${dupes})` : ''}`);
 }

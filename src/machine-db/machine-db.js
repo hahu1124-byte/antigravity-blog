@@ -608,13 +608,23 @@
     }
 
     // スラッグマップ（build.mjs が生成した 機種名→スラッグ の正確なマッピング）
-    // スラッグマップ（build.mjs が生成時にインライン埋め込み）
-    // __SLUG_MAP_PLACEHOLDER__ はビルド時に置換される
-    let slugMap = {}; /* __SLUG_MAP_PLACEHOLDER__ */
+    // 機種名からURLスラッグを生成（build.mjs と同一ロジック）
+    function toSlug(name) {
+        return name
+            .replace(/^[PＰeｅ]\s*/i, '')
+            .replace(/[【】「」『』（）()〈〉《》<>]/g, '')
+            .replace(/[～〜]/g, '-')
+            .replace(/[！!？?・：:＆&＋+／/＊*＃#|"]/g, '')
+            .replace(/[\s　]+/g, '-')
+            .replace(/[\\]/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '')
+            .toLowerCase();
+    }
 
     function showDetail(machine) {
         const m = machine;
-        const slug = slugMap[m.name] || '';
+        const slug = toSlug(m.name);
         const seoLink = slug ? `<a href="https://www.antigravity-portal.com/machine-db/${slug}/" class="modal-link modal-link-seo" target="_top">📊 詳細スペックと自前ボーダーを見る →</a>` : '';
         modalBody.innerHTML = `
             <h2 class="modal-title">${esc(m.name)}</h2>
