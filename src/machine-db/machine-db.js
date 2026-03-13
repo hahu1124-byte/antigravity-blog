@@ -609,7 +609,7 @@
 
     // スラッグマップ（build.mjs が生成した 機種名→スラッグ の正確なマッピング）
     let slugMap = {};
-    fetch('/machine-db/slug-map.json', { cache: 'no-store' })
+    fetch('slug-map.json', { cache: 'no-store' })
         .then(r => r.ok ? r.json() : {})
         .then(data => { slugMap = data; })
         .catch(() => {});
