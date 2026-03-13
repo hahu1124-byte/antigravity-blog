@@ -606,11 +606,23 @@
             applyFilters();
         });
     }
+    // フォールバック用スラッグ生成
+    function toSlug(name) {
+        return name
+            .replace(/[【】「」『』（）()〈〉《》<>]/g, '')
+            .replace(/[～〜]/g, '-')
+            .replace(/[！!？?・：:＆&＋+／/＊*＃#|"]/g, '')
+            .replace(/[\s　]+/g, '-')
+            .replace(/[\\]/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '')
+            .toLowerCase();
+    }
 
     function showDetail(machine) {
         const m = machine;
-        const slug = m.slug || '';
-        const seoLink = slug ? `<a href="https://www.antigravity-portal.com/machine-db/${slug}/" class="modal-link modal-link-seo" target="_top">📊 詳細スペックと自前ボーダーを見る →</a>` : '';
+        const slug = m.slug || toSlug(m.name);
+        const seoLink = `<a href="https://www.antigravity-portal.com/machine-db/${slug}/" class="modal-link modal-link-seo" target="_top">📊 詳細スペックと自前ボーダーを見る →</a>`;
         modalBody.innerHTML = `
             <h2 class="modal-title">${esc(m.name)}</h2>
             <div class="modal-type"><span class="type-badge ${getTypeClass(m.type)}">${esc(m.type || '不明')}</span>${m.maker ? ' <span class="modal-maker">' + esc(m.maker) + '</span>' : ''}</div>
