@@ -770,7 +770,6 @@ function buildMachinePages() {
 
     function toSlug(name) {
         return name
-            .replace(/^[PＰeｅ]\s*/i, '')
             .replace(/[【】「」『』（）()〈〉《》<>]/g, '')
             .replace(/[～〜]/g, '-')
             .replace(/[！!？?・：:＆&＋+／/＊*＃#|"]/g, '')
