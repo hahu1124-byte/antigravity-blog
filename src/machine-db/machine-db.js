@@ -606,24 +606,9 @@
             applyFilters();
         });
     }
-    // フォールバック用スラッグ生成
-    function toSlug(name) {
-        return name
-            .replace(/[【】「」『』（）()〈〉《》<>]/g, '')
-            .replace(/[～〜]/g, '-')
-            .replace(/[！!？?・：:＆&＋+／/＊*＃#|"]/g, '')
-            .replace(/[\s　]+/g, '-')
-            .replace(/[\\]/g, '-')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '')
-            .toLowerCase();
-    }
-
     function showDetail(machine) {
         const m = machine;
-        const slug = m.slug || toSlug(m.name);
-        const seoUrl = `https://www.antigravity-portal.com/machine-db/${encodeURI(slug)}/`;
-        const seoLink = `<a href="${seoUrl}" class="modal-link modal-link-seo" target="_top">📊 詳細スペックと自前ボーダーを見る →</a>`;
+        const seoLink = ''; // 数値ID方式移行後に再有効化
         modalBody.innerHTML = `
             <h2 class="modal-title">${esc(m.name)}</h2>
             <div class="modal-type"><span class="type-badge ${getTypeClass(m.type)}">${esc(m.type || '不明')}</span>${m.maker ? ' <span class="modal-maker">' + esc(m.maker) + '</span>' : ''}</div>
