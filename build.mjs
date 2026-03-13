@@ -915,11 +915,20 @@ ${m.yutimeTrigger>0?`<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回転</
         let slug = toSlug(m.name) || `machine-${generated}`;
         if (slugMap.has(slug)) { dupes++; slug = `${slug}-${dupes}`; }
         slugMap.set(slug, m.name);
+        m.slug = slug;  // 機種データにスラッグを直接追加
         const dir = join(OUTPUT_DIR, 'machine-db', slug);
         mkdirSync(dir, { recursive: true });
         writeFileSync(join(dir, 'index.html'), machinePageHtml(m, slug), 'utf-8');
         generated++;
     }
+
+    // machines.json にスラッグ付きで書き戻し（machine-db.js が m.slug を参照）
+    const mDataWithSlugs = JSON.parse(readFileSync(MACHINES_PATH, 'utf-8'));
+    const slugLookup = new Map(machines.map(m => [m.name, m.slug]));
+    for (const m of mDataWithSlugs.machines || []) {
+        if (slugLookup.has(m.name)) m.slug = slugLookup.get(m.name);
+    }
+    writeFileSync(join(OUTPUT_DIR, 'data', 'machines.json'), JSON.stringify(mDataWithSlugs), 'utf-8');
 
     // サイトマップ
     const urls = [...slugMap.keys()].map(s => `${SITE_URL}/machine-db/${s}/`);
