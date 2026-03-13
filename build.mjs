@@ -925,6 +925,11 @@ ${m.yutimeTrigger>0?`<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回転</
     const urls = [...slugMap.keys()].map(s => `${SITE_URL}/machine-db/${s}/`);
     writeFileSync(join(OUTPUT_DIR, 'machine-db', 'sitemap-machines.txt'), urls.join('\n'), 'utf-8');
 
+    // スラッグマップ（機種名 → スラッグ）をJSONで出力（machine-db.js用）
+    const nameToSlug = {};
+    for (const [slug, name] of slugMap) { nameToSlug[name] = slug; }
+    writeFileSync(join(OUTPUT_DIR, 'machine-db', 'slug-map.json'), JSON.stringify(nameToSlug), 'utf-8');
+
     console.log(`🎰 ${generated} 機種SEOページ生成完了${dupes ? ` (重複回避: ${dupes})` : ''}`);
 }
 

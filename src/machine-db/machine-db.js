@@ -607,23 +607,16 @@
         });
     }
 
-    // 機種名からURLスラッグを生成（build.mjs と同一ロジック）
-    function toSlug(name) {
-        return name
-            .replace(/^[PＰeｅ]\s*/i, '')
-            .replace(/[【】「」『』（）()〈〉《》<>]/g, '')
-            .replace(/[～〜]/g, '-')
-            .replace(/[！!？?・：:＆&＋+／/＊*＃#|"]/g, '')
-            .replace(/[\s　]+/g, '-')
-            .replace(/[\\]/g, '-')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '')
-            .toLowerCase();
-    }
+    // スラッグマップ（build.mjs が生成した 機種名→スラッグ の正確なマッピング）
+    let slugMap = {};
+    fetch('/machine-db/slug-map.json', { cache: 'no-store' })
+        .then(r => r.ok ? r.json() : {})
+        .then(data => { slugMap = data; })
+        .catch(() => {});
 
     function showDetail(machine) {
         const m = machine;
-        const slug = toSlug(m.name) || '';
+        const slug = slugMap[m.name] || '';
         const seoLink = slug ? `<a href="https://www.antigravity-portal.com/machine-db/${slug}/" class="modal-link modal-link-seo" target="_top">📊 詳細スペックと自前ボーダーを見る →</a>` : '';
         modalBody.innerHTML = `
             <h2 class="modal-title">${esc(m.name)}</h2>
