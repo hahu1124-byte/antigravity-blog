@@ -608,11 +608,9 @@
     }
 
     // スラッグマップ（build.mjs が生成した 機種名→スラッグ の正確なマッピング）
-    let slugMap = {};
-    fetch('slug-map.json', { cache: 'no-store' })
-        .then(r => r.ok ? r.json() : {})
-        .then(data => { slugMap = data; })
-        .catch(() => {});
+    // スラッグマップ（build.mjs が生成時にインライン埋め込み）
+    // __SLUG_MAP_PLACEHOLDER__ はビルド時に置換される
+    let slugMap = {}; /* __SLUG_MAP_PLACEHOLDER__ */
 
     function showDetail(machine) {
         const m = machine;
