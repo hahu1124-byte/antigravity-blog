@@ -608,7 +608,8 @@
     }
     function showDetail(machine) {
         const m = machine;
-        const seoLink = ''; // 数値ID方式移行後に再有効化
+        const slug = m.slug || '';
+        const seoLink = slug ? `<a href="https://www.antigravity-portal.com/machine-db/${encodeURI(slug)}/" class="modal-link modal-link-seo" target="_top">📊 詳細スペックと自前ボーダーを見る →</a>` : '';
         modalBody.innerHTML = `
             <h2 class="modal-title">${esc(m.name)}</h2>
             <div class="modal-type"><span class="type-badge ${getTypeClass(m.type)}">${esc(m.type || '不明')}</span>${m.maker ? ' <span class="modal-maker">' + esc(m.maker) + '</span>' : ''}</div>
