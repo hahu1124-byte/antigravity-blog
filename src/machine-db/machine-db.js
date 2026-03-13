@@ -607,8 +607,24 @@
         });
     }
 
+    // 機種名からURLスラッグを生成（build.mjs と同一ロジック）
+    function toSlug(name) {
+        return name
+            .replace(/^[PＰeｅ]\s*/i, '')
+            .replace(/[【】「」『』（）()〈〉《》<>]/g, '')
+            .replace(/[～〜]/g, '-')
+            .replace(/[！!？?・：:＆&＋+／/＊*＃#|"]/g, '')
+            .replace(/[\s　]+/g, '-')
+            .replace(/[\\]/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '')
+            .toLowerCase();
+    }
+
     function showDetail(machine) {
         const m = machine;
+        const slug = toSlug(m.name) || '';
+        const seoLink = slug ? `<a href="/machine-db/${slug}/" class="modal-link modal-link-seo">📊 詳細スペックと自前ボーダーを見る →</a>` : '';
         modalBody.innerHTML = `
             <h2 class="modal-title">${esc(m.name)}</h2>
             <div class="modal-type"><span class="type-badge ${getTypeClass(m.type)}">${esc(m.type || '不明')}</span>${m.maker ? ' <span class="modal-maker">' + esc(m.maker) + '</span>' : ''}</div>
@@ -624,7 +640,8 @@
                 <div class="spec-card"><div class="spec-label">遊タイム</div><div class="spec-value">${m.yutimeTrigger > 0 ? m.yutimeTrigger + (m.yutimeSpins > 0 && m.yutimeSpins < 9999 ? ' / ' + m.yutimeSpins : m.yutimeSpins >= 9999 ? ' / 実質次回' : '') : '非搭載'}</div></div>
                 <div class="spec-card"><div class="spec-label">導入日</div><div class="spec-value">${m.releaseDate || '未定'}</div></div>
             </div>
-            ${m.sourceUrl ? `<a href="${m.sourceUrl}" target="_blank" rel="noopener" class="modal-link">📊 詳細スペックを見る →</a>` : ''}
+            ${seoLink}
+            ${m.sourceUrl ? `<a href="${m.sourceUrl}" target="_blank" rel="noopener" class="modal-link">🔗 データ元を見る →</a>` : ''}
         `;
         modal.classList.remove('hidden');
     }

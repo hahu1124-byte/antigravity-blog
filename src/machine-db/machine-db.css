@@ -918,6 +918,28 @@ tbody tr:hover .machine-name {
     border-color: #7c7ff2;
 }
 
+/* SEO個別ページへの導線リンク（メイン CTA） */
+.modal-link-seo {
+    display: block;
+    text-align: center;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #6366f1, #7c3aed);
+    border: none;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.modal-link-seo:hover {
+    background: linear-gradient(135deg, #7c7ff2, #8b5cf6);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(99, 102, 241, 0.45);
+    color: #fff;
+}
+
 /* レスポンシブ */
 @media (max-width: 768px) {
     .filter-row {
