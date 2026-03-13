@@ -605,10 +605,38 @@
             });
             applyFilters();
         });
+    }    // 全スラッグ一覧（build.mjs がビルド時にインライン埋め込み）
+    const allSlugs = []; /* __ALL_SLUGS_PLACEHOLDER__ */
+
+    // 機種名のキーパーツでスラッグを部分一致検索
+    function findSlug(name) {
+        if (!allSlugs.length) return '';
+        // 特殊文字を空白に置換してパーツ抽出（2文字以上）
+        const parts = name
+            .replace(/[&＆！!？?・：:＋+／/＊*＃#|"【】「」『』（）()〈〉《》<>～〜\s　]+/g, ' ')
+            .trim().split(/\s+/)
+            .filter(p => p.length >= 2)
+            .map(p => p.toLowerCase());
+        if (!parts.length) return '';
+
+        let bestSlug = '';
+        let bestScore = 0;
+        for (const slug of allSlugs) {
+            let score = 0;
+            for (const part of parts) {
+                if (slug.includes(part)) score++;
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                bestSlug = slug;
+            }
+        }
+        return bestScore >= 2 ? bestSlug : '';
     }
+
     function showDetail(machine) {
         const m = machine;
-        const slug = m.slug || '';
+        const slug = findSlug(m.name);
         const seoLink = slug ? `<a href="https://www.antigravity-portal.com/machine-db/${encodeURI(slug)}/" class="modal-link modal-link-seo" target="_top">📊 詳細スペックと自前ボーダーを見る →</a>` : '';
         modalBody.innerHTML = `
             <h2 class="modal-title">${esc(m.name)}</h2>

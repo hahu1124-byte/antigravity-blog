@@ -938,6 +938,18 @@ ${m.yutimeTrigger>0?`<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回転</
     for (const [slug, name] of slugMap) { nameToSlug[name] = slug; }
     writeFileSync(join(OUTPUT_DIR, 'machine-db', 'slug-map.json'), JSON.stringify(nameToSlug), 'utf-8');
 
+    // machine-db.js の allSlugs プレースホルダーにスラッグ一覧を埋め込み
+    const machineDbJsPath = join(OUTPUT_DIR, 'machine-db', 'machine-db.js');
+    if (existsSync(machineDbJsPath)) {
+        let jsContent = readFileSync(machineDbJsPath, 'utf-8');
+        const slugArray = JSON.stringify([...slugMap.keys()]);
+        jsContent = jsContent.replace(
+            /const allSlugs = \[\];\s*\/\*\s*__ALL_SLUGS_PLACEHOLDER__\s*\*\//,
+            `const allSlugs = ${slugArray}`
+        );
+        writeFileSync(machineDbJsPath, jsContent, 'utf-8');
+        console.log(`🔗 machine-db.js にスラッグ一覧埋め込み完了 (${slugMap.size}件)`);
+    }
 
     console.log(`🎰 ${generated} 機種SEOページ生成完了${dupes ? ` (重複回避: ${dupes})` : ''}`);
 }
