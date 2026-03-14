@@ -609,14 +609,13 @@
     const allSlugs = []; /* __ALL_SLUGS_PLACEHOLDER__ */
 
     // 機種名のキーパーツでスラッグを部分一致検索
+    // e/P接頭辞は削除しない（スラッグ側にもe/pが残っているため、区別に必要）
     function findSlug(name) {
         if (!allSlugs.length) return '';
-        // e/P接頭辞を除去（toSlugと同じ処理）してからパーツ抽出
-        const cleaned = name
-            .replace(/^[PＰeｅ]\s*/i, '')
+        const parts = name
             .replace(/[&＆！!？?・：:＋+／/＊*＃#|"【】「」『』（）()〈〉《》<>～〜\s　]+/g, ' ')
-            .trim();
-        const parts = cleaned.split(/\s+/)
+            .trim()
+            .split(/\s+/)
             .filter(p => p.length >= 2)
             .map(p => p.toLowerCase());
         if (!parts.length) return '';
@@ -639,7 +638,7 @@
 
     function showDetail(machine) {
         const m = machine;
-        const slug = m.slug || '';
+        const slug = findSlug(m.name);
         const seoLink = slug ? `<a href="https://www.antigravity-portal.com/machine-db/${slug}/" class="modal-link modal-link-seo" target="_blank" rel="noopener">📊 詳細スペックと自前ボーダーを見る →</a>` : '';
         modalBody.innerHTML = `
             <h2 class="modal-title">${esc(m.name)}</h2>
