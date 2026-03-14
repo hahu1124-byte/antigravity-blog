@@ -611,10 +611,12 @@
     // 機種名のキーパーツでスラッグを部分一致検索
     function findSlug(name) {
         if (!allSlugs.length) return '';
-        // 特殊文字を空白に置換してパーツ抽出（2文字以上）
-        const parts = name
+        // e/P接頭辞を除去（toSlugと同じ処理）してからパーツ抽出
+        const cleaned = name
+            .replace(/^[PＰeｅ]\s*/i, '')
             .replace(/[&＆！!？?・：:＋+／/＊*＃#|"【】「」『』（）()〈〉《》<>～〜\s　]+/g, ' ')
-            .trim().split(/\s+/)
+            .trim();
+        const parts = cleaned.split(/\s+/)
             .filter(p => p.length >= 2)
             .map(p => p.toLowerCase());
         if (!parts.length) return '';
@@ -626,7 +628,8 @@
             for (const part of parts) {
                 if (slug.includes(part)) score++;
             }
-            if (score > bestScore) {
+            // 同スコアならスラッグが長い(より具体的な)方を優先
+            if (score > bestScore || (score === bestScore && slug.length > bestSlug.length)) {
                 bestScore = score;
                 bestSlug = slug;
             }
