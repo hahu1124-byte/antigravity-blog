@@ -628,8 +628,8 @@
             for (const part of parts) {
                 if (slug.includes(part)) score++;
             }
-            // 同スコアならスラッグが長い(より具体的な)方を優先
-            if (score > bestScore || (score === bestScore && slug.length > bestSlug.length)) {
+            // 同スコアならスラッグが短い(余計な部分が少ない=より正確)方を優先
+            if (score > bestScore || (score === bestScore && score > 0 && slug.length < bestSlug.length)) {
                 bestScore = score;
                 bestSlug = slug;
             }
