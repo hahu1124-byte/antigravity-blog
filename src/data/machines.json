@@ -118,7 +118,11 @@
       "releaseDate": "2026-04-20",
       "maker": "平和系列",
       "avgChainCalc": 3.95,
-      "calcProb": 6.98
+      "calcProb": 6.98,
+      "aliases": [
+        "86",
+        "エイティシックス"
+      ]
     },
     {
       "name": "eA夏色日記GO",
@@ -292,7 +296,10 @@
       "releaseDate": "2025-12-08",
       "maker": "京楽産業.",
       "avgChainCalc": 1.97,
-      "calcProb": 13.46
+      "calcProb": 13.46,
+      "aliases": [
+        "アズレン"
+      ]
     },
     {
       "name": "eうしおととら ～神のせSPEC～ 150ver.",
@@ -376,7 +383,10 @@
       "denchuAvgRounds": 8.88,
       "releaseDate": "2025-10-06",
       "maker": "平和",
-      "calcProb": 0
+      "calcProb": 0,
+      "aliases": [
+        "ガルパン"
+      ]
     },
     {
       "name": "eガールズ&パンツァー 最終章 159VER.",
@@ -401,7 +411,10 @@
       "releaseDate": "2026-07-06",
       "maker": "平和",
       "avgChainCalc": 1.31,
-      "calcProb": 20.43
+      "calcProb": 20.43,
+      "aliases": [
+        "ガルパン"
+      ]
     },
     {
       "name": "eカケグルイ ～生か死か～ 219ver.",
@@ -612,7 +625,10 @@
       "releaseDate": "2023-11-06",
       "maker": "藤商事",
       "avgChainCalc": 2.68,
-      "calcProb": 14.02
+      "calcProb": 14.02,
+      "aliases": [
+        "鬼太郎"
+      ]
     },
     {
       "name": "eゴジラ対エヴァンゲリオン セカンドインパクトG ～破壊神覚醒～",
@@ -966,7 +982,11 @@
       "releaseDate": "2025-11-04",
       "maker": "高尾",
       "avgChainCalc": 4.91,
-      "calcProb": 4.86
+      "calcProb": 4.86,
+      "aliases": [
+        "ノゲノラ",
+        "ノゲラ"
+      ]
     },
     {
       "name": "eノーゲーム・ノーライフ 319ver",
@@ -991,7 +1011,11 @@
       "releaseDate": "2025-11-04",
       "maker": "高尾",
       "avgChainCalc": 4.93,
-      "calcProb": 6.48
+      "calcProb": 6.48,
+      "aliases": [
+        "ノゲノラ",
+        "ノゲラ"
+      ]
     },
     {
       "name": "eバイオハザード6",
@@ -1151,7 +1175,10 @@
       "releaseDate": "2025-04-07",
       "maker": "三共系列",
       "avgChainCalc": 2.28,
-      "calcProb": 17.89
+      "calcProb": 17.89,
+      "aliases": [
+        "うたわれ"
+      ]
     },
     {
       "name": "eフィーバーからくりサーカス2 魔王ver.",
@@ -1235,7 +1262,8 @@
       "releaseDate": "2025-03-03",
       "maker": "三共系列",
       "aliases": [
-        "eフィーバーダンジョンに出会いを求めるのは間違っているだろうか"
+        "eフィーバーダンジョンに出会いを求めるのは間違っているだろうか",
+        "ダンまち"
       ],
       "avgChainCalc": 2.97,
       "calcProb": 16.1
@@ -1397,7 +1425,11 @@
       "denchuAvgRounds": 10,
       "releaseDate": "2025-07-07",
       "maker": "三共系列",
-      "calcProb": 0.78
+      "calcProb": 0.78,
+      "aliases": [
+        "炎炎",
+        "消防隊"
+      ]
     },
     {
       "name": "eフィーバー炎炎ノ消防隊2 紅丸ver.",
@@ -1422,7 +1454,11 @@
       "releaseDate": "2025-07-07",
       "maker": "三共系列",
       "avgChainCalc": 14.19,
-      "calcProb": 2.84
+      "calcProb": 2.84,
+      "aliases": [
+        "炎炎",
+        "消防隊"
+      ]
     },
     {
       "name": "eフィーバー機動戦士ガンダムユニコーン -白き一角獣と黒き獅子- 再来",
@@ -1452,7 +1488,8 @@
         "ファーストガンダム",
         "初代ガンダム",
         "UC",
-        "ユニコーン"
+        "ユニコーン",
+        "ユニコ"
       ],
       "avgChainCalc": 5.81,
       "calcProb": 6.98
@@ -1481,7 +1518,8 @@
       "maker": "三共系列",
       "aliases": [
         "シンフォギア",
-        "symphogear"
+        "symphogear",
+        "シンフォ"
       ],
       "avgChainCalc": 4.09,
       "calcProb": 11.04
@@ -1950,7 +1988,11 @@
       "releaseDate": "2025-08-04",
       "maker": "平和",
       "avgChainCalc": 2.46,
-      "calcProb": 24.08
+      "calcProb": 24.08,
+      "aliases": [
+        "黄門",
+        "水戸黄門"
+      ]
     },
     {
       "name": "e化物語 鬼99ver.",
@@ -1975,7 +2017,11 @@
       "releaseDate": "2026-06-08",
       "maker": "銀座",
       "avgChainCalc": 3.97,
-      "calcProb": 3.15
+      "calcProb": 3.15,
+      "aliases": [
+        "化物",
+        "バケモノ"
+      ]
     },
     {
       "name": "e仮面ライダーBLACK",
@@ -2090,7 +2136,8 @@
       "aliases": [
         "慶次",
         "けいじ",
-        "花慶"
+        "花慶",
+        "ケイジ"
       ],
       "avgChainCalc": 2.29,
       "calcProb": 15.22
@@ -2121,7 +2168,8 @@
         "慶次",
         "けいじ",
         "花慶",
-        "e花の慶次"
+        "e花の慶次",
+        "ケイジ"
       ],
       "avgChainCalc": 3.5,
       "calcProb": 11.76
@@ -2152,7 +2200,8 @@
         "慶次",
         "けいじ",
         "花慶",
-        "e花の慶次"
+        "e花の慶次",
+        "ケイジ"
       ],
       "avgChainCalc": 6.62,
       "calcProb": 3.53
@@ -2325,7 +2374,8 @@
       "releaseDate": "2023-10-02",
       "maker": "ニューギン系列",
       "aliases": [
-        "e義風堂々!!"
+        "e義風堂々!!",
+        "義風"
       ],
       "avgChainCalc": 1.67,
       "calcProb": 21.95
@@ -2461,7 +2511,10 @@
       "releaseDate": "2025-06-02",
       "maker": "大都技研",
       "avgChainCalc": 1.18,
-      "calcProb": 67.81
+      "calcProb": 67.81,
+      "aliases": [
+        "冴えカノ"
+      ]
     },
     {
       "name": "e終末のワルキューレ",
@@ -2511,7 +2564,10 @@
       "releaseDate": "2026-01-05",
       "maker": "サミー系列",
       "avgChainCalc": 3.42,
-      "calcProb": 7.62
+      "calcProb": 7.62,
+      "aliases": [
+        "盾勇"
+      ]
     },
     {
       "name": "e女神のカフェテラス",
@@ -2561,7 +2617,9 @@
       "releaseDate": "2025-06-02",
       "maker": "京楽産業.",
       "aliases": [
-        "e新・必殺仕置人"
+        "e新・必殺仕置人",
+        "仕置人",
+        "必殺"
       ],
       "avgChainCalc": 1.23,
       "calcProb": 28.87
@@ -2589,7 +2647,11 @@
       "releaseDate": "2024-04-22",
       "maker": "京楽産業.",
       "avgChainCalc": 1.14,
-      "calcProb": 45.44
+      "calcProb": 45.44,
+      "aliases": [
+        "仕置人",
+        "必殺"
+      ]
     },
     {
       "name": "e新･必殺仕置人S",
@@ -2613,7 +2675,11 @@
       "denchuAvgRounds": 8.02,
       "releaseDate": "2023-04-24",
       "maker": "京楽産業.",
-      "calcProb": 0.21
+      "calcProb": 0.21,
+      "aliases": [
+        "仕置人",
+        "必殺"
+      ]
     },
     {
       "name": "e新海物語349",
@@ -2818,7 +2884,10 @@
       "releaseDate": "2025-10-20",
       "maker": "銀座",
       "avgChainCalc": 10.65,
-      "calcProb": 3.62
+      "calcProb": 3.62,
+      "aliases": [
+        "ダンバイン"
+      ]
     },
     {
       "name": "e聖闘士星矢 超流星 CliMAX 349",
@@ -2875,7 +2944,10 @@
       "releaseDate": "2025-02-03",
       "maker": "大一系列",
       "avgChainCalc": 4.09,
-      "calcProb": 13.96
+      "calcProb": 13.96,
+      "aliases": [
+        "カグラ"
+      ]
     },
     {
       "name": "e蒼天の拳 羅龍SREN",
@@ -3131,7 +3203,8 @@
       "aliases": [
         "乃木坂46",
         "のぎざか",
-        "e乃木坂"
+        "e乃木坂",
+        "乃木坂"
       ],
       "avgChainCalc": 4.67,
       "calcProb": 5.14
@@ -3160,7 +3233,8 @@
       "maker": "京楽産業.",
       "aliases": [
         "乃木坂46",
-        "のぎざか"
+        "のぎざか",
+        "乃木坂"
       ],
       "avgChainCalc": 3.13,
       "calcProb": 4.15
@@ -3188,7 +3262,11 @@
       "releaseDate": "2025-06-02",
       "maker": "平和系列",
       "avgChainCalc": 1.79,
-      "calcProb": 38.15
+      "calcProb": 38.15,
+      "aliases": [
+        "バキ",
+        "刃牙"
+      ]
     },
     {
       "name": "e範馬刃牙 199ver.",
@@ -3213,7 +3291,11 @@
       "releaseDate": "2026-01-19",
       "maker": "平和系列",
       "avgChainCalc": 3.19,
-      "calcProb": 8.36
+      "calcProb": 8.36,
+      "aliases": [
+        "バキ",
+        "刃牙"
+      ]
     },
     {
       "name": "e冒険島",
@@ -3265,7 +3347,8 @@
       "aliases": [
         "北斗",
         "ほくと",
-        "北斗の拳"
+        "北斗の拳",
+        "ホクト"
       ],
       "avgChainCalc": 7.16,
       "calcProb": 6.83
@@ -3295,7 +3378,8 @@
       "aliases": [
         "北斗",
         "ほくと",
-        "北斗の拳"
+        "北斗の拳",
+        "ホクト"
       ],
       "avgChainCalc": 2.64,
       "calcProb": 13.89
@@ -3670,7 +3754,8 @@
         "ほくと",
         "北斗の拳",
         "DD北斗の拳 〜主役はジャギ!!〜",
-        "DD北斗の拳"
+        "DD北斗の拳",
+        "ホクト"
       ],
       "avgChainCalc": 4.22
     },
@@ -3701,7 +3786,8 @@
         "ほくと",
         "北斗の拳",
         "DD北斗の拳 ～主役はジャギ!!～ ユリア",
-        "DD北斗の拳"
+        "DD北斗の拳",
+        "ホクト"
       ],
       "avgChainCalc": 8
     },
@@ -3732,7 +3818,8 @@
         "ほくと",
         "北斗の拳",
         "DD北斗の拳2 ついでに愛をとりもどせ!! ～ケンシロウ～",
-        "DD北斗の拳2 ついでに愛をとりもどせ!!"
+        "DD北斗の拳2 ついでに愛をとりもどせ!!",
+        "ホクト"
       ],
       "avgChainCalc": 6.79,
       "calcProb": 6.8
@@ -3764,7 +3851,8 @@
         "ほくと",
         "北斗の拳",
         "DD北斗の拳2 ついでに愛をとりもどせ!! ～ラオウ～",
-        "DD北斗の拳2 ついでに愛をとりもどせ!!"
+        "DD北斗の拳2 ついでに愛をとりもどせ!!",
+        "ホクト"
       ],
       "avgChainCalc": 5.81,
       "calcProb": 7.87
@@ -3795,7 +3883,8 @@
         "北斗",
         "ほくと",
         "北斗の拳",
-        "DD北斗の拳2 ついでに愛をとりもどせ!! ケンシロウ99 トキVer."
+        "DD北斗の拳2 ついでに愛をとりもどせ!! ケンシロウ99 トキVer.",
+        "ホクト"
       ],
       "avgChainCalc": 4.31,
       "calcProb": 2.52
@@ -3826,7 +3915,8 @@
         "北斗",
         "ほくと",
         "北斗の拳",
-        "DD北斗の拳2 ついでに愛をとりもどせ!! ラオウ99 アミVer."
+        "DD北斗の拳2 ついでに愛をとりもどせ!! ラオウ99 アミVer.",
+        "ホクト"
       ],
       "avgChainCalc": 10.12,
       "calcProb": 2.8
@@ -3858,7 +3948,8 @@
         "ほくと",
         "北斗の拳",
         "DD北斗の拳3",
-        "DD北斗の拳"
+        "DD北斗の拳",
+        "ホクト"
       ],
       "avgChainCalc": 4.98,
       "calcProb": 11.34
@@ -3889,7 +3980,8 @@
         "北斗",
         "ほくと",
         "北斗の拳",
-        "DD北斗の拳3 百突99Ver."
+        "DD北斗の拳3 百突99Ver.",
+        "ホクト"
       ],
       "avgChainCalc": 3.35,
       "calcProb": 7.57
@@ -3944,7 +4036,8 @@
       "releaseDate": "2025-03-03",
       "maker": "藤商事",
       "aliases": [
-        "FAIRY TAIL 89Ver."
+        "FAIRY TAIL 89Ver.",
+        "フェアリーテイル"
       ],
       "avgChainCalc": 5.5,
       "calcProb": 3.09
@@ -3972,7 +4065,8 @@
       "releaseDate": "2024-04-22",
       "maker": "藤商事",
       "aliases": [
-        "FAIRY TAIL これが七炎竜の力だFSA"
+        "FAIRY TAIL これが七炎竜の力だFSA",
+        "フェアリーテイル"
       ],
       "avgChainCalc": 1.08,
       "calcProb": 31.2
@@ -4000,7 +4094,8 @@
       "releaseDate": "2025-09-08",
       "maker": "藤商事",
       "aliases": [
-        "FAIRY TAIL 超一夜Ver."
+        "FAIRY TAIL 超一夜Ver.",
+        "フェアリーテイル"
       ],
       "avgChainCalc": 3.24,
       "calcProb": 13.64
@@ -4029,7 +4124,8 @@
       "maker": "藤商事系列",
       "aliases": [
         "FAIRY TAIL2",
-        "FAIRY TAIL"
+        "FAIRY TAIL",
+        "フェアリーテイル"
       ],
       "avgChainCalc": 4.15,
       "calcProb": 8.76
@@ -4058,7 +4154,8 @@
       "maker": "藤商事系列",
       "aliases": [
         "FAIRY TAIL2",
-        "FAIRY TAIL"
+        "FAIRY TAIL",
+        "フェアリーテイル"
       ],
       "avgChainCalc": 2.81,
       "calcProb": 9.38
@@ -5577,7 +5674,8 @@
       "releaseDate": "2021-09-21",
       "maker": "藤商事系列",
       "aliases": [
-        "FAIRY TAIL2 JWA"
+        "FAIRY TAIL2 JWA",
+        "フェアリーテイル"
       ],
       "avgChainCalc": 15.78,
       "calcProb": 1.47
@@ -5716,7 +5814,8 @@
       "maker": "ニューギン系列",
       "aliases": [
         "うる星やつら～ラムのLoveSong～",
-        "うる星やつら"
+        "うる星やつら",
+        "うる星"
       ],
       "avgChainCalc": 2.61,
       "calcProb": 6.21
@@ -6559,7 +6658,8 @@
         "北斗",
         "ほくと",
         "北斗の拳",
-        "デジハネ北斗の拳7 天破"
+        "デジハネ北斗の拳7 天破",
+        "ホクト"
       ],
       "avgChainCalc": 3.92,
       "calcProb": 3.94
@@ -6906,7 +7006,9 @@
       "releaseDate": "2020-08-03",
       "maker": "京楽産業.",
       "aliases": [
-        "ぱちんこ新必殺仕置人TURBO"
+        "ぱちんこ新必殺仕置人TURBO",
+        "仕置人",
+        "必殺"
       ],
       "calcProb": 0.02
     },
@@ -6933,7 +7035,9 @@
       "releaseDate": "2020-03-02",
       "maker": "京楽産業.",
       "aliases": [
-        "ぱちんこ新必殺仕置人TURBO GORAKU"
+        "ぱちんこ新必殺仕置人TURBO GORAKU",
+        "仕置人",
+        "必殺"
       ],
       "avgChainCalc": 9.37,
       "calcProb": 2.91
@@ -7105,7 +7209,8 @@
       "releaseDate": "2024-09-02",
       "maker": "三共系列",
       "aliases": [
-        "フィーバーかぐや様は告らせたい Light ver."
+        "フィーバーかぐや様は告らせたい Light ver.",
+        "かぐや"
       ],
       "avgChainCalc": 4.29,
       "calcProb": 4.32
@@ -7409,7 +7514,8 @@
         "初代ガンダム",
         "UC",
         "ユニコーン",
-        "フィーバー機動戦士ガンダムユニコーン -白き一角獣と黒き獅子- 再来 99ver."
+        "フィーバー機動戦士ガンダムユニコーン -白き一角獣と黒き獅子- 再来 99ver.",
+        "ユニコ"
       ],
       "avgChainCalc": 8.82,
       "calcProb": 1.73
@@ -7443,7 +7549,8 @@
         "初代ガンダム",
         "UC",
         "ユニコーン",
-        "フィーバー機動戦士ガンダムユニコーン LIGHT ver."
+        "フィーバー機動戦士ガンダムユニコーン LIGHT ver.",
+        "ユニコ"
       ],
       "avgChainCalc": 5.31,
       "calcProb": 2.87
@@ -7501,7 +7608,8 @@
         "シンフォギア",
         "symphogear",
         "フィーバー戦姫絶唱シンフォギア4 FINAL COMMANDER LT-light ver.(1個賞球)",
-        "フィーバー戦姫絶唱シンフォギア4 FINAL COMMANDER LT-light ver."
+        "フィーバー戦姫絶唱シンフォギア4 FINAL COMMANDER LT-light ver.",
+        "シンフォ"
       ],
       "avgChainCalc": 3.61,
       "calcProb": 7.43
@@ -7532,7 +7640,8 @@
         "シンフォギア",
         "symphogear",
         "フィーバー戦姫絶唱シンフォギア4 FINAL COMMANDER LT-light ver.(3個賞球)",
-        "フィーバー戦姫絶唱シンフォギア4 FINAL COMMANDER LT-light ver."
+        "フィーバー戦姫絶唱シンフォギア4 FINAL COMMANDER LT-light ver.",
+        "シンフォ"
       ],
       "avgChainCalc": 1.5,
       "calcProb": 18.16
@@ -7882,7 +7991,8 @@
         "けいじ",
         "花慶",
         "花の慶次～傾奇一転 87ver.",
-        "花の慶次"
+        "花の慶次",
+        "ケイジ"
       ],
       "avgChainCalc": 2.28,
       "calcProb": 7.5
@@ -7914,7 +8024,8 @@
         "けいじ",
         "花慶",
         "花の慶次～裂～ 99ver.",
-        "花の慶次"
+        "花の慶次",
+        "ケイジ"
       ],
       "avgChainCalc": 4.2,
       "calcProb": 3.69
@@ -7946,7 +8057,8 @@
         "けいじ",
         "花慶",
         "花の慶次～蓮",
-        "花の慶次"
+        "花の慶次",
+        "ケイジ"
       ],
       "avgChainCalc": 2.64,
       "calcProb": 6.15
@@ -8164,7 +8276,8 @@
       "releaseDate": "2025-10-20",
       "maker": "ニューギン系列",
       "aliases": [
-        "義風堂々3!! -兼続と慶次- 99Ver."
+        "義風堂々3!! -兼続と慶次- 99Ver.",
+        "義風"
       ],
       "avgChainCalc": 1.37,
       "calcProb": 15.02
@@ -8307,7 +8420,9 @@
       "releaseDate": "2022-03-22",
       "maker": "サンセイR&D",
       "aliases": [
-        "激デジ 笑ゥせぇるすまん 最後の忠告"
+        "激デジ 笑ゥせぇるすまん 最後の忠告",
+        "喪黒",
+        "セールスマン"
       ],
       "avgChainCalc": 2.33,
       "calcProb": 6.38
@@ -8489,7 +8604,9 @@
       "releaseDate": "2019-12-02",
       "maker": "三洋物産",
       "aliases": [
-        "咲-Saki-阿知賀編"
+        "咲-Saki-阿知賀編",
+        "咲",
+        "サキ"
       ],
       "avgChainCalc": 1.31,
       "calcProb": 23.88
@@ -8727,7 +8844,9 @@
         "慶次",
         "けいじ",
         "花慶",
-        "真･花の慶次2 漆黒の衝撃 99ver."
+        "真･花の慶次2 漆黒の衝撃 99ver.",
+        "ケイジ",
+        "真慶次"
       ],
       "avgChainCalc": 3.66,
       "calcProb": 3.99
@@ -9050,7 +9169,8 @@
         "乙女",
         "おとめ",
         "戦乙女",
-        "戦国乙女 LEGEND BATTLE ときめき♥89ver."
+        "戦国乙女 LEGEND BATTLE ときめき♥89ver.",
+        "戦乙"
       ],
       "avgChainCalc": 4.2,
       "calcProb": 4.33
@@ -9208,7 +9328,8 @@
       "releaseDate": "2020-02-03",
       "maker": "三共系列",
       "aliases": [
-        "鉄拳 極 SWEET COMBO VER."
+        "鉄拳 極 SWEET COMBO VER.",
+        "鉄拳"
       ],
       "avgChainCalc": 9.15,
       "calcProb": 1.77
@@ -9237,7 +9358,8 @@
       "maker": "藤商事",
       "aliases": [
         "緋弾のアリア～緋弾覚醒編～",
-        "緋弾のアリア"
+        "緋弾のアリア",
+        "アリア"
       ],
       "avgChainCalc": 2.61,
       "calcProb": 5.23
@@ -9265,7 +9387,8 @@
       "releaseDate": "2019-11-05",
       "maker": "藤商事系列",
       "aliases": [
-        "緋弾のアリアAA JD設定付"
+        "緋弾のアリアAA JD設定付",
+        "アリア"
       ],
       "avgChainCalc": 2.7,
       "calcProb": 5.46
@@ -9517,7 +9640,8 @@
       "maker": "サンセイR&D",
       "aliases": [
         "オーバーロード",
-        "LT OVERLORD 魔導王光臨"
+        "LT OVERLORD 魔導王光臨",
+        "オバロ"
       ],
       "avgChainCalc": 4.59,
       "calcProb": 8.57
@@ -9546,7 +9670,8 @@
       "maker": "サンセイR&D",
       "aliases": [
         "オーバーロード",
-        "LT OVERLORD 魔導王光臨 129ver."
+        "LT OVERLORD 魔導王光臨 129ver.",
+        "オバロ"
       ],
       "avgChainCalc": 7.1,
       "calcProb": 2.06
@@ -9634,7 +9759,8 @@
       "releaseDate": "2023-03-06",
       "maker": "高尾",
       "aliases": [
-        "sin 七つの大罪 X-TREME"
+        "sin 七つの大罪 X-TREME",
+        "七大"
       ],
       "avgChainCalc": 11.82,
       "calcProb": 3.57
@@ -9662,7 +9788,8 @@
       "releaseDate": "2024-03-18",
       "maker": "高尾",
       "aliases": [
-        "sin 七つの大罪 X-TREME 強甘2400Ver."
+        "sin 七つの大罪 X-TREME 強甘2400Ver.",
+        "七大"
       ],
       "avgChainCalc": 2.81,
       "calcProb": 14.75
@@ -9719,7 +9846,8 @@
       "maker": "京楽系列",
       "aliases": [
         "アズールレーン THE ANIMATION ～異次元トリガー～",
-        "アズールレーン THE ANIMATION"
+        "アズールレーン THE ANIMATION",
+        "アズレン"
       ],
       "avgChainCalc": 2.55,
       "calcProb": 17.22
@@ -9748,7 +9876,8 @@
       "maker": "京楽産業.",
       "aliases": [
         "アズールレーン THE ANIMATION ～異次元トリガー～ 79ver.",
-        "アズールレーン THE ANIMATION"
+        "アズールレーン THE ANIMATION",
+        "アズレン"
       ],
       "avgChainCalc": 2.63,
       "calcProb": 7.38
@@ -10259,7 +10388,8 @@
       "maker": "ニューギン系列",
       "aliases": [
         "うる星やつら～ラムのLoveSong～",
-        "うる星やつら"
+        "うる星やつら",
+        "うる星"
       ],
       "avgChainCalc": 4.81,
       "calcProb": 7.17
@@ -10288,7 +10418,8 @@
       "maker": "ニューギン系列",
       "aliases": [
         "うる星やつら2",
-        "うる星やつら"
+        "うる星やつら",
+        "うる星"
       ],
       "avgChainCalc": 5.46,
       "calcProb": 4.51
@@ -10318,7 +10449,8 @@
       "aliases": [
         "うる星やつら2 ～Eternal Love Song～ 129ver.",
         "うる星やつら2",
-        "うる星やつら"
+        "うる星やつら",
+        "うる星"
       ],
       "avgChainCalc": 3.94,
       "calcProb": 3.99
@@ -10570,7 +10702,8 @@
       "releaseDate": "2021-12-06",
       "maker": "平和",
       "aliases": [
-        "ガールズ&パンツァー 劇場版"
+        "ガールズ&パンツァー 劇場版",
+        "ガルパン"
       ],
       "avgChainCalc": 3.5,
       "calcProb": 3.67
@@ -10598,7 +10731,8 @@
       "releaseDate": "2021-05-10",
       "maker": "平和",
       "aliases": [
-        "ガールズ&パンツァー 劇場版"
+        "ガールズ&パンツァー 劇場版",
+        "ガルパン"
       ],
       "avgChainCalc": 3.84,
       "calcProb": 7.67
@@ -10655,7 +10789,8 @@
       "releaseDate": "2021-11-22",
       "maker": "高尾",
       "aliases": [
-        "カイジ鉄骨渡り勝負編"
+        "カイジ鉄骨渡り勝負編",
+        "カイジ"
       ],
       "avgChainCalc": 4.48
     },
@@ -11368,7 +11503,8 @@
       "releaseDate": "2023-11-06",
       "maker": "藤商事系列",
       "aliases": [
-        "ゲゲゲの鬼太郎 獅子奮迅"
+        "ゲゲゲの鬼太郎 獅子奮迅",
+        "鬼太郎"
       ],
       "avgChainCalc": 4.13,
       "calcProb": 9.89
@@ -11396,7 +11532,8 @@
       "releaseDate": "2025-01-20",
       "maker": "藤商事系列",
       "aliases": [
-        "ゲゲゲの鬼太郎 獅子奮迅 99Ver. RWC"
+        "ゲゲゲの鬼太郎 獅子奮迅 99Ver. RWC",
+        "鬼太郎"
       ],
       "avgChainCalc": 11.56,
       "calcProb": 1.39
@@ -11455,7 +11592,8 @@
         "ギアス",
         "コドギア",
         "GEASS",
-        "コードギアス 反逆のルルーシュ Rebellion to Re;surrection"
+        "コードギアス 反逆のルルーシュ Rebellion to Re;surrection",
+        "ルルーシュ"
       ],
       "avgChainCalc": 4.86,
       "calcProb": 9.26
@@ -11486,7 +11624,8 @@
         "ギアス",
         "コドギア",
         "GEASS",
-        "コードギアス 反逆のルルーシュ 強ライトミドル"
+        "コードギアス 反逆のルルーシュ 強ライトミドル",
+        "ルルーシュ"
       ],
       "avgChainCalc": 6.13,
       "calcProb": 5.67
@@ -11517,7 +11656,8 @@
         "ギアス",
         "コドギア",
         "GEASS",
-        "コードギアス 反逆のルルーシュ3 Light ver."
+        "コードギアス 反逆のルルーシュ3 Light ver.",
+        "ルルーシュ"
       ],
       "avgChainCalc": 6.96,
       "calcProb": 3.04
@@ -11548,7 +11688,8 @@
         "ギアス",
         "コドギア",
         "GEASS",
-        "コードギアス 反逆のルルーシュbR"
+        "コードギアス 反逆のルルーシュbR",
+        "ルルーシュ"
       ],
       "avgChainCalc": 6.66,
       "calcProb": 6.96
@@ -11579,7 +11720,8 @@
         "ギアス",
         "コドギア",
         "GEASS",
-        "コードギアス反逆のルルーシュ Light"
+        "コードギアス反逆のルルーシュ Light",
+        "ルルーシュ"
       ],
       "avgChainCalc": 5.06,
       "calcProb": 3.61
@@ -11951,7 +12093,8 @@
       "releaseDate": "2024-05-07",
       "maker": "藤商事系列",
       "aliases": [
-        "ゴブリンスレイヤー ラッキートリガーVer."
+        "ゴブリンスレイヤー ラッキートリガーVer.",
+        "ゴブスレ"
       ],
       "avgChainCalc": 6.81,
       "calcProb": 2.12
@@ -11979,7 +12122,8 @@
       "releaseDate": "2023-05-08",
       "maker": "藤商事系列",
       "aliases": [
-        "ゴブリンスレイヤーJGZ"
+        "ゴブリンスレイヤーJGZ",
+        "ゴブスレ"
       ],
       "avgChainCalc": 1.05,
       "calcProb": 31.22
@@ -13455,7 +13599,8 @@
       "releaseDate": "2025-09-08",
       "maker": "ニューギン系列",
       "aliases": [
-        "デカスタ デビルマン -THE FINAL- 179ver."
+        "デカスタ デビルマン -THE FINAL- 179ver.",
+        "デビルマン"
       ],
       "avgChainCalc": 1.14,
       "calcProb": 69.26
@@ -13566,7 +13711,8 @@
       "maker": "サミー系列",
       "aliases": [
         "デジハネブラックラグーン3",
-        "デジハネブラックラグーン"
+        "デジハネブラックラグーン",
+        "ブラクラ"
       ],
       "avgChainCalc": 1.03,
       "calcProb": 26.33
@@ -13686,7 +13832,8 @@
       "releaseDate": "2025-09-08",
       "maker": "銀座",
       "aliases": [
-        "デジハネ頭文字Dせかんど"
+        "デジハネ頭文字Dせかんど",
+        "イニD"
       ],
       "avgChainCalc": 26.16,
       "calcProb": 1.91
@@ -13743,7 +13890,8 @@
       "releaseDate": "2025-02-17",
       "maker": "ニューギン系列",
       "aliases": [
-        "デビルマン THE FINAL"
+        "デビルマン THE FINAL",
+        "デビルマン"
       ],
       "avgChainCalc": 1.71,
       "calcProb": 25.82
@@ -13800,7 +13948,8 @@
       "releaseDate": "2023-08-07",
       "maker": "ニューギン系列",
       "aliases": [
-        "デビルマン黄金黙示録 N-K1 YT250"
+        "デビルマン黄金黙示録 N-K1 YT250",
+        "デビルマン"
       ],
       "avgChainCalc": 5.18,
       "calcProb": 2.93
@@ -15068,7 +15217,8 @@
       "maker": "メーシー",
       "aliases": [
         "バジリスク～甲賀忍法帖～2",
-        "バジリスク"
+        "バジリスク",
+        "バジ"
       ],
       "avgChainCalc": 1.16,
       "calcProb": 37.6
@@ -15097,7 +15247,8 @@
       "maker": "メーシー",
       "aliases": [
         "バジリスク～甲賀忍法帖～2 朧の章",
-        "バジリスク"
+        "バジリスク",
+        "バジ"
       ],
       "calcProb": 0.01
     },
@@ -15124,7 +15275,8 @@
       "releaseDate": "2021-06-07",
       "maker": "メーシー",
       "aliases": [
-        "バジリスク桜花忍法帖"
+        "バジリスク桜花忍法帖",
+        "バジ"
       ],
       "avgChainCalc": 3.2,
       "calcProb": 20.58
@@ -15152,7 +15304,8 @@
       "releaseDate": "2022-09-05",
       "maker": "メーシー",
       "aliases": [
-        "バジリスク桜花忍法帖 早咲き桜99ver."
+        "バジリスク桜花忍法帖 早咲き桜99ver.",
+        "バジ"
       ],
       "avgChainCalc": 1.52,
       "calcProb": 17.22
@@ -15437,7 +15590,9 @@
       "releaseDate": "2019-07-22",
       "maker": "京楽産業.",
       "aliases": [
-        "ぱちんこ 新・必殺仕置人"
+        "ぱちんこ 新・必殺仕置人",
+        "仕置人",
+        "必殺"
       ],
       "avgChainCalc": 5.72,
       "calcProb": 8.65
@@ -15845,7 +16000,8 @@
       "releaseDate": "2022-12-05",
       "maker": "京楽系列",
       "aliases": [
-        "ぱちんこアズールレーン THE ANIMATION"
+        "ぱちんこアズールレーン THE ANIMATION",
+        "アズレン"
       ],
       "avgChainCalc": 2.02,
       "calcProb": 4.49
@@ -16523,7 +16679,8 @@
         "乃木坂46",
         "のぎざか",
         "ぱちんこ乃木坂46",
-        "ぱちんこ乃木坂"
+        "ぱちんこ乃木坂",
+        "乃木坂"
       ],
       "avgChainCalc": 5.45,
       "calcProb": 12.76
@@ -16553,7 +16710,8 @@
       "aliases": [
         "乃木坂46",
         "のぎざか",
-        "ぱちんこ乃木坂46 トレジャースペック"
+        "ぱちんこ乃木坂46 トレジャースペック",
+        "乃木坂"
       ],
       "avgChainCalc": 2.26,
       "calcProb": 15.16
@@ -17273,7 +17431,8 @@
       "releaseDate": "2022-05-09",
       "maker": "三共系列",
       "aliases": [
-        "フィーバー ダンジョンに出会いを求めるのは間違っているだろうか"
+        "フィーバー ダンジョンに出会いを求めるのは間違っているだろうか",
+        "ダンまち"
       ],
       "avgChainCalc": 1.46
     },
@@ -17536,7 +17695,8 @@
       "releaseDate": "2026-01-05",
       "maker": "三共系列",
       "aliases": [
-        "フィーバーうたわれるもの LT-Light ver."
+        "フィーバーうたわれるもの LT-Light ver.",
+        "うたわれ"
       ],
       "avgChainCalc": 3.29,
       "calcProb": 3.58
@@ -17564,7 +17724,8 @@
       "releaseDate": "2025-04-07",
       "maker": "三共系列",
       "aliases": [
-        "フィーバーうたわれるものZ"
+        "フィーバーうたわれるものZ",
+        "うたわれ"
       ],
       "avgChainCalc": 3.22,
       "calcProb": 8.26
@@ -17592,7 +17753,8 @@
       "releaseDate": "2023-10-02",
       "maker": "三共系列",
       "aliases": [
-        "フィーバーかぐや様は告らせたい"
+        "フィーバーかぐや様は告らせたい",
+        "かぐや"
       ],
       "avgChainCalc": 4.39,
       "calcProb": 8.89
@@ -18056,7 +18218,8 @@
       "maker": "三共系列",
       "aliases": [
         "フィーバーダンジョンに出会いを求めるのは間違っているだろうか2",
-        "フィーバーダンジョンに出会いを求めるのは間違っているだろうか"
+        "フィーバーダンジョンに出会いを求めるのは間違っているだろうか",
+        "ダンまち"
       ],
       "avgChainCalc": 3.52,
       "calcProb": 11.75
@@ -18084,7 +18247,8 @@
       "releaseDate": "2025-10-06",
       "maker": "三共系列",
       "aliases": [
-        "フィーバーダンジョンに出会いを求めるのは間違っているだろうか2 LT-Light ver."
+        "フィーバーダンジョンに出会いを求めるのは間違っているだろうか2 LT-Light ver.",
+        "ダンまち"
       ],
       "avgChainCalc": 7.01,
       "calcProb": 2.33
@@ -18561,7 +18725,9 @@
       "releaseDate": "2024-05-07",
       "maker": "三共系列",
       "aliases": [
-        "フィーバー炎炎ノ消防隊 LIGHT VER."
+        "フィーバー炎炎ノ消防隊 LIGHT VER.",
+        "炎炎",
+        "消防隊"
       ],
       "avgChainCalc": 7.15,
       "calcProb": 3.34
@@ -18589,7 +18755,9 @@
       "releaseDate": "2019-05-07",
       "maker": "三共系列",
       "aliases": [
-        "フィーバー革命機ヴァルヴレイヴ Light"
+        "フィーバー革命機ヴァルヴレイヴ Light",
+        "ヴヴヴ",
+        "VVV"
       ],
       "avgChainCalc": 19,
       "calcProb": 0.7
@@ -18617,7 +18785,9 @@
       "releaseDate": "2022-02-21",
       "maker": "三共系列",
       "aliases": [
-        "フィーバー革命機ヴァルヴレイヴ2 Light"
+        "フィーバー革命機ヴァルヴレイヴ2 Light",
+        "ヴヴヴ",
+        "VVV"
       ],
       "avgChainCalc": 5.49,
       "calcProb": 3.97
@@ -18645,7 +18815,9 @@
       "releaseDate": "2022-02-21",
       "maker": "三共系列",
       "aliases": [
-        "フィーバー革命機ヴァルヴレイヴ2 カミツキ"
+        "フィーバー革命機ヴァルヴレイヴ2 カミツキ",
+        "ヴヴヴ",
+        "VVV"
       ],
       "avgChainCalc": 2.73,
       "calcProb": 14.39
@@ -18673,7 +18845,9 @@
       "releaseDate": "2021-04-19",
       "maker": "三共系列",
       "aliases": [
-        "フィーバー革命機ヴァルヴレイヴ2S"
+        "フィーバー革命機ヴァルヴレイヴ2S",
+        "ヴヴヴ",
+        "VVV"
       ],
       "avgChainCalc": 8.43,
       "calcProb": 7.98
@@ -18702,7 +18876,9 @@
       "maker": "三共系列",
       "aliases": [
         "フィーバー革命機ヴァルヴレイヴ3",
-        "フィーバー革命機ヴァルヴレイヴ"
+        "フィーバー革命機ヴァルヴレイヴ",
+        "ヴヴヴ",
+        "VVV"
       ],
       "avgChainCalc": 8.36,
       "calcProb": 8.45
@@ -18730,7 +18906,9 @@
       "releaseDate": "2024-10-07",
       "maker": "三共系列",
       "aliases": [
-        "フィーバー革命機ヴァルヴレイヴ3 Light ver."
+        "フィーバー革命機ヴァルヴレイヴ3 Light ver.",
+        "ヴヴヴ",
+        "VVV"
       ],
       "avgChainCalc": 8.97,
       "calcProb": 2.87
@@ -18866,7 +19044,8 @@
         "初代ガンダム",
         "UC",
         "ユニコーン",
-        "フィーバー機動戦士ガンダムユニコーン"
+        "フィーバー機動戦士ガンダムユニコーン",
+        "ユニコ"
       ],
       "avgChainCalc": 4.42,
       "calcProb": 8.28
@@ -18900,7 +19079,8 @@
         "初代ガンダム",
         "UC",
         "ユニコーン",
-        "フィーバー機動戦士ガンダムユニコーン -白き一角獣と黒き獅子- 再来"
+        "フィーバー機動戦士ガンダムユニコーン -白き一角獣と黒き獅子- 再来",
+        "ユニコ"
       ],
       "avgChainCalc": 4.32,
       "calcProb": 8.69
@@ -18934,7 +19114,8 @@
         "初代ガンダム",
         "UC",
         "ユニコーン",
-        "フィーバー機動戦士ガンダムユニコーン -白き一角獣と黒き獅子- 再来 129ver."
+        "フィーバー機動戦士ガンダムユニコーン -白き一角獣と黒き獅子- 再来 129ver.",
+        "ユニコ"
       ],
       "avgChainCalc": 10.94,
       "calcProb": 1.79
@@ -19021,7 +19202,8 @@
         "シンフォギア",
         "symphogear",
         "フィーバー戦姫絶唱シンフォギア2",
-        "フィーバー戦姫絶唱シンフォギア"
+        "フィーバー戦姫絶唱シンフォギア",
+        "シンフォ"
       ],
       "avgChainCalc": 8.31,
       "calcProb": 3.63
@@ -19051,7 +19233,8 @@
       "aliases": [
         "シンフォギア",
         "symphogear",
-        "フィーバー戦姫絶唱シンフォギア2S"
+        "フィーバー戦姫絶唱シンフォギア2S",
+        "シンフォ"
       ],
       "avgChainCalc": 3.02,
       "calcProb": 13.9
@@ -19081,7 +19264,8 @@
       "aliases": [
         "シンフォギア",
         "symphogear",
-        "フィーバー戦姫絶唱シンフォギア2YR"
+        "フィーバー戦姫絶唱シンフォギア2YR",
+        "シンフォ"
       ],
       "avgChainCalc": 3.31,
       "calcProb": 4.4
@@ -19111,7 +19295,8 @@
       "aliases": [
         "シンフォギア",
         "symphogear",
-        "フィーバー戦姫絶唱シンフォギア3 黄金絶唱"
+        "フィーバー戦姫絶唱シンフォギア3 黄金絶唱",
+        "シンフォ"
       ],
       "avgChainCalc": 3.95,
       "calcProb": 6.75
@@ -19141,7 +19326,8 @@
       "aliases": [
         "シンフォギア",
         "symphogear",
-        "フィーバー戦姫絶唱シンフォギア3 黄金絶唱 LIGHT VER."
+        "フィーバー戦姫絶唱シンフォギア3 黄金絶唱 LIGHT VER.",
+        "シンフォ"
       ],
       "avgChainCalc": 7.24,
       "calcProb": 4.04
@@ -19171,7 +19357,8 @@
       "aliases": [
         "シンフォギア",
         "symphogear",
-        "フィーバー戦姫絶唱シンフォギア4 FINAL COMMANDER 199ver."
+        "フィーバー戦姫絶唱シンフォギア4 FINAL COMMANDER 199ver.",
+        "シンフォ"
       ],
       "avgChainCalc": 3.79,
       "calcProb": 5.27
@@ -19201,7 +19388,8 @@
       "aliases": [
         "シンフォギア",
         "symphogear",
-        "フィーバー戦姫絶唱シンフォギアYR"
+        "フィーバー戦姫絶唱シンフォギアYR",
+        "シンフォ"
       ],
       "avgChainCalc": 3.94,
       "calcProb": 5.24
@@ -19230,7 +19418,8 @@
       "maker": "三共系列",
       "aliases": [
         "フィーバー蒼穹のファフナー2",
-        "フィーバー蒼穹のファフナー"
+        "フィーバー蒼穹のファフナー",
+        "ファフナー"
       ],
       "avgChainCalc": 4.26,
       "calcProb": 2.32
@@ -19258,7 +19447,8 @@
       "releaseDate": "2020-01-06",
       "maker": "三共系列",
       "aliases": [
-        "フィーバー蒼穹のファフナー2 Light ver."
+        "フィーバー蒼穹のファフナー2 Light ver.",
+        "ファフナー"
       ],
       "avgChainCalc": 2.66,
       "calcProb": 2.29
@@ -19286,7 +19476,8 @@
       "releaseDate": "2023-06-05",
       "maker": "三共系列",
       "aliases": [
-        "フィーバー蒼穹のファフナー3 EXODUS 織姫Light ver."
+        "フィーバー蒼穹のファフナー3 EXODUS 織姫Light ver.",
+        "ファフナー"
       ],
       "avgChainCalc": 5.01,
       "calcProb": 2.6
@@ -19371,7 +19562,8 @@
       "releaseDate": "2025-01-20",
       "maker": "サミー系列",
       "aliases": [
-        "ブラックラグーン4 EXTRA BULLET 129ver."
+        "ブラックラグーン4 EXTRA BULLET 129ver.",
+        "ブラクラ"
       ],
       "avgChainCalc": 3.27,
       "calcProb": 5.25
@@ -19399,7 +19591,8 @@
       "releaseDate": "2023-07-03",
       "maker": "銀座",
       "aliases": [
-        "ブラックラグーン4 GFPJ"
+        "ブラックラグーン4 GFPJ",
+        "ブラクラ"
       ],
       "avgChainCalc": 3.51,
       "calcProb": 10.28
@@ -20069,7 +20262,9 @@
       "releaseDate": "2019-01-21",
       "maker": "ビスティ",
       "aliases": [
-        "モードぱちんこ どらむ★ヱヴァンゲリヲンGOLD"
+        "モードぱちんこ どらむ★ヱヴァンゲリヲンGOLD",
+        "エヴァ",
+        "EVA"
       ],
       "avgChainCalc": 2.17
     },
@@ -20097,7 +20292,9 @@
       "maker": "ビスティ",
       "aliases": [
         "モードぱちんこ ヱヴァンゲリヲン～超覚醒～",
-        "モードぱちんこ ヱヴァンゲリヲン"
+        "モードぱちんこ ヱヴァンゲリヲン",
+        "エヴァ",
+        "EVA"
       ],
       "avgChainCalc": 1.32,
       "calcProb": 21.67
@@ -20126,7 +20323,9 @@
       "maker": "ビスティ",
       "aliases": [
         "モードぱちんこ ヱヴァンゲリヲン～超暴走～G",
-        "モードぱちんこ ヱヴァンゲリヲン"
+        "モードぱちんこ ヱヴァンゲリヲン",
+        "エヴァ",
+        "EVA"
       ],
       "avgChainCalc": 1.16,
       "calcProb": 39.27
@@ -20698,7 +20897,8 @@
       "releaseDate": "2021-12-20",
       "maker": "高尾",
       "aliases": [
-        "らんま1/2 熱血格闘遊戯"
+        "らんま1/2 熱血格闘遊戯",
+        "らんま"
       ],
       "avgChainCalc": 8.78,
       "calcProb": 6.23
@@ -20726,7 +20926,8 @@
       "releaseDate": "2022-05-09",
       "maker": "高尾",
       "aliases": [
-        "らんま1/2 熱血格闘遊戯 99ver."
+        "らんま1/2 熱血格闘遊戯 99ver.",
+        "らんま"
       ],
       "avgChainCalc": 8.83,
       "calcProb": 3.11
@@ -20872,7 +21073,8 @@
         "RING",
         "呪いの7日間",
         "リング 呪いの7日間2",
-        "リング 呪いの7日間"
+        "リング 呪いの7日間",
+        "貞子"
       ],
       "calcProb": 0.01
     },
@@ -20903,7 +21105,8 @@
         "RING",
         "呪いの7日間",
         "リング 呪いの7日間2",
-        "リング 呪いの7日間"
+        "リング 呪いの7日間",
+        "貞子"
       ],
       "calcProb": 0.02
     },
@@ -20933,7 +21136,8 @@
         "リング",
         "RING",
         "呪いの7日間",
-        "リング 呪いの7日間2 FWA"
+        "リング 呪いの7日間2 FWA",
+        "貞子"
       ],
       "avgChainCalc": 3.53,
       "calcProb": 4.59
@@ -20964,7 +21168,8 @@
         "リング",
         "RING",
         "呪いの7日間",
-        "リングにかけろ1"
+        "リングにかけろ1",
+        "りんかけ"
       ],
       "avgChainCalc": 3.51,
       "calcProb": 5.04
@@ -20995,7 +21200,8 @@
         "リング",
         "RING",
         "呪いの7日間",
-        "リングにかけろ1 129ver."
+        "リングにかけろ1 129ver.",
+        "りんかけ"
       ],
       "avgChainCalc": 2.39,
       "calcProb": 6.52
@@ -21027,7 +21233,8 @@
         "RING",
         "呪いの7日間",
         "リング呪いの7日間3",
-        "リング呪いの7日間"
+        "リング呪いの7日間",
+        "貞子"
       ],
       "avgChainCalc": 3.49,
       "calcProb": 9.16
@@ -21058,7 +21265,8 @@
         "リング",
         "RING",
         "呪いの7日間",
-        "リング呪いの7日間3 ラッキートリガーVer."
+        "リング呪いの7日間3 ラッキートリガーVer.",
+        "貞子"
       ],
       "avgChainCalc": 7.31,
       "calcProb": 4.48
@@ -21089,7 +21297,8 @@
         "リング",
         "RING",
         "呪いの7日間",
-        "リング呪いの7日間3 甘デジver."
+        "リング呪いの7日間3 甘デジver.",
+        "貞子"
       ],
       "avgChainCalc": 2.47,
       "calcProb": 6.73
@@ -21739,7 +21948,9 @@
       "maker": "ビスティ",
       "aliases": [
         "ヱヴァンゲリヲン～超暴走～",
-        "ヱヴァンゲリヲン"
+        "ヱヴァンゲリヲン",
+        "エヴァ",
+        "EVA"
       ],
       "avgChainCalc": 1.16,
       "calcProb": 37.04
@@ -21767,7 +21978,9 @@
       "releaseDate": "2020-02-03",
       "maker": "ビスティ",
       "aliases": [
-        "ヱヴァンゲリヲン13 エクストラモデル"
+        "ヱヴァンゲリヲン13 エクストラモデル",
+        "エヴァ",
+        "EVA"
       ],
       "avgChainCalc": 2.89,
       "calcProb": 6.77
@@ -21795,7 +22008,9 @@
       "releaseDate": "2019-09-02",
       "maker": "ビスティ",
       "aliases": [
-        "ヱヴァンゲリヲン13 プレミアムモデル"
+        "ヱヴァンゲリヲン13 プレミアムモデル",
+        "エヴァ",
+        "EVA"
       ],
       "avgChainCalc": 6.07,
       "calcProb": 4.42
@@ -21823,7 +22038,9 @@
       "releaseDate": "2019-09-02",
       "maker": "ビスティ",
       "aliases": [
-        "ヱヴァンゲリヲン13ごらくモデル"
+        "ヱヴァンゲリヲン13ごらくモデル",
+        "エヴァ",
+        "EVA"
       ],
       "avgChainCalc": 5.71,
       "calcProb": 3.92
@@ -22134,7 +22351,8 @@
       "releaseDate": "2022-07-19",
       "maker": "ビスティ",
       "aliases": [
-        "宇宙戦艦ヤマト2202 -ONLY ONE-"
+        "宇宙戦艦ヤマト2202 -ONLY ONE-",
+        "ヤマト"
       ],
       "avgChainCalc": 1.9,
       "calcProb": 36.03
@@ -22162,7 +22380,8 @@
       "releaseDate": "2023-02-06",
       "maker": "ビスティ",
       "aliases": [
-        "宇宙戦艦ヤマト2202 -ONLY ONE- Light"
+        "宇宙戦艦ヤマト2202 -ONLY ONE- Light",
+        "ヤマト"
       ],
       "avgChainCalc": 1.53,
       "calcProb": 22.61
@@ -22190,7 +22409,8 @@
       "releaseDate": "2021-07-05",
       "maker": "ビスティ",
       "aliases": [
-        "宇宙戦艦ヤマト2202 愛の戦士たち"
+        "宇宙戦艦ヤマト2202 愛の戦士たち",
+        "ヤマト"
       ],
       "avgChainCalc": 5.69,
       "calcProb": 8.4
@@ -22218,7 +22438,8 @@
       "releaseDate": "2022-09-05",
       "maker": "ビスティ",
       "aliases": [
-        "宇宙戦艦ヤマト2202 愛の戦士たち Light ver."
+        "宇宙戦艦ヤマト2202 愛の戦士たち Light ver.",
+        "ヤマト"
       ],
       "avgChainCalc": 9.26,
       "calcProb": 4.5
@@ -22246,7 +22467,8 @@
       "releaseDate": "2024-10-07",
       "maker": "ビスティ",
       "aliases": [
-        "宇宙戦艦ヤマト2202 愛の戦士たち 超波動"
+        "宇宙戦艦ヤマト2202 愛の戦士たち 超波動",
+        "ヤマト"
       ],
       "avgChainCalc": 3.16,
       "calcProb": 13.39
@@ -22274,7 +22496,8 @@
       "releaseDate": "2025-05-07",
       "maker": "ビスティ",
       "aliases": [
-        "宇宙戦艦ヤマト2202 愛の戦士たち 超波動 森雪199LTver."
+        "宇宙戦艦ヤマト2202 愛の戦士たち 超波動 森雪199LTver.",
+        "ヤマト"
       ],
       "avgChainCalc": 3.72,
       "calcProb": 5.8
@@ -22441,7 +22664,9 @@
       "releaseDate": "2026-02-02",
       "maker": "平和",
       "aliases": [
-        "黄門ちゃま 寿限無 99ver."
+        "黄門ちゃま 寿限無 99ver.",
+        "黄門",
+        "水戸黄門"
       ],
       "avgChainCalc": 3.72,
       "calcProb": 7.76
@@ -22469,7 +22694,9 @@
       "releaseDate": "2026-02-02",
       "maker": "平和",
       "aliases": [
-        "黄門ちゃま 寿限無 LLサイズSTART 259ver."
+        "黄門ちゃま 寿限無 LLサイズSTART 259ver.",
+        "黄門",
+        "水戸黄門"
       ],
       "avgChainCalc": 1.5,
       "calcProb": 17.27
@@ -22498,7 +22725,9 @@
       "maker": "平和系列",
       "aliases": [
         "黄門ちゃま神盛2",
-        "黄門ちゃま神盛"
+        "黄門ちゃま神盛",
+        "黄門",
+        "水戸黄門"
       ],
       "avgChainCalc": 2.78,
       "calcProb": 10.71
@@ -22609,7 +22838,8 @@
       "releaseDate": "2025-03-03",
       "maker": "京楽系列",
       "aliases": [
-        "俺の妹がこんなに可愛いわけがない｡"
+        "俺の妹がこんなに可愛いわけがない｡",
+        "俺妹"
       ],
       "avgChainCalc": 5.88,
       "calcProb": 7.57
@@ -22637,7 +22867,8 @@
       "releaseDate": "2026-02-02",
       "maker": "京楽系列",
       "aliases": [
-        "俺の妹がこんなに可愛いわけがない｡ 攻略!!スキップ159ver."
+        "俺の妹がこんなに可愛いわけがない｡ 攻略!!スキップ159ver.",
+        "俺妹"
       ],
       "avgChainCalc": 1.5,
       "calcProb": 18.17
@@ -22665,7 +22896,9 @@
       "releaseDate": "2024-04-08",
       "maker": "銀座",
       "aliases": [
-        "化物語 199ver."
+        "化物語 199ver.",
+        "化物",
+        "バケモノ"
       ],
       "avgChainCalc": 3.59,
       "calcProb": 8.05
@@ -22693,7 +22926,9 @@
       "releaseDate": "2024-04-08",
       "maker": "銀座",
       "aliases": [
-        "化物語 319ver."
+        "化物語 319ver.",
+        "化物",
+        "バケモノ"
       ],
       "avgChainCalc": 3.72,
       "calcProb": 12.33
@@ -22755,7 +22990,8 @@
         "蓮",
         "れん",
         "はす",
-        "花の慶次 蓮"
+        "花の慶次 蓮",
+        "ケイジ"
       ],
       "avgChainCalc": 4.32,
       "calcProb": 6.55
@@ -22787,7 +23023,8 @@
         "けいじ",
         "花慶",
         "花の慶次～傾奇一転",
-        "花の慶次"
+        "花の慶次",
+        "ケイジ"
       ],
       "avgChainCalc": 6.62,
       "calcProb": 3.53
@@ -22819,7 +23056,8 @@
         "けいじ",
         "花慶",
         "花の慶次～裂～ 蓮極129ver.",
-        "花の慶次"
+        "花の慶次",
+        "ケイジ"
       ],
       "avgChainCalc": 7.94,
       "calcProb": 2.97
@@ -22851,7 +23089,8 @@
         "けいじ",
         "花慶",
         "花の慶次～蓮",
-        "花の慶次"
+        "花の慶次",
+        "ケイジ"
       ],
       "avgChainCalc": 4.83,
       "calcProb": 8.87
@@ -23434,7 +23673,8 @@
       "maker": "ニューギン系列",
       "aliases": [
         "義風堂々!! 〜兼続と慶次〜2 M6-X 1個賞球",
-        "義風堂々!!"
+        "義風堂々!!",
+        "義風"
       ],
       "avgChainCalc": 3.02,
       "calcProb": 8.99
@@ -23463,7 +23703,8 @@
       "maker": "ニューギン系列",
       "aliases": [
         "義風堂々!! ～兼続と慶次～2 M3-X 3個賞球",
-        "義風堂々!!"
+        "義風堂々!!",
+        "義風"
       ],
       "avgChainCalc": 5.21,
       "calcProb": 4.76
@@ -23493,7 +23734,8 @@
       "aliases": [
         "義風堂々!!3 ～兼続と慶次～ 199Ver.",
         "義風堂々!!3",
-        "義風堂々!!"
+        "義風堂々!!",
+        "義風"
       ],
       "avgChainCalc": 1.25,
       "calcProb": 34.18
@@ -23662,7 +23904,8 @@
       "releaseDate": "2024-11-18",
       "maker": "ニューギン系列",
       "aliases": [
-        "銀河英雄伝説 DIE NEUE THESE 319ver."
+        "銀河英雄伝説 DIE NEUE THESE 319ver.",
+        "銀英伝"
       ],
       "avgChainCalc": 1.6,
       "calcProb": 19.98
@@ -23690,7 +23933,8 @@
       "releaseDate": "2024-11-18",
       "maker": "ニューギン系列",
       "aliases": [
-        "銀河英雄伝説 DIE NEUE THESE 89ver."
+        "銀河英雄伝説 DIE NEUE THESE 89ver.",
+        "銀英伝"
       ],
       "avgChainCalc": 6.97,
       "calcProb": 3.26
@@ -23872,7 +24116,8 @@
       "releaseDate": "2020-11-02",
       "maker": "西陣系列",
       "aliases": [
-        "結城友奈は勇者である"
+        "結城友奈は勇者である",
+        "ゆゆゆ"
       ],
       "avgChainCalc": 9.54,
       "calcProb": 2.15
@@ -23900,7 +24145,8 @@
       "releaseDate": "2022-04-18",
       "maker": "西陣系列",
       "aliases": [
-        "結城友奈は勇者である ALL RUSH RFa"
+        "結城友奈は勇者である ALL RUSH RFa",
+        "ゆゆゆ"
       ],
       "avgChainCalc": 3.29,
       "calcProb": 8.02
@@ -23928,7 +24174,8 @@
       "releaseDate": "2021-06-07",
       "maker": "西陣系列",
       "aliases": [
-        "結城友奈は勇者である GC250Ba"
+        "結城友奈は勇者である GC250Ba",
+        "ゆゆゆ"
       ],
       "avgChainCalc": 7.38,
       "calcProb": 1.25
@@ -23956,7 +24203,8 @@
       "releaseDate": "2022-07-19",
       "maker": "西陣系列",
       "aliases": [
-        "結城友奈は勇者である SWEET 77ver."
+        "結城友奈は勇者である SWEET 77ver.",
+        "ゆゆゆ"
       ],
       "avgChainCalc": 2.92,
       "calcProb": 3.5
@@ -24195,7 +24443,8 @@
       "maker": "大一系列",
       "aliases": [
         "攻殻機動隊 GHOST IN THE SHELL:SAC_2045",
-        "攻殻機動隊 GHOST IN THE SHELL:SAC_20"
+        "攻殻機動隊 GHOST IN THE SHELL:SAC_20",
+        "攻殻"
       ],
       "avgChainCalc": 8.05,
       "calcProb": 3.97
@@ -24224,7 +24473,8 @@
       "maker": "大一系列",
       "aliases": [
         "攻殻機動隊 GHOST IN THE SHELL:SAC_2045",
-        "攻殻機動隊 GHOST IN THE SHELL:SAC_20"
+        "攻殻機動隊 GHOST IN THE SHELL:SAC_20",
+        "攻殻"
       ],
       "avgChainCalc": 2.79,
       "calcProb": 8.35
@@ -24252,7 +24502,8 @@
       "releaseDate": "2026-03-02",
       "maker": "大一系列",
       "aliases": [
-        "攻殻機動隊SAC 2045 99ver."
+        "攻殻機動隊SAC 2045 99ver.",
+        "攻殻"
       ],
       "avgChainCalc": 5.27,
       "calcProb": 2.72
@@ -24397,7 +24648,8 @@
       "releaseDate": "2026-02-02",
       "maker": "大都技研",
       "aliases": [
-        "冴えない彼女の育てかた 99ver."
+        "冴えない彼女の育てかた 99ver.",
+        "冴えカノ"
       ],
       "avgChainCalc": 6.87,
       "calcProb": 4.69
@@ -24425,7 +24677,9 @@
       "releaseDate": "2019-03-04",
       "maker": "三洋物産",
       "aliases": [
-        "咲-Saki-阿知賀編 episode of side-A"
+        "咲-Saki-阿知賀編 episode of side-A",
+        "咲",
+        "サキ"
       ],
       "avgChainCalc": 1.23,
       "calcProb": 42.12
@@ -24453,7 +24707,9 @@
       "releaseDate": "2019-06-03",
       "maker": "三洋物産",
       "aliases": [
-        "咲-Saki-阿知賀編 役満GOLD"
+        "咲-Saki-阿知賀編 役満GOLD",
+        "咲",
+        "サキ"
       ],
       "avgChainCalc": 1.14,
       "calcProb": 84.48
@@ -24481,7 +24737,9 @@
       "releaseDate": "2023-09-04",
       "maker": "三洋物産",
       "aliases": [
-        "咲-Saki-全国編"
+        "咲-Saki-全国編",
+        "咲",
+        "サキ"
       ],
       "avgChainCalc": 1.08,
       "calcProb": 46.25
@@ -24509,7 +24767,9 @@
       "releaseDate": "2024-03-18",
       "maker": "三洋物産",
       "aliases": [
-        "咲-Saki-全国編 テンパイ即リーver."
+        "咲-Saki-全国編 テンパイ即リーver.",
+        "咲",
+        "サキ"
       ],
       "avgChainCalc": 1.42,
       "calcProb": 39.31
@@ -24565,7 +24825,8 @@
       "releaseDate": "2019-11-05",
       "maker": "サミー系列",
       "aliases": [
-        "七つの大罪 エリザベスVer."
+        "七つの大罪 エリザベスVer.",
+        "七大"
       ],
       "calcProb": 0.01
     },
@@ -24592,7 +24853,8 @@
       "releaseDate": "2019-04-15",
       "maker": "サミー系列",
       "aliases": [
-        "七つの大罪 強欲Ver."
+        "七つの大罪 強欲Ver.",
+        "七大"
       ],
       "avgChainCalc": 3.88,
       "calcProb": 7.21
@@ -24621,7 +24883,8 @@
       "maker": "銀座",
       "aliases": [
         "七つの大罪2",
-        "七つの大罪"
+        "七つの大罪",
+        "七大"
       ],
       "avgChainCalc": 4.22,
       "calcProb": 8.96
@@ -24649,7 +24912,8 @@
       "releaseDate": "2024-05-07",
       "maker": "銀座",
       "aliases": [
-        "七つの大罪2 神千斬りVER."
+        "七つの大罪2 神千斬りVER.",
+        "七大"
       ],
       "avgChainCalc": 10.96,
       "calcProb": 3.71
@@ -24985,7 +25249,8 @@
       "releaseDate": "2024-12-02",
       "maker": "銀座",
       "aliases": [
-        "盾の勇者の成り上がり"
+        "盾の勇者の成り上がり",
+        "盾勇"
       ],
       "avgChainCalc": 5.61,
       "calcProb": 6.53
@@ -25097,7 +25362,9 @@
       "releaseDate": "2020-01-06",
       "maker": "サンセイR&D",
       "aliases": [
-        "笑ゥせぇるすまん ドーンといきまSHOW 199ver."
+        "笑ゥせぇるすまん ドーンといきまSHOW 199ver.",
+        "喪黒",
+        "セールスマン"
       ],
       "avgChainCalc": 3.23,
       "calcProb": 9.25
@@ -25794,7 +26061,9 @@
       "releaseDate": "2020-03-02",
       "maker": "平和",
       "aliases": [
-        "真・黄門ちゃま"
+        "真・黄門ちゃま",
+        "黄門",
+        "水戸黄門"
       ],
       "avgChainCalc": 1.6,
       "calcProb": 19.98
@@ -25822,7 +26091,9 @@
       "releaseDate": "2021-01-12",
       "maker": "平和",
       "aliases": [
-        "真･黄門ちゃま"
+        "真･黄門ちゃま",
+        "黄門",
+        "水戸黄門"
       ],
       "avgChainCalc": 4.81,
       "calcProb": 4.72
@@ -25850,7 +26121,9 @@
       "releaseDate": "2021-01-12",
       "maker": "平和",
       "aliases": [
-        "真･黄門ちゃま"
+        "真･黄門ちゃま",
+        "黄門",
+        "水戸黄門"
       ],
       "avgChainCalc": 1.58,
       "calcProb": 20.39
@@ -25881,7 +26154,9 @@
         "慶次",
         "けいじ",
         "花慶",
-        "真･花の慶次 黄金一閃"
+        "真･花の慶次 黄金一閃",
+        "ケイジ",
+        "真慶次"
       ],
       "avgChainCalc": 2.74,
       "calcProb": 13.66
@@ -25917,7 +26192,8 @@
         "真慶次",
         "真・花の慶次2〜漆黒の衝撃〜EXTRA RUSH",
         "真・花の慶次2",
-        "真・花の慶次"
+        "真・花の慶次",
+        "ケイジ"
       ],
       "avgChainCalc": 4.25,
       "calcProb": 5.63
@@ -25949,7 +26225,9 @@
         "けいじ",
         "花慶",
         "真･花の慶次3",
-        "真･花の慶次"
+        "真･花の慶次",
+        "ケイジ",
+        "真慶次"
       ],
       "avgChainCalc": 5.11,
       "calcProb": 7.89
@@ -25983,7 +26261,8 @@
         "真花",
         "しん花慶",
         "真慶次",
-        "真・花の慶次3 天速Ver."
+        "真・花の慶次3 天速Ver.",
+        "ケイジ"
       ],
       "avgChainCalc": 3.47,
       "calcProb": 11.97
@@ -26014,7 +26293,9 @@
         "慶次",
         "けいじ",
         "花慶",
-        "真･花の慶次3N-K"
+        "真･花の慶次3N-K",
+        "ケイジ",
+        "真慶次"
       ],
       "avgChainCalc": 2.23,
       "calcProb": 8.09
@@ -26474,7 +26755,8 @@
       "releaseDate": "2022-06-06",
       "maker": "メーシー",
       "aliases": [
-        "真バジリスク 甲賀忍法帖"
+        "真バジリスク 甲賀忍法帖",
+        "バジ"
       ],
       "avgChainCalc": 24.9,
       "calcProb": 1.36
@@ -26503,7 +26785,8 @@
       "maker": "メーシー",
       "aliases": [
         "真バジリスク～甲賀忍法帖～豪塊319ver.",
-        "真バジリスク"
+        "真バジリスク",
+        "バジ"
       ],
       "avgChainCalc": 3.91,
       "calcProb": 14.02
@@ -26871,7 +27154,8 @@
       "releaseDate": "2023-04-03",
       "maker": "サミー系列",
       "aliases": [
-        "聖戦士ダンバイン2 ZERO LIMIT HYPER"
+        "聖戦士ダンバイン2 ZERO LIMIT HYPER",
+        "ダンバイン"
       ],
       "avgChainCalc": 4.55,
       "calcProb": 15.48
@@ -26899,7 +27183,8 @@
       "releaseDate": "2024-02-05",
       "maker": "サミー系列",
       "aliases": [
-        "聖戦士ダンバイン2 ZERO SONIC 99VER."
+        "聖戦士ダンバイン2 ZERO SONIC 99VER.",
+        "ダンバイン"
       ],
       "avgChainCalc": 9.54,
       "calcProb": 2.85
@@ -27139,7 +27424,8 @@
         "おとめ",
         "戦乙女",
         "戦国乙女5",
-        "戦国乙女"
+        "戦国乙女",
+        "戦乙"
       ],
       "avgChainCalc": 6.1,
       "calcProb": 6.65
@@ -27170,7 +27456,8 @@
         "乙女",
         "おとめ",
         "戦乙女",
-        "戦国乙女5 甘デジ"
+        "戦国乙女5 甘デジ",
+        "戦乙"
       ],
       "avgChainCalc": 2.44,
       "calcProb": 8.11
@@ -27201,7 +27488,8 @@
         "乙女",
         "おとめ",
         "戦乙女",
-        "戦国乙女6 暁の関ヶ原"
+        "戦国乙女6 暁の関ヶ原",
+        "戦乙"
       ],
       "avgChainCalc": 3.68,
       "calcProb": 31.76
@@ -27232,7 +27520,8 @@
         "乙女",
         "おとめ",
         "戦乙女",
-        "戦国乙女6 暁の関ヶ原"
+        "戦国乙女6 暁の関ヶ原",
+        "戦乙"
       ],
       "avgChainCalc": 4.32,
       "calcProb": 23.12
@@ -27263,7 +27552,8 @@
         "乙女",
         "おとめ",
         "戦乙女",
-        "戦国乙女7  終焉の関ヶ原 299ver."
+        "戦国乙女7  終焉の関ヶ原 299ver.",
+        "戦乙"
       ],
       "avgChainCalc": 9.68,
       "calcProb": 5.12
@@ -27294,7 +27584,8 @@
         "乙女",
         "おとめ",
         "戦乙女",
-        "戦国乙女7 終焉の関ヶ原"
+        "戦国乙女7 終焉の関ヶ原",
+        "戦乙"
       ],
       "avgChainCalc": 1.38,
       "calcProb": 57.83
@@ -27325,7 +27616,8 @@
         "乙女",
         "おとめ",
         "戦乙女",
-        "戦国乙女7 終焉の関ヶ原 強カワ99ver."
+        "戦国乙女7 終焉の関ヶ原 強カワ99ver.",
+        "戦乙"
       ],
       "avgChainCalc": 11.84,
       "calcProb": 1.84
@@ -27356,7 +27648,8 @@
         "乙女",
         "おとめ",
         "戦乙女",
-        "戦国乙女レジェンドバトル"
+        "戦国乙女レジェンドバトル",
+        "戦乙"
       ],
       "avgChainCalc": 2.9,
       "calcProb": 32.78
@@ -27387,7 +27680,8 @@
         "乙女",
         "おとめ",
         "戦乙女",
-        "戦国乙女レジェンドバトル 99ver"
+        "戦国乙女レジェンドバトル 99ver",
+        "戦乙"
       ],
       "avgChainCalc": 4.22,
       "calcProb": 5.28
@@ -27557,7 +27851,8 @@
       "releaseDate": "2026-01-19",
       "maker": "大一系列",
       "aliases": [
-        "閃乱カグラ 大入りスタート189ver."
+        "閃乱カグラ 大入りスタート189ver.",
+        "カグラ"
       ],
       "avgChainCalc": 2.74,
       "calcProb": 7.48
@@ -27585,7 +27880,8 @@
       "releaseDate": "2021-06-07",
       "maker": "高尾",
       "aliases": [
-        "閃乱カグラ2 パイまみれ"
+        "閃乱カグラ2 パイまみれ",
+        "カグラ"
       ],
       "avgChainCalc": 2.62,
       "calcProb": 5.93
@@ -27613,7 +27909,8 @@
       "releaseDate": "2020-12-21",
       "maker": "高尾",
       "aliases": [
-        "閃乱カグラ2 胸躍る"
+        "閃乱カグラ2 胸躍る",
+        "カグラ"
       ],
       "avgChainCalc": 2.85,
       "calcProb": 10.91
@@ -27701,7 +27998,8 @@
       "releaseDate": "2022-06-06",
       "maker": "三共系列",
       "aliases": [
-        "蒼穹のファフナー3 EXODUS 超蒼穹3800ver."
+        "蒼穹のファフナー3 EXODUS 超蒼穹3800ver.",
+        "ファフナー"
       ],
       "avgChainCalc": 2.1,
       "calcProb": 5.26
@@ -28056,7 +28354,8 @@
       "releaseDate": "2022-11-07",
       "maker": "高尾",
       "aliases": [
-        "弾球黙示録カイジ5 ざわっ･･･Ver."
+        "弾球黙示録カイジ5 ざわっ･･･Ver.",
+        "カイジ"
       ],
       "avgChainCalc": 1.5,
       "calcProb": 16.21
@@ -28084,7 +28383,8 @@
       "releaseDate": "2021-05-24",
       "maker": "高尾",
       "aliases": [
-        "弾球黙示録カイジ5 プラズマ"
+        "弾球黙示録カイジ5 プラズマ",
+        "カイジ"
       ],
       "avgChainCalc": 5.32,
       "calcProb": 6.68
@@ -28112,7 +28412,8 @@
       "releaseDate": "2021-05-24",
       "maker": "高尾",
       "aliases": [
-        "弾球黙示録カイジ5 電撃"
+        "弾球黙示録カイジ5 電撃",
+        "カイジ"
       ],
       "avgChainCalc": 5.69,
       "calcProb": 6.71
@@ -28140,7 +28441,8 @@
       "releaseDate": "2022-03-07",
       "maker": "高尾",
       "aliases": [
-        "弾球黙示録カイジ5 電撃チャージ 和也ver."
+        "弾球黙示録カイジ5 電撃チャージ 和也ver.",
+        "カイジ"
       ],
       "avgChainCalc": 1.38,
       "calcProb": 30.85
@@ -28168,7 +28470,8 @@
       "releaseDate": "2020-02-17",
       "maker": "高尾",
       "aliases": [
-        "弾球黙示録カイジ沼4 カイジVer."
+        "弾球黙示録カイジ沼4 カイジVer.",
+        "カイジ"
       ],
       "avgChainCalc": 7.95,
       "calcProb": 5.24
@@ -28196,7 +28499,8 @@
       "releaseDate": "2020-09-14",
       "maker": "高尾",
       "aliases": [
-        "弾球黙示録カイジ沼4 ざわっ…"
+        "弾球黙示録カイジ沼4 ざわっ…",
+        "カイジ"
       ],
       "avgChainCalc": 3.35,
       "calcProb": 5.67
@@ -28226,7 +28530,8 @@
       "aliases": [
         "弾球黙示録カイジ沼5 ～運否天賦～",
         "弾球黙示録カイジ沼5",
-        "弾球黙示録カイジ沼"
+        "弾球黙示録カイジ沼",
+        "カイジ"
       ],
       "avgChainCalc": 3.77,
       "calcProb": 9.45
@@ -28256,7 +28561,8 @@
       "aliases": [
         "弾球黙示録カイジ沼5 ～運否天賦～ ざわっ･･･79Ver.",
         "弾球黙示録カイジ沼5",
-        "弾球黙示録カイジ沼"
+        "弾球黙示録カイジ沼",
+        "カイジ"
       ],
       "avgChainCalc": 3.87,
       "calcProb": 2.3
@@ -28284,7 +28590,8 @@
       "releaseDate": "2024-04-22",
       "maker": "高尾",
       "aliases": [
-        "弾球黙示録カイジ沼5 超欲望129×87%Ver."
+        "弾球黙示録カイジ沼5 超欲望129×87%Ver.",
+        "カイジ"
       ],
       "avgChainCalc": 5.96,
       "calcProb": 2.39
@@ -28658,7 +28965,9 @@
       "releaseDate": "2025-04-21",
       "maker": "藤商事",
       "aliases": [
-        "痛いのは嫌なので防御力に極振りしたいと思います｡"
+        "痛いのは嫌なので防御力に極振りしたいと思います｡",
+        "防振り",
+        "ぼうふり"
       ],
       "avgChainCalc": 4.8,
       "calcProb": 9.87
@@ -28686,7 +28995,9 @@
       "releaseDate": "2026-03-02",
       "maker": "藤商事",
       "aliases": [
-        "痛いのは嫌なので防御力に極振りしたいと思います｡ 極振り129ver."
+        "痛いのは嫌なので防御力に極振りしたいと思います｡ 極振り129ver.",
+        "防振り",
+        "ぼうふり"
       ],
       "avgChainCalc": 1.99,
       "calcProb": 14.47
@@ -28895,7 +29206,8 @@
       "releaseDate": "2019-08-19",
       "maker": "三共系列",
       "aliases": [
-        "鉄拳 極"
+        "鉄拳 極",
+        "鉄拳"
       ],
       "avgChainCalc": 9.13,
       "calcProb": 3.51
@@ -29411,7 +29723,8 @@
       "releaseDate": "2022-05-09",
       "maker": "サミー系列",
       "aliases": [
-        "頭文字D"
+        "頭文字D",
+        "イニD"
       ],
       "avgChainCalc": 12.85,
       "calcProb": 3.76
@@ -29439,7 +29752,8 @@
       "releaseDate": "2024-06-03",
       "maker": "銀座",
       "aliases": [
-        "頭文字D 2nd"
+        "頭文字D 2nd",
+        "イニD"
       ],
       "avgChainCalc": 21.09,
       "calcProb": 7.4
@@ -29467,7 +29781,8 @@
       "releaseDate": "2023-10-02",
       "maker": "銀座",
       "aliases": [
-        "頭文字D Non-Stop 3000Edition"
+        "頭文字D Non-Stop 3000Edition",
+        "イニD"
       ],
       "avgChainCalc": 2.7,
       "calcProb": 10.47
@@ -29583,7 +29898,8 @@
       "aliases": [
         "乃木坂46",
         "のぎざか",
-        "乃木坂46 キュンキュンLIGHT ver."
+        "乃木坂46 キュンキュンLIGHT ver.",
+        "乃木坂"
       ],
       "avgChainCalc": 3.32,
       "calcProb": 11.63
@@ -29724,7 +30040,8 @@
       "maker": "藤商事",
       "aliases": [
         "緋弾のアリア ～緋緋神降臨～ ラッキートリガーVer.",
-        "緋弾のアリア"
+        "緋弾のアリア",
+        "アリア"
       ],
       "avgChainCalc": 2.38,
       "calcProb": 19.83
@@ -29753,7 +30070,8 @@
       "maker": "藤商事",
       "aliases": [
         "緋弾のアリア～緋弾覚醒編～",
-        "緋弾のアリア"
+        "緋弾のアリア",
+        "アリア"
       ],
       "avgChainCalc": 3.22,
       "calcProb": 7.9
@@ -29782,7 +30100,8 @@
       "maker": "藤商事系列",
       "aliases": [
         "緋弾のアリア～緋弾覚醒編～ 319Ver.",
-        "緋弾のアリア"
+        "緋弾のアリア",
+        "アリア"
       ],
       "avgChainCalc": 3.25,
       "calcProb": 9.84
@@ -29811,7 +30130,8 @@
       "maker": "藤商事",
       "aliases": [
         "緋弾のアリア～緋緋神降臨～199Ver.",
-        "緋弾のアリア"
+        "緋弾のアリア",
+        "アリア"
       ],
       "avgChainCalc": 8.13,
       "calcProb": 4.13
@@ -29840,7 +30160,8 @@
       "maker": "藤商事",
       "aliases": [
         "緋弾のアリア～緋緋神降臨～88Ver.",
-        "緋弾のアリア"
+        "緋弾のアリア",
+        "アリア"
       ],
       "avgChainCalc": 10.36,
       "calcProb": 2.44
@@ -29868,7 +30189,8 @@
       "releaseDate": "2019-03-04",
       "maker": "藤商事",
       "aliases": [
-        "緋弾のアリアAA FE 設定付"
+        "緋弾のアリアAA FE 設定付",
+        "アリア"
       ],
       "avgChainCalc": 2.74,
       "calcProb": 10.71
@@ -30179,7 +30501,8 @@
         "北斗",
         "ほくと",
         "北斗の拳",
-        "北斗の拳 強敵 LT"
+        "北斗の拳 強敵 LT",
+        "ホクト"
       ],
       "avgChainCalc": 14.44,
       "calcProb": 1.4
@@ -30210,7 +30533,8 @@
         "北斗",
         "ほくと",
         "北斗の拳",
-        "北斗の拳 慈母"
+        "北斗の拳 慈母",
+        "ホクト"
       ],
       "avgChainCalc": 12.61,
       "calcProb": 1.42
@@ -30243,7 +30567,8 @@
         "北斗の拳",
         "暴凶星",
         "ぼうきょうせい",
-        "北斗の拳 暴凶星SFPA"
+        "北斗の拳 暴凶星SFPA",
+        "ホクト"
       ],
       "avgChainCalc": 3.44,
       "calcProb": 9.29
@@ -30274,7 +30599,8 @@
         "北斗",
         "ほくと",
         "北斗の拳",
-        "北斗の拳8 救世主"
+        "北斗の拳8 救世主",
+        "ホクト"
       ],
       "avgChainCalc": 1.51,
       "calcProb": 45.09
@@ -30305,7 +30631,8 @@
         "北斗",
         "ほくと",
         "北斗の拳",
-        "北斗の拳8 究極乱世"
+        "北斗の拳8 究極乱世",
+        "ホクト"
       ],
       "avgChainCalc": 17.28,
       "calcProb": 1.26
@@ -30336,7 +30663,8 @@
         "北斗",
         "ほくと",
         "北斗の拳",
-        "北斗の拳8覇王"
+        "北斗の拳8覇王",
+        "ホクト"
       ],
       "avgChainCalc": 1.16,
       "calcProb": 52.28
@@ -30367,7 +30695,8 @@
         "北斗",
         "ほくと",
         "北斗の拳",
-        "北斗の拳9 闘神"
+        "北斗の拳9 闘神",
+        "ホクト"
       ],
       "avgChainCalc": 4.6,
       "calcProb": 8.2
@@ -30797,7 +31126,11 @@
       "releaseDate": "2020-01-06",
       "maker": "サンセイR&D",
       "avgChainCalc": 1.5,
-      "calcProb": 11.1
+      "calcProb": 11.1,
+      "aliases": [
+        "喪黒",
+        "セールスマン"
+      ]
     },
     {
       "name": "デカスタe花の慶次～傾奇一転",
@@ -30825,7 +31158,8 @@
         "慶次",
         "けいじ",
         "花慶",
-        "デカスタe花の慶次"
+        "デカスタe花の慶次",
+        "ケイジ"
       ],
       "avgChainCalc": 5.41,
       "calcProb": 7.1
@@ -30963,7 +31297,9 @@
       "releaseDate": "2021-03-08",
       "maker": "サンセイR&D",
       "aliases": [
-        "笑ゥせぇるすまん最後の忠告"
+        "笑ゥせぇるすまん最後の忠告",
+        "喪黒",
+        "セールスマン"
       ],
       "avgChainCalc": 2.95,
       "calcProb": 13.72
@@ -30991,7 +31327,8 @@
       "releaseDate": "2020-10-05",
       "maker": "ニューギン系列",
       "aliases": [
-        "戦国パチンコP義風堂々!!"
+        "戦国パチンコP義風堂々!!",
+        "義風"
       ],
       "avgChainCalc": 2.77,
       "calcProb": 5.05
