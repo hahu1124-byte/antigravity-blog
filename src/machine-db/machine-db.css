@@ -634,6 +634,13 @@ tbody tr:hover .machine-name {
     color: #a0a4b8;
 }
 
+/* 自前計算トータル確率（括弧表示） */
+.calc-prob {
+    font-size: 0.7em;
+    color: #6b6f80;
+    font-weight: 400;
+}
+
 .border-value {
     font-weight: 700;
     font-size: 0.95rem;

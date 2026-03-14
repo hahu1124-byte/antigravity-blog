@@ -368,7 +368,7 @@
         switch (col) {
             case 'type': return `<td><span class="type-badge ${getTypeClass(m.type)}">${esc(m.type || '—')}</span></td>`;
             case 'baseProb': return `<td class="prob-value">${m.baseProbability > 0 ? '1/' + m.baseProbability : '—'}</td>`;
-            case 'prob': return `<td class="prob-value">1/${m.prob}</td>`;
+            case 'prob': return `<td class="prob-value">1/${m.prob}${m.calcProb > 0 ? ` <span class="calc-prob">(${m.calcProb})</span>` : ''}</td>`;
             case 'border': return `<td class="border-value ${getBorderClass(m.borderEquiv)}">${m.borderEquiv > 0 ? m.borderEquiv.toFixed(2) : '—'}</td>`;
             case 'rb': return `<td class="rb-value">${m.rb > 0 ? m.rb.toFixed(0) + '玉' : '—'}</td>`;
             case 'chain': return `<td class="chain-value">${m.avgChain > 0 ? m.avgChain.toFixed(2) + '連' : '—'}</td>`;
@@ -643,7 +643,7 @@
             <div class="modal-type"><span class="type-badge ${getTypeClass(m.type)}">${esc(m.type || '不明')}</span>${m.maker ? ' <span class="modal-maker">' + esc(m.maker) + '</span>' : ''}</div>
             <div class="modal-specs">
                 <div class="spec-card"><div class="spec-label">大当り確率</div><div class="spec-value">${m.baseProbability > 0 ? '1/' + m.baseProbability : '—'}</div></div>
-                <div class="spec-card"><div class="spec-label">トータル確率</div><div class="spec-value">1/${m.prob}</div></div>
+                <div class="spec-card"><div class="spec-label">トータル確率</div><div class="spec-value">1/${m.prob}${m.calcProb > 0 ? ` <span class="calc-prob">(${m.calcProb})</span>` : ''}</div></div>
                 <div class="spec-card"><div class="spec-label">等価ボーダー</div><div class="spec-value ${getBorderClass(m.borderEquiv)}">${m.borderEquiv > 0 ? m.borderEquiv.toFixed(2) + ' 回転/k' : '—'}</div></div>
                 <div class="spec-card"><div class="spec-label">想定1R出玉</div><div class="spec-value">${m.rb > 0 ? m.rb.toFixed(0) + ' 玉' : '—'}</div></div>
                 <div class="spec-card"><div class="spec-label">平均連荘</div><div class="spec-value">${m.avgChain > 0 ? m.avgChain.toFixed(2) + ' 連' : '—'}</div></div>
