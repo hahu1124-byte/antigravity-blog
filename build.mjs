@@ -75,7 +75,7 @@ const ADMAX_SCRIPT_URL = 'https://adm.shinobi.jp/st/t.js';
 // ==========================================
 
 const SITE_URL = 'https://www.antigravity-portal.com';
-const DEFAULT_OG_IMAGE = `${SITE_URL}/blog/images/ai_dev_day1.png`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/blog/images/ai_dev_day1.webp`;
 
 /**
  * 共通HTMLヘッド生成
@@ -580,13 +580,19 @@ function buildArticlePages() {
 
         // OGP用: 記事のヒーロー画像をcontentから抽出
         const heroMatch = post.content.match(/src="\/blog\/images\/([^"]+)"/);
-        const ogImage = heroMatch
-            ? `${SITE_URL}/blog/images/${heroMatch[1]}`
+        let ogImageFile = heroMatch ? heroMatch[1] : null;
+        // .png → .webp に変換（OGP画像もWebP統一）
+        if (ogImageFile) ogImageFile = ogImageFile.replace(/\.png$/i, '.webp').replace(/\.jpe?g$/i, '.webp');
+        const ogImage = ogImageFile
+            ? `${SITE_URL}/blog/images/${ogImageFile}`
             : DEFAULT_OG_IMAGE;
         const ogUrl = `${SITE_URL}/blog/${post.slug}/`;
 
         // 記事content内の絶対画像パスを相対パスに変換
         let content = post.content.replace(/src="\/blog\/images\//g, `src="${toRoot}images/`);
+
+        // 画像拡張子を .webp に自動変換（PNG/JPG → WebP）
+        content = content.replace(/(src="[^"]*\/images\/[^"]+)\.(png|jpe?g)"/gi, '$1.webp"');
 
         // テーブルをスクロール可能なラッパーで囲む（スマホ対応）
         content = content.replace(/<table/g, '<div class="table-scroll"><table');
