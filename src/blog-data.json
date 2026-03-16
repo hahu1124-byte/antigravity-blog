@@ -1,5 +1,12 @@
 [
   {
+    "slug": "202603/20260316_ai_lab_update_v5",
+    "title": "💰 コストの壁が崩壊する — LAB第5回レポート：Claude長文無料化・DeepSeek V4・日本政府Gennai始動",
+    "date": "2026-03-16",
+    "excerpt": "Claude長文サーチャージ撤廃、DeepSeek V4が1兆パラメータをオープンウェイト公開、MiniMax M2.5がClaude級を低コスト実現。Gartnerは企業アプリの40%がエージェントAI搭載と予測。日本政府は18万人規模のGennaiとGENIAC-PRIZE 8億円で本格始動。",
+    "tags": ["AI", "開発", "LAB"]
+  },
+  {
     "slug": "202603/20260315_ai_lab_update_v4",
     "title": "🌍 AI業界激震の1週間 — LAB第4回レポート：#QuitGPT・Anthropic訴訟・Apple参入",
     "date": "2026-03-15",
