@@ -3,9 +3,10 @@
  * blog-data.json → 静的HTML生成スクリプト
  * GitHub Pages用のブログサイトを生成する
  */
-import { readFileSync, writeFileSync, mkdirSync, cpSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
+import { readFileSync, writeFileSync, mkdirSync, cpSync, existsSync, readdirSync, statSync } from 'fs';
+import { join, dirname, extname } from 'path';
 import { fileURLToPath } from 'url';
+import { transform } from 'esbuild';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -969,5 +970,56 @@ buildTagPages();
 buildArticlePages();
 buildRssFeed();
 buildMachinePages();
+
+// ==========================================
+// CSS / JS Minify（ビルド後処理）
+// ==========================================
+
+/** dist内の全CSS/JSファイルを再帰的に取得 */
+function collectFiles(dir, exts) {
+    const results = [];
+    if (!existsSync(dir)) return results;
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+        const fullPath = join(dir, entry.name);
+        if (entry.isDirectory()) {
+            results.push(...collectFiles(fullPath, exts));
+        } else if (exts.includes(extname(entry.name).toLowerCase())) {
+            results.push(fullPath);
+        }
+    }
+    return results;
+}
+
+async function minifyAssets() {
+    const cssFiles = collectFiles(OUTPUT_DIR, ['.css']);
+    const jsFiles = collectFiles(OUTPUT_DIR, ['.js']);
+    let totalSaved = 0;
+    let fileCount = 0;
+
+    for (const file of [...cssFiles, ...jsFiles]) {
+        const ext = extname(file).toLowerCase();
+        const original = readFileSync(file, 'utf-8');
+        const originalSize = Buffer.byteLength(original, 'utf-8');
+
+        try {
+            const result = await transform(original, {
+                loader: ext === '.css' ? 'css' : 'js',
+                minify: true,
+            });
+            const newSize = Buffer.byteLength(result.code, 'utf-8');
+            if (newSize < originalSize) {
+                writeFileSync(file, result.code);
+                totalSaved += (originalSize - newSize);
+                fileCount++;
+            }
+        } catch (e) {
+            // minify失敗時はスキップ（元ファイルを維持）
+        }
+    }
+
+    console.log(`🗜️  ${fileCount}/${cssFiles.length + jsFiles.length} ファイルをminify (${(totalSaved / 1024).toFixed(1)}KB 削減)`);
+}
+
+await minifyAssets();
 
 console.log('✅ ビルド完了！ dist/ に出力されました');
