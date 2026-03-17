@@ -28,6 +28,10 @@
     let files = [];
     let convertedFiles = [];
 
+    // UX保護制限
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+    const MAX_FILE_COUNT = 50;
+
     // ユーティリティ
     function formatBytes(bytes) {
         if (bytes === 0) return '0 B';
@@ -85,11 +89,29 @@
 
     // ファイル処理
     function handleFiles(newFiles) {
+        let skippedSize = 0;
+        let skippedCount = 0;
         for (const file of newFiles) {
             if (!file.type.startsWith('image/')) continue;
             // 重複チェック
             if (files.some(f => f.name === file.name && f.size === file.size)) continue;
+            // ファイルサイズ制限
+            if (file.size > MAX_FILE_SIZE) {
+                skippedSize++;
+                continue;
+            }
+            // 枚数制限
+            if (files.length >= MAX_FILE_COUNT) {
+                skippedCount += (newFiles.length - Array.from(newFiles).indexOf(file));
+                break;
+            }
             files.push(file);
+        }
+        if (skippedSize > 0) {
+            alert('⚠️ ' + skippedSize + '件のファイルが50MBを超えているためスキップしました。\nブラウザのメモリ保護のため、1ファイルあたり50MBが上限です。');
+        }
+        if (skippedCount > 0) {
+            alert('⚠️ 同時処理は最大50枚までです。\nブラウザの安定動作のための制限です。');
         }
         updateFileList();
     }

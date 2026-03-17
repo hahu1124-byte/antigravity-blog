@@ -2,6 +2,9 @@
 (function () {
     'use strict';
 
+    // UX保護制限
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
     // ========== タブ切り替え ==========
     const tabs = document.querySelectorAll('.tab');
     const panels = document.querySelectorAll('.tab-content');
@@ -251,6 +254,10 @@
 
     function readQRFromFile(file) {
         if (!file.type.startsWith('image/')) return;
+        if (file.size > MAX_FILE_SIZE) {
+            alert('⚠️ ファイルサイズが50MBを超えています。\nブラウザのメモリ保護のため、50MB以下のファイルを使用してください。');
+            return;
+        }
 
         // リセット
         readResult.classList.add('hidden');
