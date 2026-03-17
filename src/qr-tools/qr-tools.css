@@ -1,0 +1,537 @@
+/* QRコード生成・読み取りツール - スタイル */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0a0b10;
+    color: #e0e0e8;
+    min-height: 100vh;
+}
+
+#app {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 1.5rem 1rem;
+}
+
+/* ヘッダー */
+.tool-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.tool-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a78bfa, #7c7ff2, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+
+.tool-subtitle {
+    color: #6b6f80;
+    font-size: 0.85rem;
+}
+
+/* タブ */
+.tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    background: rgba(30, 32, 48, 0.6);
+    border-radius: 12px;
+    padding: 4px;
+    border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-radius: 9px;
+    padding: 0.65rem 1rem;
+    color: #6b6f80;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+}
+
+.tab:hover {
+    color: #a0a4b8;
+}
+
+.tab.active {
+    background: linear-gradient(135deg, rgba(124, 127, 242, 0.25), rgba(99, 102, 241, 0.15));
+    color: #e0e0e8;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 入力セクション */
+.input-section {
+    margin-bottom: 1rem;
+}
+
+.input-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #8b8fa0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+}
+
+.qr-input {
+    width: 100%;
+    background: #12131a;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    color: #e0e0e8;
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-height: 70px;
+}
+
+.qr-input:focus {
+    border-color: #7c7ff2;
+    box-shadow: 0 0 0 3px rgba(124, 127, 242, 0.1);
+}
+
+.qr-input::placeholder {
+    color: #3a3d4e;
+}
+
+.input-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.4rem;
+    font-size: 0.72rem;
+    color: #4a4d5e;
+}
+
+/* 設定パネル */
+.settings-panel {
+    background: rgba(30, 32, 48, 0.8);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+.settings-row {
+    display: flex;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    align-items: flex-start;
+}
+
+.setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+    min-width: 140px;
+}
+
+.setting-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #8b8fa0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.setting-group select {
+    background: #12131a;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    padding: 0.55rem 0.75rem;
+    color: #e0e0e8;
+    font-size: 0.82rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.setting-group select:focus {
+    border-color: #7c7ff2;
+    box-shadow: 0 0 0 3px rgba(124, 127, 242, 0.1);
+}
+
+/* カラーピッカー */
+.color-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.color-input-wrap input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 36px;
+    height: 36px;
+    border: 2px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    cursor: pointer;
+    background: none;
+    padding: 2px;
+}
+
+.color-input-wrap input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.color-input-wrap input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 5px;
+}
+
+.color-hex {
+    font-size: 0.78rem;
+    color: #6b6f80;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+/* プレビュー */
+.preview-section {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.preview-area {
+    background: rgba(30, 32, 48, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+    position: relative;
+}
+
+#qr-canvas {
+    display: none;
+    border-radius: 8px;
+    max-width: 100%;
+    image-rendering: pixelated;
+}
+
+.preview-placeholder {
+    color: #3a3d4e;
+    text-align: center;
+}
+
+.placeholder-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 0.75rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+.preview-placeholder p {
+    font-size: 0.85rem;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+}
+
+/* ボタン */
+.btn-primary {
+    background: linear-gradient(135deg, #7c7ff2, #6366f1);
+    border: none;
+    border-radius: 10px;
+    padding: 0.65rem 1.25rem;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-svg {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.btn-svg:hover {
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 10px;
+    padding: 0.65rem 1.25rem;
+    color: #a78bfa;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: rgba(99, 102, 241, 0.15);
+}
+
+/* ドロップゾーン（読み取りタブ） */
+.drop-zone {
+    border: 2px dashed rgba(124, 127, 242, 0.3);
+    border-radius: 16px;
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: pointer;
+    background: rgba(30, 32, 48, 0.4);
+}
+
+.drop-zone:hover,
+.drop-zone.drag-over {
+    border-color: #7c7ff2;
+    background: rgba(99, 102, 241, 0.08);
+    box-shadow: 0 0 30px rgba(124, 127, 242, 0.1);
+}
+
+.drop-zone.drag-over {
+    transform: scale(1.01);
+}
+
+.drop-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    animation: float 3s ease-in-out infinite;
+}
+
+.drop-text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #a0a4b8;
+    margin-bottom: 0.5rem;
+}
+
+.drop-sub {
+    color: #6b6f80;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.file-label {
+    color: #7c7ff2;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.file-label:hover {
+    color: #a78bfa;
+}
+
+.drop-hint {
+    color: #4a4d5e;
+    font-size: 0.75rem;
+}
+
+/* 読み取りプレビュー */
+.read-preview {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.read-image-wrap {
+    background: rgba(30, 32, 48, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: inline-block;
+}
+
+.read-image-wrap img {
+    max-width: 300px;
+    max-height: 300px;
+    border-radius: 8px;
+}
+
+/* 読み取り結果 */
+.read-result {
+    background: rgba(30, 32, 48, 0.8);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin: 1rem 0;
+}
+
+.result-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #4ade80;
+    margin-bottom: 0.75rem;
+}
+
+.result-content {
+    background: #12131a;
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    font-size: 0.9rem;
+    color: #e0e0e8;
+    word-break: break-all;
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.result-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn-link {
+    background: linear-gradient(135deg, #34d399, #10b981);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.btn-link:hover {
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* 読み取りエラー */
+.read-error {
+    background: rgba(30, 32, 48, 0.8);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.error-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f87171;
+    margin-bottom: 0.5rem;
+}
+
+.error-text {
+    color: #6b6f80;
+    font-size: 0.85rem;
+}
+
+/* フッター */
+.tool-footer {
+    text-align: center;
+    padding: 2rem 0 1rem;
+    border-top: 1px solid rgba(99, 102, 241, 0.1);
+    margin-top: 2rem;
+}
+
+.tool-footer p {
+    color: #4a4d5e;
+    font-size: 0.78rem;
+    margin-bottom: 0.4rem;
+}
+
+.footer-link a {
+    color: #7c7ff2;
+    text-decoration: none;
+}
+
+.footer-link a:hover {
+    color: #a78bfa;
+}
+
+/* 非表示ユーティリティ */
+.hidden {
+    display: none !important;
+}
+
+/* レスポンシブ */
+@media (max-width: 640px) {
+    .tool-title {
+        font-size: 1.4rem;
+    }
+
+    .settings-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .setting-group {
+        min-width: unset;
+    }
+
+    .drop-zone {
+        padding: 2rem 1rem;
+    }
+
+    .drop-icon {
+        font-size: 2.5rem;
+    }
+
+    .preview-area {
+        padding: 1.25rem;
+    }
+
+    .preview-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .result-actions {
+        flex-direction: column;
+    }
+
+    .read-image-wrap img {
+        max-width: 100%;
+    }
+}

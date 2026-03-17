@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRコード生成・読み取り | Gravity Portal</title>
+    <meta name="description" content="ブラウザ完結でQRコード生成・読み取りが可能。URL・テキストからQRコードを作成、色やサイズのカスタマイズ、PNG/SVGダウンロード対応。ファイルはサーバーに送信されません。">
+    <link rel="stylesheet" href="qr-tools.css">
+</head>
+
+<body>
+    <div id="app">
+        <header class="tool-header">
+            <h1 class="tool-title">📱 QRコード生成・読み取り</h1>
+            <p class="tool-subtitle">URL・テキストからQRコード作成 — ブラウザ完結・ファイル送信なし</p>
+        </header>
+
+        <!-- タブ切り替え -->
+        <div class="tabs">
+            <button class="tab active" data-tab="generate" id="tab-generate">✨ 生成</button>
+            <button class="tab" data-tab="read" id="tab-read">📷 読み取り</button>
+        </div>
+
+        <!-- 生成タブ -->
+        <div class="tab-content active" id="panel-generate">
+            <!-- 入力エリア -->
+            <div class="input-section">
+                <label for="qr-input" class="input-label">QRコードにする内容</label>
+                <textarea id="qr-input" class="qr-input" rows="3" placeholder="URL またはテキストを入力...&#10;例: https://antigravity-portal.com"></textarea>
+                <div class="input-meta">
+                    <span id="char-count">0 文字</span>
+                    <span id="input-type">—</span>
+                </div>
+            </div>
+
+            <!-- 設定パネル -->
+            <div class="settings-panel">
+                <div class="settings-row">
+                    <div class="setting-group">
+                        <label for="size-select">サイズ</label>
+                        <select id="size-select">
+                            <option value="256">256 × 256 px</option>
+                            <option value="512" selected>512 × 512 px</option>
+                            <option value="1024">1024 × 1024 px</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="ec-select">エラー訂正レベル</label>
+                        <select id="ec-select">
+                            <option value="L">L（7%復元）— 小さいQR</option>
+                            <option value="M" selected>M（15%復元）— 標準</option>
+                            <option value="Q">Q（25%復元）— 高品質</option>
+                            <option value="H">H（30%復元）— 最高品質</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="fg-color">前景色</label>
+                        <div class="color-input-wrap">
+                            <input type="color" id="fg-color" value="#000000">
+                            <span class="color-hex" id="fg-hex">#000000</span>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label for="bg-color">背景色</label>
+                        <div class="color-input-wrap">
+                            <input type="color" id="bg-color" value="#FFFFFF">
+                            <span class="color-hex" id="bg-hex">#FFFFFF</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- プレビュー -->
+            <div class="preview-section" id="preview-section">
+                <div class="preview-area">
+                    <canvas id="qr-canvas"></canvas>
+                    <div class="preview-placeholder" id="preview-placeholder">
+                        <span class="placeholder-icon">📱</span>
+                        <p>上にテキストを入力するとQRコードが表示されます</p>
+                    </div>
+                </div>
+                <div class="preview-actions hidden" id="preview-actions">
+                    <button class="btn-primary" id="download-png-btn">⬇ PNG ダウンロード</button>
+                    <button class="btn-primary btn-svg" id="download-svg-btn">⬇ SVG ダウンロード</button>
+                    <button class="btn-secondary btn-copy" id="copy-btn">📋 画像をコピー</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 読み取りタブ -->
+        <div class="tab-content" id="panel-read">
+            <div class="drop-zone" id="read-drop-zone">
+                <div class="drop-icon">📷</div>
+                <p class="drop-text">QRコード画像をドラッグ＆ドロップ</p>
+                <p class="drop-sub">または <label for="read-file-input" class="file-label">ファイルを選択</label></p>
+                <input type="file" id="read-file-input" accept="image/*" hidden>
+                <p class="drop-hint">PNG / JPEG / WebP / GIF 対応</p>
+            </div>
+
+            <!-- 読み取りプレビュー -->
+            <div class="read-preview hidden" id="read-preview">
+                <div class="read-image-wrap">
+                    <img id="read-image" alt="読み取り対象">
+                    <canvas id="read-canvas" style="display:none"></canvas>
+                </div>
+            </div>
+
+            <!-- 読み取り結果 -->
+            <div class="read-result hidden" id="read-result">
+                <h3 class="result-label">✅ 読み取り結果</h3>
+                <div class="result-content" id="result-content"></div>
+                <div class="result-actions">
+                    <button class="btn-primary" id="copy-result-btn">📋 コピー</button>
+                    <a class="btn-primary btn-link hidden" id="open-link-btn" target="_blank" rel="noopener">🔗 リンクを開く</a>
+                </div>
+            </div>
+
+            <!-- 読み取りエラー -->
+            <div class="read-error hidden" id="read-error">
+                <h3 class="error-label">❌ 読み取り失敗</h3>
+                <p class="error-text">QRコードを検出できませんでした。画像を確認してください。</p>
+            </div>
+        </div>
+
+        <!-- フッター -->
+        <footer class="tool-footer">
+            <p>🔒 すべての処理はブラウザ内で完結。データがサーバーに送信されることはありません。</p>
+            <p class="footer-link"><a href="https://antigravity-portal.com">Gravity Portal</a> の便利ツール</p>
+        </footer>
+    </div>
+
+    <!-- ライブラリ（CDN） -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="qr-tools.js"></script>
+</body>
+
+</html>
