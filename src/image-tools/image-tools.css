@@ -19,6 +19,23 @@ body {
     padding: 1.5rem 1rem;
 }
 
+/* ナビバー */
+.tool-nav {
+    margin-bottom: 1rem;
+}
+
+.back-link {
+    color: #7c7ff2;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: #a78bfa;
+}
+
 /* ヘッダー */
 .tool-header {
     text-align: center;
