@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF結合・分割 | Gravity Portal</title>
+    <meta name="description" content="ブラウザ完結でPDFファイルの結合・分割・ページ抽出が可能。複数PDFを1つにまとめたり、特定ページだけを抽出できます。ファイルはサーバーに送信されません。">
+    <link rel="stylesheet" href="pdf-tools.css">
+</head>
+
+<body>
+    <div id="app">
+        <header class="tool-header">
+            <h1 class="tool-title">📄 PDF結合・分割</h1>
+            <p class="tool-subtitle">複数PDFの結合・ページ抽出・分割 — ブラウザ完結・ファイル送信なし</p>
+        </header>
+
+        <!-- タブ切り替え -->
+        <div class="tabs">
+            <button class="tab active" data-tab="merge" id="tab-merge">📎 結合</button>
+            <button class="tab" data-tab="split" id="tab-split">✂️ 分割・抽出</button>
+        </div>
+
+        <!-- 結合タブ -->
+        <div class="tab-content active" id="panel-merge">
+            <div class="drop-zone" id="merge-drop-zone">
+                <div class="drop-icon">📎</div>
+                <p class="drop-text">PDFファイルをドラッグ＆ドロップ</p>
+                <p class="drop-sub">または <label for="merge-file-input" class="file-label">ファイルを選択</label></p>
+                <input type="file" id="merge-file-input" accept=".pdf,application/pdf" multiple hidden>
+                <p class="drop-hint">PDF対応（1ファイル50MB・最大20ファイルまで）</p>
+            </div>
+
+            <!-- ファイルリスト -->
+            <div class="file-list hidden" id="merge-file-list">
+                <div class="file-list-header">
+                    <span class="file-count" id="merge-file-count">0 ファイル</span>
+                    <span class="total-size" id="merge-total-size"></span>
+                </div>
+                <div class="file-items" id="merge-file-items"></div>
+                <p class="reorder-hint">💡 ドラッグで並び替えできます</p>
+                <div class="merge-actions">
+                    <button class="btn-primary" id="merge-btn">📎 PDFを結合</button>
+                    <button class="btn-danger" id="merge-clear-btn">🗑️ クリア</button>
+                </div>
+            </div>
+
+            <!-- 結合結果 -->
+            <div class="result-section hidden" id="merge-result">
+                <h3 class="result-label">✅ 結合完了</h3>
+                <div class="result-info" id="merge-result-info"></div>
+                <button class="btn-primary" id="merge-download-btn">⬇ ダウンロード</button>
+            </div>
+        </div>
+
+        <!-- 分割タブ -->
+        <div class="tab-content" id="panel-split">
+            <div class="drop-zone" id="split-drop-zone">
+                <div class="drop-icon">✂️</div>
+                <p class="drop-text">分割するPDFをドラッグ＆ドロップ</p>
+                <p class="drop-sub">または <label for="split-file-input" class="file-label">ファイルを選択</label></p>
+                <input type="file" id="split-file-input" accept=".pdf,application/pdf" hidden>
+                <p class="drop-hint">PDF対応（50MBまで）</p>
+            </div>
+
+            <!-- 分割設定 -->
+            <div class="split-settings hidden" id="split-settings">
+                <div class="split-file-info" id="split-file-info"></div>
+
+                <div class="settings-panel">
+                    <div class="setting-group">
+                        <label for="split-mode">分割モード</label>
+                        <select id="split-mode">
+                            <option value="pages">ページ指定で抽出</option>
+                            <option value="each">1ページずつ分割</option>
+                            <option value="range">範囲で分割</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group" id="pages-input-group">
+                        <label for="pages-input">抽出ページ</label>
+                        <input type="text" id="pages-input" placeholder="例: 1,3,5-8,12" class="text-input">
+                        <p class="input-hint">カンマ区切り・ハイフンで範囲指定</p>
+                    </div>
+
+                    <div class="setting-group hidden" id="range-input-group">
+                        <label for="range-size">分割サイズ</label>
+                        <input type="number" id="range-size" min="1" value="5" class="text-input" style="width: 80px">
+                        <p class="input-hint">指定ページ数ごとに分割</p>
+                    </div>
+                </div>
+
+                <div class="split-actions">
+                    <button class="btn-primary" id="split-btn">✂️ 分割・抽出</button>
+                    <button class="btn-danger" id="split-clear-btn">🗑️ クリア</button>
+                </div>
+            </div>
+
+            <!-- 分割結果 -->
+            <div class="result-section hidden" id="split-result">
+                <h3 class="result-label">✅ 分割完了</h3>
+                <div class="result-items" id="split-result-items"></div>
+                <button class="btn-primary" id="split-download-all-btn">📦 すべてダウンロード</button>
+            </div>
+        </div>
+
+        <!-- フッター -->
+        <footer class="tool-footer">
+            <p>🔒 すべての処理はブラウザ内で完結。ファイルがサーバーに送信されることはありません。</p>
+            <p>📋 1ファイル50MB・結合は最大20ファイルまで（ブラウザのメモリ保護のための制限です）</p>
+            <p class="footer-link"><a href="https://antigravity-portal.com">Gravity Portal</a> の便利ツール</p>
+        </footer>
+    </div>
+
+    <!-- ライブラリ（CDN） -->
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="pdf-tools.js"></script>
+</body>
+
+</html>
