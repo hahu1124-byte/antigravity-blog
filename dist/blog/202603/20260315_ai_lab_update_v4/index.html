@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 AI業界激震の1週間 — LAB第4回レポート：#QuitGPT・Anthropic訴訟・Apple参入 | Gravity Portal</title>
+    <meta name="description" content="#QuitGPTで250万人がChatGPT解約、ClaudeがApp Store 1位に。Anthropicはペンタゴンを提訴、AppleはCore AIを発表、日本政府は18万公務員向けGennaiを始動。技術と倫理が衝突した激動の7日間。">
+    <!-- OGP -->
+    <meta property="og:title" content="🌍 AI業界激震の1週間 — LAB第4回レポート：#QuitGPT・Anthropic訴訟・Apple参入">
+    <meta property="og:description" content="#QuitGPTで250万人がChatGPT解約、ClaudeがApp Store 1位に。Anthropicはペンタゴンを提訴、AppleはCore AIを発表、日本政府は18万公務員向けGennaiを始動。技術と倫理が衝突した激動の7日間。">
+    <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/ai_lab_update_v4.webp">
+    <meta property="og:url" content="https://www.antigravity-portal.com/blog/202603/20260315_ai_lab_update_v4/">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="🌍 AI業界激震の1週間 — LAB第4回レポート：#QuitGPT・Anthropic訴訟・Apple参入">
+    <meta name="twitter:description" content="#QuitGPTで250万人がChatGPT解約、ClaudeがApp Store 1位に。Anthropicはペンタゴンを提訴、AppleはCore AIを発表、日本政府は18万公務員向けGennaiを始動。技術と倫理が衝突した激動の7日間。">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/ai_lab_update_v4.webp">
+    <link rel="stylesheet" href="../../styles.css?v=1773675633134">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://adm.shinobi.jp">
+    <link rel="preconnect" href="https://cnobi.jp">
+    <link rel="dns-prefetch" href="https://adm.shinobi.jp">
+    <link rel="dns-prefetch" href="https://cnobi.jp">
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
+</head>
+<body>
+    <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
+    <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
+    <div class="article-page">
+        <nav class="breadcrumb">
+            <a href="https://antigravity-portal.com/">トップ</a>
+            <span class="separator">/</span>
+            <a href="../../">ブログ</a>
+            <span class="separator">/</span>
+            <span class="current">🌍 AI業界激震の1週間 — LAB第4回レポート：#QuitGPT・Anthropic訴訟・Apple参入</span>
+        </nav>
+
+        <article class="article">
+            <header class="article-header">
+                <div class="meta">
+                    <time class="date">2026-03-15</time>
+                    
+                    <div class="tags">
+                        <a href="../../tag/AI/" class="tag">AI</a><a href="../../tag/%E9%96%8B%E7%99%BA/" class="tag">開発</a><a href="../../tag/LAB/" class="tag">LAB</a>
+                    </div>
+                </div>
+                <h1 class="title">🌍 AI業界激震の1週間 — LAB第4回レポート：#QuitGPT・Anthropic訴訟・Apple参入</h1>
+            </header>
+
+            <div class="content">
+                <p><img src="../../images/ai_lab_update_v4.webp" alt="AI業界動向 — LAB第4回レポート：激震の1週間"></p>
+
+<h2>はじめに — 「AIの倫理」が初めて市場を動かした週</h2>
+<p>3月8日〜14日の1週間は、<strong>技術ではなく「倫理」がAI業界を揺さぶった</strong>歴史的な週でした。</p>
+<p>OpenAIのペンタゴン契約に端を発した<strong>#QuitGPTムーブメント</strong>は推定250万人のChatGPTサブスクリプション解約を引き起こし、その受け皿となったClaudeがApp Storeで1位に。一方でAnthropic自身はトランプ政権から「サプライチェーンリスク」の烙印を押され、前例のない訴訟に踏み切りました。</p>
+<p>技術面でも、Apple「Core AI」フレームワーク、Google Maps AI統合、日本政府のGennai（18万人規模）など、AIの社会実装が一気に加速。そんな激動の7日間をまとめます。</p>
+
+<hr>
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+
+<h2>🔥 #QuitGPTムーブメント — AIの倫理が市場を動かす</h2>
+<p>今週最大のニュースは間違いなく<strong>#QuitGPT</strong>です。</p>
+<p>2月28日にOpenAIがペンタゴンとの契約を締結。これに対する反発が3月第2週に爆発しました。</p>
+<ul>
+    <li><strong>推定250万人</strong>がChatGPTの有料サブスクリプションを解約</li>
+    <li>App Storeに1つ星レビューが殺到</li>
+    <li>サンフランシスコのOpenAI本社前でデモ</li>
+    <li>OpenAI社内でも倫理的懸念から<strong>ロボティクス部門幹部が辞任</strong></li>
+    <li>Sam Altman CEOが「日和見的でずさんだった」と認め、ペンタゴン契約の修正を表明</li>
+</ul>
+<p>一方で、先にペンタゴンの同様の契約を<strong>拒否した</strong>Anthropicの「Claude」がその恩恵を受け、<strong>米国App Storeでの日次DL数でChatGPTを逆転し1位に</strong>。倫理的スタンスが直接ビジネス成果につながるという、AI業界初の大規模事例になりました。</p>
+
+<h2>⚖️ Anthropic vs トランプ政権 — AIセーフティの法廷闘争</h2>
+<p>3月9日、Anthropicは<strong>米国防総省を相手に2件の訴訟</strong>を提起。</p>
+<ul>
+    <li>ペンタゴンがAnthropicを<strong>「サプライチェーンリスク」に指定</strong>（米国企業に対する初めての事例）</li>
+    <li>原因：Anthropicが<strong>大規模監視や自律型兵器への無制限利用を拒否</strong>したこと</li>
+    <li>この指定により事実上、連邦政府契約から排除</li>
+    <li>行政手続法（APA）違反と<strong>修正第1条（表現の自由）侵害</strong>を主張</li>
+    <li>GoogleとOpenAIの従業員約40人がAnthropicの安全姿勢を支持する法廷意見書を提出</li>
+</ul>
+<p>「AIの安全性を守ることが罰せられる」という前例を作らせないための闘い。AI業界全体の方向性を左右する重要な訴訟です。</p>
+
+<h2>🤖 モデルアップデートまとめ</h2>
+
+<h3>OpenAI — GPT-5.4 & 5.3 Instant</h3>
+<ul>
+    <li><strong>GPT-5.4</strong>（3/5リリース）: ネイティブPC操作対応、100万トークンコンテキスト、Thinking/Proバージョン</li>
+    <li><strong>ChatGPT for Excel (β)</strong>: GPT-5.4をスプレッドシートに直接統合</li>
+    <li><strong>GPT-5.3 Instant</strong>: 「説教臭いトーン」の排除、ハルシネーション大幅削減</li>
+    <li>GitHub CopilotでGemini 3 ProとGPT-5.1が廃止</li>
+    <li>ただし2026年の<strong>予想損失は140億ドル</strong>（約2.1兆円）</li>
+</ul>
+
+<h3>Anthropic — Claude Opus 4.6 / Sonnet 4.6 🔥</h3>
+<p>今週の<strong>主役</strong>は間違いなくAnthropic。#QuitGPTの追い風を受けてApp Store 1位を獲得しただけでなく、プロダクト面でも圧倒的な進化を見せました。</p>
+<ul>
+    <li><strong>Opus 4.6 & Sonnet 4.6</strong>が一般公開 — <strong>100万トークン</strong>のコンテキストウィンドウは業界最大級。長大なコードベースも丸ごと把握可能に</li>
+    <li>無料プランで<strong>メモリ機能を開放</strong> — さらに他AIからの記憶移行ツールも提供。ChatGPTからの乗り換えを露骨に後押し</li>
+    <li><strong>3/12: チャット内でインタラクティブなグラフ・図表を直接作成</strong>するβ機能を全ユーザーに公開。データ分析の民主化が加速</li>
+    <li>🚀 Claude Codeの年間売上は<strong>25億ドル規模</strong>（約3,750億円）に成長。2025年1月ローンチからたった1年強でこの数字は驚異的。開発者の「一軍ツール」に昇格</li>
+    <li>⚠️ 一方で闇も。中国のAIラボ3社が<strong>24,000以上の偽アカウント</strong>を作成し、<strong>1,600万回以上</strong>Claudeとやりとりして「蒸留」（モデルのリバースエンジニアリング）を行っていたことが発覚。AI知財戦争の新たな局面</li>
+</ul>
+
+<h3>Google — Gemini 3.1 Flash-Lite & Embedding 2</h3>
+<ul>
+    <li><strong>Gemini 3.1 Flash-Lite</strong>（3/3リリース）: Gemini 3シリーズ最速・最コスパモデル</li>
+    <li><strong>gemini-embedding-2-preview</strong>（3/10）: テキスト・画像・動画・音声・PDFを統一ベクトル空間で扱うマルチモーダル埋め込みモデル</li>
+    <li><strong>Google Maps AI統合</strong>（3/12）: 「Ask Maps」で自然言語検索、「Immersive Navigation」で3D表示</li>
+    <li><strong>Gemini対応Pixelアップデート</strong>: サードパーティアプリ内でAIがタスク実行する「エージェント機能」</li>
+</ul>
+
+<h2>🍎 Apple「Core AI」フレームワーク — WWDC 2026で発表へ</h2>
+<p>AppleがWWDC 2026で<strong>Core MLを置き換える新フレームワーク「Core AI」</strong>を発表する計画が明らかになりました。</p>
+<ul>
+    <li>生成AIとオンデバイスLLMに特化した設計</li>
+    <li>Apple Foundation Modelsは<strong>Google Gemini技術で学習</strong>されている模様</li>
+    <li>Siriに<strong>チャットボット的な対話能力</strong>を追加</li>
+    <li>スマートホームディスプレイのリリースはAI改修のため9月に延期</li>
+    <li>プライバシーファーストのオンデバイス処理を維持</li>
+</ul>
+
+<h2>🇯🇵 日本政府「Gennai」 — 18万公務員がAIを使う時代</h2>
+<p>デジタル庁が発表した<strong>「Gennai（ゲンアイ）」</strong>は、2026年5月から全府省庁の約18万人の公務員を対象とした生成AI環境です。</p>
+<ul>
+    <li>NTTの「tsuzumi 2」、KDDI・ELYZAの「Llama-3.1-ELYZA-JP-70B」など<strong>国産LLM 7モデル</strong>を選定</li>
+    <li>行政分野でのAI自国生産・自国運用を加速</li>
+    <li>東大 松尾・岩澤研究室の医療特化日本語LLMは、<strong>医師国家試験で人間を超える正答率</strong>を記録</li>
+</ul>
+
+<h2>🤖 ヒューマノイドロボット市場の急拡大</h2>
+<ul>
+    <li>産業用ロボット市場は<strong>過去最高の167億ドル</strong>（約2.5兆円）に到達</li>
+    <li> Yann LeCun氏の<strong>AMI Labs</strong>が10億ドルを調達（「物理世界を理解するAI」の開発）</li>
+    <li>Apptronik（Austin）が<strong>5.2億ドル</strong>を調達（Google、Mercedes-Benz出資）</li>
+    <li>ABB Roboticsが<strong>NVIDIA Omniverse統合の「RobotStudio HyperReality」</strong>を2026年後半に投入</li>
+    <li>中国企業（AgiBot、Unitree、UBTECH）がヒューマノイドロボット出荷の大部分を占める</li>
+</ul>
+
+<h2>📈 その他の注目トピック</h2>
+<ul>
+    <li>MWC 2026で<strong>AIグラス祭り</strong> — Samsung、Alibabaなどがスマートグラスを投入</li>
+    <li>OracleやBlockなど複数企業が<strong>AI自動化を理由に大規模人員削減</strong>を発表</li>
+    <li>AIモデルが戦争シミュレーションで<strong>95%の確率で核兵器使用を選択</strong>するという研究結果が話題に</li>
+    <li>ペルーで<strong>ナスカの地上絵300以上</strong>を機械学習で新たに発見</li>
+    <li>Claudeの<strong>偽サイト</strong>がGoogle検索で上位に表示される問題が発生（注意喚起）</li>
+</ul>
+
+<hr>
+
+<h2>🗣️ 日本のXで噴出するAIへの不満</h2>
+<p>海外の動向だけでなく、<strong>日本のX（旧Twitter）</strong>でもAIへの不満が大きな話題になっています。特にこの1週間、以下のテーマで議論が白熱しました。</p>
+
+<h3>📉 「ChatGPT劣化した」の大合唱</h3>
+<p>GPT-5.4 Thinking公開後、日本語ユーザーからは<strong>「体感として劣化」</strong>の声が噴出。</p>
+<ul>
+    <li><strong>日本語ソースの軽視</strong> — Web検索で英語ソースを優先する傾向が強まり、「noteやQiitaの記事が拾われない」との報告多数</li>
+    <li><strong>「自信満々にデタラメを答える」</strong> — 間違いを堂々と断言する傾向がひどくなったとの声。一方Claudeは「正確な答えが出せない」と正直に言ってくれる、と比較される</li>
+    <li><strong>アンインストール数295%増</strong> — ChatGPTのアンインストール数が急増。倫理的懸念＋品質低下のダブルパンチ</li>
+    <li><strong>「GPTに日本語で聞くと英語の翻訳っぽくなる」</strong> — 文脈を理解した自然な日本語が出にくくなったとの指摘</li>
+</ul>
+
+<h3>🔄 ChatGPT → Claude 乗り換えの波</h3>
+<p>日本のXでも<strong>ChatGPTからClaudeへの移行</strong>を報告するユーザーが急増。</p>
+<ul>
+    <li>「専門的な技術質問の精度が断然高い」</li>
+    <li>「コード生成の正確性がChatGPTと段違い」</li>
+    <li>「ペンタゴン契約を拒否した倫理的姿勢が信頼できる」</li>
+    <li>Claudeの<strong>無料プランのメモリ機能</strong>や、他AIからの記憶移行ツールが乗り換えのハードルを下げている</li>
+</ul>
+<p>ただしClaude側にも不満は。<strong>Proプランのレート制限</strong>で作業が中断されるという報告が開発者コミュニティで相次いでいます。</p>
+
+<h3>⌨️ 開発ツールへの不満</h3>
+<p>コーディングAIの競争が激化する中、日本の開発者の間でも率直な評価が飛び交っています。</p>
+<ul>
+    <li><strong>Antigravity（Google）</strong> — 最も炎上中。Pro版に突然<strong>「週間制限」</strong>が導入され、5時間リフレッシュの約束が隠れた週間キャップに変貌。数日間ロックアウトされるユーザーが続出し「Pro版なのにFree版と変わらない」の声。メインモデルも<strong>Gemini Flash（軽量版）に格下げ</strong>され、上位モデル利用にはUltraプラン誘導。3月にはアカウント大量凍結も発生</li>
+    <li><strong>Cursor</strong> — 「Composerは神だがクレジット制への移行で不満爆発」「実質$60-80/月になるユーザーも」</li>
+    <li><strong>GitHub Copilot</strong> — 「シェア42%なのにmost lovedはたった9%」使われてるが好かれていない代表格</li>
+    <li><strong>Claude Code</strong> — 「大規模コードベース理解力は最強」だが3月に障害連発（3/2, 3/3, 3/11）で信頼性に疑問符</li>
+    <li>全体的に<strong>「エージェント型」AIツール</strong>への移行が加速。単なるコード補完から自律的なファイル編集・テスト実行・Git操作まで</li>
+</ul>
+
+<h3>🐦 X（旧Twitter）自体のAI問題</h3>
+<p>AI議論の場であるX自体にも、AIに起因する問題が。</p>
+<ul>
+    <li><strong>Grokアルゴリズム統合</strong>（2025年11月〜）でインプレッションが激減。「フォロワー数より興味関心一致」重視に変更</li>
+    <li><strong>ハッシュタグ過剰使用で検索制限</strong>がかかるようになり、これまでの運用が通用しない</li>
+    <li><strong>AI画像編集機能</strong>の悪用リスクに日本政府が改善要請</li>
+    <li>新規約により<strong>AI生成コンテンツの法的責任をユーザーが負う</strong>ことが明確化</li>
+    <li><strong>インプレゾンビ</strong>の蔓延で情報収集ツールとしての価値が低下</li>
+</ul>
+
+<hr>
+
+<h2>📊 今週のAI情勢マップ</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>企業</th><th>ポジティブ</th><th>ネガティブ</th></tr></thead>
+<tbody>
+<tr><td><strong>OpenAI</strong></td><td>GPT-5.4のPC操作能力</td><td>#QuitGPT 250万人解約、140億ドル損失見通し</td></tr>
+<tr><td><strong>Anthropic</strong></td><td>App Store 1位、Claude Code 25億ドル</td><td>ペンタゴンに「サプライチェーンリスク」指定</td></tr>
+<tr><td><strong>Google</strong></td><td>Flash-Lite、Maps AI統合、Embedding 2</td><td>特になし</td></tr>
+<tr><td><strong>Apple</strong></td><td>Core AI発表へ</td><td>スマートホーム延期</td></tr>
+<tr><td><strong>日本</strong></td><td>Gennai 18万人規模、国産LLM活用</td><td>—</td></tr>
+</tbody>
+</table></div>
+
+<h2>まとめ — 技術と倫理の交差点</h2>
+<p>この1週間は「AIの技術はどこまで来たか」ではなく、<strong>「AIの倫理はどうあるべきか」</strong>が主要テーマになった異例の期間でした。</p>
+<p>#QuitGPTの250万人解約とClaudeのApp Store 1位が示すのは、<strong>ユーザーが倫理的スタンスに基づいてAIツールを選ぶ時代が来た</strong>ということ。一方で、Anthropicがペンタゴンに「セキュリティリスク」と認定されるという皮肉な状況は、AIガバナンスの難しさを物語っています。</p>
+<p>技術面ではGPT-5.4のPC操作能力、AppleのCore AI参入、日本のGennaiなど、AIの社会実装は着実に加速中。「技術の進歩」と「倫理の確立」を同時に追いかける——それが2026年3月の現実です。</p>
+<p>次回もお楽しみに。</p>
+
+            </div>
+
+            
+            
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+            
+        <div class="amazon-ads-section">
+            <h3 class="amazon-ads-heading">💻 技術書・開発に役立つ本</h3>
+            <div class="amazon-ads-grid">
+                
+        <a href="https://www.amazon.co.jp/s?k=AI%20%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%20%E5%85%A5%E9%96%80%20Python&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">🤖</span>
+            <span class="amazon-ad-title">AIプログラミング入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Next.js%20React%20TypeScript%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">📘</span>
+            <span class="amazon-ad-title">Next.js実践ガイド</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Web%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%20%E9%96%8B%E7%99%BA%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">💻</span>
+            <span class="amazon-ad-title">Webアプリ開発入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+            </div>
+            <div class="amazon-search-box">
+                <p class="amazon-search-label">🔍 <span class="amazon-logo-text">Amazon</span>で探す</p>
+                <form onsubmit="window.open('https://www.amazon.co.jp/s?k='+encodeURIComponent(this.q.value)+'&tag=gravity063-22','_blank');return false;" class="amazon-search-form">
+                    <input type="text" name="q" placeholder="キーワードを入力..." class="amazon-search-input" />
+                    <button type="submit" class="amazon-search-btn">検索</button>
+                </form>
+            </div>
+            <p class="amazon-ads-note">※ 上記リンクはAmazonアソシエイトリンクです</p>
+            <p class="amazon-ads-note">Amazonのアソシエイトとして、Gravity Portalは適格販売により収入を得ています。</p>
+        </div>
+        </article>
+
+        <nav class="post-nav">
+            <div class="post-nav-prev">
+            <a href="../../202603/20260315_uber_weekly_summary_w5/" class="post-nav-link">
+                <span class="post-nav-label">← 前の記事</span>
+                <span class="post-nav-title">📊 W5週間総括：完全復活¥83,650！7日連続稼働で体調不良からのV字回復を証明（3/9〜3/15）</span>
+            </a></div>
+            <div class="post-nav-next">
+            <a href="../../202603/20260316_ai_lab_update_v5/" class="post-nav-link">
+                <span class="post-nav-label">次の記事 →</span>
+                <span class="post-nav-title">💰 コストの壁が崩壊する — LAB第5回レポート：Claude長文無料化・DeepSeek V4・日本政府Gennai始動</span>
+            </a></div>
+        </nav>
+
+        <nav class="back-nav">
+            <a href="https://antigravity-portal.com/" class="back-link">🏠 TOPに戻る</a>
+            <a href="../../" class="back-link">← 記事一覧に戻る</a>
+        </nav>
+    </div>
+    
+    <script>
+    (function(){
+        var AD_ID = '06dfeeba49e20207a86cd5f651221d50';
+        var SDK_URL = 'https://adm.shinobi.jp/st/t.js';
+
+        // 課金チェック → 課金済みなら広告を全て非表示にしてSDKも読み込まない
+        function hideAllAds(){
+            document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                slot.style.display = 'none';
+            });
+        }
+
+        function initAds(){
+            // 1. admaxads配列にスロットを登録
+            if(!window.admaxads) window.admaxads = [];
+            document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
+                window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
+            });
+
+            // 2. SDKをロード（body末尾で1回だけ実行）
+            var s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.charset = 'utf-8';
+            s.src = SDK_URL;
+            s.async = true;
+            document.body.appendChild(s);
+
+            // 3. 広告が返らなかったスロットを非表示に（遅延チェック）
+            function checkAdSlots(){
+                document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                    var ad = slot.querySelector('.admax-switch');
+                    if(ad && ad.children.length > 0){
+                        slot.classList.add('ad-loaded');
+                    } else {
+                        slot.style.display = 'none';
+                    }
+                });
+            }
+            setTimeout(checkAdSlots, 5000);
+            setTimeout(checkAdSlots, 10000);
+        }
+
+        // 課金状態をチェック（同一ドメインのAPI）
+        fetch('/api/subscription-status')
+            .then(function(res){ return res.json(); })
+            .then(function(data){
+                if(data && data.isPaid){
+                    hideAllAds();
+                } else {
+                    initAds();
+                }
+            })
+            .catch(function(){
+                // エラー時は広告を表示（未課金扱い）
+                initAds();
+            });
+    })()
+    </script>
+</body>
+</html>

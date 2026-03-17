@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AIと1週間でWebポータルを作った記録 — Day 1: 構想とNext.jsセットアップ | Gravity Portal</title>
+    <meta name="description" content="38歳、雇われ個人事業主から完全独立。AIコーディングアシスタント「Antigravity」とペアプログラミングで個人ポータルサイトを構築した記録のDay 1。技術選定からデプロイ戦争まで。">
+    <!-- OGP -->
+    <meta property="og:title" content="🤖 AIと1週間でWebポータルを作った記録 — Day 1: 構想とNext.jsセットアップ">
+    <meta property="og:description" content="38歳、雇われ個人事業主から完全独立。AIコーディングアシスタント「Antigravity」とペアプログラミングで個人ポータルサイトを構築した記録のDay 1。技術選定からデプロイ戦争まで。">
+    <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day1.webp">
+    <meta property="og:url" content="https://www.antigravity-portal.com/blog/202603/20260306_ai_web_dev_day1/">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="🤖 AIと1週間でWebポータルを作った記録 — Day 1: 構想とNext.jsセットアップ">
+    <meta name="twitter:description" content="38歳、雇われ個人事業主から完全独立。AIコーディングアシスタント「Antigravity」とペアプログラミングで個人ポータルサイトを構築した記録のDay 1。技術選定からデプロイ戦争まで。">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day1.webp">
+    <link rel="stylesheet" href="../../styles.css?v=1773675633163">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://adm.shinobi.jp">
+    <link rel="preconnect" href="https://cnobi.jp">
+    <link rel="dns-prefetch" href="https://adm.shinobi.jp">
+    <link rel="dns-prefetch" href="https://cnobi.jp">
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
+</head>
+<body>
+    <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
+    <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
+    <div class="article-page">
+        <nav class="breadcrumb">
+            <a href="https://antigravity-portal.com/">トップ</a>
+            <span class="separator">/</span>
+            <a href="../../">ブログ</a>
+            <span class="separator">/</span>
+            <span class="current">🤖 AIと1週間でWebポータルを作った記録 — Day 1: 構想とNext.jsセットアップ</span>
+        </nav>
+
+        <article class="article">
+            <header class="article-header">
+                <div class="meta">
+                    <time class="date">2026-03-06</time>
+                    
+                    <div class="tags">
+                        <a href="../../tag/AI/" class="tag">AI</a><a href="../../tag/%E9%96%8B%E7%99%BA/" class="tag">開発</a>
+                    </div>
+                </div>
+                <h1 class="title">🤖 AIと1週間でWebポータルを作った記録 — Day 1: 構想とNext.jsセットアップ</h1>
+            </header>
+
+            <div class="content">
+                <p><img src="../../images/ai_dev_day1.webp" alt="Day 1: 構想とNext.jsセットアップ"></p>
+<h2>はじめに — なぜ「ポータルサイト」を作ったのか</h2>
+<p>2026年2月、38歳の私は雇われ個人事業主から<strong>完全独立</strong>しました。収入源は<strong>Uber配達</strong>と<strong>パチンコ（期待値稼働）</strong>の2本柱。</p>
+<p>しかし、これらを「ただの日銭稼ぎ」で終わらせたくなかった。配達のデータ分析、パチンコの期待値計算、ブログでの情報発信——すべてを統合する<strong>「基地」</strong>が欲しかったのです。</p>
+<p>そこで、AIコーディングアシスタント<strong>「Antigravity」</strong>をペアプログラマーとして迎え入れ、Webポータルサイトを構築することにしました。</p>
+<p>これはその記録の「Day 1」です。</p>
+<hr>
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+<h2>🎵 バイブコーディング — AIエージェントと「ノリ」で作る新しい開発スタイル</h2>
+<p>このシリーズで登場する開発手法は、いわゆる<strong>「バイブコーディング（Vibe Coding）」</strong>と呼ばれるものです。</p>
+<p>従来のプログラミングでは、開発者がキーボードに向かい、一行一行コードを書いていました。しかしバイブコーディングでは、<strong>AIエージェントに自然言語で「こういうのが欲しい」と伝えるだけ</strong>で、AIがコードを生成し、ファイルを作成し、ビルドまで自動で行ってくれます。</p>
+<p>開発者の役割は<strong>「設計者＆レビュアー」</strong>に変わります:</p>
+<ul>
+<li>「こんな機能が欲しい」とAIに伝える</li>
+<li>AIが生成したコードをレビューする</li>
+<li>動作を確認して、フィードバックを返す</li>
+<li>この繰り返しで、驚くほどのスピードでプロダクトが形になっていく</li>
+</ul>
+<p>私の場合、このシリーズを通じて<strong>手で書いたコードはほぼ0行</strong>です。すべてAntigravityとの対話で生成されました。プログラミングの知識は必要ですが、「書く力」より<strong>「伝える力」と「判断する力」</strong>が重要な時代になったと実感しています。</p>
+<hr>
+<h2>🤖 相棒選び — Antigravityとの出会い</h2>
+<p>最初は無料プランのAIコーディングアシスタントを使い始めました。しかし、開発の設計段階でいきなり<strong>トークン上限</strong>に到達。やり取りが途切れ途切れになり、コードの文脈を何度も説明し直す羽目に。</p>
+<p>「これでは話にならない」と思っていたところ、<strong>Antigravity（Proプラン）が今なら¥0で使える</strong>ことを発見。即座に切り替えました。</p>
+<p>Proプランのトークン上限は無料版とは桁違い。長時間の開発セッションでもコンテキストが切れず、まるで<strong>横にいるエンジニアと会話しているかのような感覚</strong>で開発を進められるようになりました。この差は衝撃的でした。</p>
+<hr>
+<h2>🎯 Day 1の目標</h2>
+<ul>
+<li>技術スタックの選定</li>
+<li>プロジェクトの初期化</li>
+<li>認証システムの導入</li>
+<li>基本レイアウトの構築</li>
+<li>デプロイ先の確保</li>
+</ul>
+<hr>
+<h2>🛠️ 技術スタック — AIに相談して決めた構成</h2>
+<p>Antigravityに「個人ポータルサイトを作りたい。要件は：ブログ、有料ツール（パチンコ期待値計算）、決済機能。最適な技術スタックは？」と聞きました。</p>
+<p>AIが最初に提案してきたのは、TailwindCSS、Prisma、NextAuth.jsなど「定番」をフルセットにした構成。しかし、本当に必要かどうかを精査し、以下のシンプルな構成に絞りました：</p>
+<div class="table-scroll"><table>
+<thead><tr><th>カテゴリ</th><th>AIの提案</th><th>最終決定</th><th>理由</th></tr></thead>
+<tbody>
+<tr><td><strong>フレームワーク</strong></td><td>Next.js</td><td>Next.js (App Router)</td><td>SSR/SSG対応、SEO最強</td></tr>
+<tr><td><strong>言語</strong></td><td>TypeScript</td><td>TypeScript</td><td>型安全、AIとの相性◎</td></tr>
+<tr><td><strong>スタイリング</strong></td><td>TailwindCSS</td><td><strong>Vanilla CSS</strong></td><td>基礎を理解したかった</td></tr>
+<tr><td><strong>認証</strong></td><td>NextAuth.js</td><td><strong>Clerk</strong></td><td>導入が圧倒的に簡単</td></tr>
+<tr><td><strong>ORM</strong></td><td>Prisma</td><td><strong>なし（Supabase直接）</strong></td><td>オーバースペック</td></tr>
+<tr><td><strong>決済</strong></td><td>Stripe</td><td>Stripe</td><td>サブスク対応、日本円OK</td></tr>
+<tr><td><strong>DB</strong></td><td>Supabase</td><td>Supabase</td><td>無料枠大、PostgreSQL</td></tr>
+</tbody>
+</table></div>
+<p>ポイントは<strong>「すべて無料枠で始められる」</strong>こと。独立直後のキャッシュフローを圧迫しないことが最優先でした。</p>
+<hr>
+<h2>🚀 プロジェクト初期化 — AIに「作って」と言ってみた</h2>
+<p>Antigravityに「Next.js + TypeScriptでプロジェクトを初期化して」と指示。数秒でコマンドが生成されました：</p>
+<pre><code>npx -y create-next-app@latest ./ --typescript --app --eslint --no-tailwind</code></pre>
+<p>ここで重要なのは<code>--no-tailwind</code>。AIは最初TailwindCSSを提案してきましたが、「CSSの基礎を理解したいから」とVanilla CSSを選択。この判断が後々、カスタムデザインの自由度で大きく活きてくることになります。</p>
+<hr>
+<h2>🔐 認証導入 — Clerkの衝撃的な簡単さ</h2>
+<p>Day 1最大の驚きは<strong>Clerk</strong>の導入スピードでした。AIに「Google OAuthで認証を入れたい」と伝えたところ、以下の手順が示されました：</p>
+<ol>
+<li><code>npm install @clerk/nextjs</code></li>
+<li>環境変数にAPIキーを設定</li>
+<li><code>middleware.ts</code> を1ファイル追加</li>
+<li><code>layout.tsx</code> を <code>ClerkProvider</code> で囲む</li>
+</ol>
+<p>たった<strong>4ステップ、所要時間15分</strong>で、Googleログイン機能が完成。Antigravityが最初に提案してきたNextAuth.jsだと、OAuth設定やDB連携で数時間はかかっていたはず。<strong>ツール選定で「定番」に流されないことの重要性</strong>を実感しました。</p>
+<p>ただし、後にNext.js 16との互換性問題（<code>auth()</code>がmiddlewareで動かない）に直面することになるのですが、それはまた別の話…。</p>
+<hr>
+<h2>🎨 基本レイアウト — ダークモードファーストで設計</h2>
+<p>レイアウトはAntigravityと対話しながら構築しました。最初に伝えたコンセプトは：</p>
+<blockquote><p>「宇宙っぽいダークテーマ。でもごちゃごちゃしない。ミニマルだけど高級感がある感じ」</p></blockquote>
+<p>AIが提案してきたCSSカスタムプロパティのカラーパレット：</p>
+<pre><code>:root {
+    --bg-primary: #0f1017;
+    --bg-card: #1e2030;
+    --accent: #7c7ff2;
+    --text-primary: #f0f0f8;
+}</code></pre>
+<p>この深い紫をアクセントカラーにした「宇宙×テクノロジー」のビジュアルが、Gravity Portalのアイデンティティになりました。</p>
+<hr>
+<h2>💥 デプロイ戦争 — ホスティング先を4回変えた話</h2>
+<p>Day 1最大の苦労ポイントが<strong>デプロイ先の選定</strong>でした。結論から言うと、<strong>4回変更</strong>しました。</p>
+<div class="table-scroll"><table>
+<thead><tr><th>試行</th><th>ホスティング</th><th>問題</th><th>結果</th></tr></thead>
+<tbody>
+<tr><td>1回目</td><td>Cloudflare Pages（無料）</td><td>13MiBのデータがデプロイ上限に引っかかる</td><td>❌ 断念</td></tr>
+<tr><td>2回目</td><td>Netlify（無料）</td><td>動くが、<strong>月の転送量制限に1日で到達</strong></td><td>❌ NG</td></tr>
+<tr><td>3回目</td><td>Cloudflare Pages（有料）</td><td>ファイルサイズ上限が3〜10MiBで根本解決せず。企業プラン（月75万円〜）は論外</td><td>❌ 無駄な出費</td></tr>
+<tr><td>4回目</td><td><strong>Vercel（Hobbyプラン）</strong></td><td>無料、Next.jsネイティブ、問題なし</td><td>✅ 採用</td></tr>
+</tbody>
+</table></div>
+<h3>Cloudflare有料プランの罠</h3>
+<p>3回目のCloudflare有料プランへの課金は<strong>完全な失敗</strong>でした。AIに事前に「有料プランでファイルサイズ上限は変わるか？」と聞いておけば、3〜10MiBの制限があること、その上は企業向けプラン（月75万円〜）しかないことが分かったはず。</p>
+<p><strong>教訓: AIに調査させてから課金しろ。</strong>勢いで有料プランにアップグレードした結果、無駄な時間とお金を失いました。</p>
+<h3>Vercelへの着地</h3>
+<p>最終的にVercel Hobbyプラン（無料）にデプロイして一発で成功。Next.jsの開発元が運営しているだけあって、<strong>最初からこれを選んでおけば</strong>…という後悔が残ります。</p>
+<p>なお、Day 3以降で商用利用（Stripe決済）を組み込む段階で、Vercel Proプラン（$20/月）にアップグレードしています。</p>
+<hr>
+<h2>📊 Day 1のまとめ</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>項目</th><th>結果</th></tr></thead>
+<tbody>
+<tr><td><strong>作業時間</strong></td><td>約12時間（14:53〜翌03:01）</td></tr>
+<tr><td><strong>完成したもの</strong></td><td>プロジェクト初期化、Clerk認証、基本レイアウト、テーマ切替、デプロイ</td></tr>
+<tr><td><strong>コスト</strong></td><td>$0（Vercel Hobby無料）+ Cloudflare有料プランの無駄遣い</td></tr>
+<tr><td><strong>AIツール変更</strong></td><td>無料AI → Antigravity Pro（¥0キャンペーン）</td></tr>
+<tr><td><strong>デプロイ先変更</strong></td><td>4回（Cloudflare無料 → Netlify → Cloudflare有料 → Vercel）</td></tr>
+<tr><td><strong>手で書いたコード</strong></td><td>ほぼ0行（AIが生成→レビュー→修正の繰り返し）</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h2>💡 Day 1の学び</h2>
+<h3>1. AIツールへの投資が最も効率的</h3>
+<p>無料AIで始めてトークン上限に苦しんだ経験から、<strong>開発ツールへのケチりは最大のコスト増</strong>だと実感しました。Antigravity Proに切り替えてからの生産性は体感5倍以上。¥0で使えるなら迷う理由がありません。</p>
+<h3>2. AIの提案に「No」と言える力が重要</h3>
+<p>AIはTailwindCSS、Prisma、NextAuth.jsなど、「定番」を次々と提案してきます。でも、自分のプロジェクトに本当に必要かどうかは自分で判断しなければなりません。Day 1でTailwindを断り、NextAuth.jsの代わりにClerkを選んだ判断は、結果的に正解でした。</p>
+<h3>3. 課金する前にAIに聞け</h3>
+<p>Cloudflare有料プランの教訓です。「有料にすれば解決するだろう」という思い込みで課金した結果、根本的な仕様制限のため意味がありませんでした。<strong>AIに5分で調べさせるだけで防げた出費</strong>です。</p>
+<h3>4. デプロイ先は「走りながら決める」</h3>
+<p>4回もホスティングを変えましたが、それでも12時間で動くものができた。最初から完璧な選択をしようとするより、<strong>「まず動かして、ダメなら変える」</strong>の精神が個人開発では最速です。</p>
+<hr>
+<h2>📌 シリーズ予定</h2>
+<p>このシリーズでは、AIと一緒にWebポータルを構築した1週間を Day ごとに振り返ります。</p>
+<ul>
+<li><strong>Day 1</strong>: 構想とNext.jsセットアップ ← 今ここ</li>
+<li><strong>Day 2</strong>: パチンコ期待値計算ツールの実装</li>
+<li><strong>Day 3</strong>: ブログ機能と収益化（Stripe + 広告）</li>
+<li><strong>Day 4</strong>: AIの記憶の限界 — コンテキストウィンドウとの戦い</li>
+<li><strong>Day 5</strong>: AIが暴走した日 — ルール違反と信頼の再構築</li>
+</ul>
+<p>次回 Day 2 では、このポータルの核となる<strong>パチンコ期待値計算ツール</strong>の実装に取り掛かります。1000機種以上のスペックデータをどう扱うか、AIとの共同作業で解決していく過程をお届けします。お楽しみに！</p>
+
+            </div>
+
+            
+        <div class="note-banner">
+            <div class="note-banner-icon">📖</div>
+            <div class="note-banner-body">
+                <p class="note-banner-title">この記事の<strong>完全版</strong>をNoteで公開中</p>
+                <p class="note-banner-desc">ブログでは書けなかった裏話・具体的な設定値・失敗のリカバリー手順まで、全5章5,500文字超の詳細版です。</p>
+                <a href="https://note.com/hahu1124/n/n499b03461f85" target="_blank" rel="noopener noreferrer" class="note-banner-link">📝 Noteで完全版を読む（¥500）</a>
+            </div>
+        </div>
+            
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+            
+        <div class="amazon-ads-section">
+            <h3 class="amazon-ads-heading">💻 技術書・開発に役立つ本</h3>
+            <div class="amazon-ads-grid">
+                
+        <a href="https://www.amazon.co.jp/s?k=AI%20%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%20%E5%85%A5%E9%96%80%20Python&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">🤖</span>
+            <span class="amazon-ad-title">AIプログラミング入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Next.js%20React%20TypeScript%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">📘</span>
+            <span class="amazon-ad-title">Next.js実践ガイド</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Web%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%20%E9%96%8B%E7%99%BA%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">💻</span>
+            <span class="amazon-ad-title">Webアプリ開発入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+            </div>
+            <div class="amazon-search-box">
+                <p class="amazon-search-label">🔍 <span class="amazon-logo-text">Amazon</span>で探す</p>
+                <form onsubmit="window.open('https://www.amazon.co.jp/s?k='+encodeURIComponent(this.q.value)+'&tag=gravity063-22','_blank');return false;" class="amazon-search-form">
+                    <input type="text" name="q" placeholder="キーワードを入力..." class="amazon-search-input" />
+                    <button type="submit" class="amazon-search-btn">検索</button>
+                </form>
+            </div>
+            <p class="amazon-ads-note">※ 上記リンクはAmazonアソシエイトリンクです</p>
+            <p class="amazon-ads-note">Amazonのアソシエイトとして、Gravity Portalは適格販売により収入を得ています。</p>
+        </div>
+        </article>
+
+        <nav class="post-nav">
+            <div class="post-nav-prev">
+            <a href="../../202603/20260305_pachinko_beginners_guide/" class="post-nav-link">
+                <span class="post-nav-label">← 前の記事</span>
+                <span class="post-nav-title">📖 【完全ガイド】パチンコ初心者が知っておくべき基礎知識まとめ</span>
+            </a></div>
+            <div class="post-nav-next">
+            <a href="../../202603/20260306_ai_web_dev_day2/" class="post-nav-link">
+                <span class="post-nav-label">次の記事 →</span>
+                <span class="post-nav-title">🤖 AIと1週間でWebポータルを作った記録 — Day 2: パチンコ期待値計算ツールの実装</span>
+            </a></div>
+        </nav>
+
+        <nav class="back-nav">
+            <a href="https://antigravity-portal.com/" class="back-link">🏠 TOPに戻る</a>
+            <a href="../../" class="back-link">← 記事一覧に戻る</a>
+        </nav>
+    </div>
+    
+    <script>
+    (function(){
+        var AD_ID = '06dfeeba49e20207a86cd5f651221d50';
+        var SDK_URL = 'https://adm.shinobi.jp/st/t.js';
+
+        // 課金チェック → 課金済みなら広告を全て非表示にしてSDKも読み込まない
+        function hideAllAds(){
+            document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                slot.style.display = 'none';
+            });
+        }
+
+        function initAds(){
+            // 1. admaxads配列にスロットを登録
+            if(!window.admaxads) window.admaxads = [];
+            document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
+                window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
+            });
+
+            // 2. SDKをロード（body末尾で1回だけ実行）
+            var s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.charset = 'utf-8';
+            s.src = SDK_URL;
+            s.async = true;
+            document.body.appendChild(s);
+
+            // 3. 広告が返らなかったスロットを非表示に（遅延チェック）
+            function checkAdSlots(){
+                document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                    var ad = slot.querySelector('.admax-switch');
+                    if(ad && ad.children.length > 0){
+                        slot.classList.add('ad-loaded');
+                    } else {
+                        slot.style.display = 'none';
+                    }
+                });
+            }
+            setTimeout(checkAdSlots, 5000);
+            setTimeout(checkAdSlots, 10000);
+        }
+
+        // 課金状態をチェック（同一ドメインのAPI）
+        fetch('/api/subscription-status')
+            .then(function(res){ return res.json(); })
+            .then(function(data){
+                if(data && data.isPaid){
+                    hideAllAds();
+                } else {
+                    initAds();
+                }
+            })
+            .catch(function(){
+                // エラー時は広告を表示（未課金扱い）
+                initAds();
+            });
+    })()
+    </script>
+</body>
+</html>

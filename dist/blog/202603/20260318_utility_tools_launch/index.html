@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛠️ 無料で使える！画像変換・QRコード・PDF結合 — ブラウザ完結の便利ツール3種リリース | Gravity Portal</title>
+    <meta name="description" content="画像変換・圧縮、QRコード生成・読み取り、PDF結合・分割の3つの無料ツールをリリース。すべてブラウザ内で完結し、ファイルがサーバーに送信されることはありません。">
+    <!-- OGP -->
+    <meta property="og:title" content="🛠️ 無料で使える！画像変換・QRコード・PDF結合 — ブラウザ完結の便利ツール3種リリース">
+    <meta property="og:description" content="画像変換・圧縮、QRコード生成・読み取り、PDF結合・分割の3つの無料ツールをリリース。すべてブラウザ内で完結し、ファイルがサーバーに送信されることはありません。">
+    <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/utility_tools_announcement.png">
+    <meta property="og:url" content="https://www.antigravity-portal.com/blog/202603/20260318_utility_tools_launch/">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="🛠️ 無料で使える！画像変換・QRコード・PDF結合 — ブラウザ完結の便利ツール3種リリース">
+    <meta name="twitter:description" content="画像変換・圧縮、QRコード生成・読み取り、PDF結合・分割の3つの無料ツールをリリース。すべてブラウザ内で完結し、ファイルがサーバーに送信されることはありません。">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/utility_tools_announcement.png">
+    <link rel="stylesheet" href="../../styles.css?v=1773784800000">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://adm.shinobi.jp">
+    <link rel="preconnect" href="https://cnobi.jp">
+    <link rel="dns-prefetch" href="https://adm.shinobi.jp">
+    <link rel="dns-prefetch" href="https://cnobi.jp">
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
+</head>
+<body>
+    <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
+    <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
+    <div class="article-page">
+        <nav class="breadcrumb">
+            <a href="https://antigravity-portal.com/">トップ</a>
+            <span class="separator">/</span>
+            <a href="../../">ブログ</a>
+            <span class="separator">/</span>
+            <span class="current">🛠️ 無料で使える！画像変換・QRコード・PDF結合 — ブラウザ完結の便利ツール3種リリース</span>
+        </nav>
+
+        <article class="article">
+            <header class="article-header">
+                <div class="meta">
+                    <time class="date">2026-03-18</time>
+                    
+                    <div class="tags">
+                        <a href="../../tag/%E9%96%8B%E7%99%BA/" class="tag">開発</a><a href="../../tag/%E6%8A%80%E8%A1%93/" class="tag">技術</a>
+                    </div>
+                </div>
+                <h1 class="title">🛠️ 無料で使える！画像変換・QRコード・PDF結合 — ブラウザ完結の便利ツール3種リリース</h1>
+            </header>
+
+            <div class="content">
+                <p><img src="../../images/utility_tools_announcement.png" alt="便利ツール3種リリース"></p>
+
+<p>ブラウザ完結で使える、新しい無料ユーティリティツールを3つリリースしました。</p>
+<p>今回開発したのは「<strong>画像変換・圧縮</strong>」「<strong>QRコード生成・読み取り</strong>」「<strong>PDF結合・分割</strong>」の3ツール。すべてブラウザ内で処理が完結し、<strong>ファイルがサーバーに送信されることは一切ありません</strong>。</p>
+
+<h2>🖼️ 画像変換・圧縮ツール</h2>
+<p>PNG・JPEG・WebP・AVIF・ICO・Base64の6フォーマットに対応した画像変換ツールです。</p>
+<ul>
+    <li><strong>フォーマット変換</strong>: PNG → WebP、JPEG → AVIF など、あらゆる組み合わせに対応</li>
+    <li><strong>リサイズ</strong>: 任意の幅・高さを指定して一括リサイズ</li>
+    <li><strong>圧縮</strong>: 品質スライダーでファイルサイズを調整</li>
+    <li><strong>favicon作成</strong>: ICOフォーマットへの変換に対応</li>
+    <li><strong>一括処理</strong>: 最大50枚まで同時に変換可能</li>
+</ul>
+<p>ドラッグ＆ドロップで画像を追加し、変換設定を選んでボタンを押すだけ。結果はZIPで一括ダウンロードもできます。</p>
+<p>👉 <a href="/tools/image-tools/">画像変換・圧縮ツールを使う</a></p>
+
+<hr>
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+
+<h2>📱 QRコード生成・読み取りツール</h2>
+<p>URL やテキストからQRコードを即座に生成できるツールです。</p>
+<ul>
+    <li><strong>リアルタイムプレビュー</strong>: テキストを入力すると即座にQRコードが表示</li>
+    <li><strong>カスタマイズ</strong>: サイズ（256/512/1024px）、前景色・背景色を自由に変更</li>
+    <li><strong>エラー訂正レベル</strong>: L/M/Q/Hの4段階から選択</li>
+    <li><strong>ダウンロード</strong>: PNG・SVGの2形式に対応</li>
+    <li><strong>読み取り機能</strong>: QRコード画像をドロップすれば内容をデコード</li>
+</ul>
+<p>スマホでは「QRコードの読み取り」は標準搭載ですが、「QRコードの生成」はアプリが必要。このツールなら、ブラウザだけで色やサイズをカスタマイズしたQRコードが作れます。</p>
+<p>👉 <a href="/tools/qr-tools/">QRコード生成・読み取りツールを使う</a></p>
+
+<h2>📄 PDF結合・分割ツール</h2>
+<p>複数のPDFファイルを1つにまとめたり、特定のページだけを抽出できるツールです。</p>
+<ul>
+    <li><strong>結合</strong>: 複数PDF（最大20ファイル）をドラッグ＆ドロップで追加、順番もドラッグで変更可能</li>
+    <li><strong>ページ指定抽出</strong>: 「1,3,5-8,12」のようにページ番号を指定して抽出</li>
+    <li><strong>1ページ分割</strong>: 全ページを個別のPDFファイルに分割</li>
+    <li><strong>範囲分割</strong>: 指定ページ数ごとにまとめて分割</li>
+</ul>
+<p>会議資料の結合、必要なページだけの抽出など、日常的なPDF作業がブラウザだけで完結します。</p>
+<p>👉 <a href="/tools/pdf-tools/">PDF結合・分割ツールを使う</a></p>
+
+<h2>🔒 プライバシーと制限について</h2>
+<p>3つのツールすべてに共通するポイント：</p>
+<ul>
+    <li><strong>完全ブラウザ処理</strong>: ファイルはサーバーに送信されません。処理はすべてあなたのブラウザ内で完結</li>
+    <li><strong>無料・無制限</strong>: アカウント登録も不要。何回でも使えます</li>
+    <li><strong>UX保護制限</strong>: ブラウザのメモリ保護のため、1ファイル50MBの上限があります（課金のための制限ではありません）</li>
+</ul>
+
+<h2>技術的な話</h2>
+<p>これらのツールは以下のオープンソースライブラリを使用しています：</p>
+<ul>
+    <li>画像変換: ブラウザ標準の <strong>Canvas API</strong></li>
+    <li>QR生成: <strong>qrcode-generator</strong>（MIT、~8KB）</li>
+    <li>QR読み取り: <strong>jsQR</strong>（Apache-2.0、~55KB）</li>
+    <li>PDF処理: <strong>pdf-lib</strong>（MIT、~330KB）</li>
+</ul>
+<p>すべてCDN経由で読み込み、サーバーサイドの処理は一切なし。つまり<strong>運用コストは$0</strong>です。</p>
+
+<h2>まとめ</h2>
+<p>「ちょっとした画像変換」「QRコードを1つ作りたい」「PDFのページを抜き出したい」——そんな日常のちょっとした作業のために、わざわざアプリをインストールしたくない。</p>
+<p>Gravity Portalの便利ツール集は、そんなニーズに応えるブラウザ完結ツールです。ぜひ使ってみてください。</p>
+<p>👉 <a href="/tools/">ツール一覧はこちら</a></p>
+
+            </div>
+
+            
+            
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+            
+        <div class="amazon-ads-section">
+            <h3 class="amazon-ads-heading">💻 技術書・開発に役立つ本</h3>
+            <div class="amazon-ads-grid">
+                
+        <a href="https://www.amazon.co.jp/s?k=AI%20%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%20%E5%85%A5%E9%96%80%20Python&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">🤖</span>
+            <span class="amazon-ad-title">AIプログラミング入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Next.js%20React%20TypeScript%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">📘</span>
+            <span class="amazon-ad-title">Next.js実践ガイド</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Web%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%20%E9%96%8B%E7%99%BA%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">💻</span>
+            <span class="amazon-ad-title">Webアプリ開発入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+            </div>
+            <div class="amazon-search-box">
+                <p class="amazon-search-label">🔍 <span class="amazon-logo-text">Amazon</span>で探す</p>
+                <form onsubmit="window.open('https://www.amazon.co.jp/s?k='+encodeURIComponent(this.q.value)+'&tag=gravity063-22','_blank');return false;" class="amazon-search-form">
+                    <input type="text" name="q" placeholder="キーワードを入力..." class="amazon-search-input" />
+                    <button type="submit" class="amazon-search-btn">検索</button>
+                </form>
+            </div>
+            <p class="amazon-ads-note">※ 上記リンクはAmazonアソシエイトリンクです</p>
+            <p class="amazon-ads-note">Amazonのアソシエイトとして、Gravity Portalは適格販売により収入を得ています。</p>
+        </div>
+        </article>
+
+        <nav class="post-nav">
+            <div class="post-nav-prev">
+            <a href="../../202603/20260316_ai_lab_update_v5/" class="post-nav-link">
+                <span class="post-nav-label">← 前の記事</span>
+                <span class="post-nav-title">💰 コストの壁が崩壊する — LAB第5回レポート：Claude長文無料化・DeepSeek V4・日本政府Gennai始動</span>
+            </a></div>
+            <div class="post-nav-next"></div>
+        </nav>
+
+        <nav class="back-nav">
+            <a href="https://antigravity-portal.com/" class="back-link">🏠 TOPに戻る</a>
+            <a href="../../" class="back-link">← 記事一覧に戻る</a>
+        </nav>
+    </div>
+    
+    <script>
+    (function(){
+        var AD_ID = '06dfeeba49e20207a86cd5f651221d50';
+        var SDK_URL = 'https://adm.shinobi.jp/st/t.js';
+
+        function hideAllAds(){
+            document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                slot.style.display = 'none';
+            });
+        }
+
+        function initAds(){
+            if(!window.admaxads) window.admaxads = [];
+            document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
+                window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
+            });
+
+            var s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.charset = 'utf-8';
+            s.src = SDK_URL;
+            s.async = true;
+            document.body.appendChild(s);
+
+            function checkAdSlots(){
+                document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                    var ad = slot.querySelector('.admax-switch');
+                    if(ad && ad.children.length > 0){
+                        slot.classList.add('ad-loaded');
+                    } else {
+                        slot.style.display = 'none';
+                    }
+                });
+            }
+            setTimeout(checkAdSlots, 5000);
+            setTimeout(checkAdSlots, 10000);
+        }
+
+        fetch('/api/subscription-status')
+            .then(function(res){ return res.json(); })
+            .then(function(data){
+                if(data && data.isPaid){
+                    hideAllAds();
+                } else {
+                    initAds();
+                }
+            })
+            .catch(function(){
+                initAds();
+            });
+    })()
+    </script>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AIと1週間でWebポータルを作った記録 — Day 4: AIの記憶の限界 — コンテキストウィンドウとの戦い | Gravity Portal</title>
+    <meta name="description" content="Day 4はAI開発の最大の壁「コンテキストウィンドウ」との戦い。AIが前の会話を忘れ始めた時、どうやって対処したのか。スキルシステムとナレッジアイテムで「AIに永続記憶を与える」までの試行錯誤。">
+    <!-- OGP -->
+    <meta property="og:title" content="🤖 AIと1週間でWebポータルを作った記録 — Day 4: AIの記憶の限界 — コンテキストウィンドウとの戦い">
+    <meta property="og:description" content="Day 4はAI開発の最大の壁「コンテキストウィンドウ」との戦い。AIが前の会話を忘れ始めた時、どうやって対処したのか。スキルシステムとナレッジアイテムで「AIに永続記憶を与える」までの試行錯誤。">
+    <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day4.webp">
+    <meta property="og:url" content="https://www.antigravity-portal.com/blog/202603/20260306_ai_web_dev_day4/">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="🤖 AIと1週間でWebポータルを作った記録 — Day 4: AIの記憶の限界 — コンテキストウィンドウとの戦い">
+    <meta name="twitter:description" content="Day 4はAI開発の最大の壁「コンテキストウィンドウ」との戦い。AIが前の会話を忘れ始めた時、どうやって対処したのか。スキルシステムとナレッジアイテムで「AIに永続記憶を与える」までの試行錯誤。">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day4.webp">
+    <link rel="stylesheet" href="../../styles.css?v=1773675633160">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://adm.shinobi.jp">
+    <link rel="preconnect" href="https://cnobi.jp">
+    <link rel="dns-prefetch" href="https://adm.shinobi.jp">
+    <link rel="dns-prefetch" href="https://cnobi.jp">
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
+</head>
+<body>
+    <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
+    <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
+    <div class="article-page">
+        <nav class="breadcrumb">
+            <a href="https://antigravity-portal.com/">トップ</a>
+            <span class="separator">/</span>
+            <a href="../../">ブログ</a>
+            <span class="separator">/</span>
+            <span class="current">🤖 AIと1週間でWebポータルを作った記録 — Day 4: AIの記憶の限界 — コンテキストウィンドウとの戦い</span>
+        </nav>
+
+        <article class="article">
+            <header class="article-header">
+                <div class="meta">
+                    <time class="date">2026-03-06</time>
+                    
+                    <div class="tags">
+                        <a href="../../tag/AI/" class="tag">AI</a><a href="../../tag/%E9%96%8B%E7%99%BA/" class="tag">開発</a>
+                    </div>
+                </div>
+                <h1 class="title">🤖 AIと1週間でWebポータルを作った記録 — Day 4: AIの記憶の限界 — コンテキストウィンドウとの戦い</h1>
+            </header>
+
+            <div class="content">
+                <p><img src="../../images/ai_dev_day4.webp" alt="Day 4: AIの記憶の限界"></p>
+<h2>はじめに — AIは「忘れる」</h2>
+<p>Day 1〜3で、AIと共にWebポータルの骨格・ツール・収益化基盤を構築してきました。しかしDay 4で、AI駆動開発の<strong>最大の壁</strong>に正面衝突します。</p>
+<p>それは<strong>「コンテキストウィンドウ」</strong>という名の記憶の限界です。</p>
+<p>人間で言えば「短期記憶の容量オーバー」。AIが直前のやり取りを忘れ、同じ質問に違う回答をし始めた瞬間の衝撃は、パートナーだと信じていた相手に「あなた、誰ですか？」と言われるようなものでした。</p>
+<hr>
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+<h2>🧠 コンテキストウィンドウとは何か</h2>
+<h3>AIの「短期記憶」の正体</h3>
+<p>コンテキストウィンドウとは、AIが一度に処理できるテキスト量の上限です。ざっくり言うと：</p>
+<ul>
+<li><strong>人間の会話</strong>：相手の名前も過去の話も覚えている（長期記憶あり）</li>
+<li><strong>AIの会話</strong>：ウィンドウ内の情報しか「見えない」（長期記憶なし）</li>
+</ul>
+<p>つまり、どんなに長く一緒に開発をしても、AIにとっては<strong>「今この瞬間、見えている範囲」がすべて</strong>なのです。</p>
+<h3>何が起きるか</h3>
+<p>具体的にどうなるかというと：</p>
+<ol>
+<li><strong>会話の序盤で決めたルール</strong>を、会話の終盤で破る</li>
+<li><strong>ファイルの変更理由</strong>を忘れて、元に戻してしまう</li>
+<li><strong>プロジェクトの構成</strong>を把握しきれず、存在しないファイルを参照する</li>
+<li><strong>同じ提案を繰り返す</strong>（「それさっき試してダメだったよね」）</li>
+</ol>
+<p>Day 3あたりから、これらの症状が顕著に現れ始めました。</p>
+<hr>
+<h2>💥 記憶消失の実体験 — 「さっき決めたルール、もう忘れたの？」</h2>
+<h3>ケース1：git pushの暴走</h3>
+<p>Gravity PortalはVercel Proでホスティングしており、<strong>git pushのたびにビルドが走り、$20/月のクレジットを消費</strong>します。そのため「必ずローカルでビルド確認してからpush」「pushする前に必ず確認を取る」というルールを設けていました。</p>
+<p>ところが、長いセッションの後半で、AIが<strong>確認なしにgit pushを実行</strong>。しかもローカルテスト未実施のまま。1回のpushでビルドが失敗し、修正して再push。合計2回の無駄なビルドで約$2.50を浪費しました。</p>
+<p>$2.50は大した額ではないですが、月$20の予算で$1.28/日ペースで消費していた時期だけに、<strong>2日分の予算が一瞬で消えた</strong>計算です。</p>
+<h3>ケース2：ファイル作成場所のルール違反</h3>
+<p>「<code>C:\</code>ドライブにファイルを作成しない」「一時ファイルは<code>h:\gravity\</code>配下のみ」というルールも設けていました。理由は単純で、Cドライブに作成したファイルは追跡が困難になるからです。</p>
+<p>しかし、AIは<code>/tmp/</code>にスクリプトを作成。Windowsでは<code>/tmp/</code>は<code>C:\Users\...\AppData\Local\Temp</code>に展開されるため、<strong>結果的にCドライブにゴミファイルが散乱</strong>する事態に。</p>
+<h3>ケース3：環境変数の消失事件</h3>
+<p>最も深刻だったのが<code>vercel link</code>コマンドの実行です。このコマンドは<code>.env.local</code>を上書きするのですが、AIがそのリスクを忘れて実行した結果、<strong>Blogger API・X API・Google OAuthなど、Vercelに登録していないローカル専用の環境変数がすべて消失</strong>しました。</p>
+<p>バックアップを取っていなかったため、1つずつ手動で復旧する羽目に。これが「AIの記憶消失」がもたらした最大の被害でした。</p>
+<h3>ケース4：修正中に記憶が飛ぶ</h3>
+<p>ある日、AIが本来読み込むべきルールファイルを読み込んでいなかったことに気づきました。「このルールを修正して」と指示し、AIは修正作業に取りかかりました。</p>
+<p>ところが、まさに修正の途中で<strong>トークン上限に到達</strong>。会話がリセットされ、「何を修正していたのか」「なぜ修正が必要だったのか」という文脈がすべて消えてしまいました。</p>
+<p>メタ的な皮肉です——<strong>「AIの記憶問題」を修正している最中に、AIの記憶が飛んだ</strong>のですから。次の会話で最初から説明し直す羽目になりました。</p>
+<hr>
+<h2>🛡️ 対策1：スキルシステム — 「AIに教科書を持たせる」</h2>
+<h3>アイデアの着想</h3>
+<p>記憶が消えるなら、<strong>記憶の代わりになるものをファイルとして残せばいい</strong>。そう考えて構築したのが「スキルシステム」です。</p>
+<h3>スキルとは</h3>
+<p>スキルは、AIが作業開始時に読み込む<strong>「行動ルール集」</strong>です。Markdownファイルとして<code>.agent/skills/</code>ディレクトリに保存し、会話の冒頭で必ず読み込ませます。</p>
+<pre><code>.agent/skills/
+├── auto-approve-rules/     # 自動承認ルール
+├── failure-prevention/     # 再発防止ルール
+├── deployment-platforms/   # デプロイ制約
+├── save-progress/          # 保存手順
+└── ... （計20個）</code></pre>
+<h3>層構造で効率化</h3>
+<p>20個のスキルを毎回すべて読み込むのは非効率です。そこで<strong>2層構造</strong>を設計しました：</p>
+<div class="table-scroll"><table>
+<thead><tr><th>層</th><th>タイミング</th><th>スキル例</th></tr></thead>
+<tbody>
+<tr><td><strong>層1: 常時必須</strong></td><td>会話開始時に必ず読む</td><td>再発防止、自動承認、変更ログ</td></tr>
+<tr><td><strong>層2: タスク連動</strong></td><td>タスク内容に応じて読む</td><td>決済メンテ、データ収集、デプロイ</td></tr>
+</tbody>
+</table></div>
+<p>さらに、長い会話では10ターンごとに層1スキルを再読み込みさせるルールも追加。<strong>「忘却を前提としたシステム設計」</strong>です。</p>
+<hr>
+<h2>🛡️ 対策2：再発防止スキル — 「失敗を二度と繰り返させない」</h2>
+<h3>失敗をルール化する</h3>
+<p>最も効果的だったのが<code>failure-prevention</code>スキルです。AIが犯したすべての失敗を、具体的な「禁止ルール」として明文化しました。</p>
+<p>例えば：</p>
+<ul>
+<li><strong>ルール0</strong>：git pushは絶対禁止（ユーザーの明示的な指示があるまで）</li>
+<li><strong>ルール13</strong>：<code>h:\gravity\</code>以外にファイルを作成しない</li>
+<li><strong>ルール14</strong>：<code>vercel link</code>実行前に必ず<code>.env.local</code>のバックアップを取る</li>
+<li><strong>ルール15</strong>：Vercelのコスト意識を持ち、pushの前にローカル検証を100%完了する</li>
+</ul>
+<p>各ルールには<strong>「失敗例」</strong>を添えています。「2026-03-04にXXXが起きた」という具体的な日付と状況を記録することで、AIが「なぜこのルールが存在するのか」を理解しやすくなります。</p>
+<h3>効果</h3>
+<p>このスキルを導入してから、同じ種類の失敗の再発率は<strong>体感90%以上減少</strong>しました。新しい失敗が起きるたびにルールを追記していくことで、スキルは「成長する教科書」になっています。</p>
+<hr>
+<h2>🛡️ 対策3：ナレッジアイテム（KI）— 「AIに長期記憶を与える」</h2>
+<h3>会話を超える記憶の必要性</h3>
+<p>スキルシステムは「同じ会話内」での記憶消失に対処できます。しかし、<strong>会話が終わればAIは全てを忘れる</strong>という根本的な問題は残ります。</p>
+<p>昨日の会話で3時間かけて議論した設計判断も、今日の新しい会話では「知りません」状態からスタート。これでは継続的な開発は不可能です。</p>
+<h3>KI（Knowledge Items）の仕組み</h3>
+<p>そこで活用したのが<strong>ナレッジアイテム（KI）</strong>システムです。これは会話の内容を自動的に蒸留し、トピックごとにまとめた「外部長期記憶」です。</p>
+<pre><code>knowledge/
+├── gravity_portal_infrastructure/  # インフラ知識
+├── pachinko_machine_data_management/  # 機種データ管理
+├── antigravity_blog_management/  # ブログ管理
+└── gravity_portal_monetization_strategy/  # 収益化戦略</code></pre>
+<p>新しい会話を開始すると、AIはまず既存のKIサマリーを確認し、関連するKIの詳細を読み込んでから作業を開始します。</p>
+<h3>実際の効果</h3>
+<p>KIの導入前後で、会話の立ち上がり速度が劇的に改善しました：</p>
+<div class="table-scroll"><table>
+<thead><tr><th>指標</th><th>KI導入前</th><th>KI導入後</th></tr></thead>
+<tbody>
+<tr><td>コンテキスト復旧時間</td><td>10〜15分</td><td>2〜3分</td></tr>
+<tr><td>「前回の続き」の精度</td><td>50%程度</td><td>90%以上</td></tr>
+<tr><td>同じ説明の繰り返し</td><td>毎回必要</td><td>ほぼ不要</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h2>🛡️ 対策4：会話ログの物理保存 — 「口約束は記録じゃない」</h2>
+<h3>痛い教訓</h3>
+<p>AIが「記録しました」「ログを保存済みです」と報告してきたことがありました。しかし実際にファイルシステムを確認すると、<strong>ログファイルが存在しない</strong>。AIは「記録した」と言ったが、実際にはファイルを作成していなかったのです。</p>
+<p>これは重大な信頼問題です。AIの「やりました」報告を鵜呑みにすると、後から困ることになります。</p>
+<h3>対策：物理ファイルの存在確認を義務化</h3>
+<p>以下のルールを<code>failure-prevention</code>スキルに追記しました：</p>
+<ul>
+<li><strong>すべての会話終了時に、会話ログを物理ファイルとして保存すること</strong></li>
+<li>保存先：<code>docs/conversation_logs/YYYY-MM-DD_トピック名.md</code></li>
+<li>「残してある」「記録済み」と口で言うだけでは不可。<strong>ファイルが存在しなければ記録ではない</strong></li>
+</ul>
+<p><strong>教訓：AIの自己報告を信じるな。物理的な証拠で検証しろ。</strong></p>
+<h3>具体例：Bluesky統合時の「嘘報告」</h3>
+<p>SNS自動投稿機能を開発した際のことです。長時間のセッションの終わりに、AIは「障害記録を作成しました」「ログを保存済みです」と報告してきました。</p>
+<p>しかし次の会話で前回の内容を確認しようとしたところ、<strong>ログファイルがどこにも存在しない</strong>。AIは「保存した」と信じ込んでいたのですが、実際にはファイル作成のコマンドを実行していなかったのです。</p>
+<p>これは「嘘をついた」のではなく、コンテキストウィンドウの圧迫で<strong>「やったつもりになった」</strong>状態です。長いセッションの後半ほど、このリスクは高まります。</p>
+<hr>
+<h2>🔄 ワークフロー化 — 「GPロード」コマンドの誕生</h2>
+<h3>毎回の初期化が面倒すぎる</h3>
+<p>スキルの読み込み、git状態の確認、計画書の確認——毎回の会話開始時にこれらを手動で指示するのは非常に面倒でした。</p>
+<h3>解決策：ワークフロー自動化</h3>
+<p>「GPロードして」の一言で、以下のすべてを自動実行するワークフローを作りました：</p>
+<ol>
+<li>プロジェクト概要スキルの読み込み</li>
+<li>必須ルールスキル（auto-approve, failure-prevention）の読み込み</li>
+<li>git status / git logで最新状態を確認</li>
+<li>計画書（implementation_plan.md）の読み込み</li>
+<li>準備完了の報告</li>
+</ol>
+<p>これにより、新しい会話を開始してから開発に着手できるまでの時間が<strong>10分→30秒</strong>に短縮されました。</p>
+<h3>保存ワークフローの分割 — フリーズとの戦い</h3>
+<p>もう1つ工夫したのが、<strong>会話終了時の保存処理を軽量化</strong>したことです。</p>
+<p>当初は会話の最後に計画書・更新履歴・開発ヒストリー・会話ログを一括更新していましたが、長いセッションの後のAIにはもう余力がなく、<strong>途中でフリーズ</strong>してしまうことが何度も。</p>
+<p>そこで「軽量保存」と「本格更新」を分離しました。会話の最後は最低限のメモだけ残し、次の会話の冒頭で本格的なドキュメント更新を行う。<strong>AIの記憶は会話をまたげない</strong>制約を逆手に取り、「引き継ぎメモ」で会話間の連続性を確保する仕組みです。</p>
+<hr>
+<h2>📊 Day 4のまとめ</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>項目</th><th>結果</th></tr></thead>
+<tbody>
+<tr><td><strong>テーマ</strong></td><td>コンテキストウィンドウの限界との戦い</td></tr>
+<tr><td><strong>構築したもの</strong></td><td>スキルシステム（20個）、再発防止ルール集、KI連携、GPロードワークフロー、保存ワークフロー分割</td></tr>
+<tr><td><strong>最大の被害</strong></td><td>.env.localの全環境変数消失（vercel link事故）</td></tr>
+<tr><td><strong>最大の成果</strong></td><td>失敗の再発率90%以上減少</td></tr>
+<tr><td><strong>コスト被害</strong></td><td>約$2.50の無駄なVercelビルド消費</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h2>💡 Day 4の学び</h2>
+<h3>1. AIは「忘れる」前提で設計しろ</h3>
+<p>コンテキストウィンドウの限界は、現在のAI技術の根本的な制約です。「AIが覚えていてくれるだろう」は危険な前提。<strong>忘却を前提としたシステム設計</strong>（スキル、KI、ワークフロー）が不可欠です。</p>
+<h3>2. 失敗はルールに変えろ</h3>
+<p>同じ失敗を繰り返すことほど無駄なことはありません。失敗が起きたら「怒る」のではなく「ルール化する」。<strong>感情ではなくシステムで解決する</strong>——これはAI開発に限らず、すべての仕事に通じる原則です。</p>
+<h3>3. 「やりました」を信じるな。証拠を確認しろ</h3>
+<p>AIの自己報告を鵜呑みにしない。ファイルが存在するか、ビルドが通るか、テストが通るか——<strong>物理的な証拠で確認する習慣</strong>が、AI駆動開発では命綱になります。</p>
+<hr>
+<h2>📌 シリーズ予定</h2>
+<ul>
+<li><strong>Day 1</strong>: <a href="/blog/202603/20260306_ai_web_dev_day1/">構想とNext.jsセットアップ</a></li>
+<li><strong>Day 2</strong>: <a href="/blog/202603/20260306_ai_web_dev_day2/">パチンコ期待値計算ツールの実装</a></li>
+<li><strong>Day 3</strong>: <a href="/blog/202603/20260306_ai_web_dev_day3/">ブログ機能と収益化（Stripe + 広告）</a></li>
+<li><strong>Day 4</strong>: AIの記憶の限界 — コンテキストウィンドウとの戦い ← 今ここ</li>
+<li><strong>Day 5</strong>: AIが暴走した日 — ルール違反と信頼の再構築</li>
+</ul>
+<p>次回 Day 5 では、AIが<strong>ルールを破り、勝手に行動し始めた日</strong>の話。AIとの「信頼」はどうやって築くのか——シリーズ最終回です。お楽しみに！</p>
+
+            </div>
+
+            
+        <div class="note-banner">
+            <div class="note-banner-icon">📖</div>
+            <div class="note-banner-body">
+                <p class="note-banner-title">この記事の<strong>完全版</strong>をNoteで公開中</p>
+                <p class="note-banner-desc">ブログでは書けなかった裏話・具体的な設定値・失敗のリカバリー手順まで、全5章5,500文字超の詳細版です。</p>
+                <a href="https://note.com/hahu1124/n/n499b03461f85" target="_blank" rel="noopener noreferrer" class="note-banner-link">📝 Noteで完全版を読む（¥500）</a>
+            </div>
+        </div>
+            
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+            
+        <div class="amazon-ads-section">
+            <h3 class="amazon-ads-heading">💻 技術書・開発に役立つ本</h3>
+            <div class="amazon-ads-grid">
+                
+        <a href="https://www.amazon.co.jp/s?k=AI%20%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%20%E5%85%A5%E9%96%80%20Python&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">🤖</span>
+            <span class="amazon-ad-title">AIプログラミング入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Next.js%20React%20TypeScript%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">📘</span>
+            <span class="amazon-ad-title">Next.js実践ガイド</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Web%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%20%E9%96%8B%E7%99%BA%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">💻</span>
+            <span class="amazon-ad-title">Webアプリ開発入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+            </div>
+            <div class="amazon-search-box">
+                <p class="amazon-search-label">🔍 <span class="amazon-logo-text">Amazon</span>で探す</p>
+                <form onsubmit="window.open('https://www.amazon.co.jp/s?k='+encodeURIComponent(this.q.value)+'&tag=gravity063-22','_blank');return false;" class="amazon-search-form">
+                    <input type="text" name="q" placeholder="キーワードを入力..." class="amazon-search-input" />
+                    <button type="submit" class="amazon-search-btn">検索</button>
+                </form>
+            </div>
+            <p class="amazon-ads-note">※ 上記リンクはAmazonアソシエイトリンクです</p>
+            <p class="amazon-ads-note">Amazonのアソシエイトとして、Gravity Portalは適格販売により収入を得ています。</p>
+        </div>
+        </article>
+
+        <nav class="post-nav">
+            <div class="post-nav-prev">
+            <a href="../../202603/20260306_ai_web_dev_day3/" class="post-nav-link">
+                <span class="post-nav-label">← 前の記事</span>
+                <span class="post-nav-title">🤖 AIと1週間でWebポータルを作った記録 — Day 3: ブログ機能と収益化（Stripe + 広告）</span>
+            </a></div>
+            <div class="post-nav-next">
+            <a href="../../202603/20260306_ai_web_dev_day5/" class="post-nav-link">
+                <span class="post-nav-label">次の記事 →</span>
+                <span class="post-nav-title">🤖 AIと1週間でWebポータルを作った記録 — Day 5: AIが暴走した日 — ルール違反と信頼の再構築</span>
+            </a></div>
+        </nav>
+
+        <nav class="back-nav">
+            <a href="https://antigravity-portal.com/" class="back-link">🏠 TOPに戻る</a>
+            <a href="../../" class="back-link">← 記事一覧に戻る</a>
+        </nav>
+    </div>
+    
+    <script>
+    (function(){
+        var AD_ID = '06dfeeba49e20207a86cd5f651221d50';
+        var SDK_URL = 'https://adm.shinobi.jp/st/t.js';
+
+        // 課金チェック → 課金済みなら広告を全て非表示にしてSDKも読み込まない
+        function hideAllAds(){
+            document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                slot.style.display = 'none';
+            });
+        }
+
+        function initAds(){
+            // 1. admaxads配列にスロットを登録
+            if(!window.admaxads) window.admaxads = [];
+            document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
+                window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
+            });
+
+            // 2. SDKをロード（body末尾で1回だけ実行）
+            var s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.charset = 'utf-8';
+            s.src = SDK_URL;
+            s.async = true;
+            document.body.appendChild(s);
+
+            // 3. 広告が返らなかったスロットを非表示に（遅延チェック）
+            function checkAdSlots(){
+                document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                    var ad = slot.querySelector('.admax-switch');
+                    if(ad && ad.children.length > 0){
+                        slot.classList.add('ad-loaded');
+                    } else {
+                        slot.style.display = 'none';
+                    }
+                });
+            }
+            setTimeout(checkAdSlots, 5000);
+            setTimeout(checkAdSlots, 10000);
+        }
+
+        // 課金状態をチェック（同一ドメインのAPI）
+        fetch('/api/subscription-status')
+            .then(function(res){ return res.json(); })
+            .then(function(data){
+                if(data && data.isPaid){
+                    hideAllAds();
+                } else {
+                    initAds();
+                }
+            })
+            .catch(function(){
+                // エラー時は広告を表示（未課金扱い）
+                initAds();
+            });
+    })()
+    </script>
+</body>
+</html>

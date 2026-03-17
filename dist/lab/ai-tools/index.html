@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発ツール比較 | LAB | Gravity Portal</title>
+    <meta name="description" content="Antigravity、Claude Code、Cursor、Windsurf、GitHub Copilotの5大AIコーディングツールを定期的に比較・追跡するシリーズ。">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
+
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LABに戻る</a>
+        <span class="lab-title">🛠️ AI開発ツール比較</span>
+    </header>
+
+    <main class="lab-content">
+        <div class="lab-hero">
+            <div class="lab-hero-icon">🛠️</div>
+            <h1>AI開発ツール比較</h1>
+            <p>Antigravity、Claude Code、Cursor、Windsurf、GitHub Copilotの<br>5大AIコーディングツールを定期的に比較・追跡するシリーズです。</p>
+        </div>
+
+        <div class="lab-section">
+            <h2>📚 バックナンバー</h2>
+
+            <a href="/lab/ai-tools/v4/" class="tool-card" style="text-decoration:none;display:block">
+                <div class="tool-card-header">
+                    <span class="tool-card-icon">🆕</span>
+                    <div class="tool-card-info">
+                        <h3>第4回 — コスト崩壊</h3>
+                        <span class="tool-maker">2026年3月16日</span>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <p>Claude長文サーチャージ撤廃、Gemini×Workspace統合、ダブル使用量キャンペーン。5大ツールのコスト競争を徹底比較。</p>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">🔥 最新</span>
+                    <span class="badge badge-type">コスト比較</span>
+                    <span class="badge badge-type">価格改定</span>
+                </div>
+            </a>
+
+            <a href="/lab/ai-tools/v3/" class="tool-card" style="text-decoration:none;display:block">
+                <div class="tool-card-header">
+                    <span class="tool-card-icon">📋</span>
+                    <div class="tool-card-info">
+                        <h3>第3回 — 光と影</h3>
+                        <span class="tool-maker">2026年3月12日</span>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <p>GPT-5.4統合、Cursor Automations、Claude Code HTTP Hooks。最新機能ラッシュの裏に潜むユーザーの不満・課題も徹底取材。</p>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-type">GPT-5.4</span>
+                    <span class="badge badge-type">ユーザーの声</span>
+                </div>
+            </a>
+
+            <a href="/lab/ai-tools/v2/" class="tool-card" style="text-decoration:none;display:block">
+                <div class="tool-card-header">
+                    <span class="tool-card-icon">📋</span>
+                    <div class="tool-card-info">
+                        <h3>第2回 — 激動の1週間</h3>
+                        <span class="tool-maker">2026年3月11日</span>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <p>Copilot CLI正式版、Claude Code Review登場、Windsurf買収劇、Cursorマルチエージェント。5大ツールの最新アップデートを比較。</p>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-type">Copilot CLI</span>
+                    <span class="badge badge-type">Claude Code Review</span>
+                </div>
+            </a>
+
+            <a href="/lab/ai-tools/v1/" class="tool-card" style="text-decoration:none;display:block">
+                <div class="tool-card-header">
+                    <span class="tool-card-icon">📋</span>
+                    <div class="tool-card-info">
+                        <h3>第1回 — 5大ツール初期比較</h3>
+                        <span class="tool-maker">2026年3月9日</span>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <p>Antigravity、Claude Code、Cursor、Windsurf、GitHub Copilotの機能・価格・特徴を初回比較。各ツールの強み・弱みを分析。</p>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-type">5ツール比較</span>
+                    <span class="badge badge-free">初回</span>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <footer class="lab-footer">
+        <p>LAB — AI開発の最前線を探る</p>
+        <div class="lab-footer-nav">
+            <a href="/lab/">🔬 LABトップ</a>
+            <a href="/lab/ai-developers/">👤 開発者</a>
+            <a href="/lab/ai-trends/">📊 トレンド</a>
+            <a href="https://antigravity-portal.com/">🏠 TOP</a>
+        </div>
+    </footer>
+</body>
+</html>

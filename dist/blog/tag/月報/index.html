@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>月報 の記事一覧 | Gravity Portal</title>
+    <meta name="description" content="「月報」タグが付いた記事 1件">
+    <!-- OGP -->
+    <meta property="og:title" content="月報 の記事一覧">
+    <meta property="og:description" content="「月報」タグが付いた記事 1件">
+    <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day1.webp">
+    <meta property="og:url" content="https://www.antigravity-portal.com/blog/tag/%E6%9C%88%E5%A0%B1/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="月報 の記事一覧">
+    <meta name="twitter:description" content="「月報」タグが付いた記事 1件">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day1.webp">
+    <link rel="stylesheet" href="../../styles.css?v=1773675633128">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://adm.shinobi.jp">
+    <link rel="preconnect" href="https://cnobi.jp">
+    <link rel="dns-prefetch" href="https://adm.shinobi.jp">
+    <link rel="dns-prefetch" href="https://cnobi.jp">
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
+</head>
+<body>
+    <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
+    <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
+    <div class="blog-page">
+        
+        <nav class="breadcrumb">
+            <a href="https://antigravity-portal.com/">トップ</a>
+            <span class="separator">/</span>
+            <a href="../../">ブログ</a>
+            <span class="separator">/</span>
+            <span class="current">月報</span>
+        </nav>
+        <header class="header">
+            <a href="https://antigravity-portal.com/" class="back-link">← トップに戻る</a>
+            <h1 class="page-title">月報 の記事一覧</h1>
+            <p class="page-desc">「月報」タグが付いた記事 1件</p>
+        </header>
+
+        <div class="tag-filter">
+            <a href="../../" class="tag">すべて (48)</a>
+            <a href="../Uber/" class="tag">Uber (32)</a>
+            <a href="../%E6%97%A5%E5%A0%B1/" class="tag">日報 (26)</a>
+            <a href="../AI/" class="tag">AI (11)</a>
+            <a href="../%E9%96%8B%E7%99%BA/" class="tag">開発 (11)</a>
+            <a href="../%E9%80%B1%E5%A0%B1/" class="tag">週報 (5)</a>
+            <a href="../%E3%83%91%E3%83%81%E3%83%B3%E3%82%B3/" class="tag">パチンコ (4)</a>
+            <a href="../LAB/" class="tag">LAB (3)</a>
+            <a href="../%E3%82%AC%E3%82%A4%E3%83%89/" class="tag">ガイド (2)</a>
+            <a href="../%E6%9C%88%E5%A0%B1/" class="tag tag-active">月報 (1)</a>
+            <a href="../%E6%96%B0%E5%8F%B0/" class="tag">新台 (1)</a>
+            <a href="../%E3%83%87%E3%83%BC%E3%82%BF%E5%88%86%E6%9E%90/" class="tag">データ分析 (1)</a>
+            <a href="../%E6%8A%80%E8%A1%93/" class="tag">技術 (1)</a>
+            <a href="../PWA/" class="tag">PWA (1)</a>
+        </div>
+
+        <section class="article-grid">
+            
+        <a href="../../202603/20260313_uber_monthly_feb/" class="article-card" data-tags="Uber,月報" data-index="0">
+            <div class="card-header">
+                <time class="date">2026-03-13 01:17</time>
+                
+                <div class="tags">
+                    <span class="tag">Uber</span><span class="tag">月報</span>
+                </div>
+            </div>
+            <h2 class="card-title">📊 2月月間総括：独立初月¥245,011 — 384件の配達で見えた「可能性」と「課題」</h2>
+            <p class="card-excerpt">2026年2月10日にUber配達員デビュー。初月19日間で¥245,011を達成。W1〜W3の全データを統合し、時給推移・プロモ戦略・体調リスク・年収シミュレーションまで徹底分析。</p>
+        </a>
+        </section>
+
+        <nav class="pagination" id="pagination"></nav>
+    </div>
+    <script>
+    (function() {
+        var PER_PAGE = 10;
+        var currentPage = 1;
+        var cards = Array.from(document.querySelectorAll('.article-card'));
+        var pagination = document.getElementById('pagination');
+
+        function render() {
+            var totalPages = Math.ceil(cards.length / PER_PAGE);
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+            var start = (currentPage - 1) * PER_PAGE;
+            var end = start + PER_PAGE;
+
+            cards.forEach(function(c, i) {
+                c.style.display = (i >= start && i < end) ? '' : 'none';
+            });
+
+            var html = '';
+            if (totalPages > 1) {
+                if (currentPage > 1) {
+                    html += '<button class="page-btn" data-page="' + (currentPage - 1) + '">← 前</button>';
+                }
+                for (var p = 1; p <= totalPages; p++) {
+                    html += '<button class="page-btn' + (p === currentPage ? ' page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
+                }
+                if (currentPage < totalPages) {
+                    html += '<button class="page-btn" data-page="' + (currentPage + 1) + '">次 →</button>';
+                }
+            }
+            pagination.innerHTML = html;
+        }
+
+        pagination.addEventListener('click', function(e) {
+            if (e.target.dataset.page) {
+                currentPage = parseInt(e.target.dataset.page);
+                render();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        render();
+    })();
+    </script>
+</body>
+</html>

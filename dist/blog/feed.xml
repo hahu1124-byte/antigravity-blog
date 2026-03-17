@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Gravity Portal ブログ</title>
+    <link>https://www.antigravity-portal.com/blog</link>
+    <description>パチンコ分析・AI開発・Uber配達の個人開発ポータル Gravity Portal の最新記事</description>
+    <language>ja</language>
+    <lastBuildDate>Sun, 15 Mar 2026 15:00:00 GMT</lastBuildDate>
+    <managingEditor>hahu1124 (Gravity Portal)</managingEditor>
+    <atom:link href="https://www.antigravity-portal.com/blog/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>💰 コストの壁が崩壊する — LAB第5回レポート：Claude長文無料化・DeepSeek V4・日本政府Gennai始動</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260316_ai_lab_update_v5/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260316_ai_lab_update_v5/</guid>
+      <pubDate>Sun, 15 Mar 2026 15:00:00 GMT</pubDate>
+      <description>Claude長文サーチャージ撤廃、DeepSeek V4が1兆パラメータをオープンウェイト公開、MiniMax M2.5がClaude級を低コスト実現。Gartnerは企業アプリの40%がエージェントAI搭載と予測。日本政府は18万人規模のGennaiとGENIAC-PRIZE 8億円で本格始動。</description>
+        <category>AI</category>
+        <category>開発</category>
+        <category>LAB</category>
+    </item>
+    <item>
+      <title>🌍 AI業界激震の1週間 — LAB第4回レポート：#QuitGPT・Anthropic訴訟・Apple参入</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260315_ai_lab_update_v4/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260315_ai_lab_update_v4/</guid>
+      <pubDate>Sat, 14 Mar 2026 15:00:00 GMT</pubDate>
+      <description>#QuitGPTで250万人がChatGPT解約、ClaudeがApp Store 1位に。Anthropicはペンタゴンを提訴、AppleはCore AIを発表、日本政府は18万公務員向けGennaiを始動。技術と倫理が衝突した激動の7日間。</description>
+        <category>AI</category>
+        <category>開発</category>
+        <category>LAB</category>
+    </item>
+    <item>
+      <title>📊 W5週間総括：完全復活¥83,650！7日連続稼働で体調不良からのV字回復を証明（3/9〜3/15）</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260315_uber_weekly_summary_w5/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260315_uber_weekly_summary_w5/</guid>
+      <pubDate>Invalid Date</pubDate>
+      <description>こんにちは、玉配達員AHです。</description>
+        <category>週報</category>
+        <category>Uber</category>
+    </item>
+    <item>
+      <title>🎉 日曜日のフィナーレ：プロモ¥9,040爆発で¥18,875！時給¥3,432の新記録（2026年3月15日）</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260315_uber_sunday_w5/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260315_uber_sunday_w5/</guid>
+      <pubDate>Invalid Date</pubDate>
+      <description>こんにちは、玉配達員AHです。</description>
+        <category>Uber</category>
+        <category>日報</category>
+    </item>
+    <item>
+      <title>🏆 土曜日のフルスロットル：29件配達で¥14,556、時給¥1,719の今週ハイスコア（2026年3月14日）</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260314_uber_saturday_w5/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260314_uber_saturday_w5/</guid>
+      <pubDate>Fri, 13 Mar 2026 15:00:00 GMT</pubDate>
+      <description>こんにちは、玉配達員AHです。</description>
+        <category>Uber</category>
+        <category>日報</category>
+    </item>
+    <item>
+      <title>🔥 金曜日のギアチェンジ：25件配達で¥13,478、今週初の1万3千円台（2026年3月13日）</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260313_uber_friday_w5/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260313_uber_friday_w5/</guid>
+      <pubDate>Invalid Date</pubDate>
+      <description>こんにちは、玉配達員AHです。</description>
+        <category>Uber</category>
+        <category>日報</category>
+    </item>
+    <item>
+      <title>🎯 チップが嬉しい木曜日：14件で¥7,087、W4比2倍の完全回復（2026年3月12日）</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260312_uber_thursday_w5/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260312_uber_thursday_w5/</guid>
+      <pubDate>Invalid Date</pubDate>
+      <description>こんにちは、玉配達員AHです。</description>
+        <category>Uber</category>
+        <category>日報</category>
+    </item>
+    <item>
+      <title>📈 安定の3日連続：21件で¥10,557、プロモ控えめでも1万円キープ（2026年3月11日）</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260311_uber_wednesday_w5/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260311_uber_wednesday_w5/</guid>
+      <pubDate>Invalid Date</pubDate>
+      <description>こんにちは、玉配達員AHです。</description>
+        <category>Uber</category>
+        <category>日報</category>
+    </item>
+    <item>
+      <title>💪 地力で稼ぐ火曜日：プロモゼロで¥8,308、件数単価¥519の正味勝負（2026年3月10日）</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260310_uber_tuesday_w5/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260310_uber_tuesday_w5/</guid>
+      <pubDate>Mon, 09 Mar 2026 15:00:00 GMT</pubDate>
+      <description>こんにちは、玉配達員AHです。</description>
+        <category>Uber</category>
+        <category>日報</category>
+    </item>
+    <item>
+      <title>🚀 復活の月曜日：W4の不振から完全回帰、初日¥10,789のスタートダッシュ（2026年3月9日）</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260309_uber_monday_w5/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260309_uber_monday_w5/</guid>
+      <pubDate>Sun, 08 Mar 2026 15:00:00 GMT</pubDate>
+      <description>こんにちは、玉配達員AHです。</description>
+        <category>Uber</category>
+        <category>日報</category>
+    </item>
+    <item>
+      <title>📊 2月月間総括：独立初月¥245,011 — 384件の配達で見えた「可能性」と「課題」</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260313_uber_monthly_feb/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260313_uber_monthly_feb/</guid>
+      <pubDate>Invalid Date</pubDate>
+      <description>2026年2月10日にUber配達員デビュー。初月19日間で¥245,011を達成。W1〜W3の全データを統合し、時給推移・プロモ戦略・体調リスク・年収シミュレーションまで徹底分析。</description>
+        <category>Uber</category>
+        <category>月報</category>
+    </item>
+    <item>
+      <title>📊 AI開発ツール最新動向 — LAB第3回レポート：光と影</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260312_ai_lab_update_v3/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260312_ai_lab_update_v3/</guid>
+      <pubDate>Wed, 11 Mar 2026 15:00:00 GMT</pubDate>
+      <description>GPT-5.4のPC操作、Cursor Automations、AI生成コードの45%に脆弱性。73%使うのに29%しか信頼しない——5大ツールの光と影を1ページで総まとめ。</description>
+        <category>AI</category>
+        <category>開発</category>
+        <category>LAB</category>
+    </item>
+    <item>
+      <title>📖 パチンコで勝つための実践知識 — スペックの見方・台選び・収支管理・失敗パターン</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260312_pachinko_guide_advanced/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260312_pachinko_guide_advanced/</guid>
+      <pubDate>Wed, 11 Mar 2026 15:00:00 GMT</pubDate>
+      <description>パチンコ初心者講座の実践編。スペックタイプの分類、チェックすべき5つの数値、ホール選びのコツ、収支管理の方法、よくある失敗パターンを徹底解説します。</description>
+        <category>パチンコ</category>
+        <category>ガイド</category>
+    </item>
+    <item>
+      <title>🎰 2026年3月の注目新台まとめ — まどマギ3・カバネリ海門決戦・ワンパンマン2、勝てるのはどれ？</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260312_march_new_machines/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260312_march_new_machines/</guid>
+      <pubDate>Wed, 11 Mar 2026 15:00:00 GMT</pubDate>
+      <description>2026年3月に導入された注目の新台3機種を徹底比較。スペック・ボーダーライン・出玉性能から、どの台が一番勝ちやすいのかを分析します。</description>
+        <category>パチンコ</category>
+        <category>新台</category>
+    </item>
+    <item>
+      <title>🔬 1週間で激変！AI開発ツール最新動向 — LAB第2回レポート</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260311_ai_lab_update_v2/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260311_ai_lab_update_v2/</guid>
+      <pubDate>Tue, 10 Mar 2026 15:00:00 GMT</pubDate>
+      <description>LABセクション第2回を公開。Windsurf買収、Copilot CLI正式版、Claude Code Reviewなど、AI開発ツール5製品の最新動向を徹底比較。</description>
+        <category>AI</category>
+        <category>開発</category>
+    </item>
+    <item>
+      <title>📊 W4週間総括：体調不良で¥7,992の最低記録。しかしAntigravityプロジェクトが誕生した転換の週（3/2〜3/8）</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260308_uber_weekly_summary_w4/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260308_uber_weekly_summary_w4/</guid>
+      <pubDate>Sat, 07 Mar 2026 15:00:00 GMT</pubDate>
+      <description>こんにちは、玉配達員AHです。</description>
+        <category>週報</category>
+        <category>Uber</category>
+    </item>
+    <item>
+      <title>🌡️ 体調不良2日目：¥3,379、2時間で切り上げ — 回復優先の木曜日（2026年3月5日）</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260305_uber_thursday_w4/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260305_uber_thursday_w4/</guid>
+      <pubDate>Wed, 04 Mar 2026 15:00:00 GMT</pubDate>
+      <description>こんにちは、玉配達員AHです。</description>
+        <category>Uber</category>
+        <category>日報</category>
+    </item>
+    <item>
+      <title>🏥 体調不良でも止まらない：¥4,613、短時間稼働の火曜日 × Webポータル開発始動（2026年3月3日）</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260303_uber_tuesday_w4/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260303_uber_tuesday_w4/</guid>
+      <pubDate>Mon, 02 Mar 2026 15:00:00 GMT</pubDate>
+      <description>こんにちは、玉配達員AHです。</description>
+        <category>Uber</category>
+        <category>日報</category>
+    </item>
+    <item>
+      <title>📊 W3週間総括：稼働日減でも効率指標は全面改善！¥53,998の「質」を検証（2/23〜3/1）</title>
+      <link>https://www.antigravity-portal.com/blog/202602/20260301_uber_weekly_summary_w3/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202602/20260301_uber_weekly_summary_w3/</guid>
+      <pubDate>Sat, 28 Feb 2026 15:00:00 GMT</pubDate>
+      <description>こんにちは、玉配達員AHです。</description>
+        <category>週報</category>
+        <category>Uber</category>
+    </item>
+    <item>
+      <title>📉 木曜日の堅実稼働：プロモなしでも¥17,939、件数単価¥815を維持（2026年2月26日）</title>
+      <link>https://www.antigravity-portal.com/blog/202602/20260226_uber_thursday_w3/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202602/20260226_uber_thursday_w3/</guid>
+      <pubDate>Wed, 25 Feb 2026 15:00:00 GMT</pubDate>
+      <description>こんにちは、玉配達員AHです。</description>
+        <category>Uber</category>
+        <category>日報</category>
+    </item>
+  </channel>
+</rss>

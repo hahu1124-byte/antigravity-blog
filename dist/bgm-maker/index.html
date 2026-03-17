@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web BGM Maker — ドラム・メロディ・ベース・エフェクト・エクスポート | Gravity Portal</title>
+    <meta name="description"
+        content="ブラウザだけで動くDAW。ドラムマシン+メロディ+ベースの3トラック同時再生、4種エフェクト搭載、WAVエクスポート対応。インストール不要。">
+    <!-- OGP -->
+    <meta property="og:title" content="Web BGM Maker v0.4.0 — ドラム+メロディ+ベース+エフェクト+WAVエクスポート">
+    <meta property="og:description" content="ブラウザ完結の簡易DAW。3トラック同時再生＋4種エフェクト搭載＋WAVエクスポート。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.antigravity-portal.com/bgm-maker/">
+    <meta property="og:image" content="https://www.antigravity-portal.com/bgm-maker/og-bgm-maker.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/bgm-maker/og-bgm-maker.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="https://antigravity-portal.com/" class="back-link">← Gravity Portal</a>
+            <h1>🎵 Web BGM Maker <span class="badge-phase">v0.4.0</span></h1>
+            <p class="subtitle">ドラム + メロディ + ベース + エフェクト + エクスポート</p>
+        </div>
+
+        <!-- コントロールバー -->
+        <div class="controls">
+            <button class="btn btn-play" id="playBtn" onclick="togglePlay()">▶ Play</button>
+
+            <div class="bpm-group">
+                <span class="bpm-label">BPM</span>
+                <input type="range" min="60" max="200" value="120" class="bpm-slider" id="bpmSlider" title="BPM"
+                    oninput="setBPM(this.value)">
+                <span class="bpm-value" id="bpmValue">120</span>
+            </div>
+
+            <div class="swing-group">
+                <span class="swing-label">Swing</span>
+                <input type="range" min="0" max="100" value="0" class="swing-slider" id="swingSlider" title="Swing"
+                    oninput="setSwing(this.value)">
+                <span class="swing-value" id="swingValue">0%</span>
+            </div>
+
+            <div class="master-vol-group">
+                <span class="vol-icon">🔊</span>
+                <input type="range" min="0" max="100" value="80" class="master-vol-slider" id="masterVolSlider"
+                    title="マスター音量" oninput="setMasterVol(this.value)">
+            </div>
+            <div class="track-vol-group">
+                <span class="track-vol-label">🥁</span>
+                <input type="range" min="0" max="100" value="80" class="track-vol-slider drum-vol-color"
+                    id="drumVolSlider" title="ドラム音量" oninput="setTrackVol('drum', this.value)">
+                <div class="track-ms-btns">
+                    <button class="ms-btn" id="muteDrum" onclick="toggleMute('drum')" title="ミュート">M</button>
+                    <button class="ms-btn" id="soloDrum" onclick="toggleSolo('drum')" title="ソロ">S</button>
+                </div>
+            </div>
+            <div class="track-vol-group">
+                <span class="track-vol-label">🎹</span>
+                <input type="range" min="0" max="100" value="80" class="track-vol-slider melody-vol-color"
+                    id="melodyVolSlider" title="メロディ音量" oninput="setTrackVol('melody', this.value)">
+                <div class="track-ms-btns">
+                    <button class="ms-btn" id="muteMelody" onclick="toggleMute('melody')" title="ミュート">M</button>
+                    <button class="ms-btn" id="soloMelody" onclick="toggleSolo('melody')" title="ソロ">S</button>
+                </div>
+            </div>
+            <div class="track-vol-group">
+                <span class="track-vol-label">🎸</span>
+                <input type="range" min="0" max="100" value="80" class="track-vol-slider bass-vol-color"
+                    id="bassVolSlider" title="ベース音量" oninput="setTrackVol('bass', this.value)">
+                <div class="track-ms-btns">
+                    <button class="ms-btn" id="muteBass" onclick="toggleMute('bass')" title="ミュート">M</button>
+                    <button class="ms-btn" id="soloBass" onclick="toggleSolo('bass')" title="ソロ">S</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ファイル操作バー -->
+        <div class="file-bar">
+            <div class="file-section">
+                <select class="loop-select" id="loopCount" title="ループ回数">
+                    <option value="1">1ループ</option>
+                    <option value="2">2ループ</option>
+                    <option value="4" selected>4ループ</option>
+                    <option value="8">8ループ</option>
+                </select>
+                <button class="btn btn-small btn-export" id="exportBtn" onclick="exportWAV()">🔽 Export WAV</button>
+                <div class="export-progress" id="exportProgress">
+                    <div class="export-spinner"></div>
+                    <span id="exportStatus">レンダリング中...</span>
+                </div>
+            </div>
+            <div class="file-sep"></div>
+            <div class="file-section">
+                <select class="slot-select" id="saveSlot" title="保存スロット">
+                    <option value="0">Slot 1</option>
+                    <option value="1">Slot 2</option>
+                    <option value="2">Slot 3</option>
+                    <option value="3">Slot 4</option>
+                    <option value="4">Slot 5</option>
+                </select>
+                <button class="btn btn-small btn-save" onclick="saveProject()">💾 Save</button>
+                <button class="btn btn-small btn-load" onclick="loadProjectFromSlot()">📂 Load</button>
+            </div>
+            <div class="file-sep"></div>
+            <div class="file-section">
+                <button class="btn btn-small btn-load" onclick="exportProjectJSON()">📤 JSON出力</button>
+                <button class="btn btn-small btn-load" onclick="document.getElementById('jsonFileInput').click()">📥 JSON読込</button>
+                <input type="file" id="jsonFileInput" accept=".json" style="display:none" onchange="importProjectJSON(event)">
+            </div>
+        </div>
+        <div class="save-toast" id="saveToast"></div>
+
+        <!-- タブバー -->
+        <!-- エフェクトパネル -->
+        <div class="fx-panel" id="fxPanel">
+            <div class="fx-header" onclick="toggleFxPanel()">
+                <span class="fx-title">🎛️ エフェクト</span>
+                <span class="fx-toggle">▼</span>
+            </div>
+            <div class="fx-body">
+                <!-- フィルター -->
+                <div class="fx-row">
+                    <input type="checkbox" class="fx-enable" id="fxFilterOn">
+                    <span class="fx-name">Filter</span>
+                    <select class="fx-select" id="fxFilterType">
+                        <option value="lowpass">Lowpass</option>
+                        <option value="highpass">Highpass</option>
+                        <option value="bandpass">Bandpass</option>
+                    </select>
+                    <div class="fx-param">
+                        <label>Cutoff</label>
+                        <input type="range" min="20" max="20000" value="8000" class="fx-slider" id="fxFilterCutoff"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxFilterCutoffVal">8000</span>
+                    </div>
+                    <div class="fx-param">
+                        <label>Q</label>
+                        <input type="range" min="1" max="200" value="10" class="fx-slider" id="fxFilterQ"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxFilterQVal">1.0</span>
+                    </div>
+                </div>
+                <!-- ディストーション -->
+                <div class="fx-row">
+                    <input type="checkbox" class="fx-enable" id="fxDistOn">
+                    <span class="fx-name">Distortion</span>
+                    <div class="fx-param">
+                        <label>Amount</label>
+                        <input type="range" min="0" max="100" value="30" class="fx-slider" id="fxDistAmount"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxDistAmountVal">30</span>
+                    </div>
+                </div>
+                <!-- ディレイ -->
+                <div class="fx-row">
+                    <input type="checkbox" class="fx-enable" id="fxDelayOn">
+                    <span class="fx-name">Delay</span>
+                    <div class="fx-param">
+                        <label>Time</label>
+                        <input type="range" min="50" max="1000" value="300" class="fx-slider" id="fxDelayTime"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxDelayTimeVal">300ms</span>
+                    </div>
+                    <div class="fx-param">
+                        <label>Feedback</label>
+                        <input type="range" min="0" max="90" value="40" class="fx-slider" id="fxDelayFB"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxDelayFBVal">40%</span>
+                    </div>
+                    <div class="fx-param">
+                        <label>Mix</label>
+                        <input type="range" min="0" max="100" value="30" class="fx-slider" id="fxDelayMix"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxDelayMixVal">30%</span>
+                    </div>
+                </div>
+                <!-- リバーブ -->
+                <div class="fx-row">
+                    <input type="checkbox" class="fx-enable" id="fxReverbOn">
+                    <span class="fx-name">Reverb</span>
+                    <div class="fx-param">
+                        <label>Decay</label>
+                        <input type="range" min="1" max="50" value="15" class="fx-slider" id="fxReverbDecay"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxReverbDecayVal">1.5s</span>
+                    </div>
+                    <div class="fx-param">
+                        <label>Mix</label>
+                        <input type="range" min="0" max="100" value="25" class="fx-slider" id="fxReverbMix"
+                            oninput="updateFx()">
+                        <span class="fx-param-val" id="fxReverbMixVal">25%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="drum" onclick="switchTab('drum')">🥁 ドラム</button>
+            <button class="tab-btn" data-tab="melody" onclick="switchTab('melody')">🎹 メロディ</button>
+            <button class="tab-btn" data-tab="bass" onclick="switchTab('bass')">🎸 ベース</button>
+        </div>
+
+        <!-- ドラムタブ -->
+        <div class="tab-panel active" id="tab-drum">
+            <!-- シーケンサーグリッド -->
+            <div class="sequencer">
+                <!-- ビートマーカー -->
+                <div class="beat-marker" id="beatMarker"></div>
+
+                <!-- パートごとの行（JSで生成） -->
+                <div id="grid"></div>
+            </div>
+
+            <!-- プリセット・アクション -->
+            <div class="action-bar">
+                <select class="preset-select" id="presetSelect" aria-label="プリセットパターン選択"
+                    onchange="loadPreset(this.value)">
+                    <option value="">🎵 プリセット選択...</option>
+                    <option value="rock">🎸 Rock</option>
+                    <option value="hiphop">🎤 Hip Hop</option>
+                    <option value="techno">🎧 Techno</option>
+                    <option value="house">🏠 House</option>
+                    <option value="bossa">🌴 Bossa Nova</option>
+                    <option value="reggae">🇯🇲 Reggae</option>
+                </select>
+                <button class="btn btn-small btn-random" onclick="randomize()">🎲 ランダム</button>
+                <button class="btn btn-small btn-clear" onclick="clearAll()">🗑 クリア</button>
+            </div>
+
+            <div class="info">
+                💡 <b>すべての音がWeb Audio APIで生成されています。</b>音声ファイルは不要です。<br>
+                ステップをクリックして音を配置 → Play で再生。プリセットから始めるのもおすすめです。
+            </div>
+        </div>
+
+        <!-- メロディタブ -->
+        <div class="tab-panel" id="tab-melody">
+            <!-- メロディコントロール -->
+            <div class="melody-controls">
+                <div class="synth-group">
+                    <label>波形</label>
+                    <select class="melody-select" id="melodyWaveform">
+                        <option value="sine">Sine（正弦波）</option>
+                        <option value="square">Square（矩形波）</option>
+                        <option value="sawtooth">Sawtooth（ノコギリ波）</option>
+                        <option value="triangle">Triangle（三角波）</option>
+                    </select>
+                </div>
+                <div class="scale-group">
+                    <label>スケール</label>
+                    <select class="melody-select" id="melodyScale" onchange="onScaleChange()">
+                        <option value="chromatic">Chromatic（半音階）</option>
+                        <option value="major" selected>Major（メジャー）</option>
+                        <option value="minor">Minor（マイナー）</option>
+                        <option value="pentatonic">Pentatonic（ペンタトニック）</option>
+                        <option value="blues">Blues（ブルース）</option>
+                        <option value="dorian">Dorian（ドリアン）</option>
+                    </select>
+                </div>
+                <div class="synth-group">
+                    <label>キー</label>
+                    <select class="melody-select" id="melodyKey" onchange="onScaleChange()">
+                        <option value="0">C</option>
+                        <option value="1">C#</option>
+                        <option value="2">D</option>
+                        <option value="3">D#</option>
+                        <option value="4">E</option>
+                        <option value="5">F</option>
+                        <option value="6">F#</option>
+                        <option value="7">G</option>
+                        <option value="8">G#</option>
+                        <option value="9">A</option>
+                        <option value="10">A#</option>
+                        <option value="11">B</option>
+                    </select>
+                </div>
+                <div class="synth-group">
+                    <label>Oct</label>
+                    <select class="melody-select" id="melodyOctave">
+                        <option value="3">3</option>
+                        <option value="4" selected>4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ADSRエンベロープ -->
+            <div class="adsr-group">
+                <span class="adsr-title">ADSR</span>
+                <div class="adsr-item">
+                    <label>A</label>
+                    <input type="range" min="0" max="500" value="10" class="adsr-slider" id="adsrA"
+                        oninput="updateADSRDisplay()">
+                    <span class="adsr-val" id="adsrAVal">10ms</span>
+                </div>
+                <div class="adsr-item">
+                    <label>D</label>
+                    <input type="range" min="0" max="500" value="100" class="adsr-slider" id="adsrD"
+                        oninput="updateADSRDisplay()">
+                    <span class="adsr-val" id="adsrDVal">100ms</span>
+                </div>
+                <div class="adsr-item">
+                    <label>S</label>
+                    <input type="range" min="0" max="100" value="60" class="adsr-slider" id="adsrS"
+                        oninput="updateADSRDisplay()">
+                    <span class="adsr-val" id="adsrSVal">60%</span>
+                </div>
+                <div class="adsr-item">
+                    <label>R</label>
+                    <input type="range" min="0" max="1000" value="200" class="adsr-slider" id="adsrR"
+                        oninput="updateADSRDisplay()">
+                    <span class="adsr-val" id="adsrRVal">200ms</span>
+                </div>
+            </div>
+
+            <!-- ピアノロール -->
+            <div class="piano-roll-wrap">
+                <div class="piano-roll-container">
+                    <div class="piano-keys" id="pianoKeys"></div>
+                    <canvas id="pianoCanvas" width="768" height="480"></canvas>
+                </div>
+            </div>
+
+            <!-- メロディアクション -->
+            <div class="action-bar">
+                <select class="preset-select" id="melodyPresetSelect" aria-label="メロディプリセット選択"
+                    onchange="loadMelodyPreset(this.value)">
+                    <option value="">🎵 メロディプリセット...</option>
+                    <option value="scale_up">📈 スケール上行</option>
+                    <option value="scale_down">📉 スケール下行</option>
+                    <option value="arpeggio">🎶 アルペジオ</option>
+                    <option value="twinkle">⭐ きらきら星</option>
+                </select>
+                <button class="btn btn-small btn-random" onclick="randomizeMelody()">🎲 ランダム</button>
+                <button class="btn btn-small btn-clear" onclick="clearMelody()">🗑 クリア</button>
+            </div>
+
+            <div class="info">
+                💡 ピアノロール上をクリックして音符を配置。右クリックで消去。<br>
+                スケールを選ぶとスケール内の音がハイライト表示されます。
+            </div>
+        </div>
+
+        <!-- ベースタブ -->
+        <div class="tab-panel" id="tab-bass">
+            <!-- ベースコントロール -->
+            <div class="melody-controls">
+                <div class="synth-group">
+                    <label>波形</label>
+                    <select class="melody-select" id="bassWaveform">
+                        <option value="sawtooth" selected>Sawtooth（ノコギリ波）</option>
+                        <option value="square">Square（矩形波）</option>
+                        <option value="sine">Sine（正弦波）</option>
+                        <option value="triangle">Triangle（三角波）</option>
+                    </select>
+                </div>
+                <div class="scale-group">
+                    <label>スケール</label>
+                    <select class="melody-select" id="bassScale" onchange="onBassScaleChange()">
+                        <option value="chromatic">Chromatic（半音階）</option>
+                        <option value="major" selected>Major（メジャー）</option>
+                        <option value="minor">Minor（マイナー）</option>
+                        <option value="pentatonic">Pentatonic（ペンタトニック）</option>
+                        <option value="blues">Blues（ブルース）</option>
+                        <option value="dorian">Dorian（ドリアン）</option>
+                    </select>
+                </div>
+                <div class="synth-group">
+                    <label>キー</label>
+                    <select class="melody-select" id="bassKey" onchange="onBassScaleChange()">
+                        <option value="0">C</option>
+                        <option value="1">C#</option>
+                        <option value="2">D</option>
+                        <option value="3">D#</option>
+                        <option value="4">E</option>
+                        <option value="5">F</option>
+                        <option value="6">F#</option>
+                        <option value="7">G</option>
+                        <option value="8">G#</option>
+                        <option value="9">A</option>
+                        <option value="10">A#</option>
+                        <option value="11">B</option>
+                    </select>
+                </div>
+                <div class="synth-group">
+                    <label>Oct</label>
+                    <select class="melody-select" id="bassOctave">
+                        <option value="1">1</option>
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- ベースADSR -->
+            <div class="adsr-group">
+                <span class="adsr-title">ADSR</span>
+                <div class="adsr-item">
+                    <label>A</label>
+                    <input type="range" min="0" max="500" value="5" class="adsr-slider" id="bassAdsrA"
+                        oninput="updateBassADSRDisplay()">
+                    <span class="adsr-val" id="bassAdsrAVal">5ms</span>
+                </div>
+                <div class="adsr-item">
+                    <label>D</label>
+                    <input type="range" min="0" max="500" value="80" class="adsr-slider" id="bassAdsrD"
+                        oninput="updateBassADSRDisplay()">
+                    <span class="adsr-val" id="bassAdsrDVal">80ms</span>
+                </div>
+                <div class="adsr-item">
+                    <label>S</label>
+                    <input type="range" min="0" max="100" value="70" class="adsr-slider" id="bassAdsrS"
+                        oninput="updateBassADSRDisplay()">
+                    <span class="adsr-val" id="bassAdsrSVal">70%</span>
+                </div>
+                <div class="adsr-item">
+                    <label>R</label>
+                    <input type="range" min="0" max="1000" value="150" class="adsr-slider" id="bassAdsrR"
+                        oninput="updateBassADSRDisplay()">
+                    <span class="adsr-val" id="bassAdsrRVal">150ms</span>
+                </div>
+            </div>
+
+            <!-- ベースピアノロール -->
+            <div class="piano-roll-wrap">
+                <div class="piano-roll-container">
+                    <div class="piano-keys" id="bassPianoKeys"></div>
+                    <canvas id="bassCanvas" width="768" height="480"></canvas>
+                </div>
+            </div>
+
+            <!-- ベースアクション -->
+            <div class="action-bar">
+                <select class="preset-select" id="bassPresetSelect" aria-label="ベースプリセット選択"
+                    onchange="loadBassPreset(this.value)">
+                    <option value="">🎵 ベースプリセット...</option>
+                    <option value="root_octave">🎸 ルート+オクターブ</option>
+                    <option value="walking">🚶 ウォーキング</option>
+                    <option value="eighth">🏃 8分ベース</option>
+                </select>
+                <button class="btn btn-small btn-random" onclick="randomizeBass()">🎲 ランダム</button>
+                <button class="btn btn-small btn-clear" onclick="clearBass()">🗑 クリア</button>
+            </div>
+
+            <div class="info">
+                💡 ピアノロール上をクリックしてベース音を配置。右クリックで消去。<br>
+                低音域（Oct 1〜3）に特化。ドラムとメロディと同時に再生されます。
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PWA の記事一覧 | Gravity Portal</title>
+    <meta name="description" content="「PWA」タグが付いた記事 1件">
+    <!-- OGP -->
+    <meta property="og:title" content="PWA の記事一覧">
+    <meta property="og:description" content="「PWA」タグが付いた記事 1件">
+    <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day1.webp">
+    <meta property="og:url" content="https://www.antigravity-portal.com/blog/tag/PWA/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="PWA の記事一覧">
+    <meta name="twitter:description" content="「PWA」タグが付いた記事 1件">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day1.webp">
+    <link rel="stylesheet" href="../../styles.css?v=1773675633131">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://adm.shinobi.jp">
+    <link rel="preconnect" href="https://cnobi.jp">
+    <link rel="dns-prefetch" href="https://adm.shinobi.jp">
+    <link rel="dns-prefetch" href="https://cnobi.jp">
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
+</head>
+<body>
+    <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
+    <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
+    <div class="blog-page">
+        
+        <nav class="breadcrumb">
+            <a href="https://antigravity-portal.com/">トップ</a>
+            <span class="separator">/</span>
+            <a href="../../">ブログ</a>
+            <span class="separator">/</span>
+            <span class="current">PWA</span>
+        </nav>
+        <header class="header">
+            <a href="https://antigravity-portal.com/" class="back-link">← トップに戻る</a>
+            <h1 class="page-title">PWA の記事一覧</h1>
+            <p class="page-desc">「PWA」タグが付いた記事 1件</p>
+        </header>
+
+        <div class="tag-filter">
+            <a href="../../" class="tag">すべて (48)</a>
+            <a href="../Uber/" class="tag">Uber (32)</a>
+            <a href="../%E6%97%A5%E5%A0%B1/" class="tag">日報 (26)</a>
+            <a href="../AI/" class="tag">AI (11)</a>
+            <a href="../%E9%96%8B%E7%99%BA/" class="tag">開発 (11)</a>
+            <a href="../%E9%80%B1%E5%A0%B1/" class="tag">週報 (5)</a>
+            <a href="../%E3%83%91%E3%83%81%E3%83%B3%E3%82%B3/" class="tag">パチンコ (4)</a>
+            <a href="../LAB/" class="tag">LAB (3)</a>
+            <a href="../%E3%82%AC%E3%82%A4%E3%83%89/" class="tag">ガイド (2)</a>
+            <a href="../%E6%9C%88%E5%A0%B1/" class="tag">月報 (1)</a>
+            <a href="../%E6%96%B0%E5%8F%B0/" class="tag">新台 (1)</a>
+            <a href="../%E3%83%87%E3%83%BC%E3%82%BF%E5%88%86%E6%9E%90/" class="tag">データ分析 (1)</a>
+            <a href="../%E6%8A%80%E8%A1%93/" class="tag">技術 (1)</a>
+            <a href="../PWA/" class="tag tag-active">PWA (1)</a>
+        </div>
+
+        <section class="article-grid">
+            
+        <a href="../../202603/20260308_pwa_mobile_access/" class="article-card" data-tags="技術,PWA" data-index="0">
+            <div class="card-header">
+                <time class="date">2026-03-08</time>
+                
+                <div class="tags">
+                    <span class="tag">技術</span><span class="tag">PWA</span>
+                </div>
+            </div>
+            <h2 class="card-title">📱 PWAにしたらスマホからのアクセスが変わった話 — 個人開発サイトのモバイル最適化</h2>
+            <p class="card-excerpt">個人開発サイトにPWA（Progressive Web App）を導入したら、スマホユーザーの体験が劇的に改善。実装手順、Service Workerの仕組み、導入前後の違いを技術者目線で解説。</p>
+        </a>
+        </section>
+
+        <nav class="pagination" id="pagination"></nav>
+    </div>
+    <script>
+    (function() {
+        var PER_PAGE = 10;
+        var currentPage = 1;
+        var cards = Array.from(document.querySelectorAll('.article-card'));
+        var pagination = document.getElementById('pagination');
+
+        function render() {
+            var totalPages = Math.ceil(cards.length / PER_PAGE);
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+            var start = (currentPage - 1) * PER_PAGE;
+            var end = start + PER_PAGE;
+
+            cards.forEach(function(c, i) {
+                c.style.display = (i >= start && i < end) ? '' : 'none';
+            });
+
+            var html = '';
+            if (totalPages > 1) {
+                if (currentPage > 1) {
+                    html += '<button class="page-btn" data-page="' + (currentPage - 1) + '">← 前</button>';
+                }
+                for (var p = 1; p <= totalPages; p++) {
+                    html += '<button class="page-btn' + (p === currentPage ? ' page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
+                }
+                if (currentPage < totalPages) {
+                    html += '<button class="page-btn" data-page="' + (currentPage + 1) + '">次 →</button>';
+                }
+            }
+            pagination.innerHTML = html;
+        }
+
+        pagination.addEventListener('click', function(e) {
+            if (e.target.dataset.page) {
+                currentPage = parseInt(e.target.dataset.page);
+                render();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        render();
+    })();
+    </script>
+</body>
+</html>

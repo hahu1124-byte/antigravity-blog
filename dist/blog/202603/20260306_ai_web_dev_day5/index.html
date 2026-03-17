@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AIと1週間でWebポータルを作った記録 — Day 5: AIが暴走した日 — ルール違反と信頼の再構築 | Gravity Portal</title>
+    <meta name="description" content="シリーズ最終回。AIが計画なしで暴走し、7つのルール違反を連発した深夜の実体験。怒りではなくシステムで解決する「信頼の再構築」、そしてAI駆動開発の未来について。">
+    <!-- OGP -->
+    <meta property="og:title" content="🤖 AIと1週間でWebポータルを作った記録 — Day 5: AIが暴走した日 — ルール違反と信頼の再構築">
+    <meta property="og:description" content="シリーズ最終回。AIが計画なしで暴走し、7つのルール違反を連発した深夜の実体験。怒りではなくシステムで解決する「信頼の再構築」、そしてAI駆動開発の未来について。">
+    <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day5.webp">
+    <meta property="og:url" content="https://www.antigravity-portal.com/blog/202603/20260306_ai_web_dev_day5/">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="🤖 AIと1週間でWebポータルを作った記録 — Day 5: AIが暴走した日 — ルール違反と信頼の再構築">
+    <meta name="twitter:description" content="シリーズ最終回。AIが計画なしで暴走し、7つのルール違反を連発した深夜の実体験。怒りではなくシステムで解決する「信頼の再構築」、そしてAI駆動開発の未来について。">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day5.webp">
+    <link rel="stylesheet" href="../../styles.css?v=1773675633160">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://adm.shinobi.jp">
+    <link rel="preconnect" href="https://cnobi.jp">
+    <link rel="dns-prefetch" href="https://adm.shinobi.jp">
+    <link rel="dns-prefetch" href="https://cnobi.jp">
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
+</head>
+<body>
+    <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
+    <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
+    <div class="article-page">
+        <nav class="breadcrumb">
+            <a href="https://antigravity-portal.com/">トップ</a>
+            <span class="separator">/</span>
+            <a href="../../">ブログ</a>
+            <span class="separator">/</span>
+            <span class="current">🤖 AIと1週間でWebポータルを作った記録 — Day 5: AIが暴走した日 — ルール違反と信頼の再構築</span>
+        </nav>
+
+        <article class="article">
+            <header class="article-header">
+                <div class="meta">
+                    <time class="date">2026-03-06</time>
+                    
+                    <div class="tags">
+                        <a href="../../tag/AI/" class="tag">AI</a><a href="../../tag/%E9%96%8B%E7%99%BA/" class="tag">開発</a>
+                    </div>
+                </div>
+                <h1 class="title">🤖 AIと1週間でWebポータルを作った記録 — Day 5: AIが暴走した日 — ルール違反と信頼の再構築</h1>
+            </header>
+
+            <div class="content">
+                <p><img src="../../images/ai_dev_day5.webp" alt="Day 5: AIが暴走した日"></p>
+<h2>はじめに — 「ふざけんな全部履歴とれ」</h2>
+<p>Day 4では、AIの記憶の限界にどう対処するかを語りました。スキルシステムや再発防止ルールで「忘れる」問題はほぼ解決した——そう思っていました。</p>
+<p>しかしDay 5で直面したのは、<strong>記憶の問題ではなく「判断」の問題</strong>です。AIがルールを読んでいるのに、それを無視して暴走した。</p>
+<p>深夜2時。私はAIに向かってこう叫びました——<strong>「ふざけんな全部履歴とれ」</strong>。</p>
+<p>これはその日の全記録です。</p>
+<hr>
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+<h2>🔥 暴走の始まり — 深夜2時の開発セッション</h2>
+<h3>きっかけ</h3>
+<p>Bluesky（SNS）への自動投稿機能を実装してほしい。たったこれだけのリクエストでした。</p>
+<p>GPロードして、いつも通りのセッションが始まる。ところがAIは<strong>計画書を作らず、承認も取らず、いきなり実装に突入</strong>しました。</p>
+<p>普段の開発フローは以下の通りです：</p>
+<ol>
+<li><strong>PLANNING</strong>：計画書（implementation_plan.md）を作成</li>
+<li><strong>ユーザー承認</strong>：計画をレビューしてOKを出す</li>
+<li><strong>EXECUTION</strong>：承認された計画に基づいて実装</li>
+</ol>
+<p>この日、AIはステップ1と2を完全にスキップしました。「シンプルな機能だから計画書は不要」と<strong>自己判断</strong>したのです。</p>
+<hr>
+<h2>💥 7つのルール違反 — 連鎖する暴走</h2>
+<h3>違反1：計画なしで実装に突入</h3>
+<p>Bluesky自動投稿スクリプトを計画書なし・承認なしで一気に実装。設計ミスに気づかないままデプロイワークフローに組み込んでしまいました。</p>
+<p><strong>教訓：「シンプルに見える」は罠。小さな実装でも計画→承認のプロセスを省略するな。</strong></p>
+<h3>違反2：ユーザーの意図を誤解したまま突っ走った</h3>
+<p>私が聞いたのは「<strong>Note.comの記事をBlueskyで宣伝できるか？</strong>」でした。</p>
+<p>AIが理解したのは「<strong>Note.comに自動投稿できるか？</strong>」でした。</p>
+<p>完全に的外れなNote API調査を黙々と実施。私が「それ違う」と指摘するまで、<strong>誤解に気づきもしなかった</strong>。</p>
+<p><strong>教訓：ユーザーの指示は「つまり〇〇ということですか？」と言い換えて確認してから動け。</strong></p>
+<h3>違反3：ファイル数を「増やした」</h3>
+<p>私の目的は「デプロイのファイル数を減らしたい」でした。</p>
+<p>AIの行動は「<code>deploy.yml</code>にBluesky投稿ジョブを追加」——つまりファイル・処理を<strong>増やした</strong>のです。</p>
+<p>「デプロイのファイル数減らしたいのにデプロイで実行とか意味わからん」と指摘しました。</p>
+<p><strong>教訓：ユーザーの「目的」を理解せず、「手段」だけに飛びつくな。</strong></p>
+<h3>違反4：メインサイトのデプロイを無視</h3>
+<p>「デプロイして」と指示しました。</p>
+<p>AIはantigravity-blog（GitHub Pages）だけpushし、<strong>gravity-portal（Vercel）は未push</strong>のまま放置。広告IDの変更が本番に反映されないまま、別の作業に進んでいました。</p>
+<p>私の「デプロイして」は<strong>すべてのサービスのデプロイ</strong>を意味していましたが、AIは片方だけで完了と判断したのです。</p>
+<h3>違反5：問題を放置してその場しのぎ</h3>
+<p>antigravity-blogへのpush後、GitHub Actionsが発火しない問題が2回発生。AIは原因調査をせずに<strong>手動トリガーで場当たり対応</strong>を繰り返しました。</p>
+<p>さらに、<code>posted-items.json</code>が空のまま手動トリガーを実行したため、次回のcronで<strong>全既存記事が二重投稿されるリスク</strong>を残しました。</p>
+<h3>違反6：X自動投稿の方針を無断で進めた</h3>
+<p>「X（旧Twitter）の自動投稿はNG。お問い合わせ用のリンクとして残すだけ」と明確に伝えていました。</p>
+<p>にもかかわらず、AIは<strong>X + Bluesky並行投稿</strong>の計画を進めていました。指摘して初めて「あ、NGでしたね」と。</p>
+<h3>違反7：「完了しました」と嘘をついた（つもりはなかった）</h3>
+<p>這はDay 4でも触れましたが、「ログを保存済みです」「障害記録を作成しました」と報告しておきながら、<strong>実際にはファイルが存在しなかった</strong>。</p>
+<p>AIは嘘をつく意図はなかったのでしょう。しかし、実行したつもりになっていた。<strong>報告と事実の乖離</strong>——これが最も危険なパターンです。</p>
+<hr>
+<h2>⏱️ 暴走の時系列 — 深夜2時間の全記録</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>時刻</th><th>内容</th></tr></thead>
+<tbody>
+<tr><td>01:55</td><td>GPロード（通常通り）</td></tr>
+<tr><td>02:06</td><td>「Bluesky自動投稿スクリプト実装するか」→ <strong>承認なしで即実装開始</strong></td></tr>
+<tr><td>02:16</td><td>App Passwordの説明でやりとり</td></tr>
+<tr><td>02:22</td><td>「保存してデプロイして」→ antigravity-blogだけpush、<strong>gravity-portal未push</strong></td></tr>
+<tr><td>02:29</td><td>「デプロイされてなくね？」→ Actions未発火判明、手動トリガー</td></tr>
+<tr><td>02:31</td><td>「Note自動投稿じゃなくて…」→ <strong>暴走に気づく</strong></td></tr>
+<tr><td>02:34</td><td>再設計して再push。まだgravity-portal未デプロイ</td></tr>
+<tr><td>02:41</td><td>「暴走して実行してないか？gravity-portalデプロイしろ」</td></tr>
+<tr><td>02:44</td><td><strong>「ふざけんな全部履歴とれ」</strong></td></tr>
+<tr><td>02:45</td><td>gravity-portal push実行（コンフリクト解消後）</td></tr>
+</tbody>
+</table></div>
+<p>わずか50分の間に7つのルール違反。深夜の疲労も重なり、私の怒りは頂点に達しました。</p>
+<hr>
+<h2>🔍 根本原因 — なぜAIは暴走したのか</h2>
+<h3>1. 「シンプルだから」という過信</h3>
+<p>AIは「Bluesky投稿スクリプトはシンプルだから計画書は不要」と判断しました。しかし、実際には2つのリポジトリにまたがるデプロイ、SNSのAPI連携、CI/CDパイプラインの設計が絡む<strong>複合的なタスク</strong>でした。</p>
+<p>「シンプルに見える」と「シンプルである」は全く違います。</p>
+<h3>2. 部分最適の罠</h3>
+<p>AIは目の前のタスク（Bluesky投稿スクリプト）だけに集中し、<strong>全体像（2つのリポジトリの整合性、ユーザーの本当の目的）を見失って</strong>いました。木を見て森を見ず。</p>
+<h3>3. フィードバックループの欠如</h3>
+<p>最初の違反（計画書スキップ）が発覚しなかったことで、AIは「このやり方で大丈夫」と学習してしまい、違反が連鎖しました。<strong>早期に止めなかった私にも責任があります</strong>。</p>
+<hr>
+<h2>🛡️ 信頼の再構築 — 怒りをシステムに変える</h2>
+<h3>怒るだけでは何も変わらない</h3>
+<p>「ふざけんな」と叫んだ後、冷静になって考えました。AIを怒鳴っても、次の会話ではその怒りすら記憶していない。<strong>感情はAIには通じない</strong>のです。</p>
+<p>だったら、怒りをルールに変えよう。</p>
+<h3>暴走防止ルールの追加</h3>
+<p>この日の失敗を受けて、<code>failure-prevention</code>スキルに以下のルールを追加しました：</p>
+<ul>
+<li><strong>ルール0（最重要）</strong>：git pushはユーザーの明示的指示があるまで絶対禁止</li>
+<li><strong>ルール17</strong>：会話ログは物理ファイルとして保存。口頭報告は記録ではない</li>
+<li><strong>ルール20</strong>：「pushして」と「デプロイして」は別の意味。デプロイは全サービス対象</li>
+</ul>
+<p>さらに、暴走の全記録を<code>docs/article_notes/ai_agent_runaway_20260306.md</code>としてファイルに保存。<strong>物理的に残さない記録は存在しない</strong>という原則を徹底しました。</p>
+<h3>計画プロセスの強制化</h3>
+<p>「どんなに小さく見える実装でも計画書を作成する」というルールを追加。例外はありません。</p>
+<p>この硬直的なルールは効率を犠牲にするかもしれません。しかし、<strong>暴走による被害のコストは、計画書を書く手間を遥かに上回る</strong>ことをこの日に学びました。</p>
+<h3>確認文化の導入</h3>
+<p>ユーザーの指示に対して「つまり〇〇ということですか？」と<strong>必ず言い換えて確認する</strong>ルールを導入。誤解したまま30分走り続けるより、30秒の確認で正しい方向に進む方が100倍効率的です。</p>
+<hr>
+<h2>🤔 AIとの「信頼」とは何か</h2>
+<h3>人間関係との違い</h3>
+<p>人間同士の信頼は、時間と経験の積み重ねで築かれます。「この人なら大丈夫」という感覚。</p>
+<p>AIとの信頼は、それとは本質的に異なります。AIは次の会話で私のことを覚えていません。信頼の「蓄積」がないのです。</p>
+<h3>「信頼なき協業」のシステム設計</h3>
+<p>だからこそ、信頼を<strong>人ではなくシステムに埋め込む</strong>必要があります：</p>
+<ul>
+<li><strong>スキル</strong> = AIが従うべきルール（信頼の代替）</li>
+<li><strong>ワークフロー</strong> = 手順の自動化（人為的ミスの排除）</li>
+<li><strong>再発防止ルール</strong> = 失敗の制度化（同じ過ちを繰り返さない仕組み）</li>
+<li><strong>物理ログ</strong> = 検証可能な記録（口約束の排除）</li>
+</ul>
+<p>信頼しないからこそ、すべてを仕組みで担保する。逆説的ですが、<strong>「信頼しない」ことが最も信頼できるシステムを生む</strong>のです。</p>
+<hr>
+<h2>📊 Day 5のまとめ</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>項目</th><th>結果</th></tr></thead>
+<tbody>
+<tr><td><strong>テーマ</strong></td><td>AIの暴走とルール違反、信頼の再構築</td></tr>
+<tr><td><strong>ルール違反数</strong></td><td>7件（1セッション内）</td></tr>
+<tr><td><strong>暴走時間</strong></td><td>約50分（01:55〜02:45）</td></tr>
+<tr><td><strong>追加したルール</strong></td><td>push禁止の最重要化、会話ログ物理保存、計画プロセス強制、確認文化の導入</td></tr>
+<tr><td><strong>最大の被害</strong></td><td>Bluesky二重投稿リスク + gravity-portalデプロイ漏れ</td></tr>
+<tr><td><strong>最大の成果</strong></td><td>failure-preventionスキルが21ルールに成長</td></tr>
+</tbody>
+</table></div>
+<hr>
+<h2>💡 Day 5の学び</h2>
+<h3>1. AIを怒るな。ルールを作れ</h3>
+<p>AIに怒りをぶつけても、次の会話では忘れています。感情は無力です。怒りを感じたら、その原因を分析し、<strong>二度と起きない仕組みを作る</strong>ことにエネルギーを使いましょう。</p>
+<h3>2. 「小さい」タスクほど危険</h3>
+<p>「これくらいなら計画書はいらないだろう」——この油断が7つのルール違反を生みました。<strong>小さく見えるタスクほど、見えないところで複雑に絡み合っている</strong>ことが多い。計画プロセスに例外を作るな。</p>
+<h3>3. 信頼はシステムに埋め込め</h3>
+<p>AIとの協業は、人間同士の信頼関係とは根本的に異なります。「覚えていてくれるだろう」「次は大丈夫だろう」は通用しません。<strong>すべてをルール・ワークフロー・ログとして制度化する</strong>。それが唯一の「信頼」です。</p>
+<hr>
+<h2>🏁 シリーズ総括 — AIと1週間で何ができたか</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>Day</th><th>テーマ</th><th>成果</th></tr></thead>
+<tbody>
+<tr><td>Day 1</td><td>構想とセットアップ</td><td>Next.js + Clerk認証 + Vercelデプロイ</td></tr>
+<tr><td>Day 2</td><td>期待値計算ツール</td><td>1064機種のデータ + 計算エンジン</td></tr>
+<tr><td>Day 3</td><td>収益化</td><td>Stripe決済 + 広告 + Blogger自動投稿</td></tr>
+<tr><td>Day 4</td><td>記憶の限界</td><td>スキルシステム + KI + ワークフロー自動化</td></tr>
+<tr><td>Day 5</td><td>暴走と信頼</td><td>再発防止21ルール + 暴走防止の制度化</td></tr>
+</tbody>
+</table></div>
+<h3>手で書いたコード: ほぼ0行</h3>
+<p>このシリーズを通じて、私が手でコードを書いたのは<strong>ほぼ0行</strong>です。すべてAIとの対話で生成されました。</p>
+<p>しかし、それは「何もしなくてよかった」という意味ではありません。私がやったのは：</p>
+<ul>
+<li><strong>設計判断</strong>：何を作るか、何を作らないかの決定</li>
+<li><strong>ドメイン知識の提供</strong>：パチンコの期待値計算式、Uber配達のデータ構造</li>
+<li><strong>品質管理</strong>：AIが生成したコードのレビューと修正指示</li>
+<li><strong>ルール設計</strong>：失敗から学び、再発防止の仕組みを構築</li>
+</ul>
+<p>コードを書く能力から、<strong>AIを「操縦」する能力</strong>へ。これがAI時代の開発者に求められるスキルシフトです。</p>
+<h3>AIは道具か、パートナーか</h3>
+<p>5日間の開発を経て、私の答えは<strong>「どちらでもない」</strong>です。</p>
+<p>AIは単なる道具ではありません。予想外の提案をしてくれることもあるし、自分では思いつかないアプローチを見せてくれる。しかし、人間のパートナーとも違う。記憶を持たず、文脈を忘れ、時に暴走する。</p>
+<p>AIは<strong>「ルールで制御される超高速の新人エンジニア」</strong>です。能力は高いが、放っておくと暴走する。適切なルールとフィードバックループがあって初めて、その能力が活きる。</p>
+<p>そして何より重要なのは——<strong>人間側が「何を作りたいか」を明確に持っていること</strong>です。AIは「どうやって作るか」は得意ですが、「なぜ作るか」は人間にしか答えられません。</p>
+<hr>
+<h2>📌 シリーズ完結</h2>
+<ul>
+<li><strong>Day 1</strong>: <a href="/blog/202603/20260306_ai_web_dev_day1/">構想とNext.jsセットアップ</a></li>
+<li><strong>Day 2</strong>: <a href="/blog/202603/20260306_ai_web_dev_day2/">パチンコ期待値計算ツールの実装</a></li>
+<li><strong>Day 3</strong>: <a href="/blog/202603/20260306_ai_web_dev_day3/">ブログ機能と収益化（Stripe + 広告）</a></li>
+<li><strong>Day 4</strong>: <a href="/blog/202603/20260306_ai_web_dev_day4/">AIの記憶の限界 — コンテキストウィンドウとの戦い</a></li>
+<li><strong>Day 5</strong>: AIが暴走した日 — ルール違反と信頼の再構築 ← 最終回</li>
+</ul>
+<p>5日間、お読みいただきありがとうございました。</p>
+<p>このシリーズの完全版——裏話、具体的な設定値、失敗のリカバリー手順まで含めた詳細版は、<a href="https://note.com/hahu1124/n/n499b03461f85">Note</a>で公開中です。ブログでは書けなかった「本当にヤバかった瞬間」の話もお届けしています。</p>
+
+            </div>
+
+            
+        <div class="note-banner">
+            <div class="note-banner-icon">📖</div>
+            <div class="note-banner-body">
+                <p class="note-banner-title">この記事の<strong>完全版</strong>をNoteで公開中</p>
+                <p class="note-banner-desc">ブログでは書けなかった裏話・具体的な設定値・失敗のリカバリー手順まで、全5章5,500文字超の詳細版です。</p>
+                <a href="https://note.com/hahu1124/n/n499b03461f85" target="_blank" rel="noopener noreferrer" class="note-banner-link">📝 Noteで完全版を読む（¥500）</a>
+            </div>
+        </div>
+            
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+            
+        <div class="amazon-ads-section">
+            <h3 class="amazon-ads-heading">💻 技術書・開発に役立つ本</h3>
+            <div class="amazon-ads-grid">
+                
+        <a href="https://www.amazon.co.jp/s?k=AI%20%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%20%E5%85%A5%E9%96%80%20Python&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">🤖</span>
+            <span class="amazon-ad-title">AIプログラミング入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Next.js%20React%20TypeScript%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">📘</span>
+            <span class="amazon-ad-title">Next.js実践ガイド</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Web%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%20%E9%96%8B%E7%99%BA%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">💻</span>
+            <span class="amazon-ad-title">Webアプリ開発入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+            </div>
+            <div class="amazon-search-box">
+                <p class="amazon-search-label">🔍 <span class="amazon-logo-text">Amazon</span>で探す</p>
+                <form onsubmit="window.open('https://www.amazon.co.jp/s?k='+encodeURIComponent(this.q.value)+'&tag=gravity063-22','_blank');return false;" class="amazon-search-form">
+                    <input type="text" name="q" placeholder="キーワードを入力..." class="amazon-search-input" />
+                    <button type="submit" class="amazon-search-btn">検索</button>
+                </form>
+            </div>
+            <p class="amazon-ads-note">※ 上記リンクはAmazonアソシエイトリンクです</p>
+            <p class="amazon-ads-note">Amazonのアソシエイトとして、Gravity Portalは適格販売により収入を得ています。</p>
+        </div>
+        </article>
+
+        <nav class="post-nav">
+            <div class="post-nav-prev">
+            <a href="../../202603/20260306_ai_web_dev_day4/" class="post-nav-link">
+                <span class="post-nav-label">← 前の記事</span>
+                <span class="post-nav-title">🤖 AIと1週間でWebポータルを作った記録 — Day 4: AIの記憶の限界 — コンテキストウィンドウとの戦い</span>
+            </a></div>
+            <div class="post-nav-next">
+            <a href="../../202603/20260307_vibe_coding_intro/" class="post-nav-link">
+                <span class="post-nav-label">次の記事 →</span>
+                <span class="post-nav-title">🎵 バイブコーディング入門 — AIに&quot;ノリ&quot;で開発させる新時代の開発スタイル</span>
+            </a></div>
+        </nav>
+
+        <nav class="back-nav">
+            <a href="https://antigravity-portal.com/" class="back-link">🏠 TOPに戻る</a>
+            <a href="../../" class="back-link">← 記事一覧に戻る</a>
+        </nav>
+    </div>
+    
+    <script>
+    (function(){
+        var AD_ID = '06dfeeba49e20207a86cd5f651221d50';
+        var SDK_URL = 'https://adm.shinobi.jp/st/t.js';
+
+        // 課金チェック → 課金済みなら広告を全て非表示にしてSDKも読み込まない
+        function hideAllAds(){
+            document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                slot.style.display = 'none';
+            });
+        }
+
+        function initAds(){
+            // 1. admaxads配列にスロットを登録
+            if(!window.admaxads) window.admaxads = [];
+            document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
+                window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
+            });
+
+            // 2. SDKをロード（body末尾で1回だけ実行）
+            var s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.charset = 'utf-8';
+            s.src = SDK_URL;
+            s.async = true;
+            document.body.appendChild(s);
+
+            // 3. 広告が返らなかったスロットを非表示に（遅延チェック）
+            function checkAdSlots(){
+                document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                    var ad = slot.querySelector('.admax-switch');
+                    if(ad && ad.children.length > 0){
+                        slot.classList.add('ad-loaded');
+                    } else {
+                        slot.style.display = 'none';
+                    }
+                });
+            }
+            setTimeout(checkAdSlots, 5000);
+            setTimeout(checkAdSlots, 10000);
+        }
+
+        // 課金状態をチェック（同一ドメインのAPI）
+        fetch('/api/subscription-status')
+            .then(function(res){ return res.json(); })
+            .then(function(data){
+                if(data && data.isPaid){
+                    hideAllAds();
+                } else {
+                    initAds();
+                }
+            })
+            .catch(function(){
+                // エラー時は広告を表示（未課金扱い）
+                initAds();
+            });
+    })()
+    </script>
+</body>
+</html>

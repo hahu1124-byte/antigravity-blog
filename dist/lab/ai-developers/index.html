@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発者ピックアップ | LAB | Gravity Portal</title>
+    <meta name="description" content="注目のオープンソースプロジェクトとAIを活用した革新的な開発事例を定期的に紹介するシリーズ。">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
+
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LABに戻る</a>
+        <span class="lab-title">👤 AI開発者ピックアップ</span>
+    </header>
+
+    <main class="lab-content">
+        <div class="lab-hero">
+            <div class="lab-hero-icon">👤</div>
+            <h1>AI開発者ピックアップ</h1>
+            <p>注目のオープンソースプロジェクトと<br>AIを活用した革新的な開発事例を定期的に紹介するシリーズです。</p>
+        </div>
+
+        <div class="lab-section">
+            <h2>📚 バックナンバー</h2>
+
+            <a href="/lab/ai-developers/v4/" class="dev-card" style="text-decoration:none;display:block">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🆕</div>
+                    <div class="dev-info">
+                        <h3>第4回 — エージェントAI時代</h3>
+                        <span class="dev-role">2026年3月16日</span>
+                    </div>
+                </div>
+                <p style="font-size:0.88rem;color:var(--lab-text-muted)">OpenClaw急浮上、DeepSeek V4のOSSインパクト。Cline vs Roo vs OpenClaw比較表＋構造的課題7項目。</p>
+                <div class="tool-card-badges" style="margin-top:0.75rem">
+                    <span class="badge badge-hot">🔥 最新</span>
+                    <span class="badge badge-type">OpenClaw</span>
+                    <span class="badge badge-type">3者比較</span>
+                </div>
+            </a>
+
+            <a href="/lab/ai-developers/v3/" class="dev-card" style="text-decoration:none;display:block">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">📋</div>
+                    <div class="dev-info">
+                        <h3>第3回 — 成長と現実</h3>
+                        <span class="dev-role">2026年3月12日</span>
+                    </div>
+                </div>
+                <p style="font-size:0.88rem;color:var(--lab-text-muted)">OpenHands 68.5k★、Cline 58.6k★の急成長。Devinプラットフォーム化。OSSエコシステムの課題も解説。</p>
+                <div class="tool-card-badges" style="margin-top:0.75rem">
+                    <span class="badge badge-type">Stars ランキング</span>
+                    <span class="badge badge-type">ユーザーの声</span>
+                </div>
+            </a>
+
+            <a href="/lab/ai-developers/v2/" class="dev-card" style="text-decoration:none;display:block">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">📋</div>
+                    <div class="dev-info">
+                        <h3>第2回 — 新星プロジェクト</h3>
+                        <span class="dev-role">2026年3月11日</span>
+                    </div>
+                </div>
+                <p style="font-size:0.88rem;color:var(--lab-text-muted)">Roo Code、OpenHands、Cline。新たに注目を集めるOSSプロジェクトを紹介。前回紹介プロジェクトの進捗も追跡。</p>
+                <div class="tool-card-badges" style="margin-top:0.75rem">
+                    <span class="badge badge-type">新規3プロジェクト</span>
+                </div>
+            </a>
+
+            <a href="/lab/ai-developers/v1/" class="dev-card" style="text-decoration:none;display:block">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">📋</div>
+                    <div class="dev-info">
+                        <h3>第1回 — 注目のOSS 6選</h3>
+                        <span class="dev-role">2026年3月9日</span>
+                    </div>
+                </div>
+                <p style="font-size:0.88rem;color:var(--lab-text-muted)">Aider、Continue、bolt.new、v0、Devin、SWE-agent。AI開発の最前線を走るオープンソースプロジェクトを紹介。</p>
+                <div class="tool-card-badges" style="margin-top:0.75rem">
+                    <span class="badge badge-type">OSS 6選</span>
+                    <span class="badge badge-free">初回</span>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <footer class="lab-footer">
+        <p>LAB — AI開発の最前線を探る</p>
+        <div class="lab-footer-nav">
+            <a href="/lab/">🔬 LABトップ</a>
+            <a href="/lab/ai-tools/">🛠️ ツール比較</a>
+            <a href="/lab/ai-trends/">📊 トレンド</a>
+            <a href="https://antigravity-portal.com/">🏠 TOP</a>
+        </div>
+    </footer>
+</body>
+</html>

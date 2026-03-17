@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📱 PWAにしたらスマホからのアクセスが変わった話 — 個人開発サイトのモバイル最適化 | Gravity Portal</title>
+    <meta name="description" content="個人開発サイトにPWA（Progressive Web App）を導入したら、スマホユーザーの体験が劇的に改善。実装手順、Service Workerの仕組み、導入前後の違いを技術者目線で解説。">
+    <!-- OGP -->
+    <meta property="og:title" content="📱 PWAにしたらスマホからのアクセスが変わった話 — 個人開発サイトのモバイル最適化">
+    <meta property="og:description" content="個人開発サイトにPWA（Progressive Web App）を導入したら、スマホユーザーの体験が劇的に改善。実装手順、Service Workerの仕組み、導入前後の違いを技術者目線で解説。">
+    <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/pwa_mobile_access.webp">
+    <meta property="og:url" content="https://www.antigravity-portal.com/blog/202603/20260308_pwa_mobile_access/">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="📱 PWAにしたらスマホからのアクセスが変わった話 — 個人開発サイトのモバイル最適化">
+    <meta name="twitter:description" content="個人開発サイトにPWA（Progressive Web App）を導入したら、スマホユーザーの体験が劇的に改善。実装手順、Service Workerの仕組み、導入前後の違いを技術者目線で解説。">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/pwa_mobile_access.webp">
+    <link rel="stylesheet" href="../../styles.css?v=1773675633158">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://adm.shinobi.jp">
+    <link rel="preconnect" href="https://cnobi.jp">
+    <link rel="dns-prefetch" href="https://adm.shinobi.jp">
+    <link rel="dns-prefetch" href="https://cnobi.jp">
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
+</head>
+<body>
+    <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
+    <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
+    <div class="article-page">
+        <nav class="breadcrumb">
+            <a href="https://antigravity-portal.com/">トップ</a>
+            <span class="separator">/</span>
+            <a href="../../">ブログ</a>
+            <span class="separator">/</span>
+            <span class="current">📱 PWAにしたらスマホからのアクセスが変わった話 — 個人開発サイトのモバイル最適化</span>
+        </nav>
+
+        <article class="article">
+            <header class="article-header">
+                <div class="meta">
+                    <time class="date">2026-03-08</time>
+                    
+                    <div class="tags">
+                        <a href="../../tag/%E6%8A%80%E8%A1%93/" class="tag">技術</a><a href="../../tag/PWA/" class="tag">PWA</a>
+                    </div>
+                </div>
+                <h1 class="title">📱 PWAにしたらスマホからのアクセスが変わった話 — 個人開発サイトのモバイル最適化</h1>
+            </header>
+
+            <div class="content">
+                <p><img src="../../images/pwa_mobile_access.webp" alt="PWAでスマホアクセスが変わった"></p>
+<h2>はじめに — 「ブックマークしてるけど、毎回ブラウザ開くのだるい」</h2>
+<p>Gravity Portalを公開して数日。Google Analyticsを確認すると、アクセスの<strong>約60%がスマートフォン</strong>からでした。</p>
+<p>パチンコの期待値を計算するユーザーの多くは、<strong>パチンコ店にいる時にスマホでアクセス</strong>しています。店内で台のスペックを確認し、回転率を入力し、打つべきかどうかを即座に判断する——そんな使い方です。</p>
+<p>しかし、通常のWebサイトでは：</p>
+<ul>
+  <li>ブラウザを開く → ブックマークを探す → タップ → ページ読み込み待ち</li>
+  <li>URLを手入力する → 面倒でやめる</li>
+</ul>
+<p>この「アクセスまでの摩擦」を限りなくゼロにする技術が<strong>PWA（Progressive Web App）</strong>です。</p>
+<hr>
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+<h2>📱 PWAとは何か</h2>
+<h3>一言で言うと</h3>
+<p>PWAは、<strong>Webサイトをネイティブアプリのように使えるようにする技術</strong>です。</p>
+<div class="table-scroll"><table>
+  <thead>
+    <tr>
+      <th>機能</th>
+      <th>通常のWebサイト</th>
+      <th>PWA</th>
+      <th>ネイティブアプリ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ホーム画面に追加</td>
+      <td>❌</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>オフライン動作</td>
+      <td>❌</td>
+      <td>✅（キャッシュ）</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>フルスクリーン</td>
+      <td>❌</td>
+      <td>✅</td>
+      <td>✅</td>
+    </tr>
+    <tr>
+      <td>アプリストア不要</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>❌</td>
+    </tr>
+    <tr>
+      <td>更新の即時反映</td>
+      <td>✅</td>
+      <td>✅</td>
+      <td>❌（審査あり）</td>
+    </tr>
+    <tr>
+      <td>開発コスト</td>
+      <td>低</td>
+      <td>低〜中</td>
+      <td>高</td>
+    </tr>
+  </tbody>
+</table></div>
+<p>要するに、<strong>Webの手軽さとアプリの体験を両立</strong>できる技術です。</p>
+<hr>
+<h2>🛠️ 実装手順 — Next.jsにPWAを導入</h2>
+<h3>Step 1: Web Manifest の作成</h3>
+<p><code>manifest.json</code>はPWAの「名刺」です。アプリ名、アイコン、テーマカラーなどを定義します。</p>
+<pre><code>{
+  "name": "Gravity Portal",
+  "short_name": "Gravity",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f1017",
+  "theme_color": "#7c7ff2",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192" },
+    { "src": "/icon-512.png", "sizes": "512x512" }
+  ]
+}</code></pre>
+<h3>Step 2: Service Worker の登録</h3>
+<p>Service Workerは、ブラウザとサーバーの間に立つ「代理人」です。リクエストをキャッシュし、オフライン時にもコンテンツを返す役割を担います。</p>
+<p>Next.jsでは、<code>next-pwa</code>パッケージを使うのが定番でしたが、私はあえて<strong>手書きのService Worker</strong>を採用しました。理由は：</p>
+<ul>
+  <li>キャッシュ戦略を細かくコントロールしたい</li>
+  <li>機種データ（13MB）は積極的にキャッシュして高速化したい</li>
+  <li>計算ロジックはキャッシュせず、常に最新版を使いたい</li>
+</ul>
+<h3>Step 3: キャッシュ戦略の選択</h3>
+<div class="table-scroll"><table>
+  <thead>
+    <tr>
+      <th>リソース</th>
+      <th>戦略</th>
+      <th>理由</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>HTML/CSS/JS</td>
+      <td>Network First</td>
+      <td>常に最新版を優先</td>
+    </tr>
+    <tr>
+      <td>機種データJSON</td>
+      <td>Cache First</td>
+      <td>頻繁に変わらない、サイズ大</td>
+    </tr>
+    <tr>
+      <td>画像</td>
+      <td>Cache First</td>
+      <td>変更されない</td>
+    </tr>
+    <tr>
+      <td>API（計算）</td>
+      <td>Network Only</td>
+      <td>リアルタイム性が必要</td>
+    </tr>
+  </tbody>
+</table></div>
+<hr>
+<h2>📊 導入前後の比較</h2>
+<h3>アクセス体験の変化</h3>
+<div class="table-scroll"><table>
+  <thead>
+    <tr>
+      <th>指標</th>
+      <th>PWA導入前</th>
+      <th>PWA導入後</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>初回読み込み</td>
+      <td>約2.5秒</td>
+      <td>約2.5秒（変わらず）</td>
+    </tr>
+    <tr>
+      <td>2回目以降の読み込み</td>
+      <td>約1.8秒</td>
+      <td><strong>約0.5秒</strong></td>
+    </tr>
+    <tr>
+      <td>アクセス手順</td>
+      <td>ブラウザ→ブックマーク→タップ</td>
+      <td><strong>ホーム画面アイコンをタップ</strong></td>
+    </tr>
+    <tr>
+      <td>アドレスバー</td>
+      <td>表示される</td>
+      <td><strong>非表示（フルスクリーン）</strong></td>
+    </tr>
+    <tr>
+      <td>オフライン時</td>
+      <td>エラー画面</td>
+      <td><strong>キャッシュから表示</strong></td>
+    </tr>
+  </tbody>
+</table></div>
+<p>特に<strong>2回目以降の読み込みが3.6倍高速化</strong>したのは大きい。パチンコ店で「ちょっと確認したい」時に、0.5秒でツールが開くのは体験として全く別物です。</p>
+<h3>ユーザー行動の変化</h3>
+<ul>
+  <li>ホーム画面に追加してくれるユーザーが増加</li>
+  <li>「アプリはないの？」という問い合わせが減少</li>
+  <li>滞在時間が平均20%増加（ストレスなく使い続けられるため）</li>
+</ul>
+<hr>
+<h2>⚠️ PWA導入の注意点</h2>
+<h3>1. iOSのPWAサポートは限定的</h3>
+<p>Androidでは完全なPWA体験を提供できますが、iOSでは：</p>
+<ul>
+  <li>プッシュ通知が使えない（iOS 16.4以降で一部対応）</li>
+  <li>バックグラウンド同期が動かない</li>
+  <li>「ホームに追加」の導線が分かりにくい</li>
+</ul>
+<p>Gravity Portalでは、iOS対応として<strong>Service Workerのフォールバック</strong>を実装。Service Workerが動かない環境でもWebサイトとして正常に機能するよう設計しています。
+</p>
+<h3>2. キャッシュの更新問題</h3>
+<p>古いキャッシュが残り続けると、ユーザーが最新版のサイトを見られない問題が発生します。Service
+  Workerの<strong>バージョン管理</strong>と<strong>キャッシュの自動クリア</strong>の仕組みが必須です。</p>
+<h3>3. HTTPS必須</h3>
+<p>Service WorkerはHTTPSでのみ動作します。ローカル開発時は<code>localhost</code>が例外として許可されますが、本番環境では必ずSSL証明書が必要です。Vercelを使っていれば自動で対応されます。
+</p>
+<hr>
+<h2>💡 まとめ：PWAは「コスパ最強」のモバイル対応</h2>
+<p>ネイティブアプリを開発するには、iOS/Androidそれぞれの知識が必要で、ストアの審査もあります。個人開発者にとって、この負担は大きすぎる。</p>
+<p>PWAなら：</p>
+<ul>
+  <li>✅ 既存のWebサイトに<strong>数ファイル追加するだけ</strong></li>
+  <li>✅ ストア審査<strong>不要</strong></li>
+  <li>✅ 更新は即時反映</li>
+  <li>✅ ホーム画面にアイコンが出る</li>
+  <li>✅ オフラインでも動く</li>
+</ul>
+<p>個人開発サイトのモバイル対応として、PWAは<strong>コスパ最強の選択肢</strong>です。特にツール系サイト（計算ツール、データベース検索など）との相性は抜群。</p>
+<p>「アプリを作るほどではないけど、スマホからの体験を良くしたい」——そんな方にはPWAを強くおすすめします。</p>
+<hr>
+<h2>📌 関連記事</h2>
+<ul>
+  <li><strong>Day 1</strong>: <a href="/blog/202603/20260306_ai_web_dev_day1/">構想とNext.jsセットアップ</a></li>
+  <li><strong>バイブコーディング入門</strong>: <a href="/blog/202603/20260307_vibe_coding_intro/">AIに"ノリ"で開発させる新時代の開発スタイル</a></li>
+  <li><a href="https://www.antigravity-portal.com">Gravity Portal</a> — PWA対応済みのパチンコ分析プラットフォーム</li>
+</ul>
+            </div>
+
+            
+            
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+            
+        <div class="amazon-ads-section">
+            <h3 class="amazon-ads-heading">💻 技術書・開発に役立つ本</h3>
+            <div class="amazon-ads-grid">
+                
+        <a href="https://www.amazon.co.jp/s?k=AI%20%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%20%E5%85%A5%E9%96%80%20Python&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">🤖</span>
+            <span class="amazon-ad-title">AIプログラミング入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Next.js%20React%20TypeScript%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">📘</span>
+            <span class="amazon-ad-title">Next.js実践ガイド</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Web%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%20%E9%96%8B%E7%99%BA%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">💻</span>
+            <span class="amazon-ad-title">Webアプリ開発入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+            </div>
+            <div class="amazon-search-box">
+                <p class="amazon-search-label">🔍 <span class="amazon-logo-text">Amazon</span>で探す</p>
+                <form onsubmit="window.open('https://www.amazon.co.jp/s?k='+encodeURIComponent(this.q.value)+'&tag=gravity063-22','_blank');return false;" class="amazon-search-form">
+                    <input type="text" name="q" placeholder="キーワードを入力..." class="amazon-search-input" />
+                    <button type="submit" class="amazon-search-btn">検索</button>
+                </form>
+            </div>
+            <p class="amazon-ads-note">※ 上記リンクはAmazonアソシエイトリンクです</p>
+            <p class="amazon-ads-note">Amazonのアソシエイトとして、Gravity Portalは適格販売により収入を得ています。</p>
+        </div>
+        </article>
+
+        <nav class="post-nav">
+            <div class="post-nav-prev">
+            <a href="../../202603/20260307_vibe_coding_intro/" class="post-nav-link">
+                <span class="post-nav-label">← 前の記事</span>
+                <span class="post-nav-title">🎵 バイブコーディング入門 — AIに&quot;ノリ&quot;で開発させる新時代の開発スタイル</span>
+            </a></div>
+            <div class="post-nav-next">
+            <a href="../../202603/20260308_probability_convergence/" class="post-nav-link">
+                <span class="post-nav-label">次の記事 →</span>
+                <span class="post-nav-title">🎲 パチンコの確率は本当に収束するのか — 自作シミュレーターで10万回転まわしてみた</span>
+            </a></div>
+        </nav>
+
+        <nav class="back-nav">
+            <a href="https://antigravity-portal.com/" class="back-link">🏠 TOPに戻る</a>
+            <a href="../../" class="back-link">← 記事一覧に戻る</a>
+        </nav>
+    </div>
+    
+    <script>
+    (function(){
+        var AD_ID = '06dfeeba49e20207a86cd5f651221d50';
+        var SDK_URL = 'https://adm.shinobi.jp/st/t.js';
+
+        // 課金チェック → 課金済みなら広告を全て非表示にしてSDKも読み込まない
+        function hideAllAds(){
+            document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                slot.style.display = 'none';
+            });
+        }
+
+        function initAds(){
+            // 1. admaxads配列にスロットを登録
+            if(!window.admaxads) window.admaxads = [];
+            document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
+                window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
+            });
+
+            // 2. SDKをロード（body末尾で1回だけ実行）
+            var s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.charset = 'utf-8';
+            s.src = SDK_URL;
+            s.async = true;
+            document.body.appendChild(s);
+
+            // 3. 広告が返らなかったスロットを非表示に（遅延チェック）
+            function checkAdSlots(){
+                document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                    var ad = slot.querySelector('.admax-switch');
+                    if(ad && ad.children.length > 0){
+                        slot.classList.add('ad-loaded');
+                    } else {
+                        slot.style.display = 'none';
+                    }
+                });
+            }
+            setTimeout(checkAdSlots, 5000);
+            setTimeout(checkAdSlots, 10000);
+        }
+
+        // 課金状態をチェック（同一ドメインのAPI）
+        fetch('/api/subscription-status')
+            .then(function(res){ return res.json(); })
+            .then(function(data){
+                if(data && data.isPaid){
+                    hideAllAds();
+                } else {
+                    initAds();
+                }
+            })
+            .catch(function(){
+                // エラー時は広告を表示（未課金扱い）
+                initAds();
+            });
+    })()
+    </script>
+</body>
+</html>
