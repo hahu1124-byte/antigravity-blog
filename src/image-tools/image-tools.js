@@ -37,10 +37,14 @@
     }
 
     function getExtension(format) {
-        return format === 'jpeg' ? 'jpg' : format;
+        if (format === 'jpeg') return 'jpg';
+        if (format === 'base64') return 'txt';
+        return format;
     }
 
     function getMimeType(format) {
+        if (format === 'ico') return 'image/x-icon';
+        if (format === 'base64') return 'text/plain';
         return 'image/' + format;
     }
 
@@ -164,11 +168,15 @@
         customSizeGroup.classList.toggle('hidden', resizeSelect.value !== 'custom');
     });
 
-    // PNG選択時は品質スライダーを無効化（PNGはロスレス）
+    // PNG/Base64選択時は品質スライダーを無効化
     formatSelect.addEventListener('change', () => {
-        const isPng = formatSelect.value === 'png';
-        qualitySlider.disabled = isPng;
-        qualitySlider.style.opacity = isPng ? '0.3' : '1';
+        const fmt = formatSelect.value;
+        const noQuality = fmt === 'png' || fmt === 'base64' || fmt === 'ico';
+        qualitySlider.disabled = noQuality;
+        qualitySlider.style.opacity = noQuality ? '0.3' : '1';
+        // ICO/Base64ではリサイズ設定を非表示（ICOは固定サイズ）
+        const hideResize = fmt === 'ico';
+        resizeSelect.closest('.setting-group').style.display = hideResize ? 'none' : '';
     });
 
     // クリア
@@ -206,11 +214,18 @@
             }
 
             try {
-                const result = await convertImage(file, format, quality, maxWidth);
+                let result;
+                if (format === 'ico') {
+                    result = await convertToIco(file);
+                } else if (format === 'base64') {
+                    result = await convertToBase64(file, quality, maxWidth);
+                } else {
+                    result = await convertImage(file, format, quality, maxWidth);
+                }
                 totalOriginal += file.size;
                 totalConverted += result.blob.size;
 
-                convertedFiles.push({
+                const entry = {
                     name: stripExtension(file.name) + '.' + getExtension(format),
                     blob: result.blob,
                     originalSize: file.size,
@@ -218,7 +233,9 @@
                     width: result.width,
                     height: result.height,
                     url: URL.createObjectURL(result.blob),
-                });
+                };
+                if (result.base64Text) entry.base64Text = result.base64Text;
+                convertedFiles.push(entry);
 
                 if (progressBar) progressBar.style.width = '100%';
             } catch (err) {
@@ -237,7 +254,7 @@
         convertBtn.textContent = '🔄 一括変換';
     });
 
-    // Canvas変換
+    // Canvas変換（PNG/JPEG/WebP/AVIF）
     function convertImage(file, format, quality, maxWidth) {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -270,13 +287,148 @@
                         if (blob) {
                             resolve({ blob, width: w, height: h });
                         } else {
-                            reject(new Error('変換に失敗しました'));
+                            // AVIFなど未対応ブラウザの場合WebPにフォールバック
+                            canvas.toBlob(
+                                (fbBlob) => {
+                                    if (fbBlob) resolve({ blob: fbBlob, width: w, height: h });
+                                    else reject(new Error('変換に失敗しました'));
+                                },
+                                'image/webp',
+                                quality
+                            );
                         }
                         URL.revokeObjectURL(img.src);
                     },
                     getMimeType(format),
-                    format === 'png' ? undefined : quality
+                    (format === 'png') ? undefined : quality
                 );
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(img.src);
+                reject(new Error('画像の読み込みに失敗'));
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
+    // ICO (favicon) 変換 — 16/32/48px の3サイズを1ファイルに
+    function convertToIco(file) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const sizes = [16, 32, 48];
+                const images = [];
+
+                for (const size of sizes) {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, size, size);
+                    const imageData = ctx.getImageData(0, 0, size, size);
+                    images.push({ size, data: imageData });
+                }
+
+                // ICOバイナリ構築
+                const headerSize = 6;
+                const entrySize = 16;
+                const dataOffset = headerSize + entrySize * images.length;
+
+                let totalDataSize = 0;
+                const pngBlobs = [];
+
+                // 各サイズをPNG形式でエンコード
+                let processed = 0;
+                images.forEach((img2, idx) => {
+                    const c = document.createElement('canvas');
+                    c.width = img2.size;
+                    c.height = img2.size;
+                    c.getContext('2d').putImageData(img2.data, 0, 0);
+                    c.toBlob((blob) => {
+                        pngBlobs[idx] = blob;
+                        processed++;
+                        if (processed === images.length) {
+                            buildIco(pngBlobs, sizes, resolve, reject);
+                        }
+                    }, 'image/png');
+                });
+
+                URL.revokeObjectURL(img.src);
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(img.src);
+                reject(new Error('画像の読み込みに失敗'));
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
+    async function buildIco(pngBlobs, sizes, resolve, reject) {
+        try {
+            const buffers = [];
+            for (const blob of pngBlobs) {
+                buffers.push(await blob.arrayBuffer());
+            }
+
+            const headerSize = 6;
+            const entrySize = 16;
+            let totalSize = headerSize + entrySize * buffers.length;
+            for (const buf of buffers) totalSize += buf.byteLength;
+
+            const ico = new ArrayBuffer(totalSize);
+            const view = new DataView(ico);
+
+            // ICOヘッダー
+            view.setUint16(0, 0, true);     // 予約
+            view.setUint16(2, 1, true);     // タイプ: ICO
+            view.setUint16(4, buffers.length, true); // 画像数
+
+            let dataPos = headerSize + entrySize * buffers.length;
+            buffers.forEach((buf, i) => {
+                const offset = headerSize + entrySize * i;
+                const s = sizes[i];
+                view.setUint8(offset, s < 256 ? s : 0);      // 幅
+                view.setUint8(offset + 1, s < 256 ? s : 0);  // 高さ
+                view.setUint8(offset + 2, 0);   // パレット
+                view.setUint8(offset + 3, 0);   // 予約
+                view.setUint16(offset + 4, 1, true);   // カラープレーン
+                view.setUint16(offset + 6, 32, true);  // ビット深度
+                view.setUint32(offset + 8, buf.byteLength, true);  // データサイズ
+                view.setUint32(offset + 12, dataPos, true);        // データオフセット
+
+                new Uint8Array(ico, dataPos, buf.byteLength).set(new Uint8Array(buf));
+                dataPos += buf.byteLength;
+            });
+
+            const blob = new Blob([ico], { type: 'image/x-icon' });
+            resolve({ blob, width: 48, height: 48 });
+        } catch (e) {
+            reject(e);
+        }
+    }
+
+    // Base64テキスト出力
+    function convertToBase64(file, quality, maxWidth) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let w = img.width;
+                let h = img.height;
+                if (maxWidth && w > maxWidth) {
+                    h = Math.round(h * (maxWidth / w));
+                    w = maxWidth;
+                }
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+
+                const dataUrl = canvas.toDataURL('image/png');
+                const text = dataUrl;
+                const blob = new Blob([text], { type: 'text/plain' });
+                resolve({ blob, width: w, height: h, base64Text: text });
+                URL.revokeObjectURL(img.src);
             };
             img.onerror = () => {
                 URL.revokeObjectURL(img.src);
@@ -346,6 +498,22 @@
             item.appendChild(thumb);
             item.appendChild(info);
             item.appendChild(dlBtn);
+
+            // Base64の場合はコピーボタンを追加
+            if (file.base64Text) {
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'btn-download';
+                copyBtn.textContent = '📋 コピー';
+                copyBtn.style.marginLeft = '0.3rem';
+                copyBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(file.base64Text).then(() => {
+                        copyBtn.textContent = '✅ コピー済';
+                        setTimeout(() => { copyBtn.textContent = '📋 コピー'; }, 2000);
+                    });
+                });
+                item.appendChild(copyBtn);
+            }
+
             resultItems.appendChild(item);
         });
     }
