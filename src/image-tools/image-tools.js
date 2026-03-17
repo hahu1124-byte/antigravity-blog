@@ -22,6 +22,7 @@
     const resultItems = document.getElementById('result-items');
     const resultsSummary = document.getElementById('results-summary');
     const downloadAllBtn = document.getElementById('download-all-btn');
+    const clearResultsBtn = document.getElementById('clear-results-btn');
 
     // ファイル管理
     let files = [];
@@ -53,7 +54,13 @@
     }
 
     // ドラッグ＆ドロップ
-    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('click', (e) => {
+        // label要素のクリックはネイティブでfile inputを開くので二重発火防止
+        if (e.target.tagName === 'LABEL' || e.target.closest('label')) return;
+        // リセットしてから開く（同じファイルの再選択を可能に）
+        fileInput.value = '';
+        fileInput.click();
+    });
     
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -71,8 +78,9 @@
     });
 
     fileInput.addEventListener('change', () => {
-        handleFiles(fileInput.files);
-        fileInput.value = '';
+        if (fileInput.files.length > 0) {
+            handleFiles(fileInput.files);
+        }
     });
 
     // ファイル処理
@@ -182,8 +190,16 @@
     // クリア
     clearBtn.addEventListener('click', () => {
         files = [];
+        convertedFiles.forEach(f => URL.revokeObjectURL(f.url));
         convertedFiles = [];
         updateFileList();
+    });
+
+    // 結果のみクリア
+    clearResultsBtn.addEventListener('click', () => {
+        convertedFiles.forEach(f => URL.revokeObjectURL(f.url));
+        convertedFiles = [];
+        results.classList.add('hidden');
     });
 
     // 変換処理
