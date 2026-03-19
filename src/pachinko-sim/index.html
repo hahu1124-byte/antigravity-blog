@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>パチンコシミュレーター | Gravity Portal</title>
+    <meta name="description" content="ブラウザで遊べるパチンコシミュレーター。実機のような盤面で玉を打ち出し、大当たり・RUSHを体験。">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #0a0a1a;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Meiryo', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ヘッダー */
+        .header {
+            width: 100%;
+            max-width: 600px;
+            padding: 12px 16px 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .back-link {
+            color: #888;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .back-link:hover { color: #aaa; }
+        .page-title {
+            font-size: 18px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .alpha-badge {
+            font-size: 10px;
+            background: #ff4444;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+
+        /* メインレイアウト */
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 0 8px 20px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        /* キャンバス */
+        .canvas-wrapper {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(255, 100, 50, 0.2), 0 4px 20px rgba(0,0,0,0.5);
+        }
+        #game-canvas {
+            display: block;
+            background: #1a3a2a;
+        }
+
+        /* ステータスバー */
+        .status-bar {
+            width: 100%;
+            max-width: 320px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+        }
+        .stat-card {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            padding: 8px 10px;
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 2px;
+        }
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .stat-value.balls { color: #ffa500; }
+        .stat-value.hits { color: #ff4444; }
+
+        /* モードバッジ */
+        .mode-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .mode-normal { background: #2a4a2a; color: #6c6; }
+        .mode-spinning { background: #4a4a2a; color: #cc6; }
+        .mode-bonus { background: #4a2a2a; color: #f66; }
+        .mode-rush { background: #2a2a4a; color: #6cf; }
+
+        /* コントロールパネル */
+        .controls {
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .handle-control {
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 10px;
+            padding: 12px 16px;
+        }
+        .handle-label {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .handle-power {
+            color: #ffa500;
+            font-weight: 700;
+        }
+
+        /* ハンドルスライダー */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #333, #ff6600);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #fff, #ccc, #999);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        }
+
+        /* ボタン */
+        .btn-row {
+            display: flex;
+            gap: 8px;
+        }
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        .btn-launch {
+            background: linear-gradient(145deg, #ff6b35, #e04000);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(255, 100, 50, 0.4);
+        }
+        .btn-launch.btn-active {
+            background: linear-gradient(145deg, #cc3300, #aa2200);
+            box-shadow: 0 2px 20px rgba(255, 50, 20, 0.6);
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+        .btn-launch:active {
+            background: linear-gradient(145deg, #ff8855, #ff5500);
+            box-shadow: 0 2px 8px rgba(255, 100, 50, 0.6);
+        }
+        .btn-buy {
+            background: linear-gradient(145deg, #2a6a3a, #1a4a2a);
+            color: #6c6;
+            box-shadow: 0 4px 15px rgba(50, 150, 50, 0.2);
+            flex: 0.6;
+        }
+
+        /* 統計パネル */
+        .stats-panel {
+            width: 100%;
+            max-width: 320px;
+            background: #1a1a2e;
+            border: 1px solid #2a2a4a;
+            border-radius: 10px;
+            padding: 12px 16px;
+        }
+        .stats-title {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #2a2a4a;
+            padding-bottom: 4px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+        .stats-item {
+            font-size: 10px;
+            color: #888;
+        }
+        .stats-item span {
+            display: block;
+            font-size: 16px;
+            font-weight: 700;
+            color: #ccc;
+            margin-top: 2px;
+        }
+
+        /* スペック情報 */
+        .spec-info {
+            width: 100%;
+            max-width: 320px;
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            padding: 4px;
+        }
+
+        /* レスポンシブ */
+        @media (max-width: 360px) {
+            #game-canvas {
+                width: 100%;
+                height: auto;
+            }
+            .stat-value { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="/tools/" class="back-link">← ツール</a>
+        <h1 class="page-title">🎰 パチンコシミュレーター</h1>
+        <span class="alpha-badge">TEST</span>
+    </header>
+
+    <main class="game-container">
+        <!-- キャンバス -->
+        <div class="canvas-wrapper">
+            <canvas id="game-canvas"></canvas>
+        </div>
+
+        <!-- ステータス -->
+        <div class="status-bar">
+            <div class="stat-card">
+                <div class="stat-label">持ち玉</div>
+                <div class="stat-value balls" id="balls-count">1,000</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">モード</div>
+                <div class="mode-badge mode-normal" id="mode-display">通常</div>
+            </div>
+        </div>
+
+        <!-- コントロール -->
+        <div class="controls">
+            <div class="handle-control">
+                <div class="handle-label">
+                    <span>🎯 ハンドル強度</span>
+                    <span class="handle-power" id="power-display">50%</span>
+                </div>
+                <input type="range" id="handle-slider" min="0" max="100" value="50"
+                    oninput="document.getElementById('power-display').textContent = this.value + '%'">
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-launch" id="launch-btn">
+                    ▶ 発射 START
+                </button>
+                <button class="btn btn-buy" id="buy-btn">
+                    💰 玉貸し
+                </button>
+            </div>
+        </div>
+
+        <!-- 統計 -->
+        <div class="stats-panel">
+            <div class="stats-title">📊 統計情報</div>
+            <div class="stats-grid">
+                <div class="stats-item">
+                    回転数
+                    <span id="spins-count">0</span>
+                </div>
+                <div class="stats-item">
+                    大当たり
+                    <span id="hits-count">0</span>
+                </div>
+                <div class="stats-item">
+                    総獲得
+                    <span id="payout-count">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="spec-info">
+            P新世紀エヴァンゲリオン 〜未来への咆哮〜<br>
+            大当たり確率: 1/319.7 | ST163回 | 10R/3R | 賞球 1&amp;5&amp;15
+        </div>
+    </main>
+
+    <script type="module">
+        import { init } from './game.js';
+
+        const canvas = document.getElementById('game-canvas');
+        init(canvas);
+    </script>
+</body>
+</html>

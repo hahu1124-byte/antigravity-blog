@@ -5,9 +5,26 @@
     <link>https://www.antigravity-portal.com/blog</link>
     <description>パチンコ分析・AI開発・Uber配達の個人開発ポータル Gravity Portal の最新記事</description>
     <language>ja</language>
-    <lastBuildDate>Sun, 15 Mar 2026 15:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Wed, 18 Mar 2026 15:00:00 GMT</lastBuildDate>
     <managingEditor>hahu1124 (Gravity Portal)</managingEditor>
     <atom:link href="https://www.antigravity-portal.com/blog/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>🚴 Uber配達日報 🌧️ 20260319 雨の日は需要UP</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260319_uber_daily/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260319_uber_daily/</guid>
+      <pubDate>Wed, 18 Mar 2026 15:00:00 GMT</pubDate>
+      <description>名古屋のUber配達に役立つ2026-03-19の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
+        <category>Uber配達</category>
+    </item>
+    <item>
+      <title>🛠️ 無料で使える！画像変換・QRコード・PDF結合 — ブラウザ完結の便利ツール3種リリース</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260318_utility_tools_launch/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260318_utility_tools_launch/</guid>
+      <pubDate>Tue, 17 Mar 2026 15:00:00 GMT</pubDate>
+      <description>画像変換・圧縮、QRコード生成・読み取り、PDF結合・分割の3つの無料ツールをリリース。すべてブラウザ内で完結し、ファイルがサーバーに送信されることはありません。</description>
+        <category>開発</category>
+        <category>技術</category>
+    </item>
     <item>
       <title>💰 コストの壁が崩壊する — LAB第5回レポート：Claude長文無料化・DeepSeek V4・日本政府Gennai始動</title>
       <link>https://www.antigravity-portal.com/blog/202603/20260316_ai_lab_update_v5/</link>
@@ -169,24 +186,6 @@
       <link>https://www.antigravity-portal.com/blog/202603/20260303_uber_tuesday_w4/</link>
       <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260303_uber_tuesday_w4/</guid>
       <pubDate>Mon, 02 Mar 2026 15:00:00 GMT</pubDate>
-      <description>こんにちは、玉配達員AHです。</description>
-        <category>Uber</category>
-        <category>日報</category>
-    </item>
-    <item>
-      <title>📊 W3週間総括：稼働日減でも効率指標は全面改善！¥53,998の「質」を検証（2/23〜3/1）</title>
-      <link>https://www.antigravity-portal.com/blog/202602/20260301_uber_weekly_summary_w3/</link>
-      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202602/20260301_uber_weekly_summary_w3/</guid>
-      <pubDate>Sat, 28 Feb 2026 15:00:00 GMT</pubDate>
-      <description>こんにちは、玉配達員AHです。</description>
-        <category>週報</category>
-        <category>Uber</category>
-    </item>
-    <item>
-      <title>📉 木曜日の堅実稼働：プロモなしでも¥17,939、件数単価¥815を維持（2026年2月26日）</title>
-      <link>https://www.antigravity-portal.com/blog/202602/20260226_uber_thursday_w3/</link>
-      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202602/20260226_uber_thursday_w3/</guid>
-      <pubDate>Wed, 25 Feb 2026 15:00:00 GMT</pubDate>
       <description>こんにちは、玉配達員AHです。</description>
         <category>Uber</category>
         <category>日報</category>

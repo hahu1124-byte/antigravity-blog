@@ -8,7 +8,7 @@
     <!-- OGP -->
     <meta property="og:title" content="🛠️ 無料で使える！画像変換・QRコード・PDF結合 — ブラウザ完結の便利ツール3種リリース">
     <meta property="og:description" content="画像変換・圧縮、QRコード生成・読み取り、PDF結合・分割の3つの無料ツールをリリース。すべてブラウザ内で完結し、ファイルがサーバーに送信されることはありません。">
-    <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/utility_tools_announcement.png">
+    <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/utility_tools_announcement.webp">
     <meta property="og:url" content="https://www.antigravity-portal.com/blog/202603/20260318_utility_tools_launch/">
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="Gravity Portal">
@@ -17,8 +17,8 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="🛠️ 無料で使える！画像変換・QRコード・PDF結合 — ブラウザ完結の便利ツール3種リリース">
     <meta name="twitter:description" content="画像変換・圧縮、QRコード生成・読み取り、PDF結合・分割の3つの無料ツールをリリース。すべてブラウザ内で完結し、ファイルがサーバーに送信されることはありません。">
-    <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/utility_tools_announcement.png">
-    <link rel="stylesheet" href="../../styles.css?v=1773784800000">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/utility_tools_announcement.webp">
+    <link rel="stylesheet" href="../../styles.css?v=1773936367832">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -69,7 +69,7 @@
             </header>
 
             <div class="content">
-                <p><img src="https://www.antigravity-portal.com/blog/images/utility_tools_announcement.png" alt="便利ツール3種リリース"></p>
+                <p><img src="../../images/utility_tools_announcement.webp" alt="便利ツール3種リリース"></p>
 
 <p>ブラウザ完結で使える、新しい無料ユーティリティツールを3つリリースしました。</p>
 <p>今回開発したのは「<strong>画像変換・圧縮</strong>」「<strong>QRコード生成・読み取り</strong>」「<strong>PDF結合・分割</strong>」の3ツール。すべてブラウザ内で処理が完結し、<strong>ファイルがサーバーに送信されることは一切ありません</strong>。</p>
@@ -85,12 +85,6 @@
 </ul>
 <p>ドラッグ＆ドロップで画像を追加し、変換設定を選んでボタンを押すだけ。結果はZIPで一括ダウンロードもできます。</p>
 <p>👉 <a href="/tools/image-tools/">画像変換・圧縮ツールを使う</a></p>
-
-<hr>
-        <div class="ninja-ad-slot">
-            <span class="ninja-ad-label">PR</span>
-            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
-        </div>
 
 <h2>📱 QRコード生成・読み取りツール</h2>
 <p>URL やテキストからQRコードを即座に生成できるツールです。</p>
@@ -187,7 +181,11 @@
                 <span class="post-nav-label">← 前の記事</span>
                 <span class="post-nav-title">💰 コストの壁が崩壊する — LAB第5回レポート：Claude長文無料化・DeepSeek V4・日本政府Gennai始動</span>
             </a></div>
-            <div class="post-nav-next"></div>
+            <div class="post-nav-next">
+            <a href="../../202603/20260319_uber_daily/" class="post-nav-link">
+                <span class="post-nav-label">次の記事 →</span>
+                <span class="post-nav-title">🚴 Uber配達日報 🌧️ 20260319 雨の日は需要UP</span>
+            </a></div>
         </nav>
 
         <nav class="back-nav">
@@ -201,6 +199,7 @@
         var AD_ID = '06dfeeba49e20207a86cd5f651221d50';
         var SDK_URL = 'https://adm.shinobi.jp/st/t.js';
 
+        // 課金チェック → 課金済みなら広告を全て非表示にしてSDKも読み込まない
         function hideAllAds(){
             document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
                 slot.style.display = 'none';
@@ -208,11 +207,13 @@
         }
 
         function initAds(){
+            // 1. admaxads配列にスロットを登録
             if(!window.admaxads) window.admaxads = [];
             document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
                 window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
             });
 
+            // 2. SDKをロード（body末尾で1回だけ実行）
             var s = document.createElement('script');
             s.type = 'text/javascript';
             s.charset = 'utf-8';
@@ -220,6 +221,7 @@
             s.async = true;
             document.body.appendChild(s);
 
+            // 3. 広告が返らなかったスロットを非表示に（遅延チェック）
             function checkAdSlots(){
                 document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
                     var ad = slot.querySelector('.admax-switch');
@@ -234,6 +236,7 @@
             setTimeout(checkAdSlots, 10000);
         }
 
+        // 課金状態をチェック（同一ドメインのAPI）
         fetch('/api/subscription-status')
             .then(function(res){ return res.json(); })
             .then(function(data){
@@ -244,6 +247,7 @@
                 }
             })
             .catch(function(){
+                // エラー時は広告を表示（未課金扱い）
                 initAds();
             });
     })()

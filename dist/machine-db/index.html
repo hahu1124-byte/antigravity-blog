@@ -140,6 +140,19 @@
         </div>
     </div>
     <script src="machine-db.js?v=4"></script>
+    <script>
+        // Google Sitelinks Searchbox 対応: ?q= パラメータを検索ボックスに反映
+        (function() {
+            var q = new URLSearchParams(location.search).get('q');
+            if (q) {
+                var el = document.getElementById('search-input');
+                if (el) {
+                    el.value = q;
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
+        })();
+    </script>
 </body>
 
 </html>
