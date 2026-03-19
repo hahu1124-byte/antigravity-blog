@@ -1,0 +1,121 @@
+{
+  "weather": {
+    "cityCode": "230010",
+    "apiUrl": "https://weather.tsukumijima.net/api/forecast/city/230010"
+  },
+  "gasoline": {
+    "source": "enecho",
+    "enechoApiUrl": "https://www.enecho.meti.go.jp/statistics/petroleum_and_lpgas/pl007/csv/",
+    "region": "愛知",
+    "cacheFile": "scripts/gas-price-cache.json"
+  },
+  "news": {
+    "sources": [
+      {
+        "name": "NHK主要ニュース",
+        "url": "https://www.nhk.or.jp/rss/news/cat0.xml",
+        "maxItems": 5
+      },
+      {
+        "name": "Google News 名古屋",
+        "url": "https://news.google.com/rss/search?q=%E5%90%8D%E5%8F%A4%E5%B1%8B+%E4%BA%A4%E9%80%9A+OR+%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88+OR+%E9%85%8D%E9%81%94&hl=ja&gl=JP&ceid=JP:ja",
+        "maxItems": 5
+      }
+    ],
+    "deliveryKeywords": [
+      "交通規制", "通行止め", "台風", "地震", "大雨", "暴風",
+      "マラソン", "大会", "祭り", "花火", "パレード",
+      "名古屋", "愛知", "東海",
+      "WBC", "五輪", "サッカー", "野球",
+      "配達", "Uber", "フードデリバリー"
+    ]
+  },
+  "events": {
+    "sources": [
+      {
+        "name": "Walker Plus 名古屋",
+        "url": "https://www.walkerplus.com/event_list/ar0623/",
+        "maxItems": 5
+      }
+    ],
+    "venues": [
+      "バンテリンドーム", "ナゴヤドーム", "日本ガイシホール",
+      "名古屋国際会議場", "ポートメッセなごや", "名古屋城",
+      "大須", "栄", "名古屋駅"
+    ]
+  },
+  "peakRules": [
+    {
+      "condition": "rain",
+      "multiplier": 1.5,
+      "emoji": "🌧️",
+      "message": "雨の日は注文が増える傾向！需要UP"
+    },
+    {
+      "condition": "friday_evening",
+      "multiplier": 1.4,
+      "emoji": "🍻",
+      "message": "金曜夜は最大ピーク帯"
+    },
+    {
+      "condition": "weekend_lunch",
+      "multiplier": 1.3,
+      "emoji": "🍽️",
+      "message": "週末ランチは稼ぎ時"
+    },
+    {
+      "condition": "cold",
+      "multiplier": 1.2,
+      "emoji": "🥶",
+      "message": "寒い日は出前需要UP"
+    },
+    {
+      "condition": "hot",
+      "multiplier": 1.2,
+      "emoji": "🥵",
+      "message": "暑い日は外出控え → 注文増"
+    },
+    {
+      "condition": "event_nearby",
+      "multiplier": 1.1,
+      "emoji": "🎪",
+      "message": "イベント周辺は混雑注意"
+    }
+  ],
+  "dayOfWeekTips": {
+    "0": { "emoji": "🌅", "tip": "日曜夜は注文増の傾向。夕方〜夜が狙い目" },
+    "1": { "emoji": "💼", "tip": "月曜ランチは企業需要多め。オフィス街を狙おう" },
+    "2": { "emoji": "📊", "tip": "火曜は比較的穏やか。エリアを広めに回るのがおすすめ" },
+    "3": { "emoji": "🏃", "tip": "水曜はノー残業デーの企業多め。夜も注文が出やすい" },
+    "4": { "emoji": "📈", "tip": "木曜は週末前の谷間。ランチに集中がおすすめ" },
+    "5": { "emoji": "🍻", "tip": "金曜夜は最大ピーク帯！20時〜22時が勝負" },
+    "6": { "emoji": "☀️", "tip": "土曜はランチ〜夕方が狙い目。ファミリー需要も多い" }
+  },
+  "titleTemplates": {
+    "sunny": { "emoji": "☀️", "text": "配達日和" },
+    "cloudy": { "emoji": "🌤️", "text": "まずまずの1日" },
+    "rainy": { "emoji": "🌧️", "text": "雨の日は需要UP" },
+    "storm": { "emoji": "⛈️", "text": "荒天注意！安全第一" },
+    "snow": { "emoji": "❄️", "text": "雪道注意！安全最優先" },
+    "hot": { "emoji": "🥵", "text": "暑さ対策必須" },
+    "cold": { "emoji": "🥶", "text": "防寒して出発" }
+  },
+  "heatAdvice": [
+    { "minTemp": 35, "emoji": "🚫", "message": "猛暑日。こまめな水分補給を！無理せず休憩を取ろう" },
+    { "minTemp": 30, "emoji": "🥵", "message": "真夏日。水分補給と日焼け対策をしっかり" },
+    { "minTemp": 25, "emoji": "😎", "message": "夏日。快適に配達できるが、水分補給は忘れずに" },
+    { "minTemp": 15, "emoji": "🌡️", "message": "過ごしやすい気温。配達日和！" },
+    { "minTemp": 10, "emoji": "🧥", "message": "肌寒い。上着を1枚多めに" },
+    { "minTemp": 5, "emoji": "🥶", "message": "かなり寒い。防寒装備必須、手袋も忘れずに" },
+    { "minTemp": 0, "emoji": "❄️", "message": "凍結注意。路面状況に細心の注意を" }
+  ],
+  "blog": {
+    "tag": "Uber配達",
+    "articlePathPrefix": "uber-daily",
+    "amazonSearches": [
+      { "emoji": "🚴", "title": "配達バッグ・グッズ", "query": "Uber Eats 配達 バッグ グッズ" },
+      { "emoji": "📱", "title": "スマホホルダー", "query": "バイク スマホホルダー 防水" },
+      { "emoji": "🧤", "title": "防寒・防水グッズ", "query": "バイク 防寒 防水 グローブ" }
+    ]
+  }
+}
