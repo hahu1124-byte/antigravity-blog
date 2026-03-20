@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-03-19T17:08:58.781Z",
+  "lastUpdated": "2026-03-20T16:54:17.424Z",
   "source": "pachinko-spec.info",
   "totalMachines": 1069,
   "machines": [
@@ -3088,15 +3088,15 @@
     {
       "name": "e東京喰種 超デカ超一撃ver.",
       "type": "ハイミドル",
-      "prob": 17.03,
+      "prob": 17.01,
       "baseProbability": 999.98,
-      "borderEquiv": 30.41,
+      "borderEquiv": 30.38,
       "rb": 140,
-      "singleSpinPayout": 8.22,
-      "avgAcquired": 2880.57,
+      "singleSpinPayout": 8.23,
+      "avgAcquired": 2881.25,
       "avgChain": 1.35,
-      "realContRate": 50.13,
-      "entryRate": 50.19,
+      "realContRate": 50.12,
+      "entryRate": 50.15,
       "rushRate": 0,
       "rushType": "",
       "yutimeTrigger": 0,
