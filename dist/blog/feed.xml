@@ -5,9 +5,27 @@
     <link>https://www.antigravity-portal.com/blog</link>
     <description>パチンコ分析・AI開発・Uber配達の個人開発ポータル Gravity Portal の最新記事</description>
     <language>ja</language>
-    <lastBuildDate>Wed, 18 Mar 2026 15:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Fri, 20 Mar 2026 15:00:00 GMT</lastBuildDate>
     <managingEditor>hahu1124 (Gravity Portal)</managingEditor>
     <atom:link href="https://www.antigravity-portal.com/blog/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>⚡ 自社モデル戦争の幕開け — LAB第6回レポート：Cursor Composer 2・Gemini CLI有料化・GPT-5.4 mini/nano</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260321_ai_lab_update_v6/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260321_ai_lab_update_v6/</guid>
+      <pubDate>Fri, 20 Mar 2026 15:00:00 GMT</pubDate>
+      <description>Cursorが自社LLM「Composer 2」を発表し100万DAU突破。Gemini CLIは3/25から無料枠縮小、GPT-5.4 mini/nanoの軽量モデルが登場。AIシークレット漏洩34%増加、Anthropic vs Pentagonの倫理衝突。OSSではOpenHands Planning Agent搭載、Cline 500万DL突破。「どのモデルを使うか」から「どのエコシステムに入るか」に問いが変わった第5回LABの総まとめ。</description>
+        <category>AI</category>
+        <category>開発</category>
+        <category>LAB</category>
+    </item>
+    <item>
+      <title>🚴 Uber配達日報 ☀️ 20260320 配達日和</title>
+      <link>https://www.antigravity-portal.com/blog/202603/20260320_uber_daily/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260320_uber_daily/</guid>
+      <pubDate>Thu, 19 Mar 2026 15:00:00 GMT</pubDate>
+      <description>名古屋のUber配達に役立つ2026-03-20の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
+        <category>Uber配達</category>
+    </item>
     <item>
       <title>🚴 Uber配達日報 🌧️ 20260319 雨の日は需要UP</title>
       <link>https://www.antigravity-portal.com/blog/202603/20260319_uber_daily/</link>
@@ -171,24 +189,6 @@
       <description>こんにちは、玉配達員AHです。</description>
         <category>週報</category>
         <category>Uber</category>
-    </item>
-    <item>
-      <title>🌡️ 体調不良2日目：¥3,379、2時間で切り上げ — 回復優先の木曜日（2026年3月5日）</title>
-      <link>https://www.antigravity-portal.com/blog/202603/20260305_uber_thursday_w4/</link>
-      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260305_uber_thursday_w4/</guid>
-      <pubDate>Wed, 04 Mar 2026 15:00:00 GMT</pubDate>
-      <description>こんにちは、玉配達員AHです。</description>
-        <category>Uber</category>
-        <category>日報</category>
-    </item>
-    <item>
-      <title>🏥 体調不良でも止まらない：¥4,613、短時間稼働の火曜日 × Webポータル開発始動（2026年3月3日）</title>
-      <link>https://www.antigravity-portal.com/blog/202603/20260303_uber_tuesday_w4/</link>
-      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202603/20260303_uber_tuesday_w4/</guid>
-      <pubDate>Mon, 02 Mar 2026 15:00:00 GMT</pubDate>
-      <description>こんにちは、玉配達員AHです。</description>
-        <category>Uber</category>
-        <category>日報</category>
     </item>
   </channel>
 </rss>
