@@ -28,6 +28,7 @@ jobs:
         run: node scripts/generate-uber-daily.mjs
 
       - name: Commit and push
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -36,6 +37,14 @@ jobs:
           if [ -n "$CHANGES" ]; then
             git commit -m "🚴 Uber daily: $(TZ=Asia/Tokyo date +%Y%m%d)"
             git push
+            echo "pushed=true" >> $GITHUB_OUTPUT
           else
             echo "No changes to commit"
+            echo "pushed=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Trigger deploy
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml
