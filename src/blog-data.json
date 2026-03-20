@@ -1,10 +1,23 @@
 [
   {
+    "slug": "202603/20260321_uber_daily",
+    "title": "🚴 Uber配達日報 ☀️ 20260321 配達日和",
+    "date": "2026-03-21",
+    "excerpt": "名古屋のUber配達に役立つ2026-03-21の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！",
+    "tags": [
+      "Uber配達"
+    ]
+  },
+  {
     "slug": "202603/20260321_ai_lab_update_v6",
     "title": "⚡ 自社モデル戦争の幕開け — LAB第6回レポート：Cursor Composer 2・Gemini CLI有料化・GPT-5.4 mini/nano",
     "date": "2026-03-21",
     "excerpt": "Cursorが自社LLM「Composer 2」を発表し100万DAU突破。Gemini CLIは3/25から無料枠縮小、GPT-5.4 mini/nanoの軽量モデルが登場。AIシークレット漏洩34%増加、Anthropic vs Pentagonの倫理衝突。OSSではOpenHands Planning Agent搭載、Cline 500万DL突破。「どのモデルを使うか」から「どのエコシステムに入るか」に問いが変わった第5回LABの総まとめ。",
-    "tags": ["AI", "開発", "LAB"],
+    "tags": [
+      "AI",
+      "開発",
+      "LAB"
+    ],
     "image": "ai_lab_update_v6.png",
     "content": "<img src=\"/blog/images/ai_lab_update_v6.png\" alt=\"LAB第6回レポート — 自社モデル戦争と無料枠の終焉\" style=\"width:100%;border-radius:12px;margin-bottom:1.5rem\">\n<p>LABセクション第5回を公開しました。今回のテーマは<strong>「自社モデル戦争と無料枠の終焉」</strong>。AI開発ツール、OSSエージェント、業界トレンドの3つの視点から、2026年3月16日〜21日の動きをまとめます。</p>\n\n<h2>⚡ 今週の3大ニュース</h2>\n<p><strong>① Cursor Composer 2</strong> — Anysphereが自社コーディングモデルを発表。IDEメーカーが独自LLMを持つ時代が始まった。100万DAU突破、$50B評価額の交渉が進行中。</p>\n<p><strong>② Gemini CLI有料化</strong> — 3月25日から無料ユーザーはFlashモデルのみに。Proモデルは有料サブスク必須。「無料最強」の地位に終止符。</p>\n<p><strong>③ GPT-5.4 mini/nano</strong> — 3月18日発表の軽量モデル。エージェントの裏側処理を劇的に効率化し、OSSツールのBYOK運用で月$15-20の本格AI開発が可能に。</p>\n\n<h2>🛠️ AI開発ツール比較 — 5ツールの最新動向</h2>\n<table>\n<thead><tr><th>ツール</th><th>主なアップデート</th><th>課題</th></tr></thead>\n<tbody>\n<tr><td><strong>Antigravity</strong></td><td>CLI有料化（3/25〜）、Mac版Desktop Intelligence開発中</td><td>無料枠縮小で「無料最強」の看板を下ろす</td></tr>\n<tr><td><strong>Claude Code</strong></td><td>auto-plan/auto-memory/voice mode、Channels（Discord/Telegram）</td><td>3/17パフォーマンス低下報告、シークレット漏洩2倍</td></tr>\n<tr><td><strong>Cursor</strong></td><td>Composer 2自社モデル、100万DAU、JetBrains ACP対応</td><td>ロックイン懸念、コスト問題継続</td></tr>\n<tr><td><strong>Copilot</strong></td><td>GPT-5.3-Codex LTS、セマンティック検索、Agent 50%高速化</td><td>Student Plan制限、愛され率9%</td></tr>\n<tr><td><strong>Windsurf</strong></td><td>OpenAI Astral買収の影響</td><td>差別化がさらに困難に</td></tr>\n</tbody>\n</table>\n<p>詳細は <a href='/lab/ai-tools/v5/'>AI開発ツール比較 第5回</a> をご覧ください。</p>\n\n<h2>👤 OSSエージェント — 進化する自律性</h2>\n<table>\n<thead><tr><th>プロジェクト</th><th>Stars</th><th>注目アップデート</th></tr></thead>\n<tbody>\n<tr><td><strong>OpenHands</strong></td><td>~69,400</td><td>Planning Agent搭載、Task Listタブ、Claude Opus 4.6対応</td></tr>\n<tr><td><strong>Cline</strong></td><td>~59,200</td><td>500万インストール突破、CoreWeave W&B Inference統合</td></tr>\n<tr><td><strong>Roo Code</strong></td><td>~22,800</td><td>v3.51.0 GPT-5.4/Gemini 3.1 Pro対応、スラッシュコマンド</td></tr>\n</tbody>\n</table>\n<p>新規トピックとして<strong>GPT-5.4 mini/nano</strong>（軽量モデルでBYOKコスト激減）と<strong>Claude Code Channels</strong>（Discord/Telegram統合の商用ツール）を取り上げました。</p>\n<p>詳細は <a href='/lab/ai-developers/v5/'>AI開発者ピックアップ 第5回</a> をご覧ください。</p>\n\n<h2>📊 6つのトレンド</h2>\n<table>\n<thead><tr><th>#</th><th>トレンド</th><th>インパクト</th></tr></thead>\n<tbody>\n<tr><td>01</td><td><strong>自社モデル戦争</strong></td><td>Cursor Composer 2で「IDE×自社LLM」時代。BYOKの自由 vs 統合体験</td></tr>\n<tr><td>02</td><td><strong>Gemini CLI有料化</strong></td><td>3/25から無料枠縮小。無料ユーザーの流出リスク</td></tr>\n<tr><td>03</td><td><strong>GPT-5.4 mini/nano</strong></td><td>軽量モデル量産化。エージェントの裏側処理で費用激減</td></tr>\n<tr><td>04</td><td><strong>AIシークレット漏洩</strong></td><td>34%増加。AI生成コードのpush前チェックが必須に</td></tr>\n<tr><td>05</td><td><strong>Anthropic vs Pentagon</strong></td><td>AI倫理と国防の正面衝突。マルチツール戦略の重要性</td></tr>\n<tr><td>06</td><td><strong>マルチモーダルAI $3.43B</strong></td><td>テキスト・音声・画像・動画の統合処理が主流に</td></tr>\n</tbody>\n</table>\n<p>詳細は <a href='/lab/ai-trends/v5/'>AI開発トレンド 第5回</a> をご覧ください。</p>\n\n<h2>🔐 セキュリティ警告：AI生成コードのシークレット漏洩</h2>\n<p>GitHub公開コミットでのシークレット漏洩が前年比<strong>34%増加</strong>。Claude Codeで共同著作されたコミットはベースラインの<strong>2倍のリスク</strong>。対策としてプレコミットフック、.gitignore/.env分離、GitHub Push Protectionの有効化を強く推奨します。</p>\n\n<h2>🎯 今週の結論</h2>\n<p>「どのモデルを使うか」から<strong>「どのエコシステムに入るか」</strong>に問いが変わった1週間。</p>\n<ul>\n<li><strong>コスパ最強</strong>: Claude Code $20/月（auto-plan + voice mode + サーチャージなし）</li>\n<li><strong>統合体験重視</strong>: Cursor Pro + Composer 2（自社モデルの最適化体験）</li>\n<li><strong>無料で最大限</strong>: Copilot Free → OSS + GPT-5.4 mini BYOK</li>\n<li><strong>エコシステム最広</strong>: Antigravity / Gemini（Workspace + Apple + Samsung）</li>\n</ul>\n<p>当サイトは引き続きAntigravityで開発中。次回LAB第6回もお楽しみに！</p>\n\n<p><strong>LAB第5回の全ページ:</strong></p>\n<ul>\n<li><a href='/lab/ai-tools/v5/'>🛠️ AI開発ツール比較 第5回</a></li>\n<li><a href='/lab/ai-developers/v5/'>👤 AI開発者ピックアップ 第5回</a></li>\n<li><a href='/lab/ai-trends/v5/'>📊 AI開発トレンド 第5回</a></li>\n</ul>"
   },
