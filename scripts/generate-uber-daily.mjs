@@ -21,14 +21,16 @@ const DRY_RUN = process.argv.includes('--dry-run');
 
 // ===== ユーティリティ =====
 
-const today = new Date();
-const YYYY = today.getFullYear();
-const MM = String(today.getMonth() + 1).padStart(2, '0');
-const DD = String(today.getDate()).padStart(2, '0');
+// GitHub Actions は UTC で実行されるため、JST (+9h) に変換して日本時間基準にする
+const now = new Date();
+const today = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+const YYYY = today.getUTCFullYear();
+const MM = String(today.getUTCMonth() + 1).padStart(2, '0');
+const DD = String(today.getUTCDate()).padStart(2, '0');
 const DATE_STR = `${YYYY}${MM}${DD}`;
 const DATE_DISPLAY = `${YYYY}-${MM}-${DD}`;
 const YYYYMM = `${YYYY}${MM}`;
-const DAY_OF_WEEK = today.getDay(); // 0=日, 1=月, ..., 6=土
+const DAY_OF_WEEK = today.getUTCDay(); // 0=日, 1=月, ..., 6=土
 const DAY_NAMES = ['日', '月', '火', '水', '木', '金', '土'];
 
 function log(msg) { console.log(`[uber-daily] ${msg}`); }
