@@ -4,12 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web BGM Maker — ドラム・メロディ・ベース・エフェクト・エクスポート | Gravity Portal</title>
+    <title>Web BGM Maker — ドラム・メロディ・ベース・9楽器・エフェクト | Gravity Portal</title>
     <meta name="description"
-        content="ブラウザだけで動くDAW。ドラムマシン+メロディ+ベースの3トラック同時再生、4種エフェクト搭載、WAVエクスポート対応。インストール不要。">
+        content="ブラウザだけで動くDAW。ドラムマシン+メロディ+ベースの3トラック、9種の楽器音色、4種エフェクト搭載、WAVエクスポート対応。インストール不要。">
     <!-- OGP -->
-    <meta property="og:title" content="Web BGM Maker v0.4.0 — ドラム+メロディ+ベース+エフェクト+WAVエクスポート">
-    <meta property="og:description" content="ブラウザ完結の簡易DAW。3トラック同時再生＋4種エフェクト搭載＋WAVエクスポート。">
+    <meta property="og:title" content="Web BGM Maker v0.5.0 — 9楽器+ドラム+メロディ+ベース+エフェクト">
+    <meta property="og:description" content="ブラウザ完結の簡易DAW。9種の楽器音色＋3トラック同時再生＋4種エフェクト搭載＋WAVエクスポート。">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://www.antigravity-portal.com/bgm-maker/">
     <meta property="og:image" content="https://www.antigravity-portal.com/bgm-maker/og-bgm-maker.png">
@@ -31,8 +31,8 @@
     <div class="container">
         <div class="header">
             <a href="https://antigravity-portal.com/" class="back-link">← Gravity Portal</a>
-            <h1>🎵 Web BGM Maker <span class="badge-phase">v0.4.0</span></h1>
-            <p class="subtitle">ドラム + メロディ + ベース + エフェクト + エクスポート</p>
+            <h1>🎵 Web BGM Maker <span class="badge-phase">v0.5.0</span></h1>
+            <p class="subtitle">9楽器 + ドラム + メロディ + ベース + エフェクト + エクスポート</p>
         </div>
 
         <!-- コントロールバー -->
@@ -252,12 +252,21 @@
             <!-- メロディコントロール -->
             <div class="melody-controls">
                 <div class="synth-group">
-                    <label>波形</label>
+                    <label>楽器</label>
                     <select class="melody-select" id="melodyWaveform">
-                        <option value="sine">Sine（正弦波）</option>
-                        <option value="square">Square（矩形波）</option>
-                        <option value="sawtooth">Sawtooth（ノコギリ波）</option>
-                        <option value="triangle">Triangle（三角波）</option>
+                        <optgroup label="🎹 シンセサイザー">
+                            <option value="sine">Sine（正弦波）</option>
+                            <option value="square">Square（矩形波）</option>
+                            <option value="sawtooth">Sawtooth（ノコギリ波）</option>
+                            <option value="triangle">Triangle（三角波）</option>
+                        </optgroup>
+                        <optgroup label="🎵 楽器音色">
+                            <option value="epiano">🎹 E.Piano（エレピ）</option>
+                            <option value="organ">🎛️ Organ（オルガン）</option>
+                            <option value="strings">🎻 Strings（ストリングス）</option>
+                            <option value="brass">🎺 Brass（ブラス）</option>
+                            <option value="bell">🔔 Bell（ベル/マリンバ）</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div class="scale-group">
@@ -344,6 +353,17 @@
                     <option value="scale_down">📉 スケール下行</option>
                     <option value="arpeggio">🎶 アルペジオ</option>
                     <option value="twinkle">⭐ きらきら星</option>
+                    <option value="chord_prog">🎼 コード進行</option>
+                    <option value="synth_riff">🎹 シンセリフ</option>
+                    <option value="melody_bounce">🏐 バウンス</option>
+                    <option value="octave_jump">⬆️ オクターブジャンプ</option>
+                    <option value="call_response">📞 コール&レスポンス</option>
+                    <option value="trill">〰️ トリル</option>
+                    <option value="pop_hook">🎤 ポップフック</option>
+                    <option value="funk_lick">🎸 ファンクリック</option>
+                    <option value="ambient_drift">🌊 アンビエント</option>
+                    <option value="dance_hook">💃 ダンスフック</option>
+                    <option value="cinematic">🎬 シネマティック</option>
                 </select>
                 <button class="btn btn-small btn-random" onclick="randomizeMelody()">🎲 ランダム</button>
                 <button class="btn btn-small btn-clear" onclick="clearMelody()">🗑 クリア</button>
@@ -360,12 +380,21 @@
             <!-- ベースコントロール -->
             <div class="melody-controls">
                 <div class="synth-group">
-                    <label>波形</label>
+                    <label>楽器</label>
                     <select class="melody-select" id="bassWaveform">
-                        <option value="sawtooth" selected>Sawtooth（ノコギリ波）</option>
-                        <option value="square">Square（矩形波）</option>
-                        <option value="sine">Sine（正弦波）</option>
-                        <option value="triangle">Triangle（三角波）</option>
+                        <optgroup label="🎹 シンセサイザー">
+                            <option value="sawtooth" selected>Sawtooth（ノコギリ波）</option>
+                            <option value="square">Square（矩形波）</option>
+                            <option value="sine">Sine（正弦波）</option>
+                            <option value="triangle">Triangle（三角波）</option>
+                        </optgroup>
+                        <optgroup label="🎵 楽器音色">
+                            <option value="epiano">🎹 E.Piano（エレピ）</option>
+                            <option value="organ">🎛️ Organ（オルガン）</option>
+                            <option value="strings">🎻 Strings（ストリングス）</option>
+                            <option value="brass">🎺 Brass（ブラス）</option>
+                            <option value="bell">🔔 Bell（ベル/マリンバ）</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div class="scale-group">
@@ -451,6 +480,14 @@
                     <option value="root_octave">🎸 ルート+オクターブ</option>
                     <option value="walking">🚶 ウォーキング</option>
                     <option value="eighth">🏃 8分ベース</option>
+                    <option value="synth_bass">🎹 シンセベース</option>
+                    <option value="reggae_bass">🇯🇲 レゲエベース</option>
+                    <option value="slap">👋 スラップ</option>
+                    <option value="arpeggiated">🎶 アルペジオベース</option>
+                    <option value="pedal">🎯 ペダルトーン</option>
+                    <option value="disco_octave">🪩 ディスコオクターブ</option>
+                    <option value="deep_sub">🔊 ディープサブ</option>
+                    <option value="driving">🚗 ドライビング</option>
                 </select>
                 <button class="btn btn-small btn-random" onclick="randomizeBass()">🎲 ランダム</button>
                 <button class="btn btn-small btn-clear" onclick="clearBass()">🗑 クリア</button>

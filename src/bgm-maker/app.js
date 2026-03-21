@@ -763,6 +763,7 @@ let pianoCanvas, pianoCtx;
 function getMelodyConfig() {
     return {
         waveform: document.getElementById('melodyWaveform').value,
+        instrument: document.getElementById('melodyWaveform').value,
         scale: document.getElementById('melodyScale').value,
         key: parseInt(document.getElementById('melodyKey').value),
         octave: parseInt(document.getElementById('melodyOctave').value),
@@ -929,35 +930,213 @@ function onCanvasClick(e) {
     drawPianoRoll();
 }
 
-// メロディ音の合成
-function playMelodyNote(midi, time, duration) {
-    const c = getCtx();
-    const cfg = getMelodyConfig();
+// ========================================
+// 楽器合成エンジン
+// ========================================
+
+// 楽器を判定して適切な合成方式で音を再生
+function synthesizeNote(c, bus, midi, time, duration, cfg) {
     const freq = midiToFreq(midi);
     const vol = 0.5;
-
-    const osc = c.createOscillator();
-    const gainNode = c.createGain();
-
-    osc.type = cfg.waveform;
-    osc.frequency.setValueAtTime(freq, time);
-
-    // ADSRエンベロープ
+    const inst = cfg.instrument || cfg.waveform;
     const a = cfg.adsr.a;
     const d = cfg.adsr.d;
     const s = cfg.adsr.s;
     const r = cfg.adsr.r;
     const totalDur = duration + r;
 
-    gainNode.gain.setValueAtTime(0, time);
-    gainNode.gain.linearRampToValueAtTime(vol, time + a);
-    gainNode.gain.linearRampToValueAtTime(vol * s, time + a + d);
-    gainNode.gain.setValueAtTime(vol * s, time + duration);
-    gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
+    switch (inst) {
+        case 'epiano': {
+            // FM合成エレクトリックピアノ（Rhodes風）
+            const modulator = c.createOscillator();
+            const modGain = c.createGain();
+            const carrier = c.createOscillator();
+            const gainNode = c.createGain();
 
-    osc.connect(gainNode).connect(melodyBus);
-    osc.start(time);
-    osc.stop(time + totalDur + 0.01);
+            // モジュレーター: キャリア周波数の2倍
+            modulator.type = 'sine';
+            modulator.frequency.setValueAtTime(freq * 2, time);
+            modGain.gain.setValueAtTime(freq * 1.5, time);
+            modGain.gain.exponentialRampToValueAtTime(freq * 0.1, time + duration * 0.8);
+
+            // キャリア
+            carrier.type = 'sine';
+            carrier.frequency.setValueAtTime(freq, time);
+
+            // FM接続: modulator → modGain → carrier.frequency
+            modulator.connect(modGain);
+            modGain.connect(carrier.frequency);
+
+            // ADSR
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol * 0.7, time + Math.min(a, 0.005));
+            gainNode.gain.exponentialRampToValueAtTime(vol * s * 0.5, time + a + d);
+            gainNode.gain.setValueAtTime(vol * s * 0.5, time + duration);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
+
+            carrier.connect(gainNode).connect(bus);
+            modulator.start(time);
+            carrier.start(time);
+            modulator.stop(time + totalDur + 0.01);
+            carrier.stop(time + totalDur + 0.01);
+            break;
+        }
+        case 'organ': {
+            // 加算合成オルガン（Hammond風 ドローバー9本）
+            const drawbars = [1, 3, 2, 4, 3, 2, 1, 1, 1]; // 相対レベル
+            const harmonics = [0.5, 1, 1.5, 2, 3, 4, 5, 6, 8]; // 倍音比
+            const totalLevel = drawbars.reduce((a, b) => a + b, 0);
+            const gainNode = c.createGain();
+
+            drawbars.forEach((level, i) => {
+                const osc = c.createOscillator();
+                const oscGain = c.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq * harmonics[i], time);
+                oscGain.gain.setValueAtTime(vol * (level / totalLevel) * 0.6, time);
+                osc.connect(oscGain).connect(gainNode);
+                osc.start(time);
+                osc.stop(time + totalDur + 0.01);
+            });
+
+            // オルガンはサステイン強め、即座に立ち上がり
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol * 0.6, time + 0.005);
+            gainNode.gain.setValueAtTime(vol * 0.6, time + duration);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + duration + 0.05);
+
+            gainNode.connect(bus);
+            break;
+        }
+        case 'strings': {
+            // デチューンSawtooth（ストリングスアンサンブル風）
+            const gainNode = c.createGain();
+            const lpf = c.createBiquadFilter();
+            lpf.type = 'lowpass';
+            lpf.frequency.setValueAtTime(3000, time);
+            lpf.Q.value = 0.5;
+
+            const detunes = [-12, -5, 0, 5, 12]; // セント単位
+            detunes.forEach(dt => {
+                const osc = c.createOscillator();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(freq, time);
+                osc.detune.setValueAtTime(dt, time);
+                const oscGain = c.createGain();
+                oscGain.gain.value = vol * 0.2;
+                osc.connect(oscGain).connect(lpf);
+                osc.start(time);
+                osc.stop(time + totalDur + 0.01);
+            });
+
+            // ストリングスはゆっくり立ち上がり
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol * 0.7, time + Math.max(a, 0.08));
+            gainNode.gain.linearRampToValueAtTime(vol * s * 0.7, time + Math.max(a, 0.08) + d);
+            gainNode.gain.setValueAtTime(vol * s * 0.7, time + duration);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
+
+            lpf.connect(gainNode).connect(bus);
+            break;
+        }
+        case 'brass': {
+            // Sawtooth + バンドパスフィルタ（ブラスセクション風）
+            const osc = c.createOscillator();
+            const osc2 = c.createOscillator();
+            const bpf = c.createBiquadFilter();
+            const gainNode = c.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, time);
+            osc2.type = 'sawtooth';
+            osc2.frequency.setValueAtTime(freq * 1.002, time); // わずかにデチューン
+
+            bpf.type = 'lowpass';
+            // フィルタースウィープ（ブラスのアタック感）
+            bpf.frequency.setValueAtTime(300, time);
+            bpf.frequency.linearRampToValueAtTime(freq * 4, time + Math.max(a, 0.06));
+            bpf.frequency.linearRampToValueAtTime(freq * 2, time + Math.max(a, 0.06) + d);
+            bpf.Q.value = 1.5;
+
+            const oscGain1 = c.createGain();
+            oscGain1.gain.value = 0.35;
+            const oscGain2 = c.createGain();
+            oscGain2.gain.value = 0.25;
+
+            osc.connect(oscGain1).connect(bpf);
+            osc2.connect(oscGain2).connect(bpf);
+
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol * 0.7, time + Math.max(a, 0.03));
+            gainNode.gain.linearRampToValueAtTime(vol * s * 0.6, time + Math.max(a, 0.03) + d);
+            gainNode.gain.setValueAtTime(vol * s * 0.6, time + duration);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
+
+            bpf.connect(gainNode).connect(bus);
+            osc.start(time);
+            osc2.start(time);
+            osc.stop(time + totalDur + 0.01);
+            osc2.stop(time + totalDur + 0.01);
+            break;
+        }
+        case 'bell': {
+            // FM合成ベル/マリンバ（非整数比でメタリックな音色）
+            const modulator = c.createOscillator();
+            const modGain = c.createGain();
+            const carrier = c.createOscillator();
+            const gainNode = c.createGain();
+
+            // 非整数比 = メタリック/ベルっぽい音
+            modulator.type = 'sine';
+            modulator.frequency.setValueAtTime(freq * 3.5, time);
+            modGain.gain.setValueAtTime(freq * 2.0, time);
+            modGain.gain.exponentialRampToValueAtTime(freq * 0.01, time + duration * 1.5);
+
+            carrier.type = 'sine';
+            carrier.frequency.setValueAtTime(freq, time);
+
+            modulator.connect(modGain);
+            modGain.connect(carrier.frequency);
+
+            // ベルは瞬時アタック + 長い減衰
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol * 0.6, time + 0.002);
+            gainNode.gain.exponentialRampToValueAtTime(vol * 0.1, time + duration * 0.5);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, time + totalDur);
+
+            carrier.connect(gainNode).connect(bus);
+            modulator.start(time);
+            carrier.start(time);
+            modulator.stop(time + totalDur + 0.01);
+            carrier.stop(time + totalDur + 0.01);
+            break;
+        }
+        default: {
+            // 基本波形（sine/square/sawtooth/triangle）
+            const osc = c.createOscillator();
+            const gainNode = c.createGain();
+            osc.type = inst;
+            osc.frequency.setValueAtTime(freq, time);
+
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol, time + a);
+            gainNode.gain.linearRampToValueAtTime(vol * s, time + a + d);
+            gainNode.gain.setValueAtTime(vol * s, time + duration);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
+
+            osc.connect(gainNode).connect(bus);
+            osc.start(time);
+            osc.stop(time + totalDur + 0.01);
+            break;
+        }
+    }
+}
+
+// メロディ音の合成
+function playMelodyNote(midi, time, duration) {
+    const c = getCtx();
+    const cfg = getMelodyConfig();
+    synthesizeNote(c, melodyBus, midi, time, duration, cfg);
 }
 
 // スケール変更ハンドラ
@@ -1076,6 +1255,38 @@ const MELODY_PRESETS = {
     },
 };
 
+// 追加メロディプリセット
+MELODY_PRESETS.pop_hook = function () {
+    const cfg = getMelodyConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const melody = [0, 4, 7, 12, 11, 7, 4, 0, 2, 5, 9, 12, 11, 9, 5, 2];
+    for (let i = 0; i < STEPS; i++) melodyNotes[i] = base + melody[i];
+};
+MELODY_PRESETS.funk_lick = function () {
+    const cfg = getMelodyConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const melody = [0, null, 3, 5, 7, null, 5, 3, 0, null, 12, 10, 7, 5, 3, null];
+    for (let i = 0; i < STEPS; i++) melodyNotes[i] = melody[i] != null ? base + melody[i] : null;
+};
+MELODY_PRESETS.ambient_drift = function () {
+    const cfg = getMelodyConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const melody = [0, null, null, 7, null, null, 4, null, null, null, 12, null, null, 9, null, null];
+    for (let i = 0; i < STEPS; i++) melodyNotes[i] = melody[i] != null ? base + melody[i] : null;
+};
+MELODY_PRESETS.dance_hook = function () {
+    const cfg = getMelodyConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const melody = [0, 0, 12, 12, 7, 7, 5, null, 0, 0, 12, 12, 10, 10, 7, null];
+    for (let i = 0; i < STEPS; i++) melodyNotes[i] = melody[i] != null ? base + melody[i] : null;
+};
+MELODY_PRESETS.cinematic = function () {
+    const cfg = getMelodyConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const melody = [0, null, 7, null, 12, null, 11, null, 9, null, 7, null, 4, null, 0, null];
+    for (let i = 0; i < STEPS; i++) melodyNotes[i] = melody[i] != null ? base + melody[i] : null;
+};
+
 function loadMelodyPreset(name) {
     if (!name || !MELODY_PRESETS[name]) return;
     MELODY_PRESETS[name]();
@@ -1150,6 +1361,7 @@ let bassCanvas, bassCtx;
 function getBassConfig() {
     return {
         waveform: document.getElementById('bassWaveform').value,
+        instrument: document.getElementById('bassWaveform').value,
         scale: document.getElementById('bassScale').value,
         key: parseInt(document.getElementById('bassKey').value),
         octave: parseInt(document.getElementById('bassOctave').value),
@@ -1277,25 +1489,7 @@ function onBassCanvasClick(e) {
 function playBassNote(midi, time, duration) {
     const c = getCtx();
     const cfg = getBassConfig();
-    const freq = midiToFreq(midi);
-    const vol = 0.5;
-    const osc = c.createOscillator();
-    const gainNode = c.createGain();
-    osc.type = cfg.waveform;
-    osc.frequency.setValueAtTime(freq, time);
-    const a = cfg.adsr.a;
-    const d = cfg.adsr.d;
-    const s = cfg.adsr.s;
-    const r = cfg.adsr.r;
-    const totalDur = duration + r;
-    gainNode.gain.setValueAtTime(0, time);
-    gainNode.gain.linearRampToValueAtTime(vol, time + a);
-    gainNode.gain.linearRampToValueAtTime(vol * s, time + a + d);
-    gainNode.gain.setValueAtTime(vol * s, time + duration);
-    gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
-    osc.connect(gainNode).connect(bassBus);
-    osc.start(time);
-    osc.stop(time + totalDur + 0.01);
+    synthesizeNote(c, bassBus, midi, time, duration, cfg);
 }
 
 function onBassScaleChange() {
@@ -1382,6 +1576,26 @@ const BASS_PRESETS = {
             bassNotes[i] = base;
         }
     },
+};
+
+// 追加ベースプリセット
+BASS_PRESETS.disco_octave = function () {
+    const cfg = getBassConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const pat = [0, null, 0, 12, null, 0, 0, 12, 0, null, 0, 12, null, 0, 0, null];
+    for (let i = 0; i < STEPS; i++) bassNotes[i] = pat[i] != null ? base + pat[i] : null;
+};
+BASS_PRESETS.deep_sub = function () {
+    const cfg = getBassConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const pat = [0, null, null, null, 0, null, null, 5, null, null, 0, null, null, null, 7, null];
+    for (let i = 0; i < STEPS; i++) bassNotes[i] = pat[i] != null ? base + pat[i] : null;
+};
+BASS_PRESETS.driving = function () {
+    const cfg = getBassConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const pat = [0, 0, 0, 0, 5, 5, 5, 5, 7, 7, 7, 7, 5, 5, 3, 3];
+    for (let i = 0; i < STEPS; i++) bassNotes[i] = base + pat[i];
 };
 
 function loadBassPreset(name) {
@@ -1654,17 +1868,8 @@ function scheduleOfflineDrum(c, bus, partId, time, vol) {
 }
 
 function scheduleOfflineSynth(c, bus, midi, time, duration, cfg) {
-    const freq = midiToFreq(midi); const vol = 0.5;
-    const osc = c.createOscillator(); const gainNode = c.createGain();
-    osc.type = cfg.waveform; osc.frequency.setValueAtTime(freq, time);
-    const a = cfg.adsr.a; const d = cfg.adsr.d; const s = cfg.adsr.s; const r = cfg.adsr.r;
-    const totalDur = duration + r;
-    gainNode.gain.setValueAtTime(0, time);
-    gainNode.gain.linearRampToValueAtTime(vol, time + a);
-    gainNode.gain.linearRampToValueAtTime(vol * s, time + a + d);
-    gainNode.gain.setValueAtTime(vol * s, time + duration);
-    gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
-    osc.connect(gainNode).connect(bus); osc.start(time); osc.stop(time + totalDur + 0.01);
+    // 楽器合成エンジンを共有使用（オンライン/オフライン両対応）
+    synthesizeNote(c, bus, midi, time, duration, cfg);
 }
 
 function encodeWAV(audioBuffer) {
