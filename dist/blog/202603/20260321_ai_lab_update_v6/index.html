@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ 自社モデル戦争の幕開け — LAB第6回レポート：Cursor Composer 2・Gemini CLI有料化・GPT-5.4 mini/nano | Gravity Portal</title>
+    <meta name="description" content="Cursorが自社LLM「Composer 2」を発表し100万DAU突破。Gemini CLIは3/25から無料枠縮小、GPT-5.4 mini/nanoの軽量モデルが登場。AIシークレット漏洩34%増加、Anthropic vs Pentagonの倫理衝突。OSSではOpenHands Planning Agent搭載、Cline 500万DL突破。「どのモデルを使うか」から「どのエコシステムに入るか」に問いが変わった第5回LABの総まとめ。">
+    <!-- OGP -->
+    <meta property="og:title" content="⚡ 自社モデル戦争の幕開け — LAB第6回レポート：Cursor Composer 2・Gemini CLI有料化・GPT-5.4 mini/nano">
+    <meta property="og:description" content="Cursorが自社LLM「Composer 2」を発表し100万DAU突破。Gemini CLIは3/25から無料枠縮小、GPT-5.4 mini/nanoの軽量モデルが登場。AIシークレット漏洩34%増加、Anthropic vs Pentagonの倫理衝突。OSSではOpenHands Planning Agent搭載、Cline 500万DL突破。「どのモデルを使うか」から「どのエコシステムに入るか」に問いが変わった第5回LABの総まとめ。">
+    <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/ai_lab_update_v6.webp">
+    <meta property="og:url" content="https://www.antigravity-portal.com/blog/202603/20260321_ai_lab_update_v6/">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="⚡ 自社モデル戦争の幕開け — LAB第6回レポート：Cursor Composer 2・Gemini CLI有料化・GPT-5.4 mini/nano">
+    <meta name="twitter:description" content="Cursorが自社LLM「Composer 2」を発表し100万DAU突破。Gemini CLIは3/25から無料枠縮小、GPT-5.4 mini/nanoの軽量モデルが登場。AIシークレット漏洩34%増加、Anthropic vs Pentagonの倫理衝突。OSSではOpenHands Planning Agent搭載、Cline 500万DL突破。「どのモデルを使うか」から「どのエコシステムに入るか」に問いが変わった第5回LABの総まとめ。">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/ai_lab_update_v6.webp">
+    <link rel="stylesheet" href="../../styles.css?v=1774229226893">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://adm.shinobi.jp">
+    <link rel="preconnect" href="https://cnobi.jp">
+    <link rel="dns-prefetch" href="https://adm.shinobi.jp">
+    <link rel="dns-prefetch" href="https://cnobi.jp">
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
+</head>
+<body>
+    <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
+    <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
+    <div class="article-page">
+        <nav class="breadcrumb">
+            <a href="https://antigravity-portal.com/">トップ</a>
+            <span class="separator">/</span>
+            <a href="../../">ブログ</a>
+            <span class="separator">/</span>
+            <span class="current">⚡ 自社モデル戦争の幕開け — LAB第6回レポート：Cursor Composer 2・Gemini CLI有料化・GPT-5.4 mini/nano</span>
+        </nav>
+
+        <article class="article">
+            <header class="article-header">
+                <div class="meta">
+                    <time class="date">2026-03-21</time>
+                    
+                    <div class="tags">
+                        <a href="../../tag/AI/" class="tag">AI</a><a href="../../tag/%E9%96%8B%E7%99%BA/" class="tag">開発</a><a href="../../tag/LAB/" class="tag">LAB</a>
+                    </div>
+                </div>
+                <h1 class="title">⚡ 自社モデル戦争の幕開け — LAB第6回レポート：Cursor Composer 2・Gemini CLI有料化・GPT-5.4 mini/nano</h1>
+            </header>
+
+            <div class="content">
+                <img src="../../images/ai_lab_update_v6.webp" alt="LAB第6回レポート — 自社モデル戦争と無料枠の終焉" style="width:100%;border-radius:12px;margin-bottom:1.5rem">
+<p>LABセクション第5回を公開しました。今回のテーマは<strong>「自社モデル戦争と無料枠の終焉」</strong>。AI開発ツール、OSSエージェント、業界トレンドの3つの視点から、2026年3月16日〜21日の動きをまとめます。</p>
+
+<h2>⚡ 今週の3大ニュース</h2>
+<p><strong>① Cursor Composer 2</strong> — Anysphereが自社コーディングモデルを発表。IDEメーカーが独自LLMを持つ時代が始まった。100万DAU突破、$50B評価額の交渉が進行中。</p>
+<p><strong>② Gemini CLI有料化</strong> — 3月25日から無料ユーザーはFlashモデルのみに。Proモデルは有料サブスク必須。「無料最強」の地位に終止符。</p>
+<p><strong>③ GPT-5.4 mini/nano</strong> — 3月18日発表の軽量モデル。エージェントの裏側処理を劇的に効率化し、OSSツールのBYOK運用で月$15-20の本格AI開発が可能に。</p>
+
+<h2>🛠️ AI開発ツール比較 — 5ツールの最新動向</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>ツール</th><th>主なアップデート</th><th>課題</th></tr></thead>
+<tbody>
+<tr><td><strong>Antigravity</strong></td><td>CLI有料化（3/25〜）、Mac版Desktop Intelligence開発中</td><td>無料枠縮小で「無料最強」の看板を下ろす</td></tr>
+<tr><td><strong>Claude Code</strong></td><td>auto-plan/auto-memory/voice mode、Channels（Discord/Telegram）</td><td>3/17パフォーマンス低下報告、シークレット漏洩2倍</td></tr>
+<tr><td><strong>Cursor</strong></td><td>Composer 2自社モデル、100万DAU、JetBrains ACP対応</td><td>ロックイン懸念、コスト問題継続</td></tr>
+<tr><td><strong>Copilot</strong></td><td>GPT-5.3-Codex LTS、セマンティック検索、Agent 50%高速化</td><td>Student Plan制限、愛され率9%</td></tr>
+<tr><td><strong>Windsurf</strong></td><td>OpenAI Astral買収の影響</td><td>差別化がさらに困難に</td></tr>
+</tbody>
+</table></div>
+<p>詳細は <a href='/lab/ai-tools/v5/'>AI開発ツール比較 第5回</a> をご覧ください。</p>
+
+<h2>👤 OSSエージェント — 進化する自律性</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>プロジェクト</th><th>Stars</th><th>注目アップデート</th></tr></thead>
+<tbody>
+<tr><td><strong>OpenHands</strong></td><td>~69,400</td><td>Planning Agent搭載、Task Listタブ、Claude Opus 4.6対応</td></tr>
+<tr><td><strong>Cline</strong></td><td>~59,200</td><td>500万インストール突破、CoreWeave W&B Inference統合</td></tr>
+<tr><td><strong>Roo Code</strong></td><td>~22,800</td><td>v3.51.0 GPT-5.4/Gemini 3.1 Pro対応、スラッシュコマンド</td></tr>
+</tbody>
+</table></div>
+<p>新規トピックとして<strong>GPT-5.4 mini/nano</strong>（軽量モデルでBYOKコスト激減）と<strong>Claude Code Channels</strong>（Discord/Telegram統合の商用ツール）を取り上げました。</p>
+<p>詳細は <a href='/lab/ai-developers/v5/'>AI開発者ピックアップ 第5回</a> をご覧ください。</p>
+
+<h2>📊 6つのトレンド</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>#</th><th>トレンド</th><th>インパクト</th></tr></thead>
+<tbody>
+<tr><td>01</td><td><strong>自社モデル戦争</strong></td><td>Cursor Composer 2で「IDE×自社LLM」時代。BYOKの自由 vs 統合体験</td></tr>
+<tr><td>02</td><td><strong>Gemini CLI有料化</strong></td><td>3/25から無料枠縮小。無料ユーザーの流出リスク</td></tr>
+<tr><td>03</td><td><strong>GPT-5.4 mini/nano</strong></td><td>軽量モデル量産化。エージェントの裏側処理で費用激減</td></tr>
+<tr><td>04</td><td><strong>AIシークレット漏洩</strong></td><td>34%増加。AI生成コードのpush前チェックが必須に</td></tr>
+<tr><td>05</td><td><strong>Anthropic vs Pentagon</strong></td><td>AI倫理と国防の正面衝突。マルチツール戦略の重要性</td></tr>
+<tr><td>06</td><td><strong>マルチモーダルAI $3.43B</strong></td><td>テキスト・音声・画像・動画の統合処理が主流に</td></tr>
+</tbody>
+</table></div>
+<p>詳細は <a href='/lab/ai-trends/v5/'>AI開発トレンド 第5回</a> をご覧ください。</p>
+
+<h2>🔐 セキュリティ警告：AI生成コードのシークレット漏洩</h2>
+<p>GitHub公開コミットでのシークレット漏洩が前年比<strong>34%増加</strong>。Claude Codeで共同著作されたコミットはベースラインの<strong>2倍のリスク</strong>。対策としてプレコミットフック、.gitignore/.env分離、GitHub Push Protectionの有効化を強く推奨します。</p>
+
+<h2>🎯 今週の結論</h2>
+<p>「どのモデルを使うか」から<strong>「どのエコシステムに入るか」</strong>に問いが変わった1週間。</p>
+<ul>
+<li><strong>コスパ最強</strong>: Claude Code $20/月（auto-plan + voice mode + サーチャージなし）</li>
+<li><strong>統合体験重視</strong>: Cursor Pro + Composer 2（自社モデルの最適化体験）</li>
+<li><strong>無料で最大限</strong>: Copilot Free → OSS + GPT-5.4 mini BYOK</li>
+<li><strong>エコシステム最広</strong>: Antigravity / Gemini（Workspace + Apple + Samsung）</li>
+</ul>
+<p>当サイトは引き続きAntigravityで開発中。次回LAB第6回もお楽しみに！</p>
+
+<p><strong>LAB第5回の全ページ:</strong></p>
+<ul>
+<li><a href='/lab/ai-tools/v5/'>🛠️ AI開発ツール比較 第5回</a></li>
+<li><a href='/lab/ai-developers/v5/'>👤 AI開発者ピックアップ 第5回</a></li>
+<li><a href='/lab/ai-trends/v5/'>📊 AI開発トレンド 第5回</a></li>
+</ul>
+            </div>
+
+            
+            
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+            
+        <div class="amazon-ads-section">
+            <h3 class="amazon-ads-heading">💻 技術書・開発に役立つ本</h3>
+            <div class="amazon-ads-grid">
+                
+        <a href="https://www.amazon.co.jp/s?k=AI%20%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%20%E5%85%A5%E9%96%80%20Python&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">🤖</span>
+            <span class="amazon-ad-title">AIプログラミング入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Next.js%20React%20TypeScript%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">📘</span>
+            <span class="amazon-ad-title">Next.js実践ガイド</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Web%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%20%E9%96%8B%E7%99%BA%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">💻</span>
+            <span class="amazon-ad-title">Webアプリ開発入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+            </div>
+            <div class="amazon-search-box">
+                <p class="amazon-search-label">🔍 <span class="amazon-logo-text">Amazon</span>で探す</p>
+                <form onsubmit="window.open('https://www.amazon.co.jp/s?k='+encodeURIComponent(this.q.value)+'&tag=gravity063-22','_blank');return false;" class="amazon-search-form">
+                    <input type="text" name="q" placeholder="キーワードを入力..." class="amazon-search-input" />
+                    <button type="submit" class="amazon-search-btn">検索</button>
+                </form>
+            </div>
+            <p class="amazon-ads-note">※ 上記リンクはAmazonアソシエイトリンクです</p>
+            <p class="amazon-ads-note">Amazonのアソシエイトとして、Gravity Portalは適格販売により収入を得ています。</p>
+        </div>
+        </article>
+
+        <nav class="post-nav">
+            <div class="post-nav-prev">
+            <a href="../../202603/20260320_uber_daily/" class="post-nav-link">
+                <span class="post-nav-label">← 前の記事</span>
+                <span class="post-nav-title">🚴 Uber配達日報 ☀️ 20260320 配達日和</span>
+            </a></div>
+            <div class="post-nav-next">
+            <a href="../../202603/20260321_uber_daily/" class="post-nav-link">
+                <span class="post-nav-label">次の記事 →</span>
+                <span class="post-nav-title">🚴 Uber配達日報 ☀️ 20260321 配達日和</span>
+            </a></div>
+        </nav>
+
+        <nav class="back-nav">
+            <a href="https://antigravity-portal.com/" class="back-link">🏠 TOPに戻る</a>
+            <a href="../../" class="back-link">← 記事一覧に戻る</a>
+        </nav>
+    </div>
+    
+    <script>
+    (function(){
+        var AD_ID = '06dfeeba49e20207a86cd5f651221d50';
+        var SDK_URL = 'https://adm.shinobi.jp/st/t.js';
+
+        // 課金チェック → 課金済みなら広告を全て非表示にしてSDKも読み込まない
+        function hideAllAds(){
+            document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                slot.style.display = 'none';
+            });
+        }
+
+        function initAds(){
+            // 1. admaxads配列にスロットを登録
+            if(!window.admaxads) window.admaxads = [];
+            document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
+                window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
+            });
+
+            // 2. SDKをロード（body末尾で1回だけ実行）
+            var s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.charset = 'utf-8';
+            s.src = SDK_URL;
+            s.async = true;
+            document.body.appendChild(s);
+
+            // 3. 広告が返らなかったスロットを非表示に（遅延チェック）
+            function checkAdSlots(){
+                document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                    var ad = slot.querySelector('.admax-switch');
+                    if(ad && ad.children.length > 0){
+                        slot.classList.add('ad-loaded');
+                    } else {
+                        slot.style.display = 'none';
+                    }
+                });
+            }
+            setTimeout(checkAdSlots, 5000);
+            setTimeout(checkAdSlots, 10000);
+        }
+
+        // 課金状態をチェック（同一ドメインのAPI）
+        fetch('/api/subscription-status')
+            .then(function(res){ return res.json(); })
+            .then(function(data){
+                if(data && data.isPaid){
+                    hideAllAds();
+                } else {
+                    initAds();
+                }
+            })
+            .catch(function(){
+                // エラー時は広告を表示（未課金扱い）
+                initAds();
+            });
+    })()
+    </script>
+</body>
+</html>

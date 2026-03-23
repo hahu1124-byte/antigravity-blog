@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発者ピックアップ 第5回 | LAB | Gravity Portal</title>
+    <meta name="description" content="AI開発者ピックアップ第5回。OpenHands Planning Agent、Cline 500万DL、Roo Code v3.51.0、GPT-5.4 mini/nano、Claude Code Channelsの最新動向。">
+    <meta property="og:title" content="AI開発者ピックアップ 第5回 — 進化する自律性">
+    <meta property="og:description" content="OSSコーディングエージェントの最新動向。OpenHands Planning Agent、Cline 500万DL突破、GPT-5.4 mini/nanoの衝撃。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-developers/v5/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-developers.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-developers/v5/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>(function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()</script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">👤 AI開発者ピックアップ 第5回</h1>
+    </header>
+    <main class="lab-content">
+        <section class="lab-hero">
+            <div class="lab-hero-icon">👤</div>
+            <h1>OSSエージェント — 進化する自律性と新たな統合 第5回</h1>
+            <p><a href="/lab/ai-developers/v4/" style="color:inherit;text-decoration:underline">第4回</a>ではOSSの「低コスト化インパクト」を追いました。<br>
+                第5回のテーマは<strong>「自律性の進化」</strong>。<br>
+                OpenHandsがPlanning Agentを搭載し、Clineは500万インストール突破、<br>
+                Roo CodeはGPT-5.4対応で最新モデルに即座に追従。<br><br>
+                一方、商用側ではGPT-5.4 mini/nanoの軽量モデルが登場し、<br>
+                Claude Code ChannelsがDiscord/Telegram統合で新境地を開く。<br>
+                OSSと商用の境界が曖昧になる——そんな第5回をお届けします。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月21日更新</span>
+                <span>🔧 7プロジェクト＋新モデル</span>
+                <span>📝 <a href="/lab/ai-developers/v4/" style="color:inherit;text-decoration:underline">第4回（3/16）はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- ランキング -->
+        <section class="lab-section">
+            <h2>⭐ OSSコーディングエージェント人気ランキング（更新）</h2>
+            <p>2026年3月21日時点のGitHub Stars比較。第4回からの変化に注目。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>順位</th><th>プロジェクト</th><th>⭐ Stars</th><th>前回差</th><th>ライセンス</th><th>得意分野</th></tr></thead>
+                    <tbody>
+                        <tr><td>🥇 1位</td><td class="tool-name">OpenHands</td><td>~69,400</td><td>📈 +400</td><td>MIT</td><td>GitHub Issue自動修正</td></tr>
+                        <tr><td>🥈 2位</td><td class="tool-name">Cline</td><td>~59,200</td><td>📈 +200</td><td>Apache-2.0</td><td>精密な段階的作業</td></tr>
+                        <tr><td>🥉 3位</td><td class="tool-name">Roo Code</td><td>~22,800</td><td>📈 +300（安定）</td><td>Apache-2.0</td><td>高速・大規模タスク</td></tr>
+                        <tr><td>4位</td><td class="tool-name">Aider</td><td>安定</td><td>→</td><td>Apache-2.0</td><td>個人開発・安定性</td></tr>
+                        <tr><td>5位</td><td class="tool-name">Continue.dev</td><td>安定</td><td>→</td><td>Apache-2.0</td><td>プライバシー・オフライン</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>Top 3は引き続き安定成長。Clineが500万インストール突破で実利用面でも圧倒的存在感。</p>
+        </section>
+
+        <!-- OSS選び方ガイド -->
+        <section class="lab-section">
+            <h2>🧭 OSSコーディングエージェント 選び方ガイド（更新）</h2>
+            <p>GPT-5.4 mini/nanoの登場で「超軽量モデル」カテゴリが新規追加。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>用途</th><th>おすすめ</th><th>理由</th></tr></thead>
+                    <tbody>
+                        <tr><td>GitHub Issue自動修正</td><td class="tool-name">OpenHands</td><td>SWE-Bench 50%突破。Planning Agent搭載で精度向上</td></tr>
+                        <tr><td>精密な段階的コーディング</td><td class="tool-name">Cline</td><td>500万DL。Plan and Actで暴走防止。CoreWeave統合で性能UP</td></tr>
+                        <tr><td>大規模・高速タスク</td><td class="tool-name">Roo Code</td><td>5モード分離＋GPT-5.4/Gemini 3.1 Pro最新モデル対応</td></tr>
+                        <tr><td>🆕 超軽量・低レイテンシ</td><td class="tool-name">Cline + GPT-5.4 mini</td><td>サブエージェントの裏側用途。高速応答でコスト最小化</td></tr>
+                        <tr><td>コスト最優先</td><td class="tool-name">Cline + DeepSeek V4</td><td>DeepSeek V4のBYOK利用でAPI費用を大幅削減</td></tr>
+                        <tr><td>フルPC自動化</td><td class="tool-name">OpenClaw ⚠️</td><td>革新的だがセキュリティリスクに要注意</td></tr>
+                        <tr><td>プライバシー最優先</td><td class="tool-name">Cline / Continue.dev</td><td>ローカル完結。コードがサーバーに送信されない</td></tr>
+                        <tr><td>安定した日常利用</td><td class="tool-name">Aider</td><td>派手さはないが確実に動く。Git自動コミットが便利</td></tr>
+                        <tr><td>エンタープライズ</td><td class="tool-name">OpenHands / Cline</td><td>セキュリティ・スケーラビリティ・コンプライアンス対応</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 注目プロジェクト詳細 -->
+        <section class="lab-section">
+            <h2>🔍 注目プロジェクト詳細分析</h2>
+
+            <!-- GPT-5.4 mini/nano 新規 -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">⚡</div>
+                    <div class="dev-info">
+                        <h3>GPT-5.4 mini / nano 🆕</h3>
+                        <div class="dev-role">軽量高速モデル — 3/18発表</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 OSSエコシステムへのインパクト</h3>
+                    <p>OpenAIが発表した<strong>GPT-5.4 mini/nano</strong>は、OSSエージェントの「裏側」を変える軽量モデルです。</p>
+                    <ul>
+                        <li><strong>GPT-5.4 mini</strong> — API/Codex/ChatGPTで利用可能。コーディングとサブエージェントタスクに最適化。高速応答で大量ワークロード処理</li>
+                        <li><strong>GPT-5.4 nano</strong> — API限定のさらに軽量なモデル。レイテンシ最小化でリアルタイム応答に特化</li>
+                        <li><strong>OSSツールのBYOKで利用可能</strong> — Cline/Roo Code/Aider等でBYOKモデルとして選択可能。「重いタスクはOpus、軽いタスクはmini/nano」の使い分けが現実に</li>
+                        <li><strong>コスト効率の革命</strong> — 大規模モデルの数分の1のトークン単価。エージェントの内部ループ（ファイル検索、パターンマッチ等）に最適</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声</h3>
+                    <ul>
+                        <li>✅「Roo CodeのArchitectモードでmini、Codeモードでnanoを使い分けたら応答速度が3倍に」</li>
+                        <li>✅「ClineのBYOKでminiを選んだら、月のAPI費用が$15以下。Cursor Proより安い」</li>
+                        <li>⚠️「nanoは小さなタスクには最高だが、複雑なリファクタリングには力不足」</li>
+                        <li>⚠️「モデル選択が増えすぎて、用途別の最適モデルが分かりにくい」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <span class="badge badge-hot">🔥 軽量革命</span>
+                        <span class="badge badge-type">API / BYOK</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Claude Code Channels 新規 -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">💬</div>
+                    <div class="dev-info">
+                        <h3>Claude Code Channels 🆕</h3>
+                        <div class="dev-role">Discord/Telegram統合 — 商用ツールのOSS的アプローチ</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 なぜ注目？</h3>
+                    <p>AnthropicがClaude Codeの<strong>Discord/Telegram統合</strong>を開始。OSSのエージェントフレームワーク（Slack bot形式）に近い使い方を商用ツールとして提供。</p>
+                    <ul>
+                        <li><strong>メッセージングアプリからClaude Codeに指示</strong> — IDEを開かずにDiscord/TelegramからClaude Codeにタスクを割り当て。チーム内コミュニケーションの延長でコーディングを依頼</li>
+                        <li><strong>OSS的なワークフロー</strong> — OpenHands/Cline等のOSSエージェントが提供していた「Slack/GitHub連携」に近い機能を、商用品質で提供</li>
+                        <li><strong>チーム開発ワークフローとの統合</strong> — 「このissue修正して」とDiscordで指示→Claude Codeが自動的にPR作成。チームメンバーはIDEを開く必要なし</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声</h3>
+                    <ul>
+                        <li>✅「Discordで指示出すだけでPRが上がってくるの最高」</li>
+                        <li>✅「OSSのSlack botより安定してる。商用品質の安心感」</li>
+                        <li>⚠️「$20/月のPro枠を使うので、ヘビーに使うとレート制限に引っかかる」</li>
+                        <li>⚠️「OSSの自由度（カスタムプロンプト等）には及ばない」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <span class="badge badge-paid">商用</span>
+                        <span class="badge badge-type">Discord/Telegram</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OpenHands -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🤲</div>
+                    <div class="dev-info">
+                        <h3>OpenHands</h3>
+                        <div class="dev-role">クラウドコーディングエージェントプラットフォーム — ⭐ 69,400</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 第5回アップデート</h3>
+                    <p>Planning Agent搭載で「考えてから動く」エージェントに進化。Claude Opus 4.6やGemini 3.1 Pro等の最新モデルにも対応拡大。</p>
+                    <ul>
+                        <li><strong>Planning Agent搭載 🔥</strong> — タスクを受け取ると、まず計画を立ててから実行するPlanning Agentを統合。Claude Codeのauto-planに近い「計画→実行」フローをOSSで実現</li>
+                        <li><strong>Task Listタブ追加</strong> — エージェントタスクのリアルタイムステータスを専用タブで確認可能。複数タスクの並行管理が容易に</li>
+                        <li><strong>スラッシュコマンドメニュー</strong> — チャット入力にスラッシュコマンドメニューを導入。利用可能なエージェントスキルやコマンドに素早くアクセス</li>
+                        <li><strong>最新モデル対応拡大</strong> — Claude Opus 4.6、GLM-4.7、Claude-Sonnet-4-6、GLM-5、Kimi-K2.5、Qwen3-Coder-Next、Gemini-3.1-Pro-Preview</li>
+                        <li><strong>リポジトリ接続の改善</strong> — 会話中にGitリポジトリをアタッチ・変更可能に。プロジェクト間の切り替えがシームレスに</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声</h3>
+                    <ul>
+                        <li>✅「Planning Agentが入ってから成功率が明らかに上がった。闇雲に手を動かさなくなった」</li>
+                        <li>✅「Task Listタブで複数issueの進捗が一目瞭然。CI/CDとの統合がさらに楽に」</li>
+                        <li>⚠️「Docker環境のセットアップは相変わらず初心者にはハードル高い」</li>
+                        <li>⚠️「Planning Agentの計画が的外れなことがたまにある。計画のレビューは必須」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <a href="https://github.com/All-Hands-AI/OpenHands" target="_blank" rel="noopener noreferrer" class="dev-link">🐙 GitHub</a>
+                        <a href="https://openhands.dev/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐 公式</a>
+                        <span class="badge badge-free">MIT License</span>
+                        <span class="badge badge-hot">🔥 Planning Agent</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cline -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🔗</div>
+                    <div class="dev-info">
+                        <h3>Cline</h3>
+                        <div class="dev-role">自律型VSCodeエージェント — ⭐ 59,200 / 500万DL</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 第5回アップデート</h3>
+                    <p>500万インストール突破でOSSエージェントの実利用No.1を証明。CoreWeave W&B Inference統合で大規模タスクの処理能力が向上。</p>
+                    <ul>
+                        <li><strong>500万インストール突破 🔥</strong> — VS Code、JetBrains、Cursor、Windsurfを含むマルチプラットフォームで500万DL。OSSエージェントとして実利用規模でトップ</li>
+                        <li><strong>CoreWeave W&B Inference統合</strong> — 大規模かつ複雑なタスクの処理能力を大幅向上。標準クラウド環境では困難だった規模のタスクに対応</li>
+                        <li><strong>GPT-5.4 mini/nano BYOKで利用可能</strong> — 軽量モデルをサブタスク処理に活用。「重要な判断はOpus、ファイル検索はmini」のハイブリッド運用</li>
+                        <li><strong>MCP Marketplace継続拡大</strong> — エンタープライズのデータソースとドキュメント接続プラグインが増加中</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声</h3>
+                    <ul>
+                        <li>✅「CoreWeave統合後、大規模リファクタリングの速度が2倍に」</li>
+                        <li>✅「GPT-5.4 mini + DeepSeek V4の組み合わせで月$20以下。Cursor Pro不要」</li>
+                        <li>⚠️「APIキー管理が面倒。初心者はセットアップで詰まる（第4回から変わらず）」</li>
+                        <li>⚠️「500万DLの裏で、非アクティブユーザーも多いのでは？という指摘」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <a href="https://github.com/cline/cline" target="_blank" rel="noopener noreferrer" class="dev-link">🐙 GitHub</a>
+                        <a href="https://cline.bot/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐 公式</a>
+                        <span class="badge badge-free">Apache-2.0</span>
+                        <span class="badge badge-hot">🔥 500万DL</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roo Code -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🦘</div>
+                    <div class="dev-info">
+                        <h3>Roo Code</h3>
+                        <div class="dev-role">AIソフトウェアエンジニアリングチーム — ⭐ 22,800</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 第5回アップデート</h3>
+                    <p>v3.51.0でGPT-5.4/GPT-5.3 Chat Latest対応。スラッシュコマンドでスキル呼び出しが高速化。最新モデルへの追従速度でOSSの機動力を証明。</p>
+                    <ul>
+                        <li><strong>v3.51.0: GPT-5.4 / GPT-5.3 Chat Latest対応 🆕</strong> — 最新のOpenAIモデルをBYOKで即座にサポート。モデル追従速度がOSSの大きな強み</li>
+                        <li><strong>Gemini 3.1 Pro対応（v3.50.0）</strong> — Googleの最新モデルも利用可能に。マルチモデル対応でBYOKの選択肢が最大化</li>
+                        <li><strong>スラッシュコマンドでスキル呼び出し</strong> — ワークフロー内の定型操作をスラッシュコマンドで高速化。開発効率がさらに向上</li>
+                        <li><strong>Claude-like CLIフラグ＋認証修正（v3.41.3）</strong> — CLIでの操作性がClaude Codeに近づく改善。認証関連のバグ修正</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声</h3>
+                    <ul>
+                        <li>✅「GPT-5.4対応が出た日に使えたのがRoo Code。OSSの速さは正義」</li>
+                        <li>✅「スラッシュコマンドでスキル呼び出しが超便利。日常の定型タスクが一瞬」</li>
+                        <li>⚠️「Clineからのフォークなので独自性が心配（第4回から変わらず）」</li>
+                        <li>⚠️「JetBrains対応がまだ開発中。VSCode以外のIDE使いには不便」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <a href="https://github.com/RooCodeInc/Roo-Code" target="_blank" rel="noopener noreferrer" class="dev-link">🐙 GitHub</a>
+                        <a href="https://roocode.com/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐 公式</a>
+                        <span class="badge badge-free">Apache-2.0</span>
+                        <span class="badge badge-type">GPT-5.4対応</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Devin -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🧠</div>
+                    <div class="dev-info">
+                        <h3>Devin（Cognition）</h3>
+                        <div class="dev-role">自律型AIソフトウェアエンジニア — 商用</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 第5回アップデート</h3>
+                    <p>OpenAIのAstral買収でCodex陣営のPythonツール強化が鮮明に。Devin/Windsurfにとっては競争激化のシグナル。</p>
+                    <ul>
+                        <li><strong>OpenAI Astral買収の影響</strong> — OpenAIがPythonツールAstralを買収しCodexに統合。開発者ツールの垂直統合がDevinの競合環境をさらに厳しく</li>
+                        <li><strong>Windsurf IDE統合は継続</strong> — 大規模な新機能発表はないが、エンタープライズ信頼性の向上に注力</li>
+                        <li><strong>350+エンタープライズ顧客は安定</strong> — 既存の法人顧客基盤は維持。ただし新規獲得でCursor（100万DAU）に大きく差をつけられている</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声</h3>
+                    <ul>
+                        <li>✅「本当に人間のエンジニアのようにバグを直してくれる（第4回に続き好評）」</li>
+                        <li>⚠️「Cursor 100万DAUの勢いを見ると、Devin/Windsurfの将来が不安」</li>
+                        <li>⚠️「エンタープライズ価格が非公開で、個人開発者には手が出ない」</li>
+                        <li>⚠️「OSSのPlanning Agent（OpenHands）やauto-plan（Claude Code）が追いついてきている」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <a href="https://devin.ai/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐 公式サイト</a>
+                        <span class="badge badge-paid">商用</span>
+                        <span class="badge badge-type">Windsurf統合</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cline vs Roo Code vs OpenHands -->
+        <section class="lab-section">
+            <h2>🆚 Cline vs Roo Code vs OpenHands — 進化する3者比較</h2>
+            <p>第4回の「Cline vs Roo Code vs OpenClaw」に代えて、実用性重視のOSS Top 3を比較。各プロジェクトの最新進化を反映。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>項目</th><th>Cline</th><th>Roo Code</th><th>OpenHands</th></tr></thead>
+                    <tbody>
+                        <tr><td>設計思想</td><td>制御・安全・透明性</td><td>自律性・速度・大規模</td><td>クラウド・自動修正</td></tr>
+                        <tr><td>インストール数</td><td>🔥 500万</td><td>成長中</td><td>クラウドベース</td></tr>
+                        <tr><td>Planning Agent</td><td>Plan and Act</td><td>Orchestratorモード</td><td>✅ Planning Agent🆕</td></tr>
+                        <tr><td>最新モデル追従</td><td>BYOK（即日対応）</td><td>✅ GPT-5.4/Gemini 3.1🆕</td><td>✅ Claude Opus 4.6/Gemini🆕</td></tr>
+                        <tr><td>初心者向き</td><td>✅ 推薦</td><td>やや学習曲線あり</td><td>Docker要（上級者向け）</td></tr>
+                        <tr><td>コスト効率</td><td>✅ BYOK最安</td><td>BYOK対応</td><td>クラウド課金</td></tr>
+                        <tr><td>強み</td><td>500万DL＋CoreWeave</td><td>5モード＋最新モデル即対応</td><td>Planning Agent＋SWE-Bench</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p><strong>結論:</strong> 「安全に確実に」ならCline、「速く大きく」ならRoo Code、「自動修正に特化」ならOpenHands。GPT-5.4 mini/nanoの活用で3者とも低コスト運用が可能に。</p>
+        </section>
+
+        <!-- 前回プロジェクト進展 -->
+        <section class="lab-section">
+            <h2>📈 前回プロジェクトの進展</h2>
+            <div class="tool-card">
+                <div class="tool-card-body">
+                    <h3>🦀 OpenClaw</h3>
+                    <p>第4回で話題になったフルコンピュータアクセス型エージェント。バズは沈静化しつつあるが、セキュリティ議論は継続中。テスト環境限定のユースケースが定着。</p>
+
+                    <h3>💻 OpenCode</h3>
+                    <p>月間500万ユーザーを維持。75以上のモデル対応とベンダーロックインなしの方針は変わらず。GPT-5.4 mini/nanoも即座にサポート。</p>
+
+                    <h3>🔧 Aider</h3>
+                    <p>成熟したOSSとして安定運用。Git自動コミットが個人開発者のメインツールとして定着。GPT-5.4 mini/nano対応でさらにコスト効率改善。</p>
+
+                    <h3>🔌 Continue.dev</h3>
+                    <p>Ollama連携でプライバシー完全保護。VS Code / JetBrains双方対応。ローカル実行ユースケースでの導入が着実に増加。</p>
+
+                    <h3>🎨 Stable Diffusion / FLUX.2</h3>
+                    <p>画像生成分野は引き続き活発。Geminiの音楽生成ツール登場により、マルチモーダル生成AIの競争が激化。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- OSSの課題 -->
+        <section class="lab-section">
+            <h2>⚠️ OSSコーディングエージェントの構造的課題（更新）</h2>
+            <p>第4回の7つの課題に「モデル選択の複雑化」が新規追加。</p>
+            <div class="summary-box">
+                <h3>成長の影に潜む8つの課題</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">🆕 モデル選択の複雑化</div>
+                        <div class="summary-value">mini/nano/V4/Opus</div>
+                        <p>GPT-5.4 mini/nano、DeepSeek V4、Claude Opus等の選択肢が増えすぎて、最適な組み合わせを見つけるのが困難に</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🔄 商用ツールのOSS化</div>
+                        <div class="summary-value">境界線が曖昧に</div>
+                        <p>Claude Code ChannelsやCursor ACP等、商用ツールがOSS的なアプローチを取り始め、OSSの独自価値が問われる</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🔧 セットアップ障壁</div>
+                        <div class="summary-value">依然として高い</div>
+                        <p>APIキー取得・環境構築・Docker設定。「5分で使えるCursor」との差は歴然</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🔄 フォーク分裂</div>
+                        <div class="summary-value">Cline vs Roo Code</div>
+                        <p>両者とも成長中だが、コミュニティ分裂のリスクは変わらず</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🛡️ シークレット漏洩</div>
+                        <div class="summary-value">34%増加</div>
+                        <p>AIコーディングアシスタント利用者のGitHub公開コミットでのシークレット漏洩が34%増加。ツール問わず業界全体の課題</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🏢 商用ツールとの競争</div>
+                        <div class="summary-value">Composer 2の脅威</div>
+                        <p>Cursorが自社モデルを投入。IDE×自社LLMの統合体験ではOSSが太刀打ちしにくい</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 この記事について</h2>
+            <p>本記事は<strong>2026年3月21日時点</strong>の情報です。過去の調査は
+                <a href="/lab/ai-developers/v1/" style="color:var(--accent);text-decoration:underline">第1回（3/9）</a>・
+                <a href="/lab/ai-developers/v2/" style="color:var(--accent);text-decoration:underline">第2回（3/11）</a>・
+                <a href="/lab/ai-developers/v3/" style="color:var(--accent);text-decoration:underline">第3回（3/12）</a>・
+                <a href="/lab/ai-developers/v4/" style="color:var(--accent);text-decoration:underline">第4回（3/16）</a>をご覧ください。</p>
+            <p>GitHub Stars数は調査時点の概数です。当サイトも<strong>AIペアプログラミング（Antigravity）</strong>を活用した個人開発プロジェクトです。</p>
+            <p>開発者の声はX（Twitter）、Reddit、Medium、GitHub Issues、Hacker News等から収集しています。</p>
+        </section>
+    </main>
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-developers/v1/">👤 第1回</a>
+            <a href="/lab/ai-developers/v2/">👤 第2回</a>
+            <a href="/lab/ai-developers/v3/">👤 第3回</a>
+            <a href="/lab/ai-developers/v4/">👤 第4回</a>
+            <a href="/lab/ai-tools/v5/">🛠️ ツール比較 第5回</a>
+            <a href="/lab/ai-trends/v5/">📊 トレンド 第5回</a>
+        </nav>
+    </footer>
+    <script>
+        (function(){var btn=document.getElementById('themeToggle');function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}update();btn.addEventListener('click',function(){var cur=document.documentElement.getAttribute('data-theme');var next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('gp-theme',next)}catch(e){}update()})})()
+    </script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発トレンド 第5回 | LAB | Gravity Portal</title>
+    <meta name="description" content="AI開発トレンド第5回。Cursor自社モデルComposer 2、Gemini CLI有料化、GPT-5.4 mini/nano、Anthropic vs Pentagon。AI業界の構造変化を解説。">
+    <meta property="og:title" content="AI開発トレンド 第5回 — 自社モデル戦争と無料枠の終焉">
+    <meta property="og:description" content="Cursor Composer 2、Gemini CLI有料化、GPT-5.4軽量モデル、AIシークレット漏洩。6つのトレンドで読むAI業界の構造変化。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-trends/v5/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-trends.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-trends/v5/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>(function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()</script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">📊 AI開発トレンド 第5回</h1>
+    </header>
+    <main class="lab-content">
+        <section class="lab-hero">
+            <div class="lab-hero-icon">📊</div>
+            <h1>AI開発トレンド — 自社モデル戦争と無料枠の終焉 第5回</h1>
+            <p><a href="/lab/ai-trends/v4/" style="color:inherit;text-decoration:underline">第4回</a>では「コスト崩壊」を軸にAI業界の構造変化を追いました。<br>
+                第5回は<strong>「自社モデル」と「囲い込み」</strong>がテーマ。<br>
+                Cursorが独自LLM Composer 2を発表、Gemini CLIは無料枠縮小、<br>
+                GPT-5.4 mini/nanoは軽量モデルの量産化、Anthropicは米国防総省と正面衝突。<br><br>
+                「安くて速い」だけでなく「誰のエコシステムに入るか」が問われる——<br>
+                AI開発の第3フェーズが始まった。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月21日更新</span>
+                <span>📊 6つのトレンド</span>
+                <span>📝 <a href="/lab/ai-trends/v4/" style="color:inherit;text-decoration:underline">第4回（3/16）はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- トレンド概要 -->
+        <section class="lab-section">
+            <h2>📊 第5回 6つのトレンド一覧</h2>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>#</th><th>トレンド</th><th>インパクト</th><th>前回からの変化</th></tr></thead>
+                    <tbody>
+                        <tr><td>01</td><td class="tool-name">自社モデル戦争</td><td>Cursor Composer 2で「IDE×自社LLM」時代</td><td>🆕 新トレンド</td></tr>
+                        <tr><td>02</td><td class="tool-name">Gemini CLI有料化</td><td>「無料最強」の終焉、3/25発効</td><td>🆕 新トレンド</td></tr>
+                        <tr><td>03</td><td class="tool-name">GPT-5.4 mini/nano</td><td>軽量モデル量産化、エージェントの裏側処理</td><td>🆕 新トレンド</td></tr>
+                        <tr><td>04</td><td class="tool-name">AIシークレット漏洩</td><td>34%増加、2倍のリスク</td><td>🆕 新トレンド</td></tr>
+                        <tr><td>05</td><td class="tool-name">Anthropic vs Pentagon</td><td>AI倫理 vs 国防の正面衝突</td><td>🆕 新トレンド</td></tr>
+                        <tr><td>06</td><td class="tool-name">マルチモーダルAI$3.43B</td><td>テキスト・音声・画像・動画の統合</td><td>進行中（第4回から継続）</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- #01 自社モデル戦争 -->
+        <section class="lab-section" id="trend-01">
+            <h2>🏭 #01 自社モデル戦争 — IDE×自社LLMの幕開け</h2>
+            <div class="trend-card">
+                <div class="trend-header">
+                    <span class="trend-badge">🏭 構造変化</span>
+                    <span class="trend-date">2026年3月</span>
+                </div>
+                <p>CursorがComposer 2で自社コーディングモデルに参入。「IDE + 最適化LLM」の統合体験で勝負する新時代。</p>
+
+                <h3>何が起きているか</h3>
+                <ul>
+                    <li><strong>Cursor Composer 2</strong> — Anysphereが開発したCursor専用コーディングモデル。Composer 1.5を大幅に上回るベンチマーク。Standard/Fastの2バリアントで差別化</li>
+                    <li><strong>100万DAU・$50B評価額</strong> — 日次100万ユーザーの巨大な実ユーザーベース。調達交渉で$50B（約7.5兆円）の企業評価が議論されている</li>
+                    <li><strong>JetBrains ACP + Marketplace 30+ プラグイン</strong> — Agent Client ProtocolでJetBrains IDEにも展開。Atlassian、Hugging Face等のパートナーエコシステムを構築</li>
+                </ul>
+
+                <h3>なぜ重要か</h3>
+                <p>これまでAI開発ツールは<strong>「どのLLMを使うか」</strong>が選択基準だった。
+                    Composer 2の登場で、<strong>「どのIDEの中のLLMが最強か」</strong>に問いが変わった。
+                    BYOKの自由度と自社モデルの統合体験——このトレードオフがユーザーの選択を分ける。</p>
+
+                <h3>影響を受けるプレイヤー</h3>
+                <div class="table-wrapper">
+                    <table class="compare-table">
+                        <thead><tr><th>プレイヤー</th><th>影響</th></tr></thead>
+                        <tbody>
+                            <tr><td class="tool-name">Cursor</td><td>自社モデルで差別化。ロックインリスクとのトレードオフ</td></tr>
+                            <tr><td class="tool-name">Claude Code</td><td>Claudeモデルが唯一のバックエンド。auto-planで差別化</td></tr>
+                            <tr><td class="tool-name">Antigravity / Gemini</td><td>Geminiモデル＋エコシステム。CLI有料化で方向転換</td></tr>
+                            <tr><td class="tool-name">OSSエージェント</td><td>BYOK（自由に選べる）が最大の強み。Composer 2に太刀打ちしにくい統合体験</td></tr>
+                            <tr><td class="tool-name">Windsurf / Devin</td><td>差別化がさらに困難に。OpenAI Astral買収も競争激化要因</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>当サイトの視点</h3>
+                <p>自社モデルは「最適化」と「ロックイン」の表裏一体。当サイトはAntigravityを使ってBYOK的な開発をしているが、
+                    Composer 2の品質次第では<strong>BYOKの自由よりも統合体験を優先するユーザーが増える</strong>可能性がある。
+                    現時点では「両方試して使い分ける」が最適解。</p>
+            </div>
+        </section>
+
+        <!-- #02 Gemini CLI有料化 -->
+        <section class="lab-section" id="trend-02">
+            <h2>💸 #02 Gemini CLI有料化 — 「無料最強」の終焉</h2>
+            <div class="trend-card">
+                <div class="trend-header">
+                    <span class="trend-badge">💸 コスト変動</span>
+                    <span class="trend-date">2026年3月25日発効</span>
+                </div>
+                <p>3月25日からGemini CLIの無料ユーザーはFlashモデルのみに。Proモデルは有料サブスク必須。</p>
+
+                <h3>何が変わるか</h3>
+                <ul>
+                    <li><strong>無料ユーザー → Flashモデル限定</strong> — Gemini 3.1 Pro等の高性能モデルが利用不可に</li>
+                    <li><strong>ライセンスベースのトラフィック優先制御</strong> — 有料ユーザーが優先される仕組みを導入</li>
+                    <li><strong>Google AI Pro ($19.99/月)</strong> — Pro以上のモデル＋Jules/Gemini Code Assist/CLI/Antigravityの利用上限拡大</li>
+                    <li><strong>Gemini 3.1 Flash-Lite Preview</strong> — 3/3にリリースされた軽量モデル。無料枠の実用性を補完</li>
+                </ul>
+
+                <h3>なぜ重要か</h3>
+                <p>Geminiの「無料で最高性能が使える」は<strong>他ツールにない最大の差別化ポイント</strong>だった。
+                    それを自ら放棄する決断は、Googleの収益化圧力の表れ。
+                    一方で、無料枠の縮小はユーザーをClaude Code/Copilot Freeに押し流す要因になる。</p>
+
+                <h3>代替選択肢の比較</h3>
+                <div class="table-wrapper">
+                    <table class="compare-table">
+                        <thead><tr><th>ツール</th><th>無料で使えるモデル</th><th>実用性</th></tr></thead>
+                        <tbody>
+                            <tr><td class="tool-name">Antigravity</td><td>⚠️ Flash限定（3/25〜）</td><td>⚠️ 大幅低下</td></tr>
+                            <tr><td class="tool-name">Claude Code</td><td>制限付きSonnet</td><td>△ レート制限あり</td></tr>
+                            <tr><td class="tool-name">Copilot Free</td><td>2,000補完 + 50リクエスト</td><td>✅ 最も充実</td></tr>
+                            <tr><td class="tool-name">Cursor Free</td><td>7日間Pro体験のみ</td><td>× 実質なし</td></tr>
+                            <tr><td class="tool-name">OSS + BYOK</td><td>自前APIキー</td><td>✅ 柔軟だがAPI費用</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>当サイトの視点</h3>
+                <p>当サイトは有料プラン(Google AI Pro)で開発を継続するため、直接的な影響は限定的。
+                    しかし<strong>無料ユーザーへの推奨が難しくなった</strong>のは事実。
+                    「まずは無料でAntigravity試して」と言えなくなる——これは布教面で大きなマイナス。</p>
+            </div>
+        </section>
+
+        <!-- #03 GPT-5.4 mini/nano -->
+        <section class="lab-section" id="trend-03">
+            <h2>⚡ #03 GPT-5.4 mini/nano — 軽量モデルの量産時代</h2>
+            <div class="trend-card">
+                <div class="trend-header">
+                    <span class="trend-badge">⚡ モデル革新</span>
+                    <span class="trend-date">2026年3月18日発表</span>
+                </div>
+                <p>OpenAIがGPT-5.4の軽量バリアントmini/nanoを発表。エージェントの「裏側処理」を劇的に効率化。</p>
+
+                <h3>何が起きているか</h3>
+                <ul>
+                    <li><strong>GPT-5.4 mini（3/18）</strong> — API/Codex/ChatGPTで利用可能。コーディング＋サブエージェントタスクに最適化。大規模モデルの数分の1のトークン単価</li>
+                    <li><strong>GPT-5.4 nano（3/18）</strong> — API限定。さらに軽量でレイテンシ最小化。リアルタイム応答に特化</li>
+                    <li><strong>GPT-5.4 Thinking（3/5）</strong> — 思考プロセスの中断・修正が可能。100万トークン対応で複雑なドキュメント処理に効果的</li>
+                    <li><strong>GPT-5.3 Instant（3/16）</strong> — 高速応答バリアント。GPT-5.4シリーズの前段として大量利用ケースに対応</li>
+                    <li><strong>GPT-5.1の退役（3/11）</strong> — 旧モデルの段階的退役が進行。モデル更新サイクルの加速を示す</li>
+                </ul>
+
+                <h3>なぜ重要か</h3>
+                <p>AIエージェントは1つのタスクで何十回もLLMを呼び出す。
+                    その<strong>「裏側の呼び出し」</strong>にmini/nanoを使えば、品質を維持しながらコストとレイテンシを大幅削減できる。
+                    「巨大モデルで考え、軽量モデルで実行する」ハイブリッドアーキテクチャが標準になる。</p>
+
+                <h3>実際の使用例</h3>
+                <div class="table-wrapper">
+                    <table class="compare-table">
+                        <thead><tr><th>タスク</th><th>推奨モデル</th><th>理由</th></tr></thead>
+                        <tbody>
+                            <tr><td>アーキテクチャ設計</td><td>Claude Opus / GPT-5.4</td><td>深い推論が必要</td></tr>
+                            <tr><td>コード生成</td><td>GPT-5.4 / Composer 2</td><td>精度＋コンテキスト理解</td></tr>
+                            <tr><td>ファイル検索・パターンマッチ</td><td>GPT-5.4 mini</td><td>高速・低コスト</td></tr>
+                            <tr><td>テスト生成</td><td>GPT-5.4 mini</td><td>定型タスク・量産向き</td></tr>
+                            <tr><td>リアルタイム補完</td><td>GPT-5.4 nano</td><td>最小レイテンシ</td></tr>
+                            <tr><td>コミットメッセージ生成</td><td>GPT-5.4 nano</td><td>軽量タスク・即時応答</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>当サイトの視点</h3>
+                <p>mini/nanoの登場で「AI開発のOps費用」が劇的に下がる。
+                    特にOSSエージェント（Cline/Roo Code等）のBYOK運用で、<strong>月$15-20で本格的なAI支援開発</strong>が可能に。
+                    「Cursor Proを買わなくてもOSS + miniで十分」という選択肢が現実的になった。</p>
+            </div>
+        </section>
+
+        <!-- #04 AIシークレット漏洩 -->
+        <section class="lab-section" id="trend-04">
+            <h2>🔐 #04 AIシークレット漏洩問題 — 34%増加の衝撃</h2>
+            <div class="trend-card">
+                <div class="trend-header">
+                    <span class="trend-badge">🔐 セキュリティ</span>
+                    <span class="trend-date">2026年3月</span>
+                </div>
+                <p>AIコーディングアシスタントの利用拡大に伴い、GitHub公開コミットでのシークレット漏洩が34%増加。</p>
+
+                <h3>何が起きているか</h3>
+                <ul>
+                    <li><strong>34%増加（年間）</strong> — 2025年のGitHub公開コミットでのシークレット漏洩が前年比34%増加。AIコーディングアシスタントの普及が主因</li>
+                    <li><strong>Claude Code利用の公開コミットは2倍のリスク</strong> — Claude Codeで共同著作されたコミットはベースラインの2倍のシークレット漏洩率</li>
+                    <li><strong>フォント描画攻撃</strong> — AI assistants（Copilot/Gemini）をフォント描画の脆弱性で汚染する新攻撃手法が報告。目に見えない悪意あるコマンドを隠す</li>
+                    <li><strong>AIツール正答率75%上限</strong> — Waterloo大研究でAIコーディングツールの正答率は最良でも約75%。4回に1回は間違える</li>
+                </ul>
+
+                <h3>なぜ重要か</h3>
+                <p>AIが書いたコードを<strong>「AIが書いたから安全」と信じてそのままプッシュ</strong>するユーザーが増えている。
+                    しかしAIは.envファイルの内容やAPIキーをコード内にハードコードすることがある。
+                    人間のレビューなしにAI生成コードをマージするフローは、セキュリティの「盲点」を生む。</p>
+
+                <h3>対策ベストプラクティス</h3>
+                <ul>
+                    <li><strong>① プレコミットフック</strong> — git-secrets、detect-secrets等のツールで自動検出</li>
+                    <li><strong>② .gitignore + .env</strong> — 環境変数は必ず.envに分離。.gitignoreで除外</li>
+                    <li><strong>③ GitHub Push Protection</strong> — GitHubの組込シークレット検出を有効化</li>
+                    <li><strong>④ AI生成コードのレビュー必須</strong> — 「AIが書いた = 安全」ではない。人間の目視確認を必須に</li>
+                    <li><strong>⑤ ローテーション可能なシークレット設計</strong> — 漏洩しても即座にローテーションできる設計にする</li>
+                </ul>
+
+                <h3>当サイトの視点</h3>
+                <p>当サイトもAntigravityでAI駆動開発をしているため、他人事ではない。
+                    特に<strong>save（保存）ワークフロー</strong>にプレコミットチェックを組み込んで防止している。
+                    全AI開発者に「push前にsecrets検出」を強く推奨。</p>
+            </div>
+        </section>
+
+        <!-- #05 Anthropic vs Pentagon -->
+        <section class="lab-section" id="trend-05">
+            <h2>⚖️ #05 Anthropic vs Pentagon — AI倫理と国防の正面衝突</h2>
+            <div class="trend-card">
+                <div class="trend-header">
+                    <span class="trend-badge">⚖️ 倫理・政策</span>
+                    <span class="trend-date">2026年3月</span>
+                </div>
+                <p>Anthropicが軍事利用を制限 → Pentagonが「サプライチェーンリスク」に指定。AI倫理の限界が試される。</p>
+
+                <h3>何が起きているか</h3>
+                <ul>
+                    <li><strong>Anthropicの立場</strong> — AI（特にClaude）の軍事利用を制限する方針を堅持。攻撃的な軍事応用への利用を拒否</li>
+                    <li><strong>Pentagonの対応</strong> — Claudeが機密ネットワークで承認済み・深く組み込まれているにもかかわらず、Anthropicを「サプライチェーンリスク」としてブラックリスト化</li>
+                    <li><strong>2万4千件の不正アカウント</strong> — 中国のAIラボに関連する可能性のある不正アカウント24,000件がClaude APIの「蒸留」（逆エンジニアリング）に使われていたとの報告</li>
+                    <li><strong>Claude内部のネガティブ反応</strong> — Anthropic内部でのClaude評価で「不安」「フラストレーション」に類するパターンが検出。AI感情の議論が再燃</li>
+                </ul>
+
+                <h3>なぜ重要か</h3>
+                <p>AI企業が<strong>「倫理を貫くか、政府の要求に従うか」</strong>を迫られる初の大規模ケース。
+                    CIA/DIA等がClaude依存を深めている中でのブラックリスト化は、米国の国家安全保障に直接影響する。
+                    AI企業の「倫理声明」がビジネスリスクになる——前例のない状況。</p>
+
+                <h3>開発者への影響</h3>
+                <div class="table-wrapper">
+                    <table class="compare-table">
+                        <thead><tr><th>影響</th><th>内容</th></tr></thead>
+                        <tbody>
+                            <tr><td class="tool-name">Claude Code利用</td><td>開発ツールとしての利用には現時点で直接影響なし</td></tr>
+                            <tr><td class="tool-name">エンタープライズ</td><td>政府系プロジェクトでClaude採用のリスクが上昇</td></tr>
+                            <tr><td class="tool-name">API利用</td><td>不正アカウント問題で本人確認・レート制限が強化される可能性</td></tr>
+                            <tr><td class="tool-name">AI倫理議論</td><td>「倫理vs実用」の議論が他AI企業にも波及</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>当サイトの視点</h3>
+                <p>開発ツールとしてのClaude Codeの品質は変わらない。
+                    しかし<strong>Anthropicの企業リスクがClaude Codeの長期的な信頼性に影響</strong>する可能性は否定できない。
+                    マルチツール戦略（特定ベンダーに依存しない）の重要性がさらに高まった。</p>
+            </div>
+        </section>
+
+        <!-- #06 マルチモーダルAI -->
+        <section class="lab-section" id="trend-06">
+            <h2>🎨 #06 マルチモーダルAI市場 $3.43B — 統合の時代</h2>
+            <div class="trend-card">
+                <div class="trend-header">
+                    <span class="trend-badge">🎨 市場拡大</span>
+                    <span class="trend-date">2026年</span>
+                </div>
+                <p>テキスト・画像・音声・動画・センサーデータの統合処理が主流に。2026年末で$3.43B規模。</p>
+
+                <h3>何が起きているか</h3>
+                <ul>
+                    <li><strong>マルチモーダルAI市場 $3.43B（2026年末予測）</strong> — テキスト・画像・音声・動画・PDFを同時処理するAIの市場が急拡大</li>
+                    <li><strong>Gemini gemini-embedding-2-preview（3/10）</strong> — マルチモーダルエンベディングモデル。テキスト・画像・動画・音声・PDFの統合検索に対応</li>
+                    <li><strong>Gemini音楽生成ツール</strong> — テキスト・画像・動画からオリジナル音楽トラックを生成。クリエイティブ系マルチモーダルの新領域</li>
+                    <li><strong>GPT-5.4 native computer use</strong> — コンピュータを自律的に操作するネイティブ機能。画面認識→操作の「見て動く」マルチモーダル</li>
+                    <li><strong>Gemini 3.1 Pro Agentic Vision</strong> — 視覚的理解とエージェント操作を組み合わせた新機能。Boston Dynamicsとの連携も</li>
+                    <li><strong>ChatGPT Agent</strong> — OpenAIのアグレッシブなエージェント展開。Computer use + 会話 + ツール操作の統合</li>
+                </ul>
+
+                <h3>なぜ重要か</h3>
+                <p>コーディングツールの文脈では、<strong>「コードを読む」だけでなく「画面を見て理解する」</strong>AIが標準になりつつある。
+                    UIテスト、デザイン→コード変換、ドキュメント理解など、マルチモーダルが開発効率を劇的に上げる用途が広がっている。</p>
+
+                <h3>開発者向け活用マップ</h3>
+                <div class="table-wrapper">
+                    <table class="compare-table">
+                        <thead><tr><th>モダリティ</th><th>開発者ユースケース</th><th>対応ツール</th></tr></thead>
+                        <tbody>
+                            <tr><td>テキスト + 画像</td><td>デザインカンプ→コード変換</td><td>GPT-5.4、Gemini、Claude</td></tr>
+                            <tr><td>テキスト + 音声</td><td>音声コーディング指示</td><td>Claude Code voice mode</td></tr>
+                            <tr><td>画面認識 + 操作</td><td>UIテスト自動化</td><td>GPT-5.4 computer use、Gemini Agentic Vision</td></tr>
+                            <tr><td>コード + ドキュメント</td><td>API仕様→実装の自動生成</td><td>各ツールのlong context</td></tr>
+                            <tr><td>画像 + 動画 + 音声</td><td>マルチメディアコンテンツ生成</td><td>Gemini音楽生成、Sora</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>当サイトの視点</h3>
+                <p>当サイトのLABセクション自体が「AIで調査→AIで執筆→AIで公開」のマルチモーダルワークフローで作られている。
+                    computer use機能が成熟すれば、<strong>「AIが画面を見てテストする」</strong>開発フローが日常化する。
+                    「コードを書くAI」から「プロダクトを作るAI」への進化は確実に進んでいる。</p>
+            </div>
+        </section>
+
+        <!-- 前回トレンド進展 -->
+        <section class="lab-section">
+            <h2>📈 前回トレンドの進展</h2>
+            <div class="tool-card">
+                <div class="tool-card-body">
+                    <h3>💰 #01 コスト崩壊（第4回）→ 有料化の波に転換</h3>
+                    <p>第4回で追った「コスト崩壊」から一転、Gemini CLI有料化という「有料化の波」が来た。
+                        無料モデルの品質低下と有料モデルの差別化が進み、「本当に安く使えるか」の答えは複雑になっている。
+                        ただしGPT-5.4 mini/nanoの登場で「軽量モデルでコスト削減」の新路線は健在。</p>
+
+                    <h3>🤖 #02 エージェントAI主流化（第4回）→ 全面展開</h3>
+                    <p>第4回の「40%がエージェントAI搭載予測」は着実に進行。
+                        Claude Code auto-plan、Cursor Automations、ChatGPT Agent、Copilot Cowork——
+                        主要ツール全てがエージェント機能を実装した。86%の企業がAI予算増加を計画。</p>
+
+                    <h3>🏢 #03 Gemini × Google Workspace（第4回）→ Apple/Samsung拡大</h3>
+                    <p>Google Workspace統合の好評は継続。さらにApple Siri統合交渉、Samsung 8億デバイス計画で
+                        「エコシステムの広さ」は5ツール中No.1に。Gemini for Mac（Desktop Intelligence）も開発中。</p>
+
+                    <h3>🇯🇵 #04 日本のAI政策 Gennai（第4回）→ 継続</h3>
+                    <p>18万人規模のGennaiプロジェクトは進行中。日本政府のAI導入は他国より慎重だが着実に前進。</p>
+
+                    <h3>🖥️ #05 ハードウェア進化（第4回）→ 継続</h3>
+                    <p>Nvidia Rubin等のAI向けハードウェア進化は継続中。データセンターインフラ投資が最大のAI支出カテゴリ。</p>
+
+                    <h3>🧰 #06 OpenAIの全方位展開（第4回）→ Astral買収+mini/nano</h3>
+                    <p>OpenAIはAstral買収でPythonツールを強化し、mini/nanoで軽量モデルラインを拡充。
+                        ChatGPT Agent + Codex + Sora統合で「OpenAIだけで全部できる」未来を目指す。
+                        #QuitGPT騒動の余波は収まりつつあるが、倫理問題の根底は未解決。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 総括 -->
+        <section class="lab-section">
+            <h2>🎯 第5回 総括</h2>
+            <div class="summary-box">
+                <h3>今週のキーワード：自社モデル・囲い込み・境界線の消滅</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">🏭 第3フェーズの始まり</div>
+                        <div class="summary-value">エコシステム競争</div>
+                        <p>第1フェーズ「補完」→ 第2フェーズ「エージェント」→ 第3フェーズ「エコシステム囲い込み」。IDE×自社モデル×プラグイン×ワークフロー。どのプラットフォームに乗るかが最重要</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">💸 無料の真の価格</div>
+                        <div class="summary-value">Flash限定 or 広告</div>
+                        <p>「無料」は消えないが「無料で最高品質」は終わった。Gemini CLI有料化がその象徴。無料ユーザーはFlash限定 or 広告表示 or レート制限の三択</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">⚡ 軽量モデル革命</div>
+                        <div class="summary-value">mini / nano / lite</div>
+                        <p>全てのタスクに巨大モデルは不要。軽量モデルの適材適所配置で、品質を維持しながらコストを数分の1に。OSSのBYOK運用で月$15-20の世界</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🔐 セキュリティの盲点</div>
+                        <div class="summary-value">AI生成 ≠ 安全</div>
+                        <p>シークレット漏洩34%増加。AIが書いたコードを無批判にpushするフローが最大のリスク。プレコミットフック＋人間レビューの二重防御が必須</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 調査にあたって</h2>
+            <p>本記事は<strong>2026年3月21日時点</strong>の情報です。過去の調査は
+                <a href="/lab/ai-trends/v1/" style="color:var(--accent);text-decoration:underline">第1回（3/9）</a>・
+                <a href="/lab/ai-trends/v2/" style="color:var(--accent);text-decoration:underline">第2回（3/11）</a>・
+                <a href="/lab/ai-trends/v3/" style="color:var(--accent);text-decoration:underline">第3回（3/12）</a>・
+                <a href="/lab/ai-trends/v4/" style="color:var(--accent);text-decoration:underline">第4回（3/16）</a>をご覧ください。</p>
+            <p>当サイト「Gravity Portal」は <strong>Antigravity</strong> を使ったAI駆動開発プロジェクトです。</p>
+            <p>情報源: VentureBeat, TechCrunch, The Guardian, SC World, Waterloo大, OpenAI公式, Anthropic公式, Google公式, GitHub公式, X/Reddit/HN等のコミュニティ投稿。</p>
+        </section>
+    </main>
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-trends/v1/">📊 第1回</a>
+            <a href="/lab/ai-trends/v2/">📊 第2回</a>
+            <a href="/lab/ai-trends/v3/">📊 第3回</a>
+            <a href="/lab/ai-trends/v4/">📊 第4回</a>
+            <a href="/lab/ai-tools/v5/">🛠️ ツール比較 第5回</a>
+            <a href="/lab/ai-developers/v5/">👤 AI開発者 第5回</a>
+        </nav>
+    </footer>
+    <script>
+        (function(){var btn=document.getElementById('themeToggle');function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}update();btn.addEventListener('click',function(){var cur=document.documentElement.getAttribute('data-theme');var next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('gp-theme',next)}catch(e){}update()})})()
+    </script>
+</body>
+</html>
