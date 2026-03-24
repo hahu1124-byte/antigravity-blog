@@ -1,5 +1,17 @@
 [
   {
+    "slug": "202603/20260324_ai_lab_update_v7",
+    "title": "🔬 標準化戦争とOpenClaw旋風 — LAB第7回レポート：MCP 9700実装・Klarna AI組織化・GLM-5 MIT公開",
+    "date": "2026-03-24",
+    "excerpt": "MCP 9,700実装で事実上の業界標準へ。OpenClaw 810K Stars爆発・GLM-5 MIT公開・Klarna 1,200エージェントで40%効率改善。LLMによる匿名ユーザー特定67%成功率が示すプライバシー崩壊の現実。第6回LABの総まとめ。",
+    "tags": [
+      "AI",
+      "開発",
+      "LAB"
+    ],
+    "image": "ai_lab_update_v7.png"
+  },
+  {
     "slug": "202603/20260324_uber_daily",
     "title": "🚴 Uber配達日報 🌤️ 20260324 まずまずの1日",
     "date": "2026-03-24",

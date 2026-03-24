@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発ツール比較 2026 第6回 | LAB | Gravity Portal</title>
+    <meta name="description" content="AI開発ツール比較 第6回。Gemini Code Assist完全無料化、Codex復活、Claude Code $17〜、Cursor vs Claude Code パフォーマンス実測データ。収束期の5大ツール最新動向。">
+    <meta property="og:title" content="AI開発ツール比較 2026 第6回 — 収束と囲い込み">
+    <meta property="og:description" content="Gemini Code Assist無料化・Codex復活・Cursor実測データ。5大AI開発ツールの最新動向（3/24更新）。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-tools/v6/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-tools.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-tools/v6/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>(function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()</script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">🛠️ AI開発ツール比較 第6回</h1>
+    </header>
+    <main class="lab-content">
+        <section class="lab-hero">
+            <div class="lab-hero-icon">🛠️</div>
+            <h1>AI開発ツール — 収束と囲い込みの時代 第6回</h1>
+            <p><a href="/lab/ai-tools/v5/" style="color:inherit;text-decoration:underline">第5回</a>では「自社モデル戦争」を追いました。<br>
+                第6回は<strong>「収束と囲い込み」</strong>がテーマ。機能差は縮まりつつも、各社のエコシステム戦略が鮮明に。<br>
+                Gemini Code Assistが個人向け完全無料化、OpenAIはCodexを復活させ開発者ツール戦略を再構築。<br>
+                実測データ（CRUD実装・リファクタリング）で5ツールの本当の実力を比較。<br><br>
+                第5回の課題の進展もフォロー。改善されたか、悪化したか。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月24日更新</span>
+                <span>🔧 6ツール実測比較</span>
+                <span>📝 <a href="/lab/ai-tools/v5/" style="color:inherit;text-decoration:underline">第5回（3/21）はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- 業界数字 -->
+        <section class="lab-section">
+            <h2>📊 AI開発ツール業界の現在地（更新）</h2>
+            <p>第5回からの変化を数字で。</p>
+            <div class="market-overview">
+                <div class="market-stats">
+                    <div class="market-stat">
+                        <div class="market-stat-value">#1</div>
+                        <div class="market-stat-label">Claude Code 開発者採用率（2026年）</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">63%</div>
+                        <div class="market-stat-label">Cursor CRUD実装時間短縮（実測）</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">71%</div>
+                        <div class="market-stat-label">Claude Code リファクタリング時間短縮（実測）</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">0円</div>
+                        <div class="market-stat-label">Gemini Code Assist 個人向け（3月～）</div>
+                    </div>
+                </div>
+                <p>機能の差が縮まりつつある2026年3月。違いは「いくら払うか」より「どのエコシステムに入るか」に移行。Claude Codeが開発者採用率No.1を獲得し、Gemini Code Assistが無料化で新たな競争軸を投入した。</p>
+            </div>
+        </section>
+
+        <!-- 第5回→第6回 変化 -->
+        <section class="lab-section">
+            <h2>🔥 第5回→第6回 主要変化サマリ</h2>
+            <p><a href="/lab/ai-tools/v5/" style="color:var(--accent);text-decoration:underline">第5回</a>からの変化を一覧で。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>ツール</th><th>主なアップデート</th><th>⚠️ 第5回の課題の進展</th></tr></thead>
+                    <tbody>
+                        <tr><td class="tool-name">Antigravity</td><td>Gemini Code Assist完全無料化（個人）🆕</td><td>⚠️ CLI有料化の方向は変わらず。Code Assist無料化で棲み分け</td></tr>
+                        <tr><td class="tool-name">Claude Code</td><td>$17/月〜新プラン・開発者採用率No.1獲得</td><td>✅ コスパ最強を維持。シークレット漏洩問題は業界全体課題に</td></tr>
+                        <tr><td class="tool-name">Cursor</td><td>実測データで新規実装最速を確認。$50B評価交渉継続</td><td>⚠️ コスト問題は継続。Composer 2への評価は高い</td></tr>
+                        <tr><td class="tool-name">GitHub Copilot</td><td>Codex復活（リポジトリ規模対応・CI連携）🆕</td><td>✅ LTSモデルで安定性確保。愛され率は依然低い</td></tr>
+                        <tr><td class="tool-name">Windsurf</td><td>Arena Mode追加（複数モデル対決機能）🆕</td><td>⚠️ Cursorとの差はさらに拡大。$15/月の安さが頼みの綱</td></tr>
+                        <tr><td class="tool-name">Codex（新）</td><td>🔥 OpenAIが開発者ツール市場に本格参入。OSS文脈で再登場</td><td>新規参入 — GitHubを通じた覇権争いへの布石</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 実測データ -->
+        <section class="lab-section">
+            <h2>⏱️ パフォーマンス実測データ（2026年3月現在）</h2>
+            <p>同一タスクで5ツールを実際に比較したデータ（Qiita調査・複数エンジニア実測）。</p>
+
+            <h3>タスク1: CRUD REST API実装（TypeScript）</h3>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>ツール</th><th>実装時間</th><th>テスト時間</th><th>合計</th><th>エラー数</th></tr></thead>
+                    <tbody>
+                        <tr><td class="tool-name">手書き</td><td>45分</td><td>20分</td><td>65分</td><td>3件</td></tr>
+                        <tr><td class="tool-name">Copilot</td><td>28分</td><td>12分</td><td>40分</td><td>2件</td></tr>
+                        <tr><td class="tool-name">Windsurf</td><td>18分</td><td>8分</td><td>26分</td><td>0件</td></tr>
+                        <tr><td class="tool-name">Claude Code</td><td>15分</td><td>4分</td><td>19分</td><td>0件</td></tr>
+                        <tr style="background:var(--card-hover)"><td class="tool-name">🏆 Cursor</td><td>12分</td><td>5分</td><td><strong>17分</strong></td><td>0件</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>🏆 <strong>Cursor最速（手書き比63%短縮）</strong> — Tab補完の精度がCRUD等の定型実装で圧倒的。</p>
+
+            <h3>タスク2: 大規模リファクタリング（既存コード整理）</h3>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>ツール</th><th>実装時間</th><th>テスト時間</th><th>合計</th></tr></thead>
+                    <tbody>
+                        <tr><td class="tool-name">手書き</td><td>120分</td><td>40分</td><td>160分</td></tr>
+                        <tr><td class="tool-name">Copilot</td><td>95分</td><td>35分</td><td>130分</td></tr>
+                        <tr><td class="tool-name">Windsurf</td><td>65分</td><td>20分</td><td>85分</td></tr>
+                        <tr><td class="tool-name">Cursor</td><td>40分</td><td>15分</td><td>55分</td></tr>
+                        <tr style="background:var(--card-hover)"><td class="tool-name">🏆 Claude Code</td><td>35分</td><td>12分</td><td><strong>47分</strong></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>🏆 <strong>Claude Code最速（手書き比71%短縮）</strong> — マルチファイル無制限＋MCP自動検出が威力を発揮。</p>
+
+            <h3>タスク3: DevOps設定ファイル作成</h3>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>ツール</th><th>実装時間</th><th>成功率</th></tr></thead>
+                    <tbody>
+                        <tr><td class="tool-name">手書き</td><td>90分</td><td>100%</td></tr>
+                        <tr><td class="tool-name">Copilot</td><td>60分</td><td>65%</td></tr>
+                        <tr><td class="tool-name">Windsurf</td><td>45分</td><td>85%</td></tr>
+                        <tr><td class="tool-name">Cursor</td><td>50分</td><td>80%</td></tr>
+                        <tr style="background:var(--card-hover)"><td class="tool-name">🏆 Claude Code</td><td>35分</td><td><strong>90%</strong></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>複雑な設定ファイルでもClaude Codeが時間・正確性ともに優秀。</p>
+        </section>
+
+        <!-- 各ツール詳細 -->
+        <section class="lab-section">
+            <h2>🔍 各ツール最新アップデート＆ユーザーの声</h2>
+
+            <!-- Antigravity / Gemini Code Assist -->
+            <div class="tool-card" id="antigravity-v6">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🚀</div>
+                    <div class="tool-card-info">
+                        <h3>Antigravity / Gemini Code Assist</h3>
+                        <div class="tool-maker">Google DeepMind — 第6回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">🆕 Code Assist 個人無料化</span>
+                    <span class="badge badge-free">VS Code / JetBrains対応</span>
+                    <span class="badge badge-type">CLI有料化継続</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Gemini Code Assist 個人完全無料化 🔥</strong> — 3月から個人開発者向けにVS Code・JetBrains用プラグインを制限なし・無料で提供開始。従来の有料サービスが無料に。企業・チーム向けとの棲み分け戦略</li>
+                        <li><strong>Gemini 3.1 Pro API</strong> — $2/M input・$12/M outputで提供開始。Gemini 3.1 Flash-LiteはGemini 2.0 Flashより30%安く、低コストAPIとして注目</li>
+                        <li><strong>Desktop Intelligence（Mac）テスト継続</strong> — 画面コンテンツとの深い統合機能。プライベートテスト段階</li>
+                        <li><strong>Claude API価格（参考）</strong> — Sonnet $3/M input・$15/M output。HaikuはGemini Flash Liteと同価格帯で競合</li>
+                    </ul>
+
+                    <h3>💰 構成の変化</h3>
+                    <ul>
+                        <li><strong>Gemini Code Assist（IDE Plugin）</strong>: 個人は完全無料 ✅</li>
+                        <li><strong>Antigravity CLI（Gemini CLI）</strong>: 無料はFlashモデルのみ（有料化継続）</li>
+                        <li><strong>Google AI Pro ($19.99/月)</strong>: CLI Proモデル＋Workspace統合</li>
+                        <li><strong>Google AI Ultra ($49.99/月)</strong>: 最大クォータ</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題（継続フォロー）</h3>
+                    <ul>
+                        <li><strong>⚠️ Code Assist無料化の真意を疑う声</strong> — 「無料にして囲い込んでから有料化する戦略では？」との懐疑論も。Cursor/Copilotに比べてエコシステムが弱い</li>
+                        <li><strong>⚠️ MCP未対応（継続）</strong> — Cursor/Copilot/Claude Codeに差をつけられたまま。MCP標準化が進む中で不利</li>
+                        <li><strong>⚠️ CLI有料化への実害が顕在化</strong> — 3/25以降の無料Flash限定で「実務では使いにくい」との声が増加</li>
+                        <li><strong>✅ Code Assist無料化は歓迎</strong> — 「IDEで軽く使う分には最強の無料ツールになった」との評価も</li>
+                    </ul>
+
+                    <h3>🔑 第6回の所感</h3>
+                    <p>Gemini Code AssistのIDE Plugin無料化は<strong>「CLI有料化の代償措置」</strong>とも読める。
+                        ターミナル派にはコスト増、IDE派には朗報という二極化。
+                        当サイトはAntigravity（CLI）で開発を継続しているが、Code Assist無料化はIDEユーザーへの強力な選択肢となった。</p>
+                </div>
+            </div>
+
+            <!-- Claude Code -->
+            <div class="tool-card" id="claude-code-v6">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🤖</div>
+                    <div class="tool-card-info">
+                        <h3>Claude Code</h3>
+                        <div class="tool-maker">Anthropic — 第6回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">🔥 採用率No.1</span>
+                    <span class="badge badge-paid">$17/月〜新プラン</span>
+                    <span class="badge badge-hot">❤️ 開発者満足度最高</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>開発者採用率No.1（2026年） 🔥</strong> — 調査サイト複数で「2026年最も採用されているAIコーディングツール」トップに。リファクタリングと自律タスクで圧倒的評価</li>
+                        <li><strong>新プラン $17/月〜</strong> — Claude Code Pro（$17/月）が新設され、より入りやすい価格帯に。用途別に$17/$100を選択可能</li>
+                        <li><strong>CLAUDE.mdによるプロジェクト記憶</strong> — ルールファイルによるコンテキスト管理が普及。Hookやスキル機能で「覚えているAI」を実現</li>
+                        <li><strong>Claudeがff22件の脆弱性を発見（Mozilla共同）</strong> — セキュリティ分野でも存在感。Claude Code + セキュリティリサーチの事例が増加</li>
+                        <li><strong>Spring Break特典継続（〜3/28）</strong> — オフピーク・週末は使用量2倍キャンペーン継続中</li>
+                    </ul>
+
+                    <h3>💰 価格体系（新プラン追加）</h3>
+                    <ul>
+                        <li><strong>Claude Code Pro $17/月</strong>: Sonnet利用可・基本タスク向け（新設）</li>
+                        <li><strong>Claude Code Max $100/月</strong>: 5〜20倍クォータ・Opus利用可</li>
+                        <li><strong>API直接利用</strong>: Sonnet $3/M input・$15/M output</li>
+                        <li><strong>Team $125/人/月</strong>: プレミアムシート（年間契約）</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題（継続フォロー）</h3>
+                    <ul>
+                        <li><strong>⚠️ シークレット漏洩リスク（業界課題に拡大）</strong> — Claude Code共同コミットでのシークレット漏洩率2倍問題は継続。ただしCursor/Copilotも同様の問題が報告され、業界全体の課題に</li>
+                        <li><strong>⚠️ コンテキストウィンドウ管理の難しさ</strong> — 長期セッションでコンテキストが溢れ「以前の指示を忘れる」問題。CLAUDE.mdでの事前設定が推奨される</li>
+                        <li><strong>⚠️ Pentagon問題（継続）</strong> — Anthropicの軍事利用制限方針とペンタゴンの「リスク指定」の対立は未解決</li>
+                        <li><strong>✅ auto-plan + voice mode好評（継続）</strong> — ワークフロー革新として引き続き高評価</li>
+                    </ul>
+
+                    <h3>🔑 第6回の所感</h3>
+                    <p>採用率No.1は<strong>実測パフォーマンスが証明した結果</strong>。
+                        リファクタリング71%短縮、DevOps設定90%成功率は他ツールを一線画く。
+                        $17/月新プランで入門ハードルも下がり、2026年後半もトップを維持する公算が高い。</p>
+                </div>
+            </div>
+
+            <!-- Cursor -->
+            <div class="tool-card" id="cursor-v6">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">⚡</div>
+                    <div class="tool-card-info">
+                        <h3>Cursor</h3>
+                        <div class="tool-maker">Anysphere — 第6回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プランあり</span>
+                    <span class="badge badge-hot">🏆 新規実装最速</span>
+                    <span class="badge badge-paid">1M+ DAU継続</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>実測データで新規実装最速を証明 🏆</strong> — CRUD実装17分（手動65分）は5ツール中トップ。Tab補完の精度と低遅延がCRUD等の定型実装で圧倒的な結果</li>
+                        <li><strong>$50B評価額交渉の継続報道</strong> — AI開発ツール企業として異例の評価額。1M+ DAUの実績が支えている</li>
+                        <li><strong>「AITool for VSCode」対比での優位性</strong> — VS Codeと互換性を保ちつつ、AIファーストのUXで差別化。「乗り換えて正解」の声が多い</li>
+                        <li><strong>Marketplace拡充継続</strong> — Atlassian、HuggingFace等30+パートナープラグイン。カスタムワークフロー構築が容易</li>
+                    </ul>
+
+                    <h3>💰 価格体系（変更なし）</h3>
+                    <ul>
+                        <li><strong>Hobby（無料）</strong>: 限定リクエスト + 7日間Pro体験</li>
+                        <li><strong>Pro $20/月</strong>: 無制限Tab補完 + $20クレジットプール</li>
+                        <li><strong>Pro+ $60/月</strong>: 3倍クレジット</li>
+                        <li><strong>Ultra $200/月</strong>: 20倍使用量 + 優先アクセス</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題（継続フォロー）</h3>
+                    <ul>
+                        <li><strong>⚠️ 実質コストの高さ（最大の不満、継続）</strong> — ヘビーユーザーで$60-80/月。Composer 2のクレジット消費でさらに上がる可能性。$20/月で済む人は少数</li>
+                        <li><strong>⚠️ リファクタリングではClaude Codeに負ける</strong> — 実測データで明確に。CursorはCRUD向き、複雑なリファクタはClaude </li>
+                        <li><strong>⚠️ Composer 2ロックイン懸念（継続）</strong> — 自社モデル依存でBYOKの自由度が低い</li>
+                        <li><strong>✅ 新規実装スピードは圧倒的</strong> — 「プロトタイプを爆速で作る」用途では依然最強との評価</li>
+                    </ul>
+
+                    <h3>🔑 第6回の所感</h3>
+                    <p>「<strong>新規実装はCursor、リファクタリングはClaude Code</strong>」という使い分けが実測データで確定した。
+                        一つのツールで全てをカバーするより、タスクに応じた使い分けが2026年のベストプラクティス。
+                        $50B評価額が示す市場の期待は高いが、コスト問題が普及の壁になっている。</p>
+                </div>
+            </div>
+
+            <!-- GitHub Copilot -->
+            <div class="tool-card" id="copilot-v6">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🐙</div>
+                    <div class="tool-card-info">
+                        <h3>GitHub Copilot + Codex</h3>
+                        <div class="tool-maker">GitHub / OpenAI — 第6回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プランあり</span>
+                    <span class="badge badge-hot">🆕 Codex復活</span>
+                    <span class="badge badge-paid">シェア42% / 最安$10/月</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート（Codex復活が最大トピック）</h3>
+                    <ul>
+                        <li><strong>Codex復活（開発者ツール市場再参入） 🔥</strong> — OpenAIがCodexをリポジトリ規模対応・CI連携強化で再公開。マルチファイルプロジェクト構造を理解し、automated code review/generationをCIに組み込める。2026年の新たな競争軸</li>
+                        <li><strong>GitHub Copilot CLI 正式リリース（3/5）</strong> — ターミナル向けコーディングエージェントが正式版に。Claude Code同様のCLIワークフローをCopilotで実現</li>
+                        <li><strong>HubSpot Sidekick 事例</strong> — マルチモデルAIコードレビューで90%高速化・エンジニア承認率80%という大規模導入事例が公開。CopilotのエンタープライズROIが可視化</li>
+                        <li><strong>OpenAI vs Microsoft緊張の余波</strong> — OpenAIがGitHub対抗の独自コードリポジトリを開発中との報道。Copilotの親会社関係が変わる可能性も</li>
+                    </ul>
+
+                    <h3>💰 価格体系（変更なし）</h3>
+                    <ul>
+                        <li><strong>Free</strong>: 月2,000補完 + 50プレミアムリクエスト</li>
+                        <li><strong>Pro $10/月</strong>: 無制限補完 + 300プレミアムリクエスト</li>
+                        <li><strong>Pro+ $39/月</strong>: 1,500リクエスト + 優先アクセス</li>
+                        <li><strong>Business $19/人/月</strong>: 組織管理</li>
+                        <li><strong>Enterprise $39/人/月</strong>: （GH Enterprise Cloud必須 → 実質$60）</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題（継続フォロー）</h3>
+                    <ul>
+                        <li><strong>⚠️ Codex復活への懐疑</strong> — 「以前のCodexは精度が低かった。今回は本当に良くなったのか」との検証待ちの声</li>
+                        <li><strong>⚠️ 愛され率9%（継続）</strong> — シェア42%に対してユーザー満足度は低いまま。「使わざるを得ない企業ツール」のポジション</li>
+                        <li><strong>⚠️ OpenAI-Microsoft対立の不確実性</strong> — 親会社関係の不安定さがエンタープライズ採用判断に影響する可能性</li>
+                        <li><strong>✅ $10/月の安さは競合なし</strong> — 5ツール中最安。Copilot CLIの正式リリースで機能面も改善</li>
+                    </ul>
+
+                    <h3>🔑 第6回の所感</h3>
+                    <p>Codex復活とCLI正式リリースは<strong>「Copilotの本気」</strong>を示す。
+                        HubSpotの大規模導入事例はエンタープライズ向けROIを証明。
+                        ただしOpenAI-Microsoft対立という根本的不確実性が、長期投資先としての評価を難しくしている。</p>
+                </div>
+            </div>
+
+            <!-- Windsurf -->
+            <div class="tool-card" id="windsurf-v6">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🏄</div>
+                    <div class="tool-card-info">
+                        <h3>Windsurf</h3>
+                        <div class="tool-maker">Cognition (元Codeium) — 第6回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プランあり</span>
+                    <span class="badge badge-hot">🆕 Arena Mode</span>
+                    <span class="badge badge-paid">$15/月 最安水準</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Arena Mode（複数モデル対決機能） 🆕</strong> — 複数のAIモデルを同一タスクで同時実行し、出力を比較できる新機能。「どのモデルが自分のコードに最適か」を実測で判断できる差別化機能</li>
+                        <li><strong>Cascade機能の継続改善</strong> — マルチファイル編集チェーン機能。シンプルなリファクタリングでの高速性は引き続き評価が高い</li>
+                        <li><strong>350+エンタープライズ顧客を維持</strong> — 既存顧客は安定しているが、新規獲得の勢いはCursorに劣る</li>
+                    </ul>
+
+                    <h3>💰 価格体系（変更なし）</h3>
+                    <ul>
+                        <li><strong>Windsurf Free</strong>: 基本機能（制限付き）</li>
+                        <li><strong>Windsurf Pro $15/月</strong>: フル機能 — 5ツール中2番目に安い</li>
+                        <li><strong>Devin</strong>: エンタープライズ向け（要問い合わせ）</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題（継続フォロー）</h3>
+                    <ul>
+                        <li><strong>⚠️ 将来の不透明さ（継続・最大の課題）</strong> — Cursor・Claude Codeとの差異が縮まり、Arena Modeで勝負するしかない状況</li>
+                        <li><strong>⚠️ リファクタリングで最下位</strong> — 実測データでリファクタリング85分は3位（Cursor55分、Claude 47分より遅い）</li>
+                        <li><strong>⚠️ 機能の「速い判断」が誤りになるリスク</strong> — 速度重視のあまり意図しない変更を生む「思い込みコーディング」問題が継続</li>
+                        <li><strong>✅ Arena Modeは差別化として有望</strong> — 「どのモデルを使うか自分で選べる」哲学は他ツールにない強み</li>
+                    </ul>
+
+                    <h3>🔑 第6回の所感</h3>
+                    <p>Arena Modeは<strong>「エコシステムへの囲い込みに抵抗する姿勢」</strong>として評価できる。
+                        しかし実測データでは最速でも最高精度でもなく、差別化の軸が弱い。
+                        $15/月の安さとエンタープライズ実績が頼みの綱。長期投資には慎重な判断が必要。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 価格比較 -->
+        <section class="lab-section">
+            <h2>💰 価格比較（2026年3月24日時点）</h2>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>ツール</th><th>無料プラン</th><th>個人（標準）</th><th>個人（上位）</th><th>チーム</th><th>実質コスト</th></tr></thead>
+                    <tbody>
+                        <tr><td class="tool-name">Antigravity CLI</td><td>⚠️ Flash限定</td><td>$19.99/月</td><td>$49.99/月</td><td>Workspace連携</td><td>⚠️ 無料ユーザー減</td></tr>
+                        <tr><td class="tool-name">Gemini Code Assist</td><td>✅ 個人完全無料🆕</td><td>—（無料）</td><td>Google AI Pro</td><td>有料</td><td>✅ IDE使用は0円</td></tr>
+                        <tr><td class="tool-name">Claude Code</td><td>制限付き</td><td>$17/月🆕</td><td>$100/月</td><td>$125/人/月</td><td>✅ 最高コスパ</td></tr>
+                        <tr><td class="tool-name">Cursor</td><td>7日間Pro</td><td>$20/月</td><td>$60〜200/月</td><td>$40/人/月</td><td>⚠️ 実質$60-80/月+</td></tr>
+                        <tr><td class="tool-name">Copilot</td><td>2,000補完+50req</td><td>$10/月</td><td>$39/月</td><td>$39→実質$60</td><td>⚠️ 超過$0.04/件</td></tr>
+                        <tr><td class="tool-name">Windsurf</td><td>基本機能</td><td>$15/月</td><td>—</td><td>Devin Enterprise</td><td>✅ 2番目に安い</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>💡 <strong>無料で使うなら</strong>: Gemini Code Assist（IDE Plugin）が圧倒的に充実。Copilot Free（2,000補完）も選択肢。<br>
+               💡 <strong>有料コスパなら</strong>: Claude Code $17〜が最強。リファクタリング用途なら$17/月で元が取れる。</p>
+        </section>
+
+        <!-- まとめ -->
+        <section class="lab-section">
+            <h2>🎯 第6回時点のおすすめ（更新）</h2>
+            <div class="summary-box">
+                <h3>前回からの変化ポイント</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">🔥 最大のニュース</div>
+                        <div class="summary-value">Gemini Code Assist無料化</div>
+                        <p>IDE Plugin個人完全無料化でGoogleが「無料の雄」に。CLI有料化との二元化で戦略が複雑に</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🏆 実測最強</div>
+                        <div class="summary-value">Claude Code（リファクタ・DevOps）/ Cursor（新規実装）</div>
+                        <p>タスク次第で使い分けが正解。「両方使う」が2026年のベストプラクティス</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🆕 注目の新参</div>
+                        <div class="summary-value">Codex（OpenAI）の復活</div>
+                        <p>リポジトリ規模対応・CI連携で再公開。OpenAIのGitHub包囲網戦略の一手</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">💰 無料最強</div>
+                        <div class="summary-value">Gemini Code Assist（変化あり）</div>
+                        <p>IDE Pluginは完全無料。CLI無料枠は縮小。使い分けが必須に</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🏢 企業向け</div>
+                        <div class="summary-value">GitHub Copilot（変わらず）</div>
+                        <p>HubSpotのROI事例が説得力を提供。Codex復活で機能面も改善</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🤔 結論</div>
+                        <div class="summary-value">エコシステム選びの時代</div>
+                        <p>機能差は縮小。「どの会社のAIに乗るか」という選択が、将来の開発環境を決める</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 調査にあたって</h2>
+            <p>本記事は<strong>2026年3月24日時点</strong>の情報です。過去の調査は
+                <a href="/lab/ai-tools/v1/" style="color:var(--accent);text-decoration:underline">第1回（3/9）</a>・
+                <a href="/lab/ai-tools/v2/" style="color:var(--accent);text-decoration:underline">第2回（3/11）</a>・
+                <a href="/lab/ai-tools/v3/" style="color:var(--accent);text-decoration:underline">第3回（3/12）</a>・
+                <a href="/lab/ai-tools/v4/" style="color:var(--accent);text-decoration:underline">第4回（3/16）</a>・
+                <a href="/lab/ai-tools/v5/" style="color:var(--accent);text-decoration:underline">第5回（3/21）</a>をご覧ください。</p>
+            <p>当サイト「Gravity Portal」は <strong>Antigravity</strong> を使って開発されています。</p>
+            <p>実測データはQiita, Medium, Reddit等で公表されたエンジニアの計測値を参考にしています。個人差や環境差があります。</p>
+        </section>
+    </main>
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-tools/v1/">🛠️ 第1回</a>
+            <a href="/lab/ai-tools/v2/">🛠️ 第2回</a>
+            <a href="/lab/ai-tools/v3/">🛠️ 第3回</a>
+            <a href="/lab/ai-tools/v4/">🛠️ 第4回</a>
+            <a href="/lab/ai-tools/v5/">🛠️ 第5回</a>
+            <a href="/lab/ai-developers/v6/">👤 AI開発者 第6回</a>
+            <a href="/lab/ai-trends/v6/">📊 トレンド 第6回</a>
+        </nav>
+    </footer>
+    <script>
+        (function(){var btn=document.getElementById('themeToggle');function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}update();btn.addEventListener('click',function(){var cur=document.documentElement.getAttribute('data-theme');var next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('gp-theme',next)}catch(e){}update()})})()</script>
+</body>
+</html>
