@@ -64,6 +64,15 @@ for (const tool of staticTools) {
     }
 }
 
+// スクリプトをコピー
+const scriptsSrc = join(__dirname, 'src', 'scripts');
+const scriptsDst = join(OUTPUT_DIR, 'blog', 'scripts');
+if (existsSync(scriptsSrc)) {
+    mkdirSync(scriptsDst, { recursive: true });
+    cpSync(scriptsSrc, scriptsDst, { recursive: true });
+    console.log('📜 スクリプトコピー完了');
+}
+
 // ==========================================
 // 忍者AdMax 設定
 // ==========================================
@@ -123,11 +132,13 @@ function htmlHead(title, description, cssRelPath = 'styles.css', ogp = {}) {
     <link rel="preconnect" href="https://cnobi.jp">
     <link rel="dns-prefetch" href="https://adm.shinobi.jp">
     <link rel="dns-prefetch" href="https://cnobi.jp">
+    <script defer src="${cssRelPath.replace('styles.css', 'scripts/hero-bg.js')}?v=${cacheBust}"></script>
     <script>
         (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
     </script>
 </head>
 <body>
+    <div id="gp-hero-bg"></div>
     <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
     <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
     <script>
