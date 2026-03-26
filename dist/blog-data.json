@@ -1,5 +1,26 @@
 [
   {
+    "slug": "202603/20260327_uber_daily",
+    "title": "🚴 Uber配達日報 ☀️ 20260327 配達日和",
+    "date": "2026-03-27",
+    "excerpt": "名古屋のUber配達に役立つ2026-03-27の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！",
+    "tags": [
+      "Uber配達"
+    ]
+  },
+  {
+    "slug": "202603/20260326_ai_lab_update_v8",
+    "title": "🧪 LAB 第8回：最強モデルの代償 — Opus枯渇・Composer 2論争・推論コストの壁",
+    "date": "2026-03-26",
+    "excerpt": "Antigravity UltraでもOpus枯渇が止まらない。Cursor Composer 2がKimi K2.5ベースと判明。推論コストの構造問題がサブスクを破壊し、マルチモデル運用が「唯一の正解」になった3月末の記録。",
+    "tags": [
+      "AI",
+      "開発",
+      "LAB"
+    ],
+    "image": "ai_lab_update_v8.png"
+  },
+  {
     "slug": "202603/20260326_uber_daily",
     "title": "🚴 Uber配達日報 🌧️ 20260326 雨の日は需要UP",
     "date": "2026-03-26",
