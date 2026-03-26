@@ -1,0 +1,68 @@
+<p><img src="/blog/images/ai_lab_update_v8.png" alt="LAB第8回レポート — 最強モデルの代償"></p>
+<p>LABセクション第7回を公開しました。今回のテーマは<strong>「最強モデルの代償」</strong>。Opus枯渇問題、Composer 2のKimi K2.5論争、推論コストの壁——3つの視点からまとめます。</p>
+
+<h2>🔬 今週の3大ニュース</h2>
+<p><strong>① Antigravity Ultra Opus枯渇問題が深刻化 🚨</strong> — 月額$250のUltraプランでも1時間でOpus枠ゼロに。公式フォーラムで「Secret Quota Cuts（秘密のクォータ削減）」として議論沸騰。週300M→9Mトークンへの97%カットが報告され、7〜10日間のロック期間が発生。</p>
+<p><strong>② Cursor Composer 2 = Kimi K2.5（中国モデル）と発覚 🔥</strong> — VentureBeat報道で判明。$29.3B評価のAnysphereが「自社研究の成果」としたモデルが、実はAlibaba・Tencent出資のMoonshot AIのオープンウェイトモデルに追加学習を施したもの。性能は本物だが信頼の傷は深い。</p>
+<p><strong>③ OSSエージェント＋BYOKが自己防衛の本命に</strong> — サブスク制限への反発でCline（59K Stars）、OpenHands（70K Stars）、OpenCode（129K Stars）等のBYOK型OSSエージェントが一斉に成熟期へ。LLM AI Routerの登場で50+プロバイダーの自動切り替えも可能に。</p>
+
+<h2>🛠️ AI開発ツール比較 第7回 — 最強モデルの代償</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>ツール</th><th>主なアップデート</th><th>⚠️ 課題</th></tr></thead>
+<tbody>
+<tr><td><strong>Antigravity</strong></td><td>⚠️ Ultra含むOpus枯渇問題が深刻化</td><td>❌ 週300M→9Mトークン、7〜10日ロック</td></tr>
+<tr><td><strong>Claude Code</strong></td><td>⚠️ Max利用制限も急ドレイン報告</td><td>⚠️ MCPスキル乗っ取り事例発覚</td></tr>
+<tr><td><strong>Cursor</strong></td><td>🔥 Composer 2 = Kimi K2.5判明</td><td>⚠️ 中国モデル依存の地政学リスク</td></tr>
+<tr><td><strong>GitHub Copilot</strong></td><td>安定運用を継続</td><td>✅ $10/月で炎上もロックもなし</td></tr>
+<tr><td><strong>Windsurf</strong></td><td>大きな変動なし</td><td>⚠️ Cursorとの差は拡大傾向</td></tr>
+</tbody>
+</table></div>
+<p>詳細は <a href='/lab/ai-tools/v7/'>AI開発ツール比較 第7回</a> をご覧ください。</p>
+
+<h2>👤 BYOK自己防衛時代 — AI開発者ピックアップ 第7回</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>プロジェクト</th><th>Stars / 特徴</th><th>注目点</th></tr></thead>
+<tbody>
+<tr><td><strong>Cline</strong></td><td>59K Stars</td><td>VS Code BYOK標準。サブエージェント＋CLI 2.0対応</td></tr>
+<tr><td><strong>OpenHands</strong></td><td>70K Stars</td><td>自律型エージェントのOSS本命。無料BYOKティア</td></tr>
+<tr><td><strong>OpenCode</strong></td><td>129K Stars</td><td>ターミナルネイティブ。75+ LLMプロバイダー対応</td></tr>
+<tr><td><strong>LLM AI Router</strong></td><td>完全無料</td><td>50+プロバイダーを1エンドポイントでルーティング</td></tr>
+</tbody>
+</table></div>
+<p>詳細は <a href='/lab/ai-developers/v7/'>AI開発者ピックアップ 第7回</a> をご覧ください。</p>
+
+<h2>📊 推論コストの壁 — 4大トレンド</h2>
+<div class="table-scroll"><table>
+<thead><tr><th>#</th><th>トレンド</th><th>インパクト</th></tr></thead>
+<tbody>
+<tr><td>01</td><td><strong>推論コストの壁</strong></td><td>Gartner:「単価は90%下がるが総支出は80%増」。サブスク定額モデルの構造的限界が露呈</td></tr>
+<tr><td>02</td><td><strong>マルチモデル必須化</strong></td><td>日常/開発/設計の3層モデル運用が事実上の必須に。LLM AI Routerで自動フェイルオーバー</td></tr>
+<tr><td>03</td><td><strong>MCPセキュリティリスク</strong></td><td>APIリダイレクト攻撃の実例発覚。npm初期と同じサプライチェーン攻撃リスクが浮上</td></tr>
+<tr><td>04</td><td><strong>OSSモデルの出自問題</strong></td><td>Composer 2論争で「プロベナンス（来歴）表示」が新たな業界標準要件に</td></tr>
+</tbody>
+</table></div>
+<p>詳細は <a href='/lab/ai-trends/v7/'>AI開発トレンド 第7回</a> をご覧ください。</p>
+
+<h2>🔑 今週の4断層</h2>
+<ul>
+<li><strong>コスト断層</strong>: 定額サブスク≠使い放題。推論コストがエージェント時代に構造的に破綻</li>
+<li><strong>運用断層</strong>: シングルモデル→マルチモデル必須。「Opus枯渇→自動で別モデルへ」が標準に</li>
+<li><strong>セキュリティ断層</strong>: MCPスキル経由のサイレントAPI乗っ取り。.claude/settings.json要確認</li>
+<li><strong>信頼断層</strong>: 「どこのモデルを使っているか」を隠す時代は終わり。プロベナンスが競争軸に</li>
+</ul>
+
+<h2>🎯 今週の結論</h2>
+<ul>
+<li><strong>最大の問題</strong>: サブスク「使い放題」の破綻（Antigravity＆Claude双方）</li>
+<li><strong>唯一の正解</strong>: マルチモデル体制（日常Sonnet/Flash → ここぞのOpus）</li>
+<li><strong>自己防衛策</strong>: BYOK型OSSエージェント（Cline/OpenHands/OpenCode）＋LLM AI Router</li>
+<li><strong>無料最強</strong>: Gemini Code Assist（IDE Plugin、変わらず）</li>
+</ul>
+<p>当サイトはAntigravityで開発中。Opus使用はアーキテクチャ設計時のみに限定し、日常はSonnet+Geminiのマルチモデル体制で運用しています。次回もお楽しみに！</p>
+
+<p><strong>LAB第7回の全ページ:</strong></p>
+<ul>
+<li><a href='/lab/ai-tools/v7/'>🛠️ AI開発ツール比較 第7回</a></li>
+<li><a href='/lab/ai-developers/v7/'>👤 AI開発者ピックアップ 第7回</a></li>
+<li><a href='/lab/ai-trends/v7/'>📊 AI開発トレンド 第7回</a></li>
+</ul>
