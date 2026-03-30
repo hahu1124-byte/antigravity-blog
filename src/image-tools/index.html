@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>画像変換・圧縮ツール | Gravity Portal</title>
-    <meta name="description" content="ブラウザ完結で画像フォーマット変換（PNG/JPEG/WebP）、リサイズ、圧縮が可能。ファイルはサーバーに送信されません。">
+    <meta name="description" content="ブラウザ完結で画像フォーマット変換（PNG/JPEG/WebP/AVIF）、リサイズ、圧縮が可能。ファイルはサーバーに送信されません。">
     <link rel="stylesheet" href="image-tools.css">
 </head>
 
@@ -13,7 +13,7 @@
     <div id="app">
         <header class="tool-header">
             <h1 class="tool-title">🖼️ 画像変換・圧縮</h1>
-            <p class="tool-subtitle">PNG / JPEG / WebP の変換・リサイズ・圧縮 — ブラウザ完結・ファイル送信なし</p>
+            <p class="tool-subtitle">PNG / JPEG / WebP / AVIF の変換・リサイズ・圧縮 — ブラウザ完結・ファイル送信なし</p>
         </header>
 
         <!-- ドロップゾーン -->
@@ -27,43 +27,75 @@
 
         <!-- 変換設定パネル -->
         <div class="settings-panel hidden" id="settings-panel">
-            <div class="settings-row">
-                <div class="setting-group">
-                    <label for="format-select">出力フォーマット</label>
-                    <select id="format-select">
-                        <option value="webp">WebP</option>
-                        <option value="jpeg">JPEG</option>
-                        <option value="png">PNG</option>
-                        <option value="avif">AVIF (次世代)</option>
-                        <option value="ico">ICO (favicon)</option>
-                        <option value="base64">Base64 テキスト</option>
-                    </select>
-                </div>
-                <div class="setting-group">
-                    <label for="quality-slider">品質: <span id="quality-value">85</span>%</label>
-                    <input type="range" id="quality-slider" min="1" max="100" value="85">
-                    <div class="quality-hints">
-                        <span>低品質・小サイズ</span>
-                        <span>高品質・大サイズ</span>
-                    </div>
-                </div>
-                <div class="setting-group">
-                    <label for="resize-select">リサイズ</label>
-                    <select id="resize-select">
-                        <option value="none">変更なし</option>
-                        <option value="1920">最大幅 1920px</option>
-                        <option value="1280">最大幅 1280px</option>
-                        <option value="1024">最大幅 1024px</option>
-                        <option value="800">最大幅 800px</option>
-                        <option value="640">最大幅 640px</option>
-                        <option value="custom">カスタム</option>
-                    </select>
-                </div>
-                <div class="setting-group hidden" id="custom-size-group">
-                    <label for="custom-width">幅 (px)</label>
-                    <input type="number" id="custom-width" min="1" max="10000" value="800" placeholder="幅">
+            <!-- 出力フォーマット -->
+            <div class="settings-section">
+                <div class="section-label">出力フォーマット</div>
+                <div class="format-chips" id="format-chips">
+                    <button class="format-chip active" data-fmt="original">元形式のまま</button>
+                    <button class="format-chip" data-fmt="webp">WebP</button>
+                    <button class="format-chip" data-fmt="jpeg">JPEG</button>
+                    <button class="format-chip" data-fmt="png">PNG</button>
+                    <button class="format-chip" data-fmt="avif">AVIF</button>
+                    <button class="format-chip" data-fmt="ico">ICO</button>
+                    <button class="format-chip" data-fmt="base64">Base64</button>
                 </div>
             </div>
+
+            <!-- 品質 -->
+            <div class="settings-section" id="quality-section">
+                <div class="section-label">
+                    <span>品質</span>
+                    <span class="quality-badge" id="quality-value">90%</span>
+                </div>
+                <input type="range" id="quality-slider" min="1" max="100" value="90">
+                <div class="quality-hints">
+                    <span>低品質・小サイズ</span>
+                    <span>高品質・大サイズ</span>
+                </div>
+            </div>
+
+            <!-- リサイズ -->
+            <div class="settings-section" id="resize-section">
+                <div class="section-label">リサイズ</div>
+                <div class="resize-presets" id="resize-presets">
+                    <button class="resize-preset" data-pct="25">25%</button>
+                    <button class="resize-preset" data-pct="50">50%</button>
+                    <button class="resize-preset" data-pct="75">75%</button>
+                    <button class="resize-preset" data-pct="90">90%</button>
+                    <button class="resize-preset active" data-pct="100">100%</button>
+                    <button class="resize-preset" data-pct="custom">カスタム</button>
+                </div>
+
+                <!-- カスタムサイズ -->
+                <div class="custom-size-panel hidden" id="custom-size-panel">
+                    <div class="custom-size-row">
+                        <div class="custom-size-field">
+                            <label>幅</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="custom-width-pct" min="1" max="1000" value="100" placeholder="100">
+                                <span class="unit">%</span>
+                            </div>
+                        </div>
+                        <div class="custom-size-sep">×</div>
+                        <div class="custom-size-field">
+                            <label>高さ</label>
+                            <div class="input-with-unit">
+                                <input type="number" id="custom-height-pct" min="1" max="1000" value="100" placeholder="100">
+                                <span class="unit">%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="aspect-lock-row">
+                        <button class="aspect-lock-btn active" id="aspect-lock-btn" title="アスペクト比を維持">
+                            <span class="lock-icon" id="lock-icon">🔗</span>
+                            <span>アスペクト比を維持</span>
+                        </button>
+                    </div>
+                    <div class="size-preview" id="size-preview"></div>
+                </div>
+            </div>
+
+            <!-- アクションボタン -->
             <div class="settings-actions">
                 <button class="btn-primary" id="convert-btn">🔄 一括変換</button>
                 <button class="btn-secondary" id="clear-btn">🗑️ クリア</button>
@@ -85,7 +117,7 @@
                 <h2 class="results-title">✅ 変換結果</h2>
                 <div class="results-summary" id="results-summary"></div>
                 <button class="btn-secondary" id="clear-results-btn">🗑️ 結果を削除</button>
-                <button class="btn-primary" id="download-all-btn">📦 すべてダウンロード</button>
+                <button class="btn-primary" id="download-all-btn">📦 すべてダウンロード (ZIP)</button>
             </div>
             <div class="result-items" id="result-items"></div>
         </div>
@@ -94,9 +126,9 @@
         <footer class="tool-footer">
             <p>🔒 すべての処理はブラウザ内で完結。画像がサーバーに送信されることはありません。</p>
             <p>📋 1ファイル50MB・最大50枚まで（ブラウザのメモリ保護のための制限です）</p>
-
         </footer>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="image-tools.js"></script>
 </body>
 
