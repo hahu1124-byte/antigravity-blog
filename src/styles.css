@@ -7,7 +7,7 @@
 :root {
     --bg-primary: rgba(15, 16, 23, 0.85);
     --bg-secondary: rgba(22, 24, 34, 0.85);
-    --bg-card: #1e2030;
+    --bg-card: rgba(30, 32, 48, 0.75);
     --text-primary: #f0f0f8;
     --text-secondary: #a0aec0;
     --text-muted: #718096;
@@ -34,7 +34,7 @@
 html[data-theme="light"] {
     --bg-primary: rgba(245, 245, 250, 0.85);
     --bg-secondary: rgba(238, 238, 245, 0.85);
-    --bg-card: #ffffff;
+    --bg-card: rgba(255, 255, 255, 0.75);
     --text-primary: #1a1a2e;
     --text-secondary: #4a5568;
     --text-muted: #718096;
@@ -223,6 +223,8 @@ a:hover {
     text-decoration: none;
     color: inherit;
     transition: all var(--transition-spring);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .article-card:hover {
@@ -318,6 +320,8 @@ a:hover {
     border-radius: var(--radius-lg);
     padding: 2.5rem 3rem;
     margin-bottom: 2rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .article-header {
@@ -578,6 +582,8 @@ html[data-theme="light"] .content img {
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     transition: all var(--transition-spring);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .post-nav-link:hover {
