@@ -1,7 +1,7 @@
 {
-  "lastUpdated": "2026-03-29T16:46:37.841Z",
+  "lastUpdated": "2026-04-01T17:23:43.062Z",
   "source": "pachinko-spec.info",
-  "totalMachines": 1074,
+  "totalMachines": 1075,
   "machines": [
     {
       "name": "e CYBORG 009 RULE OF SACRIFICE",
@@ -1979,15 +1979,15 @@
     {
       "name": "e一方通行 最狂",
       "type": "ミドル",
-      "prob": 14.82,
+      "prob": 14.84,
       "baseProbability": 253.95,
-      "borderEquiv": 26.46,
+      "borderEquiv": 26.5,
       "rb": 140,
-      "singleSpinPayout": 9.45,
-      "avgAcquired": 2398.78,
-      "avgChain": 1.86,
-      "realContRate": 69.63,
-      "entryRate": 69.65,
+      "singleSpinPayout": 9.43,
+      "avgAcquired": 2397.34,
+      "avgChain": 1.85,
+      "realContRate": 69.6,
+      "entryRate": 69.61,
       "rushRate": 0,
       "rushType": "",
       "yutimeTrigger": 0,
@@ -1999,8 +1999,8 @@
       "releaseDate": "2026-07-06",
       "maker": "藤商事系列",
       "sourceUrl": "https://pachinko-spec.info/spec/169404/",
-      "avgChainCalc": 2.6,
-      "calcProb": 6.98
+      "avgChainCalc": 2.59,
+      "calcProb": 7.02
     },
     {
       "name": "e黄門ちゃま 寿限無",
@@ -3085,16 +3085,16 @@
     {
       "name": "e転生したらスライムだった件2",
       "type": "ハイミドル",
-      "prob": 9.13,
+      "prob": 9.38,
       "baseProbability": 349.99,
-      "borderEquiv": 16.3,
+      "borderEquiv": 16.75,
       "rb": 140,
-      "singleSpinPayout": 15.33,
-      "avgAcquired": 5368.17,
+      "singleSpinPayout": 14.93,
+      "avgAcquired": 5227.55,
       "avgChain": 3.83,
-      "realContRate": 76.69,
-      "entryRate": 65.92,
-      "rushRate": 103.67,
+      "realContRate": 76.78,
+      "entryRate": 65.94,
+      "rushRate": 103.68,
       "rushType": "確変",
       "yutimeTrigger": 0,
       "yutimeSpins": 0,
@@ -3108,8 +3108,8 @@
       "aliases": [
         "転スラ"
       ],
-      "avgChainCalc": 3.17,
-      "calcProb": 11.4
+      "avgChainCalc": 3.18,
+      "calcProb": 11.36
     },
     {
       "name": "e東京リベンジャーズ",
@@ -11578,16 +11578,16 @@
     {
       "name": "PシャカRUSH Z Jr.",
       "type": "ライト(甘デジ)",
-      "prob": 5.07,
+      "prob": 5.06,
       "baseProbability": 98.7,
-      "borderEquiv": 17.52,
+      "borderEquiv": 17.49,
       "rb": 72.33,
-      "singleSpinPayout": 14.27,
-      "avgAcquired": 1409.53,
+      "singleSpinPayout": 14.29,
+      "avgAcquired": 1410.74,
       "avgChain": 4.13,
-      "realContRate": 91.59,
-      "entryRate": 69.7,
-      "rushRate": 104.45,
+      "realContRate": 91.61,
+      "entryRate": 69.71,
+      "rushRate": 104.47,
       "rushType": "確変",
       "yutimeTrigger": 0,
       "yutimeSpins": 50,
@@ -11598,7 +11598,7 @@
       "releaseDate": "2026-06-22",
       "maker": "マルホン",
       "sourceUrl": "https://pachinko-spec.info/spec/169411/",
-      "avgChainCalc": 8.72,
+      "avgChainCalc": 8.74,
       "calcProb": 2.28
     },
     {
@@ -29297,6 +29297,30 @@
       ],
       "avgChainCalc": 2.77,
       "calcProb": 5.05
+    },
+    {
+      "name": "遊moreLT Pエガブレイブ VVV",
+      "type": "その他",
+      "prob": 2.19,
+      "baseProbability": 0,
+      "borderEquiv": 7.22,
+      "rb": 75.86,
+      "singleSpinPayout": 34.77,
+      "avgAcquired": 598.1,
+      "avgChain": 1.23,
+      "realContRate": 56.92,
+      "entryRate": 0,
+      "rushRate": 1.83,
+      "rushType": "確変",
+      "yutimeTrigger": 0,
+      "yutimeSpins": 0,
+      "holdOver": 0,
+      "normalJitan": 0,
+      "hesoAvgRounds": 5.5,
+      "denchuAvgRounds": 8.36,
+      "releaseDate": "2026-06-08",
+      "maker": "豊丸産業",
+      "sourceUrl": "https://pachinko-spec.info/spec/169656/"
     }
   ]
 }
