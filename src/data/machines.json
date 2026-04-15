@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-12T16:51:20.414Z",
+  "lastUpdated": "2026-04-15T17:24:16.078Z",
   "source": "pachinko-spec.info",
   "totalMachines": 1083,
   "machines": [
@@ -3533,15 +3533,15 @@
     {
       "name": "e魔法少女リリカルなのは",
       "type": "ハイミドル",
-      "prob": 9.85,
+      "prob": 9.86,
       "baseProbability": 348.6,
-      "borderEquiv": 17.59,
+      "borderEquiv": 17.61,
       "rb": 140,
       "singleSpinPayout": 14.21,
-      "avgAcquired": 4956.06,
+      "avgAcquired": 4954.39,
       "avgChain": 4,
-      "realContRate": 74.59,
-      "entryRate": 74.55,
+      "realContRate": 74.58,
+      "entryRate": 74.57,
       "rushRate": 54.29,
       "rushType": "確変",
       "yutimeTrigger": 0,
@@ -20296,16 +20296,16 @@
     {
       "name": "Pルパン三世 ONE COLLECTION 100ver.",
       "type": "ライト(甘デジ)",
-      "prob": 5.39,
+      "prob": 5.42,
       "baseProbability": 100.11,
-      "borderEquiv": 18.02,
-      "rb": 74.77,
-      "singleSpinPayout": 13.87,
-      "avgAcquired": 1389.41,
-      "avgChain": 4.17,
+      "borderEquiv": 16.99,
+      "rb": 79.74,
+      "singleSpinPayout": 14.71,
+      "avgAcquired": 1473.36,
+      "avgChain": 3.12,
       "realContRate": 79.52,
-      "entryRate": 79.61,
-      "rushRate": 9.44,
+      "entryRate": 62.5,
+      "rushRate": 50.02,
       "rushType": "確変",
       "yutimeTrigger": 0,
       "yutimeSpins": 0,
@@ -20319,8 +20319,8 @@
       "aliases": [
         "ルパン"
       ],
-      "avgChainCalc": 4.09,
-      "calcProb": 3.25
+      "avgChainCalc": 3.43,
+      "calcProb": 4.02
     },
     {
       "name": "Pルパン三世 THE FIRST",
