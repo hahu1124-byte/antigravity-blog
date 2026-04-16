@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-15T17:24:16.078Z",
+  "lastUpdated": "2026-04-16T17:40:16.332Z",
   "source": "pachinko-spec.info",
   "totalMachines": 1083,
   "machines": [
@@ -1924,15 +1924,15 @@
     {
       "name": "eワールドダイスター",
       "type": "ライトミドル",
-      "prob": 9.08,
+      "prob": 9.07,
       "baseProbability": 159.92,
-      "borderEquiv": 16.81,
+      "borderEquiv": 16.79,
       "rb": 135.02,
-      "singleSpinPayout": 14.88,
-      "avgAcquired": 2380.33,
+      "singleSpinPayout": 14.89,
+      "avgAcquired": 2381.41,
       "avgChain": 4.57,
       "realContRate": 90.51,
-      "entryRate": 90.51,
+      "entryRate": 90.5,
       "rushRate": 0,
       "rushType": "",
       "yutimeTrigger": 0,
