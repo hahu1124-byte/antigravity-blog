@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-04-19T16:52:10.193Z",
+  "lastUpdated": "2026-04-20T17:24:55.967Z",
   "source": "pachinko-spec.info",
   "totalMachines": 1084,
   "machines": [
@@ -2547,14 +2547,14 @@
     {
       "name": "e結城友奈は勇者である 極限7500",
       "type": "ハイミドル",
-      "prob": 9.52,
+      "prob": 9.53,
       "baseProbability": 349.99,
-      "borderEquiv": 17,
+      "borderEquiv": 17.02,
       "rb": 140,
       "singleSpinPayout": 14.7,
-      "avgAcquired": 5147.86,
+      "avgAcquired": 5146.65,
       "avgChain": 2.33,
-      "realContRate": 75.59,
+      "realContRate": 75.56,
       "entryRate": 63.51,
       "rushRate": 0,
       "rushType": "",
@@ -4972,7 +4972,9 @@
       "denchuAvgRounds": 8.23,
       "releaseDate": "2020-09-07",
       "maker": "銀座",
-      "sourceUrl": "https://pachinko-spec.info/spec/400/",
+      "aliases": [
+        "ROAD TO EDEN"
+      ],
       "avgChainCalc": 6.76
     },
     {
@@ -5722,7 +5724,9 @@
       "denchuAvgRounds": 7.9,
       "releaseDate": "2020-08-17",
       "maker": "サンセイR&D",
-      "sourceUrl": "https://pachinko-spec.info/spec/162/",
+      "aliases": [
+        "GI DREAM駿"
+      ],
       "avgChainCalc": 2.58,
       "calcProb": 6.45
     },
@@ -6915,8 +6919,8 @@
       "denchuAvgRounds": 6.5,
       "releaseDate": "2020-08-03",
       "maker": "京楽産業.",
-      "sourceUrl": "https://pachinko-spec.info/spec/98/",
       "aliases": [
+        "ぱちんこ新必殺仕置人TURBO",
         "仕置人",
         "必殺"
       ],
@@ -7081,7 +7085,11 @@
       "denchuAvgRounds": 6.1,
       "releaseDate": "2020-08-17",
       "maker": "三共系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/179/",
+      "aliases": [
+        "アクエリ",
+        "AQUARION",
+        "フィーバーアクエリオン ALL STARS LIGHT"
+      ],
       "avgChainCalc": 3.48,
       "calcProb": 4.96
     },
@@ -7243,7 +7251,9 @@
       "denchuAvgRounds": 7.3,
       "releaseDate": "2020-05-18",
       "maker": "三共系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/142/",
+      "aliases": [
+        "フィーバートータル・イクリプスLIGHT"
+      ],
       "avgChainCalc": 1.51,
       "calcProb": 11.45
     },
@@ -7269,7 +7279,12 @@
       "denchuAvgRounds": 7.6,
       "releaseDate": "2020-07-20",
       "maker": "三共系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/129/",
+      "aliases": [
+        "バイハ",
+        "バイオ",
+        "BIOHAZARD",
+        "フィーバーバイオハザード リベレーションズ2 LIGHT"
+      ],
       "avgChainCalc": 2.88,
       "calcProb": 5.71
     },
@@ -7577,7 +7592,9 @@
       "denchuAvgRounds": 6.7,
       "releaseDate": "2020-10-05",
       "maker": "三洋系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/5994/",
+      "aliases": [
+        "ヤッターマンVVV"
+      ],
       "avgChainCalc": 7.76,
       "calcProb": 2.03
     },
@@ -8675,7 +8692,10 @@
       "denchuAvgRounds": 6.04,
       "releaseDate": "2020-09-07",
       "maker": "ニューギン系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/22341/",
+      "aliases": [
+        "GODZILLA",
+        "真・怪獣王ゴジラNL-K1"
+      ],
       "avgChainCalc": 2.25,
       "calcProb": 5.98
     },
@@ -9604,7 +9624,9 @@
       "denchuAvgRounds": 6.4,
       "releaseDate": "2020-08-17",
       "maker": "メーシー",
-      "sourceUrl": "https://pachinko-spec.info/spec/127/",
+      "aliases": [
+        "アナザーゴッドハーデス ザ・ワールド"
+      ],
       "avgChainCalc": 4.75,
       "calcProb": 7.12
     },
@@ -10157,7 +10179,9 @@
       "denchuAvgRounds": 6.65,
       "releaseDate": "2020-10-19",
       "maker": "大一系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/906/",
+      "aliases": [
+        "おそ松さんのゴールデンロード"
+      ],
       "avgChainCalc": 1.83,
       "calcProb": 25.73
     },
@@ -10209,7 +10233,9 @@
       "denchuAvgRounds": 3.85,
       "releaseDate": "2020-08-03",
       "maker": "西陣系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/140/",
+      "aliases": [
+        "おばけらんど怪GLS"
+      ],
       "avgChainCalc": 8.69,
       "calcProb": 2.89
     },
@@ -10451,7 +10477,11 @@
       "denchuAvgRounds": 4.56,
       "releaseDate": "2020-07-13",
       "maker": "マルホン",
-      "sourceUrl": "https://pachinko-spec.info/spec/138/",
+      "aliases": [
+        "カナカナ2〜桃汁100％〜",
+        "カナカナ2",
+        "カナカナ"
+      ],
       "calcProb": 12.46
     },
     {
@@ -10904,7 +10934,9 @@
       "denchuAvgRounds": 5.7,
       "releaseDate": "2020-08-17",
       "maker": "高尾",
-      "sourceUrl": "https://pachinko-spec.info/spec/230/",
+      "aliases": [
+        "クイーンズブレイド3 ナナエル"
+      ],
       "avgChainCalc": 3.27,
       "calcProb": 6.25
     },
@@ -12101,10 +12133,15 @@
       "denchuAvgRounds": 6.15,
       "releaseDate": "2020-09-07",
       "maker": "三洋物産",
-      "sourceUrl": "https://pachinko-spec.info/spec/243/",
       "aliases": [
         "海",
-        "ウミ"
+        "うみ",
+        "ウミ",
+        "UMI",
+        "スーパー海",
+        "スパ海",
+        "スーパー海物語 IN JAPAN 2 金富士 199",
+        "スーパー海物語 IN JAPAN 2 金富士 1"
       ],
       "avgChainCalc": 3.72
     },
@@ -12130,10 +12167,15 @@
       "denchuAvgRounds": 7.15,
       "releaseDate": "2020-09-07",
       "maker": "三洋物産",
-      "sourceUrl": "https://pachinko-spec.info/spec/249/",
       "aliases": [
         "海",
-        "ウミ"
+        "うみ",
+        "ウミ",
+        "UMI",
+        "スーパー海",
+        "スパ海",
+        "スーパー海物語 IN JAPAN 2 金富士 319",
+        "スーパー海物語 IN JAPAN 2 金富士 31"
       ],
       "avgChainCalc": 4.02
     },
@@ -12852,7 +12894,9 @@
       "denchuAvgRounds": 7,
       "releaseDate": "2020-08-03",
       "maker": "ニューギン系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/154/",
+      "aliases": [
+        "ダンガンロンパ"
+      ],
       "avgChainCalc": 3.96,
       "calcProb": 9.3
     },
@@ -12960,7 +13004,9 @@
       "denchuAvgRounds": 4.55,
       "releaseDate": "2020-08-17",
       "maker": "西陣系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/106589/",
+      "aliases": [
+        "ツインループ花満開GLA"
+      ],
       "avgChainCalc": 1.5,
       "calcProb": 14.75
     },
@@ -15525,10 +15571,10 @@
       "denchuAvgRounds": 6.52,
       "releaseDate": "2020-10-19",
       "maker": "京楽系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/4703/",
       "aliases": [
         "まどマギ",
-        "まどか"
+        "まどか",
+        "ぱちんこ劇場版魔法少女まどか☆マギカ キュゥべえ"
       ],
       "calcProb": 32.73
     },
@@ -16103,9 +16149,11 @@
       "denchuAvgRounds": 9,
       "releaseDate": "2020-07-20",
       "maker": "大一商会",
-      "sourceUrl": "https://pachinko-spec.info/spec/12841/",
       "aliases": [
-        "ひぐらし"
+        "ひぐらし",
+        "HIGURASHI",
+        "ひぐらしのなく頃に～憩～",
+        "ひぐらしのなく頃に"
       ],
       "avgChainCalc": 5.5,
       "calcProb": 2.75
@@ -16918,7 +16966,10 @@
       "denchuAvgRounds": 4.78,
       "releaseDate": "2020-10-05",
       "maker": "三共系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/388/",
+      "aliases": [
+        "フィーバークィーンⅡ",
+        "フィーバークィーン"
+      ],
       "avgChainCalc": 5.06
     },
     {
@@ -16968,7 +17019,9 @@
       "denchuAvgRounds": 4.48,
       "releaseDate": "2020-10-05",
       "maker": "三共系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/391/",
+      "aliases": [
+        "フィーバークィーンⅡ ごらく"
+      ],
       "avgChainCalc": 5.06
     },
     {
@@ -17362,7 +17415,13 @@
       "denchuAvgRounds": 6.6,
       "releaseDate": "2020-07-20",
       "maker": "三共系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/120/",
+      "aliases": [
+        "バイハ",
+        "バイオ",
+        "BIOHAZARD",
+        "フィーバーバイオハザード リベレーションズ2",
+        "フィーバーバイオハザード リベレーションズ"
+      ],
       "avgChainCalc": 4.3,
       "calcProb": 7.66
     },
@@ -18917,7 +18976,9 @@
       "denchuAvgRounds": 4.9,
       "releaseDate": "2020-07-20",
       "maker": "竹屋",
-      "sourceUrl": "https://pachinko-spec.info/spec/136/",
+      "aliases": [
+        "ミニミニモンスター4a"
+      ],
       "avgChainCalc": 4.83,
       "calcProb": 5.45
     },
@@ -18943,7 +19004,9 @@
       "denchuAvgRounds": 8.2,
       "releaseDate": "2020-07-20",
       "maker": "竹屋",
-      "sourceUrl": "https://pachinko-spec.info/spec/134/",
+      "aliases": [
+        "ミニミニモンスター4LM"
+      ],
       "avgChainCalc": 5.58,
       "calcProb": 5.45
     },
@@ -19319,7 +19382,9 @@
       "denchuAvgRounds": 7,
       "releaseDate": "2020-07-06",
       "maker": "西陣系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/105/",
+      "aliases": [
+        "モモキュンソードMC"
+      ],
       "avgChainCalc": 3.91,
       "calcProb": 7.86
     },
@@ -19879,32 +19944,35 @@
     },
     {
       "name": "Pリング 呪いの7日間2",
-      "type": "ハイミドル",
-      "prob": 8.97,
-      "baseProbability": 319.69,
-      "borderEquiv": 17.25,
-      "rb": 130,
-      "singleSpinPayout": 14.5,
-      "avgAcquired": 4004.04,
-      "avgChain": 4.11,
+      "type": "ライトミドル",
+      "prob": 8.16,
+      "baseProbability": 199.8,
+      "borderEquiv": 17,
+      "rb": 120,
+      "singleSpinPayout": 14.72,
+      "avgAcquired": 2613.48,
+      "avgChain": 3.27,
       "realContRate": 99.97,
-      "entryRate": 75.99,
-      "rushRate": 21.32,
+      "entryRate": 99.96,
+      "rushRate": 15.09,
       "rushType": "確変",
-      "yutimeTrigger": 885,
-      "yutimeSpins": 1214,
+      "yutimeTrigger": 599,
+      "yutimeSpins": 759,
       "holdOver": 4,
       "normalJitan": 0,
-      "hesoAvgRounds": 5.12,
-      "denchuAvgRounds": 7.58,
-      "releaseDate": "2020-05-11",
-      "maker": "藤商事系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/90/",
+      "hesoAvgRounds": 4.36,
+      "denchuAvgRounds": 6.95,
+      "releaseDate": "2020-10-05",
+      "maker": "藤商事",
       "aliases": [
         "リング",
+        "RING",
+        "呪いの7日間",
+        "リング 呪いの7日間2",
+        "リング 呪いの7日間",
         "貞子"
       ],
-      "calcProb": 62.44
+      "calcProb": 45.83
     },
     {
       "name": "Pリング 呪いの7日間2",
@@ -20326,12 +20394,12 @@
       "baseProbability": 100.11,
       "borderEquiv": 16.99,
       "rb": 79.74,
-      "singleSpinPayout": 14.71,
-      "avgAcquired": 1473.36,
+      "singleSpinPayout": 14.72,
+      "avgAcquired": 1474.25,
       "avgChain": 3.12,
-      "realContRate": 79.52,
-      "entryRate": 62.5,
-      "rushRate": 50.02,
+      "realContRate": 79.53,
+      "entryRate": 62.52,
+      "rushRate": 50.01,
       "rushType": "確変",
       "yutimeTrigger": 0,
       "yutimeSpins": 0,
@@ -21382,7 +21450,9 @@
       "denchuAvgRounds": 9.6,
       "releaseDate": "2020-08-03",
       "maker": "藤商事系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/108/",
+      "aliases": [
+        "遠山の金さん2 遠山桜と華の密偵JUD"
+      ],
       "avgChainCalc": 2.84,
       "calcProb": 9.39
     },
@@ -22343,7 +22413,9 @@
       "denchuAvgRounds": 6.96,
       "releaseDate": "2020-10-19",
       "maker": "高尾",
-      "sourceUrl": "https://pachinko-spec.info/spec/395/",
+      "aliases": [
+        "学園黙示録ハイスクール･オブ･ザ･デッド2 弾丸"
+      ],
       "avgChainCalc": 3.72,
       "calcProb": 12.58
     },
@@ -23080,7 +23152,13 @@
       "denchuAvgRounds": 7.8,
       "releaseDate": "2020-08-03",
       "maker": "サミー系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/103/",
+      "aliases": [
+        "エウレカ",
+        "EUREKA",
+        "交響詩篇",
+        "エウレカセブン",
+        "交響詩篇エウレカセブン HIｰEVOLUTION ZERO"
+      ],
       "avgChainCalc": 4.24,
       "calcProb": 7.05
     },
@@ -24366,10 +24444,14 @@
       "denchuAvgRounds": 8.25,
       "releaseDate": "2020-10-05",
       "maker": "ビスティ",
-      "sourceUrl": "https://pachinko-spec.info/spec/353/",
       "aliases": [
         "エヴァ",
-        "EVA"
+        "EVA",
+        "えゔぁ",
+        "ヱヴァ",
+        "新世紀エヴァンゲリオン",
+        "新世紀エヴァンゲリオン 決戦 ～真紅～",
+        "新世紀エヴァンゲリオン 決戦"
       ],
       "avgChainCalc": 4.45,
       "calcProb": 9.83
@@ -24886,10 +24968,10 @@
       "denchuAvgRounds": 7.6,
       "releaseDate": "2020-10-05",
       "maker": "サンセイR&D",
-      "sourceUrl": "https://pachinko-spec.info/spec/393/",
       "aliases": [
         "ガロ",
-        "GARO"
+        "GARO",
+        "真・牙狼RS"
       ],
       "avgChainCalc": 5.57,
       "calcProb": 8.47
@@ -25915,33 +25997,33 @@
     },
     {
       "name": "P戦国乙女6 暁の関ヶ原",
-      "type": "ミドル",
-      "prob": 9.77,
-      "baseProbability": 222.91,
-      "borderEquiv": 17.45,
-      "rb": 140,
-      "singleSpinPayout": 14.33,
-      "avgAcquired": 2995.63,
-      "avgChain": 3.54,
-      "realContRate": 80.06,
-      "entryRate": 80.05,
-      "rushRate": 53.32,
+      "type": "ライト(甘デジ)",
+      "prob": 6.31,
+      "baseProbability": 299.17,
+      "borderEquiv": 17.53,
+      "rb": 90,
+      "singleSpinPayout": 14.26,
+      "avgAcquired": 1424.64,
+      "avgChain": 2.91,
+      "realContRate": 77.01,
+      "entryRate": 77.09,
+      "rushRate": 44.53,
       "rushType": "確変",
-      "yutimeTrigger": 666,
+      "yutimeTrigger": 777,
       "yutimeSpins": 171,
       "holdOver": 4,
       "normalJitan": 71,
-      "hesoAvgRounds": 3,
+      "hesoAvgRounds": 4.06,
       "denchuAvgRounds": 2,
-      "releaseDate": "2020-10-05",
+      "releaseDate": "2021-06-07",
       "maker": "平和系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/95/",
+      "sourceUrl": "https://pachinko-spec.info/spec/24864/",
       "aliases": [
         "乙女",
         "戦乙"
       ],
-      "avgChainCalc": 4.32,
-      "calcProb": 23.12
+      "avgChainCalc": 3.68,
+      "calcProb": 31.76
     },
     {
       "name": "P戦国乙女6 暁の関ヶ原",
@@ -26866,8 +26948,8 @@
       "denchuAvgRounds": 5.8,
       "releaseDate": "2020-09-14",
       "maker": "高尾",
-      "sourceUrl": "https://pachinko-spec.info/spec/5989/",
       "aliases": [
+        "弾球黙示録カイジ沼4 ざわっ…",
         "カイジ"
       ],
       "avgChainCalc": 3.35,
@@ -27420,7 +27502,13 @@
       "denchuAvgRounds": 7.9,
       "releaseDate": "2020-07-20",
       "maker": "高尾",
-      "sourceUrl": "https://pachinko-spec.info/spec/75/",
+      "aliases": [
+        "さだこ",
+        "SADAKO",
+        "貞子3D2〜呪われた12時間〜",
+        "貞子3D2",
+        "貞子3D"
+      ],
       "avgChainCalc": 4.71,
       "calcProb": 9.87
     },
@@ -28618,7 +28706,9 @@
       "denchuAvgRounds": 9,
       "releaseDate": "2020-08-17",
       "maker": "マルホン",
-      "sourceUrl": "https://pachinko-spec.info/spec/1165/",
+      "aliases": [
+        "鳳凰∞ ライトミドル"
+      ],
       "avgChainCalc": 5.06,
       "calcProb": 5.12
     },
@@ -29469,9 +29559,9 @@
       "denchuAvgRounds": 8.4,
       "releaseDate": "2020-09-07",
       "maker": "京楽系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/76/",
       "aliases": [
-        "ライダー"
+        "ライダー",
+        "RIDER"
       ],
       "avgChainCalc": 6.62,
       "calcProb": 6.36
@@ -29528,8 +29618,8 @@
       "denchuAvgRounds": 9,
       "releaseDate": "2020-10-05",
       "maker": "ニューギン系列",
-      "sourceUrl": "https://pachinko-spec.info/spec/401/",
       "aliases": [
+        "戦国パチンコP義風堂々!!",
         "義風"
       ],
       "avgChainCalc": 2.77,
