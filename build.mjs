@@ -956,6 +956,11 @@ ${m.yutimeTrigger>0?`<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回転</
     for (const [slug, name] of slugMap) { nameToSlug[name] = slug; }
     writeFileSync(join(OUTPUT_DIR, 'machine-db', 'slug-map.json'), JSON.stringify(nameToSlug), 'utf-8');
 
+    // stats.json — GP等が機種数を動的取得するための軽量ファイル
+    const stats = { machineCount: generated, builtAt: new Date().toISOString() };
+    writeFileSync(join(OUTPUT_DIR, 'data', 'stats.json'), JSON.stringify(stats), 'utf-8');
+    console.log(`📊 stats.json 出力完了 (machineCount: ${generated})`);
+
     // machine-db.js の allSlugs プレースホルダーにスラッグ一覧を埋め込み
     const machineDbJsPath = join(OUTPUT_DIR, 'machine-db', 'machine-db.js');
     if (existsSync(machineDbJsPath)) {
