@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-05-16T17:18:57.336Z",
+  "lastUpdated": "2026-05-17T17:16:52.553Z",
   "source": "pachinko-spec.info",
   "totalMachines": 1087,
   "machines": [
@@ -3608,29 +3608,31 @@
       "name": "e魔法少女まどか☆マギカ3 時間遡行～始まりの願い～",
       "type": "ハイミドル",
       "prob": 11.14,
-      "baseProbability": 0,
+      "baseProbability": 319.98,
       "borderEquiv": 19.89,
       "rb": 140,
       "singleSpinPayout": 12.57,
       "avgAcquired": 4022.67,
       "avgChain": 6.13,
-      "realContRate": 0,
-      "entryRate": 0,
+      "realContRate": 79.55,
+      "entryRate": 79.68,
       "rushRate": 35.18,
       "rushType": "確変",
       "yutimeTrigger": 0,
       "yutimeSpins": 0,
       "holdOver": 0,
       "normalJitan": 0,
-      "hesoAvgRounds": 0,
-      "denchuAvgRounds": 0,
+      "hesoAvgRounds": 3.07,
+      "denchuAvgRounds": 5,
       "releaseDate": "2026-03-02",
       "maker": "京楽産業.",
       "sourceUrl": "https://pachinko-spec.info/spec/166168/",
       "aliases": [
         "まどマギ",
         "まどか"
-      ]
+      ],
+      "avgChainCalc": 4.1,
+      "calcProb": 17.23
     },
     {
       "name": "e魔法少女リリカルなのは",
