@@ -3,6 +3,13 @@
     'use strict';
 
     const DATA_URL = '/data/machines.json';
+    const NEW_DAYS = 90;
+    const NOW_MS = Date.now();
+
+    function isNewMachine(releaseDate) {
+        if (!releaseDate) return false;
+        return (NOW_MS - new Date(releaseDate).getTime()) < NEW_DAYS * 86400000;
+    }
 
     let allMachines = [];
     let filteredMachines = [];
@@ -353,7 +360,8 @@
             const favClass = isFavorite(m.name) ? 'fav-active' : '';
             const favStar = isFavorite(m.name) ? '★' : '☆';
             let cells = `<td class="fav-cell"><button class="fav-btn ${favClass}" data-name="${esc(m.name)}" title="お気に入り">${favStar}</button></td>`;
-            cells += `<td class="machine-name" title="${esc(m.name)}">${esc(m.name)}</td>`;
+            const newBadge = isNewMachine(m.releaseDate) ? '<span class="new-badge">NEW</span>' : '';
+            cells += `<td class="machine-name" title="${esc(m.name)}">${newBadge}${esc(m.name)}</td>`;
             for (const col of columnOrder) {
                 if (!v[col]) continue;
                 cells += renderCell(col, m);
