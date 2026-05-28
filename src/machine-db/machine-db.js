@@ -3,7 +3,7 @@
     'use strict';
 
     const DATA_URL = '/data/machines.json';
-    const NEW_DAYS = 90;
+    const NEW_DAYS = 15;
     const NOW_MS = Date.now();
 
     function isNewMachine(releaseDate) {
