@@ -12,6 +12,8 @@
   var els = {
     machine: document.getElementById("machine"),
     machineNote: document.getElementById("machineNote"),
+    variantField: document.getElementById("variantField"),
+    variant: document.getElementById("variant"),
     exchange: document.getElementById("exchange"),
     step: document.getElementById("step"),
     ceilingSummary: document.getElementById("ceilingSummary"),
@@ -29,12 +31,27 @@
     return "¥" + sign + v;
   }
 
-  function getSpec() {
-    return specs[els.machine.selectedIndex] || null;
+  // variant選択を考慮した実効スペックを返す
+  function getActiveSpec() {
+    var spec = specs[els.machine.selectedIndex] || null;
+    if (!spec) return null;
+    if (!spec.variants || !spec.variants.length) return spec;
+    var idx = els.variant ? Math.max(0, els.variant.selectedIndex) : 0;
+    var v = spec.variants[idx] || spec.variants[0];
+    return {
+      id: spec.id,
+      name: spec.name,
+      ceilingG: v.ceilingG,
+      ceilingPayout: v.ceilingPayout,
+      gamePerMin: spec.gamePerMin || DEFAULT_GPM,
+      evTable: (v.evTable != null) ? v.evTable : (spec.evTable || []),
+      zones: v.zones || spec.zones,
+      note: v.note || spec.note,
+    };
   }
 
   // EVテーブルルックアップ（等価ベース→換金率補正）
-  // evTable がある場合: (ev_eq + cost) * (exchange/20) - cost
+  // evTable がある場合: データ点間を線形補間して ev_eq を算出
   // ない場合: ceilingPayout * exchange - cost（旧計算）
   function lookupEV(spec, g, exchange) {
     var remain = spec.ceilingG - g;
@@ -43,13 +60,23 @@
     if (!table || !table.length || g < table[0].g) {
       return spec.ceilingPayout * exchange - cost;
     }
-    var ev_eq = table[0].ev;
+    var lo = table[0];
+    var hi = null;
     for (var i = 0; i < table.length; i++) {
       if (table[i].g <= g) {
-        ev_eq = table[i].ev;
+        lo = table[i];
       } else {
+        hi = table[i];
         break;
       }
+    }
+    var ev_eq;
+    if (hi === null || lo.g === g) {
+      ev_eq = lo.ev;
+    } else {
+      // lo.g < g < hi.g の範囲を線形補間
+      var t = (g - lo.g) / (hi.g - lo.g);
+      ev_eq = lo.ev + t * (hi.ev - lo.ev);
     }
     return (ev_eq + cost) * (exchange / RENTAL_YEN) - cost;
   }
@@ -70,8 +97,8 @@
     }
     if (spec.zones) {
       spec.zones.forEach(function (z) {
-        set[z.startG] = true;
-        set[z.endG] = true;
+        if (z.startG <= spec.ceilingG) set[z.startG] = true;
+        if (z.endG <= spec.ceilingG) set[z.endG] = true;
       });
     }
     set[spec.ceilingG] = true;
@@ -79,7 +106,7 @@
   }
 
   function render() {
-    var spec = getSpec();
+    var spec = getActiveSpec();
     if (!spec) return;
 
     var exchange = currentExchange;
@@ -90,7 +117,7 @@
     els.payoutSummary.textContent = spec.ceilingPayout.toLocaleString("ja-JP") + " 枚";
     els.machineNote.textContent = spec.note || "";
 
-    // EV転換G数（EV=0になるG数）
+    // 期待値転換G数
     var breakEven = spec.ceilingG - Math.round((spec.ceilingPayout * exchange) / (COIN_PER_GAME * RENTAL_YEN));
     if (breakEven < 0) breakEven = 0;
     els.breakEvenG.textContent = breakEven.toLocaleString("ja-JP") + " G〜";
@@ -101,14 +128,19 @@
 
     gList.forEach(function (g) {
       var remain = spec.ceilingG - g;
-      var invest = remain * COIN_PER_GAME * RENTAL_YEN;
+      var cost = remain * COIN_PER_GAME * RENTAL_YEN;
       var ev = lookupEV(spec, g, exchange);
       var minutes = remain / gpm;
       var hourlyRate = minutes > 0 ? Math.round(ev / (minutes / 60)) : 0;
       var zone = getZoneAtG(spec.zones, g);
 
+      // 出率: (投資+EV)÷投資×100（100%がトントン、超えるとプラス）
+      var roi = (cost > 0) ? Math.round((cost + ev) / cost * 1000) / 10 : 100;
+      var roiStr = cost > 0 ? roi.toFixed(1) + "%" : "—";
+
       var evClass = ev >= 0 ? "ev-pos" : "ev-neg";
       var hourlyClass = hourlyRate >= 0 ? "ev-pos" : "ev-neg";
+      var roiClass = roi >= 100 ? "ev-pos" : "ev-neg";
       var rowClass = zone ? " row-zone" : (ev >= 0 ? " row-pos" : "");
       var zoneName = zone ? zone.name : "—";
 
@@ -116,6 +148,7 @@
       html += "<td class=\"g-cell\">" + g.toLocaleString("ja-JP") + "G</td>";
       html += "<td class=\"zone-cell\">" + zoneName + "</td>";
       html += "<td class=\"ev-cell " + evClass + "\">" + yen(ev) + "</td>";
+      html += "<td class=\"roi-cell " + roiClass + "\">" + roiStr + "</td>";
       html += "<td class=\"time-cell\">" + Math.round(minutes) + "分</td>";
       html += "<td class=\"hourly-cell " + hourlyClass + "\">" + yen(hourlyRate) + "</td>";
       html += "</tr>";
@@ -124,8 +157,25 @@
     els.evTbody.innerHTML = html;
   }
 
+  // 機種変更時にvariant UIを更新
+  function updateVariantUI() {
+    var spec = specs[els.machine.selectedIndex] || null;
+    if (!spec || !spec.variants || !spec.variants.length) {
+      els.variantField.style.display = "none";
+      if (els.variant) els.variant.innerHTML = "";
+      return;
+    }
+    els.variantField.style.display = "";
+    els.variant.innerHTML = "";
+    spec.variants.forEach(function (v) {
+      var opt = document.createElement("option");
+      opt.value = v.id;
+      opt.textContent = v.name;
+      els.variant.appendChild(opt);
+    });
+  }
+
   function initExchangeSelect() {
-    // localStorageの値に合わせてoptionを選択
     var opts = els.exchange.options;
     for (var i = 0; i < opts.length; i++) {
       if (parseFloat(opts[i].value) === currentExchange) {
@@ -141,7 +191,6 @@
   }
 
   function initStepSelect() {
-    // localStorageの値に合わせてoptionを選択
     var opts = els.step.options;
     for (var i = 0; i < opts.length; i++) {
       if (parseInt(opts[i].value, 10) === currentStep) {
@@ -169,7 +218,17 @@
 
     initExchangeSelect();
     initStepSelect();
-    els.machine.addEventListener("change", render);
+
+    els.machine.addEventListener("change", function () {
+      updateVariantUI();
+      render();
+    });
+
+    if (els.variant) {
+      els.variant.addEventListener("change", render);
+    }
+
+    updateVariantUI();
     render();
   }
 
