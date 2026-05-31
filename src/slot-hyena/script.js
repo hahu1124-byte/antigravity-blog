@@ -33,6 +33,27 @@
     return specs[els.machine.selectedIndex] || null;
   }
 
+  // EVテーブルルックアップ（等価ベース→換金率補正）
+  // evTable がある場合: (ev_eq + cost) * (exchange/20) - cost
+  // ない場合: ceilingPayout * exchange - cost（旧計算）
+  function lookupEV(spec, g, exchange) {
+    var remain = spec.ceilingG - g;
+    var cost = remain * COIN_PER_GAME * RENTAL_YEN;
+    var table = spec.evTable;
+    if (!table || !table.length || g < table[0].g) {
+      return spec.ceilingPayout * exchange - cost;
+    }
+    var ev_eq = table[0].ev;
+    for (var i = 0; i < table.length; i++) {
+      if (table[i].g <= g) {
+        ev_eq = table[i].ev;
+      } else {
+        break;
+      }
+    }
+    return (ev_eq + cost) * (exchange / RENTAL_YEN) - cost;
+  }
+
   function getZoneAtG(zones, g) {
     if (!zones) return null;
     for (var i = 0; i < zones.length; i++) {
@@ -81,8 +102,7 @@
     gList.forEach(function (g) {
       var remain = spec.ceilingG - g;
       var invest = remain * COIN_PER_GAME * RENTAL_YEN;
-      var ret = spec.ceilingPayout * exchange;
-      var ev = ret - invest;
+      var ev = lookupEV(spec, g, exchange);
       var minutes = remain / gpm;
       var hourlyRate = minutes > 0 ? Math.round(ev / (minutes / 60)) : 0;
       var zone = getZoneAtG(spec.zones, g);

@@ -1,8 +1,11 @@
 // スロット機種 ハイエナ概算スペック（ゾーン期待値対応版）
 // ----------------------------------------------------------------------------
 // ceilingG       : 天井ゲーム数
-// ceilingPayout  : 天井恩恵の平均獲得枚数
+// ceilingPayout  : 天井恩恵の平均獲得枚数（evTableがない機種の旧計算用）
 // gamePerMin     : 1分あたりの消化ゲーム数（省略時 13.3）
+// evTable        : G数別期待値テーブル（slobase.jp、等価20円/枚ベース）
+//   g            : ゲーム数
+//   ev           : そのG数から天井まで打った場合の期待値（円, 等価）
 // zones          : ゾーン情報配列
 //   startG       : ゾーン開始G（このG数から狙い始める）
 //   endG         : ゾーン終了G（このG数まで滞在）
@@ -15,10 +18,22 @@ window.HYENA_SPECS = [
   {
     id: "hokuto-tensei2",
     name: "スマスロ 北斗の拳 転生の章2",
-    ceilingG: 1536,
+    ceilingG: 1024,
     ceilingPayout: 1500,
     gamePerMin: 13.3,
     note: "シャッターゾーン狙いが有名。AT後の即連も有効",
+    evTable: [
+      { g: 0, ev: -1332 },
+      { g: 100, ev: -1019 },
+      { g: 200, ev: -500 },
+      { g: 300, ev: -98 },
+      { g: 350, ev: 214 },
+      { g: 400, ev: 800 },
+      { g: 500, ev: 1424 },
+      { g: 600, ev: 2500 },
+      { g: 750, ev: 4795 },
+      { g: 900, ev: 8103 },
+    ],
     zones: [
       {
         startG: 0,
@@ -53,12 +68,12 @@ window.HYENA_SPECS = [
         note: "モードC天井(576G)越え狙い",
       },
       {
-        startG: 1400,
-        endG: 1536,
+        startG: 900,
+        endG: 1024,
         name: "天井前ゾーン",
         hitPct: 0.85,
         avgPayout: 1500,
-        note: "天井136G前は実質ほぼ確定",
+        note: "天井124G前は実質ほぼ確定",
       },
     ],
   },
@@ -69,6 +84,17 @@ window.HYENA_SPECS = [
     ceilingPayout: 1200,
     gamePerMin: 13.3,
     note: "650Gゾーンが最強（当選率約40〜50%）",
+    evTable: [
+      { g: 250, ev: -1300 },
+      { g: 360, ev: -600 },
+      { g: 420, ev: 200 },
+      { g: 500, ev: 1300 },
+      { g: 550, ev: 2000 },
+      { g: 650, ev: 3200 },
+      { g: 750, ev: 4500 },
+      { g: 850, ev: 6000 },
+      { g: 999, ev: 8200 },
+    ],
     zones: [
       {
         startG: 140,
@@ -119,6 +145,18 @@ window.HYENA_SPECS = [
     ceilingPayout: 1500,
     gamePerMin: 13.3,
     note: "周期システム。設定変更後は天井短縮で狙い目大",
+    evTable: [
+      { g: 0, ev: -1564 },
+      { g: 100, ev: -1200 },
+      { g: 200, ev: -500 },
+      { g: 300, ev: 0 },
+      { g: 400, ev: 1000 },
+      { g: 500, ev: 2200 },
+      { g: 600, ev: 3500 },
+      { g: 700, ev: 4915 },
+      { g: 800, ev: 7000 },
+      { g: 900, ev: 9253 },
+    ],
     zones: [
       {
         startG: 0,
@@ -161,6 +199,7 @@ window.HYENA_SPECS = [
     ceilingPayout: 900,
     gamePerMin: 13.3,
     note: "周期天井最大6周期。モード別に期待度が大きく異なる",
+    evTable: [],
     zones: [
       {
         startG: 0,
@@ -203,6 +242,20 @@ window.HYENA_SPECS = [
     ceilingPayout: 1200,
     gamePerMin: 13.3,
     note: "CZ成功でAT。CZスルー4回で5回目AT確定",
+    evTable: [
+      { g: 0, ev: -3200 },
+      { g: 100, ev: -2800 },
+      { g: 200, ev: -2300 },
+      { g: 300, ev: -1700 },
+      { g: 400, ev: -1100 },
+      { g: 500, ev: -400 },
+      { g: 600, ev: 400 },
+      { g: 700, ev: 1300 },
+      { g: 800, ev: 2400 },
+      { g: 900, ev: 3800 },
+      { g: 1000, ev: 5500 },
+      { g: 1100, ev: 7800 },
+    ],
     zones: [
       {
         startG: 60,
@@ -245,6 +298,7 @@ window.HYENA_SPECS = [
     ceilingPayout: 1000,
     gamePerMin: 13.3,
     note: "CZスルー最大7回。BIG後650G〜がボーダー",
+    evTable: [],
     zones: [
       {
         startG: 120,
@@ -287,6 +341,7 @@ window.HYENA_SPECS = [
     ceilingPayout: 1100,
     gamePerMin: 13.3,
     note: "複雑な周期システム。CZ間天井999Gも存在",
+    evTable: [],
     zones: [
       {
         startG: 0,
@@ -329,6 +384,18 @@ window.HYENA_SPECS = [
     ceilingPayout: 1050,
     gamePerMin: 13.3,
     note: "AT後70G引き戻し状態。ボーナス9スルーで天井",
+    evTable: [
+      { g: 0, ev: -2000 },
+      { g: 100, ev: -1500 },
+      { g: 200, ev: -900 },
+      { g: 300, ev: -200 },
+      { g: 400, ev: 700 },
+      { g: 500, ev: 1800 },
+      { g: 600, ev: 3200 },
+      { g: 700, ev: 5000 },
+      { g: 800, ev: 7200 },
+      { g: 900, ev: 9800 },
+    ],
     zones: [
       {
         startG: 0,

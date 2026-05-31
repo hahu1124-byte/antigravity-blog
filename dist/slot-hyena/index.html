@@ -12,87 +12,76 @@
   <div id="app">
     <header class="header">
       <h1 class="title">🐆 ハイエナ期待値計算ツール</h1>
-      <p class="subtitle">天井狙いの期待値を概算します（試作版）</p>
+      <p class="subtitle">天井狙い・ゾーン狙いの期待値一覧（試作版）</p>
     </header>
 
-    <main class="card">
+    <div class="card">
+      <!-- 機種選択 -->
       <div class="field">
         <label class="label" for="machine">機種</label>
         <select id="machine" class="select"></select>
         <p class="machine-note" id="machineNote"></p>
       </div>
 
+      <!-- 換金率 -->
       <div class="field-row">
         <div class="field">
-          <label class="label" for="currentG">現在ゲーム数</label>
-          <input id="currentG" class="input" type="number" inputmode="numeric"
-                 min="0" step="1" placeholder="例: 700" value="700">
+          <label class="label" for="exchange">換金率</label>
+          <select id="exchange" class="select">
+            <option value="20">等価（20円/枚）</option>
+            <option value="18.18">5.5枚交換（約18.2円）</option>
+            <option value="16.67">6枚交換（約16.7円）</option>
+          </select>
         </div>
+
+        <!-- G数刻み -->
         <div class="field">
-          <label class="label" for="ceiling">天井</label>
-          <div class="readonly" id="ceiling">— G</div>
+          <label class="label" for="step">表示刻み</label>
+          <select id="step" class="select">
+            <option value="5">5G</option>
+            <option value="10">10G</option>
+            <option value="50" selected>50G</option>
+            <option value="100">100G</option>
+          </select>
         </div>
       </div>
 
-      <div class="field">
-        <label class="label" for="exchange">換金率</label>
-        <select id="exchange" class="select">
-          <option value="20">等価（20円／枚）</option>
-          <option value="17.86" selected>5.6枚交換（約17.86円／枚）</option>
-          <option value="16.95">5.9枚交換（約16.95円／枚）</option>
-          <option value="16.67">6.0枚交換（約16.67円／枚）</option>
-        </select>
+      <!-- 機種サマリー -->
+      <div class="summary-row" id="summaryRow">
+        <div class="summary-item">
+          <span class="summary-label">天井</span>
+          <span class="summary-val" id="ceilingSummary">—</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">天井期待出玉</span>
+          <span class="summary-val" id="payoutSummary">—</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">EV転換G数</span>
+          <span class="summary-val" id="breakEvenG">—</span>
+        </div>
       </div>
+    </div>
 
-      <section class="result" id="result">
-        <div class="result-badge" id="badge">—</div>
-        <div class="result-ev" id="ev">¥0</div>
-        <dl class="result-detail">
-          <div class="detail-item">
-            <dt>残りゲーム数</dt><dd id="remainG">— G</dd>
-          </div>
-          <div class="detail-item">
-            <dt>投資目安</dt><dd id="invest">¥0</dd>
-          </div>
-          <div class="detail-item">
-            <dt>天井期待出玉</dt><dd id="payout">— 枚</dd>
-          </div>
-          <div class="detail-item">
-            <dt>消化時間目安</dt><dd id="time">— 分</dd>
-          </div>
-        </dl>
-      </section>
+    <!-- G数別期待値テーブル -->
+    <div class="table-wrap" id="tableWrap">
+      <table class="ev-table" id="evTable">
+        <thead>
+          <tr>
+            <th>G数</th>
+            <th>ゾーン</th>
+            <th>EV</th>
+            <th>消化時間</th>
+            <th>期待時給</th>
+          </tr>
+        </thead>
+        <tbody id="evTbody"></tbody>
+      </table>
+    </div>
 
-      <section class="zone-section" id="zoneSection">
-        <h2 class="zone-title">ゾーン期待値</h2>
-
-        <div class="zone-row">
-          <div class="zone-panel zone-panel-current">
-            <div class="zone-panel-label">現在の状態</div>
-            <div id="currentZoneName" class="zone-in-label">—</div>
-            <div id="currentZoneNote" class="zone-panel-note">—</div>
-          </div>
-        </div>
-
-        <div class="zone-row">
-          <div class="zone-panel">
-            <div class="zone-panel-label">次のゾーン</div>
-            <div id="nextZoneName" class="zone-next-name">—</div>
-            <div id="nextZoneDist" class="zone-next-dist">—</div>
-          </div>
-          <div class="zone-panel">
-            <div class="zone-panel-label">ゾーン狙いEV</div>
-            <div id="nextZoneEv" class="zone-ev-val">—</div>
-          </div>
-        </div>
-        <div id="nextZoneNote" class="zone-footnote">—</div>
-      </section>
-
-      <p class="disclaimer">
-        ※ 概算ツールです。道中当選・出玉の振れ・やめ時の取りこぼしは未考慮のため、
-        実際よりやや高めの目安になります。ゾーンEVはゾーン到達時の期待値のみを考慮した簡易計算です。投資は自己責任で。
-      </p>
-    </main>
+    <p class="disclaimer">
+      ※ 概算ツールです。道中当選・出玉の振れ・設定差は未考慮のため実際の期待値は異なります。投資は自己責任で。
+    </p>
   </div>
 
   <script src="./specs.js"></script>
