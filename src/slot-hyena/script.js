@@ -117,7 +117,7 @@
       html += "<td class=\"zone-cell\">" + zoneName + "</td>";
       html += "<td class=\"ev-cell " + evClass + "\">" + yen(ev) + "</td>";
       html += "<td class=\"time-cell\">" + Math.round(minutes) + "分</td>";
-      html += "<td class=\"hourly-cell " + hourlyClass + "\">" + yen(hourlyRate) + "/時</td>";
+      html += "<td class=\"hourly-cell " + hourlyClass + "\">" + yen(hourlyRate) + "</td>";
       html += "</tr>";
     });
 
