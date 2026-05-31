@@ -23,13 +23,26 @@
         <p class="machine-note" id="machineNote"></p>
       </div>
 
-      <!-- 換金率ボタン -->
-      <div class="field">
-        <div class="label">換金率</div>
-        <div class="exchange-btns" id="exchangeBtns">
-          <button class="ex-btn active" data-value="20">等価<span class="ex-sub">20円/枚</span></button>
-          <button class="ex-btn" data-value="18.18">5.5枚交換<span class="ex-sub">愛知・約18.2円</span></button>
-          <button class="ex-btn" data-value="16.67">6枚交換<span class="ex-sub">約16.7円/枚</span></button>
+      <!-- 換金率 -->
+      <div class="field-row">
+        <div class="field">
+          <label class="label" for="exchange">換金率</label>
+          <select id="exchange" class="select">
+            <option value="20">等価（20円/枚）</option>
+            <option value="18.18">5.5枚交換（約18.2円）</option>
+            <option value="16.67">6枚交換（約16.7円）</option>
+          </select>
+        </div>
+
+        <!-- G数刻み -->
+        <div class="field">
+          <label class="label" for="step">表示刻み</label>
+          <select id="step" class="select">
+            <option value="5">5G</option>
+            <option value="10">10G</option>
+            <option value="50" selected>50G</option>
+            <option value="100">100G</option>
+          </select>
         </div>
       </div>
 

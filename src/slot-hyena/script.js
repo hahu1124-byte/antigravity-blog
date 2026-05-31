@@ -4,21 +4,24 @@
   var COIN_PER_GAME = 3;
   var RENTAL_YEN = 20;
   var DEFAULT_GPM = 13.3;
-  var LS_KEY = "slot_hyena_exchange";
+  var LS_KEY_EXCHANGE = "slot_hyena_exchange";
+  var LS_KEY_STEP = "slot_hyena_step";
 
   var specs = window.HYENA_SPECS || [];
 
   var els = {
     machine: document.getElementById("machine"),
     machineNote: document.getElementById("machineNote"),
-    exchangeBtns: document.getElementById("exchangeBtns"),
+    exchange: document.getElementById("exchange"),
+    step: document.getElementById("step"),
     ceilingSummary: document.getElementById("ceilingSummary"),
     payoutSummary: document.getElementById("payoutSummary"),
     breakEvenG: document.getElementById("breakEvenG"),
     evTbody: document.getElementById("evTbody"),
   };
 
-  var currentExchange = parseFloat(localStorage.getItem(LS_KEY)) || 20;
+  var currentExchange = parseFloat(localStorage.getItem(LS_KEY_EXCHANGE)) || 20;
+  var currentStep = parseInt(localStorage.getItem(LS_KEY_STEP), 10) || 50;
 
   function yen(n) {
     var sign = n > 0 ? "+" : n < 0 ? "-" : "";
@@ -41,7 +44,7 @@
 
   function buildGList(spec) {
     var set = {};
-    for (var g = 0; g <= spec.ceilingG; g += 50) {
+    for (var g = 0; g <= spec.ceilingG; g += currentStep) {
       set[g] = true;
     }
     if (spec.zones) {
@@ -101,22 +104,35 @@
     els.evTbody.innerHTML = html;
   }
 
-  function initExchangeBtns() {
-    var btns = els.exchangeBtns.querySelectorAll(".ex-btn");
-    btns.forEach(function (btn) {
-      var val = parseFloat(btn.dataset.value);
-      if (val === currentExchange) {
-        btn.classList.add("active");
-      } else {
-        btn.classList.remove("active");
+  function initExchangeSelect() {
+    // localStorageの値に合わせてoptionを選択
+    var opts = els.exchange.options;
+    for (var i = 0; i < opts.length; i++) {
+      if (parseFloat(opts[i].value) === currentExchange) {
+        els.exchange.selectedIndex = i;
+        break;
       }
-      btn.addEventListener("click", function () {
-        currentExchange = parseFloat(btn.dataset.value);
-        localStorage.setItem(LS_KEY, String(currentExchange));
-        btns.forEach(function (b) { b.classList.remove("active"); });
-        btn.classList.add("active");
-        render();
-      });
+    }
+    els.exchange.addEventListener("change", function () {
+      currentExchange = parseFloat(els.exchange.value);
+      localStorage.setItem(LS_KEY_EXCHANGE, String(currentExchange));
+      render();
+    });
+  }
+
+  function initStepSelect() {
+    // localStorageの値に合わせてoptionを選択
+    var opts = els.step.options;
+    for (var i = 0; i < opts.length; i++) {
+      if (parseInt(opts[i].value, 10) === currentStep) {
+        els.step.selectedIndex = i;
+        break;
+      }
+    }
+    els.step.addEventListener("change", function () {
+      currentStep = parseInt(els.step.value, 10);
+      localStorage.setItem(LS_KEY_STEP, String(currentStep));
+      render();
     });
   }
 
@@ -131,7 +147,8 @@
       els.machine.appendChild(opt);
     });
 
-    initExchangeBtns();
+    initExchangeSelect();
+    initStepSelect();
     els.machine.addEventListener("change", render);
     render();
   }
