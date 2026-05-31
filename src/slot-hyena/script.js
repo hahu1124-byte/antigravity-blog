@@ -4,29 +4,21 @@
   var COIN_PER_GAME = 3;
   var RENTAL_YEN = 20;
   var DEFAULT_GPM = 13.3;
+  var LS_KEY = "slot_hyena_exchange";
 
   var specs = window.HYENA_SPECS || [];
 
   var els = {
     machine: document.getElementById("machine"),
     machineNote: document.getElementById("machineNote"),
-    currentG: document.getElementById("currentG"),
-    ceiling: document.getElementById("ceiling"),
-    exchange: document.getElementById("exchange"),
-    badge: document.getElementById("badge"),
-    ev: document.getElementById("ev"),
-    remainG: document.getElementById("remainG"),
-    invest: document.getElementById("invest"),
-    payout: document.getElementById("payout"),
-    time: document.getElementById("time"),
-    zoneSection: document.getElementById("zoneSection"),
-    currentZoneName: document.getElementById("currentZoneName"),
-    currentZoneNote: document.getElementById("currentZoneNote"),
-    nextZoneName: document.getElementById("nextZoneName"),
-    nextZoneDist: document.getElementById("nextZoneDist"),
-    nextZoneEv: document.getElementById("nextZoneEv"),
-    nextZoneNote: document.getElementById("nextZoneNote"),
+    exchangeBtns: document.getElementById("exchangeBtns"),
+    ceilingSummary: document.getElementById("ceilingSummary"),
+    payoutSummary: document.getElementById("payoutSummary"),
+    breakEvenG: document.getElementById("breakEvenG"),
+    evTbody: document.getElementById("evTbody"),
   };
+
+  var currentExchange = parseFloat(localStorage.getItem(LS_KEY)) || 20;
 
   function yen(n) {
     var sign = n > 0 ? "+" : n < 0 ? "-" : "";
@@ -38,118 +30,94 @@
     return specs[els.machine.selectedIndex] || null;
   }
 
-  function findCurrentZone(currentG, zones) {
+  function getZoneAtG(zones, g) {
     if (!zones) return null;
     for (var i = 0; i < zones.length; i++) {
       var z = zones[i];
-      if (currentG >= z.startG && currentG <= z.endG) return z;
+      if (g >= z.startG && g <= z.endG) return z;
     }
     return null;
   }
 
-  function findNextZone(currentG, zones) {
-    if (!zones) return null;
-    var best = null;
-    for (var i = 0; i < zones.length; i++) {
-      var z = zones[i];
-      if (z.startG > currentG) {
-        if (!best || z.startG < best.startG) best = z;
-      }
+  function buildGList(spec) {
+    var set = {};
+    for (var g = 0; g <= spec.ceilingG; g += 50) {
+      set[g] = true;
     }
-    return best;
+    if (spec.zones) {
+      spec.zones.forEach(function (z) {
+        set[z.startG] = true;
+        set[z.endG] = true;
+      });
+    }
+    set[spec.ceilingG] = true;
+    return Object.keys(set).map(Number).sort(function (a, b) { return a - b; });
   }
 
-  function calcZoneEv(zone, currentG, exchange) {
-    var dist = Math.max(0, zone.startG - currentG);
-    var invest = dist * COIN_PER_GAME * RENTAL_YEN;
-    var ret = zone.hitPct * zone.avgPayout * exchange;
-    return ret - invest;
-  }
-
-  function calc() {
+  function render() {
     var spec = getSpec();
     if (!spec) return;
 
-    var current = parseInt(els.currentG.value, 10);
-    if (isNaN(current) || current < 0) current = 0;
-
-    var exchange = parseFloat(els.exchange.value) || RENTAL_YEN;
+    var exchange = currentExchange;
     var gpm = spec.gamePerMin || DEFAULT_GPM;
 
-    var remain = Math.max(0, spec.ceilingG - current);
-    var invest = remain * COIN_PER_GAME * RENTAL_YEN;
-    var ret = spec.ceilingPayout * exchange;
-    var ev = ret - invest;
-    var minutes = remain / gpm;
-
-    els.ceiling.textContent = spec.ceilingG.toLocaleString("ja-JP") + " G";
+    // サマリー更新
+    els.ceilingSummary.textContent = spec.ceilingG.toLocaleString("ja-JP") + " G";
+    els.payoutSummary.textContent = spec.ceilingPayout.toLocaleString("ja-JP") + " 枚";
     els.machineNote.textContent = spec.note || "";
-    els.remainG.textContent = remain.toLocaleString("ja-JP") + " G";
-    els.invest.textContent = yen(invest);
-    els.payout.textContent = spec.ceilingPayout.toLocaleString("ja-JP") + " 枚";
-    els.time.textContent = Math.round(minutes).toLocaleString("ja-JP") + " 分";
 
-    els.ev.textContent = yen(ev);
-    els.ev.className = "result-ev " + (ev >= 0 ? "ev-pos" : "ev-neg");
+    // EV転換G数（EV=0になるG数）
+    var breakEven = spec.ceilingG - Math.round((spec.ceilingPayout * exchange) / (COIN_PER_GAME * RENTAL_YEN));
+    if (breakEven < 0) breakEven = 0;
+    els.breakEvenG.textContent = breakEven.toLocaleString("ja-JP") + " G〜";
 
-    setBadge(ev);
-    updateZoneInfo(spec, current, exchange);
+    // テーブル生成
+    var gList = buildGList(spec);
+    var html = "";
+
+    gList.forEach(function (g) {
+      var remain = spec.ceilingG - g;
+      var invest = remain * COIN_PER_GAME * RENTAL_YEN;
+      var ret = spec.ceilingPayout * exchange;
+      var ev = ret - invest;
+      var minutes = remain / gpm;
+      var hourlyRate = minutes > 0 ? Math.round(ev / (minutes / 60)) : 0;
+      var zone = getZoneAtG(spec.zones, g);
+
+      var evClass = ev >= 0 ? "ev-pos" : "ev-neg";
+      var hourlyClass = hourlyRate >= 0 ? "ev-pos" : "ev-neg";
+      var rowClass = zone ? " row-zone" : (ev >= 0 ? " row-pos" : "");
+      var zoneName = zone ? zone.name : "—";
+
+      html += "<tr class=\"" + rowClass.trim() + "\">";
+      html += "<td class=\"g-cell\">" + g.toLocaleString("ja-JP") + "G</td>";
+      html += "<td class=\"zone-cell\">" + zoneName + "</td>";
+      html += "<td class=\"ev-cell " + evClass + "\">" + yen(ev) + "</td>";
+      html += "<td class=\"time-cell\">" + Math.round(minutes) + "分</td>";
+      html += "<td class=\"hourly-cell " + hourlyClass + "\">" + yen(hourlyRate) + "/時</td>";
+      html += "</tr>";
+    });
+
+    els.evTbody.innerHTML = html;
   }
 
-  function setBadge(ev) {
-    var label, cls;
-    if (ev >= 5000) {
-      label = "✅ 好条件";
-      cls = "badge-great";
-    } else if (ev >= 1000) {
-      label = "👍 狙い目";
-      cls = "badge-good";
-    } else if (ev > 0) {
-      label = "🤔 様子見";
-      cls = "badge-watch";
-    } else {
-      label = "🚫 非推奨";
-      cls = "badge-no";
-    }
-    els.badge.textContent = label;
-    els.badge.className = "result-badge " + cls;
-  }
-
-  function updateZoneInfo(spec, currentG, exchange) {
-    if (!spec.zones || !spec.zones.length) {
-      els.zoneSection.style.display = "none";
-      return;
-    }
-    els.zoneSection.style.display = "";
-
-    var curZone = findCurrentZone(currentG, spec.zones);
-    var nextZone = findNextZone(currentG, spec.zones);
-
-    if (curZone) {
-      els.currentZoneName.textContent = "🎯 " + curZone.name + " 滞在中！";
-      els.currentZoneName.className = "zone-in-label zone-in-active";
-      els.currentZoneNote.textContent = curZone.note;
-    } else {
-      els.currentZoneName.textContent = "ゾーン外";
-      els.currentZoneName.className = "zone-in-label";
-      els.currentZoneNote.textContent = "現在はゾーン外です";
-    }
-
-    if (nextZone) {
-      var dist = nextZone.startG - currentG;
-      var zev = calcZoneEv(nextZone, currentG, exchange);
-      els.nextZoneName.textContent = nextZone.name;
-      els.nextZoneDist.textContent = "あと " + dist.toLocaleString("ja-JP") + " G";
-      els.nextZoneEv.textContent = yen(zev);
-      els.nextZoneEv.className = "zone-ev-val " + (zev >= 0 ? "ev-pos" : "ev-neg");
-      els.nextZoneNote.textContent = "当選率 " + Math.round(nextZone.hitPct * 100) + "% / 平均 " + nextZone.avgPayout.toLocaleString("ja-JP") + "枚 — " + nextZone.note;
-    } else {
-      els.nextZoneName.textContent = "（なし）";
-      els.nextZoneDist.textContent = "—";
-      els.nextZoneEv.textContent = "—";
-      els.nextZoneEv.className = "zone-ev-val";
-      els.nextZoneNote.textContent = "天井に向かって投資継続";
-    }
+  function initExchangeBtns() {
+    var btns = els.exchangeBtns.querySelectorAll(".ex-btn");
+    btns.forEach(function (btn) {
+      var val = parseFloat(btn.dataset.value);
+      if (val === currentExchange) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+      btn.addEventListener("click", function () {
+        currentExchange = parseFloat(btn.dataset.value);
+        localStorage.setItem(LS_KEY, String(currentExchange));
+        btns.forEach(function (b) { b.classList.remove("active"); });
+        btn.classList.add("active");
+        render();
+      });
+    });
   }
 
   function init() {
@@ -163,11 +131,9 @@
       els.machine.appendChild(opt);
     });
 
-    els.machine.addEventListener("change", calc);
-    els.currentG.addEventListener("input", calc);
-    els.exchange.addEventListener("change", calc);
-
-    calc();
+    initExchangeBtns();
+    els.machine.addEventListener("change", render);
+    render();
   }
 
   init();
