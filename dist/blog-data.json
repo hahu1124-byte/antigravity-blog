@@ -1,5 +1,13 @@
 [
   {
+    "slug": "202606/20260603_ai_lab_update_v9",
+    "title": "🔬 LAB第9回レポート：使い放題崩壊・OSS覇権・Claude Code全面移行の経緯",
+    "date": "2026-06-03",
+    "excerpt": "約2ヶ月ぶりのLABレポート。第8回の振り返り（Opus枯渇問題・OSS覇権・スケーリングの壁）と、Antigravity v2 UI刷新を機にClaude Codeへ全面移行した経緯を詳細にまとめます。",
+    "tags": ["AI", "開発", "LAB", "Claude Code"],
+    "yearMonth": "202606"
+  },
+  {
     "slug": "202606/20260603_uber_daily",
     "title": "🚴 Uber配達日報 🌧️ 20260603 雨の日は需要UP",
     "date": "2026-06-03",
