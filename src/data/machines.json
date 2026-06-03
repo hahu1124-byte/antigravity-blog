@@ -1,7 +1,7 @@
 {
-  "lastUpdated": "2026-06-02T18:43:23.679Z",
+  "lastUpdated": "2026-06-03T18:48:35.231Z",
   "source": "pachinko-spec.info",
-  "totalMachines": 1622,
+  "totalMachines": 1623,
   "machines": [
     {
       "name": "CR Another FPQZ 194.11Ver.",
@@ -32558,6 +32558,65 @@
       "calcProb": 4.73
     },
     {
+      "name": "PA大海物語 with アグネス・ラム Premium Edition",
+      "type": "ライト(甘デジ)",
+      "prob": 6.48,
+      "baseProbability": 99.9,
+      "borderEquiv": 16.36,
+      "rb": 99,
+      "singleSpinPayout": 15.27,
+      "avgAcquired": 1325.82,
+      "avgChain": 2.46,
+      "realContRate": 76.73,
+      "contRateByState": [
+        {
+          "state": "通常",
+          "prob": 99.9,
+          "contRate": 86.85
+        },
+        {
+          "state": "ST",
+          "prob": 19.52,
+          "contRate": 40.9
+        },
+        {
+          "state": "時短",
+          "prob": 99.86,
+          "contRate": 28.45
+        },
+        {
+          "state": "遊タイム",
+          "prob": 99.97,
+          "contRate": 100
+        },
+        {
+          "state": "残保留",
+          "prob": 100.39,
+          "contRate": 3.92
+        }
+      ],
+      "entryRate": 76.99,
+      "koatariProbability": 0,
+      "machineSubType": "一種",
+      "rushRate": 0,
+      "rushType": "",
+      "yutimeTrigger": 239,
+      "yutimeSpins": 10000,
+      "holdOver": 4,
+      "normalJitan": 0,
+      "hesoAvgRounds": 5.44,
+      "denchuAvgRounds": 5.44,
+      "releaseDate": "2026-09-07",
+      "maker": "三洋物産",
+      "sourceUrl": "https://pachinko-spec.info/spec/171633/",
+      "aliases": [
+        "海",
+        "ウミ"
+      ],
+      "avgChainCalc": 3.54,
+      "calcProb": 6.48
+    },
+    {
       "name": "PA大海物語4スペシャル with アグネス・ラム",
       "type": "ライト(甘デジ)",
       "prob": 6.94,
@@ -61524,13 +61583,13 @@
       "borderEquiv": 18.53,
       "rb": 90,
       "singleSpinPayout": 13.49,
-      "avgAcquired": 1214.14,
+      "avgAcquired": 1214.04,
       "avgChain": 2.61,
-      "realContRate": 60.03,
+      "realContRate": 60.02,
       "contRateByState": [
         {
           "state": "通常(特図1)",
-          "prob": 89.94,
+          "prob": 89.93,
           "contRate": 50.55
         },
         {
@@ -61541,11 +61600,11 @@
         {
           "state": "ST",
           "prob": 65.93,
-          "contRate": 60.03
+          "contRate": 60.02
         },
         {
           "state": "残保留",
-          "prob": 90,
+          "prob": 90.01,
           "contRate": 4.37
         }
       ],
