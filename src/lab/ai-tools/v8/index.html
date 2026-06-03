@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI開発ツール比較 2026 第8回 | LAB | Gravity Portal</title>
-    <meta name="description" content="AI開発ツール比較 第8回。Antigravity UltraのOpus枠枯渇問題と自己防衛策。Cursor、Claude Code、Gemini Code Assistなど主要ツールの最新動向。">
-    <meta property="og:title" content="AI開発ツール比較 2026 第8回 — 最強モデルの代償と使い分け">
-    <meta property="og:description" content="Antigravity Ultra 月額$250でもOpus 4.6がすぐ制限される？ 開発現場のリアルな課題と最新ツール動向。">
+    <meta name="description" content="AI開発ツール比較 第8回（2026年6月更新）。Antigravity 2.0/Google I/O、Cursor v3/Composer 2.5、Grok Build参入、Claude Code躍進。4〜6月のAI開発ツール全評価。">
+    <meta property="og:title" content="AI開発ツール比較 2026 第8回 — ポスト使い放題時代の群雄割拠">
+    <meta property="og:description" content="Antigravity 2.0でGemini CLI終了、Cursor v3で8並列エージェント、Grok Buildがxから参入。月額$200時代の現実とClaude Code躍進。">
     <meta property="og:type" content="article">
     <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-tools/v8/">
     <meta property="og:site_name" content="Gravity Portal">
@@ -28,135 +28,225 @@
     <main class="lab-content">
         <section class="lab-hero">
             <div class="lab-hero-icon">🛠️</div>
-            <h1>AI開発ツール — 最強モデルの代償 第8回</h1>
-            <p><a href="/lab/ai-tools/v6/" style="color:inherit;text-decoration:underline">第6回</a>では「収束と囲い込み」を追及しました。<br>
-                第8回（2026年3月末）のメインテーマは<strong>「Claude Opus 4.6クォータ枯渇問題」</strong>です。<br>
-                各エディタが最高推論モデルを謳う一方で、水面下ではその巨大な演算コストがユーザーの利用制限という形で顕在化しています。<br>
-                今回はAntigravity Ultraプランの現状を深掘りするとともに、CursorとClaude Codeの現在地をアップデートします。</p>
+            <h1>AI開発ツール — ポスト使い放題時代の群雄割拠 第8回</h1>
+            <p>3月末の「Opus枯渇問題」から始まった「使い放題の崩壊」は、2026年4〜6月にかけてさらに深化。<br>
+               Antigravity 2.0がGoogle I/Oで全面刷新、Cursor v3が8並列Cloud Agentを実装。<br>
+               さらにxAIのGrok Buildが新規参入し、競合は一気に8社超に拡大しました。<br>
+               当サイトがClaude Codeに完全移行した経緯も含め、2026年6月時点の全評価をお届けします。</p>
             <div class="lab-hero-meta">
-                <span>📅 2026年3月26日更新</span>
-                <span>🔧 Opus枯渇問題 特集</span>
-                <span>📝 <a href="/lab/ai-tools/v6/" style="color:inherit;text-decoration:underline">前回の主要レポートはこちら</a></span>
+                <span>📅 2026年6月3日更新</span>
+                <span>🔧 8ツール比較</span>
+                <span>📝 <a href="/lab/ai-tools/v7/" style="color:inherit;text-decoration:underline">前回（第7回）はこちら</a></span>
             </div>
         </section>
 
-        <!-- メインイシュー -->
         <section class="lab-section">
-            <h2>🚨 業界トピック: Antigravity Opus枯渇問題</h2>
-            <p>2026年3月現在、Antigravityの最上位プラン「Ultra（月額$250）」ユーザーにおいて、<strong>Claude Opus 4.6のクォータ（推論枠）がすぐに尽きてしまう現象</strong>が多数報告されています。</p>
+            <h2>🔥 4〜6月の3大ニュース</h2>
+            <p><strong>① Antigravity 2.0 @ Google I/O（5月19日）🚀</strong> — GoogleがI/OでAntigravity 2.0を発表。VSCode風IDEを廃止し、<strong>エージェントファーストプラットフォーム</strong>に全面刷新。Desktop App・CLI（agy）・SDK・Managed Agents APIの4サーフェスを提供。Agent Teamsパネルで複数サブエージェントを並列実行。Gemini CLI個人向けは<strong>6月18日に終了</strong>しAntigravity CLIへ移行。価格刷新：AI Pro $19.99/月、AI Ultra 5x $99.99/月、AI Ultra 20x $199.99/月。</p>
+            <p><strong>② Cursor v3＋Composer 2.5（4〜5月）⚡</strong> — Cursor v3がBackground Agentsを大強化。<strong>クラウドVM上で最大8エージェントを並列実行</strong>し、各エージェントが独自Desktop+Browserを持つ。5月18日にComposer 2.5をKimi K2.5ベースで出荷（SWE-Bench Multilingual 79.8%）。Auto ModeはクレジットゼロでAuto選択。</p>
+            <p><strong>③ Grok Build参入（5月25日）🤖</strong> — xAIが全SuperGrok向けにGrok Buildをリリース。<strong>8サブエージェントを独立Gitワークツリーで並列実行</strong>するカテゴリ最大の並列度。ローカルファースト設計でソースコードが外部送信されない。SWE-bench 70.8%（初期検証）。</p>
+        </section>
+
+        <section class="lab-section">
+            <h2>🔍 各ツール最新アップデート（2026年6月）</h2>
+
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🚀</div>
+                    <div class="tool-card-info"><h3>Antigravity 2.0</h3><div class="tool-maker">Google DeepMind</div></div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">⚠️ Gemini CLI終了6/18</span>
+                    <span class="badge badge-free">Agent Teams</span>
+                    <span class="badge badge-free">5サーフェス</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 Google I/O 2026での全面刷新</h3>
+                    <ul>
+                        <li><strong>IDEから「5サーフェス」へ</strong>: Desktop App・CLI・SDK・Managed Agents API・Enterpriseの5面構成に再設計</li>
+                        <li><strong>Agent Teamsパネル</strong>: サブエージェントをロール別に組成・並列実行。各エージェントはサンドボックス内で独立動作</li>
+                        <li><strong>Chromium統合ブラウザ検証</strong>: アプリを起動→複数ビューポートでスクリーンショット→デザインと自動比較→自己修正</li>
+                        <li><strong>ネイティブ音声コマンド</strong>: Gemini Audioモデル経由でのボイス操作</li>
+                        <li><strong>Gemini 3.5 Flash採用</strong>: 1Mトークンコンテキスト・他社比4倍高速な推論速度</li>
+                        <li><strong>Gemini CLI移行</strong>: 個人/AI Pro/Ultraユーザーは6月18日までにAntigravity CLIへ移行必須</li>
+                    </ul>
+                    <h3>⚠️ 課題・注意点</h3>
+                    <ul>
+                        <li>2.0は「preview」段階で個人Gmailアカウントのみ対応（法人アカウント未対応）</li>
+                        <li>VSCode IDEの廃止で既存ユーザーのセットアップが一夜にして崩壊→当サイトもこれでClaude Codeに移行</li>
+                        <li>3月の枠削減に続く2度目の大変更で信頼が揺らいでいる</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">⚡</div>
+                    <div class="tool-card-info"><h3>Cursor v3</h3><div class="tool-maker">Anysphere</div></div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">8並列Cloud Agent</span>
+                    <span class="badge badge-free">Composer 2.5</span>
+                    <span class="badge badge-free">マルチモデル</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 4〜5月の主要アップデート</h3>
+                    <ul>
+                        <li><strong>Background Agents（v3）</strong>: クラウドVMにリポジトリをクローン→エージェントが専用ブランチで作業→PRとして返す。最大8並列</li>
+                        <li><strong>Desktop+Browser per agent</strong>: 各Background AgentがフルDesktop環境+Browserを取得。UIの動作確認も自動化</li>
+                        <li><strong>Composer 2.5（5月18日）</strong>: Kimi K2.5ベースの第1パーティモデル。SWE-Bench Multilingual 79.8%</li>
+                        <li><strong>マルチモデル対応</strong>: Claude 4.7 Opus / Sonnet 4.6、GPT-5.5、Gemini 3.5 Flash、Kimi K2.5から選択可能</li>
+                        <li><strong>Auto Mode</strong>: クレジット消費なしで自動モデル選択。プレミアム固定時のみクレジット消費</li>
+                        <li><strong>無料Hobbyティア</strong>: クレジットカード不要で試せる唯一の大手ツール</li>
+                    </ul>
+                    <h3>⚠️ 課題</h3>
+                    <ul>
+                        <li>Composer 2 = Kimi K2.5（中国モデル）ベース論争が継続。地政学リスクを懸念する声</li>
+                        <li>Premium request枯渇問題は業界全体の構造問題として続く</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🤖</div>
+                    <div class="tool-card-info"><h3>Claude Code</h3><div class="tool-maker">Anthropic</div></div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">SWE-bench 87.6% #1</span>
+                    <span class="badge badge-paid">iOS / JetBrains / Slack</span>
+                    <span class="badge badge-free">Discord連携</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 Code with Claude 開発者会議（5月）以降の躍進</h3>
+                    <ul>
+                        <li><strong>マルチサーフェス展開</strong>: Terminal・VS Code拡張・JetBrainsプラグイン・スタンドアロンDesktop・Web・<strong>iOS・Slack</strong>の7サーフェス対応</li>
+                        <li><strong>SWE-bench 87.6%</strong>: SWE-bench Verifiedでカテゴリトップ。SWE-bench Pro 64.3%も記録</li>
+                        <li><strong>PostToolUse出力置換（5月）</strong>: フックでツール呼び出し後の出力を差し替える機能追加</li>
+                        <li><strong>Routines</strong>: 定期実行タスクをスケジュール登録</li>
+                        <li><strong>GitHub Actions統合</strong>: CIワークフロー内からClaude Codeを呼び出し可能</li>
+                        <li><strong>MCP成熟度最高水準</strong>: Supabase・Discord・Playwright等のMCPサーバー接続実績多数</li>
+                        <li><strong>Discord連携（Claude Code Channels）</strong>: スマホDiscordから開発指示が可能（当サイトも採用中）</li>
+                    </ul>
+                    <h3>💰 価格体系（2026年6月）</h3>
+                    <ul>
+                        <li>Pro: $20/月 | Max 5x: $100/月 | Max 20x: $200/月 | Teams: $100〜$125/シート/月</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🤖</div>
+                    <div class="tool-card-info"><h3>Grok Build（xAI）</h3><div class="tool-maker">xAI</div></div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">🆕 2026年5月参入</span>
+                    <span class="badge badge-free">8並列worktree</span>
+                    <span class="badge badge-free">ローカルファースト</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 新参者の野心的設計</h3>
+                    <ul>
+                        <li><strong>8サブエージェント並列</strong>: 各エージェントが独立したGitワークツリー上で動作。カテゴリ最大の並列度</li>
+                        <li><strong>ローカルファースト</strong>: ソースコード・認証情報はセッション中もxAIサーバーに送信しない</li>
+                        <li><strong>grok-build-0.1A</strong>: エージェントコーディング専用モデル。SWE-bench 70.8%（初期サードパーティ検証）</li>
+                        <li><strong>Arena Mode（予定）</strong>: 複数エージェントの出力を競わせて最良を選択</li>
+                    </ul>
+                    <h3>⚠️ 課題</h3>
+                    <ul>
+                        <li>コンプライアンス書類が薄い（独立認証待ち）。規制業種では採用困難</li>
+                        <li>初週以降のリテンション率が未知数</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">💻</div>
+                    <div class="tool-card-info"><h3>GitHub Copilot</h3><div class="tool-maker">Microsoft / GitHub</div></div>
+                </div>
+                <div class="tool-card-badges"><span class="badge badge-type">従量課金移行中（6月〜）</span></div>
+                <div class="tool-card-body">
+                    <ul>
+                        <li><strong>4エージェントタイプ</strong>: Local / Background（CLIローカル-クラウドハンドオフ）/ Cloud（PR自動生成）/ Sub-Agentsに対応</li>
+                        <li><strong>従量課金移行</strong>: 2026年6月からフラット定額モデルを廃止し使用量ベース課金へ</li>
+                        <li><strong>マルチモデル</strong>: Claude Opus 4.5/4.6・Sonnet 4.5/4.6・GPTシリーズを選択可能</li>
+                        <li><strong>$10/月〜</strong>: 最低コストで試せる大手ツール。企業向けコンプライアンス体制は業界最強</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🟢</div>
+                    <div class="tool-card-info"><h3>OpenAI Codex CLI</h3><div class="tool-maker">OpenAI</div></div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">4M+ 週間開発者</span>
+                    <span class="badge badge-free">Goal Mode GA</span>
+                </div>
+                <div class="tool-card-body">
+                    <ul>
+                        <li><strong>ユーザー急増</strong>: 4月中旬 300万人→5月末 400万人超の週間開発者数</li>
+                        <li><strong>Goal Mode GA（5月）</strong>: 数時間〜数日のタスクを無人実行。GPT-5.5で1000+連続ツール呼び出しの実証済み</li>
+                        <li><strong>Terminal-Bench 2.0</strong>: GPT-5.5で82.7%を記録</li>
+                        <li><strong>ChatGPT Plus同梱</strong>: 2000万以上のChatGPT有料ユーザーに提供。企業ロールアウトで急拡大</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="lab-section">
+            <h2>📊 全ツール総合比較（2026年6月）</h2>
             <div class="table-wrapper">
                 <table class="compare-table">
-                    <thead><tr><th>問題点</th><th>公式仕様</th><th>ユーザーの実態報告</th></tr></thead>
+                    <thead><tr><th>ツール</th><th>月額目安</th><th>並列エージェント</th><th>SWE-bench</th><th>MCP</th><th>特徴</th></tr></thead>
                     <tbody>
-                        <tr><td class="tool-name">利用可能回数</td><td>「通常用途なら十分」</td><td>数ファイル読み込ませての設計変更を数回行っただけで制限到達</td></tr>
-                        <tr><td class="tool-name">リフレッシュ時間</td><td>使い切っても5時間で回復</td><td>「3日経ってもロック解除されない」などの報告がSNSで散見</td></tr>
-                        <tr><td class="tool-name">クレジット消費率</td><td>動的計算（非公開）</td><td>Opus 4.6はSonnet 4.6の<b>約8倍</b>のレートでクレジットを消費している推測</td></tr>
+                        <tr><td class="tool-name">Claude Code</td><td>$20〜$200</td><td>Git worktree×N</td><td>87.6% ✅ #1</td><td>✅ 最成熟</td><td>深い推論・7サーフェス・MCP拡張</td></tr>
+                        <tr><td class="tool-name">Cursor v3</td><td>Free〜$200</td><td>最大8（Cloud VM）</td><td>79.8% (Multilingual)</td><td>✅</td><td>IDE体験最強・全モデル選択・無料枠</td></tr>
+                        <tr><td class="tool-name">Antigravity 2.0</td><td>Free〜$200</td><td>Agent Teams</td><td>—</td><td>✅</td><td>Googleエコ・1Mコンテキスト・5面</td></tr>
+                        <tr><td class="tool-name">Grok Build</td><td>SuperGrok込</td><td>最大8（独立worktree）</td><td>70.8%</td><td>△</td><td>ローカルファースト・xAI新参入</td></tr>
+                        <tr><td class="tool-name">Codex CLI</td><td>$20〜（Plus同梱）</td><td>Goal Mode長時間実行</td><td>82.7% (Terminal)</td><td>△</td><td>無人長時間タスク・最大普及</td></tr>
+                        <tr><td class="tool-name">GitHub Copilot</td><td>$10〜$39</td><td>4タイプ</td><td>—</td><td>✅</td><td>企業向け最強・コンプライアンス</td></tr>
+                        <tr><td class="tool-name">Windsurf</td><td>Free〜$15</td><td>Cascade + Devin</td><td>—</td><td>✅</td><td>低コスト・Devin統合</td></tr>
+                        <tr><td class="tool-name">Kiro（AWS）</td><td>$20〜</td><td>リポジトリ隔離</td><td>—</td><td>△</td><td>AWSショップ向け・Bedrock特化</td></tr>
                     </tbody>
                 </table>
             </div>
-            
-            <h3>💡 ユーザー側の自己防衛策（マルチモデル流儀）</h3>
-            <ul>
-                <li><strong>日常業務はSonnet 4.6に固定</strong>: 実装やデバッグの大半はSonnet 4.6で十分対応可能。無意識にOpusを使う設定を解除する。</li>
-                <li><strong>Gemini 3.1 Proへの切り替え</strong>: Claude系がロックされた場合、Antigravity内ではGeminiのクォータプールが別管理となっているため、APIを切り替えて急場を凌ぐ。</li>
-                <li><strong>ダウングレード＋外部API</strong>: $250のUltraプランをやめ、Proプラン＋APIYI等の外部従量課金APIを食わせる方が安上がりで安定する説が急浮上しています。</li>
-            </ul>
         </section>
 
-        <!-- 各ツール詳細 -->
         <section class="lab-section">
-            <h2>🔍 各ツール最新アップデート＆ユーザーの声</h2>
-
-            <!-- Antigravity -->
-            <div class="tool-card" id="antigravity-v8">
-                <div class="tool-card-header">
-                    <div class="tool-card-icon">🚀</div>
-                    <div class="tool-card-info">
-                        <h3>Antigravity</h3>
-                        <div class="tool-maker">Google DeepMind — 第8回アップデート</div>
-                    </div>
-                </div>
-                <div class="tool-card-badges">
-                    <span class="badge badge-hot">⚠️ Opus制限問題</span>
-                    <span class="badge badge-free">Gemini 3.1 Pro連携</span>
-                </div>
-                <div class="tool-card-body">
-                    <h3>📢 最新アップデート・現状</h3>
-                    <ul>
-                        <li><strong>UI・操作性の頂点</strong>: エディタとしての完成度は依然として高く、コンテキスト自動認識能力は業界最高水準。</li>
-                        <li><strong>Opus 4.6枯渇問題の火種</strong>: 月額$250のハイエントリプランの価値が「制限」によって毀損されており、早急なアーキテクチャ改善か価格改定が求められている。</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Cursor -->
-            <div class="tool-card" id="cursor-v8">
-                <div class="tool-card-header">
-                    <div class="tool-card-icon">⚡</div>
-                    <div class="tool-card-info">
-                        <h3>Cursor</h3>
-                        <div class="tool-maker">Anysphere — 第8回アップデート</div>
-                    </div>
-                </div>
-                <div class="tool-card-badges">
-                    <span class="badge badge-free">無料プランあり</span>
-                    <span class="badge badge-paid">課金体系見直しの声</span>
-                </div>
-                <div class="tool-card-body">
-                    <h3>📢 最新アップデート・現状</h3>
-                    <ul>
-                        <li><strong>Composer 2の実力とコスト</strong>: 新規実装スピード最強は変わらず。しかし、Cursorでも最上位モデルの利用過多による「Fast Premium request」消滅問題は起きており、業界全体で「最強モデルのコスト転嫁」が進んでいる。</li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Claude Code -->
-            <div class="tool-card" id="claude-code-v8">
-                <div class="tool-card-header">
-                    <div class="tool-card-icon">🤖</div>
-                    <div class="tool-card-info">
-                        <h3>Claude Code</h3>
-                        <div class="tool-maker">Anthropic — 第8回アップデート</div>
-                    </div>
-                </div>
-                <div class="tool-card-badges">
-                    <span class="badge badge-hot">CLIエージェント</span>
-                    <span class="badge badge-paid">$17/月〜高コスパ維持</span>
-                </div>
-                <div class="tool-card-body">
-                    <h3>📢 最新アップデート・現状</h3>
-                    <ul>
-                        <li><strong>自社モデルの強み</strong>: API直結による強みを活かし、安定した動作。コンテキスト溢れに対する自己要約（CLAUDE.mdへの学習転写）ノウハウが広く共有されている。</li>
-                    </ul>
-                </div>
-            </div>
-
-        </section>
-
-        <!-- まとめ -->
-        <section class="lab-section">
-            <h2>🎯 第8回時点のおすすめ</h2>
+            <h2>🎯 第8回時点のおすすめ（2026年6月）</h2>
             <div class="summary-box">
                 <div class="summary-grid">
                     <div class="summary-item">
-                        <div class="summary-label">🔥 最大の課題</div>
-                        <div class="summary-value">最上位モデルのサブスク破綻</div>
-                        <p>「使い放題」の限界。各社ともOpusやGPT-5級モデルの無制限提供は不可能に。</p>
+                        <div class="summary-label">🔥 深い推論・大規模リファクタ</div>
+                        <div class="summary-value">Claude Code (Max 5x $100/月)</div>
+                        <p>SWE-bench 87.6% #1。MCP拡張・iOS・Discord連携。個人〜チームまで対応</p>
                     </div>
                     <div class="summary-item">
-                        <div class="summary-label">💡 解決策</div>
-                        <div class="summary-value">モデルの使い分け</div>
-                        <p>Sonnet 4.6 / Gemini 3.1 Flash 等の一段軽いモデルを「常用」にするのが唯一の正解。</p>
+                        <div class="summary-label">🖥️ IDE体験重視</div>
+                        <div class="summary-value">Cursor v3 ($20〜/月)</div>
+                        <p>8並列Cloud Agent・Composer 2.5・全モデル選択可。無料Hobbyから試せる</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🔵 Googleエコシステム</div>
+                        <div class="summary-value">Antigravity 2.0</div>
+                        <p>GCP・Firebase・Android向け。Agent Teams・1Mトークン。6月18日に移行必須</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">⏰ 無人長時間タスク</div>
+                        <div class="summary-value">Codex CLI Goal Mode</div>
+                        <p>数時間〜数日のバックグラウンド実行。OpenAIエコ・ChatGPT Plus同梱</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 注意 -->
         <section class="lab-section">
             <h2>📝 調査にあたって</h2>
-            <p>本記事は<strong>2026年3月26日時点</strong>の情報です。<a href="/lab/">アーカイブはこちら</a>をご覧ください。</p>
-            <p>当サイト「Gravity Portal」は <strong>Antigravity</strong> を使って開発されています。</p>
+            <p>本記事は<strong>2026年6月3日時点</strong>の情報を基に更新しました。当サイトは2026年6月よりAntigravity 2.0のUI刷新を契機にClaude Codeへ完全移行しています。<a href="/lab/">アーカイブはこちら</a>。</p>
         </section>
     </main>
     <footer class="lab-footer">
@@ -164,12 +254,11 @@
         <nav class="lab-footer-nav">
             <a href="/">🏠 TOP</a>
             <a href="/lab/">🔬 LAB</a>
-            <a href="/lab/ai-tools/v6/">🛠️ 第6回</a>
-            <a href="/lab/ai-developers/v6/">👤 AI開発者 第6回</a>
-            <a href="/lab/ai-trends/v6/">📊 トレンド 第6回</a>
+            <a href="/lab/ai-tools/v7/">🛠️ 第7回</a>
+            <a href="/lab/ai-developers/v8/">👤 開発者 第8回</a>
+            <a href="/lab/ai-trends/v8/">📊 トレンド 第8回</a>
         </nav>
     </footer>
-    <script>
-        (function(){var btn=document.getElementById('themeToggle');function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}update();btn.addEventListener('click',function(){var cur=document.documentElement.getAttribute('data-theme');var next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('gp-theme',next)}catch(e){}update()})})()</script>
+    <script>(function(){var btn=document.getElementById('themeToggle');function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}update();btn.addEventListener('click',function(){var cur=document.documentElement.getAttribute('data-theme');var next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('gp-theme',next)}catch(e){}update()})})()</script>
 </body>
 </html>
