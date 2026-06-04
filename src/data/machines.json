@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-06-03T18:48:35.231Z",
+  "lastUpdated": "2026-06-04T17:49:45.211Z",
   "source": "pachinko-spec.info",
   "totalMachines": 1623,
   "machines": [
@@ -32564,38 +32564,38 @@
       "baseProbability": 99.9,
       "borderEquiv": 16.36,
       "rb": 99,
-      "singleSpinPayout": 15.27,
-      "avgAcquired": 1325.82,
+      "singleSpinPayout": 15.28,
+      "avgAcquired": 1326.45,
       "avgChain": 2.46,
-      "realContRate": 76.73,
+      "realContRate": 76.89,
       "contRateByState": [
         {
           "state": "通常",
-          "prob": 99.9,
-          "contRate": 86.85
+          "prob": 99.89,
+          "contRate": 86.86
         },
         {
           "state": "ST",
-          "prob": 19.52,
-          "contRate": 40.9
+          "prob": 19.51,
+          "contRate": 40.91
         },
         {
           "state": "時短",
-          "prob": 99.86,
-          "contRate": 28.45
+          "prob": 99.82,
+          "contRate": 28.46
         },
         {
           "state": "遊タイム",
-          "prob": 99.97,
+          "prob": 99.96,
           "contRate": 100
         },
         {
           "state": "残保留",
-          "prob": 100.39,
-          "contRate": 3.92
+          "prob": 99.96,
+          "contRate": 3.94
         }
       ],
-      "entryRate": 76.99,
+      "entryRate": 77.1,
       "koatariProbability": 0,
       "machineSubType": "一種",
       "rushRate": 0,
@@ -32613,7 +32613,7 @@
         "海",
         "ウミ"
       ],
-      "avgChainCalc": 3.54,
+      "avgChainCalc": 3.57,
       "calcProb": 6.48
     },
     {
