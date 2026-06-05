@@ -765,6 +765,17 @@ tbody tr:hover .machine-name {
     transition: all 0.2s;
 }
 
+.page-btn.page-arrow {
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0;
+    font-size: 1.4rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .page-btn:hover:not(:disabled) {
     background: rgba(99, 102, 241, 0.15);
     border-color: #7c7ff2;
@@ -775,10 +786,18 @@ tbody tr:hover .machine-name {
     cursor: not-allowed;
 }
 
-.page-info {
+.page-select {
+    background: rgba(30, 32, 48, 0.8);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    padding: 0.4rem 0.8rem;
     color: #8b8fa0;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    min-width: 5rem;
+    text-align: center;
 }
 
 .per-page-select {

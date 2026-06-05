@@ -133,7 +133,7 @@
     const loading = $('loading');
     const prevBtn = $('prev-btn');
     const nextBtn = $('next-btn');
-    const pageInfo = $('page-info');
+    const pageSelect = $('page-select');
     const perPageSelect = $('per-page');
     const activeFilters = $('active-filters');
     const modal = $('detail-modal');
@@ -440,7 +440,11 @@
 
     function updatePaging() {
         const totalPages = Math.max(1, Math.ceil(filteredMachines.length / perPage));
-        pageInfo.textContent = `${currentPage} / ${totalPages}`;
+        const opts = [];
+        for (let i = 1; i <= totalPages; i++) {
+            opts.push(`<option value="${i}"${i === currentPage ? ' selected' : ''}>${i} / ${totalPages}</option>`);
+        }
+        pageSelect.innerHTML = opts.join('');
         prevBtn.disabled = currentPage <= 1;
         nextBtn.disabled = currentPage >= totalPages;
     }
@@ -679,6 +683,7 @@
 
     prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); } });
     nextBtn.addEventListener('click', () => { if (currentPage < Math.ceil(filteredMachines.length / perPage)) { currentPage++; renderTable(); } });
+    pageSelect.addEventListener('change', () => { currentPage = parseInt(pageSelect.value); renderTable(); });
     perPageSelect.addEventListener('change', () => { perPage = parseInt(perPageSelect.value); currentPage = 1; renderTable(); });
     tbody.addEventListener('click', (e) => { if (e.target.closest('.fav-btn, .fav-cell')) return; const row = e.target.closest('tr'); if (row?.dataset.index !== undefined) showDetail(filteredMachines[parseInt(row.dataset.index)]); });
     modalClose.addEventListener('click', hideDetail);
