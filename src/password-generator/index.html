@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>パスワード生成ツール | Gravity Portal</title>
+    <meta name="description" content="文字種・長さを自由にカスタマイズして安全なパスワードを即時生成。英大文字・小文字・数字・記号対応。暗号論的擬似乱数使用・ブラウザ完結。">
+    <meta property="og:title" content="🔐 パスワード生成ツール | Gravity Portal">
+    <meta property="og:description" content="文字種・長さカスタマイズ対応の安全なパスワード生成。ブラウザ完結・サーバー送信なし。">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.antigravity-portal.com/tools/password-generator/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <meta name="twitter:card" content="summary">
+    <style>
+        :root {
+            --bg: #0d0e1a;
+            --bg2: rgba(22,23,40,0.5);
+            --border: rgba(255,255,255,0.1);
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #6366f1;
+            --accent-hover: rgba(99,102,241,0.15);
+            --radius: 12px;
+            --green: #10b981;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            padding: 2rem 1rem 4rem;
+        }
+        .wrap {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+        /* 結果ボックス */
+        .result-box {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .pw-text {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: 700;
+            word-break: break-all;
+            letter-spacing: 0.05em;
+        }
+        .copy-btn {
+            flex-shrink: 0;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid var(--accent);
+            background: transparent;
+            color: var(--accent);
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+            white-space: nowrap;
+        }
+        .copy-btn:hover { background: var(--accent-hover); }
+        .copy-btn.done { border-color: var(--green); color: var(--green); }
+        /* 強度メーター */
+        .strength-bar {
+            height: 5px;
+            border-radius: 9999px;
+            background: var(--border);
+            margin-bottom: 0.35rem;
+            overflow: hidden;
+        }
+        .strength-fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.3s, background-color 0.3s;
+        }
+        .strength-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            text-align: right;
+            margin-bottom: 1.25rem;
+        }
+        /* セクション */
+        .section {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.1rem 1.4rem;
+            margin-bottom: 0.85rem;
+        }
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 0.85rem;
+        }
+        /* 長さスライダー */
+        .length-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+        .length-val {
+            min-width: 2.2rem;
+            text-align: right;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        /* 文字種トグル */
+        .toggle-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.65rem;
+        }
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.55rem 0.85rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            user-select: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .toggle-item.on {
+            border-color: var(--accent);
+            background: rgba(99,102,241,0.1);
+        }
+        .toggle-label { font-size: 0.82rem; color: var(--text-muted); }
+        .toggle-item.on .toggle-label { color: var(--text); font-weight: 600; }
+        .sw {
+            width: 34px; height: 18px;
+            border-radius: 9999px;
+            background: var(--border);
+            position: relative;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        .sw::after {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: white;
+            transition: transform 0.2s;
+        }
+        .toggle-item.on .sw { background: var(--accent); }
+        .toggle-item.on .sw::after { transform: translateX(16px); }
+        /* チェックボックス行 */
+        .check-row {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .check-row input { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+        .check-label { font-size: 0.82rem; color: var(--text-muted); }
+        /* 生成ボタン */
+        .gen-btn {
+            width: 100%;
+            padding: 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: none;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            margin-top: 0.35rem;
+        }
+        .gen-btn:hover { opacity: 0.9; }
+        .gen-btn:active { transform: scale(0.98); }
+        .note {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <!-- 生成結果 -->
+    <div class="result-box">
+        <span class="pw-text" id="pw-out">N7L6SJcQvVUzKUyA</span>
+        <button class="copy-btn" id="copy-btn" onclick="copyPw()">コピー</button>
+    </div>
+    <!-- 強度メーター -->
+    <div class="strength-bar"><div class="strength-fill" id="strength-fill"></div></div>
+    <p class="strength-label" id="strength-label"></p>
+
+    <!-- 長さ -->
+    <div class="section">
+        <p class="section-title">文字数</p>
+        <div class="length-row">
+            <input type="range" id="len-slider" min="4" max="64" value="16" oninput="onLenChange(this.value)">
+            <span class="length-val" id="len-val">16</span>
+        </div>
+    </div>
+
+    <!-- 文字種 -->
+    <div class="section">
+        <p class="section-title">使用する文字種</p>
+        <div class="toggle-grid">
+            <div class="toggle-item on" id="tog-upper" onclick="toggle('upper')">
+                <span class="toggle-label">英大文字 (A-Z)</span>
+                <span class="sw"></span>
+            </div>
+            <div class="toggle-item on" id="tog-lower" onclick="toggle('lower')">
+                <span class="toggle-label">英小文字 (a-z)</span>
+                <span class="sw"></span>
+            </div>
+            <div class="toggle-item on" id="tog-digit" onclick="toggle('digit')">
+                <span class="toggle-label">数字 (0-9)</span>
+                <span class="sw"></span>
+            </div>
+            <div class="toggle-item" id="tog-symbol" onclick="toggle('symbol')">
+                <span class="toggle-label">記号 (!@#…)</span>
+                <span class="sw"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- オプション -->
+    <div class="section">
+        <p class="section-title">オプション</p>
+        <label class="check-row">
+            <input type="checkbox" id="excl-similar" checked onchange="generate()">
+            <span class="check-label">紛らわしい文字を除外（O, 0, l, 1, I など）</span>
+        </label>
+    </div>
+
+    <button class="gen-btn" onclick="generate()">🔄 パスワードを生成</button>
+    <p class="note">ブラウザ完結・ファイルはサーバーに送信されません。暗号論的擬似乱数（crypto.getRandomValues）を使用。</p>
+</div>
+
+<script>
+const SETS = {
+    upper:  { safe: 'ABCDEFGHJKLMNPQRSTUVWXYZ', full: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' },
+    lower:  { safe: 'abcdefghjkmnpqrstuvwxyz',  full: 'abcdefghijklmnopqrstuvwxyz' },
+    digit:  { safe: '23456789',                  full: '0123456789' },
+    symbol: { safe: '!@#$%^&*()-_=+[]{}|;:,.<>?', full: '!@#$%^&*()-_=+[]{}|;:,.<>?' },
+};
+const state = { upper: true, lower: true, digit: true, symbol: false, len: 16, excl: true };
+
+function toggle(key) {
+    state[key] = !state[key];
+    document.getElementById('tog-' + key).classList.toggle('on', state[key]);
+    generate();
+}
+function onLenChange(v) {
+    state.len = +v;
+    document.getElementById('len-val').textContent = v;
+    generate();
+}
+function generate() {
+    state.excl = document.getElementById('excl-similar').checked;
+    let pool = '';
+    ['upper','lower','digit','symbol'].forEach(k => {
+        if (state[k]) pool += (state.excl ? SETS[k].safe : SETS[k].full);
+    });
+    if (!pool) { document.getElementById('pw-out').textContent = '文字種を1つ以上選んでください'; updateStrength(''); return; }
+    const arr = new Uint32Array(state.len);
+    crypto.getRandomValues(arr);
+    const pw = Array.from(arr, n => pool[n % pool.length]).join('');
+    document.getElementById('pw-out').textContent = pw;
+    updateStrength(pw);
+    document.getElementById('copy-btn').textContent = 'コピー';
+    document.getElementById('copy-btn').classList.remove('done');
+}
+function updateStrength(pw) {
+    if (!pw) { document.getElementById('strength-fill').style.width = '0%'; document.getElementById('strength-label').textContent = ''; return; }
+    let s = 0;
+    if (pw.length >= 8)  s++;
+    if (pw.length >= 12) s++;
+    if (pw.length >= 16) s++;
+    if (/[A-Z]/.test(pw)) s++;
+    if (/[a-z]/.test(pw)) s++;
+    if (/[0-9]/.test(pw)) s++;
+    if (/[^A-Za-z0-9]/.test(pw)) s++;
+    const pct = Math.round(s / 7 * 100);
+    const map = [[2,'#ef4444','弱い'],[4,'#f59e0b','普通'],[5,'#3b82f6','強い'],[7,'#10b981','非常に強い']];
+    const [,color,label] = map.find(([t]) => s <= t) || map[3];
+    const fill = document.getElementById('strength-fill');
+    fill.style.width = pct + '%';
+    fill.style.backgroundColor = color;
+    document.getElementById('strength-label').textContent = '強度: ' + label;
+}
+function copyPw() {
+    const pw = document.getElementById('pw-out').textContent;
+    if (!pw || pw.includes('選んで')) return;
+    navigator.clipboard.writeText(pw).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = '✓ コピー済';
+        btn.classList.add('done');
+        setTimeout(() => { btn.textContent = 'コピー'; btn.classList.remove('done'); }, 2000);
+    });
+}
+// 初期生成
+generate();
+</script>
+</body>
+</html>
