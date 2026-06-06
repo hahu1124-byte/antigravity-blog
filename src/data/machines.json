@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-06-05T17:19:31.114Z",
+  "lastUpdated": "2026-06-06T16:10:57.323Z",
   "source": "pachinko-spec.info",
   "totalMachines": 1623,
   "machines": [
@@ -34815,23 +34815,23 @@
     {
       "name": "Pうしおととら 神のせSPEC 100ver",
       "type": "ライト(甘デジ)",
-      "prob": 5.94,
+      "prob": 5.93,
       "baseProbability": 100.05,
-      "borderEquiv": 16.5,
+      "borderEquiv": 16.47,
       "rb": 90,
-      "singleSpinPayout": 15.16,
-      "avgAcquired": 1517.78,
+      "singleSpinPayout": 15.17,
+      "avgAcquired": 1518.56,
       "avgChain": 2.38,
       "realContRate": 50.49,
       "contRateByState": [
         {
           "state": "通常",
-          "prob": 100.07,
+          "prob": 100.05,
           "contRate": 100
         },
         {
           "state": "普図A",
-          "prob": 100.06,
+          "prob": 100.05,
           "contRate": 50.49
         },
         {
@@ -34845,7 +34845,7 @@
           "contRate": 100
         }
       ],
-      "entryRate": 50.48,
+      "entryRate": 50.5,
       "koatariProbability": 1.01,
       "machineSubType": "一種二種",
       "rushRate": 0,
@@ -34860,7 +34860,7 @@
       "maker": "大一系列",
       "sourceUrl": "https://pachinko-spec.info/spec/171443/",
       "avgChainCalc": 1.51,
-      "calcProb": 5.94
+      "calcProb": 5.93
     },
     {
       "name": "Pうまい棒",
