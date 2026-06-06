@@ -24,7 +24,7 @@ const posts = JSON.parse(readFileSync(BLOG_DATA_PATH, 'utf-8')).map(post => {
     return post;
 });
 
-console.log(`📝 ${posts.length} 記事を処理中（content: ${posts.filter(p => p.content).length} 件）...`);
+console.log(`📝 ${posts.filter(p => p.content).length} 記事を生成（メタデータのみ: ${posts.filter(p => !p.content).length} 件は除外）...`);
 
 // 出力ディレクトリ作成
 mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -560,16 +560,11 @@ function buildIndexPage() {
 // ==========================================
 
 function buildArticlePages() {
-    posts.forEach((post, index) => {
-        // contentがない記事（メタデータのみ）はスキップ
-        if (!post.content) {
-            console.log(`⏭️  ${post.slug} — contentなし、スキップ`);
-            return;
-        }
-
-        // 前後の記事（postsは新しい順）
-        const prev = index > 0 ? posts[index - 1] : null;
-        const next = index < posts.length - 1 ? posts[index + 1] : null;
+    const contentPosts = posts.filter(p => p.content);
+    contentPosts.forEach((post, index) => {
+        // 前後の記事（contentありのもの同士でナビゲーション）
+        const prev = index > 0 ? contentPosts[index - 1] : null;
+        const next = index < contentPosts.length - 1 ? contentPosts[index + 1] : null;
 
         // 相対パスのベースを計算（slugの階層分だけ../を重ねる）
         const depth = post.slug.split('/').length;
