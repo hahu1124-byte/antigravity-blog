@@ -650,7 +650,7 @@
 
     function showDetail(machine) {
         const m = machine;
-        const slug = findSlug(m.name);
+        const slug = m.slug || findSlug(m.name);
         const seoLink = slug ? `<a href="https://www.antigravity-portal.com/machine-db/${slug}/" class="modal-link modal-link-seo" target="_blank" rel="noopener">📊 詳細スペックと自前ボーダーを見る →</a>` : '';
         modalBody.innerHTML = `
             <h2 class="modal-title">${esc(m.name)}</h2>

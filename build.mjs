@@ -70,6 +70,17 @@ for (const tool of staticTools) {
     }
 }
 
+// machine-db/index.html の CSS/JS バージョン番号をBUILD_STAMPで更新
+{
+    const machineDbHtml = join(OUTPUT_DIR, 'machine-db', 'index.html');
+    if (existsSync(machineDbHtml)) {
+        let html = readFileSync(machineDbHtml, 'utf-8');
+        html = html.replace(/(\?v=)\d+/g, `$1${BUILD_STAMP}`);
+        writeFileSync(machineDbHtml, html, 'utf-8');
+        console.log(`🔧 machine-db/index.html バージョン → ${BUILD_STAMP}`);
+    }
+}
+
 // スクリプトをコピー
 const scriptsSrc = join(__dirname, 'src', 'scripts');
 const scriptsDst = join(OUTPUT_DIR, 'blog', 'scripts');
@@ -822,7 +833,7 @@ function buildMachinePages() {
             url: `${SITE_URL}/machine-db/${slug}/`,
             publisher: { "@type": "Organization", name: "Gravity Portal", url: SITE_URL },
             datePublished: m.releaseDate || undefined,
-            dateModified: new Date().toISOString().split('T')[0],
+            dateModified: BUILD_STAMP.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'),
         });
     }
 
@@ -915,6 +926,7 @@ ${m.yutimeTrigger>0?`<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回転</
 </table></div></section>
 <a href="/tools/ev-calculator/" class="cta-secondary">🔧 EV計算ツールで ${escapeHtml(m.name)} を分析する →</a>
 <section class="sec"><h2>🔗 関連ツール</h2><div class="link-grid">
+<a href="/machine-db/?q=${encodeURIComponent(m.name)}" class="link-card">🔍 機種DBで ${escapeHtml(m.name)} を検索</a>
 <a href="/machine-db/" class="link-card">📖 機種データベース一覧</a>
 <a href="/tools/ev-calculator/" class="link-card">📊 期待値計算ツール</a>
 <a href="/tools/" class="link-card">🛠 ツール一覧</a>
