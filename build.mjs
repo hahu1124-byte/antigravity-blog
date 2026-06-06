@@ -53,7 +53,7 @@ if (existsSync(cssSrc)) {
 }
 
 // 静的ツールをコピー（convergence, simulator, machine-db等）
-const staticTools = ['convergence', 'simulator', 'machine-db', 'data', 'idle-game', 'quiz', 'general-quiz', 'lab', 'bgm-maker', 'static-pages', 'pachinko-sim', 'slot-hyena', 'password-generator'];
+const staticTools = ['convergence', 'simulator', 'machine-db', 'data', 'idle-game', 'quiz', 'general-quiz', 'lab', 'bgm-maker', 'static-pages', 'pachinko-sim', 'slot-hyena', 'password-generator', 'image-tools', 'pdf-tools', 'qr-tools'];
 for (const tool of staticTools) {
     const toolSrc = join(__dirname, 'src', tool);
     const toolDst = join(OUTPUT_DIR, tool);
@@ -61,6 +61,8 @@ for (const tool of staticTools) {
         mkdirSync(toolDst, { recursive: true });
         cpSync(toolSrc, toolDst, { recursive: true });
         console.log(`🔧 ${tool} コピー完了`);
+    } else {
+        console.warn(`⚠️  ${tool} が src/ に見つかりません — スキップ`);
     }
 }
 
@@ -667,7 +669,7 @@ function buildArticlePages() {
         writeFileSync(join(articleDir, 'index.html'), html, 'utf-8');
     });
 
-    console.log(`📄 ${posts.length} 記事ページ生成完了`);
+    console.log(`📄 ${contentPosts.length} 記事ページ生成完了`);
 }
 
 // ==========================================
