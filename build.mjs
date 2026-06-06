@@ -10,6 +10,9 @@ import { transform } from 'esbuild';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// ビルド日付スタンプ（YYYYMMDD）— キャッシュバスターに使用。同日複数回ビルドでもHTMLが変わらない
+const BUILD_STAMP = new Date().toISOString().split('T')[0].replace(/-/g, '');
+
 // ソースパス
 const BLOG_DATA_PATH = join(__dirname, 'src', 'blog-data.json');
 const ARTICLES_DIR = join(__dirname, 'src', 'articles');
@@ -100,7 +103,7 @@ const DEFAULT_OG_IMAGE = `${SITE_URL}/blog/images/ai_dev_day1.webp`;
  * @param {string} [ogp.type] - og:type ('article' or 'website')
  */
 function htmlHead(title, description, cssRelPath = 'styles.css', ogp = {}) {
-    const cacheBust = Date.now();
+    const cacheBust = BUILD_STAMP;
     const ogTitle = escapeHtml(title);
     const ogDesc = escapeHtml(description);
     const ogUrl = ogp.url || SITE_URL;
@@ -954,7 +957,7 @@ ${m.yutimeTrigger>0?`<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回転</
     writeFileSync(join(OUTPUT_DIR, 'machine-db', 'slug-map.json'), JSON.stringify(nameToSlug), 'utf-8');
 
     // stats.json — GP等が機種数を動的取得するための軽量ファイル
-    const stats = { machineCount: generated, builtAt: new Date().toISOString() };
+    const stats = { machineCount: generated, builtAt: BUILD_STAMP };
     writeFileSync(join(OUTPUT_DIR, 'data', 'stats.json'), JSON.stringify(stats), 'utf-8');
     console.log(`📊 stats.json 出力完了 (machineCount: ${generated})`);
 

@@ -23,6 +23,12 @@
         <p class="machine-note" id="machineNote"></p>
       </div>
 
+      <!-- バリアント選択（AT天井/リセット等、バリアントがある機種のみ表示） -->
+      <div class="field" id="variantField" style="display:none">
+        <label class="label" for="variant">狙い方</label>
+        <select id="variant" class="select"></select>
+      </div>
+
       <!-- 換金率 -->
       <div class="field-row">
         <div class="field">
@@ -71,6 +77,7 @@
             <th>G数</th>
             <th>ゾーン</th>
             <th>EV</th>
+            <th>出率</th>
             <th>消化時間</th>
             <th>期待時給</th>
           </tr>

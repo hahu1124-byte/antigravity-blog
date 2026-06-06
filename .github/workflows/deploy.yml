@@ -24,19 +24,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
       - name: Build
         run: node build.mjs
-
-      - name: Copy static tools to dist
-        run: |
-          cp -r src/image-tools dist/image-tools
-          cp -r src/qr-tools dist/qr-tools
-          cp -r src/pdf-tools dist/pdf-tools
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
