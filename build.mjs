@@ -796,7 +796,7 @@ function buildMachinePages() {
     }
 
     const mData = JSON.parse(readFileSync(MACHINES_PATH, 'utf-8'));
-    const machines = (mData.machines || []).filter(m => m.prob > 0 && m.rb > 0 && m.name);
+    const machines = (mData.machines || []).filter(m => m.prob > 0 && m.name);
 
     function toSlug(name) {
         return name
@@ -841,8 +841,13 @@ function buildMachinePages() {
         const border = m.borderEquiv||0, prob = m.prob||0, base = m.baseProbability||0;
         const chain = m.avgChainCalc||m.avgChain||0, cont = m.realContRate||0, entry = m.entryRate||0;
         const rush = m.rushRate||0, rb = m.rb||0, avg = m.avgAcquired||0;
-        const title = `${m.name}のボーダー・期待値・トータル確率完全解析`;
-        const desc = `${m.name}の等価ボーダー${border}回転/千円、トータル確率1/${prob}。スペック・遊タイム情報と期待値計算ツールへのリンクあり。`;
+        const incomplete = rb === 0;  // ボーダー等の詳細データが未取得
+        const title = incomplete
+            ? `${m.name}のスペック情報`
+            : `${m.name}のボーダー・期待値・トータル確率完全解析`;
+        const desc = incomplete
+            ? `${m.name}（${m.maker||''}）のスペック情報ページ。トータル確率1/${prob}。詳細データは未取得のため、データ元リンクをご確認ください。`
+            : `${m.name}の等価ボーダー${border}回転/千円、トータル確率1/${prob}。スペック・遊タイム情報と期待値計算ツールへのリンクあり。`;
 
         return `<!DOCTYPE html>
 <html lang="ja">
@@ -876,6 +881,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .hero-item{text-align:center}.hero-lbl{font-size:.72rem;font-weight:700;color:#8b8fa0;text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem}
 .hero-val{font-family:'SF Mono',Consolas,monospace;font-size:1.75rem;font-weight:800}.hero-unit{font-size:.8rem;color:#6b6f80;font-weight:400}
 .clr-easy{color:#22c55e}.clr-normal{color:#eab308}.clr-hard{color:#ef4444}.clr-prob{color:#a78bfa}.clr-chain{color:#c084fc}.clr-entry{color:#facc15}
+.notice{background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.25);border-radius:10px;padding:.85rem 1rem;margin-bottom:1.5rem;font-size:.85rem;color:#fbbf24;line-height:1.6}
+.notice a{color:#fde68a;text-decoration:underline}
 .cta-primary{display:block;text-align:center;padding:1rem 2rem;background:linear-gradient(135deg,#6366f1,#7c3aed);color:#fff;font-size:1rem;font-weight:700;border-radius:12px;text-decoration:none;transition:transform .2s,box-shadow .2s;box-shadow:0 4px 20px rgba(99,102,241,.3);margin-bottom:.4rem}
 .cta-primary:hover{transform:translateY(-2px);box-shadow:0 6px 30px rgba(99,102,241,.45)}
 .cta-sub{text-align:center;font-size:.78rem;color:#6b6f80;margin-bottom:1.8rem}
@@ -886,7 +893,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .spec{width:100%;border-collapse:collapse}
 .spec th{text-align:left;padding:.65rem .8rem;font-size:.82rem;font-weight:600;color:#8b8fa0;background:rgba(30,32,48,.6);border-bottom:1px solid rgba(255,255,255,.05);width:40%;white-space:nowrap}
 .spec td{padding:.65rem .8rem;font-size:.9rem;color:#e0e0e8;border-bottom:1px solid rgba(255,255,255,.04);font-family:'SF Mono',Consolas,monospace}
-.accent{color:#a78bfa;font-weight:600}.dim{color:#3a3d4e}
+.accent{color:#a78bfa;font-weight:600}.dim{color:#3a3d4e}.na{color:#4a4d5e;font-style:italic}
 .link-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.8rem}
 .link-card{display:block;padding:.8rem 1rem;background:rgba(30,32,48,.6);border:1px solid rgba(99,102,241,.12);border-radius:10px;color:#a78bfa;text-decoration:none;font-size:.85rem;font-weight:600;transition:all .2s}
 .link-card:hover{background:rgba(99,102,241,.1);border-color:rgba(99,102,241,.3)}
@@ -898,33 +905,36 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="wrap">
 <nav class="bc"><a href="/">トップ</a> &gt; <a href="/machine-db/">機種データベース</a> &gt; ${escapeHtml(m.name)}</nav>
 <header class="hdr">
-<h1>${escapeHtml(m.name)}のボーダー・期待値・トータル確率完全解析</h1>
+<h1>${escapeHtml(title)}</h1>
 <div class="meta">${mTypeBadge(m.type)}${m.maker?` <span class="maker">${escapeHtml(m.maker)}</span>`:''}${m.releaseDate?` <span class="rel">導入日: ${m.releaseDate}</span>`:''}</div>
 </header>
+${incomplete ? `<div class="notice">⚠️ この機種はボーダー・出玉データが未取得のため、一部情報が表示できません。${m.sourceUrl ? `<br>詳細スペックは <a href="${m.sourceUrl}" target="_blank" rel="noopener">データ元サイト</a> でご確認ください。` : ''}</div>` : ''}
 <section class="hero"><div class="hero-grid">
-<div class="hero-item"><div class="hero-lbl">等価ボーダー</div><div class="hero-val ${bdrClass(border)}">${border}<span class="hero-unit"> 回転/千円</span></div></div>
+${!incomplete ? `<div class="hero-item"><div class="hero-lbl">等価ボーダー</div><div class="hero-val ${bdrClass(border)}">${border}<span class="hero-unit"> 回転/千円</span></div></div>` : ''}
 <div class="hero-item"><div class="hero-lbl">トータル確率</div><div class="hero-val clr-prob">1/<span>${prob}</span></div></div>
-<div class="hero-item"><div class="hero-lbl">平均連荘</div><div class="hero-val clr-chain">${Math.round(chain*100)/100}<span class="hero-unit"> 連</span></div></div>
+${!incomplete ? `<div class="hero-item"><div class="hero-lbl">平均連荘</div><div class="hero-val clr-chain">${Math.round(chain*100)/100}<span class="hero-unit"> 連</span></div></div>` : ''}
 ${entry>0?`<div class="hero-item"><div class="hero-lbl">RUSH突入率</div><div class="hero-val clr-entry">${entry}<span class="hero-unit"> %</span></div></div>`:''}
 </div></section>
-<a href="/tools/ev-calculator/" class="cta-primary">📊 この機種の正確な期待値を計算する</a>
-<p class="cta-sub">店舗の換金率・実出玉に合わせた正確な期待値を算出できます</p>
+${!incomplete ? `<a href="/tools/ev-calculator/" class="cta-primary">📊 この機種の正確な期待値を計算する</a>
+<p class="cta-sub">店舗の換金率・実出玉に合わせた正確な期待値を算出できます</p>` : ''}
 <section class="sec"><h2>📋 基本スペック</h2><div class="t-card"><table class="spec">
-<tr><th>大当り確率（通常時）</th><td>1/${base}</td></tr>
+${base>0?`<tr><th>大当り確率（通常時）</th><td>1/${base}</td></tr>`:''}
 <tr><th>トータル確率</th><td>1/${prob}</td></tr>
-<tr><th>等価ボーダー</th><td>${border} 回転/千円</td></tr>
-<tr><th>想定1R出玉</th><td>${rb} 玉</td></tr>
+<tr><th>等価ボーダー</th><td>${border>0 ? border+' 回転/千円' : '<span class="na">データなし</span>'}</td></tr>
+<tr><th>想定1R出玉</th><td>${rb>0 ? rb+' 玉' : '<span class="na">データなし</span>'}</td></tr>
 ${avg>0?`<tr><th>平均獲得出玉</th><td>${avg} 玉</td></tr>`:''}
-<tr><th>平均連荘</th><td>${Math.round(chain*100)/100} 連</td></tr>
+${!incomplete?`<tr><th>平均連荘</th><td>${Math.round(chain*100)/100} 連</td></tr>`:''}
 ${cont>0?`<tr><th>実質継続率</th><td>${cont}%</td></tr>`:''}
 ${entry>0?`<tr><th>RUSH突入率</th><td>${entry}%</td></tr>`:''}
 ${rush>0?`<tr><th>RUSH発生率</th><td>${rush}%${m.rushType?` (${m.rushType})`:''}</td></tr>`:''}
+${m.maker?`<tr><th>メーカー</th><td>${escapeHtml(m.maker)}</td></tr>`:''}
+${m.releaseDate?`<tr><th>導入日</th><td>${m.releaseDate}</td></tr>`:''}
 </table></div></section>
-<section class="sec"><h2>⏱ 遊タイム</h2><div class="t-card"><table class="spec">
+${!incomplete ? `<section class="sec"><h2>⏱ 遊タイム</h2><div class="t-card"><table class="spec">
 <tr><th>遊タイム</th><td>${fmtYt(m)}</td></tr>
 ${m.yutimeTrigger>0?`<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回転</td></tr><tr><th>時短回転数</th><td>${m.yutimeSpins||0} 回転</td></tr>${m.holdOver>0?`<tr><th>残保留</th><td>${m.holdOver} 個</td></tr>`:''}`:''}
 </table></div></section>
-<a href="/tools/ev-calculator/" class="cta-secondary">🔧 EV計算ツールで ${escapeHtml(m.name)} を分析する →</a>
+<a href="/tools/ev-calculator/" class="cta-secondary">🔧 EV計算ツールで ${escapeHtml(m.name)} を分析する →</a>` : ''}
 <section class="sec"><h2>🔗 関連ツール</h2><div class="link-grid">
 <a href="/machine-db/?q=${encodeURIComponent(m.name)}" class="link-card">🔍 機種DBで ${escapeHtml(m.name)} を検索</a>
 <a href="/machine-db/" class="link-card">📖 機種データベース一覧</a>
