@@ -4,8 +4,9 @@
  * GitHub Pages用のブログサイトを生成する
  */
 import { readFileSync, writeFileSync, mkdirSync, cpSync, existsSync, readdirSync, statSync } from 'fs';
-import { join, dirname, extname } from 'path';
+import { join, dirname, extname, relative } from 'path';
 import { fileURLToPath } from 'url';
+import { createHash } from 'crypto';
 import { transform } from 'esbuild';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -988,10 +989,24 @@ buildRssFeed();
 buildMachinePages();
 
 // ==========================================
-// CSS / JS Minify（ビルド後処理）
+// CSS / JS / HTML Minify（ビルド後処理）
 // ==========================================
 
-/** dist内の全CSS/JSファイルを再帰的に取得 */
+const MINIFY_CACHE_PATH = join(OUTPUT_DIR, '.minify-cache.json');
+
+function sha(content) {
+    return createHash('sha256').update(content).digest('hex').slice(0, 12);
+}
+
+function loadMinifyCache() {
+    if (existsSync(MINIFY_CACHE_PATH)) {
+        try { return JSON.parse(readFileSync(MINIFY_CACHE_PATH, 'utf-8')); }
+        catch { return {}; }
+    }
+    return {};
+}
+
+/** dist内の全ファイルを再帰的に取得 */
 function collectFiles(dir, exts) {
     const results = [];
     if (!existsSync(dir)) return results;
@@ -1006,17 +1021,59 @@ function collectFiles(dir, exts) {
     return results;
 }
 
-async function minifyAssets() {
-    const cssFiles = collectFiles(OUTPUT_DIR, ['.css']);
-    const jsFiles = collectFiles(OUTPUT_DIR, ['.js']);
-    let totalSaved = 0;
-    let fileCount = 0;
+/**
+ * HTMLのインラインCSS/JSをesbuildでminify、タグ間余分空白を削除
+ * <pre>タグは壊さないよう、src属性付き<script>はスキップ
+ */
+async function minifyHtmlContent(html) {
+    // <style>ブロックをesbuildでminify
+    const styleMatches = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)];
+    for (const m of styleMatches) {
+        if (!m[1].trim()) continue;
+        try {
+            const r = await transform(m[1], { loader: 'css', minify: true });
+            html = html.replace(m[0], `<style>${r.code}</style>`);
+        } catch { /* 元のまま維持 */ }
+    }
 
+    // src属性なしの<script>ブロックをesbuildでminify
+    const scriptMatches = [...html.matchAll(/<script(?![^>]*\bsrc\b)[^>]*>([\s\S]*?)<\/script>/g)];
+    for (const m of scriptMatches) {
+        if (!m[1].trim()) continue;
+        try {
+            const r = await transform(m[1], { loader: 'js', minify: true });
+            html = html.replace(m[0], m[0].replace(m[1], r.code));
+        } catch { /* 元のまま維持 */ }
+    }
+
+    // HTMLコメント削除（条件付きコメント <!--[if は除外）
+    html = html.replace(/<!--(?!\[if)[\s\S]*?-->/g, '');
+
+    // タグ間の連続空白を削減（<pre>内は影響しにくい単純パターン）
+    html = html.replace(/>\s{2,}</g, '> ').replace(/\s{2,}</g, ' <');
+
+    return html;
+}
+
+async function minifyAssets() {
+    const cache = loadMinifyCache();
+    const newCache = {};
+
+    const cssFiles = collectFiles(OUTPUT_DIR, ['.css']);
+    const jsFiles  = collectFiles(OUTPUT_DIR, ['.js']);
+    const htmlFiles = collectFiles(OUTPUT_DIR, ['.html']);
+
+    let totalSaved = 0, minified = 0, skipped = 0, errors = 0;
+
+    // CSS / JS
     for (const file of [...cssFiles, ...jsFiles]) {
         const ext = extname(file).toLowerCase();
         const original = readFileSync(file, 'utf-8');
-        const originalSize = Buffer.byteLength(original, 'utf-8');
+        const hash = sha(original);
 
+        if (cache[file] === hash) { newCache[file] = hash; skipped++; continue; }
+
+        const originalSize = Buffer.byteLength(original, 'utf-8');
         try {
             const result = await transform(original, {
                 loader: ext === '.css' ? 'css' : 'js',
@@ -1025,15 +1082,50 @@ async function minifyAssets() {
             const newSize = Buffer.byteLength(result.code, 'utf-8');
             if (newSize < originalSize) {
                 writeFileSync(file, result.code);
-                totalSaved += (originalSize - newSize);
-                fileCount++;
+                totalSaved += originalSize - newSize;
+                minified++;
+                newCache[file] = sha(result.code);
+            } else {
+                newCache[file] = hash;
             }
         } catch (e) {
-            // minify失敗時はスキップ（元ファイルを維持）
+            console.warn(`⚠️  minify失敗 [${ext}] ${relative(OUTPUT_DIR, file)}: ${e.message}`);
+            errors++;
+            newCache[file] = hash;
         }
     }
 
-    console.log(`🗜️  ${fileCount}/${cssFiles.length + jsFiles.length} ファイルをminify (${(totalSaved / 1024).toFixed(1)}KB 削減)`);
+    // HTML（インラインCSS/JS圧縮 + タグ間空白削減）
+    for (const file of htmlFiles) {
+        const original = readFileSync(file, 'utf-8');
+        const hash = sha(original);
+
+        if (cache[file] === hash) { newCache[file] = hash; skipped++; continue; }
+
+        const originalSize = Buffer.byteLength(original, 'utf-8');
+        try {
+            const minifiedHtml = await minifyHtmlContent(original);
+            const newSize = Buffer.byteLength(minifiedHtml, 'utf-8');
+            if (newSize < originalSize) {
+                writeFileSync(file, minifiedHtml);
+                totalSaved += originalSize - newSize;
+                minified++;
+                newCache[file] = sha(minifiedHtml);
+            } else {
+                newCache[file] = hash;
+            }
+        } catch (e) {
+            console.warn(`⚠️  minify失敗 [html] ${relative(OUTPUT_DIR, file)}: ${e.message}`);
+            errors++;
+            newCache[file] = hash;
+        }
+    }
+
+    writeFileSync(MINIFY_CACHE_PATH, JSON.stringify(newCache), 'utf-8');
+
+    const total = cssFiles.length + jsFiles.length + htmlFiles.length;
+    const errMsg = errors > 0 ? ` ⚠️ ${errors}件失敗` : '';
+    console.log(`🗜️  ${minified}/${total} ファイルをminify (${(totalSaved / 1024).toFixed(1)}KB 削減, ${skipped}件キャッシュスキップ${errMsg})`);
 }
 
 await minifyAssets();
