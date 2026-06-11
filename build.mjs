@@ -1075,9 +1075,6 @@ async function minifyHtmlContent(html) {
     // HTMLコメント削除（条件付きコメント <!--[if は除外）
     html = html.replace(/<!--(?!\[if)[\s\S]*?-->/g, '');
 
-    // タグ間の連続空白を削減（<pre>内は影響しにくい単純パターン）
-    html = html.replace(/>\s{2,}</g, '> ').replace(/\s{2,}</g, ' <');
-
     return html;
 }
 
