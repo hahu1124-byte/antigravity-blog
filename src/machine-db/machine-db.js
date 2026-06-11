@@ -2,7 +2,7 @@
 (() => {
     'use strict';
 
-    const DATA_URL = `/data/machines.json?v=${new Date().toISOString().slice(0, 10)}`;
+    const DATA_URL = `https://hahu1124-byte.github.io/antigravity-blog/data/machines.json?v=${new Date().toISOString().slice(0, 10)}`;
     const NEW_DAYS = 15;
     const NOW_MS = Date.now();
 
