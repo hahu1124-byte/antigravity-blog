@@ -2,7 +2,8 @@
 (() => {
     'use strict';
 
-    const DATA_URL = `https://hahu1124-byte.github.io/antigravity-blog/data/machines.json?v=${new Date().toISOString().slice(0, 10)}`;
+    const SUPABASE_URL = 'https://tsuadozxtszfbzeikkec.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzdWFkb3p4dHN6ZmJ6ZWlra2VjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMzk0NjIsImV4cCI6MjA4NzkxNTQ2Mn0.vOD0rKgpOUg5uobJRweSXffEf4mdLspJBeIU2UscpSQ';
     const NEW_DAYS = 15;
     const NOW_MS = Date.now();
 
@@ -146,12 +147,42 @@
 
     async function loadData() {
         try {
-            const res = await fetch(DATA_URL, { cache: 'no-store' });
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            allMachines = data.machines || [];
-            if (data.lastUpdated) {
-                const d = new Date(data.lastUpdated);
+            const PAGE = 1000;
+            const SELECT = 'name,type,prob,base_probability,border_equiv,rb,yutime_trigger,yutime_spins,avg_chain,avg_acquired,entry_rate,real_cont_rate,rush_rate,aliases,release_date,maker,source_url,updated_at';
+            const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` };
+            const allRows = [];
+            for (let offset = 0; ; offset += PAGE) {
+                const url = `${SUPABASE_URL}/rest/v1/machines?select=${SELECT}&limit=${PAGE}&offset=${offset}`;
+                const res = await fetch(url, { headers: HEADERS, cache: 'no-store' });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const rows = await res.json();
+                if (!rows || rows.length === 0) break;
+                allRows.push(...rows);
+                if (rows.length < PAGE) break;
+            }
+            allMachines = allRows.map(row => ({
+                name: row.name,
+                type: row.type || '',
+                prob: Number(row.prob) || 0,
+                baseProbability: Number(row.base_probability) || 0,
+                borderEquiv: Number(row.border_equiv) || 0,
+                rb: Number(row.rb) || 0,
+                yutimeTrigger: row.yutime_trigger || 0,
+                yutimeSpins: row.yutime_spins || 0,
+                avgChain: Number(row.avg_chain) || 0,
+                avgAcquired: Number(row.avg_acquired) || 0,
+                entryRate: Number(row.entry_rate) || 0,
+                realContRate: Number(row.real_cont_rate) || 0,
+                rushRate: Number(row.rush_rate) || 0,
+                aliases: Array.isArray(row.aliases) ? row.aliases : [],
+                releaseDate: row.release_date || null,
+                maker: row.maker || '',
+                sourceUrl: row.source_url || '',
+            }));
+            // 最終更新日時（updated_atの最大値）
+            const maxUpdated = allRows.reduce((max, r) => (!r.updated_at ? max : (!max || r.updated_at > max ? r.updated_at : max)), null);
+            if (maxUpdated && lastUpdated) {
+                const d = new Date(maxUpdated);
                 lastUpdated.textContent = `更新: ${d.toLocaleDateString('ja-JP')} ${d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}`;
             }
             buildMakerOptions();
