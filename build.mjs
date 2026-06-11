@@ -85,7 +85,12 @@ for (const tool of staticTools) {
         missingTools.push(tool);
     }
 }
-console.log(`🔧 静的ツール ${staticTools.length - missingTools.length}件コピー完了`);
+const toolCount = staticTools.length - missingTools.length;
+curStats.toolCount = toolCount;
+if (prevStats.toolCount !== toolCount) {
+    const diff = prevStats.toolCount != null ? ` (${toolCount > prevStats.toolCount ? '+' : ''}${toolCount - prevStats.toolCount})` : '';
+    console.log(`🔧 静的ツール ${toolCount}件${diff}`);
+}
 if (missingTools.length) console.warn(`⚠️  見つからずスキップ: ${missingTools.join(', ')}`);
 
 // machine-db/index.html の CSS/JS バージョン番号をBUILD_STAMPで更新
