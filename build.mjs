@@ -19,6 +19,17 @@ const BLOG_DATA_PATH = join(__dirname, 'src', 'blog-data.json');
 const ARTICLES_DIR = join(__dirname, 'src', 'articles');
 const OUTPUT_DIR = join(__dirname, 'dist');
 
+// 前回ビルドの統計情報（差分表示用）
+const BUILD_STATS_PATH = join(OUTPUT_DIR, '.build-stats.json');
+function loadBuildStats() {
+    if (existsSync(BUILD_STATS_PATH)) {
+        try { return JSON.parse(readFileSync(BUILD_STATS_PATH, 'utf-8')); } catch { return {}; }
+    }
+    return {};
+}
+const prevStats = loadBuildStats();
+const curStats = {};
+
 // blog-data.json 読み込み（メタデータ）+ 個別HTMLファイルからcontent結合
 const posts = JSON.parse(readFileSync(BLOG_DATA_PATH, 'utf-8')).map(post => {
     const articlePath = join(ARTICLES_DIR, `${post.slug}.html`);
@@ -28,7 +39,12 @@ const posts = JSON.parse(readFileSync(BLOG_DATA_PATH, 'utf-8')).map(post => {
     return post;
 });
 
-console.log(`📝 ${posts.filter(p => p.content).length} 記事を生成（メタデータのみ: ${posts.filter(p => !p.content).length} 件は除外）...`);
+const contentCount = posts.filter(p => p.content).length;
+curStats.articleCount = contentCount;
+if (prevStats.articleCount !== contentCount) {
+    const diff = prevStats.articleCount != null ? ` (${contentCount > prevStats.articleCount ? '+' : ''}${contentCount - prevStats.articleCount})` : '';
+    console.log(`📝 記事 ${contentCount}件${diff}`);
+}
 
 // 出力ディレクトリ作成
 mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -36,12 +52,10 @@ mkdirSync(join(OUTPUT_DIR, 'blog'), { recursive: true });
 
 // .nojekyll — GitHub PagesのJekyll処理を無効化
 writeFileSync(join(OUTPUT_DIR, '.nojekyll'), '', 'utf-8');
-console.log('🚫 .nojekyll 生成完了');
 
 // blog-data.json（メタデータのみ版）をdistに出力（Vercel側からfetch用）
 const metaOnly = posts.map(({ slug, title, date, excerpt, tags }) => ({ slug, title, date, excerpt, tags }));
 writeFileSync(join(OUTPUT_DIR, 'blog-data.json'), JSON.stringify(metaOnly), 'utf-8');
-console.log('📦 blog-data.json (メタデータ版) 出力完了');
 
 // 画像をコピー
 const imgSrc = join(__dirname, 'src', 'images');
@@ -49,7 +63,6 @@ const imgDst = join(OUTPUT_DIR, 'blog', 'images');
 if (existsSync(imgSrc)) {
     mkdirSync(imgDst, { recursive: true });
     cpSync(imgSrc, imgDst, { recursive: true });
-    console.log('🖼️  画像コピー完了');
 }
 
 // CSSをコピー
@@ -57,7 +70,6 @@ const cssSrc = join(__dirname, 'src', 'styles.css');
 const cssDst = join(OUTPUT_DIR, 'blog', 'styles.css');
 if (existsSync(cssSrc)) {
     cpSync(cssSrc, cssDst);
-    console.log('🎨 CSSコピー完了');
 }
 
 // 静的ツールをコピー（convergence, simulator, machine-db等）
@@ -92,7 +104,6 @@ const scriptsDst = join(OUTPUT_DIR, 'blog', 'scripts');
 if (existsSync(scriptsSrc)) {
     mkdirSync(scriptsDst, { recursive: true });
     cpSync(scriptsSrc, scriptsDst, { recursive: true });
-    console.log('📜 スクリプトコピー完了');
 }
 
 // ==========================================
@@ -573,7 +584,6 @@ function buildIndexPage() {
         null
     );
     writeFileSync(join(OUTPUT_DIR, 'blog', 'index.html'), html, 'utf-8');
-    console.log('📄 一覧ページ生成完了');
 }
 
 
@@ -689,7 +699,6 @@ function buildArticlePages() {
         writeFileSync(join(articleDir, 'index.html'), html, 'utf-8');
     });
 
-    console.log(`📄 ${contentPosts.length} 記事ページ生成完了`);
 }
 
 // ==========================================
@@ -726,7 +735,11 @@ function buildTagPages() {
         );
         writeFileSync(join(tagDir, 'index.html'), html, 'utf-8');
     }
-    console.log(`🏷️  ${tagEntries.length} カテゴリページ生成完了`);
+    curStats.tagCount = tagEntries.length;
+    if (prevStats.tagCount !== tagEntries.length) {
+        const diff = prevStats.tagCount != null ? ` (${tagEntries.length > prevStats.tagCount ? '+' : ''}${tagEntries.length - prevStats.tagCount})` : '';
+        console.log(`🏷️  カテゴリ ${tagEntries.length}件${diff}`);
+    }
 }
 
 // ==========================================
@@ -786,7 +799,6 @@ ${items}
 
     const feedPath = join(OUTPUT_DIR, 'blog', 'feed.xml');
     writeFileSync(feedPath, xml, 'utf-8');
-    console.log(`📡 RSSフィード生成完了: ${feedPosts.length}件`);
 }
 
 // ==========================================
@@ -997,7 +1009,6 @@ ${m.yutimeTrigger>0?`<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回転</
     // stats.json — GP等が機種数を動的取得するための軽量ファイル
     const stats = { machineCount: generated, builtAt: BUILD_STAMP };
     writeFileSync(join(OUTPUT_DIR, 'data', 'stats.json'), JSON.stringify(stats), 'utf-8');
-    console.log(`📊 stats.json 出力完了 (machineCount: ${generated})`);
 
     // machine-db.js の allSlugs プレースホルダーにスラッグ一覧を埋め込み
     const machineDbJsPath = join(OUTPUT_DIR, 'machine-db', 'machine-db.js');
@@ -1182,5 +1193,8 @@ async function minifyAssets() {
 }
 
 await minifyAssets();
+
+// 今回のビルド統計を保存（次回差分表示用）
+writeFileSync(BUILD_STATS_PATH, JSON.stringify(curStats), 'utf-8');
 
 console.log('✅ ビルド完了！ dist/ に出力されました');
