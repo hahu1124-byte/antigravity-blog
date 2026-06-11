@@ -62,17 +62,19 @@ if (existsSync(cssSrc)) {
 
 // 静的ツールをコピー（convergence, simulator, machine-db等）
 const staticTools = ['convergence', 'simulator', 'machine-db', 'data', 'idle-game', 'quiz', 'general-quiz', 'lab', 'bgm-maker', 'static-pages', 'pachinko-sim', 'slot-hyena', 'password-generator', 'image-tools', 'pdf-tools', 'qr-tools'];
+const missingTools = [];
 for (const tool of staticTools) {
     const toolSrc = join(__dirname, 'src', tool);
     const toolDst = join(OUTPUT_DIR, tool);
     if (existsSync(toolSrc)) {
         mkdirSync(toolDst, { recursive: true });
         cpSync(toolSrc, toolDst, { recursive: true });
-        console.log(`🔧 ${tool} コピー完了`);
     } else {
-        console.warn(`⚠️  ${tool} が src/ に見つかりません — スキップ`);
+        missingTools.push(tool);
     }
 }
+console.log(`🔧 静的ツール ${staticTools.length - missingTools.length}件コピー完了`);
+if (missingTools.length) console.warn(`⚠️  見つからずスキップ: ${missingTools.join(', ')}`);
 
 // machine-db/index.html の CSS/JS バージョン番号をBUILD_STAMPで更新
 {
@@ -81,7 +83,6 @@ for (const tool of staticTools) {
         let html = readFileSync(machineDbHtml, 'utf-8');
         html = html.replace(/(\?v=)\d+/g, `$1${BUILD_STAMP}`);
         writeFileSync(machineDbHtml, html, 'utf-8');
-        console.log(`🔧 machine-db/index.html バージョン → ${BUILD_STAMP}`);
     }
 }
 
@@ -952,6 +953,16 @@ ${m.yutimeTrigger>0?`<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回転</
 </html>`;
     }
 
+    // 既存の machine-db ページスラッグを事前収集（差分表示用）
+    const machineDbDistDir = join(OUTPUT_DIR, 'machine-db');
+    const existingMachineSlugs = new Set(
+        existsSync(machineDbDistDir)
+            ? readdirSync(machineDbDistDir, { withFileTypes: true })
+                .filter(e => e.isDirectory())
+                .map(e => e.name)
+            : []
+    );
+
     // 生成
     const slugMap = new Map();
     let generated = 0, dupes = 0;
@@ -998,10 +1009,18 @@ ${m.yutimeTrigger>0?`<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回転</
             `const allSlugs = ${slugArray}`
         );
         writeFileSync(machineDbJsPath, jsContent, 'utf-8');
-        console.log(`🔗 machine-db.js にスラッグ一覧埋め込み完了 (${slugMap.size}件)`);
     }
 
-    console.log(`🎰 ${generated} 機種SEOページ生成完了${dupes ? ` (重複回避: ${dupes})` : ''}`);
+    // 新規追加・削除スラッグを計算して差分のみ表示
+    const newSlugs = [...slugMap.keys()].filter(s => !existingMachineSlugs.has(s));
+    const removedSlugs = [...existingMachineSlugs].filter(s => !slugMap.has(s) && s !== 'sitemap-machines.txt');
+    if (newSlugs.length > 0 || removedSlugs.length > 0) {
+        const preview = (arr) => arr.length <= 3 ? arr.join(', ') : `${arr.slice(0, 3).join(', ')} ...他${arr.length - 3}件`;
+        if (newSlugs.length > 0) console.log(`🎰 +${newSlugs.length}件追加: ${preview(newSlugs)}${dupes ? ` (重複回避: ${dupes})` : ''}`);
+        if (removedSlugs.length > 0) console.log(`🗑️  -${removedSlugs.length}件削除: ${preview(removedSlugs)}`);
+    } else {
+        console.log(`🎰 機種ページ: 変化なし (計${generated}件)`);
+    }
 }
 
 // ==========================================
@@ -1087,6 +1106,7 @@ async function minifyAssets() {
     const htmlFiles = collectFiles(OUTPUT_DIR, ['.html']);
 
     let totalSaved = 0, minified = 0, skipped = 0, errors = 0;
+    const minifiedFiles = [];
 
     // CSS / JS
     for (const file of [...cssFiles, ...jsFiles]) {
@@ -1107,7 +1127,8 @@ async function minifyAssets() {
                 writeFileSync(file, result.code);
                 totalSaved += originalSize - newSize;
                 minified++;
-                newCache[file] = sha(result.code);
+                minifiedFiles.push(relative(OUTPUT_DIR, file));
+                newCache[file] = hash;  // minify前のハッシュで保存（次回ビルドで元HTML上書き後も一致）
             } else {
                 newCache[file] = hash;
             }
@@ -1133,7 +1154,8 @@ async function minifyAssets() {
                 writeFileSync(file, minifiedHtml);
                 totalSaved += originalSize - newSize;
                 minified++;
-                newCache[file] = sha(minifiedHtml);
+                minifiedFiles.push(relative(OUTPUT_DIR, file));
+                newCache[file] = hash;  // minify前のハッシュで保存
             } else {
                 newCache[file] = hash;
             }
@@ -1148,7 +1170,15 @@ async function minifyAssets() {
 
     const total = cssFiles.length + jsFiles.length + htmlFiles.length;
     const errMsg = errors > 0 ? ` ⚠️ ${errors}件失敗` : '';
-    console.log(`🗜️  ${minified}/${total} ファイルをminify (${(totalSaved / 1024).toFixed(1)}KB 削減, ${skipped}件キャッシュスキップ${errMsg})`);
+    if (minified === 0) {
+        console.log(`🗜️  変更なし (${skipped}件キャッシュ済${errMsg})`);
+    } else {
+        const MAX_SHOW = 5;
+        const preview = minifiedFiles.length <= MAX_SHOW
+            ? minifiedFiles.join(', ')
+            : `${minifiedFiles.slice(0, MAX_SHOW).join(', ')} ...他${minifiedFiles.length - MAX_SHOW}件`;
+        console.log(`🗜️  +${minified}件 minify (${(totalSaved / 1024).toFixed(1)}KB削減): ${preview}${errMsg}`);
+    }
 }
 
 await minifyAssets();
