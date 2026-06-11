@@ -34,6 +34,10 @@ console.log(`📝 ${posts.filter(p => p.content).length} 記事を生成（メ�
 mkdirSync(OUTPUT_DIR, { recursive: true });
 mkdirSync(join(OUTPUT_DIR, 'blog'), { recursive: true });
 
+// .nojekyll — GitHub PagesのJekyll処理を無効化
+writeFileSync(join(OUTPUT_DIR, '.nojekyll'), '', 'utf-8');
+console.log('🚫 .nojekyll 生成完了');
+
 // blog-data.json（メタデータのみ版）をdistに出力（Vercel側からfetch用）
 const metaOnly = posts.map(({ slug, title, date, excerpt, tags }) => ({ slug, title, date, excerpt, tags }));
 writeFileSync(join(OUTPUT_DIR, 'blog-data.json'), JSON.stringify(metaOnly), 'utf-8');
