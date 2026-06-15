@@ -1,7 +1,400 @@
-function formatNum(t){return t>=1e8?(t/1e8).toFixed(1)+"\u5104":t>=1e4?(t/1e4).toFixed(1)+"\u4E07":Math.floor(t).toLocaleString("ja-JP")}function formatYen(t){const e=Math.floor(t*YEN_PER_BALL);return Math.abs(e)>=1e8?"\xA5"+(e/1e8).toFixed(1)+"\u5104":Math.abs(e)>=1e4?"\xA5"+(e/1e4).toFixed(1)+"\u4E07":"\xA5"+e.toLocaleString("ja-JP")}function formatYenRaw(t){return"\xA5"+Math.floor(t*YEN_PER_BALL).toLocaleString("ja-JP")}function formatTime(t){if(t=Math.floor(t),t<60)return`${t}\u79D2`;if(t<3600)return`${Math.floor(t/60)}\u5206${t%60}\u79D2`;const e=Math.floor(t/3600),a=Math.floor(t%3600/60);return`${e}\u6642\u9593${a}\u5206`}function getPrestigeMultiplier(){const t=state.prestiges;return Math.pow(1.03,1.03*t*Math.sqrt(t))}function getKakuhenProb(){return getCurrentMachine().highProb*Math.pow(1.015,state.upgrades.kakuhenBoost)}function getMaxStSpins(){const t=getCurrentMachine();return Math.round(t.baseStSpins*(1+(state.upgrades.stSpins||0)*.06))}function getKakuhenContinueRate(){const t=getCurrentMachine();return Math.min(t.kakuhenContinueRate+(state.upgrades.kakuhenCont||0)*.025,.95)}function getJitanSpins(){const t=getCurrentMachine();return Math.round(JITAN_BASE_SPINS/(t.prob*JITAN_REF_DENOM))}function getEffectiveYutimeThreshold(){const t=getCurrentMachine(),e=t.yutimeThreshold,a=1/t.prob,s=1/state.jackpotProb;return Math.floor(e*(s/a))}function getUpgradeTotalSpent(t){const e=state.upgrades[t.id]||0;return e===0?0:t.costMultiplier===1?t.baseCost*e:Math.floor(t.baseCost*(Math.pow(t.costMultiplier,e)-1)/(t.costMultiplier-1))}function getCriticalChance(){return state.upgrades.critical*10}function getPrestigeThreshold(){return Math.round(20+Math.pow(state.prestiges,1.15))}function getStartingBalls(){return 500+state.prestiges*500+getAchievementBonusBalls()}function getCurrentProb(){return state.mode===MODE_KAKUHEN||state.mode===MODE_ST?getKakuhenProb():state.jackpotProb}function getCurrentMachine(){return MACHINES.find(t=>t.id===state.currentMachineId)||MACHINES[0]}function applyMachineSpecs(){const t=getCurrentMachine(),e=getPrestigeMultiplier();state.jackpotProb=t.prob*Math.pow(1.05,state.upgrades.jackpotProb);const a=state.upgrades.jackpotPayout||0,s=Math.round(1/t.prob),i=Math.pow(s,.1)/100;state.jackpotPayout=Math.floor(t.payout*(1+a*(.05+i))*e),state.costPerSpin=t.cost*Math.pow(.95,state.upgrades.costReduction||0);const n=state.upgrades.spinRate||0,r=n>0?.5*(Math.pow(1.05,n)-1)/.05:0,o=state.upgrades.hyperShooter||0;state.spinRate=(1+r+o*1)*e}function switchMachine(t){state.mode===MODE_KAKUHEN||state.mode===MODE_ST||!MACHINES.find(a=>a.id===t)||state.unlockedMachines.includes(t)&&(state.currentMachineId=t,applyMachineSpecs(),state.sinceLastJackpot=0,state.yutimeGauge=0,state.yutimeTriggered=!1,renderMachineSelector(),saveGame())}function checkMachineUnlocks(){let t=!1;MACHINES.forEach(e=>{!state.unlockedMachines.includes(e.id)&&e.unlockCondition(state)&&(state.unlockedMachines.push(e.id),t=!0)}),t&&renderMachineSelector(),checkRateUnlock()}function checkRateUnlock(){dom.rateSection.classList.remove("hidden");const t=dom.rateGrid.querySelector('[data-rate="2"]'),e=dom.rateGrid.querySelector('[data-rate="4"]');t&&(state.prestiges>=15?(t.classList.remove("locked-rate"),t.disabled=!1):(t.classList.add("locked-rate"),t.disabled=!0)),e&&(state.prestiges>=30?(e.classList.remove("locked-rate"),e.disabled=!1):(e.classList.add("locked-rate"),e.disabled=!0))}function switchRate(t){state.mode===MODE_KAKUHEN||state.mode===MODE_ST||t>=2&&state.prestiges<15||t>=4&&state.prestiges<30||(YEN_PER_BALL=t,dom.rateGrid.querySelectorAll(".rate-btn").forEach(e=>{e.classList.toggle("active",Number(e.dataset.rate)===t)}),saveGame())}function getAllUpgrades(){return(isPremium?[...UPGRADES,...PREMIUM_UPGRADES]:UPGRADES).filter(e=>!(e.hidden&&state.prestiges<15))}function getUpgradeCost(t){const e=getCurrentMachine();return Math.floor(t.baseCost*Math.pow(t.costMultiplier,state.upgrades[t.id]||0)*(e.costScale||1))}function buyUpgrade(t){const e=getAllUpgrades().find(n=>n.id===t);if(!e)return;const a=state.upgrades[e.id]||0;if(a>=e.maxLevel)return;const s=getUpgradeCost(e),i=state.totalBalls-state.totalInvest;if(e.maxLevel===1){if(state.balls<s)return}else if(state.balls<s){if(i<=0)return;for(;state.balls<s;)takeLoan()}state.balls-=s,state.totalInvest+=s,state.upgrades[e.id]=a+1,state.lifetimeMaxUpgrades||(state.lifetimeMaxUpgrades={}),state.lifetimeMaxUpgrades[e.id]=Math.max(state.lifetimeMaxUpgrades[e.id]||0,state.upgrades[e.id]),e.apply(state),applyAllUpgrades(),saveGame()}function applyAllUpgrades(){getAllUpgrades().forEach(t=>t.apply(state)),applyMachineSpecs()}function executePrestige(t=!1){const e=getPrestigeThreshold();if(state.jackpots<e)return;if(!t){prestigePaused=!0;const d=getStartingBalls()+500,T=Math.pow(1.03,state.prestiges+1);if(!confirm(`\u30D7\u30EC\u30B9\u30C6\u30FC\u30B8\u3092\u5B9F\u884C\u3057\u307E\u3059\u304B\uFF1F
+/**
+ * パチンコ放置ゲーム — ユーティリティ・ヘルパー関数
+ */
 
-\u30FB\u30A2\u30C3\u30D7\u30B0\u30EC\u30FC\u30C9\u30FB\u7389\u6570\u30FB\u56DE\u8EE2\u6570\u304C\u30EA\u30BB\u30C3\u30C8\u3055\u308C\u307E\u3059
-\u30FB\u53CE\u652F\u304C\u30EA\u30BB\u30C3\u30C8\u3055\u308C\u307E\u3059\uFF08\u501F\u91D1\u306F\u5F15\u304D\u7D99\u304E\uFF09
-\u30FB\u51FA\u7389\u30DC\u30FC\u30CA\u30B9 x${T.toFixed(2)} \u306B\u306A\u308A\u307E\u3059
-\u30FB\u6B21\u56DE\u521D\u671F\u6301\u7389: ${d}\u7389\uFF08${formatYen(d)}\uFF09
-\u30FB\u73FE\u5728: ${state.prestiges} \u2192 ${state.prestiges+1}`)){prestigePaused=!1;return}}const a=state.prestiges+1,s=state.totalLifetimeJackpots,i=[...state.unlockedMachines],n=state.currentMachineId,r=state.debt,o=state.debtStartTime,f=state.lastDebtTime,c=state.upgrades.autoBuyer||0,l=state.upgrades.autoPrestige||0,p=[...state.autoBuyerExcludes],h={...state.achievements},m=state.reelClicks||0,g={...state.lifetimeMaxUpgrades||{}},M=(state.lifetimeTotalBalls||0)+state.totalBalls,k=(state.lifetimeTotalInvest||0)+state.totalInvest,E=(state.lifetimeSpins||0)+state.spins,S=(state.lifetimeJackpots||0)+state.jackpots,b=(state.lifetimePlayTime||0)+state.playTime;state={...DEFAULT_STATE,balls:500+a*500+getAchievementBonusBalls(),prestiges:a,totalLifetimeJackpots:s,unlockedMachines:i,currentMachineId:n,lastSave:Date.now(),startedAt:Date.now(),debt:r,debtStartTime:o,lastDebtTime:f,autoBuyer:c>=1,autoPrestige:l>=1,autoBuyerExcludes:p,achievements:h,lifetimeMaxUpgrades:g,lifetimeTotalBalls:M,lifetimeTotalInvest:k,lifetimeSpins:E,lifetimeJackpots:S,lifetimePlayTime:b,reelClicks:m,upgrades:{...DEFAULT_STATE.upgrades,autoBuyer:c,autoPrestige:l}};const u=state.balls-500;u>0&&(state.totalBalls=u),applyMachineSpecs(),checkMachineUnlocks(),renderShop(),renderMachineSelector(),saveGame(),prestigePaused=!0,prestigePauseTimer=PRESTIGE_PAUSE_DURATION}function doPrestige(){executePrestige(!1)}function getAchClaimableCount(t){const e=state.achievements[t.id]||0,a=t.getValue(state);let s=0,i=e;for(;i<(t.maxMilestones||1/0);){const n=t.getThreshold(i);if(n==null)break;if(a>=n)s++,i++;else break}return s}function getAchNextThreshold(t){const e=state.achievements[t.id]||0;return t.getThreshold(e)}function claimAchievement(t){const e=ACHIEVEMENT_DEFS.find(i=>i.id===t);if(!e)return 0;const a=getAchClaimableCount(e);if(a<=0)return 0;const s=a*e.reward;return state.achievements[e.id]=(state.achievements[e.id]||0)+a,state.balls+=s,saveGame(),s}function getAchievementBonusBalls(){let t=0;return ACHIEVEMENT_DEFS.forEach(e=>{const a=state.achievements[e.id]||0;t+=a*e.reward}),t}
+// ============================================================
+// フォーマット
+// ============================================================
+
+function formatNum(n) {
+    if (n >= 1e8) return (n / 1e8).toFixed(1) + '億';
+    if (n >= 1e4) return (n / 1e4).toFixed(1) + '万';
+    return Math.floor(n).toLocaleString('ja-JP');
+}
+
+function formatYen(balls) {
+    const yen = Math.floor(balls * YEN_PER_BALL);
+    if (Math.abs(yen) >= 1e8) return '¥' + (yen / 1e8).toFixed(1) + '億';
+    if (Math.abs(yen) >= 1e4) return '¥' + (yen / 1e4).toFixed(1) + '万';
+    return '¥' + yen.toLocaleString('ja-JP');
+}
+
+// 借金UI専用: 万表示しない円フォーマット
+function formatYenRaw(balls) {
+    const yen = Math.floor(balls * YEN_PER_BALL);
+    return '¥' + yen.toLocaleString('ja-JP');
+}
+
+function formatTime(seconds) {
+    seconds = Math.floor(seconds);
+    if (seconds < 60) return `${seconds}秒`;
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}分${seconds % 60}秒`;
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    return `${h}時間${m}分`;
+}
+
+// ============================================================
+// 計算ヘルパー
+// ============================================================
+
+function getPrestigeMultiplier() {
+    const n = state.prestiges;
+    return Math.pow(1.03, 1.03 * n * Math.sqrt(n));
+}
+
+function getKakuhenProb() {
+    const m = getCurrentMachine();
+    return m.highProb * Math.pow(1.015, state.upgrades.kakuhenBoost);
+}
+
+function getMaxStSpins() {
+    const m = getCurrentMachine();
+    return Math.round(m.baseStSpins * (1 + (state.upgrades.stSpins || 0) * 0.06));
+}
+
+function getKakuhenContinueRate() {
+    const m = getCurrentMachine();
+    return Math.min(m.kakuhenContinueRate + (state.upgrades.kakuhenCont || 0) * 0.025, 0.95);
+}
+
+function getJitanSpins() {
+    const m = getCurrentMachine();
+    return Math.round(JITAN_BASE_SPINS / (m.prob * JITAN_REF_DENOM));
+}
+
+// 遊タイム閾値: アップグレード後の確率を反映した回数
+function getEffectiveYutimeThreshold() {
+    const m = getCurrentMachine();
+    const baseThreshold = m.yutimeThreshold;
+    const baseDenom = 1 / m.prob; // 機種の元々の分母
+    const upgradedDenom = 1 / state.jackpotProb; // アップグレード後の分母
+    // 確率が上がった分、遊タイム到達回転数を比例的に下げる
+    return Math.floor(baseThreshold * (upgradedDenom / baseDenom));
+}
+
+function getUpgradeTotalSpent(upg) {
+    const level = state.upgrades[upg.id] || 0;
+    if (level === 0) return 0;
+    if (upg.costMultiplier === 1) return upg.baseCost * level;
+    return Math.floor(upg.baseCost * (Math.pow(upg.costMultiplier, level) - 1) / (upg.costMultiplier - 1));
+}
+
+function getCriticalChance() {
+    return state.upgrades.critical * 10;
+}
+
+function getPrestigeThreshold() {
+    return Math.round(20 + Math.pow(state.prestiges, 1.15));
+}
+
+function getStartingBalls() {
+    return 500 + state.prestiges * 500 + getAchievementBonusBalls();
+}
+
+function getCurrentProb() {
+    if (state.mode === MODE_KAKUHEN || state.mode === MODE_ST) {
+        return getKakuhenProb();
+    }
+    // 時短モードは通常確率を使用
+    return state.jackpotProb;
+}
+
+// ============================================================
+// 機種ヘルパー
+// ============================================================
+
+function getCurrentMachine() {
+    return MACHINES.find(m => m.id === state.currentMachineId) || MACHINES[0];
+}
+
+function applyMachineSpecs() {
+    const m = getCurrentMachine();
+    const pMult = getPrestigeMultiplier();
+    state.jackpotProb = m.prob * Math.pow(1.05, state.upgrades.jackpotProb);
+    const lv = state.upgrades.jackpotPayout || 0;
+    const denom = Math.round(1 / m.prob);
+    const hiddenRate = Math.pow(denom, 0.1) / 100;
+    state.jackpotPayout = Math.floor(m.payout * (1 + lv * (0.05 + hiddenRate)) * pMult);
+    state.costPerSpin = m.cost * Math.pow(0.95, state.upgrades.costReduction || 0);
+    // 回転速度: ベース + アップグレード の全体にプレステージ乗算
+    const spinLv = state.upgrades.spinRate || 0;
+    const spinBonus = spinLv > 0 ? 0.5 * (Math.pow(1.05, spinLv) - 1) / 0.05 : 0;
+    const hyperLv = state.upgrades.hyperShooter || 0;
+    state.spinRate = (1 + spinBonus + hyperLv * 1.0) * pMult;
+}
+
+function switchMachine(machineId) {
+    // 確変/ST中は台変更不可、通常/時短中は可能
+    if (state.mode === MODE_KAKUHEN || state.mode === MODE_ST) return;
+    const machine = MACHINES.find(m => m.id === machineId);
+    if (!machine) return;
+    if (!state.unlockedMachines.includes(machineId)) return;
+
+    state.currentMachineId = machineId;
+    applyMachineSpecs();
+    state.sinceLastJackpot = 0;
+    state.yutimeGauge = 0;
+    state.yutimeTriggered = false;
+    renderMachineSelector();
+    saveGame();
+}
+
+function checkMachineUnlocks() {
+    let newUnlock = false;
+    MACHINES.forEach(m => {
+        if (!state.unlockedMachines.includes(m.id) && m.unlockCondition(state)) {
+            state.unlockedMachines.push(m.id);
+            newUnlock = true;
+        }
+    });
+    if (newUnlock) {
+        renderMachineSelector();
+    }
+    checkRateUnlock();
+}
+
+function checkRateUnlock() {
+    // レート個別解放: ¥2=P15, ¥4=P30
+    dom.rateSection.classList.remove('hidden');
+    const rate2Btn = dom.rateGrid.querySelector('[data-rate="2"]');
+    const rate4Btn = dom.rateGrid.querySelector('[data-rate="4"]');
+    if (rate2Btn) {
+        if (state.prestiges >= 15) {
+            rate2Btn.classList.remove('locked-rate');
+            rate2Btn.disabled = false;
+        } else {
+            rate2Btn.classList.add('locked-rate');
+            rate2Btn.disabled = true;
+        }
+    }
+    if (rate4Btn) {
+        if (state.prestiges >= 30) {
+            rate4Btn.classList.remove('locked-rate');
+            rate4Btn.disabled = false;
+        } else {
+            rate4Btn.classList.add('locked-rate');
+            rate4Btn.disabled = true;
+        }
+    }
+}
+
+function switchRate(rate) {
+    if (state.mode === MODE_KAKUHEN || state.mode === MODE_ST) return;
+    // ロックされたレートは選択不可
+    if (rate >= 2 && state.prestiges < 15) return;
+    if (rate >= 4 && state.prestiges < 30) return;
+    YEN_PER_BALL = rate;
+    dom.rateGrid.querySelectorAll('.rate-btn').forEach(btn => {
+        btn.classList.toggle('active', Number(btn.dataset.rate) === rate);
+    });
+    saveGame();
+}
+
+// ============================================================
+// アップグレード
+// ============================================================
+
+function getAllUpgrades() {
+    const base = isPremium ? [...UPGRADES, ...PREMIUM_UPGRADES] : UPGRADES;
+    return base.filter(upg => {
+        if (upg.hidden && state.prestiges < 15) return false;
+        return true;
+    });
+}
+
+function getUpgradeCost(upg) {
+    const m = getCurrentMachine();
+    return Math.floor(upg.baseCost * Math.pow(upg.costMultiplier, state.upgrades[upg.id] || 0) * (m.costScale || 1));
+}
+
+function buyUpgrade(id) {
+    const upg = getAllUpgrades().find(u => u.id === id);
+    if (!upg) return;
+    const level = state.upgrades[upg.id] || 0;
+    if (level >= upg.maxLevel) return;
+
+    const cost = getUpgradeCost(upg);
+    const profit = state.totalBalls - state.totalInvest;
+
+    // 高額単発アイテム（maxLevel=1）は借金購入不可
+    if (upg.maxLevel === 1) {
+        if (state.balls < cost) return;
+    } else {
+        // 収支プラスなら借金で購入可能
+        if (state.balls < cost) {
+            if (profit <= 0) return;
+            while (state.balls < cost) {
+                takeLoan();
+            }
+        }
+    }
+
+    state.balls -= cost;
+    state.totalInvest += cost;
+    state.upgrades[upg.id] = level + 1;
+    // 生涯最高レベルをトラッキング（アチーブメント用）
+    if (!state.lifetimeMaxUpgrades) state.lifetimeMaxUpgrades = {};
+    state.lifetimeMaxUpgrades[upg.id] = Math.max(state.lifetimeMaxUpgrades[upg.id] || 0, state.upgrades[upg.id]);
+    upg.apply(state);
+    applyAllUpgrades();
+    saveGame();
+}
+
+function applyAllUpgrades() {
+    getAllUpgrades().forEach(upg => upg.apply(state));
+    applyMachineSpecs();
+}
+
+// ============================================================
+// プレステージ
+// ============================================================
+
+function executePrestige(isAuto = false) {
+    const threshold = getPrestigeThreshold();
+    if (state.jackpots < threshold) return;
+
+    if (!isAuto) {
+        // 確認ポップアップ中はゲームループを一時停止
+        prestigePaused = true;
+        const startBalls = getStartingBalls() + 500;
+        const nextMultiplier = Math.pow(1.03, state.prestiges + 1);
+        if (!confirm(`プレステージを実行しますか？\n\n・アップグレード・玉数・回転数がリセットされます\n・収支がリセットされます（借金は引き継ぎ）\n・出玉ボーナス x${nextMultiplier.toFixed(2)} になります\n・次回初期持玉: ${startBalls}玉（${formatYen(startBalls)}）\n・現在: ${state.prestiges} → ${state.prestiges + 1}`)) {
+            // キャンセル → 即座に再開
+            prestigePaused = false;
+            return;
+        }
+    }
+
+
+    const newPrestiges = state.prestiges + 1;
+    const lifetimeJackpots = state.totalLifetimeJackpots;
+    const unlockedMachines = [...state.unlockedMachines];
+    const keepMachineId = state.currentMachineId;
+
+    // 収支リセット、借金は引き継ぐ
+    const keepDebt = state.debt;
+    const keepDebtStartTime = state.debtStartTime;
+    const keepLastDebtTime = state.lastDebtTime;
+
+    // 自動化系アップグレードをプレステージ後も引き継ぐ
+    const keepAutoBuyer = state.upgrades.autoBuyer || 0;
+    const keepAutoPrestige = state.upgrades.autoPrestige || 0;
+
+    const keepExcludes = [...state.autoBuyerExcludes];
+
+    // アチーブメント・リールクリック・生涯最高レベルは永続
+    const keepAchievements = { ...state.achievements };
+    const keepReelClicks = state.reelClicks || 0;
+    const keepLifetimeMax = { ...(state.lifetimeMaxUpgrades || {}) };
+
+    // 生涯統計に現在のプレステージ分を加算
+    const keepLifetimeTotalBalls = (state.lifetimeTotalBalls || 0) + state.totalBalls;
+    const keepLifetimeTotalInvest = (state.lifetimeTotalInvest || 0) + state.totalInvest;
+    const keepLifetimeSpins = (state.lifetimeSpins || 0) + state.spins;
+    const keepLifetimeJackpots = (state.lifetimeJackpots || 0) + state.jackpots;
+    const keepLifetimePlayTime = (state.lifetimePlayTime || 0) + state.playTime;
+
+    state = {
+        ...DEFAULT_STATE,
+        balls: 500 + newPrestiges * 500 + getAchievementBonusBalls(),
+        prestiges: newPrestiges,
+        totalLifetimeJackpots: lifetimeJackpots,
+        unlockedMachines: unlockedMachines,
+        currentMachineId: keepMachineId,
+        lastSave: Date.now(),
+        startedAt: Date.now(),
+        // 収支リセット（totalBalls/totalInvestは初期値0に戻る）
+        // 借金引き継ぎ
+        debt: keepDebt,
+        debtStartTime: keepDebtStartTime,
+        lastDebtTime: keepLastDebtTime,
+        // 自動化引き継ぎ
+        autoBuyer: keepAutoBuyer >= 1,
+        autoPrestige: keepAutoPrestige >= 1,
+        autoBuyerExcludes: keepExcludes,
+        // アチーブメント永続
+        achievements: keepAchievements,
+        lifetimeMaxUpgrades: keepLifetimeMax,
+        // 生涯統計保持
+        lifetimeTotalBalls: keepLifetimeTotalBalls,
+        lifetimeTotalInvest: keepLifetimeTotalInvest,
+        lifetimeSpins: keepLifetimeSpins,
+        lifetimeJackpots: keepLifetimeJackpots,
+        lifetimePlayTime: keepLifetimePlayTime,
+        reelClicks: keepReelClicks,
+        upgrades: {
+            ...DEFAULT_STATE.upgrades,
+            autoBuyer: keepAutoBuyer,
+            autoPrestige: keepAutoPrestige,
+        },
+    };
+
+    // 収支基準点: 初期500玉を超える分を収支プラスとして反映
+    const bonusBalls = state.balls - 500;
+    if (bonusBalls > 0) {
+        state.totalBalls = bonusBalls;
+    }
+
+    applyMachineSpecs();
+    checkMachineUnlocks();
+    renderShop();
+    renderMachineSelector();
+    saveGame();
+
+    // プレステージ完了後3秒間はゲームループを一時停止
+    prestigePaused = true;
+    prestigePauseTimer = PRESTIGE_PAUSE_DURATION;
+}
+
+function doPrestige() {
+    executePrestige(false);
+}
+
+// ============================================================
+// アチーブメントヘルパー
+// ============================================================
+
+function getAchClaimableCount(def) {
+    const claimed = state.achievements[def.id] || 0;
+    const value = def.getValue(state);
+    let count = 0;
+    let i = claimed;
+    while (i < (def.maxMilestones || Infinity)) {
+        const threshold = def.getThreshold(i);
+        if (threshold === null || threshold === undefined) break;
+        if (value >= threshold) {
+            count++;
+            i++;
+        } else {
+            break;
+        }
+    }
+    return count;
+}
+
+function getAchNextThreshold(def) {
+    const claimed = state.achievements[def.id] || 0;
+    return def.getThreshold(claimed);
+}
+
+function claimAchievement(defId) {
+    const def = ACHIEVEMENT_DEFS.find(d => d.id === defId);
+    if (!def) return 0;
+    const count = getAchClaimableCount(def);
+    if (count <= 0) return 0;
+    const totalReward = count * def.reward;
+    state.achievements[def.id] = (state.achievements[def.id] || 0) + count;
+    state.balls += totalReward;
+    saveGame();
+    return totalReward;
+}
+
+function getAchievementBonusBalls() {
+    let bonus = 0;
+    ACHIEVEMENT_DEFS.forEach(def => {
+        const claimed = state.achievements[def.id] || 0;
+        bonus += claimed * def.reward;
+    });
+    return bonus;
+}

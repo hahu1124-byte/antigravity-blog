@@ -1,81 +1,702 @@
-const $=e=>document.getElementById(e),dom={ballCount:$("ballCount"),spinCount:$("spinCount"),jackpotCount:$("jackpotCount"),profitDisplay:$("profitDisplay"),reel1:$("reel1"),reel2:$("reel2"),reel3:$("reel3"),jackpotBanner:$("jackpotBanner"),jackpotPayoutDisplay:$("jackpotPayoutDisplay"),jackpotTypeDisplay:$("jackpotTypeDisplay"),probDisplay:$("probDisplay"),payoutDisplay:$("payoutDisplay"),rateDisplay:$("rateDisplay"),costDisplay:$("costDisplay"),hamariCount:$("hamariCount"),hamariTarget:$("hamariTarget"),hamariBar:$("hamariBar"),shopGrid:$("shopGrid"),offlineBanner:$("offlineBanner"),offlineDetail:$("offlineDetail"),offlineClose:$("offlineClose"),totalBallsStat:$("totalBallsStat"),totalInvestStat:$("totalInvestStat"),jackpotRateStat:$("jackpotRateStat"),playTimeStat:$("playTimeStat"),lifetimeBallsStat:$("lifetimeBallsStat"),lifetimeInvestStat:$("lifetimeInvestStat"),lifetimeJackpotRateStat:$("lifetimeJackpotRateStat"),lifetimePlayTimeStat:$("lifetimePlayTimeStat"),resetBtn:$("resetBtn"),saveStatus:$("saveStatus"),modeIndicator:$("modeIndicator"),rushBanner:$("rushBanner"),rushChainDisplay:$("rushChainDisplay"),rushProbDisplay:$("rushProbDisplay"),rushContDisplay:$("rushContDisplay"),lcdScreen:$("lcdScreen"),prestigeBtn:$("prestigeBtn"),prestigeCount:$("prestigeCount"),prestigeBonus:$("prestigeBonus"),rushSummary:$("rushSummary"),rushSummaryDetail:$("rushSummaryDetail"),rushSummaryClose:$("rushSummaryClose"),yutimeBanner:$("yutimeBanner"),machineGrid:$("machineGrid"),machineName:$("machineName"),debtSection:$("debtSection"),debtAmount:$("debtAmount"),debtInterestRate:$("debtInterestRate"),debtInterestDetail:$("debtInterestDetail"),repayBtn:$("repayBtn"),repayPartialBtn:$("repayPartialBtn"),loanBtn:$("loanBtn"),rateSection:$("rateSection"),rateGrid:$("rateGrid"),versionDisplay:$("versionDisplay"),jackpotNotify:$("jackpotNotify"),achNotify:$("achNotify"),achievementBtn:$("achievementBtn")},REEL_SYMBOLS=["0","1","2","3","4","5","6","7","8","9"];let reelUpdateTimer=0;function updateReels(e,a){reelUpdateTimer+=e,!(reelUpdateTimer<.08)&&(reelUpdateTimer=0,a?(dom.reel1.textContent="7",dom.reel2.textContent="7",dom.reel3.textContent="7",dom.reel1.className="reel jackpot",dom.reel2.className="reel jackpot",dom.reel3.className="reel jackpot"):(dom.reel1.textContent=REEL_SYMBOLS[Math.floor(Math.random()*10)],dom.reel2.textContent=REEL_SYMBOLS[Math.floor(Math.random()*10)],dom.reel3.textContent=REEL_SYMBOLS[Math.floor(Math.random()*10)],dom.reel1.className="reel",dom.reel2.className="reel",dom.reel3.className="reel"))}let jackpotAnimTimer=0,lastJackpotInfo=null;function showJackpotBanner(e,a){const t={[MODE_KAKUHEN]:"\u{1F525}",[MODE_ST]:"\u26A1",[MODE_JITAN]:"\u{1F550}",[MODE_NORMAL]:"\u{1F389}"};lastJackpotInfo=`\u{1F389} +${formatNum(a)}`,jackpotAnimTimer=1,dom.jackpotNotify.textContent=lastJackpotInfo,dom.jackpotNotify.className="jackpot-notify",dom.jackpotNotify.classList.remove("hidden","closing")}function showRushSummary(e,a){lastJackpotInfo=`\u{1F3C6} ${e}\u9023\u8358 +${formatNum(a)}`,jackpotAnimTimer=1,dom.jackpotNotify.textContent=lastJackpotInfo,dom.jackpotNotify.className="jackpot-notify rush-notify",dom.jackpotNotify.classList.remove("hidden","closing")}let yutimeAnimTimer=0,achNotifyTimer=0,prevClaimableTotal=-1;function showAchNotify(e){dom.achNotify.textContent=e,dom.achNotify.classList.remove("hidden","closing"),achNotifyTimer=1.5}function checkAchNotify(){let e=0;ACHIEVEMENT_DEFS.forEach(a=>{a.id!=="jackpots"&&(e+=getAchClaimableCount(a))}),prevClaimableTotal>=0&&e>prevClaimableTotal&&showAchNotify("\u{1F3C6} \u30A2\u30C1\u30FC\u30D6\u30E1\u30F3\u30C8\u89E3\u653E\uFF01"),prevClaimableTotal=e}function showYutimeBanner(){dom.yutimeBanner.classList.remove("hidden"),yutimeAnimTimer=1.5}let uiUpdateTimer=0;function updateUI(){if(uiUpdateTimer++,uiUpdateTimer%3!==0)return;const e=getCurrentMachine(),a=formatNum(state.balls);dom.ballCount.textContent=a,dom.spinCount.textContent=formatNum(state.spins),dom.jackpotCount.textContent=formatNum(state.jackpots);const t=state.totalBalls-state.totalInvest,i=formatYen(t);dom.profitDisplay.textContent=t>=0?`+${i}`:i,dom.profitDisplay.className=`status-value ${t>=0?"positive":"negative"}`;const s=state.mode===MODE_KAKUHEN||state.mode===MODE_ST,n=state.mode===MODE_JITAN,o={[MODE_NORMAL]:`\u901A\u5E38 ${formatNum(state.sinceLastJackpot)}\u56DE\u8EE2`,[MODE_KAKUHEN]:`\u78BA\u5909 ${formatNum(state.sinceLastJackpot)}\u56DE\u8EE2`,[MODE_ST]:`ST(\u6B8B${state.stRemaining})`,[MODE_JITAN]:state.yutimeTriggered?`\u904A\u30BF\u30A4\u30E0 ${formatNum(state.sinceLastJackpot)}\u56DE\u8EE2`:`\u6642\u77ED ${formatNum(state.sinceLastJackpot)}\u56DE\u8EE2`};if(dom.modeIndicator.textContent=o[state.mode]||"\u901A\u5E38",dom.modeIndicator.className=`mode-badge mode-${state.mode}`,s){dom.rushBanner.classList.remove("hidden"),state.mode===MODE_KAKUHEN?(dom.rushBanner.className="rush-kakuhen",document.getElementById("rushLabel").textContent="\u{1F525} \u78BA\u5909RUSH"):(dom.rushBanner.className="rush-st",document.getElementById("rushLabel").textContent="\u26A1 ST RUSH"),dom.rushChainDisplay.textContent=`${state.rushChain}\u9023\u8358\u4E2D`,dom.rushProbDisplay.textContent=`\u78BA\u7387 1/${Math.round(1/getKakuhenProb())}`;let h;state.mode===MODE_KAKUHEN?h=getKakuhenContinueRate():h=1-Math.pow(1-getKakuhenProb(),getMaxStSpins()),dom.rushContDisplay.textContent=`\u7D99\u7D9A ${(h*100).toFixed(2)}%`,dom.lcdScreen.classList.add("rush-active")}else n?(dom.rushBanner.classList.remove("hidden"),dom.rushBanner.className="rush-jitan",document.getElementById("rushLabel").textContent=state.yutimeTriggered?"\u23F0 \u904A\u30BF\u30A4\u30E0":"\u{1F550} \u6642\u77ED",dom.rushChainDisplay.textContent=`\u6B8B${formatNum(state.jitanRemaining)}\u56DE\u8EE2`,dom.rushProbDisplay.textContent=`\u78BA\u7387 1/${Math.round(1/getCurrentProb())}`,dom.rushContDisplay.textContent="",dom.lcdScreen.classList.remove("rush-active")):(dom.rushBanner.classList.add("hidden"),dom.lcdScreen.classList.remove("rush-active"));n?dom.lcdScreen.classList.add("jitan-active"):dom.lcdScreen.classList.remove("jitan-active"),dom.probDisplay.textContent=`1/${(1/getCurrentProb()).toFixed(3)}`,dom.payoutDisplay.textContent=`${formatNum(state.jackpotPayout)}\u7389`,dom.rateDisplay.textContent=`${state.spinRate.toFixed(3)}\u56DE/\u79D2`,dom.costDisplay.textContent=`${state.costPerSpin.toFixed(3)}\u7389`;const r=getEffectiveYutimeThreshold(),p=Math.min(state.yutimeGauge/r*100,100);dom.hamariCount.textContent=formatNum(state.yutimeGauge),dom.hamariTarget.textContent=formatNum(r),dom.hamariBar.style.width=`${p}%`,state.yutimeGauge>=r?dom.hamariBar.className="meter-fill yutime":state.yutimeGauge>=Math.round(1/e.prob)?dom.hamariBar.className="meter-fill danger":dom.hamariBar.className="meter-fill";const d=document.querySelector(".popup-prestige-stats");d&&(state.prestiges>0?d.classList.remove("hidden"):d.classList.add("hidden")),dom.totalBallsStat.textContent=formatNum(state.totalBalls),dom.totalInvestStat.textContent=formatNum(state.totalInvest),dom.jackpotRateStat.textContent=state.spins>0?`1/${Math.round(state.spins/Math.max(state.jackpots,1))}`:"-",dom.playTimeStat.textContent=formatTime(state.playTime);const c=(state.lifetimeTotalBalls||0)+state.totalBalls,l=(state.lifetimeTotalInvest||0)+state.totalInvest,m=(state.lifetimeSpins||0)+state.spins,u=(state.lifetimeJackpots||0)+state.jackpots,f=(state.lifetimePlayTime||0)+state.playTime;if(dom.lifetimeBallsStat.textContent=formatNum(c),dom.lifetimeInvestStat.textContent=formatNum(l),dom.lifetimeJackpotRateStat.textContent=m>0?`1/${Math.round(m/Math.max(u,1))}`:"-",dom.lifetimePlayTimeStat.textContent=formatTime(f),dom.debtAmount.textContent=state.debt>0?formatYenRaw(state.debt):"\xA50",state.debt>0){const h=(state.lastInterest*YEN_PER_BALL).toFixed(0),x=(state.accumulatedInterest*YEN_PER_BALL).toFixed(0),E=state.debtStartTime>0?Math.floor((Date.now()-state.debtStartTime)/1e3):0,b=E>0?` \u7D4C\u904E${formatTime(E)}`:"";dom.debtInterestRate.textContent=`\u8907\u52295%/\u5206${b}`,dom.debtInterestDetail.textContent=`\u5229\u606F: +\xA5${h} / \u7D2F\u8A08: +\xA5${x}`}else dom.debtInterestRate.textContent="\u5229\u606F\u306A\u3057",dom.debtInterestDetail.textContent="";dom.repayBtn.disabled=state.balls<=0||state.debt<=0;const S=getDebtRepayBalls();dom.repayPartialBtn.disabled=state.balls<S||state.debt<=0,dom.repayPartialBtn.textContent=`\u{1F4B4} ${formatNum(S)}\u7389\u8FD4\u6E08`;const v=getPrestigeThreshold();dom.prestigeCount.textContent=state.prestiges;const B=state.prestiges,y=Math.pow(1.03,1.03*B*Math.sqrt(B));dom.prestigeBonus.textContent=`x${y.toFixed(2)}`;const C=document.getElementById("prestigeBonusDetail");C&&(state.prestiges>0?C.textContent=`\u51FA\u7389 x${y.toFixed(2)} / \u56DE\u8EE2\u901F\u5EA6 x${y.toFixed(2)}`:C.textContent="\u51FA\u7389\u30FB\u56DE\u8EE2\u901F\u5EA6\u306B\u4E57\u7B97");const g=state.jackpots>=v,N=document.getElementById("prestigeSection");if(g?(N.classList.remove("hidden"),dom.prestigeBtn.disabled=!1,dom.prestigeBtn.textContent=`\u2B50 \u30D7\u30EC\u30B9\u30C6\u30FC\u30B8\u5B9F\u884C\uFF08${state.jackpots}/${v}\uFF09`):(N.classList.add("hidden"),dom.prestigeBtn.disabled=!0,dom.prestigeBtn.textContent=`\u{1F512} \u5927\u5F53\u305F\u308A ${state.jackpots}/${v} \u3067\u30D7\u30EC\u30B9\u30C6\u30FC\u30B8\u89E3\u653E`),updateShopUI(),dom.achievementBtn){let h=!1;ACHIEVEMENT_DEFS.forEach(x=>{getAchClaimableCount(x)>0&&(h=!0)}),h?(dom.achievementBtn.classList.remove("ach-inactive"),dom.achievementBtn.classList.add("ach-active")):(dom.achievementBtn.classList.remove("ach-active"),dom.achievementBtn.classList.add("ach-inactive"))}}function renderMachineSelector(){dom.machineGrid.innerHTML="";const e=state.unlockedMachines.length,a=document.getElementById("machineSection");e>=1?a.classList.remove("hidden"):a.classList.add("hidden"),MACHINES.forEach(t=>{const i=state.unlockedMachines.includes(t.id),s=state.currentMachineId===t.id;if(!i||!s)return;const n=document.createElement("div");n.className="machine-card active",n.innerHTML=`
+/**
+ * パチンコ放置ゲーム — UI更新・ショップ・機種選択・演出
+ */
+
+// ============================================================
+// DOM要素キャッシュ
+// ============================================================
+
+const $ = (id) => document.getElementById(id);
+
+const dom = {
+    ballCount: $('ballCount'),
+    spinCount: $('spinCount'),
+    jackpotCount: $('jackpotCount'),
+    profitDisplay: $('profitDisplay'),
+    reel1: $('reel1'),
+    reel2: $('reel2'),
+    reel3: $('reel3'),
+    jackpotBanner: $('jackpotBanner'),
+    jackpotPayoutDisplay: $('jackpotPayoutDisplay'),
+    jackpotTypeDisplay: $('jackpotTypeDisplay'),
+    probDisplay: $('probDisplay'),
+    payoutDisplay: $('payoutDisplay'),
+    rateDisplay: $('rateDisplay'),
+    costDisplay: $('costDisplay'),
+    hamariCount: $('hamariCount'),
+    hamariTarget: $('hamariTarget'),
+    hamariBar: $('hamariBar'),
+    shopGrid: $('shopGrid'),
+    offlineBanner: $('offlineBanner'),
+    offlineDetail: $('offlineDetail'),
+    offlineClose: $('offlineClose'),
+    totalBallsStat: $('totalBallsStat'),
+    totalInvestStat: $('totalInvestStat'),
+    jackpotRateStat: $('jackpotRateStat'),
+    playTimeStat: $('playTimeStat'),
+    lifetimeBallsStat: $('lifetimeBallsStat'),
+    lifetimeInvestStat: $('lifetimeInvestStat'),
+    lifetimeJackpotRateStat: $('lifetimeJackpotRateStat'),
+    lifetimePlayTimeStat: $('lifetimePlayTimeStat'),
+    resetBtn: $('resetBtn'),
+    saveStatus: $('saveStatus'),
+    // Phase 2
+    modeIndicator: $('modeIndicator'),
+    rushBanner: $('rushBanner'),
+    rushChainDisplay: $('rushChainDisplay'),
+    rushProbDisplay: $('rushProbDisplay'),
+    rushContDisplay: $('rushContDisplay'),
+    lcdScreen: $('lcdScreen'),
+    prestigeBtn: $('prestigeBtn'),
+    prestigeCount: $('prestigeCount'),
+    prestigeBonus: $('prestigeBonus'),
+    rushSummary: $('rushSummary'),
+    rushSummaryDetail: $('rushSummaryDetail'),
+    rushSummaryClose: $('rushSummaryClose'),
+    yutimeBanner: $('yutimeBanner'),
+    // Phase 3
+    machineGrid: $('machineGrid'),
+    machineName: $('machineName'),
+    // 借金
+    debtSection: $('debtSection'),
+    debtAmount: $('debtAmount'),
+    debtInterestRate: $('debtInterestRate'),
+    debtInterestDetail: $('debtInterestDetail'),
+    repayBtn: $('repayBtn'),
+    repayPartialBtn: $('repayPartialBtn'),
+    loanBtn: $('loanBtn'),
+
+    // レート選択
+    rateSection: $('rateSection'),
+    rateGrid: $('rateGrid'),
+    versionDisplay: $('versionDisplay'),
+    jackpotNotify: $('jackpotNotify'),
+    achNotify: $('achNotify'),
+    achievementBtn: $('achievementBtn'),
+};
+
+// ============================================================
+// リール表示
+// ============================================================
+
+const REEL_SYMBOLS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+let reelUpdateTimer = 0;
+
+function updateReels(dt, isJackpot) {
+    reelUpdateTimer += dt;
+    if (reelUpdateTimer < 0.08) return;
+    reelUpdateTimer = 0;
+
+    if (isJackpot) {
+        dom.reel1.textContent = '7';
+        dom.reel2.textContent = '7';
+        dom.reel3.textContent = '7';
+        dom.reel1.className = 'reel jackpot';
+        dom.reel2.className = 'reel jackpot';
+        dom.reel3.className = 'reel jackpot';
+    } else {
+        dom.reel1.textContent = REEL_SYMBOLS[Math.floor(Math.random() * 10)];
+        dom.reel2.textContent = REEL_SYMBOLS[Math.floor(Math.random() * 10)];
+        dom.reel3.textContent = REEL_SYMBOLS[Math.floor(Math.random() * 10)];
+        dom.reel1.className = 'reel';
+        dom.reel2.className = 'reel';
+        dom.reel3.className = 'reel';
+    }
+}
+
+// ============================================================
+// 演出
+// ============================================================
+
+let jackpotAnimTimer = 0;
+let lastJackpotInfo = null;
+
+function showJackpotBanner(type, payout) {
+    const typeIcons = {
+        [MODE_KAKUHEN]: '🔥',
+        [MODE_ST]: '⚡',
+        [MODE_JITAN]: '🕐',
+        [MODE_NORMAL]: '🎉',
+    };
+    lastJackpotInfo = `🎉 +${formatNum(payout)}`;
+    jackpotAnimTimer = 1.0;
+    // フローティング通知に表示
+    dom.jackpotNotify.textContent = lastJackpotInfo;
+    dom.jackpotNotify.className = 'jackpot-notify';
+    dom.jackpotNotify.classList.remove('hidden', 'closing');
+}
+
+function showRushSummary(chains, totalPayout) {
+    lastJackpotInfo = `🏆 ${chains}連荘 +${formatNum(totalPayout)}`;
+    jackpotAnimTimer = 1.0;
+    // フローティング通知に表示
+    dom.jackpotNotify.textContent = lastJackpotInfo;
+    dom.jackpotNotify.className = 'jackpot-notify rush-notify';
+    dom.jackpotNotify.classList.remove('hidden', 'closing');
+}
+
+let yutimeAnimTimer = 0;
+
+// アチーブメント解放通知
+let achNotifyTimer = 0;
+let prevClaimableTotal = -1; // 初回スキップ用
+
+function showAchNotify(text) {
+    dom.achNotify.textContent = text;
+    dom.achNotify.classList.remove('hidden', 'closing');
+    achNotifyTimer = 1.5;
+}
+
+function checkAchNotify() {
+    let total = 0;
+    ACHIEVEMENT_DEFS.forEach(def => {
+        // 大当たり回数は頻繁すぎるため通知対象外
+        if (def.id === 'jackpots') return;
+        total += getAchClaimableCount(def);
+    });
+    if (prevClaimableTotal >= 0 && total > prevClaimableTotal) {
+        showAchNotify('🏆 アチーブメント解放！');
+    }
+    prevClaimableTotal = total;
+}
+
+function showYutimeBanner() {
+    dom.yutimeBanner.classList.remove('hidden');
+    yutimeAnimTimer = 1.5;
+}
+
+// ============================================================
+// UI更新
+// ============================================================
+
+let uiUpdateTimer = 0;
+
+function updateUI() {
+    uiUpdateTimer++;
+    if (uiUpdateTimer % 3 !== 0) return;
+
+    const m = getCurrentMachine();
+
+    // ステータスバー
+    const ballText = formatNum(state.balls);
+    dom.ballCount.textContent = ballText;
+    dom.spinCount.textContent = formatNum(state.spins);
+    dom.jackpotCount.textContent = formatNum(state.jackpots);
+
+    const profit = state.totalBalls - state.totalInvest;
+    const profitYen = formatYen(profit);
+    dom.profitDisplay.textContent = profit >= 0 ? `+${profitYen}` : profitYen;
+    dom.profitDisplay.className = `status-value ${profit >= 0 ? 'positive' : 'negative'}`;
+
+    // モードインジケーター
+    const isRush = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
+    const isJitan = state.mode === MODE_JITAN;
+    const modeLabels = {
+        [MODE_NORMAL]: `通常 ${formatNum(state.sinceLastJackpot)}回転`,
+        [MODE_KAKUHEN]: `確変 ${formatNum(state.sinceLastJackpot)}回転`,
+        [MODE_ST]: `ST(残${state.stRemaining})`,
+        [MODE_JITAN]: state.yutimeTriggered
+            ? `遊タイム ${formatNum(state.sinceLastJackpot)}回転`
+            : `時短 ${formatNum(state.sinceLastJackpot)}回転`,
+    };
+    dom.modeIndicator.textContent = modeLabels[state.mode] || '通常';
+    dom.modeIndicator.className = `mode-badge mode-${state.mode}`;
+
+    // RUSH バナー / 遊タイム・時短バナー（確変/ST区別 + 遊タイム残回転）
+    if (isRush) {
+        dom.rushBanner.classList.remove('hidden');
+        if (state.mode === MODE_KAKUHEN) {
+            dom.rushBanner.className = 'rush-kakuhen';
+            document.getElementById('rushLabel').textContent = '🔥 確変RUSH';
+        } else {
+            dom.rushBanner.className = 'rush-st';
+            document.getElementById('rushLabel').textContent = '⚡ ST RUSH';
+        }
+        dom.rushChainDisplay.textContent = `${state.rushChain}連荘中`;
+        dom.rushProbDisplay.textContent = `確率 1/${Math.round(1 / getKakuhenProb())}`;
+        // 実質継続率: 確変=継続率、ST=ST回転内当選率
+        let contRate;
+        if (state.mode === MODE_KAKUHEN) {
+            contRate = getKakuhenContinueRate();
+        } else {
+            contRate = 1 - Math.pow(1 - getKakuhenProb(), getMaxStSpins());
+        }
+        dom.rushContDisplay.textContent = `継続 ${(contRate * 100).toFixed(2)}%`;
+        dom.lcdScreen.classList.add('rush-active');
+    } else if (isJitan) {
+        // 遊タイム・時短中: バナー領域に残回転数を表示
+        dom.rushBanner.classList.remove('hidden');
+        dom.rushBanner.className = 'rush-jitan';
+        document.getElementById('rushLabel').textContent = state.yutimeTriggered ? '⏰ 遊タイム' : '🕐 時短';
+        dom.rushChainDisplay.textContent = `残${formatNum(state.jitanRemaining)}回転`;
+        dom.rushProbDisplay.textContent = `確率 1/${Math.round(1 / getCurrentProb())}`;
+        dom.rushContDisplay.textContent = '';
+        dom.lcdScreen.classList.remove('rush-active');
+    } else {
+        dom.rushBanner.classList.add('hidden');
+        dom.lcdScreen.classList.remove('rush-active');
+    }
+
+    // 時短中の液晶演出
+    if (isJitan) {
+        dom.lcdScreen.classList.add('jitan-active');
+    } else {
+        dom.lcdScreen.classList.remove('jitan-active');
+    }
+
+    // 台情報
+    dom.probDisplay.textContent = `1/${(1 / getCurrentProb()).toFixed(3)}`;
+    dom.payoutDisplay.textContent = `${formatNum(state.jackpotPayout)}玉`;
+    dom.rateDisplay.textContent = `${state.spinRate.toFixed(3)}回/秒`;
+    dom.costDisplay.textContent = `${state.costPerSpin.toFixed(3)}玉`;
+
+    // ハマりゲージ（遊タイム）
+    const yutimeThreshold = getEffectiveYutimeThreshold();
+    const hamariPct = Math.min((state.yutimeGauge / yutimeThreshold) * 100, 100);
+    dom.hamariCount.textContent = formatNum(state.yutimeGauge);
+    dom.hamariTarget.textContent = formatNum(yutimeThreshold);
+    dom.hamariBar.style.width = `${hamariPct}%`;
+
+    if (state.yutimeGauge >= yutimeThreshold) {
+        dom.hamariBar.className = 'meter-fill yutime';
+    } else if (state.yutimeGauge >= Math.round(1 / m.prob)) {
+        dom.hamariBar.className = 'meter-fill danger';
+    } else {
+        dom.hamariBar.className = 'meter-fill';
+    }
+
+    // 統計（今回の転生）— プレステージ1回以上のときのみ表示
+    const currentStatsSection = document.querySelector('.popup-prestige-stats');
+    if (currentStatsSection) {
+        if (state.prestiges > 0) {
+            currentStatsSection.classList.remove('hidden');
+        } else {
+            currentStatsSection.classList.add('hidden');
+        }
+    }
+    dom.totalBallsStat.textContent = formatNum(state.totalBalls);
+    dom.totalInvestStat.textContent = formatNum(state.totalInvest);
+    dom.jackpotRateStat.textContent = state.spins > 0
+        ? `1/${Math.round(state.spins / Math.max(state.jackpots, 1))}`
+        : '-';
+    dom.playTimeStat.textContent = formatTime(state.playTime);
+
+    // 統計（通算 = 生涯統計 + 現在のプレステージ分）
+    const ltBalls = (state.lifetimeTotalBalls || 0) + state.totalBalls;
+    const ltInvest = (state.lifetimeTotalInvest || 0) + state.totalInvest;
+    const ltSpins = (state.lifetimeSpins || 0) + state.spins;
+    const ltJackpots = (state.lifetimeJackpots || 0) + state.jackpots;
+    const ltPlayTime = (state.lifetimePlayTime || 0) + state.playTime;
+    dom.lifetimeBallsStat.textContent = formatNum(ltBalls);
+    dom.lifetimeInvestStat.textContent = formatNum(ltInvest);
+    dom.lifetimeJackpotRateStat.textContent = ltSpins > 0
+        ? `1/${Math.round(ltSpins / Math.max(ltJackpots, 1))}`
+        : '-';
+    dom.lifetimePlayTimeStat.textContent = formatTime(ltPlayTime);
+
+    // 借金表示: 常時表示
+    dom.debtAmount.textContent = state.debt > 0 ? formatYenRaw(state.debt) : '¥0';
+    if (state.debt > 0) {
+        const lastYen = (state.lastInterest * YEN_PER_BALL).toFixed(0);
+        const totalYen = (state.accumulatedInterest * YEN_PER_BALL).toFixed(0);
+        const elapsedSec = state.debtStartTime > 0 ? Math.floor((Date.now() - state.debtStartTime) / 1000) : 0;
+        const elapsedText = elapsedSec > 0 ? ` 経過${formatTime(elapsedSec)}` : '';
+        dom.debtInterestRate.textContent = `複利5%/分${elapsedText}`;
+        dom.debtInterestDetail.textContent = `利息: +¥${lastYen} / 累計: +¥${totalYen}`;
+    } else {
+        dom.debtInterestRate.textContent = '利息なし';
+        dom.debtInterestDetail.textContent = '';
+    }
+    dom.repayBtn.disabled = state.balls <= 0 || state.debt <= 0;
+    const repayBalls = getDebtRepayBalls();
+    dom.repayPartialBtn.disabled = state.balls < repayBalls || state.debt <= 0;
+    dom.repayPartialBtn.textContent = `💴 ${formatNum(repayBalls)}玉返済`;
+
+    // プレステージ（統計ポップアップ: 回数とボーナスのみ）
+    const pThreshold = getPrestigeThreshold();
+    dom.prestigeCount.textContent = state.prestiges;
+    const pN = state.prestiges;
+    const pMult = Math.pow(1.03, 1.03 * pN * Math.sqrt(pN));
+    dom.prestigeBonus.textContent = `x${pMult.toFixed(2)}`;
+    // ボーナス詳細表示
+    const bonusDetail = document.getElementById('prestigeBonusDetail');
+    if (bonusDetail) {
+        if (state.prestiges > 0) {
+            bonusDetail.textContent = `出玉 x${pMult.toFixed(2)} / 回転速度 x${pMult.toFixed(2)}`;
+        } else {
+            bonusDetail.textContent = '出玉・回転速度に乗算';
+        }
+    }
+
+    // プレステージセクション（機種選択〜ショップ間: 条件達成時のみ表示）
+    const canPrestige = state.jackpots >= pThreshold;
+    const prestigeSection = document.getElementById('prestigeSection');
+    if (canPrestige) {
+        prestigeSection.classList.remove('hidden');
+        dom.prestigeBtn.disabled = false;
+        dom.prestigeBtn.textContent = `⭐ プレステージ実行（${state.jackpots}/${pThreshold}）`;
+    } else {
+        prestigeSection.classList.add('hidden');
+        dom.prestigeBtn.disabled = true;
+        dom.prestigeBtn.textContent = `🔒 大当たり ${state.jackpots}/${pThreshold} でプレステージ解放`;
+    }
+
+    updateShopUI();
+
+    // アチーブメントボタン活性/非活性
+    if (dom.achievementBtn) {
+        let hasClaimable = false;
+        ACHIEVEMENT_DEFS.forEach(def => {
+            if (getAchClaimableCount(def) > 0) hasClaimable = true;
+        });
+        if (hasClaimable) {
+            dom.achievementBtn.classList.remove('ach-inactive');
+            dom.achievementBtn.classList.add('ach-active');
+        } else {
+            dom.achievementBtn.classList.remove('ach-active');
+            dom.achievementBtn.classList.add('ach-inactive');
+        }
+    }
+}
+
+// ============================================================
+// 機種選択UI
+// ============================================================
+
+function renderMachineSelector() {
+    dom.machineGrid.innerHTML = '';
+
+    // 解放済み機種がある場合はセクションを表示
+    const unlockedCount = state.unlockedMachines.length;
+    const machineSection = document.getElementById('machineSection');
+    if (unlockedCount >= 1) {
+        machineSection.classList.remove('hidden');
+    } else {
+        machineSection.classList.add('hidden');
+    }
+
+    MACHINES.forEach(m => {
+        const isUnlocked = state.unlockedMachines.includes(m.id);
+        const isActive = state.currentMachineId === m.id;
+        if (!isUnlocked || !isActive) return; // 選択中の機種のみ表示
+
+        const card = document.createElement('div');
+        card.className = 'machine-card active';
+
+        card.innerHTML = `
             <div class="machine-header">
-                <span class="machine-title">${t.name}</span>
-                <span class="machine-active-badge">\u7A3C\u50CD\u4E2D</span>
+                <span class="machine-title">${m.name}</span>
+                <span class="machine-active-badge">稼働中</span>
             </div>
             <div class="machine-specs">
-                <span>\u78BA\u7387 1/${(1/t.prob).toFixed(3)}</span>
-                <span>\u51FA\u7389 ${formatNum(t.payout)}</span>
-                <span>\u30B3\u30B9\u30C8 ${t.cost}\u7389</span>
+                <span>確率 1/${(1 / m.prob).toFixed(3)}</span>
+                <span>出玉 ${formatNum(m.payout)}</span>
+                <span>コスト ${m.cost}玉</span>
             </div>
-            <div class="machine-desc">${t.desc}</div>
-        `,dom.machineGrid.appendChild(n)}),renderMachineInfoPopup()}function renderMachineInfoPopup(){const e=document.getElementById("machineInfoList");if(!e)return;e.innerHTML="";const a=MACHINES.length-state.unlockedMachines.length;if(MACHINES.forEach(t=>{const i=state.unlockedMachines.includes(t.id),s=document.createElement("div");if(s.className=`machine-info-item${i?"":" locked"}`,i){const n=state.currentMachineId===t.id,o=1-Math.pow(1-t.highProb,t.baseStSpins),r=Math.round(JITAN_BASE_SPINS/(t.prob*JITAN_REF_DENOM)),p=t.jitanRate>0?1-Math.pow(1-t.prob,r):0,d=Math.max(0,1-t.kakuhenRate-t.stRate-t.jitanRate);s.innerHTML=`
-                <div class="machine-info-name">${t.name}${n?' <span class="machine-active-badge">\u7A3C\u50CD\u4E2D</span>':""}</div>
-                <div class="machine-info-desc">${t.desc}</div>
+            <div class="machine-desc">${m.desc}</div>
+        `;
+
+        dom.machineGrid.appendChild(card);
+    });
+
+    // 機種情報ポップアップの中身を生成
+    renderMachineInfoPopup();
+}
+
+function renderMachineInfoPopup() {
+    const list = document.getElementById('machineInfoList');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const lockedCount = MACHINES.length - state.unlockedMachines.length;
+
+    MACHINES.forEach(m => {
+        const isUnlocked = state.unlockedMachines.includes(m.id);
+        const item = document.createElement('div');
+        item.className = `machine-info-item${isUnlocked ? '' : ' locked'}`;
+
+        if (isUnlocked) {
+            const isActive = state.currentMachineId === m.id;
+            // 計算値
+            const stCont = 1 - Math.pow(1 - m.highProb, m.baseStSpins);
+            const jitanSpins = Math.round(JITAN_BASE_SPINS / (m.prob * JITAN_REF_DENOM));
+            const jitanCont = m.jitanRate > 0 ? (1 - Math.pow(1 - m.prob, jitanSpins)) : 0;
+            const normalRate = Math.max(0, 1 - m.kakuhenRate - m.stRate - m.jitanRate);
+            item.innerHTML = `
+                <div class="machine-info-name">${m.name}${isActive ? ' <span class="machine-active-badge">稼働中</span>' : ''}</div>
+                <div class="machine-info-desc">${m.desc}</div>
                 <div class="machine-info-specs">
-                    <span>\u78BA\u7387 1/${(1/t.prob).toFixed(3)}</span>
-                    <span>\u51FA\u7389 ${formatNum(t.payout)}</span>
-                    <span>\u30B3\u30B9\u30C8 ${t.cost}\u7389</span>
+                    <span>確率 1/${(1 / m.prob).toFixed(3)}</span>
+                    <span>出玉 ${formatNum(m.payout)}</span>
+                    <span>コスト ${m.cost}玉</span>
                 </div>
                 <div class="machine-info-specs">
-                    <span>\u78BA\u5909\u7387 ${(t.kakuhenRate*100).toFixed(2)}%</span>
-                    <span>\u78BA\u5909\u7D99\u7D9A\u7387 ${(t.kakuhenContinueRate*100).toFixed(2)}%</span>
+                    <span>確変率 ${(m.kakuhenRate * 100).toFixed(2)}%</span>
+                    <span>確変継続率 ${(m.kakuhenContinueRate * 100).toFixed(2)}%</span>
                 </div>
                 <div class="machine-info-specs">
-                    <span>ST\u7387 ${(t.stRate*100).toFixed(2)}%</span>
-                    <span>ST\u56DE\u8EE2 ${t.baseStSpins}</span>
+                    <span>ST率 ${(m.stRate * 100).toFixed(2)}%</span>
+                    <span>ST回転 ${m.baseStSpins}</span>
                 </div>
                 <div class="machine-info-specs">
-                    <span>\u9AD8\u78BA\u7387 1/${(1/t.highProb).toFixed(2)}</span>
-                    <span>ST\u7D99\u7D9A\u7387 ${(o*100).toFixed(2)}%</span>
+                    <span>高確率 1/${(1 / m.highProb).toFixed(2)}</span>
+                    <span>ST継続率 ${(stCont * 100).toFixed(2)}%</span>
                 </div>
                 <div class="machine-info-specs">
-                    <span>\u6642\u77ED\u7387 ${(t.jitanRate*100).toFixed(2)}%</span>
-                    <span>\u6642\u77ED ${r}\u56DE\u8EE2</span>
-                    <span>\u5F15\u623B\u7387 ${(p*100).toFixed(2)}%</span>
+                    <span>時短率 ${(m.jitanRate * 100).toFixed(2)}%</span>
+                    <span>時短 ${jitanSpins}回転</span>
+                    <span>引戻率 ${(jitanCont * 100).toFixed(2)}%</span>
                 </div>
                 <div class="machine-info-specs">
-                    <span>\u904A\u30BF\u30A4\u30E0 ${t.yutimeThreshold}\u56DE\u8EE2</span>
-                    <span>\u6642\u77ED\u7121 ${(d*100).toFixed(2)}%</span>
+                    <span>遊タイム ${m.yutimeThreshold}回転</span>
+                    <span>時短無 ${(normalRate * 100).toFixed(2)}%</span>
                 </div>
-            `,n||(s.classList.add("selectable"),s.addEventListener("click",()=>{if(state.mode===MODE_KAKUHEN||state.mode===MODE_ST){alert("RUSH\u4E2D\u306F\u53F0\u5909\u66F4\u3067\u304D\u307E\u305B\u3093");return}confirm("\u5909\u66F4\u3059\u308B\u5834\u5408\u306F\u56DE\u8EE2\u6570\u304C\u521D\u671F\u5316\u3055\u308C\u307E\u3059\u304C\u3088\u308D\u3057\u3044\u3067\u3059\u304B\uFF1F")&&(switchMachine(t.id),document.getElementById("machineInfoPopup").classList.add("hidden"))}))}else s.innerHTML=`
-                <div class="machine-info-name">\u{1F512} ???</div>
-                <div class="machine-info-desc">\u89E3\u653E\u6761\u4EF6: ${t.unlockText}</div>
-            `;e.appendChild(s)}),a>0){const t=document.createElement("div");t.className="machine-info-footer",t.textContent=`\u{1F512} \u6B8B\u308A ${a} \u6A5F\u7A2E\u304C\u96A0\u3055\u308C\u3066\u3044\u307E\u3059`,e.appendChild(t)}}function renderShop(){dom.shopGrid.innerHTML="";const e=document.createElement("div");e.className="shop-total-summary",e.id="shopTotalSummary",e.textContent="",dom.shopGrid.appendChild(e),getAllUpgrades().forEach(a=>{const t=document.createElement("div");t.className="shop-card",t.dataset.upgradeId=a.id,t.innerHTML=`
-            <div class="shop-autobuy-check ${state.upgrades.autoBuyer>=1?"":"hidden"}">
-                <input type="checkbox" class="autobuy-cb" data-upg-id="${a.id}"
-                    ${state.autoBuyerExcludes.includes(a.id)?"":"checked"}>
+            `;
+            if (!isActive) {
+                item.classList.add('selectable');
+                item.addEventListener('click', () => {
+                    const isRush = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
+                    if (isRush) {
+                        alert('RUSH中は台変更できません');
+                        return;
+                    }
+                    if (confirm('変更する場合は回転数が初期化されますがよろしいですか？')) {
+                        switchMachine(m.id);
+                        document.getElementById('machineInfoPopup').classList.add('hidden');
+                    }
+                });
+            }
+        } else {
+            item.innerHTML = `
+                <div class="machine-info-name">🔒 ???</div>
+                <div class="machine-info-desc">解放条件: ${m.unlockText}</div>
+            `;
+        }
+        list.appendChild(item);
+    });
+
+    if (lockedCount > 0) {
+        const footer = document.createElement('div');
+        footer.className = 'machine-info-footer';
+        footer.textContent = `🔒 残り ${lockedCount} 機種が隠されています`;
+        list.appendChild(footer);
+    }
+}
+
+// ============================================================
+// ショップUI
+// ============================================================
+
+function renderShop() {
+    dom.shopGrid.innerHTML = '';
+    // 総投資額サマリー
+    const summaryEl = document.createElement('div');
+    summaryEl.className = 'shop-total-summary';
+    summaryEl.id = 'shopTotalSummary';
+    summaryEl.textContent = '';
+    dom.shopGrid.appendChild(summaryEl);
+    getAllUpgrades().forEach(upg => {
+        const card = document.createElement('div');
+        card.className = 'shop-card';
+        card.dataset.upgradeId = upg.id;
+        card.innerHTML = `
+            <div class="shop-autobuy-check ${state.upgrades.autoBuyer >= 1 ? '' : 'hidden'}">
+                <input type="checkbox" class="autobuy-cb" data-upg-id="${upg.id}"
+                    ${!state.autoBuyerExcludes.includes(upg.id) ? 'checked' : ''}>
             </div>
-            <div class="shop-icon">${a.icon}</div>
+            <div class="shop-icon">${upg.icon}</div>
             <div class="shop-info">
-                <div class="shop-name">${a.name}${a.maxLevel>1?`\uFF08${a.maxLevel===1/0?"\u221E":a.maxLevel}\uFF09`:""}</div>
-                <div class="shop-desc">${a.desc}</div>
+                <div class="shop-name">${upg.name}${upg.maxLevel > 1 ? `（${upg.maxLevel === Infinity ? '∞' : upg.maxLevel}）` : ''}</div>
+                <div class="shop-desc">${upg.desc}</div>
                 <div class="shop-level"></div>
             </div>
             <div class="shop-spent"></div>
             <div class="shop-cost"></div>
-        `,dom.shopGrid.appendChild(t)}),dom.shopGrid.querySelectorAll(".autobuy-cb").forEach(a=>{a.addEventListener("click",t=>{t.stopPropagation()}),a.addEventListener("change",t=>{toggleAutoBuyTarget(t.target.dataset.upgId,t.target.checked)})}),updateShopUI()}function updateShopUI(){getAllUpgrades().forEach(t=>{const i=dom.shopGrid.querySelector(`[data-upgrade-id="${t.id}"]`);if(!i)return;const s=state.upgrades[t.id]||0,n=s>=t.maxLevel,o=getUpgradeCost(t),r=state.totalBalls-state.totalInvest,p=(state.balls>=o||r>0)&&!n;i.className=`shop-card${p?"":" disabled"}${n?" maxed":""}`;const d=i.querySelector(".shop-level"),c=i.querySelector(".shop-cost");if(d)if(n)d.textContent=`Lv.${s} (${t.effectText(state)}) \u2705 MAX`;else{const m=t.effectText(state);state.upgrades[t.id]=s+1,applyAllUpgrades();const u=t.effectText(state);state.upgrades[t.id]=s,applyAllUpgrades();const f=t.maxLevel!==1/0?`/${t.maxLevel}`:"";d.textContent=`Lv.${s}${f} (${m}) \u2192 Lv.${s+1} (${u})`}c&&(c.textContent=n?"\u2705 MAX":`${formatNum(o)}\u7389`);const l=i.querySelector(".shop-spent");if(l){const m=getUpgradeTotalSpent(t);l.textContent=m>0?`\u6295\u8CC7${formatNum(m)}\u7389`:""}});const e=document.getElementById("shopTotalSummary");if(e){let t=0;getAllUpgrades().forEach(i=>{t+=getUpgradeTotalSpent(i)}),e.textContent=`\u{1F48E} \u7DCF\u30A2\u30C3\u30D7\u30B0\u30EC\u30FC\u30C9\u6295\u8CC7: ${formatNum(t)}\u7389`}const a=state.upgrades.autoBuyer>=1;getAllUpgrades().forEach(t=>{const i=dom.shopGrid.querySelector(`[data-upgrade-id="${t.id}"]`);if(!i)return;const s=i.querySelector(".shop-autobuy-check");if(s)if(a&&t.id!=="autoBuyer"&&t.id!=="autoPrestige"){s.classList.remove("hidden");const n=s.querySelector(".autobuy-cb");n&&(n.checked=!state.autoBuyerExcludes.includes(t.id))}else s.classList.add("hidden");if(t.id==="autoBuyer"&&a){const n=i.querySelector(".shop-level");n&&(n.textContent=state.autoBuyer?"\u{1F6D2} ON\uFF08\u30BF\u30C3\u30D7\u3067OFF\uFF09":"\u{1F6D2} OFF\uFF08\u30BF\u30C3\u30D7\u3067ON\uFF09");const o=i.querySelector(".shop-cost");o&&(o.textContent=state.autoBuyer?"\u2705 ON":"\u274C OFF"),i.className=`shop-card${state.autoBuyer?" maxed":""}`}})}function toggleAutoBuyTarget(e,a){a?state.autoBuyerExcludes=state.autoBuyerExcludes.filter(t=>t!==e):state.autoBuyerExcludes.includes(e)||state.autoBuyerExcludes.push(e),saveGame()}function renderAchievementPopup(){const e=document.getElementById("achievementList"),a=document.getElementById("achBonusSummary");if(!e)return;e.innerHTML="";const t=getAchievementBonusBalls();a.textContent=`\u521D\u671F\u6240\u6301\u7389\u30DC\u30FC\u30CA\u30B9: +${formatNum(t)}\u7389`;let i=0;ACHIEVEMENT_DEFS.forEach(s=>{const n=state.achievements[s.id]||0,o=getAchClaimableCount(s),r=s.getValue(state),p=getAchNextThreshold(s),d=!s.hidden||n>0||o>0,c=document.createElement("div");if(!d)c.className="ach-item ach-hidden",c.innerHTML=`
-                <div class="ach-icon">\u2753</div>
+        `;
+        dom.shopGrid.appendChild(card);
+    });
+
+    // チェックボックスのイベント（カードクリックと分離）
+    dom.shopGrid.querySelectorAll('.autobuy-cb').forEach(cb => {
+        cb.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        cb.addEventListener('change', (e) => {
+            toggleAutoBuyTarget(e.target.dataset.upgId, e.target.checked);
+        });
+    });
+
+    updateShopUI();
+}
+
+function updateShopUI() {
+    getAllUpgrades().forEach(upg => {
+        const card = dom.shopGrid.querySelector(`[data-upgrade-id="${upg.id}"]`);
+        if (!card) return;
+
+        const level = state.upgrades[upg.id] || 0;
+        const isMaxed = level >= upg.maxLevel;
+        const cost = getUpgradeCost(upg);
+        const profit = state.totalBalls - state.totalInvest;
+        const canAfford = (state.balls >= cost || profit > 0) && !isMaxed;
+
+        card.className = `shop-card${!canAfford ? ' disabled' : ''}${isMaxed ? ' maxed' : ''}`;
+
+        const levelEl = card.querySelector('.shop-level');
+        const costEl = card.querySelector('.shop-cost');
+        if (levelEl) {
+            if (isMaxed) {
+                levelEl.textContent = `Lv.${level} (${upg.effectText(state)}) ✅ MAX`;
+            } else {
+                const currentEffect = upg.effectText(state);
+                // 次Lvの効果を一時計算（全アップグレードを再適用して正確な値を出す）
+                state.upgrades[upg.id] = level + 1;
+                applyAllUpgrades();
+                const nextEffect = upg.effectText(state);
+                // 元に戻す
+                state.upgrades[upg.id] = level;
+                applyAllUpgrades();
+                const maxLabel = upg.maxLevel !== Infinity ? `/${upg.maxLevel}` : '';
+                levelEl.textContent = `Lv.${level}${maxLabel} (${currentEffect}) → Lv.${level + 1} (${nextEffect})`;
+            }
+        }
+        if (costEl) costEl.textContent = isMaxed ? '✅ MAX' : `${formatNum(cost)}玉`;
+
+        const spentEl = card.querySelector('.shop-spent');
+        if (spentEl) {
+            const totalSpent = getUpgradeTotalSpent(upg);
+            spentEl.textContent = totalSpent > 0 ? `投資${formatNum(totalSpent)}玉` : '';
+        }
+    });
+
+    // 総投資額サマリー更新
+    const summaryEl = document.getElementById('shopTotalSummary');
+    if (summaryEl) {
+        let grandTotal = 0;
+        getAllUpgrades().forEach(upg => {
+            grandTotal += getUpgradeTotalSpent(upg);
+        });
+        summaryEl.textContent = `💎 総アップグレード投資: ${formatNum(grandTotal)}玉`;
+    }
+
+    // オートバイヤーチェックボックスの表示/非表示（購入済みなら常時表示）
+    const autoBuyerPurchased = state.upgrades.autoBuyer >= 1;
+    getAllUpgrades().forEach(upg => {
+        const card = dom.shopGrid.querySelector(`[data-upgrade-id="${upg.id}"]`);
+        if (!card) return;
+        const cbWrap = card.querySelector('.shop-autobuy-check');
+        if (cbWrap) {
+            // autoBuyer/autoPrestige自体にはチェックボックスを表示しない
+            if (autoBuyerPurchased && upg.id !== 'autoBuyer' && upg.id !== 'autoPrestige') {
+                cbWrap.classList.remove('hidden');
+                // チェックボックスの状態を同期
+                const cb = cbWrap.querySelector('.autobuy-cb');
+                if (cb) cb.checked = !state.autoBuyerExcludes.includes(upg.id);
+            } else {
+                cbWrap.classList.add('hidden');
+            }
+        }
+
+        // autoBuyerカード自体のレベル表示を更新
+        if (upg.id === 'autoBuyer' && autoBuyerPurchased) {
+            const levelEl = card.querySelector('.shop-level');
+            if (levelEl) {
+                levelEl.textContent = state.autoBuyer ? '🛒 ON（タップでOFF）' : '🛒 OFF（タップでON）';
+            }
+            const costEl = card.querySelector('.shop-cost');
+            if (costEl) costEl.textContent = state.autoBuyer ? '✅ ON' : '❌ OFF';
+            card.className = `shop-card${state.autoBuyer ? ' maxed' : ''}`;
+        }
+    });
+}
+
+function toggleAutoBuyTarget(upgId, isChecked) {
+    if (isChecked) {
+        state.autoBuyerExcludes = state.autoBuyerExcludes.filter(id => id !== upgId);
+    } else {
+        if (!state.autoBuyerExcludes.includes(upgId)) {
+            state.autoBuyerExcludes.push(upgId);
+        }
+    }
+    saveGame();
+}
+
+// ============================================================
+// アチーブメントポップアップ
+// ============================================================
+
+function renderAchievementPopup() {
+    const list = document.getElementById('achievementList');
+    const summary = document.getElementById('achBonusSummary');
+    if (!list) return;
+    list.innerHTML = '';
+
+    const totalBonus = getAchievementBonusBalls();
+    summary.textContent = `初期所持玉ボーナス: +${formatNum(totalBonus)}玉`;
+
+    let totalClaimable = 0;
+
+    ACHIEVEMENT_DEFS.forEach(def => {
+        const claimed = state.achievements[def.id] || 0;
+        const claimable = getAchClaimableCount(def);
+        const value = def.getValue(state);
+        const nextThreshold = getAchNextThreshold(def);
+        const isRevealed = !def.hidden || claimed > 0 || claimable > 0;
+
+        const item = document.createElement('div');
+
+        if (!isRevealed) {
+            // 隠しアチーブメント（未発見）
+            item.className = 'ach-item ach-hidden';
+            item.innerHTML = `
+                <div class="ach-icon">❓</div>
                 <div class="ach-info">
-                    <div class="ach-name">\uFF1F\uFF1F\uFF1F</div>
-                    <div class="ach-desc">\u96A0\u3057\u30A2\u30C1\u30FC\u30D6\u30E1\u30F3\u30C8</div>
+                    <div class="ach-name">？？？</div>
+                    <div class="ach-desc">隠しアチーブメント</div>
                 </div>
-            `;else if(o>0){i+=o;const l=o*s.reward;c.className="ach-item ach-claimable",c.innerHTML=`
-                <div class="ach-icon">${s.icon}</div>
+            `;
+        } else if (claimable > 0) {
+            // クレーム可能
+            totalClaimable += claimable;
+            const reward = claimable * def.reward;
+            item.className = 'ach-item ach-claimable';
+            item.innerHTML = `
+                <div class="ach-icon">${def.icon}</div>
                 <div class="ach-info">
-                    <div class="ach-name">${s.name}</div>
-                    <div class="ach-desc">${s.hidden?"\u96A0\u3057":""} \u9054\u6210${n}\u56DE \u2192 ${n+o}\u56DE</div>
-                    <div class="ach-progress">\u73FE\u5728: ${formatNum(r)}</div>
+                    <div class="ach-name">${def.name}</div>
+                    <div class="ach-desc">${def.hidden ? '隠し' : ''} 達成${claimed}回 → ${claimed + claimable}回</div>
+                    <div class="ach-progress">現在: ${formatNum(value)}</div>
                 </div>
                 <div class="ach-reward">
-                    <span class="ach-reward-text">+${formatNum(l)}\u7389</span>
-                    <span class="ach-claim-label">\u30BF\u30C3\u30D7\u3067\u7372\u5F97</span>
+                    <span class="ach-reward-text">+${formatNum(reward)}玉</span>
+                    <span class="ach-claim-label">タップで獲得</span>
                 </div>
-            `,c.addEventListener("click",()=>{claimAchievement(s.id)>0&&renderAchievementPopup()})}else{const l=p;c.className="ach-item ach-locked";const m=l!=null?`${formatNum(r)} / ${formatNum(l)}`:"\u5168\u30DE\u30A4\u30EB\u30B9\u30C8\u30FC\u30F3\u9054\u6210 \u2705";l==null&&c.classList.add("ach-complete"),c.innerHTML=`
-                <div class="ach-icon">${s.icon}</div>
+            `;
+            item.addEventListener('click', () => {
+                const r = claimAchievement(def.id);
+                if (r > 0) {
+                    renderAchievementPopup();
+                }
+            });
+        } else {
+            // ロック中 or 全達成済み
+            const nextTh = nextThreshold;
+            item.className = 'ach-item ach-locked';
+            const progressText = nextTh !== null && nextTh !== undefined
+                ? `${formatNum(value)} / ${formatNum(nextTh)}`
+                : '全マイルストーン達成 ✅';
+            const isComplete = nextTh === null || nextTh === undefined;
+            if (isComplete) item.classList.add('ach-complete');
+            item.innerHTML = `
+                <div class="ach-icon">${def.icon}</div>
                 <div class="ach-info">
-                    <div class="ach-name">${s.name}</div>
-                    <div class="ach-desc">\u9054\u6210${n}\u56DE (\u5831\u916C: ${s.hidden?"\u5404+300\u7389":"\u5404+100\u7389"})</div>
-                    <div class="ach-progress">${m}</div>
+                    <div class="ach-name">${def.name}</div>
+                    <div class="ach-desc">達成${claimed}回 (報酬: ${def.hidden ? '各+300玉' : '各+100玉'})</div>
+                    <div class="ach-progress">${progressText}</div>
                 </div>
-            `}e.appendChild(c)})}
+            `;
+        }
+
+        list.appendChild(item);
+    });
+}

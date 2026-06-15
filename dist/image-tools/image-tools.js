@@ -1,1 +1,738 @@
-(function(){"use strict";const E=document.getElementById("drop-zone"),y=document.getElementById("file-input"),F=document.getElementById("settings-panel"),O=document.getElementById("file-list"),T=document.getElementById("file-items"),J=document.getElementById("file-count"),K=document.getElementById("total-size"),U=document.getElementById("quality-slider"),$=document.getElementById("quality-value"),Y=document.getElementById("quality-section"),H=document.getElementById("resize-section"),x=document.getElementById("convert-btn"),W=document.getElementById("clear-btn"),R=document.getElementById("results"),A=document.getElementById("result-items"),q=document.getElementById("results-summary"),B=document.getElementById("download-all-btn"),ee=document.getElementById("clear-results-btn"),D=document.getElementById("custom-size-panel"),I=document.getElementById("custom-width-pct"),C=document.getElementById("custom-height-pct"),Z=document.getElementById("aspect-lock-btn"),te=document.getElementById("lock-icon"),M=document.getElementById("size-preview");let p=[],g=[],v="original",k=100,S=!1,b=!0;const ne=50*1024*1024,se=50;function L(e){if(e===0)return"0 B";const t=1024,s=["B","KB","MB","GB"],i=Math.floor(Math.log(e)/Math.log(t));return parseFloat((e/Math.pow(t,i)).toFixed(1))+" "+s[i]}function ie(e){return e==="jpeg"?"jpg":e==="base64"?"txt":e}function oe(e){return e==="ico"?"image/x-icon":e==="base64"?"text/plain":"image/"+e}function ce(e){return e.replace(/\.[^.]+$/,"")}function _(e){const t=e.type;if(t==="image/jpeg")return"jpeg";if(t==="image/png")return"png";if(t==="image/webp")return"webp";if(t==="image/avif")return"avif";if(t==="image/gif")return"gif";if(t==="image/bmp")return"bmp";if(t==="image/svg+xml")return"svg";const s=e.name.split(".").pop()?.toLowerCase()||"";return s==="jpg"?"jpeg":s||"png"}function Q(e){return v==="original"?["jpeg","png","webp","avif"].includes(e)?e:"png":v}function ue(e){return e.name.split(".").pop()?.toLowerCase()||""}E.addEventListener("click",e=>{e.target.tagName==="LABEL"||e.target.closest("label")||(y.value="",y.click())}),E.addEventListener("dragover",e=>{e.preventDefault(),E.classList.add("drag-over")}),E.addEventListener("dragleave",()=>{E.classList.remove("drag-over")}),E.addEventListener("drop",e=>{e.preventDefault(),E.classList.remove("drag-over"),V(e.dataTransfer.files)}),y.addEventListener("change",()=>{y.files.length>0&&V(y.files)});function V(e){let t=0,s=0;const i=[];for(const n of e){if(!n.type.startsWith("image/")||p.some(r=>r.file.name===n.name&&r.file.size===n.size))continue;if(n.size>ne){t++;continue}if(p.length>=se){s+=e.length-Array.from(e).indexOf(n);break}const a=new Promise(r=>{const o=new Image;o.onload=()=>{p.push({file:n,img:o,width:o.naturalWidth,height:o.naturalHeight}),r()},o.onerror=()=>r(),o.src=URL.createObjectURL(n)});i.push(a)}Promise.all(i).then(()=>{t>0&&alert("\u26A0\uFE0F "+t+"\u4EF6\u306E\u30D5\u30A1\u30A4\u30EB\u304C50MB\u3092\u8D85\u3048\u3066\u3044\u308B\u305F\u3081\u30B9\u30AD\u30C3\u30D7\u3057\u307E\u3057\u305F\u3002"),s>0&&alert("\u26A0\uFE0F \u540C\u6642\u51E6\u7406\u306F\u6700\u592750\u679A\u307E\u3067\u3067\u3059\u3002"),N(),w()})}function N(){if(p.length===0){F.classList.add("hidden"),O.classList.add("hidden"),R.classList.add("hidden");return}F.classList.remove("hidden"),O.classList.remove("hidden"),J.textContent=p.length+" \u30D5\u30A1\u30A4\u30EB";const e=p.reduce((t,s)=>t+s.file.size,0);K.textContent="\u5408\u8A08: "+L(e),T.innerHTML="",p.forEach((t,s)=>{const i=document.createElement("div");i.className="file-item",i.id="file-item-"+s;const n=document.createElement("img");n.className="file-thumb",n.src=URL.createObjectURL(t.file),n.onload=()=>URL.revokeObjectURL(n.src);const a=document.createElement("div");a.className="file-info";const r=document.createElement("div");r.className="file-name",r.textContent=t.file.name;const o=document.createElement("div");o.className="file-meta",o.textContent=t.width+"\xD7"+t.height+" \u2022 "+L(t.file.size)+" \u2022 "+t.file.type.split("/")[1].toUpperCase();const l=document.createElement("div");l.className="file-after-size",l.id="after-size-"+s,X(l,t),a.appendChild(r),a.appendChild(o),a.appendChild(l);const c=document.createElement("div");c.className="file-progress hidden",c.id="progress-"+s;const m=document.createElement("div");m.className="file-progress-bar",c.appendChild(m),a.appendChild(c);const u=document.createElement("button");u.className="file-remove",u.textContent="\u2715",u.addEventListener("click",d=>{d.stopPropagation(),p.splice(s,1),N(),w()}),i.appendChild(n),i.appendChild(a),i.appendChild(u),T.appendChild(i)})}function X(e,t){const{w:s,h:i}=P(t.width,t.height),n=Q(_(t.file)).toUpperCase();s!==t.width||i!==t.height||v!=="original"?e.textContent="\u2192 "+s+"\xD7"+i+" \u2022 "+n:e.textContent=""}function z(){p.forEach((e,t)=>{const s=document.getElementById("after-size-"+t);s&&X(s,e)})}function P(e,t){if(S){const s=parseInt(I.value)||100,i=parseInt(C.value)||100;return{w:Math.max(1,Math.round(e*s/100)),h:Math.max(1,Math.round(t*i/100))}}return{w:Math.max(1,Math.round(e*k/100)),h:Math.max(1,Math.round(t*k/100))}}document.getElementById("format-chips").addEventListener("click",e=>{const t=e.target.closest(".format-chip");if(!t)return;document.querySelectorAll(".format-chip").forEach(i=>i.classList.remove("active")),t.classList.add("active"),v=t.dataset.fmt;const s=["png","base64","ico"].includes(v==="original"?"":v);U.disabled=s,Y.style.opacity=s?"0.4":"1",H.style.display=v==="ico"?"none":"",z()}),U.addEventListener("input",()=>{$.textContent=U.value+"%"}),document.getElementById("resize-presets").addEventListener("click",e=>{const t=e.target.closest(".resize-preset");t&&(document.querySelectorAll(".resize-preset").forEach(s=>s.classList.remove("active")),t.classList.add("active"),t.dataset.pct==="custom"?(S=!0,D.classList.remove("hidden")):(S=!1,k=parseInt(t.dataset.pct),D.classList.add("hidden")),z(),w())}),I.addEventListener("input",()=>{b&&(C.value=I.value),z(),w()}),C.addEventListener("input",()=>{b&&(I.value=C.value),z(),w()}),Z.addEventListener("click",()=>{b=!b,Z.classList.toggle("active",b),te.textContent=b?"\u{1F517}":"\u{1F513}",b&&(C.value=I.value,z(),w())});function w(){if(p.length===0||!S&&k===100){M.textContent="";return}const e=p[0],{w:t,h:s}=P(e.width,e.height);p.length===1?M.textContent=e.width+"\xD7"+e.height+" \u2192 "+t+"\xD7"+s+" px":M.textContent="\u4F8B: "+e.width+"\xD7"+e.height+" \u2192 "+t+"\xD7"+s+" px\uFF08\u5404\u30D5\u30A1\u30A4\u30EB\u3054\u3068\u306B\u8A08\u7B97\uFF09"}W.addEventListener("click",()=>{p=[],g.forEach(e=>URL.revokeObjectURL(e.url)),g=[],N()}),ee.addEventListener("click",()=>{g.forEach(e=>URL.revokeObjectURL(e.url)),g=[],R.classList.add("hidden")}),x.addEventListener("click",async()=>{if(p.length===0)return;x.disabled=!0,x.textContent="\u23F3 \u5909\u63DB\u4E2D...",g=[],R.classList.add("hidden");const e=parseInt(U.value)/100;let t=0,s=0;for(let i=0;i<p.length;i++){const n=p[i],a=n.file,r=document.getElementById("progress-"+i),o=r?.querySelector(".file-progress-bar");r&&(r.classList.remove("hidden"),o.style.width="30%",o.style.background="");const l=_(a),c=Q(l),{w:m,h:u}=P(n.width,n.height);try{let d;c==="ico"||v==="ico"?d=await re(a):c==="base64"||v==="base64"?d=await de(a,e,m,u):d=await ae(a,c,e,m,u),t+=a.size,s+=d.blob.size;let f;v==="original"?f=a.name:f=ce(a.name)+"."+ie(c);const h={name:f,blob:d.blob,originalSize:a.size,newSize:d.blob.size,width:d.width,height:d.height,url:URL.createObjectURL(d.blob)};d.base64Text&&(h.base64Text=d.base64Text),g.push(h),o&&(o.style.width="100%")}catch(d){console.warn("\u5909\u63DB\u5931\u6557:",a.name,d),o&&(o.style.width="100%",o.style.background="#ef4444")}}me(t,s),x.disabled=!1,x.textContent="\u{1F504} \u4E00\u62EC\u5909\u63DB"});function ae(e,t,s,i,n){return new Promise((a,r)=>{const o=new Image;o.onload=()=>{const l=document.createElement("canvas");l.width=i,l.height=n;const c=l.getContext("2d");t==="jpeg"&&(c.fillStyle="#FFFFFF",c.fillRect(0,0,i,n)),c.imageSmoothingEnabled=!0,c.imageSmoothingQuality="high",c.drawImage(o,0,0,i,n),l.toBlob(m=>{m?a({blob:m,width:i,height:n}):l.toBlob(u=>{u?a({blob:u,width:i,height:n}):r(new Error("\u5909\u63DB\u306B\u5931\u6557\u3057\u307E\u3057\u305F"))},"image/webp",s),URL.revokeObjectURL(o.src)},oe(t),t==="png"?void 0:s)},o.onerror=()=>{URL.revokeObjectURL(o.src),r(new Error("\u753B\u50CF\u306E\u8AAD\u307F\u8FBC\u307F\u306B\u5931\u6557"))},o.src=URL.createObjectURL(e)})}function re(e){return new Promise((t,s)=>{const i=new Image;i.onload=()=>{const n=[16,32,48],a=[];for(const l of n){const c=document.createElement("canvas");c.width=l,c.height=l;const m=c.getContext("2d");m.drawImage(i,0,0,l,l);const u=m.getImageData(0,0,l,l);a.push({size:l,data:u})}let r=0;const o=[];a.forEach((l,c)=>{const m=document.createElement("canvas");m.width=l.size,m.height=l.size,m.getContext("2d").putImageData(l.data,0,0),m.toBlob(u=>{o[c]=u,r++,r===a.length&&le(o,n,t,s)},"image/png")}),URL.revokeObjectURL(i.src)},i.onerror=()=>{URL.revokeObjectURL(i.src),s(new Error("\u753B\u50CF\u306E\u8AAD\u307F\u8FBC\u307F\u306B\u5931\u6557"))},i.src=URL.createObjectURL(e)})}async function le(e,t,s,i){try{const n=[];for(const d of e)n.push(await d.arrayBuffer());const a=6,r=16;let o=a+r*n.length;for(const d of n)o+=d.byteLength;const l=new ArrayBuffer(o),c=new DataView(l);c.setUint16(0,0,!0),c.setUint16(2,1,!0),c.setUint16(4,n.length,!0);let m=a+r*n.length;n.forEach((d,f)=>{const h=a+r*f,j=t[f];c.setUint8(h,j<256?j:0),c.setUint8(h+1,j<256?j:0),c.setUint8(h+2,0),c.setUint8(h+3,0),c.setUint16(h+4,1,!0),c.setUint16(h+6,32,!0),c.setUint32(h+8,d.byteLength,!0),c.setUint32(h+12,m,!0),new Uint8Array(l,m,d.byteLength).set(new Uint8Array(d)),m+=d.byteLength});const u=new Blob([l],{type:"image/x-icon"});s({blob:u,width:48,height:48})}catch(n){i(n)}}function de(e,t,s,i){return new Promise((n,a)=>{const r=new Image;r.onload=()=>{const o=document.createElement("canvas");o.width=s,o.height=i,o.getContext("2d").drawImage(r,0,0,s,i);const c=o.toDataURL("image/png"),m=new Blob([c],{type:"text/plain"});n({blob:m,width:s,height:i,base64Text:c}),URL.revokeObjectURL(r.src)},r.onerror=()=>{URL.revokeObjectURL(r.src),a(new Error("\u753B\u50CF\u306E\u8AAD\u307F\u8FBC\u307F\u306B\u5931\u6557"))},r.src=URL.createObjectURL(e)})}function me(e,t){R.classList.remove("hidden");const s=e-t,i=e>0?Math.round(s/e*100):0;s>0?q.textContent=L(e)+" \u2192 "+L(t)+" ("+i+"% \u524A\u6E1B)":q.textContent=L(e)+" \u2192 "+L(t),A.innerHTML="",g.forEach(n=>{const a=document.createElement("div");a.className="result-item";const r=document.createElement("img");r.className="result-thumb",r.src=n.url;const o=document.createElement("div");o.className="result-info";const l=document.createElement("div");l.className="result-name",l.textContent=n.name;const c=document.createElement("div");c.className="result-meta";const m=document.createElement("span");m.className="result-size",m.textContent=n.width+"\xD7"+n.height+" \u2022 "+L(n.newSize);const u=document.createElement("span");u.className="result-savings";const d=n.originalSize-n.newSize;d>0?u.textContent="\u25BC "+Math.round(d/n.originalSize*100)+"% \u524A\u6E1B":d<0&&(u.textContent="\u25B2 "+Math.round(Math.abs(d)/n.originalSize*100)+"% \u5897\u52A0",u.style.color="#f87171"),c.appendChild(m),d!==0&&c.appendChild(u),o.appendChild(l),o.appendChild(c);const f=document.createElement("button");if(f.className="btn-download",f.textContent="\u2B07 DL",f.addEventListener("click",()=>G(n)),a.appendChild(r),a.appendChild(o),a.appendChild(f),n.base64Text){const h=document.createElement("button");h.className="btn-download",h.textContent="\u{1F4CB} \u30B3\u30D4\u30FC",h.style.marginLeft="0.3rem",h.addEventListener("click",()=>{navigator.clipboard.writeText(n.base64Text).then(()=>{h.textContent="\u2705 \u30B3\u30D4\u30FC\u6E08",setTimeout(()=>{h.textContent="\u{1F4CB} \u30B3\u30D4\u30FC"},2e3)})}),a.appendChild(h)}A.appendChild(a)})}function G(e){const t=document.createElement("a");t.href=e.url,t.download=e.name,t.click()}B.addEventListener("click",async()=>{if(g.length!==0){if(g.length===1){G(g[0]);return}B.disabled=!0,B.textContent="\u23F3 ZIP\u4F5C\u6210\u4E2D...";try{const e=new JSZip;for(const n of g)e.file(n.name,n.blob);const t=await e.generateAsync({type:"blob"}),s=URL.createObjectURL(t),i=document.createElement("a");i.href=s,i.download="converted-images.zip",i.click(),URL.revokeObjectURL(s)}catch(e){console.error("ZIP\u4F5C\u6210\u5931\u6557:",e),alert("\u26A0\uFE0F ZIP\u306E\u4F5C\u6210\u306B\u5931\u6557\u3057\u307E\u3057\u305F\u3002\u500B\u5225\u306B\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9\u3057\u3066\u304F\u3060\u3055\u3044\u3002")}B.disabled=!1,B.textContent="\u{1F4E6} \u3059\u3079\u3066\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9 (ZIP)"}})})();
+// 画像変換・圧縮ツール — ブラウザ完結（リサイズ強化版）
+(function () {
+    'use strict';
+
+    // DOM要素
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const settingsPanel = document.getElementById('settings-panel');
+    const fileList = document.getElementById('file-list');
+    const fileItems = document.getElementById('file-items');
+    const fileCount = document.getElementById('file-count');
+    const totalSize = document.getElementById('total-size');
+    const qualitySlider = document.getElementById('quality-slider');
+    const qualityValue = document.getElementById('quality-value');
+    const qualitySection = document.getElementById('quality-section');
+    const resizeSection = document.getElementById('resize-section');
+    const convertBtn = document.getElementById('convert-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    const results = document.getElementById('results');
+    const resultItems = document.getElementById('result-items');
+    const resultsSummary = document.getElementById('results-summary');
+    const downloadAllBtn = document.getElementById('download-all-btn');
+    const clearResultsBtn = document.getElementById('clear-results-btn');
+    const customSizePanel = document.getElementById('custom-size-panel');
+    const customWidthPct = document.getElementById('custom-width-pct');
+    const customHeightPct = document.getElementById('custom-height-pct');
+    const aspectLockBtn = document.getElementById('aspect-lock-btn');
+    const lockIcon = document.getElementById('lock-icon');
+    const sizePreview = document.getElementById('size-preview');
+
+    // ファイル管理
+    let files = [];           // {file, img, width, height}
+    let convertedFiles = [];
+
+    // 設定状態
+    let outputFormat = 'original';
+    let resizePercent = 100;
+    let isCustomResize = false;
+    let aspectLocked = true;
+
+    // UX保護制限
+    const MAX_FILE_SIZE = 50 * 1024 * 1024;
+    const MAX_FILE_COUNT = 50;
+
+    // === ユーティリティ ===
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+
+    function getExtension(format) {
+        if (format === 'jpeg') return 'jpg';
+        if (format === 'base64') return 'txt';
+        return format;
+    }
+
+    function getMimeType(format) {
+        if (format === 'ico') return 'image/x-icon';
+        if (format === 'base64') return 'text/plain';
+        return 'image/' + format;
+    }
+
+    function stripExtension(name) {
+        return name.replace(/\.[^.]+$/, '');
+    }
+
+    function detectSourceFormat(file) {
+        const t = file.type;
+        if (t === 'image/jpeg') return 'jpeg';
+        if (t === 'image/png') return 'png';
+        if (t === 'image/webp') return 'webp';
+        if (t === 'image/avif') return 'avif';
+        if (t === 'image/gif') return 'gif';
+        if (t === 'image/bmp') return 'bmp';
+        if (t === 'image/svg+xml') return 'svg';
+        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+        if (ext === 'jpg') return 'jpeg';
+        return ext || 'png';
+    }
+
+    function getEffectiveFormat(sourceFormat) {
+        if (outputFormat === 'original') {
+            // Canvas非対応の形式はPNGにフォールバック
+            const supported = ['jpeg', 'png', 'webp', 'avif'];
+            return supported.includes(sourceFormat) ? sourceFormat : 'png';
+        }
+        return outputFormat;
+    }
+
+    function getSourceExtension(file) {
+        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+        return ext;
+    }
+
+    // === ドラッグ＆ドロップ ===
+    dropZone.addEventListener('click', (e) => {
+        if (e.target.tagName === 'LABEL' || e.target.closest('label')) return;
+        fileInput.value = '';
+        fileInput.click();
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('drag-over');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            handleFiles(fileInput.files);
+        }
+    });
+
+    // === ファイル処理 ===
+    function handleFiles(newFiles) {
+        let skippedSize = 0;
+        let skippedCount = 0;
+
+        const promises = [];
+
+        for (const file of newFiles) {
+            if (!file.type.startsWith('image/')) continue;
+            if (files.some(f => f.file.name === file.name && f.file.size === file.size)) continue;
+            if (file.size > MAX_FILE_SIZE) { skippedSize++; continue; }
+            if (files.length >= MAX_FILE_COUNT) {
+                skippedCount += (newFiles.length - Array.from(newFiles).indexOf(file));
+                break;
+            }
+
+            // 画像のサイズを取得
+            const p = new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    files.push({ file, img, width: img.naturalWidth, height: img.naturalHeight });
+                    resolve();
+                };
+                img.onerror = () => resolve();
+                img.src = URL.createObjectURL(file);
+            });
+            promises.push(p);
+        }
+
+        Promise.all(promises).then(() => {
+            if (skippedSize > 0) {
+                alert('⚠️ ' + skippedSize + '件のファイルが50MBを超えているためスキップしました。');
+            }
+            if (skippedCount > 0) {
+                alert('⚠️ 同時処理は最大50枚までです。');
+            }
+            updateFileList();
+            updateSizePreview();
+        });
+    }
+
+    function updateFileList() {
+        if (files.length === 0) {
+            settingsPanel.classList.add('hidden');
+            fileList.classList.add('hidden');
+            results.classList.add('hidden');
+            return;
+        }
+
+        settingsPanel.classList.remove('hidden');
+        fileList.classList.remove('hidden');
+
+        fileCount.textContent = files.length + ' ファイル';
+        const total = files.reduce((s, f) => s + f.file.size, 0);
+        totalSize.textContent = '合計: ' + formatBytes(total);
+
+        fileItems.innerHTML = '';
+        files.forEach((entry, idx) => {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.id = 'file-item-' + idx;
+
+            const thumb = document.createElement('img');
+            thumb.className = 'file-thumb';
+            thumb.src = URL.createObjectURL(entry.file);
+            thumb.onload = () => URL.revokeObjectURL(thumb.src);
+
+            const info = document.createElement('div');
+            info.className = 'file-info';
+
+            const name = document.createElement('div');
+            name.className = 'file-name';
+            name.textContent = entry.file.name;
+
+            const meta = document.createElement('div');
+            meta.className = 'file-meta';
+            meta.textContent = entry.width + '×' + entry.height + ' • ' + formatBytes(entry.file.size) + ' • ' + entry.file.type.split('/')[1].toUpperCase();
+
+            // リサイズ後のサイズ表示
+            const afterSize = document.createElement('div');
+            afterSize.className = 'file-after-size';
+            afterSize.id = 'after-size-' + idx;
+            updateFileAfterSize(afterSize, entry);
+
+            info.appendChild(name);
+            info.appendChild(meta);
+            info.appendChild(afterSize);
+
+            // プログレスバー
+            const progress = document.createElement('div');
+            progress.className = 'file-progress hidden';
+            progress.id = 'progress-' + idx;
+            const progressBar = document.createElement('div');
+            progressBar.className = 'file-progress-bar';
+            progress.appendChild(progressBar);
+            info.appendChild(progress);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'file-remove';
+            removeBtn.textContent = '✕';
+            removeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                files.splice(idx, 1);
+                updateFileList();
+                updateSizePreview();
+            });
+
+            item.appendChild(thumb);
+            item.appendChild(info);
+            item.appendChild(removeBtn);
+            fileItems.appendChild(item);
+        });
+    }
+
+    function updateFileAfterSize(el, entry) {
+        const { w, h } = calcNewSize(entry.width, entry.height);
+        const fmt = getEffectiveFormat(detectSourceFormat(entry.file)).toUpperCase();
+        if (w !== entry.width || h !== entry.height || outputFormat !== 'original') {
+            el.textContent = '→ ' + w + '×' + h + ' • ' + fmt;
+        } else {
+            el.textContent = '';
+        }
+    }
+
+    function updateAllAfterSizes() {
+        files.forEach((entry, idx) => {
+            const el = document.getElementById('after-size-' + idx);
+            if (el) updateFileAfterSize(el, entry);
+        });
+    }
+
+    // === リサイズ計算 ===
+    function calcNewSize(origW, origH) {
+        if (isCustomResize) {
+            const wp = parseInt(customWidthPct.value) || 100;
+            const hp = parseInt(customHeightPct.value) || 100;
+            return {
+                w: Math.max(1, Math.round(origW * wp / 100)),
+                h: Math.max(1, Math.round(origH * hp / 100))
+            };
+        }
+        return {
+            w: Math.max(1, Math.round(origW * resizePercent / 100)),
+            h: Math.max(1, Math.round(origH * resizePercent / 100))
+        };
+    }
+
+    // === 出力フォーマット ===
+    document.getElementById('format-chips').addEventListener('click', (e) => {
+        const chip = e.target.closest('.format-chip');
+        if (!chip) return;
+        document.querySelectorAll('.format-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        outputFormat = chip.dataset.fmt;
+
+        // PNG/Base64/ICOでは品質無効化
+        const noQuality = ['png', 'base64', 'ico'].includes(outputFormat === 'original' ? '' : outputFormat);
+        qualitySlider.disabled = noQuality;
+        qualitySection.style.opacity = noQuality ? '0.4' : '1';
+
+        // ICOではリサイズセクション非表示
+        resizeSection.style.display = outputFormat === 'ico' ? 'none' : '';
+
+        updateAllAfterSizes();
+    });
+
+    // === 品質スライダー ===
+    qualitySlider.addEventListener('input', () => {
+        qualityValue.textContent = qualitySlider.value + '%';
+    });
+
+    // === リサイズプリセット ===
+    document.getElementById('resize-presets').addEventListener('click', (e) => {
+        const btn = e.target.closest('.resize-preset');
+        if (!btn) return;
+
+        document.querySelectorAll('.resize-preset').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        if (btn.dataset.pct === 'custom') {
+            isCustomResize = true;
+            customSizePanel.classList.remove('hidden');
+        } else {
+            isCustomResize = false;
+            resizePercent = parseInt(btn.dataset.pct);
+            customSizePanel.classList.add('hidden');
+        }
+
+        updateAllAfterSizes();
+        updateSizePreview();
+    });
+
+    // === カスタムサイズ入力 ===
+    customWidthPct.addEventListener('input', () => {
+        if (aspectLocked) {
+            customHeightPct.value = customWidthPct.value;
+        }
+        updateAllAfterSizes();
+        updateSizePreview();
+    });
+
+    customHeightPct.addEventListener('input', () => {
+        if (aspectLocked) {
+            customWidthPct.value = customHeightPct.value;
+        }
+        updateAllAfterSizes();
+        updateSizePreview();
+    });
+
+    // === アスペクト比ロック ===
+    aspectLockBtn.addEventListener('click', () => {
+        aspectLocked = !aspectLocked;
+        aspectLockBtn.classList.toggle('active', aspectLocked);
+        lockIcon.textContent = aspectLocked ? '🔗' : '🔓';
+
+        if (aspectLocked) {
+            // ロック時は幅に合わせる
+            customHeightPct.value = customWidthPct.value;
+            updateAllAfterSizes();
+            updateSizePreview();
+        }
+    });
+
+    // === サイズプレビュー ===
+    function updateSizePreview() {
+        if (files.length === 0 || (!isCustomResize && resizePercent === 100)) {
+            sizePreview.textContent = '';
+            return;
+        }
+        const first = files[0];
+        const { w, h } = calcNewSize(first.width, first.height);
+        if (files.length === 1) {
+            sizePreview.textContent = first.width + '×' + first.height + ' → ' + w + '×' + h + ' px';
+        } else {
+            sizePreview.textContent = '例: ' + first.width + '×' + first.height + ' → ' + w + '×' + h + ' px（各ファイルごとに計算）';
+        }
+    }
+
+    // === クリア ===
+    clearBtn.addEventListener('click', () => {
+        files = [];
+        convertedFiles.forEach(f => URL.revokeObjectURL(f.url));
+        convertedFiles = [];
+        updateFileList();
+    });
+
+    clearResultsBtn.addEventListener('click', () => {
+        convertedFiles.forEach(f => URL.revokeObjectURL(f.url));
+        convertedFiles = [];
+        results.classList.add('hidden');
+    });
+
+    // === 変換処理 ===
+    convertBtn.addEventListener('click', async () => {
+        if (files.length === 0) return;
+
+        convertBtn.disabled = true;
+        convertBtn.textContent = '⏳ 変換中...';
+        convertedFiles = [];
+        results.classList.add('hidden');
+
+        const quality = parseInt(qualitySlider.value) / 100;
+
+        let totalOriginal = 0;
+        let totalConverted = 0;
+
+        for (let i = 0; i < files.length; i++) {
+            const entry = files[i];
+            const file = entry.file;
+            const progressEl = document.getElementById('progress-' + i);
+            const progressBar = progressEl?.querySelector('.file-progress-bar');
+
+            if (progressEl) {
+                progressEl.classList.remove('hidden');
+                progressBar.style.width = '30%';
+                progressBar.style.background = '';
+            }
+
+            const sourceFormat = detectSourceFormat(file);
+            const format = getEffectiveFormat(sourceFormat);
+            const { w, h } = calcNewSize(entry.width, entry.height);
+
+            try {
+                let result;
+                if (format === 'ico' || outputFormat === 'ico') {
+                    result = await convertToIco(file);
+                } else if (format === 'base64' || outputFormat === 'base64') {
+                    result = await convertToBase64(file, quality, w, h);
+                } else {
+                    result = await convertImage(file, format, quality, w, h);
+                }
+                totalOriginal += file.size;
+                totalConverted += result.blob.size;
+
+                // ファイル名を決定
+                let outName;
+                if (outputFormat === 'original') {
+                    outName = file.name; // 元ファイル名そのまま
+                } else {
+                    outName = stripExtension(file.name) + '.' + getExtension(format);
+                }
+
+                const resultEntry = {
+                    name: outName,
+                    blob: result.blob,
+                    originalSize: file.size,
+                    newSize: result.blob.size,
+                    width: result.width,
+                    height: result.height,
+                    url: URL.createObjectURL(result.blob),
+                };
+                if (result.base64Text) resultEntry.base64Text = result.base64Text;
+                convertedFiles.push(resultEntry);
+
+                if (progressBar) progressBar.style.width = '100%';
+            } catch (err) {
+                console.warn('変換失敗:', file.name, err);
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                    progressBar.style.background = '#ef4444';
+                }
+            }
+        }
+
+        showResults(totalOriginal, totalConverted);
+        convertBtn.disabled = false;
+        convertBtn.textContent = '🔄 一括変換';
+    });
+
+    // === Canvas変換 ===
+    function convertImage(file, format, quality, targetW, targetH) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = targetW;
+                canvas.height = targetH;
+
+                const ctx = canvas.getContext('2d');
+
+                // JPEGは透過非対応 → 白背景
+                if (format === 'jpeg') {
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, targetW, targetH);
+                }
+
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, 0, 0, targetW, targetH);
+
+                canvas.toBlob(
+                    (blob) => {
+                        if (blob) {
+                            resolve({ blob, width: targetW, height: targetH });
+                        } else {
+                            // AVIF等未対応ブラウザ → WebPフォールバック
+                            canvas.toBlob(
+                                (fbBlob) => {
+                                    if (fbBlob) resolve({ blob: fbBlob, width: targetW, height: targetH });
+                                    else reject(new Error('変換に失敗しました'));
+                                },
+                                'image/webp',
+                                quality
+                            );
+                        }
+                        URL.revokeObjectURL(img.src);
+                    },
+                    getMimeType(format),
+                    (format === 'png') ? undefined : quality
+                );
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(img.src);
+                reject(new Error('画像の読み込みに失敗'));
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
+    // === ICO変換 ===
+    function convertToIco(file) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const sizes = [16, 32, 48];
+                const images = [];
+
+                for (const size of sizes) {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, size, size);
+                    const imageData = ctx.getImageData(0, 0, size, size);
+                    images.push({ size, data: imageData });
+                }
+
+                let processed = 0;
+                const pngBlobs = [];
+                images.forEach((img2, idx) => {
+                    const c = document.createElement('canvas');
+                    c.width = img2.size;
+                    c.height = img2.size;
+                    c.getContext('2d').putImageData(img2.data, 0, 0);
+                    c.toBlob((blob) => {
+                        pngBlobs[idx] = blob;
+                        processed++;
+                        if (processed === images.length) {
+                            buildIco(pngBlobs, sizes, resolve, reject);
+                        }
+                    }, 'image/png');
+                });
+
+                URL.revokeObjectURL(img.src);
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(img.src);
+                reject(new Error('画像の読み込みに失敗'));
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
+    async function buildIco(pngBlobs, sizes, resolve, reject) {
+        try {
+            const buffers = [];
+            for (const blob of pngBlobs) {
+                buffers.push(await blob.arrayBuffer());
+            }
+
+            const headerSize = 6;
+            const entrySize = 16;
+            let totalIcoSize = headerSize + entrySize * buffers.length;
+            for (const buf of buffers) totalIcoSize += buf.byteLength;
+
+            const ico = new ArrayBuffer(totalIcoSize);
+            const view = new DataView(ico);
+
+            view.setUint16(0, 0, true);
+            view.setUint16(2, 1, true);
+            view.setUint16(4, buffers.length, true);
+
+            let dataPos = headerSize + entrySize * buffers.length;
+            buffers.forEach((buf, i) => {
+                const offset = headerSize + entrySize * i;
+                const s = sizes[i];
+                view.setUint8(offset, s < 256 ? s : 0);
+                view.setUint8(offset + 1, s < 256 ? s : 0);
+                view.setUint8(offset + 2, 0);
+                view.setUint8(offset + 3, 0);
+                view.setUint16(offset + 4, 1, true);
+                view.setUint16(offset + 6, 32, true);
+                view.setUint32(offset + 8, buf.byteLength, true);
+                view.setUint32(offset + 12, dataPos, true);
+
+                new Uint8Array(ico, dataPos, buf.byteLength).set(new Uint8Array(buf));
+                dataPos += buf.byteLength;
+            });
+
+            const blob = new Blob([ico], { type: 'image/x-icon' });
+            resolve({ blob, width: 48, height: 48 });
+        } catch (e) {
+            reject(e);
+        }
+    }
+
+    // === Base64変換 ===
+    function convertToBase64(file, quality, targetW, targetH) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = targetW;
+                canvas.height = targetH;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, targetW, targetH);
+
+                const dataUrl = canvas.toDataURL('image/png');
+                const blob = new Blob([dataUrl], { type: 'text/plain' });
+                resolve({ blob, width: targetW, height: targetH, base64Text: dataUrl });
+                URL.revokeObjectURL(img.src);
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(img.src);
+                reject(new Error('画像の読み込みに失敗'));
+            };
+            img.src = URL.createObjectURL(file);
+        });
+    }
+
+    // === 結果表示 ===
+    function showResults(totalOriginal, totalConverted) {
+        results.classList.remove('hidden');
+
+        const savedBytes = totalOriginal - totalConverted;
+        const savedPct = totalOriginal > 0 ? Math.round((savedBytes / totalOriginal) * 100) : 0;
+
+        if (savedBytes > 0) {
+            resultsSummary.textContent = formatBytes(totalOriginal) + ' → ' + formatBytes(totalConverted) + ' (' + savedPct + '% 削減)';
+        } else {
+            resultsSummary.textContent = formatBytes(totalOriginal) + ' → ' + formatBytes(totalConverted);
+        }
+
+        resultItems.innerHTML = '';
+        convertedFiles.forEach((file) => {
+            const item = document.createElement('div');
+            item.className = 'result-item';
+
+            const thumb = document.createElement('img');
+            thumb.className = 'result-thumb';
+            thumb.src = file.url;
+
+            const info = document.createElement('div');
+            info.className = 'result-info';
+
+            const name = document.createElement('div');
+            name.className = 'result-name';
+            name.textContent = file.name;
+
+            const meta = document.createElement('div');
+            meta.className = 'result-meta';
+
+            const sizeSpan = document.createElement('span');
+            sizeSpan.className = 'result-size';
+            sizeSpan.textContent = file.width + '×' + file.height + ' • ' + formatBytes(file.newSize);
+
+            const savings = document.createElement('span');
+            savings.className = 'result-savings';
+            const diff = file.originalSize - file.newSize;
+            if (diff > 0) {
+                savings.textContent = '▼ ' + Math.round((diff / file.originalSize) * 100) + '% 削減';
+            } else if (diff < 0) {
+                savings.textContent = '▲ ' + Math.round((Math.abs(diff) / file.originalSize) * 100) + '% 増加';
+                savings.style.color = '#f87171';
+            }
+
+            meta.appendChild(sizeSpan);
+            if (diff !== 0) meta.appendChild(savings);
+
+            info.appendChild(name);
+            info.appendChild(meta);
+
+            const dlBtn = document.createElement('button');
+            dlBtn.className = 'btn-download';
+            dlBtn.textContent = '⬇ DL';
+            dlBtn.addEventListener('click', () => downloadFile(file));
+
+            item.appendChild(thumb);
+            item.appendChild(info);
+            item.appendChild(dlBtn);
+
+            // Base64コピーボタン
+            if (file.base64Text) {
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'btn-download';
+                copyBtn.textContent = '📋 コピー';
+                copyBtn.style.marginLeft = '0.3rem';
+                copyBtn.addEventListener('click', () => {
+                    navigator.clipboard.writeText(file.base64Text).then(() => {
+                        copyBtn.textContent = '✅ コピー済';
+                        setTimeout(() => { copyBtn.textContent = '📋 コピー'; }, 2000);
+                    });
+                });
+                item.appendChild(copyBtn);
+            }
+
+            resultItems.appendChild(item);
+        });
+    }
+
+    // === ダウンロード ===
+    function downloadFile(file) {
+        const a = document.createElement('a');
+        a.href = file.url;
+        a.download = file.name;
+        a.click();
+    }
+
+    downloadAllBtn.addEventListener('click', async () => {
+        if (convertedFiles.length === 0) return;
+
+        // 1ファイルなら単体ダウンロード
+        if (convertedFiles.length === 1) {
+            downloadFile(convertedFiles[0]);
+            return;
+        }
+
+        // 複数ファイル → ZIPにまとめる
+        downloadAllBtn.disabled = true;
+        downloadAllBtn.textContent = '⏳ ZIP作成中...';
+
+        try {
+            const zip = new JSZip();
+            for (const file of convertedFiles) {
+                zip.file(file.name, file.blob);
+            }
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const url = URL.createObjectURL(zipBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'converted-images.zip';
+            a.click();
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('ZIP作成失敗:', err);
+            alert('⚠️ ZIPの作成に失敗しました。個別にダウンロードしてください。');
+        }
+
+        downloadAllBtn.disabled = false;
+        downloadAllBtn.textContent = '📦 すべてダウンロード (ZIP)';
+    });
+
+})();

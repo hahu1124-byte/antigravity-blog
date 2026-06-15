@@ -1,9 +1,237 @@
-let YEN_PER_BALL=1;const DEFAULT_STATE={balls:500,totalBalls:0,totalInvest:0,spins:0,jackpots:0,spinRate:1,jackpotProb:656/65536,jackpotPayout:465,costPerSpin:10,sinceLastJackpot:0,debt:0,lastDebtTime:0,debtStartTime:0,lastInterest:0,accumulatedInterest:0,mode:MODE_NORMAL,rushChain:0,stRemaining:0,jitanRemaining:0,yutimeGauge:0,totalRushChains:0,currentRushPayout:0,yutimeTriggered:!1,prestiges:0,totalLifetimeJackpots:0,currentMachineId:"amadeji",unlockedMachines:["amadeji"],autoBuyer:!1,autoBuyerExcludes:[],autoPrestige:!1,upgrades:{spinRate:0,jackpotProb:0,jackpotPayout:0,kakuhenBoost:0,stSpins:0,kakuhenCont:0,costReduction:0,autoBuyer:0,autoPrestige:0,critical:0},lastSave:Date.now(),playTime:0,startedAt:Date.now(),achievements:{},reelClicks:0,lifetimeMaxUpgrades:{},lifetimeTotalBalls:0,lifetimeTotalInvest:0,lifetimeSpins:0,lifetimeJackpots:0,lifetimePlayTime:0};let state={...DEFAULT_STATE},isPremium=!1,cloudSaveTimer=0;function saveGame(){state.lastSave=Date.now(),state.yenPerBall=YEN_PER_BALL,state.gameVersion=GAME_VERSION;try{localStorage.setItem(SAVE_KEY,JSON.stringify(state)),showSaveStatus("\u4FDD\u5B58\u6E08\u307F \u2713")}catch(e){console.warn("\u30BB\u30FC\u30D6\u5931\u6557:",e)}const t=Date.now();isPremium&&t-cloudSaveTimer>=CLOUD_SAVE_INTERVAL&&(cloudSaveTimer=t,sendCloudSave())}function loadGame(){try{const t=localStorage.getItem(SAVE_KEY);if(!t)return!1;const e=JSON.parse(t);return!e.gameVersion||e.gameVersion<"v0.14.17"?(console.warn("\u65E7\u30D0\u30FC\u30B8\u30E7\u30F3\u306E\u30BB\u30FC\u30D6\u30C7\u30FC\u30BF\u3092\u691C\u51FA \u2192 \u521D\u671F\u5316"),localStorage.removeItem(SAVE_KEY),!1):(state={...DEFAULT_STATE,...e,upgrades:{...DEFAULT_STATE.upgrades,...e.upgrades},unlockedMachines:e.unlockedMachines||["amadeji"],currentMachineId:e.currentMachineId||"amadeji",achievements:e.achievements||{},reelClicks:e.reelClicks||0,lifetimeMaxUpgrades:e.lifetimeMaxUpgrades||{},lifetimeTotalBalls:e.lifetimeTotalBalls||0,lifetimeTotalInvest:e.lifetimeTotalInvest||0,lifetimeSpins:e.lifetimeSpins||0,lifetimeJackpots:e.lifetimeJackpots||0,lifetimePlayTime:e.lifetimePlayTime||0},applyAllUpgrades(),checkMachineUnlocks(),e.yenPerBall&&(YEN_PER_BALL=e.yenPerBall),!0)}catch(t){return console.warn("\u30ED\u30FC\u30C9\u5931\u6557:",t),!1}}function resetGame(){confirm(`\u672C\u5F53\u306B\u30C7\u30FC\u30BF\u3092\u30EA\u30BB\u30C3\u30C8\u3057\u307E\u3059\u304B\uFF1F
-\u3059\u3079\u3066\u306E\u9032\u884C\u72B6\u6CC1\u304C\u5931\u308F\u308C\u307E\u3059\u3002`)&&(localStorage.removeItem(SAVE_KEY),YEN_PER_BALL=1,state={...DEFAULT_STATE,upgrades:{...DEFAULT_STATE.upgrades},unlockedMachines:["amadeji"],lastSave:Date.now(),startedAt:Date.now()},applyAllUpgrades(),renderShop(),renderMachineSelector(),saveGame())}function calculateOffline(){const e=(Date.now()-state.lastSave)/1e3;if(e<10)return;const f=24*3600,n=Math.min(e,f),c=isPremium?state.spinRate*PREMIUM_SPEED_MULTIPLIER:state.spinRate,a=Math.floor(c*n);if(a<=0)return;const p=getCurrentProb(),d=a*p,S=1+(Math.random()-.5)*.4,o=Math.max(0,Math.round(d*S));let s=0,i=state.mode;for(let u=0;u<o;u++){const r=rollJackpotType(),h=getJackpotPayout(r);s+=h,i=r===MODE_NORMAL?MODE_NORMAL:r}const m=a*state.costPerSpin*.55,l=s-m;state.balls+=l,state.balls<0&&(state.balls=0),state.totalBalls+=s,state.totalInvest+=m,state.spins+=a,state.jackpots+=o,state.totalLifetimeJackpots+=o,state.playTime+=n,o>0&&(state.mode=i,i===MODE_ST&&(state.stRemaining=getMaxStSpins())),checkMachineUnlocks();const g=isPremium?" \u{1F48E}x2":"";dom.offlineDetail.innerHTML=`
-        ${formatTime(n)}\u306E\u9593\u306B\u2026<br>
-        \u{1F3B0} ${formatNum(a)}\u56DE\u8EE2${g}<br>
-        \u{1F389} \u5927\u5F53\u305F\u308A ${o}\u56DE<br>
-        \u{1F4B0} \u53CE\u652F: ${l>=0?"+":""}${formatYen(l)}<br>
-        \u26A1 \u56DE\u8EE2\u901F\u5EA6: ${formatNum(c)}\u56DE/\u79D2<br>
-        \u{1F3B0} \u30E2\u30FC\u30C9: ${state.mode==="kakuhen"?"\u78BA\u5909":state.mode==="st"?"ST":state.mode==="jitan"?"\u6642\u77ED":"\u901A\u5E38"}
-    `,dom.offlineBanner.classList.remove("hidden")}
+/**
+ * パチンコ放置ゲーム — ステート管理・セーブ/ロード
+ */
+
+// ============================================================
+// ゲームステート
+// ============================================================
+
+let YEN_PER_BALL = 1;
+
+const DEFAULT_STATE = {
+    balls: 500,
+    totalBalls: 0,
+    totalInvest: 0,
+    spins: 0,
+    jackpots: 0,
+    spinRate: 1,
+    jackpotProb: 656 / 65536,
+    jackpotPayout: 465,
+    costPerSpin: 10,
+    sinceLastJackpot: 0,
+
+
+    // 借金システム
+    debt: 0,
+    lastDebtTime: 0,
+    debtStartTime: 0,
+    lastInterest: 0,
+    accumulatedInterest: 0,
+
+    // Phase 2: モード
+    mode: MODE_NORMAL,
+    rushChain: 0,
+    stRemaining: 0,
+    jitanRemaining: 0,
+    yutimeGauge: 0,
+    totalRushChains: 0,
+    currentRushPayout: 0,
+    yutimeTriggered: false,
+
+    // Phase 2: プレステージ
+    prestiges: 0,
+    totalLifetimeJackpots: 0,
+
+    // Phase 3: 機種
+    currentMachineId: 'amadeji',
+    unlockedMachines: ['amadeji'],
+
+    // Phase 3: 自動化
+    autoBuyer: false,
+    autoBuyerExcludes: [],
+    autoPrestige: false,
+
+    upgrades: {
+        spinRate: 0,
+        jackpotProb: 0,
+        jackpotPayout: 0,
+
+        kakuhenBoost: 0,
+        stSpins: 0,
+        kakuhenCont: 0,
+        costReduction: 0,
+        autoBuyer: 0,
+        autoPrestige: 0,
+        critical: 0,
+    },
+    lastSave: Date.now(),
+    playTime: 0,
+    startedAt: Date.now(),
+
+    // アチーブメント（プレステージで初期化しない永続データ）
+    achievements: {},
+    reelClicks: 0,
+    lifetimeMaxUpgrades: {},
+
+    // 生涯統計（プレステージでリセットしない）
+    lifetimeTotalBalls: 0,
+    lifetimeTotalInvest: 0,
+    lifetimeSpins: 0,
+    lifetimeJackpots: 0,
+    lifetimePlayTime: 0,
+};
+
+let state = { ...DEFAULT_STATE };
+
+// ============================================================
+// Premium状態
+// ============================================================
+
+let isPremium = false;
+let cloudSaveTimer = 0;
+
+// ============================================================
+// セーブ/ロード
+// ============================================================
+
+function saveGame() {
+    state.lastSave = Date.now();
+    state.yenPerBall = YEN_PER_BALL;
+    state.gameVersion = GAME_VERSION;
+    try {
+        localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+        showSaveStatus('保存済み ✓');
+    } catch (e) {
+        console.warn('セーブ失敗:', e);
+    }
+
+    // クラウドセーブ（有料ユーザーのみ、間隔制限付き）
+    const now = Date.now();
+    if (isPremium && now - cloudSaveTimer >= CLOUD_SAVE_INTERVAL) {
+        cloudSaveTimer = now;
+        sendCloudSave();
+    }
+}
+
+function loadGame() {
+    try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return false;
+
+        const saved = JSON.parse(raw);
+
+        // v0.14.17未満のデータは強制リセット（高速回転によるフリーズ対策）
+        if (!saved.gameVersion || saved.gameVersion < 'v0.14.17') {
+            console.warn('旧バージョンのセーブデータを検出 → 初期化');
+            localStorage.removeItem(SAVE_KEY);
+            return false;
+        }
+
+        state = {
+            ...DEFAULT_STATE,
+            ...saved,
+            upgrades: { ...DEFAULT_STATE.upgrades, ...saved.upgrades },
+            unlockedMachines: saved.unlockedMachines || ['amadeji'],
+            currentMachineId: saved.currentMachineId || 'amadeji',
+            achievements: saved.achievements || {},
+            reelClicks: saved.reelClicks || 0,
+            lifetimeMaxUpgrades: saved.lifetimeMaxUpgrades || {},
+            lifetimeTotalBalls: saved.lifetimeTotalBalls || 0,
+            lifetimeTotalInvest: saved.lifetimeTotalInvest || 0,
+            lifetimeSpins: saved.lifetimeSpins || 0,
+            lifetimeJackpots: saved.lifetimeJackpots || 0,
+            lifetimePlayTime: saved.lifetimePlayTime || 0,
+        };
+        applyAllUpgrades();
+        checkMachineUnlocks();
+        if (saved.yenPerBall) {
+            YEN_PER_BALL = saved.yenPerBall;
+        }
+        return true;
+    } catch (e) {
+        console.warn('ロード失敗:', e);
+        return false;
+    }
+}
+
+function resetGame() {
+    if (!confirm('本当にデータをリセットしますか？\nすべての進行状況が失われます。')) return;
+    localStorage.removeItem(SAVE_KEY);
+    YEN_PER_BALL = 1;
+    state = {
+        ...DEFAULT_STATE,
+        upgrades: { ...DEFAULT_STATE.upgrades },
+        unlockedMachines: ['amadeji'],
+        lastSave: Date.now(),
+        startedAt: Date.now(),
+    };
+    applyAllUpgrades();
+    renderShop();
+    renderMachineSelector();
+    saveGame();
+}
+
+// ============================================================
+// オフライン差分計算
+// ============================================================
+
+function calculateOffline() {
+    const now = Date.now();
+    const elapsed = (now - state.lastSave) / 1000;
+
+    if (elapsed < 10) return;
+
+    const maxOffline = 24 * 3600;
+    const offlineSeconds = Math.min(elapsed, maxOffline);
+    const effectiveRate = isPremium ? state.spinRate * PREMIUM_SPEED_MULTIPLIER : state.spinRate;
+    const offlineSpins = Math.floor(effectiveRate * offlineSeconds);
+
+    if (offlineSpins <= 0) return;
+
+    const prob = getCurrentProb();
+    const expectedJackpots = offlineSpins * prob;
+    const randomFactor = 1 + (Math.random() - 0.5) * 0.4;
+    const actualJackpots = Math.max(0, Math.round(expectedJackpots * randomFactor));
+
+    let totalPayout = 0;
+    let lastMode = state.mode;
+    for (let i = 0; i < actualJackpots; i++) {
+        const type = rollJackpotType();
+        const payout = getJackpotPayout(type);
+        totalPayout += payout;
+        lastMode = (type === MODE_NORMAL) ? MODE_NORMAL : type;
+    }
+
+    const avgCostRate = 0.55;
+    const totalCost = offlineSpins * state.costPerSpin * avgCostRate;
+    const netGain = totalPayout - totalCost;
+
+    state.balls += netGain;
+    if (state.balls < 0) state.balls = 0;
+    state.totalBalls += totalPayout;
+    state.totalInvest += totalCost;
+    state.spins += offlineSpins;
+    state.jackpots += actualJackpots;
+    state.totalLifetimeJackpots += actualJackpots;
+    state.playTime += offlineSeconds;
+
+    if (actualJackpots > 0) {
+        state.mode = lastMode;
+        if (lastMode === MODE_ST) {
+            state.stRemaining = getMaxStSpins();
+        }
+    }
+
+    checkMachineUnlocks();
+
+    const premiumLabel = isPremium ? ' 💎x2' : '';
+    dom.offlineDetail.innerHTML = `
+        ${formatTime(offlineSeconds)}の間に…<br>
+        🎰 ${formatNum(offlineSpins)}回転${premiumLabel}<br>
+        🎉 大当たり ${actualJackpots}回<br>
+        💰 収支: ${netGain >= 0 ? '+' : ''}${formatYen(netGain)}<br>
+        ⚡ 回転速度: ${formatNum(effectiveRate)}回/秒<br>
+        🎰 モード: ${state.mode === 'kakuhen' ? '確変' : state.mode === 'st' ? 'ST' : state.mode === 'jitan' ? '時短' : '通常'}
+    `;
+    dom.offlineBanner.classList.remove('hidden');
+}

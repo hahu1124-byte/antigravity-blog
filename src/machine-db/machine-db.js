@@ -2,8 +2,8 @@
 (() => {
     'use strict';
 
-    const SUPABASE_URL = 'https://tsuadozxtszfbzeikkec.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzdWFkb3p4dHN6ZmJ6ZWlra2VjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzMzk0NjIsImV4cCI6MjA4NzkxNTQ2Mn0.vOD0rKgpOUg5uobJRweSXffEf4mdLspJBeIU2UscpSQ';
+    const SUPABASE_URL = '__SUPABASE_URL__';
+    const SUPABASE_KEY = '__SUPABASE_ANON_KEY__';
     const NEW_DAYS = 15;
     const NOW_MS = Date.now();
 

@@ -1,0 +1,3 @@
+- [x] deploy.ymlの修正 (`${{ 'github-pages' }}` から `github-pages` へ戻す)
+- [x] ドキュメントの生成
+- [ ] 変更内容の記録 (hsave.ps1)

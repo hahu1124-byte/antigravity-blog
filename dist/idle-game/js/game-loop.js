@@ -1,1 +1,458 @@
-function rollJackpotType(){const e=getCurrentMachine(),t=Math.random();return state.mode===MODE_ST?MODE_ST:state.mode===MODE_KAKUHEN?t<getKakuhenContinueRate()?MODE_KAKUHEN:MODE_JITAN:t<e.kakuhenRate?MODE_KAKUHEN:t<e.kakuhenRate+e.stRate?MODE_ST:t<e.kakuhenRate+e.stRate+e.jitanRate?MODE_JITAN:MODE_NORMAL}function getJackpotPayout(e){let t=state.jackpotPayout;const s=state.upgrades.luckyPayout||0;return s>0&&(t=t*(1+s*.15)),e===MODE_KAKUHEN&&(t=Math.floor(t*1.5)),Math.random()*100<getCriticalChance()&&(t=Math.floor(t*2)),Math.floor(t)}function processJackpot(){const e=rollJackpotType(),t=getJackpotPayout(e),s=state.mode===MODE_KAKUHEN||state.mode===MODE_ST;return state.balls+=t,state.totalBalls+=t,state.jackpots++,state.totalLifetimeJackpots++,state.sinceLastJackpot=0,state.yutimeGauge=0,state.yutimeTriggered=!1,e===MODE_KAKUHEN?(s?(state.rushChain++,state.currentRushPayout+=t):(state.rushChain=1,state.currentRushPayout=t),state.mode=MODE_KAKUHEN,state.stRemaining=0,state.jitanRemaining=0):e===MODE_ST?(s?(state.rushChain++,state.currentRushPayout+=t):(state.rushChain=1,state.currentRushPayout=t),state.mode=MODE_ST,state.stRemaining=getMaxStSpins(),state.jitanRemaining=0):e===MODE_JITAN?(s&&(state.rushChain++,state.currentRushPayout+=t,showRushSummary(state.rushChain,state.currentRushPayout),state.rushChain>state.totalRushChains&&(state.totalRushChains=state.rushChain)),state.mode=MODE_JITAN,state.jitanRemaining=getJitanSpins(),state.rushChain=0,state.currentRushPayout=0,state.stRemaining=0):(s&&(state.rushChain++,state.currentRushPayout+=t,showRushSummary(state.rushChain,state.currentRushPayout),state.rushChain>state.totalRushChains&&(state.totalRushChains=state.rushChain)),state.mode=MODE_NORMAL,state.rushChain=0,state.currentRushPayout=0,state.stRemaining=0,state.jitanRemaining=0),checkMachineUnlocks(),{type:e,payout:t}}function getYutimeThreshold(e){return e.yutimeThreshold}function checkYutime(){if(state.mode!==MODE_NORMAL||state.yutimeTriggered)return;const e=getEffectiveYutimeThreshold();state.yutimeGauge>=e&&(state.yutimeTriggered=!0,state.mode=MODE_JITAN,state.jitanRemaining=JITAN_SPINS,state.rushChain=0,state.currentRushPayout=0,state.stRemaining=0,showYutimeBanner())}let autoBuyTimer=0;function processAutoBuyer(e){if(!state.autoBuyer||(autoBuyTimer+=e,autoBuyTimer<.5))return;autoBuyTimer=0;let t=null,s=1/0;UPGRADES.forEach(i=>{if(i.id==="autoBuyer"||i.id==="autoPrestige"||state.autoBuyerExcludes.includes(i.id)||state.upgrades[i.id]>=i.maxLevel)return;const n=getUpgradeCost(i);state.balls>=n&&n<s&&(t=i,s=n)}),t&&(state.balls-=s,state.totalInvest+=s,state.upgrades[t.id]++,t.apply(state),applyAllUpgrades())}function processAutoPrestige(){state.autoPrestige&&state.jackpots>=getPrestigeThreshold()&&executePrestige(!0)}let lastFrameTime=performance.now(),spinAccumulator=0,jackpotOccurred=!1,lastJackpotType=null,prestigePaused=!1,prestigePauseTimer=0;const PRESTIGE_PAUSE_DURATION=.5,FRAME_INTERVAL=1e3/30,MAX_SPINS_PER_FRAME=200;function processBatchSpins(e){let t=e;if(state.mode===MODE_ST&&state.stRemaining>0){const a=Math.min(t,state.stRemaining);state.stRemaining-=a,state.spins+=a,state.sinceLastJackpot+=a,t-=a,state.balls-=a*.3,state.totalInvest+=a*.3,state.stRemaining<=0&&(state.rushChain>0&&(showRushSummary(state.rushChain,state.currentRushPayout),state.rushChain>state.totalRushChains&&(state.totalRushChains=state.rushChain)),state.mode=MODE_NORMAL,state.yutimeGauge=0,state.yutimeTriggered=!1,state.rushChain=0,state.currentRushPayout=0)}if(state.mode===MODE_JITAN&&state.jitanRemaining>0){const a=Math.min(t,state.jitanRemaining);state.jitanRemaining-=a,state.spins+=a,state.sinceLastJackpot+=a,t-=a,state.balls-=a*.3,state.totalInvest+=a*.3;const h=getEffectiveYutimeThreshold();state.yutimeGauge=Math.min(state.yutimeGauge+a,h),state.jitanRemaining<=0&&(state.mode=MODE_NORMAL,state.jitanRemaining=0)}if(t<=0)return{jackpots:0,payout:0,type:null};const s=getCurrentProb(),n=state.mode===MODE_KAKUHEN?.3:state.costPerSpin;if(state.spins+=t,state.balls-=t*n,state.totalInvest+=t*n,state.mode===MODE_NORMAL||state.mode===MODE_JITAN){const a=getEffectiveYutimeThreshold();state.yutimeGauge=Math.min(state.yutimeGauge+t,a)}const c=t*s,r=1+(Math.random()-.5)*.4,u=Math.max(0,Math.round(c*r));let m=0,o=null;for(let a=0;a<u;a++){const h=processJackpot();m+=h.payout,o=h.type}for(u>0?state.sinceLastJackpot=Math.floor(t/(u+1)):state.sinceLastJackpot+=t,checkYutime();state.balls<0;)takeLoan();return{jackpots:u,payout:m,type:o}}function gameLoop(e){if(e-lastFrameTime<FRAME_INTERVAL){requestAnimationFrame(gameLoop);return}const t=Math.min((e-lastFrameTime)/1e3,.1);if(lastFrameTime=e,prestigePaused){prestigePauseTimer-=t,prestigePauseTimer<=0&&(prestigePaused=!1,prestigePauseTimer=0),updateUI(),requestAnimationFrame(gameLoop);return}state.playTime+=t,jackpotAnimTimer>0&&(jackpotAnimTimer-=t,jackpotAnimTimer<=0?(lastJackpotInfo=null,jackpotOccurred=!1,dom.jackpotNotify.classList.remove("closing"),dom.jackpotNotify.classList.add("hidden")):jackpotAnimTimer<=.3&&dom.jackpotNotify.classList.add("closing")),yutimeAnimTimer>0&&(yutimeAnimTimer-=t,yutimeAnimTimer<=0&&dom.yutimeBanner.classList.add("hidden")),achNotifyTimer>0&&(achNotifyTimer-=t,achNotifyTimer<=0?(dom.achNotify.classList.remove("closing"),dom.achNotify.classList.add("hidden")):achNotifyTimer<=.3&&dom.achNotify.classList.add("closing")),checkAchNotify();const s=isPremium?state.spinRate*PREMIUM_SPEED_MULTIPLIER:state.spinRate;spinAccumulator+=s*t;const i=Math.floor(spinAccumulator);spinAccumulator-=i;let n=0,c=0,r=null;const u=Math.min(i,MAX_SPINS_PER_FRAME);for(let o=0;o<u;o++){const a=state.mode===MODE_KAKUHEN||state.mode===MODE_ST,h=state.mode===MODE_JITAN;let l;if(a||h?l=.1+Math.random()*.4:l=state.costPerSpin,state.balls-=l,state.totalInvest+=l,state.spins++,state.sinceLastJackpot++,state.mode===MODE_NORMAL||state.mode===MODE_JITAN){const f=getEffectiveYutimeThreshold();state.yutimeGauge<f&&state.yutimeGauge++}state.mode===MODE_ST&&(state.stRemaining--,state.stRemaining<=0&&(state.rushChain>0&&(showRushSummary(state.rushChain,state.currentRushPayout),state.rushChain>state.totalRushChains&&(state.totalRushChains=state.rushChain)),state.mode=MODE_NORMAL,state.yutimeGauge=0,state.yutimeTriggered=!1,state.rushChain=0,state.currentRushPayout=0)),state.mode===MODE_JITAN&&(state.jitanRemaining--,state.jitanRemaining<=0&&(state.mode=MODE_NORMAL,state.jitanRemaining=0)),state.balls<0&&(state.balls=0,takeLoan());const d=getCurrentProb();if(Math.random()<d){const f=processJackpot();n++,c+=f.payout,r=f.type}checkYutime()}const m=i-u;if(m>0){const o=processBatchSpins(m);n+=o.jackpots,c+=o.payout,o.type&&(r=o.type)}n>0&&(jackpotOccurred=!0,lastJackpotType=r,showJackpotBanner(r,c)),updateReels(t,jackpotOccurred),processAutoBuyer(t),processAutoPrestige(),processDebtInterest(),updateUI(),requestAnimationFrame(gameLoop)}
+/**
+ * パチンコ放置ゲーム — コアゲームループ
+ */
+
+// ============================================================
+// 大当たり処理
+// ============================================================
+
+function rollJackpotType() {
+    const m = getCurrentMachine();
+    const r = Math.random();
+
+    // ST中: 当たったら常にST継続
+    if (state.mode === MODE_ST) {
+        return MODE_ST;
+    }
+
+    // 確変中: 継続率で確変維持 or 時短落ち
+    if (state.mode === MODE_KAKUHEN) {
+        if (r < getKakuhenContinueRate()) return MODE_KAKUHEN;
+        return MODE_JITAN;
+    }
+
+    // 通常/時短/遊タイム: 4種振分
+    if (r < m.kakuhenRate) return MODE_KAKUHEN;
+    if (r < m.kakuhenRate + m.stRate) return MODE_ST;
+    if (r < m.kakuhenRate + m.stRate + m.jitanRate) return MODE_JITAN;
+    return MODE_NORMAL;
+}
+
+function getJackpotPayout(type) {
+    let base = state.jackpotPayout;
+    // Premiumアップグレード: ラッキーペイアウト
+    const luckyLv = state.upgrades.luckyPayout || 0;
+    if (luckyLv > 0) {
+        base = base * (1 + luckyLv * 0.15);
+    }
+    if (type === MODE_KAKUHEN) base = Math.floor(base * 1.5);
+
+    // クリティカル判定
+    if (Math.random() * 100 < getCriticalChance()) {
+        base = Math.floor(base * 2);
+    }
+
+    return Math.floor(base);
+}
+
+function processJackpot() {
+    const type = rollJackpotType();
+    const payout = getJackpotPayout(type);
+    const wasRush = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
+
+    state.balls += payout;
+    state.totalBalls += payout;
+    state.jackpots++;
+    state.totalLifetimeJackpots++;
+    state.sinceLastJackpot = 0;
+    state.yutimeGauge = 0;
+    state.yutimeTriggered = false;
+
+    if (type === MODE_KAKUHEN) {
+        if (!wasRush) {
+            state.rushChain = 1;
+            state.currentRushPayout = payout;
+        } else {
+            state.rushChain++;
+            state.currentRushPayout += payout;
+        }
+        state.mode = MODE_KAKUHEN;
+        state.stRemaining = 0;
+        state.jitanRemaining = 0;
+    } else if (type === MODE_ST) {
+        if (!wasRush) {
+            state.rushChain = 1;
+            state.currentRushPayout = payout;
+        } else {
+            state.rushChain++;
+            state.currentRushPayout += payout;
+        }
+        state.mode = MODE_ST;
+        state.stRemaining = getMaxStSpins();
+        state.jitanRemaining = 0;
+    } else if (type === MODE_JITAN) {
+        // 時短: RUSH中なら終了サマリー表示
+        if (wasRush) {
+            state.rushChain++;
+            state.currentRushPayout += payout;
+            showRushSummary(state.rushChain, state.currentRushPayout);
+            if (state.rushChain > state.totalRushChains) {
+                state.totalRushChains = state.rushChain;
+            }
+        }
+        state.mode = MODE_JITAN;
+        state.jitanRemaining = getJitanSpins();
+        state.rushChain = 0;
+        state.currentRushPayout = 0;
+        state.stRemaining = 0;
+    } else {
+        // 純通常: RUSH終了
+        if (wasRush) {
+            state.rushChain++;
+            state.currentRushPayout += payout;
+            showRushSummary(state.rushChain, state.currentRushPayout);
+            if (state.rushChain > state.totalRushChains) {
+                state.totalRushChains = state.rushChain;
+            }
+        }
+        state.mode = MODE_NORMAL;
+        state.rushChain = 0;
+        state.currentRushPayout = 0;
+        state.stRemaining = 0;
+        state.jitanRemaining = 0;
+    }
+
+    checkMachineUnlocks();
+    return { type, payout };
+}
+
+// ============================================================
+// 遊タイム
+// ============================================================
+
+function getYutimeThreshold(m) {
+    return m.yutimeThreshold;
+}
+
+function checkYutime() {
+    // 遊タイムは通常モードでのみ発動（時短・確変・ST中は発動しない）
+    if (state.mode !== MODE_NORMAL) return;
+    if (state.yutimeTriggered) return;
+
+    const threshold = getEffectiveYutimeThreshold();
+    if (state.yutimeGauge >= threshold) {
+        state.yutimeTriggered = true;
+        // 遊タイム → 無限時短（通常確率で10000回転）
+        state.mode = MODE_JITAN;
+        state.jitanRemaining = JITAN_SPINS;
+        state.rushChain = 0;
+        state.currentRushPayout = 0;
+        state.stRemaining = 0;
+        showYutimeBanner();
+    }
+}
+
+// ============================================================
+// 自動化
+// ============================================================
+
+let autoBuyTimer = 0;
+
+function processAutoBuyer(dt) {
+    if (!state.autoBuyer) return;
+    autoBuyTimer += dt;
+    if (autoBuyTimer < 0.5) return;
+    autoBuyTimer = 0;
+
+    let cheapest = null;
+    let cheapestCost = Infinity;
+
+    UPGRADES.forEach(upg => {
+        if (upg.id === 'autoBuyer' || upg.id === 'autoPrestige') return;
+        if (state.autoBuyerExcludes.includes(upg.id)) return;
+        if (state.upgrades[upg.id] >= upg.maxLevel) return;
+        const cost = getUpgradeCost(upg);
+        // 玉が足りない場合は購入しない（借金しない）
+        if (state.balls >= cost && cost < cheapestCost) {
+            cheapest = upg;
+            cheapestCost = cost;
+        }
+    });
+
+    if (cheapest) {
+        state.balls -= cheapestCost;
+        state.totalInvest += cheapestCost;
+        state.upgrades[cheapest.id]++;
+        cheapest.apply(state);
+        applyAllUpgrades();
+    }
+}
+
+function processAutoPrestige() {
+    if (!state.autoPrestige) return;
+    if (state.jackpots >= getPrestigeThreshold()) {
+        executePrestige(true);
+    }
+}
+
+// ============================================================
+// コアゲームループ
+// ============================================================
+
+let lastFrameTime = performance.now();
+let spinAccumulator = 0;
+let jackpotOccurred = false;
+let lastJackpotType = null;
+
+// プレステージ一時停止フラグ（確認〜完了後0.5秒）
+let prestigePaused = false;
+let prestigePauseTimer = 0;
+const PRESTIGE_PAUSE_DURATION = 0.5;
+
+// パフォーマンス最適化: 30fps制限 + バッチ処理
+const FRAME_INTERVAL = 1000 / 30;  // 30fps（CPU負荷・スマホ発熱軽減）
+const MAX_SPINS_PER_FRAME = 200;   // 詳細ループ上限（超過分はバッチ計算）
+
+// 高速回転時のバッチ処理（超過分を確率ベースで一括計算）
+function processBatchSpins(count) {
+    let remaining = count;
+
+    // ST残回転の消化
+    if (state.mode === MODE_ST && state.stRemaining > 0) {
+        const consumed = Math.min(remaining, state.stRemaining);
+        state.stRemaining -= consumed;
+        state.spins += consumed;
+        state.sinceLastJackpot += consumed;
+        remaining -= consumed;
+        state.balls -= consumed * 0.3;
+        state.totalInvest += consumed * 0.3;
+
+        if (state.stRemaining <= 0) {
+            if (state.rushChain > 0) {
+                showRushSummary(state.rushChain, state.currentRushPayout);
+                if (state.rushChain > state.totalRushChains) state.totalRushChains = state.rushChain;
+            }
+            state.mode = MODE_NORMAL;
+            state.yutimeGauge = 0;
+            state.yutimeTriggered = false;
+            state.rushChain = 0;
+            state.currentRushPayout = 0;
+        }
+    }
+
+    // 時短残回転の消化
+    if (state.mode === MODE_JITAN && state.jitanRemaining > 0) {
+        const consumed = Math.min(remaining, state.jitanRemaining);
+        state.jitanRemaining -= consumed;
+        state.spins += consumed;
+        state.sinceLastJackpot += consumed;
+        remaining -= consumed;
+        state.balls -= consumed * 0.3;
+        state.totalInvest += consumed * 0.3;
+
+        const threshold = getEffectiveYutimeThreshold();
+        state.yutimeGauge = Math.min(state.yutimeGauge + consumed, threshold);
+
+        if (state.jitanRemaining <= 0) {
+            state.mode = MODE_NORMAL;
+            state.jitanRemaining = 0;
+        }
+    }
+
+    if (remaining <= 0) return { jackpots: 0, payout: 0, type: null };
+
+    // 残スピンを確率ベースで一括計算（calculateOfflineと同等の精度）
+    const prob = getCurrentProb();
+    const isRush = state.mode === MODE_KAKUHEN;
+    const costPerSpin = isRush ? 0.3 : state.costPerSpin;
+
+    state.spins += remaining;
+    state.balls -= remaining * costPerSpin;
+    state.totalInvest += remaining * costPerSpin;
+
+    // 遊タイムゲージ（通常/時短中のみカウント）
+    if (state.mode === MODE_NORMAL || state.mode === MODE_JITAN) {
+        const threshold = getEffectiveYutimeThreshold();
+        state.yutimeGauge = Math.min(state.yutimeGauge + remaining, threshold);
+    }
+
+    // 大当たり判定（確率 × 回転数 ± ランダム変動20%）
+    const expectedJackpots = remaining * prob;
+    const randomFactor = 1 + (Math.random() - 0.5) * 0.4;
+    const actualJackpots = Math.max(0, Math.round(expectedJackpots * randomFactor));
+
+    let totalPayout = 0;
+    let lastType = null;
+    for (let i = 0; i < actualJackpots; i++) {
+        const result = processJackpot();
+        totalPayout += result.payout;
+        lastType = result.type;
+    }
+
+    // sinceLastJackpot: 最後の当たり以降の推定スピン数
+    if (actualJackpots > 0) {
+        state.sinceLastJackpot = Math.floor(remaining / (actualJackpots + 1));
+    } else {
+        state.sinceLastJackpot += remaining;
+    }
+
+    checkYutime();
+
+    while (state.balls < 0) {
+        takeLoan();
+    }
+
+    return { jackpots: actualJackpots, payout: totalPayout, type: lastType };
+}
+
+function gameLoop(now) {
+    // 30fps制限: CPU負荷・スマホ発熱を軽減（視認性に影響なし）
+    if (now - lastFrameTime < FRAME_INTERVAL) {
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+    const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
+    lastFrameTime = now;
+
+    // プレステージ一時停止中: タイマー消化のみ
+    if (prestigePaused) {
+        prestigePauseTimer -= dt;
+        if (prestigePauseTimer <= 0) {
+            prestigePaused = false;
+            prestigePauseTimer = 0;
+        }
+        updateUI();
+        requestAnimationFrame(gameLoop);
+        return;
+    }
+
+    state.playTime += dt;
+
+    // 大当たり表示タイマー
+    if (jackpotAnimTimer > 0) {
+        jackpotAnimTimer -= dt;
+        if (jackpotAnimTimer <= 0) {
+            lastJackpotInfo = null;
+            jackpotOccurred = false;
+            dom.jackpotNotify.classList.remove('closing');
+            dom.jackpotNotify.classList.add('hidden');
+        } else if (jackpotAnimTimer <= 0.3) {
+            dom.jackpotNotify.classList.add('closing');
+        }
+    }
+    if (yutimeAnimTimer > 0) {
+        yutimeAnimTimer -= dt;
+        if (yutimeAnimTimer <= 0) {
+            dom.yutimeBanner.classList.add('hidden');
+        }
+    }
+    // アチーブメント解放通知タイマー
+    if (achNotifyTimer > 0) {
+        achNotifyTimer -= dt;
+        if (achNotifyTimer <= 0) {
+            dom.achNotify.classList.remove('closing');
+            dom.achNotify.classList.add('hidden');
+        } else if (achNotifyTimer <= 0.3) {
+            dom.achNotify.classList.add('closing');
+        }
+    }
+    checkAchNotify();
+
+    // 回転処理（常時自動購入: 玉不足時は自動借金で補充）
+    const effectiveSpinRate = isPremium ? state.spinRate * PREMIUM_SPEED_MULTIPLIER : state.spinRate;
+    spinAccumulator += effectiveSpinRate * dt;
+    const spinsThisFrame = Math.floor(spinAccumulator);
+    spinAccumulator -= spinsThisFrame;
+
+    let frameJackpots = 0;
+    let framePayout = 0;
+    let frameJackpotType = null;
+
+    // 詳細ループ（上限MAX_SPINS_PER_FRAME回、残りはバッチ処理）
+    const detailedSpins = Math.min(spinsThisFrame, MAX_SPINS_PER_FRAME);
+    for (let i = 0; i < detailedSpins; i++) {
+        const isRushMode = state.mode === MODE_KAKUHEN || state.mode === MODE_ST;
+        const isJitan = state.mode === MODE_JITAN;
+        let actualCost;
+        if (isRushMode || isJitan) {
+            actualCost = 0.1 + Math.random() * 0.4;
+        } else {
+            actualCost = state.costPerSpin;
+        }
+        state.balls -= actualCost;
+        state.totalInvest += actualCost;
+        state.spins++;
+
+        // 回転数: 全モードで常にカウント
+        state.sinceLastJackpot++;
+
+        // 遊タイムゲージ: 通常+時短中にカウント（確変/ST中は停止、MAX到達後は増やさない）
+        if (state.mode === MODE_NORMAL || state.mode === MODE_JITAN) {
+            const threshold = getEffectiveYutimeThreshold();
+            if (state.yutimeGauge < threshold) {
+                state.yutimeGauge++;
+            }
+        }
+
+        // ST消化
+        if (state.mode === MODE_ST) {
+            state.stRemaining--;
+            if (state.stRemaining <= 0) {
+                if (state.rushChain > 0) {
+                    showRushSummary(state.rushChain, state.currentRushPayout);
+                    if (state.rushChain > state.totalRushChains) {
+                        state.totalRushChains = state.rushChain;
+                    }
+                }
+                state.mode = MODE_NORMAL;
+                state.yutimeGauge = 0;
+                state.yutimeTriggered = false;
+                state.rushChain = 0;
+                state.currentRushPayout = 0;
+            }
+        }
+
+        // 時短消化
+        if (state.mode === MODE_JITAN) {
+            state.jitanRemaining--;
+            if (state.jitanRemaining <= 0) {
+                state.mode = MODE_NORMAL;
+                state.jitanRemaining = 0;
+                // 遊タイムゲージは引き継ぐ（リセットしない）
+            }
+        }
+
+        // 玉が0以下になったら自動で持玉購入（¥1,000単位）
+        if (state.balls < 0) {
+            state.balls = 0;
+            takeLoan();
+        }
+
+        const prob = getCurrentProb();
+        if (Math.random() < prob) {
+            const result = processJackpot();
+            frameJackpots++;
+            framePayout += result.payout;
+            frameJackpotType = result.type;
+        }
+
+        checkYutime();
+    }
+
+    // 超過分のバッチ処理
+    const batchSpins = spinsThisFrame - detailedSpins;
+    if (batchSpins > 0) {
+        const batchResult = processBatchSpins(batchSpins);
+        frameJackpots += batchResult.jackpots;
+        framePayout += batchResult.payout;
+        if (batchResult.type) frameJackpotType = batchResult.type;
+    }
+
+    if (frameJackpots > 0) {
+        jackpotOccurred = true;
+        lastJackpotType = frameJackpotType;
+        showJackpotBanner(frameJackpotType, framePayout);
+    }
+
+    updateReels(dt, jackpotOccurred);
+
+    // 自動化処理
+    processAutoBuyer(dt);
+    processAutoPrestige();
+
+    // 借金利息計算
+    processDebtInterest();
+
+    updateUI();
+    requestAnimationFrame(gameLoop);
+}

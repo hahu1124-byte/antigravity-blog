@@ -1,1 +1,1999 @@
-const STEPS=16,PARTS=[{id:"kick",name:"Kick",color:"var(--clr-kick)"},{id:"snare",name:"Snare",color:"var(--clr-snare)"},{id:"hihatC",name:"HH Close",color:"var(--clr-hihat-c)"},{id:"hihatO",name:"HH Open",color:"var(--clr-hihat-o)"},{id:"clap",name:"Clap",color:"var(--clr-clap)"},{id:"tom",name:"Tom",color:"var(--clr-tom)"}],pattern={};PARTS.forEach(e=>{pattern[e.id]=new Array(16).fill(!1)});const partVolume={};PARTS.forEach(e=>{partVolume[e.id]=.8});let bpm=120,swing=0,masterVol=.8,isPlaying=!1,currentStep=-1,nextNoteTime=0,timerID=null;const trackState={drum:{vol:.8,muted:!1,soloed:!1},melody:{vol:.8,muted:!1,soloed:!1},bass:{vol:.8,muted:!1,soloed:!1}},bassNotes=new Array(16).fill(null);let bassInitialized=!1,ctx,masterGain,drumBus,melodyBus,bassBus,fxFilter,fxDistortion,fxDelayNode,fxDelayFeedback,fxDelayDry,fxDelayWet,fxReverbConvolver,fxReverbDry,fxReverbWet,fxInitialized=!1;function getCtx(){return ctx||(ctx=new(window.AudioContext||window.webkitAudioContext),initAudioRouting()),ctx.state==="suspended"&&ctx.resume(),ctx}function initAudioRouting(){const e=ctx;masterGain=e.createGain(),masterGain.gain.value=masterVol,drumBus=e.createGain(),drumBus.gain.value=trackState.drum.vol,melodyBus=e.createGain(),melodyBus.gain.value=trackState.melody.vol,bassBus=e.createGain(),bassBus.gain.value=trackState.bass.vol,drumBus.connect(masterGain),melodyBus.connect(masterGain),bassBus.connect(masterGain),buildFxChain()}function buildFxChain(){const e=ctx;fxFilter=e.createBiquadFilter(),fxFilter.type="lowpass",fxFilter.frequency.value=8e3,fxFilter.Q.value=1,fxDistortion=e.createWaveShaper(),fxDistortion.curve=makeDistortionCurve(0),fxDistortion.oversample="4x",fxDelayNode=e.createDelay(2),fxDelayNode.delayTime.value=.3,fxDelayFeedback=e.createGain(),fxDelayFeedback.gain.value=.4,fxDelayDry=e.createGain(),fxDelayDry.gain.value=1,fxDelayWet=e.createGain(),fxDelayWet.gain.value=0,fxReverbConvolver=e.createConvolver(),fxReverbConvolver.buffer=createReverbIR(e,1.5),fxReverbDry=e.createGain(),fxReverbDry.gain.value=1,fxReverbWet=e.createGain(),fxReverbWet.gain.value=0,masterGain.connect(fxFilter),fxFilter.connect(fxDistortion),fxDistortion.connect(fxDelayDry),fxDistortion.connect(fxDelayNode),fxDelayNode.connect(fxDelayFeedback),fxDelayFeedback.connect(fxDelayNode),fxDelayNode.connect(fxDelayWet);const n=e.createGain();fxDelayDry.connect(n),fxDelayWet.connect(n),n.connect(fxReverbDry),n.connect(fxReverbConvolver),fxReverbConvolver.connect(fxReverbWet),fxReverbDry.connect(e.destination),fxReverbWet.connect(e.destination),fxInitialized=!0}function makeDistortionCurve(e){const n=e,o=44100,t=new Float32Array(o);for(let a=0;a<o;a++){const l=a*2/o-1;t[a]=n===0?l:(3+n)*l*20*(Math.PI/180)/(Math.PI+n*Math.abs(l))}return t}function createReverbIR(e,n){const o=e.sampleRate,t=o*n,a=e.createBuffer(2,t,o);for(let l=0;l<2;l++){const c=a.getChannelData(l);for(let s=0;s<t;s++)c[s]=(Math.random()*2-1)*Math.pow(1-s/t,2)}return a}function updateFx(){if(!fxInitialized)return;const e=document.getElementById("fxFilterOn").checked,n=document.getElementById("fxFilterType").value,o=parseInt(document.getElementById("fxFilterCutoff").value),t=parseInt(document.getElementById("fxFilterQ").value)/10;fxFilter.type=e?n:"lowpass",fxFilter.frequency.value=e?o:2e4,fxFilter.Q.value=e?t:.1,document.getElementById("fxFilterCutoffVal").textContent=o,document.getElementById("fxFilterQVal").textContent=t.toFixed(1);const a=document.getElementById("fxDistOn").checked,l=parseInt(document.getElementById("fxDistAmount").value);fxDistortion.curve=makeDistortionCurve(a?l:0),document.getElementById("fxDistAmountVal").textContent=l;const c=document.getElementById("fxDelayOn").checked,s=parseInt(document.getElementById("fxDelayTime").value),u=parseInt(document.getElementById("fxDelayFB").value),i=parseInt(document.getElementById("fxDelayMix").value);fxDelayNode.delayTime.value=s/1e3,fxDelayFeedback.gain.value=u/100,fxDelayWet.gain.value=c?i/100:0,fxDelayDry.gain.value=c?1-i/200:1,document.getElementById("fxDelayTimeVal").textContent=s+"ms",document.getElementById("fxDelayFBVal").textContent=u+"%",document.getElementById("fxDelayMixVal").textContent=i+"%";const r=document.getElementById("fxReverbOn").checked,d=parseInt(document.getElementById("fxReverbDecay").value)/10,v=parseInt(document.getElementById("fxReverbMix").value);r?(fxReverbConvolver.buffer=createReverbIR(ctx,d),fxReverbWet.gain.value=v/100,fxReverbDry.gain.value=1-v/200):(fxReverbWet.gain.value=0,fxReverbDry.gain.value=1),document.getElementById("fxReverbDecayVal").textContent=d.toFixed(1)+"s",document.getElementById("fxReverbMixVal").textContent=v+"%"}function toggleFxPanel(){document.getElementById("fxPanel").classList.toggle("open")}function setTrackVol(e,n){trackState[e].vol=n/100,applyTrackStates()}function toggleMute(e){trackState[e].muted=!trackState[e].muted,applyTrackStates()}function toggleSolo(e){trackState[e].soloed=!trackState[e].soloed,applyTrackStates()}function applyTrackStates(){const e=["drum","melody","bass"],n={drum:drumBus,melody:melodyBus,bass:bassBus},o=e.some(t=>trackState[t].soloed);e.forEach(t=>{if(!n[t])return;let a=trackState[t].vol;(trackState[t].muted||o&&!trackState[t].soloed)&&(a=0),n[t].gain.value=a;const l=t.charAt(0).toUpperCase()+t.slice(1),c=document.getElementById("mute"+l),s=document.getElementById("solo"+l);c&&c.classList.toggle("muted",trackState[t].muted),s&&s.classList.toggle("soloed",trackState[t].soloed)}),masterGain&&(masterGain.gain.value=masterVol)}function buildUI(){const e=document.getElementById("beatMarker");for(let o=0;o<16;o++){const t=document.createElement("span");t.className="beat-num"+(o%4===0?" downbeat":""),t.textContent=o+1,e.appendChild(t)}const n=document.getElementById("grid");PARTS.forEach(o=>{const t=document.createElement("div");t.className="seq-row";const a=document.createElement("div");a.className="part-label",a.textContent=o.name,a.style.color=o.color,t.appendChild(a);const l=document.createElement("input");l.type="range",l.min="0",l.max="100",l.value="80",l.className="part-vol",l.style.accentColor=o.color,l.addEventListener("input",()=>{partVolume[o.id]=l.value/100}),t.appendChild(l);const c=document.createElement("div");c.className="steps";for(let s=0;s<16;s++){const u=document.createElement("div");u.className="step",u.style.setProperty("--part-color",o.color),u.dataset.part=o.id,u.dataset.step=s,s%4===0&&s>0&&(u.style.marginLeft="4px"),u.addEventListener("click",()=>{pattern[o.id][s]=!pattern[o.id][s],u.classList.toggle("on",pattern[o.id][s]),pattern[o.id][s]&&playSound(o.id,getCtx().currentTime)}),c.appendChild(u)}t.appendChild(c),n.appendChild(t)})}function playSound(e,n){const o=getCtx(),t=partVolume[e];switch(e){case"kick":{const a=o.createOscillator(),l=o.createGain();a.type="sine",a.frequency.setValueAtTime(160,n),a.frequency.exponentialRampToValueAtTime(35,n+.12),l.gain.setValueAtTime(t*.9,n),l.gain.exponentialRampToValueAtTime(.001,n+.35),a.connect(l).connect(drumBus),a.start(n),a.stop(n+.35);const c=o.createOscillator(),s=o.createGain();c.type="square",c.frequency.setValueAtTime(1200,n),c.frequency.exponentialRampToValueAtTime(200,n+.02),s.gain.setValueAtTime(t*.15,n),s.gain.exponentialRampToValueAtTime(.001,n+.03),c.connect(s).connect(drumBus),c.start(n),c.stop(n+.03);break}case"snare":{const a=o.createOscillator(),l=o.createGain();a.type="triangle",a.frequency.value=200,l.gain.setValueAtTime(t*.4,n),l.gain.exponentialRampToValueAtTime(.001,n+.12),a.connect(l).connect(drumBus),a.start(n),a.stop(n+.12);const c=o.sampleRate*.15,s=o.createBuffer(1,c,o.sampleRate),u=s.getChannelData(0);for(let v=0;v<c;v++)u[v]=Math.random()*2-1;const i=o.createBufferSource();i.buffer=s;const r=o.createGain();r.gain.setValueAtTime(t*.45,n),r.gain.exponentialRampToValueAtTime(.001,n+.18);const d=o.createBiquadFilter();d.type="bandpass",d.frequency.value=4e3,d.Q.value=1.2,i.connect(d).connect(r).connect(drumBus),i.start(n);break}case"hihatC":{const a=o.sampleRate*.04,l=o.createBuffer(1,a,o.sampleRate),c=l.getChannelData(0);for(let r=0;r<a;r++)c[r]=(Math.random()*2-1)*(1-r/a);const s=o.createBufferSource();s.buffer=l;const u=o.createGain();u.gain.setValueAtTime(t*.3,n),u.gain.exponentialRampToValueAtTime(.001,n+.06);const i=o.createBiquadFilter();i.type="highpass",i.frequency.value=8e3,s.connect(i).connect(u).connect(drumBus),s.start(n);break}case"hihatO":{const a=o.sampleRate*.2,l=o.createBuffer(1,a,o.sampleRate),c=l.getChannelData(0);for(let r=0;r<a;r++)c[r]=Math.random()*2-1;const s=o.createBufferSource();s.buffer=l;const u=o.createGain();u.gain.setValueAtTime(t*.25,n),u.gain.exponentialRampToValueAtTime(.001,n+.25);const i=o.createBiquadFilter();i.type="highpass",i.frequency.value=7e3,s.connect(i).connect(u).connect(drumBus),s.start(n);break}case"clap":{for(let r=0;r<3;r++){const d=o.sampleRate*.015,v=o.createBuffer(1,d,o.sampleRate),y=v.getChannelData(0);for(let h=0;h<d;h++)y[h]=Math.random()*2-1;const f=o.createBufferSource();f.buffer=v;const m=o.createGain(),p=n+r*.012;m.gain.setValueAtTime(t*.35,p),m.gain.exponentialRampToValueAtTime(.001,p+.05);const g=o.createBiquadFilter();g.type="bandpass",g.frequency.value=2500,g.Q.value=2,f.connect(g).connect(m).connect(drumBus),f.start(p)}const a=o.sampleRate*.15,l=o.createBuffer(1,a,o.sampleRate),c=l.getChannelData(0);for(let r=0;r<a;r++)c[r]=Math.random()*2-1;const s=o.createBufferSource();s.buffer=l;const u=o.createGain();u.gain.setValueAtTime(t*.25,n+.035),u.gain.exponentialRampToValueAtTime(.001,n+.2);const i=o.createBiquadFilter();i.type="bandpass",i.frequency.value=2e3,s.connect(i).connect(u).connect(drumBus),s.start(n+.035);break}case"tom":{const a=o.createOscillator(),l=o.createGain();a.type="sine",a.frequency.setValueAtTime(200,n),a.frequency.exponentialRampToValueAtTime(80,n+.2),l.gain.setValueAtTime(t*.6,n),l.gain.exponentialRampToValueAtTime(.001,n+.3),a.connect(l).connect(drumBus),a.start(n),a.stop(n+.3);break}}}const SCHEDULE_AHEAD=.1,LOOK_AHEAD=25;function scheduler(){const e=getCtx();for(;nextNoteTime<e.currentTime+SCHEDULE_AHEAD;)scheduleStep(currentStep,nextNoteTime),advanceStep();timerID=setTimeout(scheduler,LOOK_AHEAD)}function scheduleStep(e,n){requestAnimationFrame(()=>highlightStep(e)),PARTS.forEach(o=>{pattern[o.id][e]&&playSound(o.id,n)})}function advanceStep(){const n=60/bpm/4;currentStep=(currentStep+1)%16,currentStep%2===1&&swing>0?nextNoteTime+=n*(1+swing/100*.66):nextNoteTime+=n}function highlightStep(e){document.querySelectorAll(".step.current").forEach(n=>n.classList.remove("current")),document.querySelectorAll(`.step[data-step="${e}"]`).forEach(n=>n.classList.add("current"))}function togglePlay(){const e=document.getElementById("playBtn");if(isPlaying)isPlaying=!1,clearTimeout(timerID),currentStep=-1,document.querySelectorAll(".step.current").forEach(n=>n.classList.remove("current")),e.textContent="\u25B6 Play",e.classList.remove("playing");else{isPlaying=!0;const n=getCtx();currentStep=0,nextNoteTime=n.currentTime+.05,e.textContent="\u23F9 Stop",e.classList.add("playing"),scheduler()}}function setBPM(e){bpm=parseInt(e),document.getElementById("bpmValue").textContent=bpm}function setSwing(e){swing=parseInt(e),document.getElementById("swingValue").textContent=swing+"%"}function setMasterVol(e){masterVol=parseInt(e)/100,masterGain&&(masterGain.gain.value=masterVol)}const PRESETS={rock:{kick:[1,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],hihatC:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],hihatO:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],clap:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],tom:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]},hiphop:{kick:[1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1],hihatC:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],hihatO:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],clap:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],tom:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},techno:{kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],snare:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],hihatC:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],hihatO:[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],clap:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],tom:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},house:{kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],snare:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],hihatC:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],hihatO:[0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0],clap:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],tom:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]},bossa:{kick:[1,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0],snare:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],hihatC:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],hihatO:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],clap:[0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0],tom:[0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0]},reggae:{kick:[1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0],snare:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],hihatC:[0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],hihatO:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],clap:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],tom:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]},dnb:{kick:[1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1],hihatC:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],hihatO:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],clap:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],tom:[0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0]},trap:{kick:[1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],hihatC:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],hihatO:[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],clap:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],tom:[0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0]},jazz:{kick:[1,0,0,1,0,0,1,0,0,0,1,0,0,0,0,0],snare:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],hihatC:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],hihatO:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],clap:[0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0],tom:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0]},latin:{kick:[1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],hihatC:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],hihatO:[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],clap:[0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0],tom:[0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0]},funk:{kick:[1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0],snare:[0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0],hihatC:[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],hihatO:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],clap:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],tom:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1]},edm:{kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0],snare:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],hihatC:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,1],hihatO:[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0],clap:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],tom:[0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1]}};function loadPreset(e){if(!e||!PRESETS[e])return;const n=PRESETS[e];PARTS.forEach(o=>{const t=n[o.id]||new Array(16).fill(0);for(let a=0;a<16;a++)pattern[o.id][a]=!!t[a]}),updateGridUI()}function clearAll(){PARTS.forEach(e=>{for(let n=0;n<16;n++)pattern[e.id][n]=!1}),updateGridUI(),document.getElementById("presetSelect").value=""}function randomize(){const e={kick:.25,snare:.15,hihatC:.4,hihatO:.1,clap:.1,tom:.08};PARTS.forEach(n=>{const o=e[n.id]||.2;for(let t=0;t<16;t++)pattern[n.id][t]=Math.random()<o}),updateGridUI(),document.getElementById("presetSelect").value=""}function updateGridUI(){PARTS.forEach(e=>{for(let n=0;n<16;n++){const o=document.querySelector(`.step[data-part="${e.id}"][data-step="${n}"]`);o&&o.classList.toggle("on",pattern[e.id][n])}})}function switchTab(e){document.querySelectorAll(".tab-btn").forEach(n=>{n.classList.toggle("active",n.dataset.tab===e)}),document.querySelectorAll(".tab-panel").forEach(n=>{n.classList.toggle("active",n.id==="tab-"+e)}),e==="melody"&&!melodyInitialized&&(initMelodyEditor(),melodyInitialized=!0),e==="bass"&&!bassInitialized&&(initBassEditor(),bassInitialized=!0)}let melodyInitialized=!1;const SCALES={chromatic:[0,1,2,3,4,5,6,7,8,9,10,11],major:[0,2,4,5,7,9,11],minor:[0,2,3,5,7,8,10],pentatonic:[0,2,4,7,9],blues:[0,3,5,6,7,10],dorian:[0,2,3,5,7,9,10]},NOTE_NAMES=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"],melodyNotes=new Array(16).fill(null),PR_ROWS=24,PR_CELL_W=48,PR_CELL_H=20;let pianoCanvas,pianoCtx;function getMelodyConfig(){return{waveform:document.getElementById("melodyWaveform").value,instrument:document.getElementById("melodyWaveform").value,scale:document.getElementById("melodyScale").value,key:parseInt(document.getElementById("melodyKey").value),octave:parseInt(document.getElementById("melodyOctave").value),adsr:{a:parseInt(document.getElementById("adsrA").value)/1e3,d:parseInt(document.getElementById("adsrD").value)/1e3,s:parseInt(document.getElementById("adsrS").value)/100,r:parseInt(document.getElementById("adsrR").value)/1e3}}}function midiToFreq(e){return 440*Math.pow(2,(e-69)/12)}function getVisibleNotes(){const n=(getMelodyConfig().octave+1)*12,o=[];for(let t=PR_ROWS-1;t>=0;t--)o.push(n+t);return o}function isInScale(e){const n=getMelodyConfig(),o=SCALES[n.scale],t=(e%12-n.key+12)%12;return o.includes(t)}function midiToName(e){return NOTE_NAMES[e%12]+Math.floor(e/12-1)}function buildPianoKeys(){const e=document.getElementById("pianoKeys");e.innerHTML="",getVisibleNotes().forEach(o=>{const t=document.createElement("div");t.className="piano-key";const a=o%12;[1,3,6,8,10].includes(a)&&t.classList.add("black-key"),isInScale(o)&&t.classList.add("scale-note"),t.textContent=midiToName(o),t.addEventListener("click",()=>{playMelodyNote(o,getCtx().currentTime,.3)}),e.appendChild(t)})}function drawPianoRoll(){if(!pianoCanvas)return;const e=16*PR_CELL_W,n=PR_ROWS*PR_CELL_H;pianoCanvas.width=e,pianoCanvas.height=n;const o=pianoCtx,t=getVisibleNotes(),a=getMelodyConfig(),l=SCALES[a.scale];for(let c=0;c<PR_ROWS;c++){const s=t[c],u=(s%12-a.key+12)%12,i=l.includes(u),r=[1,3,6,8,10].includes(s%12);for(let d=0;d<16;d++){const v=d*PR_CELL_W,y=c*PR_CELL_H;i?o.fillStyle=r?"rgba(99,102,241,0.08)":"rgba(99,102,241,0.04)":o.fillStyle=r?"rgba(255,255,255,0.03)":"rgba(255,255,255,0.01)",o.fillRect(v,y,PR_CELL_W,PR_CELL_H),o.strokeStyle=d%4===0?"rgba(255,255,255,0.12)":"rgba(255,255,255,0.05)",o.strokeRect(v,y,PR_CELL_W,PR_CELL_H)}}for(let c=0;c<16;c++){const s=melodyNotes[c];if(s==null)continue;const u=t.indexOf(s);if(u===-1)continue;const i=c*PR_CELL_W+2,r=u*PR_CELL_H+2,d=PR_CELL_W-4,v=PR_CELL_H-4;o.fillStyle="rgba(99,102,241,0.7)",o.beginPath(),o.roundRect(i,r,d,v,3),o.fill(),o.shadowColor="rgba(99,102,241,0.5)",o.shadowBlur=8,o.fill(),o.shadowBlur=0}isPlaying&&currentStep>=0&&(o.fillStyle="rgba(34,197,94,0.1)",o.fillRect(currentStep*PR_CELL_W,0,PR_CELL_W,n))}function onCanvasClick(e){const n=pianoCanvas.getBoundingClientRect(),o=pianoCanvas.width/n.width,t=pianoCanvas.height/n.height,a=(e.clientX-n.left)*o,l=(e.clientY-n.top)*t,c=Math.floor(a/PR_CELL_W),s=Math.floor(l/PR_CELL_H);if(c<0||c>=16||s<0||s>=PR_ROWS)return;const i=getVisibleNotes()[s];e.button===2||e.ctrlKey||melodyNotes[c]===i?melodyNotes[c]=null:(melodyNotes[c]=i,playMelodyNote(i,getCtx().currentTime,.2)),drawPianoRoll()}function synthesizeNote(e,n,o,t,a,l){const c=midiToFreq(o),s=.5,u=l.instrument||l.waveform,i=l.adsr.a,r=l.adsr.d,d=l.adsr.s,v=l.adsr.r,y=a+v;switch(u){case"epiano":{const f=e.createOscillator(),m=e.createGain(),p=e.createOscillator(),g=e.createGain();f.type="sine",f.frequency.setValueAtTime(c*2,t),m.gain.setValueAtTime(c*1.5,t),m.gain.exponentialRampToValueAtTime(c*.1,t+a*.8),p.type="sine",p.frequency.setValueAtTime(c,t),f.connect(m),m.connect(p.frequency),g.gain.setValueAtTime(0,t),g.gain.linearRampToValueAtTime(s*.7,t+Math.min(i,.005)),g.gain.exponentialRampToValueAtTime(s*d*.5,t+i+r),g.gain.setValueAtTime(s*d*.5,t+a),g.gain.linearRampToValueAtTime(.001,t+y),p.connect(g).connect(n),f.start(t),p.start(t),f.stop(t+y+.01),p.stop(t+y+.01);break}case"organ":{const f=[1,3,2,4,3,2,1,1,1],m=[.5,1,1.5,2,3,4,5,6,8],p=f.reduce((h,b)=>h+b,0),g=e.createGain();f.forEach((h,b)=>{const E=e.createOscillator(),x=e.createGain();E.type="sine",E.frequency.setValueAtTime(c*m[b],t),x.gain.setValueAtTime(s*(h/p)*.6,t),E.connect(x).connect(g),E.start(t),E.stop(t+y+.01)}),g.gain.setValueAtTime(0,t),g.gain.linearRampToValueAtTime(s*.6,t+.005),g.gain.setValueAtTime(s*.6,t+a),g.gain.linearRampToValueAtTime(.001,t+a+.05),g.connect(n);break}case"strings":{const f=e.createGain(),m=e.createBiquadFilter();m.type="lowpass",m.frequency.setValueAtTime(3e3,t),m.Q.value=.5,[-12,-5,0,5,12].forEach(g=>{const h=e.createOscillator();h.type="sawtooth",h.frequency.setValueAtTime(c,t),h.detune.setValueAtTime(g,t);const b=e.createGain();b.gain.value=s*.2,h.connect(b).connect(m),h.start(t),h.stop(t+y+.01)}),f.gain.setValueAtTime(0,t),f.gain.linearRampToValueAtTime(s*.7,t+Math.max(i,.08)),f.gain.linearRampToValueAtTime(s*d*.7,t+Math.max(i,.08)+r),f.gain.setValueAtTime(s*d*.7,t+a),f.gain.linearRampToValueAtTime(.001,t+y),m.connect(f).connect(n);break}case"brass":{const f=e.createOscillator(),m=e.createOscillator(),p=e.createBiquadFilter(),g=e.createGain();f.type="sawtooth",f.frequency.setValueAtTime(c,t),m.type="sawtooth",m.frequency.setValueAtTime(c*1.002,t),p.type="lowpass",p.frequency.setValueAtTime(300,t),p.frequency.linearRampToValueAtTime(c*4,t+Math.max(i,.06)),p.frequency.linearRampToValueAtTime(c*2,t+Math.max(i,.06)+r),p.Q.value=1.5;const h=e.createGain();h.gain.value=.35;const b=e.createGain();b.gain.value=.25,f.connect(h).connect(p),m.connect(b).connect(p),g.gain.setValueAtTime(0,t),g.gain.linearRampToValueAtTime(s*.7,t+Math.max(i,.03)),g.gain.linearRampToValueAtTime(s*d*.6,t+Math.max(i,.03)+r),g.gain.setValueAtTime(s*d*.6,t+a),g.gain.linearRampToValueAtTime(.001,t+y),p.connect(g).connect(n),f.start(t),m.start(t),f.stop(t+y+.01),m.stop(t+y+.01);break}case"bell":{const f=e.createOscillator(),m=e.createGain(),p=e.createOscillator(),g=e.createGain();f.type="sine",f.frequency.setValueAtTime(c*3.5,t),m.gain.setValueAtTime(c*2,t),m.gain.exponentialRampToValueAtTime(c*.01,t+a*1.5),p.type="sine",p.frequency.setValueAtTime(c,t),f.connect(m),m.connect(p.frequency),g.gain.setValueAtTime(0,t),g.gain.linearRampToValueAtTime(s*.6,t+.002),g.gain.exponentialRampToValueAtTime(s*.1,t+a*.5),g.gain.exponentialRampToValueAtTime(.001,t+y),p.connect(g).connect(n),f.start(t),p.start(t),f.stop(t+y+.01),p.stop(t+y+.01);break}default:{const f=e.createOscillator(),m=e.createGain();f.type=u,f.frequency.setValueAtTime(c,t),m.gain.setValueAtTime(0,t),m.gain.linearRampToValueAtTime(s,t+i),m.gain.linearRampToValueAtTime(s*d,t+i+r),m.gain.setValueAtTime(s*d,t+a),m.gain.linearRampToValueAtTime(.001,t+y),f.connect(m).connect(n),f.start(t),f.stop(t+y+.01);break}}}function playMelodyNote(e,n,o){const t=getCtx(),a=getMelodyConfig();synthesizeNote(t,melodyBus,e,n,o,a)}function onScaleChange(){buildPianoKeys(),drawPianoRoll()}function updateADSRDisplay(){document.getElementById("adsrAVal").textContent=document.getElementById("adsrA").value+"ms",document.getElementById("adsrDVal").textContent=document.getElementById("adsrD").value+"ms",document.getElementById("adsrSVal").textContent=document.getElementById("adsrS").value+"%",document.getElementById("adsrRVal").textContent=document.getElementById("adsrR").value+"ms"}const MELODY_PRESETS={scale_up:function(){const e=getMelodyConfig(),n=SCALES[e.scale],o=(e.octave+1)*12+e.key;for(let t=0;t<16;t++){const a=t%n.length,l=Math.floor(t/n.length);melodyNotes[t]=o+n[a]+l*12}},scale_down:function(){const e=getMelodyConfig(),n=SCALES[e.scale],o=(e.octave+2)*12+e.key;for(let t=0;t<16;t++){const a=n.length-1-t%n.length,l=Math.floor(t/n.length);melodyNotes[t]=o-(12-n[a])-l*12+12}},arpeggio:function(){const e=getMelodyConfig(),n=(e.octave+1)*12+e.key,o=[0,4,7,12,7,4,0,-5];for(let t=0;t<16;t++)melodyNotes[t]=n+o[t%o.length]},twinkle:function(){const e=getMelodyConfig(),n=(e.octave+1)*12+e.key,o=[0,0,7,7,9,9,7,null,5,5,4,4,2,2,0,null];for(let t=0;t<16;t++)melodyNotes[t]=o[t]!=null?n+o[t]:null},chord_prog:function(){const e=getMelodyConfig(),n=(e.octave+1)*12+e.key,o=[[0,4,7],[7,11,14],[9,12,16],[5,9,12]];for(let t=0;t<16;t++){const a=o[Math.floor(t/4)%4];melodyNotes[t]=n+a[t%a.length]}},synth_riff:function(){const e=getMelodyConfig(),n=(e.octave+1)*12+e.key,o=[0,0,12,7,5,5,3,null,0,0,12,10,7,5,3,0];for(let t=0;t<16;t++)melodyNotes[t]=o[t]!=null?n+o[t]:null},melody_bounce:function(){const e=getMelodyConfig(),n=SCALES[e.scale],o=(e.octave+1)*12+e.key;for(let t=0;t<16;t++)if(t%4===3)melodyNotes[t]=null;else{const a=t%2===0?t%n.length:n.length-1-t%n.length;melodyNotes[t]=o+n[a]+(t%2===0?12:0)}},octave_jump:function(){const e=getMelodyConfig(),n=(e.octave+1)*12+e.key,o=[0,12,0,12,4,16,4,16,7,19,7,19,5,17,5,null];for(let t=0;t<16;t++)melodyNotes[t]=o[t]!=null?n+o[t]:null},call_response:function(){const e=getMelodyConfig(),n=(e.octave+1)*12+e.key,o=[0,2,4,7,null,null,null,null,7,5,4,2,0,null,null,null];for(let t=0;t<16;t++)melodyNotes[t]=o[t]!=null?n+o[t]:null},trill:function(){const e=getMelodyConfig(),n=SCALES[e.scale],o=(e.octave+1)*12+e.key,t=n[0],a=n.length>1?n[1]:t+2;for(let l=0;l<16;l++)l>=12?melodyNotes[l]=l%2===0?o+n[2%n.length]:o+n[3%n.length]:melodyNotes[l]=l%2===0?o+t:o+a}};MELODY_PRESETS.pop_hook=function(){const e=getMelodyConfig(),n=(e.octave+1)*12+e.key,o=[0,4,7,12,11,7,4,0,2,5,9,12,11,9,5,2];for(let t=0;t<16;t++)melodyNotes[t]=n+o[t]},MELODY_PRESETS.funk_lick=function(){const e=getMelodyConfig(),n=(e.octave+1)*12+e.key,o=[0,null,3,5,7,null,5,3,0,null,12,10,7,5,3,null];for(let t=0;t<16;t++)melodyNotes[t]=o[t]!=null?n+o[t]:null},MELODY_PRESETS.ambient_drift=function(){const e=getMelodyConfig(),n=(e.octave+1)*12+e.key,o=[0,null,null,7,null,null,4,null,null,null,12,null,null,9,null,null];for(let t=0;t<16;t++)melodyNotes[t]=o[t]!=null?n+o[t]:null},MELODY_PRESETS.dance_hook=function(){const e=getMelodyConfig(),n=(e.octave+1)*12+e.key,o=[0,0,12,12,7,7,5,null,0,0,12,12,10,10,7,null];for(let t=0;t<16;t++)melodyNotes[t]=o[t]!=null?n+o[t]:null},MELODY_PRESETS.cinematic=function(){const e=getMelodyConfig(),n=(e.octave+1)*12+e.key,o=[0,null,7,null,12,null,11,null,9,null,7,null,4,null,0,null];for(let t=0;t<16;t++)melodyNotes[t]=o[t]!=null?n+o[t]:null};function loadMelodyPreset(e){!e||!MELODY_PRESETS[e]||(MELODY_PRESETS[e](),clampMelodyNotesToView(),drawPianoRoll())}function clampMelodyNotesToView(){const e=getVisibleNotes(),n=Math.min(...e),o=Math.max(...e);for(let t=0;t<16;t++)if(melodyNotes[t]!=null){for(;melodyNotes[t]<n;)melodyNotes[t]+=12;for(;melodyNotes[t]>o;)melodyNotes[t]-=12}}function randomizeMelody(){const e=getMelodyConfig(),n=SCALES[e.scale],o=(e.octave+1)*12+e.key;for(let t=0;t<16;t++)if(Math.random()<.7){const a=n[Math.floor(Math.random()*n.length)],l=Math.floor(Math.random()*2)*12;melodyNotes[t]=o+a+l}else melodyNotes[t]=null;clampMelodyNotesToView(),drawPianoRoll(),document.getElementById("melodyPresetSelect").value=""}function clearMelody(){for(let e=0;e<16;e++)melodyNotes[e]=null;drawPianoRoll(),document.getElementById("melodyPresetSelect").value=""}function initMelodyEditor(){pianoCanvas=document.getElementById("pianoCanvas"),pianoCtx=pianoCanvas.getContext("2d"),pianoCanvas.addEventListener("click",onCanvasClick),pianoCanvas.addEventListener("contextmenu",e=>{e.preventDefault(),onCanvasClick(e)}),document.getElementById("melodyOctave").addEventListener("change",()=>{buildPianoKeys(),clampMelodyNotesToView(),drawPianoRoll()}),buildPianoKeys(),drawPianoRoll()}let bassCanvas,bassCtx;function getBassConfig(){return{waveform:document.getElementById("bassWaveform").value,instrument:document.getElementById("bassWaveform").value,scale:document.getElementById("bassScale").value,key:parseInt(document.getElementById("bassKey").value),octave:parseInt(document.getElementById("bassOctave").value),adsr:{a:parseInt(document.getElementById("bassAdsrA").value)/1e3,d:parseInt(document.getElementById("bassAdsrD").value)/1e3,s:parseInt(document.getElementById("bassAdsrS").value)/100,r:parseInt(document.getElementById("bassAdsrR").value)/1e3}}}function getBassVisibleNotes(){const n=(getBassConfig().octave+1)*12,o=[];for(let t=PR_ROWS-1;t>=0;t--)o.push(n+t);return o}function isBassInScale(e){const n=getBassConfig(),o=SCALES[n.scale],t=(e%12-n.key+12)%12;return o.includes(t)}function buildBassPianoKeys(){const e=document.getElementById("bassPianoKeys");e.innerHTML="",getBassVisibleNotes().forEach(o=>{const t=document.createElement("div");t.className="piano-key";const a=o%12;[1,3,6,8,10].includes(a)&&t.classList.add("black-key"),isBassInScale(o)&&t.classList.add("scale-note"),t.textContent=midiToName(o),t.addEventListener("click",()=>{playBassNote(o,getCtx().currentTime,.3)}),e.appendChild(t)})}function drawBassRoll(){if(!bassCanvas)return;const e=16*PR_CELL_W,n=PR_ROWS*PR_CELL_H;bassCanvas.width=e,bassCanvas.height=n;const o=bassCtx,t=getBassVisibleNotes(),a=getBassConfig(),l=SCALES[a.scale];for(let c=0;c<PR_ROWS;c++){const s=t[c],u=(s%12-a.key+12)%12,i=l.includes(u),r=[1,3,6,8,10].includes(s%12);for(let d=0;d<16;d++){const v=d*PR_CELL_W,y=c*PR_CELL_H;i?o.fillStyle=r?"rgba(249,115,22,0.08)":"rgba(249,115,22,0.04)":o.fillStyle=r?"rgba(255,255,255,0.03)":"rgba(255,255,255,0.01)",o.fillRect(v,y,PR_CELL_W,PR_CELL_H),o.strokeStyle=d%4===0?"rgba(255,255,255,0.12)":"rgba(255,255,255,0.05)",o.strokeRect(v,y,PR_CELL_W,PR_CELL_H)}}for(let c=0;c<16;c++){const s=bassNotes[c];if(s==null)continue;const u=t.indexOf(s);if(u===-1)continue;const i=c*PR_CELL_W+2,r=u*PR_CELL_H+2;o.fillStyle="rgba(249,115,22,0.7)",o.beginPath(),o.roundRect(i,r,PR_CELL_W-4,PR_CELL_H-4,3),o.fill(),o.shadowColor="rgba(249,115,22,0.5)",o.shadowBlur=8,o.fill(),o.shadowBlur=0}isPlaying&&currentStep>=0&&(o.fillStyle="rgba(34,197,94,0.1)",o.fillRect(currentStep*PR_CELL_W,0,PR_CELL_W,n))}function onBassCanvasClick(e){const n=bassCanvas.getBoundingClientRect(),o=bassCanvas.width/n.width,t=bassCanvas.height/n.height,a=(e.clientX-n.left)*o,l=(e.clientY-n.top)*t,c=Math.floor(a/PR_CELL_W),s=Math.floor(l/PR_CELL_H);if(c<0||c>=16||s<0||s>=PR_ROWS)return;const i=getBassVisibleNotes()[s];e.button===2||e.ctrlKey||bassNotes[c]===i?bassNotes[c]=null:(bassNotes[c]=i,playBassNote(i,getCtx().currentTime,.2)),drawBassRoll()}function playBassNote(e,n,o){const t=getCtx(),a=getBassConfig();synthesizeNote(t,bassBus,e,n,o,a)}function onBassScaleChange(){buildBassPianoKeys(),drawBassRoll()}function updateBassADSRDisplay(){document.getElementById("bassAdsrAVal").textContent=document.getElementById("bassAdsrA").value+"ms",document.getElementById("bassAdsrDVal").textContent=document.getElementById("bassAdsrD").value+"ms",document.getElementById("bassAdsrSVal").textContent=document.getElementById("bassAdsrS").value+"%",document.getElementById("bassAdsrRVal").textContent=document.getElementById("bassAdsrR").value+"ms"}const BASS_PRESETS={root_octave:function(){const e=getBassConfig(),n=(e.octave+1)*12+e.key;for(let o=0;o<16;o++)bassNotes[o]=o%2===0?n:n+12},walking:function(){const e=getBassConfig(),n=SCALES[e.scale],o=(e.octave+1)*12+e.key;for(let t=0;t<16;t++)if(t%4===0)bassNotes[t]=o;else{const a=n[Math.floor(Math.random()*n.length)];bassNotes[t]=o+a}},eighth:function(){const e=getBassConfig(),n=(e.octave+1)*12+e.key,o=[0,0,7,7,0,0,5,5,0,0,7,7,0,0,12,12];for(let t=0;t<16;t++)bassNotes[t]=n+o[t%o.length]},synth_bass:function(){const e=getBassConfig(),n=(e.octave+1)*12+e.key,o=[null,0,null,0,null,0,null,0,null,0,null,0,null,0,null,0];for(let t=0;t<16;t++)bassNotes[t]=o[t]!=null?n+o[t]:null},reggae_bass:function(){const e=getBassConfig(),n=(e.octave+1)*12+e.key,o=[0,null,null,7,null,null,5,null,0,null,null,3,null,null,5,null];for(let t=0;t<16;t++)bassNotes[t]=o[t]!=null?n+o[t]:null},slap:function(){const e=getBassConfig(),n=(e.octave+1)*12+e.key,o=[0,null,12,null,0,0,null,12,null,null,0,null,12,0,null,null];for(let t=0;t<16;t++)bassNotes[t]=o[t]!=null?n+o[t]:null},arpeggiated:function(){const e=getBassConfig(),n=SCALES[e.scale],o=(e.octave+1)*12+e.key,t=[0,2,4,2];for(let a=0;a<16;a++){const l=t[a%t.length]%n.length;bassNotes[a]=o+n[l]}},pedal:function(){const e=getBassConfig(),n=(e.octave+1)*12+e.key;for(let o=0;o<16;o++)bassNotes[o]=n}};BASS_PRESETS.disco_octave=function(){const e=getBassConfig(),n=(e.octave+1)*12+e.key,o=[0,null,0,12,null,0,0,12,0,null,0,12,null,0,0,null];for(let t=0;t<16;t++)bassNotes[t]=o[t]!=null?n+o[t]:null},BASS_PRESETS.deep_sub=function(){const e=getBassConfig(),n=(e.octave+1)*12+e.key,o=[0,null,null,null,0,null,null,5,null,null,0,null,null,null,7,null];for(let t=0;t<16;t++)bassNotes[t]=o[t]!=null?n+o[t]:null},BASS_PRESETS.driving=function(){const e=getBassConfig(),n=(e.octave+1)*12+e.key,o=[0,0,0,0,5,5,5,5,7,7,7,7,5,5,3,3];for(let t=0;t<16;t++)bassNotes[t]=n+o[t]};function loadBassPreset(e){!e||!BASS_PRESETS[e]||(BASS_PRESETS[e](),clampBassNotesToView(),drawBassRoll())}function clampBassNotesToView(){const e=getBassVisibleNotes(),n=Math.min(...e),o=Math.max(...e);for(let t=0;t<16;t++)if(bassNotes[t]!=null){for(;bassNotes[t]<n;)bassNotes[t]+=12;for(;bassNotes[t]>o;)bassNotes[t]-=12}}function randomizeBass(){const e=getBassConfig(),n=SCALES[e.scale],o=(e.octave+1)*12+e.key;for(let t=0;t<16;t++)if(Math.random()<.6){const a=n[Math.floor(Math.random()*n.length)];bassNotes[t]=o+a}else bassNotes[t]=null;clampBassNotesToView(),drawBassRoll(),document.getElementById("bassPresetSelect").value=""}function clearBass(){for(let e=0;e<16;e++)bassNotes[e]=null;drawBassRoll(),document.getElementById("bassPresetSelect").value=""}function initBassEditor(){bassCanvas=document.getElementById("bassCanvas"),bassCtx=bassCanvas.getContext("2d"),bassCanvas.addEventListener("click",onBassCanvasClick),bassCanvas.addEventListener("contextmenu",e=>{e.preventDefault(),onBassCanvasClick(e)}),document.getElementById("bassOctave").addEventListener("change",()=>{buildBassPianoKeys(),clampBassNotesToView(),drawBassRoll()}),buildBassPianoKeys(),drawBassRoll()}const origScheduleStep=scheduleStep;scheduleStep=function(e,n){origScheduleStep(e,n);const o=60/bpm/4;melodyNotes[e]!=null&&playMelodyNote(melodyNotes[e],n,o*.9),bassNotes[e]!=null&&playBassNote(bassNotes[e],n,o*.9),melodyInitialized&&requestAnimationFrame(()=>drawPianoRoll()),bassInitialized&&requestAnimationFrame(()=>drawBassRoll())};async function exportWAV(){const e=document.getElementById("exportBtn"),n=document.getElementById("exportProgress"),o=document.getElementById("exportStatus");e.disabled=!0,n.classList.add("active"),o.textContent="\u30EC\u30F3\u30C0\u30EA\u30F3\u30B0\u4E2D...";try{const t=parseInt(document.getElementById("loopCount").value),l=60/bpm/4,c=16*l,u=c*t+2,i=44100,r=new OfflineAudioContext(2,Math.ceil(u*i),i),d=r.createGain();d.gain.value=masterVol;const v=r.createGain();v.gain.value=trackState.drum.muted?0:trackState.drum.vol;const y=r.createGain();y.gain.value=trackState.melody.muted?0:trackState.melody.vol;const f=r.createGain();f.gain.value=trackState.bass.muted?0:trackState.bass.vol,["drum","melody","bass"].some(T=>trackState[T].soloed)&&(trackState.drum.soloed||(v.gain.value=0),trackState.melody.soloed||(y.gain.value=0),trackState.bass.soloed||(f.gain.value=0)),v.connect(d),y.connect(d),f.connect(d);const p=r.createBiquadFilter(),g=document.getElementById("fxFilterOn").checked;p.type=g?document.getElementById("fxFilterType").value:"lowpass",p.frequency.value=g?parseInt(document.getElementById("fxFilterCutoff").value):2e4,p.Q.value=g?parseInt(document.getElementById("fxFilterQ").value)/10:.1;const h=r.createWaveShaper(),b=document.getElementById("fxDistOn").checked;h.curve=makeDistortionCurve(b?parseInt(document.getElementById("fxDistAmount").value):0),h.oversample="4x";const E=r.createDelay(2),x=document.getElementById("fxDelayOn").checked;E.delayTime.value=parseInt(document.getElementById("fxDelayTime").value)/1e3;const A=r.createGain();A.gain.value=parseInt(document.getElementById("fxDelayFB").value)/100;const O=parseInt(document.getElementById("fxDelayMix").value),k=r.createGain();k.gain.value=x?1-O/200:1;const V=r.createGain();V.gain.value=x?O/100:0;const R=r.createConvolver(),M=document.getElementById("fxReverbOn").checked,F=parseInt(document.getElementById("fxReverbDecay").value)/10,q=parseInt(document.getElementById("fxReverbMix").value);R.buffer=createReverbIR(r,F);const C=r.createGain();C.gain.value=M?1-q/200:1;const w=r.createGain();w.gain.value=M?q/100:0,d.connect(p),p.connect(h),h.connect(k),h.connect(E),E.connect(A),A.connect(E),E.connect(V);const I=r.createGain();k.connect(I),V.connect(I),I.connect(C),I.connect(R),R.connect(w),C.connect(r.destination),w.connect(r.destination),o.textContent="\u30CE\u30FC\u30C8\u3092\u30B9\u30B1\u30B8\u30E5\u30FC\u30EB\u4E2D...",await new Promise(T=>setTimeout(T,10));for(let T=0;T<t;T++){let B=T*c;for(let S=0;S<16;S++)PARTS.forEach(D=>{pattern[D.id][S]&&scheduleOfflineDrum(r,v,D.id,B,partVolume[D.id])}),melodyNotes[S]!=null&&scheduleOfflineSynth(r,y,melodyNotes[S],B,l*.9,getMelodyConfig()),bassNotes[S]!=null&&scheduleOfflineSynth(r,f,bassNotes[S],B,l*.9,getBassConfig()),(S+1)%2===1&&swing>0?B+=l*(1+swing/100*.66):B+=l}o.textContent="\u30AA\u30FC\u30C7\u30A3\u30AA\u30EC\u30F3\u30C0\u30EA\u30F3\u30B0\u4E2D...",await new Promise(T=>setTimeout(T,10));const L=await r.startRendering();o.textContent="WAV\u30A8\u30F3\u30B3\u30FC\u30C9\u4E2D...",await new Promise(T=>setTimeout(T,10));const N=encodeWAV(L),G=URL.createObjectURL(N),P=document.createElement("a");P.href=G,P.download=`wbm_${bpm}bpm_${t}loop.wav`,P.click(),URL.revokeObjectURL(G),o.textContent="\u5B8C\u4E86\uFF01",showToast("\u2705 WAV\u30D5\u30A1\u30A4\u30EB\u3092\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9\u3057\u307E\u3057\u305F"),setTimeout(()=>n.classList.remove("active"),1500)}catch(t){console.error("Export failed:",t),o.textContent="\u30A8\u30E9\u30FC: "+t.message,showToast("\u274C \u30A8\u30AF\u30B9\u30DD\u30FC\u30C8\u306B\u5931\u6557\u3057\u307E\u3057\u305F"),setTimeout(()=>n.classList.remove("active"),3e3)}finally{e.disabled=!1}}function scheduleOfflineDrum(e,n,o,t,a){switch(o){case"kick":{const l=e.createOscillator(),c=e.createGain();l.type="sine",l.frequency.setValueAtTime(160,t),l.frequency.exponentialRampToValueAtTime(35,t+.12),c.gain.setValueAtTime(a*.9,t),c.gain.exponentialRampToValueAtTime(.001,t+.35),l.connect(c).connect(n),l.start(t),l.stop(t+.35);const s=e.createOscillator(),u=e.createGain();s.type="square",s.frequency.setValueAtTime(1200,t),s.frequency.exponentialRampToValueAtTime(200,t+.02),u.gain.setValueAtTime(a*.15,t),u.gain.exponentialRampToValueAtTime(.001,t+.03),s.connect(u).connect(n),s.start(t),s.stop(t+.03);break}case"snare":{const l=e.createOscillator(),c=e.createGain();l.type="triangle",l.frequency.value=200,c.gain.setValueAtTime(a*.4,t),c.gain.exponentialRampToValueAtTime(.001,t+.12),l.connect(c).connect(n),l.start(t),l.stop(t+.12);const s=e.sampleRate*.15,u=e.createBuffer(1,s,e.sampleRate),i=u.getChannelData(0);for(let y=0;y<s;y++)i[y]=Math.random()*2-1;const r=e.createBufferSource();r.buffer=u;const d=e.createGain();d.gain.setValueAtTime(a*.45,t),d.gain.exponentialRampToValueAtTime(.001,t+.18);const v=e.createBiquadFilter();v.type="bandpass",v.frequency.value=4e3,v.Q.value=1.2,r.connect(v).connect(d).connect(n),r.start(t);break}case"hihatC":{const l=e.sampleRate*.04,c=e.createBuffer(1,l,e.sampleRate),s=c.getChannelData(0);for(let d=0;d<l;d++)s[d]=(Math.random()*2-1)*(1-d/l);const u=e.createBufferSource();u.buffer=c;const i=e.createGain();i.gain.setValueAtTime(a*.3,t),i.gain.exponentialRampToValueAtTime(.001,t+.06);const r=e.createBiquadFilter();r.type="highpass",r.frequency.value=8e3,u.connect(r).connect(i).connect(n),u.start(t);break}case"hihatO":{const l=e.sampleRate*.2,c=e.createBuffer(1,l,e.sampleRate),s=c.getChannelData(0);for(let d=0;d<l;d++)s[d]=Math.random()*2-1;const u=e.createBufferSource();u.buffer=c;const i=e.createGain();i.gain.setValueAtTime(a*.25,t),i.gain.exponentialRampToValueAtTime(.001,t+.25);const r=e.createBiquadFilter();r.type="highpass",r.frequency.value=7e3,u.connect(r).connect(i).connect(n),u.start(t);break}case"clap":{for(let d=0;d<3;d++){const v=e.sampleRate*.015,y=e.createBuffer(1,v,e.sampleRate),f=y.getChannelData(0);for(let b=0;b<v;b++)f[b]=Math.random()*2-1;const m=e.createBufferSource();m.buffer=y;const p=e.createGain(),g=t+d*.012;p.gain.setValueAtTime(a*.35,g),p.gain.exponentialRampToValueAtTime(.001,g+.05);const h=e.createBiquadFilter();h.type="bandpass",h.frequency.value=2500,h.Q.value=2,m.connect(h).connect(p).connect(n),m.start(g)}const l=e.sampleRate*.15,c=e.createBuffer(1,l,e.sampleRate),s=c.getChannelData(0);for(let d=0;d<l;d++)s[d]=Math.random()*2-1;const u=e.createBufferSource();u.buffer=c;const i=e.createGain();i.gain.setValueAtTime(a*.25,t+.035),i.gain.exponentialRampToValueAtTime(.001,t+.2);const r=e.createBiquadFilter();r.type="bandpass",r.frequency.value=2e3,u.connect(r).connect(i).connect(n),u.start(t+.035);break}case"tom":{const l=e.createOscillator(),c=e.createGain();l.type="sine",l.frequency.setValueAtTime(200,t),l.frequency.exponentialRampToValueAtTime(80,t+.2),c.gain.setValueAtTime(a*.6,t),c.gain.exponentialRampToValueAtTime(.001,t+.3),l.connect(c).connect(n),l.start(t),l.stop(t+.3);break}}}function scheduleOfflineSynth(e,n,o,t,a,l){synthesizeNote(e,n,o,t,a,l)}function encodeWAV(e){const n=e.numberOfChannels,o=e.sampleRate,t=16,a=n*2,l=e.length,c=l*a,s=44+c,u=new ArrayBuffer(s),i=new DataView(u);function r(y,f){for(let m=0;m<f.length;m++)i.setUint8(y+m,f.charCodeAt(m))}r(0,"RIFF"),i.setUint32(4,s-8,!0),r(8,"WAVE"),r(12,"fmt "),i.setUint32(16,16,!0),i.setUint16(20,1,!0),i.setUint16(22,n,!0),i.setUint32(24,o,!0),i.setUint32(28,o*a,!0),i.setUint16(32,a,!0),i.setUint16(34,t,!0),r(36,"data"),i.setUint32(40,c,!0);const d=[];for(let y=0;y<n;y++)d.push(e.getChannelData(y));let v=44;for(let y=0;y<l;y++)for(let f=0;f<n;f++){let m=Math.max(-1,Math.min(1,d[f][y]));i.setInt16(v,m<0?m*32768:m*32767,!0),v+=2}return new Blob([u],{type:"audio/wav"})}const STORAGE_PREFIX="wbm_project_";function getFullProjectData(){const e={version:"0.4.0",bpm,swing,masterVol:Math.round(masterVol*100),drum:{pattern:{},partVolume:{},trackVol:Math.round(trackState.drum.vol*100),muted:trackState.drum.muted},melody:{notes:[...melodyNotes],waveform:document.getElementById("melodyWaveform")?.value||"square",scale:document.getElementById("melodyScale")?.value||"major",key:parseInt(document.getElementById("melodyKey")?.value||"0"),octave:parseInt(document.getElementById("melodyOctave")?.value||"3"),adsr:{a:parseInt(document.getElementById("adsrA")?.value||"10"),d:parseInt(document.getElementById("adsrD")?.value||"100"),s:parseInt(document.getElementById("adsrS")?.value||"60"),r:parseInt(document.getElementById("adsrR")?.value||"200")},trackVol:Math.round(trackState.melody.vol*100),muted:trackState.melody.muted},bass:{notes:[...bassNotes],waveform:document.getElementById("bassWaveform")?.value||"sawtooth",scale:document.getElementById("bassScale")?.value||"major",key:parseInt(document.getElementById("bassKey")?.value||"0"),octave:parseInt(document.getElementById("bassOctave")?.value||"2"),adsr:{a:parseInt(document.getElementById("bassAdsrA")?.value||"5"),d:parseInt(document.getElementById("bassAdsrD")?.value||"80"),s:parseInt(document.getElementById("bassAdsrS")?.value||"70"),r:parseInt(document.getElementById("bassAdsrR")?.value||"150")},trackVol:Math.round(trackState.bass.vol*100),muted:trackState.bass.muted},fx:{filter:{on:document.getElementById("fxFilterOn")?.checked||!1,type:document.getElementById("fxFilterType")?.value||"lowpass",cutoff:parseInt(document.getElementById("fxFilterCutoff")?.value||"8000"),q:parseInt(document.getElementById("fxFilterQ")?.value||"10")},distortion:{on:document.getElementById("fxDistOn")?.checked||!1,amount:parseInt(document.getElementById("fxDistAmount")?.value||"30")},delay:{on:document.getElementById("fxDelayOn")?.checked||!1,time:parseInt(document.getElementById("fxDelayTime")?.value||"300"),feedback:parseInt(document.getElementById("fxDelayFB")?.value||"40"),mix:parseInt(document.getElementById("fxDelayMix")?.value||"30")},reverb:{on:document.getElementById("fxReverbOn")?.checked||!1,decay:parseInt(document.getElementById("fxReverbDecay")?.value||"15"),mix:parseInt(document.getElementById("fxReverbMix")?.value||"25")}}};return PARTS.forEach(n=>{e.drum.pattern[n.id]=[...pattern[n.id]],e.drum.partVolume[n.id]=partVolume[n.id]}),e}function saveProject(){const e=document.getElementById("saveSlot").value,n=getFullProjectData();n.savedAt=new Date().toISOString();try{localStorage.setItem(STORAGE_PREFIX+e,JSON.stringify(n)),localStorage.setItem(STORAGE_PREFIX+"lastSlot",e),showToast(`\u{1F4BE} Slot ${parseInt(e)+1} \u306B\u4FDD\u5B58\u3057\u307E\u3057\u305F`)}catch(o){showToast("\u274C \u4FDD\u5B58\u306B\u5931\u6557: "+o.message)}}function loadProjectFromSlot(){const e=document.getElementById("saveSlot").value,n=localStorage.getItem(STORAGE_PREFIX+e);if(!n){showToast(`\u26A0 Slot ${parseInt(e)+1} \u306B\u30C7\u30FC\u30BF\u304C\u3042\u308A\u307E\u305B\u3093`);return}try{applyProjectData(JSON.parse(n)),showToast(`\u{1F4C2} Slot ${parseInt(e)+1} \u3092\u30ED\u30FC\u30C9\u3057\u307E\u3057\u305F`)}catch(o){showToast("\u274C \u30ED\u30FC\u30C9\u306B\u5931\u6557: "+o.message)}}function exportProjectJSON(){const e=new Blob([JSON.stringify(getFullProjectData(),null,2)],{type:"application/json"}),n=URL.createObjectURL(e),o=document.createElement("a");o.href=n,o.download=`wbm_project_${bpm}bpm.json`,o.click(),URL.revokeObjectURL(n),showToast("\u{1F4E4} \u30D7\u30ED\u30B8\u30A7\u30AF\u30C8JSON\u3092\u30A8\u30AF\u30B9\u30DD\u30FC\u30C8\u3057\u307E\u3057\u305F")}function importProjectJSON(e){const n=e.target.files[0];if(!n)return;const o=new FileReader;o.onload=t=>{try{applyProjectData(JSON.parse(t.target.result)),showToast("\u{1F4E5} \u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u3092\u30A4\u30F3\u30DD\u30FC\u30C8\u3057\u307E\u3057\u305F")}catch{showToast("\u274C JSON\u306E\u8AAD\u307F\u8FBC\u307F\u306B\u5931\u6557")}e.target.value=""},o.readAsText(n)}function applyProjectData(e){if(e.bpm&&(bpm=e.bpm,document.getElementById("bpmSlider").value=bpm,document.getElementById("bpmValue").textContent=bpm),e.swing!=null&&(swing=e.swing,document.getElementById("swingSlider").value=swing,document.getElementById("swingValue").textContent=swing+"%"),e.masterVol!=null&&(masterVol=e.masterVol/100,document.getElementById("masterVolSlider").value=e.masterVol,masterGain&&(masterGain.gain.value=masterVol)),e.drum&&(e.drum.pattern&&(PARTS.forEach(n=>{if(e.drum.pattern[n.id])for(let o=0;o<16;o++)pattern[n.id][o]=!!e.drum.pattern[n.id][o]}),updateGridUI()),e.drum.partVolume&&PARTS.forEach(n=>{e.drum.partVolume[n.id]!=null&&(partVolume[n.id]=e.drum.partVolume[n.id])}),e.drum.trackVol!=null&&(trackState.drum.vol=e.drum.trackVol/100,document.getElementById("drumVolSlider").value=e.drum.trackVol),e.drum.muted!=null&&(trackState.drum.muted=e.drum.muted)),e.melody){if(e.melody.notes)for(let o=0;o<16;o++)melodyNotes[o]=e.melody.notes[o]!=null?e.melody.notes[o]:null;const n=(o,t)=>{const a=document.getElementById(o);a&&t!=null&&(a.value=t)};n("melodyWaveform",e.melody.waveform),n("melodyScale",e.melody.scale),n("melodyKey",e.melody.key),n("melodyOctave",e.melody.octave),e.melody.adsr&&(n("adsrA",e.melody.adsr.a),n("adsrD",e.melody.adsr.d),n("adsrS",e.melody.adsr.s),n("adsrR",e.melody.adsr.r),updateADSRDisplay()),e.melody.trackVol!=null&&(trackState.melody.vol=e.melody.trackVol/100,document.getElementById("melodyVolSlider").value=e.melody.trackVol),e.melody.muted!=null&&(trackState.melody.muted=e.melody.muted),melodyInitialized&&(buildPianoKeys(),drawPianoRoll())}if(e.bass){if(e.bass.notes)for(let o=0;o<16;o++)bassNotes[o]=e.bass.notes[o]!=null?e.bass.notes[o]:null;const n=(o,t)=>{const a=document.getElementById(o);a&&t!=null&&(a.value=t)};n("bassWaveform",e.bass.waveform),n("bassScale",e.bass.scale),n("bassKey",e.bass.key),n("bassOctave",e.bass.octave),e.bass.adsr&&(n("bassAdsrA",e.bass.adsr.a),n("bassAdsrD",e.bass.adsr.d),n("bassAdsrS",e.bass.adsr.s),n("bassAdsrR",e.bass.adsr.r),updateBassADSRDisplay()),e.bass.trackVol!=null&&(trackState.bass.vol=e.bass.trackVol/100,document.getElementById("bassVolSlider").value=e.bass.trackVol),e.bass.muted!=null&&(trackState.bass.muted=e.bass.muted),bassInitialized&&(buildBassPianoKeys(),drawBassRoll())}if(e.fx){const n=(t,a)=>{const l=document.getElementById(t);l&&(l.checked=a)},o=(t,a)=>{const l=document.getElementById(t);l&&a!=null&&(l.value=a)};e.fx.filter&&(n("fxFilterOn",e.fx.filter.on),o("fxFilterType",e.fx.filter.type),o("fxFilterCutoff",e.fx.filter.cutoff),o("fxFilterQ",e.fx.filter.q)),e.fx.distortion&&(n("fxDistOn",e.fx.distortion.on),o("fxDistAmount",e.fx.distortion.amount)),e.fx.delay&&(n("fxDelayOn",e.fx.delay.on),o("fxDelayTime",e.fx.delay.time),o("fxDelayFB",e.fx.delay.feedback),o("fxDelayMix",e.fx.delay.mix)),e.fx.reverb&&(n("fxReverbOn",e.fx.reverb.on),o("fxReverbDecay",e.fx.reverb.decay),o("fxReverbMix",e.fx.reverb.mix)),fxInitialized&&updateFx()}applyTrackStates()}function showToast(e){const n=document.getElementById("saveToast");n.textContent=e,n.classList.add("show"),setTimeout(()=>n.classList.remove("show"),2500)}function autoRestore(){const e=localStorage.getItem(STORAGE_PREFIX+"lastSlot");if(e==null)return;const n=localStorage.getItem(STORAGE_PREFIX+e);if(n)try{applyProjectData(JSON.parse(n)),document.getElementById("saveSlot").value=e}catch{}}buildUI(),autoRestore();
+// ========================================
+// 定数・状態
+// ========================================
+const STEPS = 16;
+const PARTS = [
+    { id: 'kick', name: 'Kick', color: 'var(--clr-kick)' },
+    { id: 'snare', name: 'Snare', color: 'var(--clr-snare)' },
+    { id: 'hihatC', name: 'HH Close', color: 'var(--clr-hihat-c)' },
+    { id: 'hihatO', name: 'HH Open', color: 'var(--clr-hihat-o)' },
+    { id: 'clap', name: 'Clap', color: 'var(--clr-clap)' },
+    { id: 'tom', name: 'Tom', color: 'var(--clr-tom)' },
+];
+
+// パターンデータ: parts[partId][stepIndex] = true/false
+const pattern = {};
+PARTS.forEach(p => { pattern[p.id] = new Array(STEPS).fill(false); });
+
+// 各パートの音量 (0-1)
+const partVolume = {};
+PARTS.forEach(p => { partVolume[p.id] = 0.8; });
+
+let bpm = 120;
+let swing = 0;       // 0-100
+let masterVol = 0.8;
+let isPlaying = false;
+let currentStep = -1;
+let nextNoteTime = 0;
+let timerID = null;
+
+// トラック音量・状態
+const trackState = {
+    drum: { vol: 0.8, muted: false, soloed: false },
+    melody: { vol: 0.8, muted: false, soloed: false },
+    bass: { vol: 0.8, muted: false, soloed: false },
+};
+
+// ベースパターンデータ
+const bassNotes = new Array(STEPS).fill(null);
+let bassInitialized = false;
+
+// Web Audio & Bus ノード
+let ctx;
+let masterGain, drumBus, melodyBus, bassBus;
+// エフェクトノード
+let fxFilter, fxDistortion, fxDelayNode, fxDelayFeedback, fxDelayDry, fxDelayWet;
+let fxReverbConvolver, fxReverbDry, fxReverbWet;
+let fxInitialized = false;
+
+function getCtx() {
+    if (!ctx) {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        initAudioRouting();
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+}
+
+// オーディオルーティング初期化
+function initAudioRouting() {
+    const c = ctx;
+
+    // マスターゲイン
+    masterGain = c.createGain();
+    masterGain.gain.value = masterVol;
+
+    // トラックバス
+    drumBus = c.createGain();
+    drumBus.gain.value = trackState.drum.vol;
+    melodyBus = c.createGain();
+    melodyBus.gain.value = trackState.melody.vol;
+    bassBus = c.createGain();
+    bassBus.gain.value = trackState.bass.vol;
+
+    // Bus → masterGain
+    drumBus.connect(masterGain);
+    melodyBus.connect(masterGain);
+    bassBus.connect(masterGain);
+
+    // エフェクトチェーン構築
+    buildFxChain();
+}
+
+// エフェクトチェーン: masterGain → Filter → Distortion → Delay → Reverb → destination
+function buildFxChain() {
+    const c = ctx;
+
+    // Filter
+    fxFilter = c.createBiquadFilter();
+    fxFilter.type = 'lowpass';
+    fxFilter.frequency.value = 8000;
+    fxFilter.Q.value = 1.0;
+
+    // Distortion
+    fxDistortion = c.createWaveShaper();
+    fxDistortion.curve = makeDistortionCurve(0);
+    fxDistortion.oversample = '4x';
+
+    // Delay (dry/wet パラレル)
+    fxDelayNode = c.createDelay(2.0);
+    fxDelayNode.delayTime.value = 0.3;
+    fxDelayFeedback = c.createGain();
+    fxDelayFeedback.gain.value = 0.4;
+    fxDelayDry = c.createGain();
+    fxDelayDry.gain.value = 1.0;
+    fxDelayWet = c.createGain();
+    fxDelayWet.gain.value = 0.0; // OFF by default
+
+    // Reverb (dry/wet パラレル)
+    fxReverbConvolver = c.createConvolver();
+    fxReverbConvolver.buffer = createReverbIR(c, 1.5);
+    fxReverbDry = c.createGain();
+    fxReverbDry.gain.value = 1.0;
+    fxReverbWet = c.createGain();
+    fxReverbWet.gain.value = 0.0; // OFF by default
+
+    // --- 接続 ---
+    // masterGain → Filter → Distortion → (Delay split) → (Reverb split) → destination
+    // Filter OFF = バイパス (高カットオフで音が変わらない)
+    masterGain.connect(fxFilter);
+    fxFilter.connect(fxDistortion);
+
+    // Delay: dry + wet (feedback loop)
+    fxDistortion.connect(fxDelayDry);
+    fxDistortion.connect(fxDelayNode);
+    fxDelayNode.connect(fxDelayFeedback);
+    fxDelayFeedback.connect(fxDelayNode); // feedback loop
+    fxDelayNode.connect(fxDelayWet);
+
+    // Delay out → Reverb merger (GainNode)
+    const delayMerge = c.createGain();
+    fxDelayDry.connect(delayMerge);
+    fxDelayWet.connect(delayMerge);
+
+    // Reverb: dry + wet
+    delayMerge.connect(fxReverbDry);
+    delayMerge.connect(fxReverbConvolver);
+    fxReverbConvolver.connect(fxReverbWet);
+
+    fxReverbDry.connect(c.destination);
+    fxReverbWet.connect(c.destination);
+
+    fxInitialized = true;
+}
+
+// ディストーションカーブ生成
+function makeDistortionCurve(amount) {
+    const k = amount;
+    const samples = 44100;
+    const curve = new Float32Array(samples);
+    for (let i = 0; i < samples; i++) {
+        const x = (i * 2) / samples - 1;
+        curve[i] = k === 0 ? x : ((3 + k) * x * 20 * (Math.PI / 180)) / (Math.PI + k * Math.abs(x));
+    }
+    return curve;
+}
+
+// リバーブIR生成（指数減衰ノイズ）
+function createReverbIR(c, decay) {
+    const sampleRate = c.sampleRate;
+    const length = sampleRate * decay;
+    const buf = c.createBuffer(2, length, sampleRate);
+    for (let ch = 0; ch < 2; ch++) {
+        const data = buf.getChannelData(ch);
+        for (let i = 0; i < length; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, 2);
+        }
+    }
+    return buf;
+}
+
+// エフェクトパラメータ更新
+function updateFx() {
+    if (!fxInitialized) return;
+
+    // Filter
+    const filterOn = document.getElementById('fxFilterOn').checked;
+    const filterType = document.getElementById('fxFilterType').value;
+    const cutoff = parseInt(document.getElementById('fxFilterCutoff').value);
+    const q = parseInt(document.getElementById('fxFilterQ').value) / 10;
+    fxFilter.type = filterOn ? filterType : 'lowpass';
+    fxFilter.frequency.value = filterOn ? cutoff : 20000;
+    fxFilter.Q.value = filterOn ? q : 0.1;
+    document.getElementById('fxFilterCutoffVal').textContent = cutoff;
+    document.getElementById('fxFilterQVal').textContent = q.toFixed(1);
+
+    // Distortion
+    const distOn = document.getElementById('fxDistOn').checked;
+    const distAmount = parseInt(document.getElementById('fxDistAmount').value);
+    fxDistortion.curve = makeDistortionCurve(distOn ? distAmount : 0);
+    document.getElementById('fxDistAmountVal').textContent = distAmount;
+
+    // Delay
+    const delayOn = document.getElementById('fxDelayOn').checked;
+    const delayTime = parseInt(document.getElementById('fxDelayTime').value);
+    const delayFB = parseInt(document.getElementById('fxDelayFB').value);
+    const delayMix = parseInt(document.getElementById('fxDelayMix').value);
+    fxDelayNode.delayTime.value = delayTime / 1000;
+    fxDelayFeedback.gain.value = delayFB / 100;
+    fxDelayWet.gain.value = delayOn ? delayMix / 100 : 0;
+    fxDelayDry.gain.value = delayOn ? 1 - (delayMix / 200) : 1;
+    document.getElementById('fxDelayTimeVal').textContent = delayTime + 'ms';
+    document.getElementById('fxDelayFBVal').textContent = delayFB + '%';
+    document.getElementById('fxDelayMixVal').textContent = delayMix + '%';
+
+    // Reverb
+    const reverbOn = document.getElementById('fxReverbOn').checked;
+    const reverbDecay = parseInt(document.getElementById('fxReverbDecay').value) / 10;
+    const reverbMix = parseInt(document.getElementById('fxReverbMix').value);
+    if (reverbOn) {
+        fxReverbConvolver.buffer = createReverbIR(ctx, reverbDecay);
+        fxReverbWet.gain.value = reverbMix / 100;
+        fxReverbDry.gain.value = 1 - (reverbMix / 200);
+    } else {
+        fxReverbWet.gain.value = 0;
+        fxReverbDry.gain.value = 1;
+    }
+    document.getElementById('fxReverbDecayVal').textContent = reverbDecay.toFixed(1) + 's';
+    document.getElementById('fxReverbMixVal').textContent = reverbMix + '%';
+}
+
+// エフェクトパネル折りたたみ
+function toggleFxPanel() {
+    document.getElementById('fxPanel').classList.toggle('open');
+}
+
+// トラック音量設定
+function setTrackVol(track, val) {
+    trackState[track].vol = val / 100;
+    applyTrackStates();
+}
+
+// ミュート/ソロ
+function toggleMute(track) {
+    trackState[track].muted = !trackState[track].muted;
+    applyTrackStates();
+}
+
+function toggleSolo(track) {
+    trackState[track].soloed = !trackState[track].soloed;
+    applyTrackStates();
+}
+
+function applyTrackStates() {
+    const tracks = ['drum', 'melody', 'bass'];
+    const buses = { drum: drumBus, melody: melodyBus, bass: bassBus };
+    const anySolo = tracks.some(t => trackState[t].soloed);
+
+    tracks.forEach(t => {
+        if (!buses[t]) return;
+        let gain = trackState[t].vol;
+        if (trackState[t].muted) gain = 0;
+        else if (anySolo && !trackState[t].soloed) gain = 0;
+        buses[t].gain.value = gain;
+
+        // UI更新
+        const cap = t.charAt(0).toUpperCase() + t.slice(1);
+        const muteBtn = document.getElementById('mute' + cap);
+        const soloBtn = document.getElementById('solo' + cap);
+        if (muteBtn) muteBtn.classList.toggle('muted', trackState[t].muted);
+        if (soloBtn) soloBtn.classList.toggle('soloed', trackState[t].soloed);
+    });
+
+    if (masterGain) masterGain.gain.value = masterVol;
+}
+
+// ========================================
+// UI生成
+// ========================================
+function buildUI() {
+    // ビートマーカー
+    const marker = document.getElementById('beatMarker');
+    for (let i = 0; i < STEPS; i++) {
+        const el = document.createElement('span');
+        el.className = 'beat-num' + (i % 4 === 0 ? ' downbeat' : '');
+        el.textContent = i + 1;
+        marker.appendChild(el);
+    }
+
+    // グリッド
+    const grid = document.getElementById('grid');
+    PARTS.forEach((part) => {
+        const row = document.createElement('div');
+        row.className = 'seq-row';
+
+        // パート名
+        const label = document.createElement('div');
+        label.className = 'part-label';
+        label.textContent = part.name;
+        label.style.color = part.color;
+        row.appendChild(label);
+
+        // パート音量
+        const vol = document.createElement('input');
+        vol.type = 'range';
+        vol.min = '0';
+        vol.max = '100';
+        vol.value = '80';
+        vol.className = 'part-vol';
+        vol.style.accentColor = part.color;
+        vol.addEventListener('input', () => {
+            partVolume[part.id] = vol.value / 100;
+        });
+        row.appendChild(vol);
+
+        // ステップ
+        const stepsDiv = document.createElement('div');
+        stepsDiv.className = 'steps';
+        for (let i = 0; i < STEPS; i++) {
+            const step = document.createElement('div');
+            step.className = 'step';
+            step.style.setProperty('--part-color', part.color);
+            step.dataset.part = part.id;
+            step.dataset.step = i;
+
+            // 4拍区切りの視覚分離
+            if (i % 4 === 0 && i > 0) {
+                step.style.marginLeft = '4px';
+            }
+
+            step.addEventListener('click', () => {
+                pattern[part.id][i] = !pattern[part.id][i];
+                step.classList.toggle('on', pattern[part.id][i]);
+                // クリック時にプレビュー音を鳴らす
+                if (pattern[part.id][i]) {
+                    playSound(part.id, getCtx().currentTime);
+                }
+            });
+
+            stepsDiv.appendChild(step);
+        }
+        row.appendChild(stepsDiv);
+        grid.appendChild(row);
+    });
+}
+
+// ========================================
+// ドラム合成
+// ========================================
+function playSound(partId, time) {
+    const c = getCtx();
+    const vol = partVolume[partId];
+
+    switch (partId) {
+        case 'kick': {
+            const osc = c.createOscillator();
+            const gain = c.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(160, time);
+            osc.frequency.exponentialRampToValueAtTime(35, time + 0.12);
+            gain.gain.setValueAtTime(vol * 0.9, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.35);
+            osc.connect(gain).connect(drumBus);
+            osc.start(time);
+            osc.stop(time + 0.35);
+
+            // クリック成分
+            const click = c.createOscillator();
+            const cGain = c.createGain();
+            click.type = 'square';
+            click.frequency.setValueAtTime(1200, time);
+            click.frequency.exponentialRampToValueAtTime(200, time + 0.02);
+            cGain.gain.setValueAtTime(vol * 0.15, time);
+            cGain.gain.exponentialRampToValueAtTime(0.001, time + 0.03);
+            click.connect(cGain).connect(drumBus);
+            click.start(time);
+            click.stop(time + 0.03);
+            break;
+        }
+        case 'snare': {
+            // トーン
+            const osc = c.createOscillator();
+            const oGain = c.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = 200;
+            oGain.gain.setValueAtTime(vol * 0.4, time);
+            oGain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+            osc.connect(oGain).connect(drumBus);
+            osc.start(time);
+            osc.stop(time + 0.12);
+
+            // ノイズ
+            const bufLen = c.sampleRate * 0.15;
+            const buf = c.createBuffer(1, bufLen, c.sampleRate);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+            const noise = c.createBufferSource();
+            noise.buffer = buf;
+            const nGain = c.createGain();
+            nGain.gain.setValueAtTime(vol * 0.45, time);
+            nGain.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
+            const filter = c.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 4000;
+            filter.Q.value = 1.2;
+            noise.connect(filter).connect(nGain).connect(drumBus);
+            noise.start(time);
+            break;
+        }
+        case 'hihatC': {
+            const bufLen = c.sampleRate * 0.04;
+            const buf = c.createBuffer(1, bufLen, c.sampleRate);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufLen);
+            const noise = c.createBufferSource();
+            noise.buffer = buf;
+            const gain = c.createGain();
+            gain.gain.setValueAtTime(vol * 0.3, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+            const hp = c.createBiquadFilter();
+            hp.type = 'highpass';
+            hp.frequency.value = 8000;
+            noise.connect(hp).connect(gain).connect(drumBus);
+            noise.start(time);
+            break;
+        }
+        case 'hihatO': {
+            const bufLen = c.sampleRate * 0.2;
+            const buf = c.createBuffer(1, bufLen, c.sampleRate);
+            const data = buf.getChannelData(0);
+            for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+            const noise = c.createBufferSource();
+            noise.buffer = buf;
+            const gain = c.createGain();
+            gain.gain.setValueAtTime(vol * 0.25, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.25);
+            const hp = c.createBiquadFilter();
+            hp.type = 'highpass';
+            hp.frequency.value = 7000;
+            noise.connect(hp).connect(gain).connect(drumBus);
+            noise.start(time);
+            break;
+        }
+        case 'clap': {
+            // 3連打ノイズ
+            for (let j = 0; j < 3; j++) {
+                const bufLen = c.sampleRate * 0.015;
+                const buf = c.createBuffer(1, bufLen, c.sampleRate);
+                const data = buf.getChannelData(0);
+                for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+                const noise = c.createBufferSource();
+                noise.buffer = buf;
+                const gain = c.createGain();
+                const t = time + j * 0.012;
+                gain.gain.setValueAtTime(vol * 0.35, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+                const bp = c.createBiquadFilter();
+                bp.type = 'bandpass';
+                bp.frequency.value = 2500;
+                bp.Q.value = 2;
+                noise.connect(bp).connect(gain).connect(drumBus);
+                noise.start(t);
+            }
+            // テール
+            const tailBufLen = c.sampleRate * 0.15;
+            const tailBuf = c.createBuffer(1, tailBufLen, c.sampleRate);
+            const tailData = tailBuf.getChannelData(0);
+            for (let i = 0; i < tailBufLen; i++) tailData[i] = Math.random() * 2 - 1;
+            const tailNoise = c.createBufferSource();
+            tailNoise.buffer = tailBuf;
+            const tailGain = c.createGain();
+            tailGain.gain.setValueAtTime(vol * 0.25, time + 0.035);
+            tailGain.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+            const tailBp = c.createBiquadFilter();
+            tailBp.type = 'bandpass';
+            tailBp.frequency.value = 2000;
+            tailNoise.connect(tailBp).connect(tailGain).connect(drumBus);
+            tailNoise.start(time + 0.035);
+            break;
+        }
+        case 'tom': {
+            const osc = c.createOscillator();
+            const gain = c.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(200, time);
+            osc.frequency.exponentialRampToValueAtTime(80, time + 0.2);
+            gain.gain.setValueAtTime(vol * 0.6, time);
+            gain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
+            osc.connect(gain).connect(drumBus);
+            osc.start(time);
+            osc.stop(time + 0.3);
+            break;
+        }
+    }
+}
+
+// ========================================
+// スケジューラー
+// ========================================
+const SCHEDULE_AHEAD = 0.1;  // 先読み秒数
+const LOOK_AHEAD = 25;      // タイマー間隔 ms
+
+function scheduler() {
+    const c = getCtx();
+    while (nextNoteTime < c.currentTime + SCHEDULE_AHEAD) {
+        scheduleStep(currentStep, nextNoteTime);
+        advanceStep();
+    }
+    timerID = setTimeout(scheduler, LOOK_AHEAD);
+}
+
+function scheduleStep(step, time) {
+    // UIハイライト更新
+    requestAnimationFrame(() => highlightStep(step));
+
+    // 各パートの音を鳴らす
+    PARTS.forEach(part => {
+        if (pattern[part.id][step]) {
+            playSound(part.id, time);
+        }
+    });
+}
+
+function advanceStep() {
+    const secondsPerBeat = 60.0 / bpm;
+    const sixteenthNote = secondsPerBeat / 4;
+
+    currentStep = (currentStep + 1) % STEPS;
+
+    // スウィング: 偶数ステップ（裏拍）のタイミングを遅らせる
+    if (currentStep % 2 === 1 && swing > 0) {
+        nextNoteTime += sixteenthNote * (1 + swing / 100 * 0.66);
+    } else {
+        nextNoteTime += sixteenthNote;
+    }
+}
+
+function highlightStep(step) {
+    document.querySelectorAll('.step.current').forEach(el => el.classList.remove('current'));
+    document.querySelectorAll(`.step[data-step="${step}"]`).forEach(el => el.classList.add('current'));
+}
+
+// ========================================
+// 再生制御
+// ========================================
+function togglePlay() {
+    const btn = document.getElementById('playBtn');
+    if (isPlaying) {
+        // 停止
+        isPlaying = false;
+        clearTimeout(timerID);
+        currentStep = -1;
+        document.querySelectorAll('.step.current').forEach(el => el.classList.remove('current'));
+        btn.textContent = '▶ Play';
+        btn.classList.remove('playing');
+    } else {
+        // 再生開始
+        isPlaying = true;
+        const c = getCtx();
+        currentStep = 0;
+        nextNoteTime = c.currentTime + 0.05;
+        btn.textContent = '⏹ Stop';
+        btn.classList.add('playing');
+        scheduler();
+    }
+}
+
+function setBPM(val) {
+    bpm = parseInt(val);
+    document.getElementById('bpmValue').textContent = bpm;
+}
+
+function setSwing(val) {
+    swing = parseInt(val);
+    document.getElementById('swingValue').textContent = swing + '%';
+}
+
+function setMasterVol(val) {
+    masterVol = parseInt(val) / 100;
+    if (masterGain) masterGain.gain.value = masterVol;
+}
+
+// ========================================
+// プリセット
+// ========================================
+const PRESETS = {
+    rock: {
+        kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0],
+        snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        hihatC: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+        hihatO: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        clap: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        tom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+    },
+    hiphop: {
+        kick: [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+        hihatC: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        hihatO: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        clap: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        tom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
+    techno: {
+        kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+        snare: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        hihatC: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+        hihatO: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+        clap: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        tom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    },
+    house: {
+        kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+        snare: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        hihatC: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+        hihatO: [0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+        clap: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        tom: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    },
+    bossa: {
+        kick: [1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        snare: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        hihatC: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+        hihatO: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        clap: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+        tom: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    },
+    reggae: {
+        kick: [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        snare: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        hihatC: [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
+        hihatO: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        clap: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        tom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+    },
+    dnb: {
+        kick: [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1],
+        hihatC: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        hihatO: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        clap: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        tom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    },
+    trap: {
+        kick: [1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0],
+        snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        hihatC: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        hihatO: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+        clap: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        tom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+    },
+    jazz: {
+        kick: [1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        snare: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        hihatC: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+        hihatO: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        clap: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+        tom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+    },
+    latin: {
+        kick: [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0],
+        snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        hihatC: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+        hihatO: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+        clap: [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
+        tom: [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+    },
+    funk: {
+        kick: [1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0],
+        snare: [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+        hihatC: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        hihatO: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        clap: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        tom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+    },
+    edm: {
+        kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0],
+        snare: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        hihatC: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 1],
+        hihatO: [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
+        clap: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+        tom: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+    },
+};
+
+function loadPreset(name) {
+    if (!name || !PRESETS[name]) return;
+    const preset = PRESETS[name];
+    PARTS.forEach(part => {
+        const data = preset[part.id] || new Array(STEPS).fill(0);
+        for (let i = 0; i < STEPS; i++) {
+            pattern[part.id][i] = !!data[i];
+        }
+    });
+    updateGridUI();
+}
+
+function clearAll() {
+    PARTS.forEach(part => {
+        for (let i = 0; i < STEPS; i++) pattern[part.id][i] = false;
+    });
+    updateGridUI();
+    document.getElementById('presetSelect').value = '';
+}
+
+function randomize() {
+    // パートごとに密度を変える
+    const densities = { kick: 0.25, snare: 0.15, hihatC: 0.4, hihatO: 0.1, clap: 0.1, tom: 0.08 };
+    PARTS.forEach(part => {
+        const density = densities[part.id] || 0.2;
+        for (let i = 0; i < STEPS; i++) {
+            pattern[part.id][i] = Math.random() < density;
+        }
+    });
+    updateGridUI();
+    document.getElementById('presetSelect').value = '';
+}
+
+function updateGridUI() {
+    PARTS.forEach(part => {
+        for (let i = 0; i < STEPS; i++) {
+            const el = document.querySelector(`.step[data-part="${part.id}"][data-step="${i}"]`);
+            if (el) el.classList.toggle('on', pattern[part.id][i]);
+        }
+    });
+}
+
+// ========================================
+// タブ切り替え
+// ========================================
+function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabId);
+    });
+    document.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === 'tab-' + tabId);
+    });
+    if (tabId === 'melody' && !melodyInitialized) {
+        initMelodyEditor();
+        melodyInitialized = true;
+    }
+    if (tabId === 'bass' && !bassInitialized) {
+        initBassEditor();
+        bassInitialized = true;
+    }
+}
+
+// ========================================
+// メロディエディタ
+// ========================================
+let melodyInitialized = false;
+
+// スケール定義（半音のオフセット）
+const SCALES = {
+    chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    major: [0, 2, 4, 5, 7, 9, 11],
+    minor: [0, 2, 3, 5, 7, 8, 10],
+    pentatonic: [0, 2, 4, 7, 9],
+    blues: [0, 3, 5, 6, 7, 10],
+    dorian: [0, 2, 3, 5, 7, 9, 10],
+};
+
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+// メロディパターン: melodyNotes[step] = MIDIノート番号 or null
+const melodyNotes = new Array(STEPS).fill(null);
+
+// ピアノロール設定
+const PR_ROWS = 24;        // 2オクターブ分
+const PR_CELL_W = 48;      // ステップの幅 px
+const PR_CELL_H = 20;      // 音程行の高さ px
+
+let pianoCanvas, pianoCtx;
+
+function getMelodyConfig() {
+    return {
+        waveform: document.getElementById('melodyWaveform').value,
+        instrument: document.getElementById('melodyWaveform').value,
+        scale: document.getElementById('melodyScale').value,
+        key: parseInt(document.getElementById('melodyKey').value),
+        octave: parseInt(document.getElementById('melodyOctave').value),
+        adsr: {
+            a: parseInt(document.getElementById('adsrA').value) / 1000,
+            d: parseInt(document.getElementById('adsrD').value) / 1000,
+            s: parseInt(document.getElementById('adsrS').value) / 100,
+            r: parseInt(document.getElementById('adsrR').value) / 1000,
+        },
+    };
+}
+
+// MIDIノート番号 → 周波数
+function midiToFreq(midi) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+// 現在のオクターブ範囲のMIDIノートリスト（高い音が上）
+function getVisibleNotes() {
+    const cfg = getMelodyConfig();
+    const baseNote = (cfg.octave + 1) * 12; // C(oct+1) がベース
+    const notes = [];
+    for (let i = PR_ROWS - 1; i >= 0; i--) {
+        notes.push(baseNote + i);
+    }
+    return notes;
+}
+
+// 指定MIDIノートがスケール内か判定
+function isInScale(midi) {
+    const cfg = getMelodyConfig();
+    const scaleNotes = SCALES[cfg.scale];
+    const noteClass = ((midi % 12) - cfg.key + 12) % 12;
+    return scaleNotes.includes(noteClass);
+}
+
+// MIDIノート番号 → 表示名
+function midiToName(midi) {
+    return NOTE_NAMES[midi % 12] + Math.floor(midi / 12 - 1);
+}
+
+// ピアノキー列の生成
+function buildPianoKeys() {
+    const container = document.getElementById('pianoKeys');
+    container.innerHTML = '';
+    const notes = getVisibleNotes();
+    notes.forEach(midi => {
+        const el = document.createElement('div');
+        el.className = 'piano-key';
+        const noteClass = midi % 12;
+        if ([1, 3, 6, 8, 10].includes(noteClass)) {
+            el.classList.add('black-key');
+        }
+        if (isInScale(midi)) {
+            el.classList.add('scale-note');
+        }
+        el.textContent = midiToName(midi);
+        // クリックで音のプレビュー
+        el.addEventListener('click', () => {
+            playMelodyNote(midi, getCtx().currentTime, 0.3);
+        });
+        container.appendChild(el);
+    });
+}
+
+// ピアノロール Canvas の描画
+function drawPianoRoll() {
+    if (!pianoCanvas) return;
+    const w = STEPS * PR_CELL_W;
+    const h = PR_ROWS * PR_CELL_H;
+    pianoCanvas.width = w;
+    pianoCanvas.height = h;
+    const c = pianoCtx;
+
+    const notes = getVisibleNotes();
+    const cfg = getMelodyConfig();
+    const scaleNotes = SCALES[cfg.scale];
+
+    // 背景
+    for (let row = 0; row < PR_ROWS; row++) {
+        const midi = notes[row];
+        const noteClass = ((midi % 12) - cfg.key + 12) % 12;
+        const inScale = scaleNotes.includes(noteClass);
+        const isBlack = [1, 3, 6, 8, 10].includes(midi % 12);
+
+        for (let col = 0; col < STEPS; col++) {
+            const x = col * PR_CELL_W;
+            const y = row * PR_CELL_H;
+
+            // 背景色
+            if (inScale) {
+                c.fillStyle = isBlack ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.04)';
+            } else {
+                c.fillStyle = isBlack ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)';
+            }
+            c.fillRect(x, y, PR_CELL_W, PR_CELL_H);
+
+            // グリッド線
+            c.strokeStyle = col % 4 === 0 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.05)';
+            c.strokeRect(x, y, PR_CELL_W, PR_CELL_H);
+        }
+    }
+
+    // ノートの描画
+    for (let col = 0; col < STEPS; col++) {
+        const midi = melodyNotes[col];
+        if (midi == null) continue;
+        const rowIdx = notes.indexOf(midi);
+        if (rowIdx === -1) continue;
+
+        const x = col * PR_CELL_W + 2;
+        const y = rowIdx * PR_CELL_H + 2;
+        const w2 = PR_CELL_W - 4;
+        const h2 = PR_CELL_H - 4;
+
+        // ノートブロック
+        c.fillStyle = 'rgba(99,102,241,0.7)';
+        c.beginPath();
+        c.roundRect(x, y, w2, h2, 3);
+        c.fill();
+
+        // グロー
+        c.shadowColor = 'rgba(99,102,241,0.5)';
+        c.shadowBlur = 8;
+        c.fill();
+        c.shadowBlur = 0;
+    }
+
+    // 再生位置ハイライト
+    if (isPlaying && currentStep >= 0) {
+        c.fillStyle = 'rgba(34,197,94,0.1)';
+        c.fillRect(currentStep * PR_CELL_W, 0, PR_CELL_W, h);
+    }
+}
+
+// Canvas クリックイベント
+function onCanvasClick(e) {
+    const rect = pianoCanvas.getBoundingClientRect();
+    const scaleX = pianoCanvas.width / rect.width;
+    const scaleY = pianoCanvas.height / rect.height;
+    const mx = (e.clientX - rect.left) * scaleX;
+    const my = (e.clientY - rect.top) * scaleY;
+
+    const col = Math.floor(mx / PR_CELL_W);
+    const row = Math.floor(my / PR_CELL_H);
+
+    if (col < 0 || col >= STEPS || row < 0 || row >= PR_ROWS) return;
+
+    const notes = getVisibleNotes();
+    const midi = notes[row];
+
+    if (e.button === 2 || e.ctrlKey) {
+        // 右クリック or Ctrl+クリック: 削除
+        melodyNotes[col] = null;
+    } else {
+        // 左クリック: 配置 (同じ位置なら削除)
+        if (melodyNotes[col] === midi) {
+            melodyNotes[col] = null;
+        } else {
+            melodyNotes[col] = midi;
+            playMelodyNote(midi, getCtx().currentTime, 0.2);
+        }
+    }
+    drawPianoRoll();
+}
+
+// ========================================
+// 楽器合成エンジン
+// ========================================
+
+// 楽器を判定して適切な合成方式で音を再生
+function synthesizeNote(c, bus, midi, time, duration, cfg) {
+    const freq = midiToFreq(midi);
+    const vol = 0.5;
+    const inst = cfg.instrument || cfg.waveform;
+    const a = cfg.adsr.a;
+    const d = cfg.adsr.d;
+    const s = cfg.adsr.s;
+    const r = cfg.adsr.r;
+    const totalDur = duration + r;
+
+    switch (inst) {
+        case 'epiano': {
+            // FM合成エレクトリックピアノ（Rhodes風）
+            const modulator = c.createOscillator();
+            const modGain = c.createGain();
+            const carrier = c.createOscillator();
+            const gainNode = c.createGain();
+
+            // モジュレーター: キャリア周波数の2倍
+            modulator.type = 'sine';
+            modulator.frequency.setValueAtTime(freq * 2, time);
+            modGain.gain.setValueAtTime(freq * 1.5, time);
+            modGain.gain.exponentialRampToValueAtTime(freq * 0.1, time + duration * 0.8);
+
+            // キャリア
+            carrier.type = 'sine';
+            carrier.frequency.setValueAtTime(freq, time);
+
+            // FM接続: modulator → modGain → carrier.frequency
+            modulator.connect(modGain);
+            modGain.connect(carrier.frequency);
+
+            // ADSR
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol * 0.7, time + Math.min(a, 0.005));
+            gainNode.gain.exponentialRampToValueAtTime(vol * s * 0.5, time + a + d);
+            gainNode.gain.setValueAtTime(vol * s * 0.5, time + duration);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
+
+            carrier.connect(gainNode).connect(bus);
+            modulator.start(time);
+            carrier.start(time);
+            modulator.stop(time + totalDur + 0.01);
+            carrier.stop(time + totalDur + 0.01);
+            break;
+        }
+        case 'organ': {
+            // 加算合成オルガン（Hammond風 ドローバー9本）
+            const drawbars = [1, 3, 2, 4, 3, 2, 1, 1, 1]; // 相対レベル
+            const harmonics = [0.5, 1, 1.5, 2, 3, 4, 5, 6, 8]; // 倍音比
+            const totalLevel = drawbars.reduce((a, b) => a + b, 0);
+            const gainNode = c.createGain();
+
+            drawbars.forEach((level, i) => {
+                const osc = c.createOscillator();
+                const oscGain = c.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq * harmonics[i], time);
+                oscGain.gain.setValueAtTime(vol * (level / totalLevel) * 0.6, time);
+                osc.connect(oscGain).connect(gainNode);
+                osc.start(time);
+                osc.stop(time + totalDur + 0.01);
+            });
+
+            // オルガンはサステイン強め、即座に立ち上がり
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol * 0.6, time + 0.005);
+            gainNode.gain.setValueAtTime(vol * 0.6, time + duration);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + duration + 0.05);
+
+            gainNode.connect(bus);
+            break;
+        }
+        case 'strings': {
+            // デチューンSawtooth（ストリングスアンサンブル風）
+            const gainNode = c.createGain();
+            const lpf = c.createBiquadFilter();
+            lpf.type = 'lowpass';
+            lpf.frequency.setValueAtTime(3000, time);
+            lpf.Q.value = 0.5;
+
+            const detunes = [-12, -5, 0, 5, 12]; // セント単位
+            detunes.forEach(dt => {
+                const osc = c.createOscillator();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(freq, time);
+                osc.detune.setValueAtTime(dt, time);
+                const oscGain = c.createGain();
+                oscGain.gain.value = vol * 0.2;
+                osc.connect(oscGain).connect(lpf);
+                osc.start(time);
+                osc.stop(time + totalDur + 0.01);
+            });
+
+            // ストリングスはゆっくり立ち上がり
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol * 0.7, time + Math.max(a, 0.08));
+            gainNode.gain.linearRampToValueAtTime(vol * s * 0.7, time + Math.max(a, 0.08) + d);
+            gainNode.gain.setValueAtTime(vol * s * 0.7, time + duration);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
+
+            lpf.connect(gainNode).connect(bus);
+            break;
+        }
+        case 'brass': {
+            // Sawtooth + バンドパスフィルタ（ブラスセクション風）
+            const osc = c.createOscillator();
+            const osc2 = c.createOscillator();
+            const bpf = c.createBiquadFilter();
+            const gainNode = c.createGain();
+
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(freq, time);
+            osc2.type = 'sawtooth';
+            osc2.frequency.setValueAtTime(freq * 1.002, time); // わずかにデチューン
+
+            bpf.type = 'lowpass';
+            // フィルタースウィープ（ブラスのアタック感）
+            bpf.frequency.setValueAtTime(300, time);
+            bpf.frequency.linearRampToValueAtTime(freq * 4, time + Math.max(a, 0.06));
+            bpf.frequency.linearRampToValueAtTime(freq * 2, time + Math.max(a, 0.06) + d);
+            bpf.Q.value = 1.5;
+
+            const oscGain1 = c.createGain();
+            oscGain1.gain.value = 0.35;
+            const oscGain2 = c.createGain();
+            oscGain2.gain.value = 0.25;
+
+            osc.connect(oscGain1).connect(bpf);
+            osc2.connect(oscGain2).connect(bpf);
+
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol * 0.7, time + Math.max(a, 0.03));
+            gainNode.gain.linearRampToValueAtTime(vol * s * 0.6, time + Math.max(a, 0.03) + d);
+            gainNode.gain.setValueAtTime(vol * s * 0.6, time + duration);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
+
+            bpf.connect(gainNode).connect(bus);
+            osc.start(time);
+            osc2.start(time);
+            osc.stop(time + totalDur + 0.01);
+            osc2.stop(time + totalDur + 0.01);
+            break;
+        }
+        case 'bell': {
+            // FM合成ベル/マリンバ（非整数比でメタリックな音色）
+            const modulator = c.createOscillator();
+            const modGain = c.createGain();
+            const carrier = c.createOscillator();
+            const gainNode = c.createGain();
+
+            // 非整数比 = メタリック/ベルっぽい音
+            modulator.type = 'sine';
+            modulator.frequency.setValueAtTime(freq * 3.5, time);
+            modGain.gain.setValueAtTime(freq * 2.0, time);
+            modGain.gain.exponentialRampToValueAtTime(freq * 0.01, time + duration * 1.5);
+
+            carrier.type = 'sine';
+            carrier.frequency.setValueAtTime(freq, time);
+
+            modulator.connect(modGain);
+            modGain.connect(carrier.frequency);
+
+            // ベルは瞬時アタック + 長い減衰
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol * 0.6, time + 0.002);
+            gainNode.gain.exponentialRampToValueAtTime(vol * 0.1, time + duration * 0.5);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, time + totalDur);
+
+            carrier.connect(gainNode).connect(bus);
+            modulator.start(time);
+            carrier.start(time);
+            modulator.stop(time + totalDur + 0.01);
+            carrier.stop(time + totalDur + 0.01);
+            break;
+        }
+        default: {
+            // 基本波形（sine/square/sawtooth/triangle）
+            const osc = c.createOscillator();
+            const gainNode = c.createGain();
+            osc.type = inst;
+            osc.frequency.setValueAtTime(freq, time);
+
+            gainNode.gain.setValueAtTime(0, time);
+            gainNode.gain.linearRampToValueAtTime(vol, time + a);
+            gainNode.gain.linearRampToValueAtTime(vol * s, time + a + d);
+            gainNode.gain.setValueAtTime(vol * s, time + duration);
+            gainNode.gain.linearRampToValueAtTime(0.001, time + totalDur);
+
+            osc.connect(gainNode).connect(bus);
+            osc.start(time);
+            osc.stop(time + totalDur + 0.01);
+            break;
+        }
+    }
+}
+
+// メロディ音の合成
+function playMelodyNote(midi, time, duration) {
+    const c = getCtx();
+    const cfg = getMelodyConfig();
+    synthesizeNote(c, melodyBus, midi, time, duration, cfg);
+}
+
+// スケール変更ハンドラ
+function onScaleChange() {
+    buildPianoKeys();
+    drawPianoRoll();
+}
+
+// ADSR表示更新
+function updateADSRDisplay() {
+    document.getElementById('adsrAVal').textContent = document.getElementById('adsrA').value + 'ms';
+    document.getElementById('adsrDVal').textContent = document.getElementById('adsrD').value + 'ms';
+    document.getElementById('adsrSVal').textContent = document.getElementById('adsrS').value + '%';
+    document.getElementById('adsrRVal').textContent = document.getElementById('adsrR').value + 'ms';
+}
+
+// メロディプリセット
+const MELODY_PRESETS = {
+    scale_up: function () {
+        const cfg = getMelodyConfig();
+        const scaleNotes = SCALES[cfg.scale];
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        for (let i = 0; i < STEPS; i++) {
+            const idx = i % scaleNotes.length;
+            const oct = Math.floor(i / scaleNotes.length);
+            melodyNotes[i] = base + scaleNotes[idx] + oct * 12;
+        }
+    },
+    scale_down: function () {
+        const cfg = getMelodyConfig();
+        const scaleNotes = SCALES[cfg.scale];
+        const base = (cfg.octave + 2) * 12 + cfg.key;
+        for (let i = 0; i < STEPS; i++) {
+            const idx = (scaleNotes.length - 1) - (i % scaleNotes.length);
+            const oct = Math.floor(i / scaleNotes.length);
+            melodyNotes[i] = base - (12 - scaleNotes[idx]) - oct * 12 + 12;
+        }
+    },
+    arpeggio: function () {
+        const cfg = getMelodyConfig();
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        // 1-3-5-8パターン
+        const degrees = [0, 4, 7, 12, 7, 4, 0, -5];
+        for (let i = 0; i < STEPS; i++) {
+            melodyNotes[i] = base + degrees[i % degrees.length];
+        }
+    },
+    twinkle: function () {
+        const cfg = getMelodyConfig();
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        // C C G G A A G - F F E E D D C -
+        const melody = [0, 0, 7, 7, 9, 9, 7, null, 5, 5, 4, 4, 2, 2, 0, null];
+        for (let i = 0; i < STEPS; i++) {
+            melodyNotes[i] = melody[i] != null ? base + melody[i] : null;
+        }
+    },
+    chord_prog: function () {
+        const cfg = getMelodyConfig();
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        const chords = [[0, 4, 7], [7, 11, 14], [9, 12, 16], [5, 9, 12]];
+        for (let i = 0; i < STEPS; i++) {
+            const chord = chords[Math.floor(i / 4) % 4];
+            melodyNotes[i] = base + chord[i % chord.length];
+        }
+    },
+    synth_riff: function () {
+        const cfg = getMelodyConfig();
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        const riff = [0, 0, 12, 7, 5, 5, 3, null, 0, 0, 12, 10, 7, 5, 3, 0];
+        for (let i = 0; i < STEPS; i++) {
+            melodyNotes[i] = riff[i] != null ? base + riff[i] : null;
+        }
+    },
+    melody_bounce: function () {
+        const cfg = getMelodyConfig();
+        const scaleNotes = SCALES[cfg.scale];
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        for (let i = 0; i < STEPS; i++) {
+            if (i % 4 === 3) {
+                melodyNotes[i] = null;
+            } else {
+                const idx = (i % 2 === 0) ? i % scaleNotes.length : (scaleNotes.length - 1 - (i % scaleNotes.length));
+                melodyNotes[i] = base + scaleNotes[idx] + (i % 2 === 0 ? 12 : 0);
+            }
+        }
+    },
+    octave_jump: function () {
+        const cfg = getMelodyConfig();
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        const pat = [0, 12, 0, 12, 4, 16, 4, 16, 7, 19, 7, 19, 5, 17, 5, null];
+        for (let i = 0; i < STEPS; i++) {
+            melodyNotes[i] = pat[i] != null ? base + pat[i] : null;
+        }
+    },
+    call_response: function () {
+        const cfg = getMelodyConfig();
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        const melody = [0, 2, 4, 7, null, null, null, null, 7, 5, 4, 2, 0, null, null, null];
+        for (let i = 0; i < STEPS; i++) {
+            melodyNotes[i] = melody[i] != null ? base + melody[i] : null;
+        }
+    },
+    trill: function () {
+        const cfg = getMelodyConfig();
+        const scaleNotes = SCALES[cfg.scale];
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        const root = scaleNotes[0];
+        const second = scaleNotes.length > 1 ? scaleNotes[1] : root + 2;
+        for (let i = 0; i < STEPS; i++) {
+            if (i >= 12) {
+                melodyNotes[i] = (i % 2 === 0) ? base + scaleNotes[2 % scaleNotes.length] : base + scaleNotes[3 % scaleNotes.length];
+            } else {
+                melodyNotes[i] = (i % 2 === 0) ? base + root : base + second;
+            }
+        }
+    },
+};
+
+// 追加メロディプリセット
+MELODY_PRESETS.pop_hook = function () {
+    const cfg = getMelodyConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const melody = [0, 4, 7, 12, 11, 7, 4, 0, 2, 5, 9, 12, 11, 9, 5, 2];
+    for (let i = 0; i < STEPS; i++) melodyNotes[i] = base + melody[i];
+};
+MELODY_PRESETS.funk_lick = function () {
+    const cfg = getMelodyConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const melody = [0, null, 3, 5, 7, null, 5, 3, 0, null, 12, 10, 7, 5, 3, null];
+    for (let i = 0; i < STEPS; i++) melodyNotes[i] = melody[i] != null ? base + melody[i] : null;
+};
+MELODY_PRESETS.ambient_drift = function () {
+    const cfg = getMelodyConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const melody = [0, null, null, 7, null, null, 4, null, null, null, 12, null, null, 9, null, null];
+    for (let i = 0; i < STEPS; i++) melodyNotes[i] = melody[i] != null ? base + melody[i] : null;
+};
+MELODY_PRESETS.dance_hook = function () {
+    const cfg = getMelodyConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const melody = [0, 0, 12, 12, 7, 7, 5, null, 0, 0, 12, 12, 10, 10, 7, null];
+    for (let i = 0; i < STEPS; i++) melodyNotes[i] = melody[i] != null ? base + melody[i] : null;
+};
+MELODY_PRESETS.cinematic = function () {
+    const cfg = getMelodyConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const melody = [0, null, 7, null, 12, null, 11, null, 9, null, 7, null, 4, null, 0, null];
+    for (let i = 0; i < STEPS; i++) melodyNotes[i] = melody[i] != null ? base + melody[i] : null;
+};
+
+function loadMelodyPreset(name) {
+    if (!name || !MELODY_PRESETS[name]) return;
+    MELODY_PRESETS[name]();
+    // ノートが表示範囲に入るよう調整
+    clampMelodyNotesToView();
+    drawPianoRoll();
+}
+
+function clampMelodyNotesToView() {
+    const notes = getVisibleNotes();
+    const minNote = Math.min(...notes);
+    const maxNote = Math.max(...notes);
+    for (let i = 0; i < STEPS; i++) {
+        if (melodyNotes[i] != null) {
+            while (melodyNotes[i] < minNote) melodyNotes[i] += 12;
+            while (melodyNotes[i] > maxNote) melodyNotes[i] -= 12;
+        }
+    }
+}
+
+function randomizeMelody() {
+    const cfg = getMelodyConfig();
+    const scaleNotes = SCALES[cfg.scale];
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    for (let i = 0; i < STEPS; i++) {
+        if (Math.random() < 0.7) {
+            const deg = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
+            const octShift = Math.floor(Math.random() * 2) * 12;
+            melodyNotes[i] = base + deg + octShift;
+        } else {
+            melodyNotes[i] = null; // 休符
+        }
+    }
+    clampMelodyNotesToView();
+    drawPianoRoll();
+    document.getElementById('melodyPresetSelect').value = '';
+}
+
+function clearMelody() {
+    for (let i = 0; i < STEPS; i++) melodyNotes[i] = null;
+    drawPianoRoll();
+    document.getElementById('melodyPresetSelect').value = '';
+}
+
+// メロディエディタ初期化
+function initMelodyEditor() {
+    pianoCanvas = document.getElementById('pianoCanvas');
+    pianoCtx = pianoCanvas.getContext('2d');
+
+    pianoCanvas.addEventListener('click', onCanvasClick);
+    pianoCanvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        onCanvasClick(e);
+    });
+
+    // オクターブ変更時のリビルド
+    document.getElementById('melodyOctave').addEventListener('change', () => {
+        buildPianoKeys();
+        clampMelodyNotesToView();
+        drawPianoRoll();
+    });
+
+    buildPianoKeys();
+    drawPianoRoll();
+}
+
+// ========================================
+// ベースエディタ
+// ========================================
+let bassCanvas, bassCtx;
+
+function getBassConfig() {
+    return {
+        waveform: document.getElementById('bassWaveform').value,
+        instrument: document.getElementById('bassWaveform').value,
+        scale: document.getElementById('bassScale').value,
+        key: parseInt(document.getElementById('bassKey').value),
+        octave: parseInt(document.getElementById('bassOctave').value),
+        adsr: {
+            a: parseInt(document.getElementById('bassAdsrA').value) / 1000,
+            d: parseInt(document.getElementById('bassAdsrD').value) / 1000,
+            s: parseInt(document.getElementById('bassAdsrS').value) / 100,
+            r: parseInt(document.getElementById('bassAdsrR').value) / 1000,
+        },
+    };
+}
+
+function getBassVisibleNotes() {
+    const cfg = getBassConfig();
+    const baseNote = (cfg.octave + 1) * 12;
+    const notes = [];
+    for (let i = PR_ROWS - 1; i >= 0; i--) {
+        notes.push(baseNote + i);
+    }
+    return notes;
+}
+
+function isBassInScale(midi) {
+    const cfg = getBassConfig();
+    const scaleNotes = SCALES[cfg.scale];
+    const noteClass = ((midi % 12) - cfg.key + 12) % 12;
+    return scaleNotes.includes(noteClass);
+}
+
+function buildBassPianoKeys() {
+    const container = document.getElementById('bassPianoKeys');
+    container.innerHTML = '';
+    const notes = getBassVisibleNotes();
+    notes.forEach(midi => {
+        const el = document.createElement('div');
+        el.className = 'piano-key';
+        const noteClass = midi % 12;
+        if ([1, 3, 6, 8, 10].includes(noteClass)) el.classList.add('black-key');
+        if (isBassInScale(midi)) el.classList.add('scale-note');
+        el.textContent = midiToName(midi);
+        el.addEventListener('click', () => {
+            playBassNote(midi, getCtx().currentTime, 0.3);
+        });
+        container.appendChild(el);
+    });
+}
+
+function drawBassRoll() {
+    if (!bassCanvas) return;
+    const w = STEPS * PR_CELL_W;
+    const h = PR_ROWS * PR_CELL_H;
+    bassCanvas.width = w;
+    bassCanvas.height = h;
+    const c = bassCtx;
+    const notes = getBassVisibleNotes();
+    const cfg = getBassConfig();
+    const scaleNotes = SCALES[cfg.scale];
+
+    for (let row = 0; row < PR_ROWS; row++) {
+        const midi = notes[row];
+        const noteClass = ((midi % 12) - cfg.key + 12) % 12;
+        const inScale = scaleNotes.includes(noteClass);
+        const isBlack = [1, 3, 6, 8, 10].includes(midi % 12);
+        for (let col = 0; col < STEPS; col++) {
+            const x = col * PR_CELL_W;
+            const y = row * PR_CELL_H;
+            if (inScale) {
+                c.fillStyle = isBlack ? 'rgba(249,115,22,0.08)' : 'rgba(249,115,22,0.04)';
+            } else {
+                c.fillStyle = isBlack ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.01)';
+            }
+            c.fillRect(x, y, PR_CELL_W, PR_CELL_H);
+            c.strokeStyle = col % 4 === 0 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.05)';
+            c.strokeRect(x, y, PR_CELL_W, PR_CELL_H);
+        }
+    }
+
+    for (let col = 0; col < STEPS; col++) {
+        const midi = bassNotes[col];
+        if (midi == null) continue;
+        const rowIdx = notes.indexOf(midi);
+        if (rowIdx === -1) continue;
+        const x = col * PR_CELL_W + 2;
+        const y = rowIdx * PR_CELL_H + 2;
+        c.fillStyle = 'rgba(249,115,22,0.7)';
+        c.beginPath();
+        c.roundRect(x, y, PR_CELL_W - 4, PR_CELL_H - 4, 3);
+        c.fill();
+        c.shadowColor = 'rgba(249,115,22,0.5)';
+        c.shadowBlur = 8;
+        c.fill();
+        c.shadowBlur = 0;
+    }
+
+    if (isPlaying && currentStep >= 0) {
+        c.fillStyle = 'rgba(34,197,94,0.1)';
+        c.fillRect(currentStep * PR_CELL_W, 0, PR_CELL_W, h);
+    }
+}
+
+function onBassCanvasClick(e) {
+    const rect = bassCanvas.getBoundingClientRect();
+    const scaleX = bassCanvas.width / rect.width;
+    const scaleY = bassCanvas.height / rect.height;
+    const mx = (e.clientX - rect.left) * scaleX;
+    const my = (e.clientY - rect.top) * scaleY;
+    const col = Math.floor(mx / PR_CELL_W);
+    const row = Math.floor(my / PR_CELL_H);
+    if (col < 0 || col >= STEPS || row < 0 || row >= PR_ROWS) return;
+    const notes = getBassVisibleNotes();
+    const midi = notes[row];
+    if (e.button === 2 || e.ctrlKey) {
+        bassNotes[col] = null;
+    } else {
+        if (bassNotes[col] === midi) {
+            bassNotes[col] = null;
+        } else {
+            bassNotes[col] = midi;
+            playBassNote(midi, getCtx().currentTime, 0.2);
+        }
+    }
+    drawBassRoll();
+}
+
+function playBassNote(midi, time, duration) {
+    const c = getCtx();
+    const cfg = getBassConfig();
+    synthesizeNote(c, bassBus, midi, time, duration, cfg);
+}
+
+function onBassScaleChange() {
+    buildBassPianoKeys();
+    drawBassRoll();
+}
+
+function updateBassADSRDisplay() {
+    document.getElementById('bassAdsrAVal').textContent = document.getElementById('bassAdsrA').value + 'ms';
+    document.getElementById('bassAdsrDVal').textContent = document.getElementById('bassAdsrD').value + 'ms';
+    document.getElementById('bassAdsrSVal').textContent = document.getElementById('bassAdsrS').value + '%';
+    document.getElementById('bassAdsrRVal').textContent = document.getElementById('bassAdsrR').value + 'ms';
+}
+
+// ベースプリセット
+const BASS_PRESETS = {
+    root_octave: function () {
+        const cfg = getBassConfig();
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        for (let i = 0; i < STEPS; i++) {
+            bassNotes[i] = (i % 2 === 0) ? base : base + 12;
+        }
+    },
+    walking: function () {
+        const cfg = getBassConfig();
+        const scaleNotes = SCALES[cfg.scale];
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        for (let i = 0; i < STEPS; i++) {
+            if (i % 4 === 0) {
+                bassNotes[i] = base; // ルート
+            } else {
+                const deg = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
+                bassNotes[i] = base + deg;
+            }
+        }
+    },
+    eighth: function () {
+        const cfg = getBassConfig();
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        // 8分音符パターン（全ステップにルートとオクターブ交互）
+        const pattern = [0, 0, 7, 7, 0, 0, 5, 5, 0, 0, 7, 7, 0, 0, 12, 12];
+        for (let i = 0; i < STEPS; i++) {
+            bassNotes[i] = base + pattern[i % pattern.length];
+        }
+    },
+    synth_bass: function () {
+        const cfg = getBassConfig();
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        const pat = [null, 0, null, 0, null, 0, null, 0, null, 0, null, 0, null, 0, null, 0];
+        for (let i = 0; i < STEPS; i++) {
+            bassNotes[i] = pat[i] != null ? base + pat[i] : null;
+        }
+    },
+    reggae_bass: function () {
+        const cfg = getBassConfig();
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        const pat = [0, null, null, 7, null, null, 5, null, 0, null, null, 3, null, null, 5, null];
+        for (let i = 0; i < STEPS; i++) {
+            bassNotes[i] = pat[i] != null ? base + pat[i] : null;
+        }
+    },
+    slap: function () {
+        const cfg = getBassConfig();
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        const pat = [0, null, 12, null, 0, 0, null, 12, null, null, 0, null, 12, 0, null, null];
+        for (let i = 0; i < STEPS; i++) {
+            bassNotes[i] = pat[i] != null ? base + pat[i] : null;
+        }
+    },
+    arpeggiated: function () {
+        const cfg = getBassConfig();
+        const scaleNotes = SCALES[cfg.scale];
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        const degrees = [0, 2, 4, 2];
+        for (let i = 0; i < STEPS; i++) {
+            const idx = degrees[i % degrees.length] % scaleNotes.length;
+            bassNotes[i] = base + scaleNotes[idx];
+        }
+    },
+    pedal: function () {
+        const cfg = getBassConfig();
+        const base = (cfg.octave + 1) * 12 + cfg.key;
+        for (let i = 0; i < STEPS; i++) {
+            bassNotes[i] = base;
+        }
+    },
+};
+
+// 追加ベースプリセット
+BASS_PRESETS.disco_octave = function () {
+    const cfg = getBassConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const pat = [0, null, 0, 12, null, 0, 0, 12, 0, null, 0, 12, null, 0, 0, null];
+    for (let i = 0; i < STEPS; i++) bassNotes[i] = pat[i] != null ? base + pat[i] : null;
+};
+BASS_PRESETS.deep_sub = function () {
+    const cfg = getBassConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const pat = [0, null, null, null, 0, null, null, 5, null, null, 0, null, null, null, 7, null];
+    for (let i = 0; i < STEPS; i++) bassNotes[i] = pat[i] != null ? base + pat[i] : null;
+};
+BASS_PRESETS.driving = function () {
+    const cfg = getBassConfig();
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    const pat = [0, 0, 0, 0, 5, 5, 5, 5, 7, 7, 7, 7, 5, 5, 3, 3];
+    for (let i = 0; i < STEPS; i++) bassNotes[i] = base + pat[i];
+};
+
+function loadBassPreset(name) {
+    if (!name || !BASS_PRESETS[name]) return;
+    BASS_PRESETS[name]();
+    clampBassNotesToView();
+    drawBassRoll();
+}
+
+function clampBassNotesToView() {
+    const notes = getBassVisibleNotes();
+    const minNote = Math.min(...notes);
+    const maxNote = Math.max(...notes);
+    for (let i = 0; i < STEPS; i++) {
+        if (bassNotes[i] != null) {
+            while (bassNotes[i] < minNote) bassNotes[i] += 12;
+            while (bassNotes[i] > maxNote) bassNotes[i] -= 12;
+        }
+    }
+}
+
+function randomizeBass() {
+    const cfg = getBassConfig();
+    const scaleNotes = SCALES[cfg.scale];
+    const base = (cfg.octave + 1) * 12 + cfg.key;
+    for (let i = 0; i < STEPS; i++) {
+        if (Math.random() < 0.6) {
+            const deg = scaleNotes[Math.floor(Math.random() * scaleNotes.length)];
+            bassNotes[i] = base + deg;
+        } else {
+            bassNotes[i] = null;
+        }
+    }
+    clampBassNotesToView();
+    drawBassRoll();
+    document.getElementById('bassPresetSelect').value = '';
+}
+
+function clearBass() {
+    for (let i = 0; i < STEPS; i++) bassNotes[i] = null;
+    drawBassRoll();
+    document.getElementById('bassPresetSelect').value = '';
+}
+
+function initBassEditor() {
+    bassCanvas = document.getElementById('bassCanvas');
+    bassCtx = bassCanvas.getContext('2d');
+    bassCanvas.addEventListener('click', onBassCanvasClick);
+    bassCanvas.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        onBassCanvasClick(e);
+    });
+    document.getElementById('bassOctave').addEventListener('change', () => {
+        buildBassPianoKeys();
+        clampBassNotesToView();
+        drawBassRoll();
+    });
+    buildBassPianoKeys();
+    drawBassRoll();
+}
+
+// ========================================
+// スケジューラー拡張 — メロディ＋ベース再生統合
+// ========================================
+const origScheduleStep = scheduleStep;
+scheduleStep = function (step, time) {
+    origScheduleStep(step, time);
+    const sixteenthNote = 60.0 / bpm / 4;
+
+    // メロディの音を鳴らす
+    if (melodyNotes[step] != null) {
+        playMelodyNote(melodyNotes[step], time, sixteenthNote * 0.9);
+    }
+
+    // ベースの音を鳴らす
+    if (bassNotes[step] != null) {
+        playBassNote(bassNotes[step], time, sixteenthNote * 0.9);
+    }
+
+    // ピアノロールの再生位置を更新
+    if (melodyInitialized) {
+        requestAnimationFrame(() => drawPianoRoll());
+    }
+    if (bassInitialized) {
+        requestAnimationFrame(() => drawBassRoll());
+    }
+};
+
+// ========================================
+// WAVエクスポート
+// ========================================
+async function exportWAV() {
+    const btn = document.getElementById('exportBtn');
+    const progress = document.getElementById('exportProgress');
+    const statusEl = document.getElementById('exportStatus');
+    btn.disabled = true;
+    progress.classList.add('active');
+    statusEl.textContent = 'レンダリング中...';
+    try {
+        const loops = parseInt(document.getElementById('loopCount').value);
+        const secondsPerBeat = 60.0 / bpm;
+        const sixteenthNote = secondsPerBeat / 4;
+        const loopDuration = STEPS * sixteenthNote;
+        const tailSeconds = 2.0;
+        const totalDuration = loopDuration * loops + tailSeconds;
+        const sampleRate = 44100;
+        const offCtx = new OfflineAudioContext(2, Math.ceil(totalDuration * sampleRate), sampleRate);
+        const offMasterGain = offCtx.createGain();
+        offMasterGain.gain.value = masterVol;
+        const offDrumBus = offCtx.createGain();
+        offDrumBus.gain.value = trackState.drum.muted ? 0 : trackState.drum.vol;
+        const offMelodyBus = offCtx.createGain();
+        offMelodyBus.gain.value = trackState.melody.muted ? 0 : trackState.melody.vol;
+        const offBassBus = offCtx.createGain();
+        offBassBus.gain.value = trackState.bass.muted ? 0 : trackState.bass.vol;
+        const anySolo = ['drum', 'melody', 'bass'].some(t => trackState[t].soloed);
+        if (anySolo) {
+            if (!trackState.drum.soloed) offDrumBus.gain.value = 0;
+            if (!trackState.melody.soloed) offMelodyBus.gain.value = 0;
+            if (!trackState.bass.soloed) offBassBus.gain.value = 0;
+        }
+        offDrumBus.connect(offMasterGain);
+        offMelodyBus.connect(offMasterGain);
+        offBassBus.connect(offMasterGain);
+        // FXチェーン
+        const offFilter = offCtx.createBiquadFilter();
+        const filterOn = document.getElementById('fxFilterOn').checked;
+        offFilter.type = filterOn ? document.getElementById('fxFilterType').value : 'lowpass';
+        offFilter.frequency.value = filterOn ? parseInt(document.getElementById('fxFilterCutoff').value) : 20000;
+        offFilter.Q.value = filterOn ? parseInt(document.getElementById('fxFilterQ').value) / 10 : 0.1;
+        const offDist = offCtx.createWaveShaper();
+        const distOn = document.getElementById('fxDistOn').checked;
+        offDist.curve = makeDistortionCurve(distOn ? parseInt(document.getElementById('fxDistAmount').value) : 0);
+        offDist.oversample = '4x';
+        const offDelay = offCtx.createDelay(2.0);
+        const delayOn = document.getElementById('fxDelayOn').checked;
+        offDelay.delayTime.value = parseInt(document.getElementById('fxDelayTime').value) / 1000;
+        const offDelayFB = offCtx.createGain();
+        offDelayFB.gain.value = parseInt(document.getElementById('fxDelayFB').value) / 100;
+        const delayMix = parseInt(document.getElementById('fxDelayMix').value);
+        const offDelayDry = offCtx.createGain();
+        offDelayDry.gain.value = delayOn ? 1 - (delayMix / 200) : 1;
+        const offDelayWet = offCtx.createGain();
+        offDelayWet.gain.value = delayOn ? delayMix / 100 : 0;
+        const offReverbConv = offCtx.createConvolver();
+        const reverbOn = document.getElementById('fxReverbOn').checked;
+        const reverbDecay = parseInt(document.getElementById('fxReverbDecay').value) / 10;
+        const reverbMix = parseInt(document.getElementById('fxReverbMix').value);
+        offReverbConv.buffer = createReverbIR(offCtx, reverbDecay);
+        const offReverbDry = offCtx.createGain();
+        offReverbDry.gain.value = reverbOn ? 1 - (reverbMix / 200) : 1;
+        const offReverbWet = offCtx.createGain();
+        offReverbWet.gain.value = reverbOn ? reverbMix / 100 : 0;
+        offMasterGain.connect(offFilter);
+        offFilter.connect(offDist);
+        offDist.connect(offDelayDry);
+        offDist.connect(offDelay);
+        offDelay.connect(offDelayFB);
+        offDelayFB.connect(offDelay);
+        offDelay.connect(offDelayWet);
+        const offDelayMerge = offCtx.createGain();
+        offDelayDry.connect(offDelayMerge);
+        offDelayWet.connect(offDelayMerge);
+        offDelayMerge.connect(offReverbDry);
+        offDelayMerge.connect(offReverbConv);
+        offReverbConv.connect(offReverbWet);
+        offReverbDry.connect(offCtx.destination);
+        offReverbWet.connect(offCtx.destination);
+        statusEl.textContent = 'ノートをスケジュール中...';
+        await new Promise(r => setTimeout(r, 10));
+        for (let loop = 0; loop < loops; loop++) {
+            let noteTime = loop * loopDuration;
+            for (let step = 0; step < STEPS; step++) {
+                PARTS.forEach(part => {
+                    if (pattern[part.id][step]) scheduleOfflineDrum(offCtx, offDrumBus, part.id, noteTime, partVolume[part.id]);
+                });
+                if (melodyNotes[step] != null) scheduleOfflineSynth(offCtx, offMelodyBus, melodyNotes[step], noteTime, sixteenthNote * 0.9, getMelodyConfig());
+                if (bassNotes[step] != null) scheduleOfflineSynth(offCtx, offBassBus, bassNotes[step], noteTime, sixteenthNote * 0.9, getBassConfig());
+                if ((step + 1) % 2 === 1 && swing > 0) noteTime += sixteenthNote * (1 + swing / 100 * 0.66);
+                else noteTime += sixteenthNote;
+            }
+        }
+        statusEl.textContent = 'オーディオレンダリング中...';
+        await new Promise(r => setTimeout(r, 10));
+        const renderedBuffer = await offCtx.startRendering();
+        statusEl.textContent = 'WAVエンコード中...';
+        await new Promise(r => setTimeout(r, 10));
+        const wavBlob = encodeWAV(renderedBuffer);
+        const url = URL.createObjectURL(wavBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `wbm_${bpm}bpm_${loops}loop.wav`;
+        a.click();
+        URL.revokeObjectURL(url);
+        statusEl.textContent = '完了！';
+        showToast('✅ WAVファイルをダウンロードしました');
+        setTimeout(() => progress.classList.remove('active'), 1500);
+    } catch (err) {
+        console.error('Export failed:', err);
+        statusEl.textContent = 'エラー: ' + err.message;
+        showToast('❌ エクスポートに失敗しました');
+        setTimeout(() => progress.classList.remove('active'), 3000);
+    } finally { btn.disabled = false; }
+}
+
+function scheduleOfflineDrum(c, bus, partId, time, vol) {
+    switch (partId) {
+        case 'kick': {
+            const osc = c.createOscillator(); const gain = c.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(160, time); osc.frequency.exponentialRampToValueAtTime(35, time + 0.12);
+            gain.gain.setValueAtTime(vol * 0.9, time); gain.gain.exponentialRampToValueAtTime(0.001, time + 0.35);
+            osc.connect(gain).connect(bus); osc.start(time); osc.stop(time + 0.35);
+            const click = c.createOscillator(); const cGain = c.createGain();
+            click.type = 'square'; click.frequency.setValueAtTime(1200, time); click.frequency.exponentialRampToValueAtTime(200, time + 0.02);
+            cGain.gain.setValueAtTime(vol * 0.15, time); cGain.gain.exponentialRampToValueAtTime(0.001, time + 0.03);
+            click.connect(cGain).connect(bus); click.start(time); click.stop(time + 0.03); break;
+        }
+        case 'snare': {
+            const osc = c.createOscillator(); const oGain = c.createGain();
+            osc.type = 'triangle'; osc.frequency.value = 200;
+            oGain.gain.setValueAtTime(vol * 0.4, time); oGain.gain.exponentialRampToValueAtTime(0.001, time + 0.12);
+            osc.connect(oGain).connect(bus); osc.start(time); osc.stop(time + 0.12);
+            const bufLen = c.sampleRate * 0.15; const buf = c.createBuffer(1, bufLen, c.sampleRate); const data = buf.getChannelData(0);
+            for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+            const noise = c.createBufferSource(); noise.buffer = buf;
+            const nGain = c.createGain(); nGain.gain.setValueAtTime(vol * 0.45, time); nGain.gain.exponentialRampToValueAtTime(0.001, time + 0.18);
+            const filter = c.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 4000; filter.Q.value = 1.2;
+            noise.connect(filter).connect(nGain).connect(bus); noise.start(time); break;
+        }
+        case 'hihatC': {
+            const bufLen = c.sampleRate * 0.04; const buf = c.createBuffer(1, bufLen, c.sampleRate); const data = buf.getChannelData(0);
+            for (let i = 0; i < bufLen; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / bufLen);
+            const noise = c.createBufferSource(); noise.buffer = buf;
+            const gain = c.createGain(); gain.gain.setValueAtTime(vol * 0.3, time); gain.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+            const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 8000;
+            noise.connect(hp).connect(gain).connect(bus); noise.start(time); break;
+        }
+        case 'hihatO': {
+            const bufLen = c.sampleRate * 0.2; const buf = c.createBuffer(1, bufLen, c.sampleRate); const data = buf.getChannelData(0);
+            for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+            const noise = c.createBufferSource(); noise.buffer = buf;
+            const gain = c.createGain(); gain.gain.setValueAtTime(vol * 0.25, time); gain.gain.exponentialRampToValueAtTime(0.001, time + 0.25);
+            const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 7000;
+            noise.connect(hp).connect(gain).connect(bus); noise.start(time); break;
+        }
+        case 'clap': {
+            for (let j = 0; j < 3; j++) {
+                const bufLen = c.sampleRate * 0.015; const buf = c.createBuffer(1, bufLen, c.sampleRate); const data = buf.getChannelData(0);
+                for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+                const noise = c.createBufferSource(); noise.buffer = buf;
+                const gain = c.createGain(); const t = time + j * 0.012;
+                gain.gain.setValueAtTime(vol * 0.35, t); gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+                const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2500; bp.Q.value = 2;
+                noise.connect(bp).connect(gain).connect(bus); noise.start(t);
+            }
+            const tailBufLen = c.sampleRate * 0.15; const tailBuf = c.createBuffer(1, tailBufLen, c.sampleRate); const tailData = tailBuf.getChannelData(0);
+            for (let i = 0; i < tailBufLen; i++) tailData[i] = Math.random() * 2 - 1;
+            const tailNoise = c.createBufferSource(); tailNoise.buffer = tailBuf;
+            const tailGain = c.createGain(); tailGain.gain.setValueAtTime(vol * 0.25, time + 0.035); tailGain.gain.exponentialRampToValueAtTime(0.001, time + 0.2);
+            const tailBp = c.createBiquadFilter(); tailBp.type = 'bandpass'; tailBp.frequency.value = 2000;
+            tailNoise.connect(tailBp).connect(tailGain).connect(bus); tailNoise.start(time + 0.035); break;
+        }
+        case 'tom': {
+            const osc = c.createOscillator(); const gain = c.createGain();
+            osc.type = 'sine'; osc.frequency.setValueAtTime(200, time); osc.frequency.exponentialRampToValueAtTime(80, time + 0.2);
+            gain.gain.setValueAtTime(vol * 0.6, time); gain.gain.exponentialRampToValueAtTime(0.001, time + 0.3);
+            osc.connect(gain).connect(bus); osc.start(time); osc.stop(time + 0.3); break;
+        }
+    }
+}
+
+function scheduleOfflineSynth(c, bus, midi, time, duration, cfg) {
+    // 楽器合成エンジンを共有使用（オンライン/オフライン両対応）
+    synthesizeNote(c, bus, midi, time, duration, cfg);
+}
+
+function encodeWAV(audioBuffer) {
+    const numCh = audioBuffer.numberOfChannels; const sr = audioBuffer.sampleRate;
+    const bps = 16; const ba = numCh * 2; const nf = audioBuffer.length;
+    const ds = nf * ba; const bs = 44 + ds;
+    const buf = new ArrayBuffer(bs); const v = new DataView(buf);
+    function ws(o, s) { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); }
+    ws(0, 'RIFF'); v.setUint32(4, bs - 8, true); ws(8, 'WAVE');
+    ws(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, numCh, true);
+    v.setUint32(24, sr, true); v.setUint32(28, sr * ba, true); v.setUint16(32, ba, true); v.setUint16(34, bps, true);
+    ws(36, 'data'); v.setUint32(40, ds, true);
+    const chs = []; for (let c = 0; c < numCh; c++) chs.push(audioBuffer.getChannelData(c));
+    let off = 44;
+    for (let i = 0; i < nf; i++) {
+        for (let c = 0; c < numCh; c++) {
+            let s = Math.max(-1, Math.min(1, chs[c][i]));
+            v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true); off += 2;
+        }
+    }
+    return new Blob([buf], { type: 'audio/wav' });
+}
+
+// ========================================
+// プロジェクト保存/読み込み
+// ========================================
+const STORAGE_PREFIX = 'wbm_project_';
+
+function getFullProjectData() {
+    const data = {
+        version: '0.4.0', bpm, swing, masterVol: Math.round(masterVol * 100),
+        drum: { pattern: {}, partVolume: {}, trackVol: Math.round(trackState.drum.vol * 100), muted: trackState.drum.muted },
+        melody: { notes: [...melodyNotes], waveform: document.getElementById('melodyWaveform')?.value || 'square', scale: document.getElementById('melodyScale')?.value || 'major', key: parseInt(document.getElementById('melodyKey')?.value || '0'), octave: parseInt(document.getElementById('melodyOctave')?.value || '3'), adsr: { a: parseInt(document.getElementById('adsrA')?.value || '10'), d: parseInt(document.getElementById('adsrD')?.value || '100'), s: parseInt(document.getElementById('adsrS')?.value || '60'), r: parseInt(document.getElementById('adsrR')?.value || '200') }, trackVol: Math.round(trackState.melody.vol * 100), muted: trackState.melody.muted },
+        bass: { notes: [...bassNotes], waveform: document.getElementById('bassWaveform')?.value || 'sawtooth', scale: document.getElementById('bassScale')?.value || 'major', key: parseInt(document.getElementById('bassKey')?.value || '0'), octave: parseInt(document.getElementById('bassOctave')?.value || '2'), adsr: { a: parseInt(document.getElementById('bassAdsrA')?.value || '5'), d: parseInt(document.getElementById('bassAdsrD')?.value || '80'), s: parseInt(document.getElementById('bassAdsrS')?.value || '70'), r: parseInt(document.getElementById('bassAdsrR')?.value || '150') }, trackVol: Math.round(trackState.bass.vol * 100), muted: trackState.bass.muted },
+        fx: { filter: { on: document.getElementById('fxFilterOn')?.checked || false, type: document.getElementById('fxFilterType')?.value || 'lowpass', cutoff: parseInt(document.getElementById('fxFilterCutoff')?.value || '8000'), q: parseInt(document.getElementById('fxFilterQ')?.value || '10') }, distortion: { on: document.getElementById('fxDistOn')?.checked || false, amount: parseInt(document.getElementById('fxDistAmount')?.value || '30') }, delay: { on: document.getElementById('fxDelayOn')?.checked || false, time: parseInt(document.getElementById('fxDelayTime')?.value || '300'), feedback: parseInt(document.getElementById('fxDelayFB')?.value || '40'), mix: parseInt(document.getElementById('fxDelayMix')?.value || '30') }, reverb: { on: document.getElementById('fxReverbOn')?.checked || false, decay: parseInt(document.getElementById('fxReverbDecay')?.value || '15'), mix: parseInt(document.getElementById('fxReverbMix')?.value || '25') } },
+    };
+    PARTS.forEach(p => { data.drum.pattern[p.id] = [...pattern[p.id]]; data.drum.partVolume[p.id] = partVolume[p.id]; });
+    return data;
+}
+
+function saveProject() {
+    const slot = document.getElementById('saveSlot').value;
+    const data = getFullProjectData(); data.savedAt = new Date().toISOString();
+    try { localStorage.setItem(STORAGE_PREFIX + slot, JSON.stringify(data)); localStorage.setItem(STORAGE_PREFIX + 'lastSlot', slot); showToast(`💾 Slot ${parseInt(slot) + 1} に保存しました`); }
+    catch (e) { showToast('❌ 保存に失敗: ' + e.message); }
+}
+
+function loadProjectFromSlot() {
+    const slot = document.getElementById('saveSlot').value;
+    const raw = localStorage.getItem(STORAGE_PREFIX + slot);
+    if (!raw) { showToast(`⚠ Slot ${parseInt(slot) + 1} にデータがありません`); return; }
+    try { applyProjectData(JSON.parse(raw)); showToast(`📂 Slot ${parseInt(slot) + 1} をロードしました`); }
+    catch (e) { showToast('❌ ロードに失敗: ' + e.message); }
+}
+
+function exportProjectJSON() {
+    const blob = new Blob([JSON.stringify(getFullProjectData(), null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob); const a = document.createElement('a');
+    a.href = url; a.download = `wbm_project_${bpm}bpm.json`; a.click(); URL.revokeObjectURL(url);
+    showToast('📤 プロジェクトJSONをエクスポートしました');
+}
+
+function importProjectJSON(event) {
+    const file = event.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => { try { applyProjectData(JSON.parse(e.target.result)); showToast('📥 プロジェクトをインポートしました'); } catch { showToast('❌ JSONの読み込みに失敗'); } event.target.value = ''; };
+    reader.readAsText(file);
+}
+
+function applyProjectData(data) {
+    if (data.bpm) { bpm = data.bpm; document.getElementById('bpmSlider').value = bpm; document.getElementById('bpmValue').textContent = bpm; }
+    if (data.swing != null) { swing = data.swing; document.getElementById('swingSlider').value = swing; document.getElementById('swingValue').textContent = swing + '%'; }
+    if (data.masterVol != null) { masterVol = data.masterVol / 100; document.getElementById('masterVolSlider').value = data.masterVol; if (masterGain) masterGain.gain.value = masterVol; }
+    if (data.drum) {
+        if (data.drum.pattern) { PARTS.forEach(p => { if (data.drum.pattern[p.id]) { for (let i = 0; i < STEPS; i++) pattern[p.id][i] = !!data.drum.pattern[p.id][i]; } }); updateGridUI(); }
+        if (data.drum.partVolume) PARTS.forEach(p => { if (data.drum.partVolume[p.id] != null) partVolume[p.id] = data.drum.partVolume[p.id]; });
+        if (data.drum.trackVol != null) { trackState.drum.vol = data.drum.trackVol / 100; document.getElementById('drumVolSlider').value = data.drum.trackVol; }
+        if (data.drum.muted != null) trackState.drum.muted = data.drum.muted;
+    }
+    if (data.melody) {
+        if (data.melody.notes) { for (let i = 0; i < STEPS; i++) melodyNotes[i] = data.melody.notes[i] != null ? data.melody.notes[i] : null; }
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+        setEl('melodyWaveform', data.melody.waveform); setEl('melodyScale', data.melody.scale); setEl('melodyKey', data.melody.key); setEl('melodyOctave', data.melody.octave);
+        if (data.melody.adsr) { setEl('adsrA', data.melody.adsr.a); setEl('adsrD', data.melody.adsr.d); setEl('adsrS', data.melody.adsr.s); setEl('adsrR', data.melody.adsr.r); updateADSRDisplay(); }
+        if (data.melody.trackVol != null) { trackState.melody.vol = data.melody.trackVol / 100; document.getElementById('melodyVolSlider').value = data.melody.trackVol; }
+        if (data.melody.muted != null) trackState.melody.muted = data.melody.muted;
+        if (melodyInitialized) { buildPianoKeys(); drawPianoRoll(); }
+    }
+    if (data.bass) {
+        if (data.bass.notes) { for (let i = 0; i < STEPS; i++) bassNotes[i] = data.bass.notes[i] != null ? data.bass.notes[i] : null; }
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+        setEl('bassWaveform', data.bass.waveform); setEl('bassScale', data.bass.scale); setEl('bassKey', data.bass.key); setEl('bassOctave', data.bass.octave);
+        if (data.bass.adsr) { setEl('bassAdsrA', data.bass.adsr.a); setEl('bassAdsrD', data.bass.adsr.d); setEl('bassAdsrS', data.bass.adsr.s); setEl('bassAdsrR', data.bass.adsr.r); updateBassADSRDisplay(); }
+        if (data.bass.trackVol != null) { trackState.bass.vol = data.bass.trackVol / 100; document.getElementById('bassVolSlider').value = data.bass.trackVol; }
+        if (data.bass.muted != null) trackState.bass.muted = data.bass.muted;
+        if (bassInitialized) { buildBassPianoKeys(); drawBassRoll(); }
+    }
+    if (data.fx) {
+        const setChk = (id, val) => { const el = document.getElementById(id); if (el) el.checked = val; };
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el && val != null) el.value = val; };
+        if (data.fx.filter) { setChk('fxFilterOn', data.fx.filter.on); setVal('fxFilterType', data.fx.filter.type); setVal('fxFilterCutoff', data.fx.filter.cutoff); setVal('fxFilterQ', data.fx.filter.q); }
+        if (data.fx.distortion) { setChk('fxDistOn', data.fx.distortion.on); setVal('fxDistAmount', data.fx.distortion.amount); }
+        if (data.fx.delay) { setChk('fxDelayOn', data.fx.delay.on); setVal('fxDelayTime', data.fx.delay.time); setVal('fxDelayFB', data.fx.delay.feedback); setVal('fxDelayMix', data.fx.delay.mix); }
+        if (data.fx.reverb) { setChk('fxReverbOn', data.fx.reverb.on); setVal('fxReverbDecay', data.fx.reverb.decay); setVal('fxReverbMix', data.fx.reverb.mix); }
+        if (fxInitialized) updateFx();
+    }
+    applyTrackStates();
+}
+
+function showToast(msg) {
+    const t = document.getElementById('saveToast'); t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function autoRestore() {
+    const ls = localStorage.getItem(STORAGE_PREFIX + 'lastSlot');
+    if (ls == null) return;
+    const raw = localStorage.getItem(STORAGE_PREFIX + ls);
+    if (!raw) return;
+    try { applyProjectData(JSON.parse(raw)); document.getElementById('saveSlot').value = ls; } catch (e) { }
+}
+
+// ========================================
+// 初期化
+// ========================================
+buildUI();
+autoRestore();

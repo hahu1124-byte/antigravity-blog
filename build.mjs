@@ -8,6 +8,8 @@ import { join, dirname, extname, relative } from 'path';
 import { fileURLToPath } from 'url';
 import { createHash } from 'crypto';
 import { transform } from 'esbuild';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -100,6 +102,23 @@ if (missingTools.length) console.warn(`⚠️  見つからずスキップ: ${mi
         let html = readFileSync(machineDbHtml, 'utf-8');
         html = html.replace(/(\?v=)\d+/g, `$1${BUILD_STAMP}`);
         writeFileSync(machineDbHtml, html, 'utf-8');
+    }
+}
+
+// machine-db.js の Supabase 設定をビルド時に埋め込み（キーをソースコードから除外）
+{
+    const machineDbJsPath = join(OUTPUT_DIR, 'machine-db', 'machine-db.js');
+    if (existsSync(machineDbJsPath)) {
+        const supabaseUrl = process.env.SUPABASE_URL;
+        const supabaseKey = process.env.SUPABASE_ANON_KEY;
+        if (!supabaseUrl || !supabaseKey) {
+            console.error('❌ .env に SUPABASE_URL / SUPABASE_ANON_KEY が未設定です');
+            process.exit(1);
+        }
+        let js = readFileSync(machineDbJsPath, 'utf-8');
+        js = js.replace('__SUPABASE_URL__', supabaseUrl);
+        js = js.replace('__SUPABASE_ANON_KEY__', supabaseKey);
+        writeFileSync(machineDbJsPath, js, 'utf-8');
     }
 }
 

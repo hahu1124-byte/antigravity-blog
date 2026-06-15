@@ -1,0 +1,3 @@
+- [x] VS Codeの警告回避策の調査
+- [x] deploy.ymlの修正 (`github-pages` を式に変更)
+- [x] ドキュメントの生成

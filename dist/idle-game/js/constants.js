@@ -1,1 +1,350 @@
-const MODE_NORMAL="normal",MODE_KAKUHEN="kakuhen",MODE_ST="st",MODE_JITAN="jitan",GAME_VERSION="v0.14.19",DEBT_UNIT_YEN=1e3,DEBT_REPAY_UNIT_YEN=500,DEBT_INTEREST_RATE=.05,DEBT_INTERVAL_MS=6e4,PREMIUM_SPEED_MULTIPLIER=2,JITAN_SPINS=1e4,JITAN_BASE_SPINS=100,JITAN_REF_DENOM=319,SAVE_KEY="gp-idle-game-save",SAVE_INTERVAL=3e4,CLOUD_SAVE_INTERVAL=6e4,MACHINES=[{id:"amadeji",name:"\u{1F7E2} \u7518\u30C7\u30B8",desc:"ST\u504F\u91CD\u30FB\u5B89\u5B9A\u9023\u8358\u578B",prob:.010009765625,highProb:.0345001220703125,payout:465,cost:10,costScale:1,kakuhenRate:.4,stRate:.3,jitanRate:.3,kakuhenContinueRate:.65,baseStSpins:30,yutimeThreshold:249,unlockCondition:()=>!0,unlockText:"\u521D\u671F\u53F0"},{id:"lightmiddle",name:"\u{1F535} \u30E9\u30A4\u30C8\u30DF\u30C9\u30EB",desc:"\u30D0\u30E9\u30F3\u30B9\u578B",prob:.0050048828125,highProb:.0263214111328125,payout:936,cost:12.5,costScale:1.5,kakuhenRate:.3,stRate:.35,jitanRate:.2,kakuhenContinueRate:.65,baseStSpins:40,yutimeThreshold:499,unlockCondition:e=>e.prestiges>=1,unlockText:"\u30D7\u30EC\u30B9\u30C6\u30FC\u30B81\u56DE"},{id:"middle",name:"\u{1F7E3} \u30DF\u30C9\u30EB",desc:"\u30B9\u30BF\u30F3\u30C0\u30FC\u30C9",prob:.0031280517578125,highProb:.0208282470703125,payout:1500,cost:15,costScale:2,kakuhenRate:.25,stRate:.35,jitanRate:.15,kakuhenContinueRate:.65,baseStSpins:50,yutimeThreshold:959,unlockCondition:e=>e.prestiges>=3,unlockText:"\u30D7\u30EC\u30B9\u30C6\u30FC\u30B83\u56DE"},{id:"max",name:"\u{1F534} MAX\u30BF\u30A4\u30D7",desc:"\u78BA\u5909\u30EB\u30FC\u30D7\u7279\u5316\u578B",prob:.00250244140625,highProb:.017547607421875,payout:1876,cost:17.5,costScale:3,kakuhenRate:.15,stRate:.4,jitanRate:.05,kakuhenContinueRate:.65,baseStSpins:60,yutimeThreshold:1198,unlockCondition:e=>e.prestiges>=7,unlockText:"\u30D7\u30EC\u30B9\u30C6\u30FC\u30B87\u56DE"},{id:"supermax",name:"\u{1F31F} \u8D85MAX",desc:"\u78BA\u5909\u30EB\u30FC\u30D7\u5168\u632F\u308A\u30FB\u30ED\u30DE\u30F3\u578B",prob:.0019989013671875,highProb:.014923095703125,payout:2347,cost:20,costScale:5,kakuhenRate:.1,stRate:.4,jitanRate:0,kakuhenContinueRate:.65,baseStSpins:70,yutimeThreshold:1500,unlockCondition:e=>e.prestiges>=15,unlockText:"\u30D7\u30EC\u30B9\u30C6\u30FC\u30B815\u56DE"}],UPGRADES=[{id:"spinRate",name:"\u26A1 \u56DE\u8EE2\u901F\u5EA6UP",desc:"\u6BCE\u79D2\u306E\u56DE\u8EE2\u6570\u3092\u6307\u6570\u7684\u306B\u5897\u52A0",icon:"\u26A1",baseCost:500,costMultiplier:1.25,maxLevel:1/0,apply:()=>{},effectText:e=>`${e.spinRate.toFixed(3)}\u56DE/\u79D2`},{id:"jackpotProb",name:"\u{1F3AF} \u5927\u5F53\u305F\u308A\u78BA\u7387UP",desc:"\u5927\u5F53\u305F\u308A\u78BA\u7387\u30925%\u6539\u5584",icon:"\u{1F3AF}",baseCost:600,costMultiplier:1.6,maxLevel:30,apply:()=>{},effectText:e=>`1/${Math.round(1/e.jackpotProb)}`},{id:"jackpotPayout",name:"\u{1F4B0} \u51FA\u7389UP",desc:"\u5927\u5F53\u305F\u308A\u6642\u306E\u51FA\u7389\u3092+5%\u6539\u5584",icon:"\u{1F4B0}",baseCost:500,costMultiplier:1.8,maxLevel:50,apply:()=>{},effectText:e=>`${formatNum(e.jackpotPayout)}\u7389`},{id:"kakuhenBoost",name:"\u{1F525} \u78BA\u5909\u500D\u7387UP",desc:"\u78BA\u5909/ST\u4E2D\u306E\u78BA\u7387\u3092\u3055\u3089\u306B1.5%\u6539\u5584",icon:"\u{1F525}",baseCost:1500,costMultiplier:1.8,maxLevel:20,apply:()=>{},effectText:()=>`1/${Math.round(1/getKakuhenProb())}`},{id:"stSpins",name:"\u23F1\uFE0F ST\u56DE\u8EE2\u6570UP",desc:"ST\u30E2\u30FC\u30C9\u306E\u56DE\u8EE2\u6570\u3092+6%\u6539\u5584",icon:"\u23F1\uFE0F",baseCost:1200,costMultiplier:1.6,maxLevel:20,apply:()=>{},effectText:()=>`${getMaxStSpins()}\u56DE\u8EE2`},{id:"kakuhenCont",name:"\u{1F501} \u78BA\u5909\u7D99\u7D9A\u7387UP",desc:"\u78BA\u5909\u30E2\u30FC\u30C9\u306E\u7D99\u7D9A\u7387\u3092+2.5%\u6539\u5584",icon:"\u{1F501}",baseCost:2e3,costMultiplier:2,maxLevel:10,apply:()=>{},effectText:()=>`${(getKakuhenContinueRate()*100).toFixed(2)}%`},{id:"critical",name:"\u{1F48E} \u30AF\u30EA\u30C6\u30A3\u30AB\u30EB",desc:"\u5927\u5F53\u305F\u308A\u664210%\u3067\u51FA\u73892\u500D",icon:"\u{1F48E}",baseCost:3e3,costMultiplier:2,maxLevel:10,apply:()=>{},effectText:()=>`${getCriticalChance()}%`},{id:"costReduction",name:"\u{1F4B8} \u30B3\u30B9\u30C8\u524A\u6E1B",desc:"1\u56DE\u8EE2\u3042\u305F\u308A\u306E\u30B3\u30B9\u30C8\u30925%\u524A\u6E1B\uFF08\u7D2F\u4E57\uFF09",icon:"\u{1F4B8}",baseCost:1500,costMultiplier:1.8,maxLevel:10,apply:()=>{},effectText:e=>{const t=e.upgrades.costReduction||0;return t>0?`-${((1-Math.pow(.95,t))*100).toFixed(2)}%`:"0.00%"}},{id:"autoBuyer",name:"\u{1F6D2} \u30AA\u30FC\u30C8\u30D0\u30A4\u30E4\u30FC",desc:"\u6700\u5B89\u306E\u30A2\u30C3\u30D7\u30B0\u30EC\u30FC\u30C9\u3092\u81EA\u52D5\u8CFC\u5165",icon:"\u{1F6D2}",baseCost:5e5,costMultiplier:1,maxLevel:1,apply:e=>{e.autoBuyer=e.upgrades.autoBuyer>=1},effectText:e=>e.autoBuyer?"ON":"OFF"},{id:"autoPrestige",name:"\u{1F504} \u30AA\u30FC\u30C8\u30D7\u30EC\u30B9\u30C6\u30FC\u30B8",desc:"\u6761\u4EF6\u9054\u6210\u3067\u81EA\u52D5\u30D7\u30EC\u30B9\u30C6\u30FC\u30B8\uFF08\u8EE2\u751F15\u56DE\u3067\u89E3\u653E\uFF09",icon:"\u{1F504}",baseCost:1e7,costMultiplier:1,maxLevel:1,hidden:!0,apply:e=>{e.autoPrestige=e.upgrades.autoPrestige>=1},effectText:e=>e.autoPrestige?"ON":"OFF"}],PREMIUM_UPGRADES=[{id:"luckyPayout",name:"\u{1F340} \u30E9\u30C3\u30AD\u30FC\u30DA\u30A4\u30A2\u30A6\u30C8",desc:"\u5927\u5F53\u305F\u308A\u51FA\u7389+15%\uFF08\u6709\u6599\u9650\u5B9A\uFF09",icon:"\u{1F340}",baseCost:2e3,costMultiplier:2.2,maxLevel:10,apply:()=>{},effectText:e=>`+${(e.upgrades.luckyPayout||0)*15}%`},{id:"hyperShooter",name:"\u{1F680} \u30CF\u30A4\u30D1\u30FC\u30B7\u30E5\u30FC\u30BF\u30FC",desc:"\u56DE\u8EE2\u901F\u5EA6+1.0/Lv\uFF08\u6709\u6599\u9650\u5B9A\uFF09",icon:"\u{1F680}",baseCost:1500,costMultiplier:1.8,maxLevel:20,apply:()=>{},effectText:e=>`+${(e.upgrades.hyperShooter||0)*1}\u56DE/\u79D2`}];function achThresholdJackpot(e){return(e+1)*5}function achThresholdUpgrade(e){return e===0?1:e*5}const ACHIEVEMENT_DEFS=[{id:"jackpots",name:"\u{1F389} \u5927\u5F53\u305F\u308A\u306E\u661F",icon:"\u{1F389}",getValue:e=>e.totalLifetimeJackpots,getThreshold:achThresholdJackpot,maxMilestones:1/0,reward:100,hidden:!1},{id:"upg_spinRate",name:"\u26A1 \u9AD8\u901F\u56DE\u8EE2\u306E\u9054\u4EBA",icon:"\u26A1",getValue:e=>e.upgrades.spinRate||0,getThreshold:achThresholdUpgrade,maxMilestones:1/0,reward:100,hidden:!1},{id:"upg_jackpotProb",name:"\u{1F3AF} \u5F15\u304D\u5BC4\u305B\u306E\u6975\u610F",icon:"\u{1F3AF}",getValue:e=>e.lifetimeMaxUpgrades?.jackpotProb||e.upgrades.jackpotProb||0,getThreshold:achThresholdUpgrade,maxMilestones:7,reward:100,hidden:!1},{id:"upg_jackpotPayout",name:"\u{1F4B0} \u51FA\u7389\u738B\u306E\u8A3C",icon:"\u{1F4B0}",getValue:e=>e.lifetimeMaxUpgrades?.jackpotPayout||e.upgrades.jackpotPayout||0,getThreshold:achThresholdUpgrade,maxMilestones:11,reward:100,hidden:!1},{id:"upg_kakuhenBoost",name:"\u{1F525} \u707C\u71B1\u306E\u6C42\u9053\u8005",icon:"\u{1F525}",getValue:e=>e.lifetimeMaxUpgrades?.kakuhenBoost||e.upgrades.kakuhenBoost||0,getThreshold:achThresholdUpgrade,maxMilestones:5,reward:100,hidden:!1},{id:"upg_stSpins",name:"\u23F1\uFE0F \u6642\u3092\u64CD\u308B\u8005",icon:"\u23F1\uFE0F",getValue:e=>e.lifetimeMaxUpgrades?.stSpins||e.upgrades.stSpins||0,getThreshold:achThresholdUpgrade,maxMilestones:5,reward:100,hidden:!1},{id:"upg_kakuhenCont",name:"\u{1F501} \u7121\u9650\u9023\u8358\u306E\u5922",icon:"\u{1F501}",getValue:e=>e.lifetimeMaxUpgrades?.kakuhenCont||e.upgrades.kakuhenCont||0,getThreshold:achThresholdUpgrade,maxMilestones:3,reward:100,hidden:!1},{id:"upg_critical",name:"\u{1F48E} \u4E00\u6483\u5FC5\u6BBA\u306E\u9B42",icon:"\u{1F48E}",getValue:e=>e.lifetimeMaxUpgrades?.critical||e.upgrades.critical||0,getThreshold:achThresholdUpgrade,maxMilestones:3,reward:100,hidden:!1},{id:"upg_costReduction",name:"\u{1F4B8} \u7BC0\u7D04\u306E\u9B3C",icon:"\u{1F4B8}",getValue:e=>e.lifetimeMaxUpgrades?.costReduction||e.upgrades.costReduction||0,getThreshold:achThresholdUpgrade,maxMilestones:3,reward:100,hidden:!1},{id:"reelClick",name:"\u{1F3B0} \u30EA\u30FC\u30EB\u30DE\u30B9\u30BF\u30FC",icon:"\u{1F3B0}",getValue:e=>e.reelClicks||0,getThreshold:e=>[10,50,100][e]??null,maxMilestones:3,reward:300,hidden:!0}];
+/**
+ * パチンコ放置ゲーム — 定数・機種データ・アップグレード定義
+ */
+
+// ============================================================
+// モード定数
+// ============================================================
+
+const MODE_NORMAL = 'normal';
+const MODE_KAKUHEN = 'kakuhen';
+const MODE_ST = 'st';
+const MODE_JITAN = 'jitan';
+
+// 高確率は機種ごとにhighProbで定義（ST当選率65%ベース）
+
+// ============================================================
+// ゲームバージョン・借金定数
+// ============================================================
+
+const GAME_VERSION = 'v0.14.19';
+const DEBT_UNIT_YEN = 1000;
+const DEBT_REPAY_UNIT_YEN = 500;
+const DEBT_INTEREST_RATE = 0.05;
+const DEBT_INTERVAL_MS = 60000;
+const PREMIUM_SPEED_MULTIPLIER = 2.0;
+const JITAN_SPINS = 10000;
+const JITAN_BASE_SPINS = 100;
+const JITAN_REF_DENOM = 319;
+
+
+const SAVE_KEY = 'gp-idle-game-save';
+const SAVE_INTERVAL = 30000;
+const CLOUD_SAVE_INTERVAL = 60000;
+
+// ============================================================
+// 機種データ
+// ============================================================
+
+const MACHINES = [
+    {
+        id: 'amadeji',
+        name: '🟢 甘デジ',
+        desc: 'ST偏重・安定連荘型',
+        prob: 656 / 65536,  // 1/99.902
+        highProb: 2261 / 65536,  // 1/29.0 → ST30回転で65%
+        payout: 465,
+        cost: 10,
+        costScale: 1.0,
+        kakuhenRate: 0.40,
+        stRate: 0.30,
+        jitanRate: 0.30,
+        kakuhenContinueRate: 0.65,
+        baseStSpins: 30,
+        yutimeThreshold: 249,
+        unlockCondition: () => true,
+        unlockText: '初期台',
+    },
+    {
+        id: 'lightmiddle',
+        name: '🔵 ライトミドル',
+        desc: 'バランス型',
+        prob: 328 / 65536,  // 1/199.805
+        highProb: 1725 / 65536,  // 1/38.0 → ST40回転で65%
+        payout: 936,
+        cost: 12.5,
+        costScale: 1.5,
+        kakuhenRate: 0.30,
+        stRate: 0.35,
+        jitanRate: 0.20,
+        kakuhenContinueRate: 0.65,
+        baseStSpins: 40,
+        yutimeThreshold: 499,
+        unlockCondition: (s) => s.prestiges >= 1,
+        unlockText: 'プレステージ1回',
+    },
+    {
+        id: 'middle',
+        name: '🟣 ミドル',
+        desc: 'スタンダード',
+        prob: 205 / 65536,  // 1/319.688
+        highProb: 1365 / 65536,  // 1/48.0 → ST50回転で65%
+        payout: 1500,
+        cost: 15,
+        costScale: 2.0,
+        kakuhenRate: 0.25,
+        stRate: 0.35,
+        jitanRate: 0.15,
+        kakuhenContinueRate: 0.65,
+        baseStSpins: 50,
+        yutimeThreshold: 959,
+        unlockCondition: (s) => s.prestiges >= 3,
+        unlockText: 'プレステージ3回',
+    },
+    {
+        id: 'max',
+        name: '🔴 MAXタイプ',
+        desc: '確変ループ特化型',
+        prob: 164 / 65536,  // 1/399.610
+        highProb: 1150 / 65536,  // 1/57.0 → ST60回転で65%
+        payout: 1876,
+        cost: 17.5,
+        costScale: 3.0,
+        kakuhenRate: 0.15,
+        stRate: 0.40,
+        jitanRate: 0.05,
+        kakuhenContinueRate: 0.65,
+        baseStSpins: 60,
+        yutimeThreshold: 1198,
+        unlockCondition: (s) => s.prestiges >= 7,
+        unlockText: 'プレステージ7回',
+    },
+    {
+        id: 'supermax',
+        name: '🌟 超MAX',
+        desc: '確変ループ全振り・ロマン型',
+        prob: 131 / 65536,  // 1/500.275
+        highProb: 978 / 65536,  // 1/67.0 → ST70回転で65%
+        payout: 2347,
+        cost: 20,
+        costScale: 5.0,
+        kakuhenRate: 0.10,
+        stRate: 0.40,
+        jitanRate: 0.00,
+        kakuhenContinueRate: 0.65,
+        baseStSpins: 70,
+        yutimeThreshold: 1500,
+        unlockCondition: (s) => s.prestiges >= 15,
+        unlockText: 'プレステージ15回',
+    },
+];
+
+// ============================================================
+// アップグレード定義
+// ============================================================
+
+const UPGRADES = [
+    {
+        id: 'spinRate',
+        name: '⚡ 回転速度UP',
+        desc: '毎秒の回転数を指数的に増加',
+        icon: '⚡',
+        baseCost: 500,
+        costMultiplier: 1.25,
+        maxLevel: Infinity,
+        apply: () => { },
+        effectText: (s) => `${s.spinRate.toFixed(3)}回/秒`,
+    },
+    {
+        id: 'jackpotProb',
+        name: '🎯 大当たり確率UP',
+        desc: '大当たり確率を5%改善',
+        icon: '🎯',
+        baseCost: 600,
+        costMultiplier: 1.6,
+        maxLevel: 30,
+        apply: () => { },
+        effectText: (s) => `1/${Math.round(1 / s.jackpotProb)}`,
+    },
+    {
+        id: 'jackpotPayout',
+        name: '💰 出玉UP',
+        desc: '大当たり時の出玉を+5%改善',
+        icon: '💰',
+        baseCost: 500,
+        costMultiplier: 1.8,
+        maxLevel: 50,
+        apply: () => { },
+        effectText: (s) => `${formatNum(s.jackpotPayout)}玉`,
+    },
+
+    {
+        id: 'kakuhenBoost',
+        name: '🔥 確変倍率UP',
+        desc: '確変/ST中の確率をさらに1.5%改善',
+        icon: '🔥',
+        baseCost: 1500,
+        costMultiplier: 1.8,
+        maxLevel: 20,
+        apply: () => { },
+        effectText: () => `1/${Math.round(1 / getKakuhenProb())}`,
+    },
+    {
+        id: 'stSpins',
+        name: '⏱️ ST回転数UP',
+        desc: 'STモードの回転数を+6%改善',
+        icon: '⏱️',
+        baseCost: 1200,
+        costMultiplier: 1.6,
+        maxLevel: 20,
+        apply: () => { },
+        effectText: () => `${getMaxStSpins()}回転`,
+    },
+    {
+        id: 'kakuhenCont',
+        name: '🔁 確変継続率UP',
+        desc: '確変モードの継続率を+2.5%改善',
+        icon: '🔁',
+        baseCost: 2000,
+        costMultiplier: 2.0,
+        maxLevel: 10,
+        apply: () => { },
+        effectText: () => `${(getKakuhenContinueRate() * 100).toFixed(2)}%`,
+    },
+    {
+        id: 'critical',
+        name: '💎 クリティカル',
+        desc: '大当たり時10%で出玉2倍',
+        icon: '💎',
+        baseCost: 3000,
+        costMultiplier: 2.0,
+        maxLevel: 10,
+        apply: () => { },
+        effectText: () => `${getCriticalChance()}%`,
+    },
+    {
+        id: 'costReduction',
+        name: '💸 コスト削減',
+        desc: '1回転あたりのコストを5%削減（累乗）',
+        icon: '💸',
+        baseCost: 1500,
+        costMultiplier: 1.8,
+        maxLevel: 10,
+        apply: () => { },
+        effectText: (s) => {
+            const lv = s.upgrades.costReduction || 0;
+            return lv > 0 ? `-${((1 - Math.pow(0.95, lv)) * 100).toFixed(2)}%` : '0.00%';
+        },
+    },
+    {
+        id: 'autoBuyer',
+        name: '🛒 オートバイヤー',
+        desc: '最安のアップグレードを自動購入',
+        icon: '🛒',
+        baseCost: 500000,
+        costMultiplier: 1,
+        maxLevel: 1,
+        apply: (s) => { s.autoBuyer = s.upgrades.autoBuyer >= 1; },
+        effectText: (s) => s.autoBuyer ? 'ON' : 'OFF',
+    },
+    {
+        id: 'autoPrestige',
+        name: '🔄 オートプレステージ',
+        desc: '条件達成で自動プレステージ（転生15回で解放）',
+        icon: '🔄',
+        baseCost: 10000000,
+        costMultiplier: 1,
+        maxLevel: 1,
+        hidden: true,
+        apply: (s) => { s.autoPrestige = s.upgrades.autoPrestige >= 1; },
+        effectText: (s) => s.autoPrestige ? 'ON' : 'OFF',
+    },
+];
+
+// Premium限定アップグレード
+const PREMIUM_UPGRADES = [
+    {
+        id: 'luckyPayout',
+        name: '🍀 ラッキーペイアウト',
+        desc: '大当たり出玉+15%（有料限定）',
+        icon: '🍀',
+        baseCost: 2000,
+        costMultiplier: 2.2,
+        maxLevel: 10,
+        apply: () => { },
+        effectText: (s) => `+${(s.upgrades.luckyPayout || 0) * 15}%`,
+    },
+    {
+        id: 'hyperShooter',
+        name: '🚀 ハイパーシューター',
+        desc: '回転速度+1.0/Lv（有料限定）',
+        icon: '🚀',
+        baseCost: 1500,
+        costMultiplier: 1.8,
+        maxLevel: 20,
+        apply: () => { },
+        effectText: (s) => `+${(s.upgrades.hyperShooter || 0) * 1.0}回/秒`,
+    },
+];
+
+// ============================================================
+// アチーブメント定義
+// ============================================================
+
+// マイルストーン閾値を返す（n=0から）
+function achThresholdJackpot(n) { return (n + 1) * 5; }
+function achThresholdUpgrade(n) { return n === 0 ? 1 : n * 5; }
+
+const ACHIEVEMENT_DEFS = [
+    {
+        id: 'jackpots', name: '🎉 大当たりの星', icon: '🎉',
+        getValue: (s) => s.totalLifetimeJackpots,
+        getThreshold: achThresholdJackpot,
+        maxMilestones: Infinity, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_spinRate', name: '⚡ 高速回転の達人', icon: '⚡',
+        getValue: (s) => s.upgrades.spinRate || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: Infinity, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_jackpotProb', name: '🎯 引き寄せの極意', icon: '🎯',
+        getValue: (s) => s.lifetimeMaxUpgrades?.jackpotProb || s.upgrades.jackpotProb || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: 7, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_jackpotPayout', name: '💰 出玉王の証', icon: '💰',
+        getValue: (s) => s.lifetimeMaxUpgrades?.jackpotPayout || s.upgrades.jackpotPayout || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: 11, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_kakuhenBoost', name: '🔥 灼熱の求道者', icon: '🔥',
+        getValue: (s) => s.lifetimeMaxUpgrades?.kakuhenBoost || s.upgrades.kakuhenBoost || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: 5, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_stSpins', name: '⏱️ 時を操る者', icon: '⏱️',
+        getValue: (s) => s.lifetimeMaxUpgrades?.stSpins || s.upgrades.stSpins || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: 5, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_kakuhenCont', name: '🔁 無限連荘の夢', icon: '🔁',
+        getValue: (s) => s.lifetimeMaxUpgrades?.kakuhenCont || s.upgrades.kakuhenCont || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: 3, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_critical', name: '💎 一撃必殺の魂', icon: '💎',
+        getValue: (s) => s.lifetimeMaxUpgrades?.critical || s.upgrades.critical || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: 3, reward: 100, hidden: false,
+    },
+    {
+        id: 'upg_costReduction', name: '💸 節約の鬼', icon: '💸',
+        getValue: (s) => s.lifetimeMaxUpgrades?.costReduction || s.upgrades.costReduction || 0,
+        getThreshold: achThresholdUpgrade,
+        maxMilestones: 3, reward: 100, hidden: false,
+    },
+    // 隠しアチーブメント
+    {
+        id: 'reelClick', name: '🎰 リールマスター', icon: '🎰',
+        getValue: (s) => s.reelClicks || 0,
+        getThreshold: (n) => [10, 50, 100][n] ?? null,
+        maxMilestones: 3, reward: 300, hidden: true,
+    },
+];

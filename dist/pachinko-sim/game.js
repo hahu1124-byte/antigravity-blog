@@ -1,1 +1,540 @@
-import{Ball as R,BoardLayout as S,Pocket as f,collideBallNail as C,collideBallWindmill as k}from"./physics.js";import{ReelSet as g}from"./reels.js";const h=340,i=h/2,r=h/2,c=h/2-8,w=.14,T=.999,B=12,M=7,u={prob:319.7,probRush:99.4,stCount:163,stEntryRate:.59,rounds10R:.59,prize:{heso:5,denchu:1,attacker:15,normal:5}},a={x:55,y:40,w:175,h:120},L={cx:i,cy:r,r:c},o={balls:[],board:null,pockets:[],reelSet:null,holdCount:0,maxHold:4,totalBalls:1e3,handlePower:.5,autoLaunch:!1,launchCounter:0,mode:"normal",bonusRound:0,bonusMaxRound:10,bonusCount:0,bonusMaxCount:10,bonusType:"10R",rushRemaining:0,isRush:!1,totalSpins:0,totalHits:0,totalPayout:0,canvas:null,ctx:null,frameCount:0,announceText:"",announceTimer:0};export function init(e){o.canvas=e,o.ctx=e.getContext("2d"),e.width=h,e.height=h,o.board=new S({x:i,y:r},c,a);const n=i,t=a.y+a.h+80;o.pockets.push(new f(n-8,t,16,7,"heso",{color:"#e04040",label:"START"})),o.pockets.push(new f(a.x+a.w+25,a.y+a.h+50,18,7,"denchu",{color:"#40a0e0",label:"\u96FB\u30C1\u30E5\u30FC",isOpen:!1})),o.pockets.push(new f(a.x+a.w+30,a.y+10,8,40,"attacker",{color:"#e04040",label:"ATK",isOpen:!1,vertical:!0})),o.pockets.push(new f(45,t-25,12,6,"normal",{color:"#60a060"})),o.pockets.push(new f(60,t+8,12,6,"normal",{color:"#60a060"})),o.pockets.push(new f(n-35,t+16,12,6,"normal",{color:"#60a060"})),o.pockets.push(new f(n+23,t+16,12,6,"normal",{color:"#60a060"})),o.pockets.push(new f(a.x+a.w+20,t+10,14,6,"heso",{color:"#c04080"})),o.reelSet=new g,o.reelSet.onComplete=O,P(),requestAnimationFrame(b)}function P(){const e=document.getElementById("handle-slider"),n=document.getElementById("launch-btn"),t=document.getElementById("buy-btn");e&&e.addEventListener("input",l=>{o.handlePower=l.target.value/100}),n&&n.addEventListener("click",()=>{o.autoLaunch=!o.autoLaunch,n.textContent=o.autoLaunch?"\u23F9 \u767A\u5C04 STOP":"\u25B6 \u767A\u5C04 START",n.classList.toggle("btn-active",o.autoLaunch)}),t&&t.addEventListener("click",()=>{o.totalBalls+=250,y()})}function A(){if(o.totalBalls<=0||o.balls.filter(p=>p.active).length>=B)return;const e=22,n=r+c-40,t=o.handlePower,l=5+t*7,s=-1.1-t*.25,d=new R(e+Math.random()*2,n,Math.cos(s)*l*.5,Math.sin(s)*l);o.balls.push(d),o.totalBalls--}function v(e){const n=a.x+15,t=a.y+a.h+2,l=a.w-30;if(e.y+e.radius>t&&e.y-e.radius<t+5&&e.x>n&&e.x<n+l){e.y=t-e.radius,e.vy=-Math.abs(e.vy)*.15;const d=n+l/2;e.vx+=(d-e.x)*.006,e.vx*=.8}}function I(e,n){switch(e.active=!1,n.type){case"heso":o.holdCount<o.maxHold&&(o.holdCount++,o.totalBalls+=u.prize.heso);break;case"denchu":o.holdCount<o.maxHold&&(o.holdCount++,o.totalBalls+=u.prize.denchu);break;case"attacker":o.bonusCount++,o.totalBalls+=u.prize.attacker,o.totalPayout+=u.prize.attacker,o.bonusCount>=o.bonusMaxCount&&(o.bonusRound++,o.bonusCount=0,o.bonusRound>=o.bonusMaxRound&&$());break;case"normal":o.totalBalls+=u.prize.normal;break}}function E(){if(o.holdCount<=0||!o.reelSet.isIdle()||o.mode==="bonus")return;o.holdCount--,o.totalSpins++;const e=o.isRush?u.probRush:u.prob,n=Math.random()<1/e;o.reelSet.startSpin(n),o.mode="spinning"}function O(e){e.isHit?(o.totalHits++,H()):o.isRush?(o.rushRemaining--,o.rushRemaining<=0?D():o.mode="rush"):o.mode="normal"}function H(){const e=Math.random()<u.rounds10R;o.bonusType=e?"10R":"3R",o.bonusMaxRound=e?10:3,o.mode="bonus",o.bonusRound=0,o.bonusCount=0,o.bonusMaxCount=10;const n=o.pockets.find(t=>t.type==="attacker");n&&(n.isOpen=!0),m(`\u5927\u5F53\u305F\u308A! ${o.bonusType}`,90)}function $(){const e=o.pockets.find(n=>n.type==="attacker");if(e&&(e.isOpen=!1),Math.random()<u.stEntryRate){o.isRush=!0,o.rushRemaining=u.stCount,o.mode="rush";const n=o.pockets.find(t=>t.type==="denchu");n&&(n.isOpen=!0),m("IMPACT MODE!",90)}else{o.isRush=!1,o.mode="normal";const n=o.pockets.find(t=>t.type==="denchu");n&&(n.isOpen=!1),m("\u901A\u5E38\u30E2\u30FC\u30C9",50)}}function D(){o.isRush=!1,o.mode="normal";const e=o.pockets.find(n=>n.type==="denchu");e&&(e.isOpen=!1),m("RUSH \u7D42\u4E86",50)}function m(e,n){o.announceText=e,o.announceTimer=n}function b(){W(),Y(),requestAnimationFrame(b)}function W(){o.frameCount++,o.autoLaunch&&o.handlePower>0&&(o.launchCounter++,o.launchCounter>=M&&(A(),o.launchCounter=0));for(const e of o.balls)if(e.active){e.update(w,T,L);for(const n of o.board.nails)C(e,n);for(const n of o.board.windmills)k(e,n);v(e);for(const n of o.pockets)if(n.checkBall(e)){I(e,n);break}}o.board.update(),o.frameCount%60===0&&(o.balls=o.balls.filter(e=>e.active)),o.reelSet.update(),o.reelSet.updateFlash(),o.holdCount>0&&o.reelSet.isIdle()&&o.mode!=="bonus"&&E(),o.announceTimer>0&&o.announceTimer--,o.frameCount%15===0&&y()}function Y(){const e=o.ctx;e.fillStyle="#1a1a2a",e.fillRect(0,0,h,h),z(e),N(e),o.board.draw(e),_(e);for(const n of o.pockets)n.draw(e);q(e),X(e),o.reelSet.draw(e,a.x+10,a.y+16,a.w-20,a.h-28);for(const n of o.balls)n.draw(e);G(e),o.mode==="bonus"&&U(e),o.isRush&&o.mode!=="bonus"&&F(e),o.announceTimer>0&&V(e)}function z(e){e.save(),e.beginPath(),e.arc(i,r,c,0,Math.PI*2);const n=e.createRadialGradient(i,r,0,i,r,c);n.addColorStop(0,"#1e4a2e"),n.addColorStop(1,"#0e2a1a"),e.fillStyle=n,e.fill(),e.strokeStyle="#999",e.lineWidth=4,e.stroke(),e.strokeStyle="#bbb",e.lineWidth=1,e.stroke(),e.restore()}function N(e){e.strokeStyle="#888",e.lineWidth=3,e.beginPath();const n=16,t=r+c-15;e.moveTo(n,t),e.quadraticCurveTo(8,r,i-50,r-c+15),e.stroke(),e.strokeStyle="#aaa",e.lineWidth=1,e.beginPath(),e.moveTo(n+2,t),e.quadraticCurveTo(10,r,i-48,r-c+17),e.stroke()}function X(e){e.fillStyle="#050510";const n=4;e.fillRect(a.x-n,a.y-n,a.w+n*2,a.h+n*2),e.strokeStyle="#333",e.lineWidth=2,e.strokeRect(a.x-n,a.y-n,a.w+n*2,a.h+n*2),e.fillStyle="#444",e.font="7px sans-serif",e.textAlign="center",e.fillText(`1/${u.prob}`,a.x+a.w/2,a.y+10)}function _(e){const n=a.x+15,t=a.y+a.h+2,l=a.w-30,s=5,d=e.createLinearGradient(n,t,n,t+s);d.addColorStop(0,"#666"),d.addColorStop(.5,"#aaa"),d.addColorStop(1,"#555"),e.fillStyle=d,e.beginPath(),e.moveTo(n,t),e.quadraticCurveTo(n+l/2,t+3,n+l,t),e.lineTo(n+l,t+s),e.lineTo(n,t+s),e.closePath(),e.fill()}function q(e){const n=a.y+a.h+14,t=3.5,l=i-o.maxHold*10/2;for(let s=0;s<o.maxHold;s++){const d=l+s*10+t;if(e.beginPath(),e.arc(d,n,t,0,Math.PI*2),s<o.holdCount){const p=["#ff3333","#3366ff","#ff3333","#3366ff"];e.fillStyle=p[s],e.fill(),e.shadowColor=p[s],e.shadowBlur=5,e.fill(),e.shadowBlur=0}else e.fillStyle="#1a1a1a",e.fill();e.strokeStyle="#333",e.lineWidth=.5,e.stroke()}}function G(e){const n=i,t=r+c-16;e.fillStyle="#0a0a0a",e.beginPath(),e.ellipse(n,t,18,6,0,0,Math.PI*2),e.fill(),e.strokeStyle="#333",e.lineWidth=1,e.stroke()}function U(e){e.fillStyle="rgba(200, 30, 30, 0.9)",e.font="bold 14px sans-serif",e.textAlign="center",e.fillText(`${o.bonusType}  R${o.bonusRound+1}/${o.bonusMaxRound}`,i,22),e.fillStyle="#fff",e.font="10px sans-serif",e.fillText(`${o.bonusCount}/${o.bonusMaxCount}C`,i,35)}function F(e){const n=Math.sin(o.frameCount*.1)*.3+.7;e.fillStyle=`rgba(0, 200, 255, ${n})`,e.font="bold 10px sans-serif",e.textAlign="center",e.fillText(`\u2605 IMPACT MODE \u2605 \u6B8B${o.rushRemaining}\u56DE`,i,20)}function V(e){const n=Math.min(1,o.announceTimer/15);e.fillStyle=`rgba(0, 0, 0, ${.7*n})`,e.fillRect(i-80,r-15,160,30),e.fillStyle=`rgba(255, 215, 0, ${n})`,e.font="bold 15px sans-serif",e.textAlign="center",e.textBaseline="middle",e.fillText(o.announceText,i,r),e.textBaseline="alphabetic"}function y(){const e=(t,l)=>{const s=document.getElementById(t);s&&(s.textContent=l)};e("balls-count",o.totalBalls.toLocaleString()),e("spins-count",o.totalSpins.toLocaleString()),e("hits-count",o.totalHits.toLocaleString()),e("payout-count",o.totalPayout.toLocaleString());const n=document.getElementById("mode-display");if(n){const t={normal:"\u901A\u5E38",spinning:"\u5909\u52D5\u4E2D",bonus:`${o.bonusType} R${o.bonusRound+1}`,rush:`IMPACT \u6B8B${o.rushRemaining}`};n.textContent=t[o.mode]||o.mode,n.className=`mode-badge mode-${o.mode}`}}
+// ========================================
+// game.js — メインゲームループ（v3: 実機画像準拠）
+// ========================================
+
+import { Ball, BoardLayout, Pocket, collideBallNail, collideBallWindmill } from './physics.js';
+import { ReelSet } from './reels.js';
+
+// ========== 定数 ==========
+const BOARD_SIZE = 340;
+const BOARD_CX = BOARD_SIZE / 2;
+const BOARD_CY = BOARD_SIZE / 2;
+const BOARD_R = BOARD_SIZE / 2 - 8;
+const GRAVITY = 0.14;
+const DAMPING = 0.999;
+const MAX_BALLS = 12;
+const LAUNCH_INTERVAL = 7;
+
+// エヴァ15 スペック
+const SPEC = {
+    prob: 319.7,
+    probRush: 99.4,
+    stCount: 163,
+    stEntryRate: 0.59,
+    rounds10R: 0.59,
+    prize: { heso: 5, denchu: 1, attacker: 15, normal: 5 },
+};
+
+// 液晶エリア（盤面上部中央寄り、画像に合わせて大きめ）
+const LCD = { x: 55, y: 40, w: 175, h: 120 };
+
+// 盤面の円形境界
+const BOUNDS = { cx: BOARD_CX, cy: BOARD_CY, r: BOARD_R };
+
+// ========== ゲーム状態 ==========
+const state = {
+    balls: [],
+    board: null,
+    pockets: [],
+    reelSet: null,
+    holdCount: 0,
+    maxHold: 4,
+    totalBalls: 1000,
+    handlePower: 0.5,
+    autoLaunch: false, // トグル式ON/OFF
+    launchCounter: 0,
+    mode: 'normal',
+    bonusRound: 0,
+    bonusMaxRound: 10,
+    bonusCount: 0,
+    bonusMaxCount: 10,
+    bonusType: '10R',
+    rushRemaining: 0,
+    isRush: false,
+    totalSpins: 0,
+    totalHits: 0,
+    totalPayout: 0,
+    canvas: null,
+    ctx: null,
+    frameCount: 0,
+    announceText: '',
+    announceTimer: 0,
+};
+
+// ========== 初期化 ==========
+export function init(canvas) {
+    state.canvas = canvas;
+    state.ctx = canvas.getContext('2d');
+    canvas.width = BOARD_SIZE;
+    canvas.height = BOARD_SIZE;
+
+    // 盤面レイアウト
+    state.board = new BoardLayout({ x: BOARD_CX, y: BOARD_CY }, BOARD_R, LCD);
+
+    // 入賞口の配置（画像に基づく）
+    const cx = BOARD_CX;
+
+    // ヘソ（下部中央、画像の①マーク位置）
+    const hesoY = LCD.y + LCD.h + 80;
+    state.pockets.push(new Pocket(
+        cx - 8, hesoY, 16, 7, 'heso',
+        { color: '#e04040', label: 'START' }
+    ));
+
+    // 電チュー（右下、画像の「特2電チュー」位置）
+    state.pockets.push(new Pocket(
+        LCD.x + LCD.w + 25, LCD.y + LCD.h + 50, 18, 7, 'denchu',
+        { color: '#40a0e0', label: '電チュー', isOpen: false }
+    ));
+
+    // アタッカー（右側、画像の「アタッカー」位置 — 縦長）
+    state.pockets.push(new Pocket(
+        LCD.x + LCD.w + 30, LCD.y + 10, 8, 40, 'attacker',
+        { color: '#e04040', label: 'ATK', isOpen: false, vertical: true }
+    ));
+
+    // 一般入賞口（⑤マーク位置に基づく）
+    // 左下
+    state.pockets.push(new Pocket(45, hesoY - 25, 12, 6, 'normal', { color: '#60a060' }));
+    state.pockets.push(new Pocket(60, hesoY + 8, 12, 6, 'normal', { color: '#60a060' }));
+    // 下部
+    state.pockets.push(new Pocket(cx - 35, hesoY + 16, 12, 6, 'normal', { color: '#60a060' }));
+    state.pockets.push(new Pocket(cx + 23, hesoY + 16, 12, 6, 'normal', { color: '#60a060' }));
+
+    // サブデジ入賞口（右下、画像の①位置）
+    state.pockets.push(new Pocket(
+        LCD.x + LCD.w + 20, hesoY + 10, 14, 6, 'heso',
+        { color: '#c04080' }
+    ));
+
+    // リール
+    state.reelSet = new ReelSet();
+    state.reelSet.onComplete = handleSpinResult;
+
+    setupEvents();
+    requestAnimationFrame(gameLoop);
+}
+
+// ========== イベント ==========
+function setupEvents() {
+    const handleSlider = document.getElementById('handle-slider');
+    const launchBtn = document.getElementById('launch-btn');
+    const buyBtn = document.getElementById('buy-btn');
+
+    if (handleSlider) {
+        handleSlider.addEventListener('input', (e) => {
+            state.handlePower = e.target.value / 100;
+        });
+    }
+
+    if (launchBtn) {
+        // トグル式ON/OFF
+        launchBtn.addEventListener('click', () => {
+            state.autoLaunch = !state.autoLaunch;
+            launchBtn.textContent = state.autoLaunch ? '⏹ 発射 STOP' : '▶ 発射 START';
+            launchBtn.classList.toggle('btn-active', state.autoLaunch);
+        });
+    }
+
+    if (buyBtn) {
+        buyBtn.addEventListener('click', () => {
+            state.totalBalls += 250;
+            updateUI();
+        });
+    }
+}
+
+// ========== 発射（左下から上へ弧を描く）==========
+function launchBall() {
+    if (state.totalBalls <= 0) return;
+    if (state.balls.filter(b => b.active).length >= MAX_BALLS) return;
+
+    // 発射起点: 盤面左下（実機の発射レール上端）
+    const startX = 22;
+    const startY = BOARD_CY + BOARD_R - 40;
+
+    // 左下から右上方向へ弧を描く
+    const power = state.handlePower;
+    const speed = 5 + power * 7;
+    // 約60度〜75度の角度で右上へ
+    const angle = -1.1 - power * 0.25;
+
+    const ball = new Ball(
+        startX + Math.random() * 2,
+        startY,
+        Math.cos(angle) * speed * 0.5,
+        Math.sin(angle) * speed
+    );
+    state.balls.push(ball);
+    state.totalBalls--;
+}
+
+// ========== ステージ衝突 ==========
+function checkStage(ball) {
+    const stageX = LCD.x + 15;
+    const stageY = LCD.y + LCD.h + 2;
+    const stageW = LCD.w - 30;
+    const stageH = 5;
+
+    if (ball.y + ball.radius > stageY &&
+        ball.y - ball.radius < stageY + stageH &&
+        ball.x > stageX && ball.x < stageX + stageW) {
+        ball.y = stageY - ball.radius;
+        ball.vy = -Math.abs(ball.vy) * 0.15;
+        const center = stageX + stageW / 2;
+        ball.vx += (center - ball.x) * 0.006;
+        ball.vx *= 0.8;
+    }
+}
+
+// ========== 入賞処理 ==========
+function handlePocketEntry(ball, pocket) {
+    ball.active = false;
+    switch (pocket.type) {
+        case 'heso':
+            if (state.holdCount < state.maxHold) {
+                state.holdCount++;
+                state.totalBalls += SPEC.prize.heso;
+            }
+            break;
+        case 'denchu':
+            if (state.holdCount < state.maxHold) {
+                state.holdCount++;
+                state.totalBalls += SPEC.prize.denchu;
+            }
+            break;
+        case 'attacker':
+            state.bonusCount++;
+            state.totalBalls += SPEC.prize.attacker;
+            state.totalPayout += SPEC.prize.attacker;
+            if (state.bonusCount >= state.bonusMaxCount) {
+                state.bonusRound++;
+                state.bonusCount = 0;
+                if (state.bonusRound >= state.bonusMaxRound) endBonus();
+            }
+            break;
+        case 'normal':
+            state.totalBalls += SPEC.prize.normal;
+            break;
+    }
+}
+
+// ========== 変動 ==========
+function startSpin() {
+    if (state.holdCount <= 0 || !state.reelSet.isIdle() || state.mode === 'bonus') return;
+    state.holdCount--;
+    state.totalSpins++;
+    const prob = state.isRush ? SPEC.probRush : SPEC.prob;
+    const isHit = Math.random() < (1 / prob);
+    state.reelSet.startSpin(isHit);
+    state.mode = 'spinning';
+}
+
+function handleSpinResult(result) {
+    if (result.isHit) {
+        state.totalHits++;
+        startBonus();
+    } else {
+        if (state.isRush) {
+            state.rushRemaining--;
+            if (state.rushRemaining <= 0) { endRush(); } else { state.mode = 'rush'; }
+        } else {
+            state.mode = 'normal';
+        }
+    }
+}
+
+function startBonus() {
+    const is10R = Math.random() < SPEC.rounds10R;
+    state.bonusType = is10R ? '10R' : '3R';
+    state.bonusMaxRound = is10R ? 10 : 3;
+    state.mode = 'bonus';
+    state.bonusRound = 0;
+    state.bonusCount = 0;
+    state.bonusMaxCount = 10;
+    const attacker = state.pockets.find(p => p.type === 'attacker');
+    if (attacker) attacker.isOpen = true;
+    setAnnounce(`大当たり! ${state.bonusType}`, 90);
+}
+
+function endBonus() {
+    const attacker = state.pockets.find(p => p.type === 'attacker');
+    if (attacker) attacker.isOpen = false;
+    if (Math.random() < SPEC.stEntryRate) {
+        state.isRush = true;
+        state.rushRemaining = SPEC.stCount;
+        state.mode = 'rush';
+        const denchu = state.pockets.find(p => p.type === 'denchu');
+        if (denchu) denchu.isOpen = true;
+        setAnnounce('IMPACT MODE!', 90);
+    } else {
+        state.isRush = false;
+        state.mode = 'normal';
+        const denchu = state.pockets.find(p => p.type === 'denchu');
+        if (denchu) denchu.isOpen = false;
+        setAnnounce('通常モード', 50);
+    }
+}
+
+function endRush() {
+    state.isRush = false;
+    state.mode = 'normal';
+    const denchu = state.pockets.find(p => p.type === 'denchu');
+    if (denchu) denchu.isOpen = false;
+    setAnnounce('RUSH 終了', 50);
+}
+
+function setAnnounce(text, frames) {
+    state.announceText = text;
+    state.announceTimer = frames;
+}
+
+// ========== ゲームループ ==========
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+function update() {
+    state.frameCount++;
+
+    // 自動発射
+    if (state.autoLaunch && state.handlePower > 0) {
+        state.launchCounter++;
+        if (state.launchCounter >= LAUNCH_INTERVAL) {
+            launchBall();
+            state.launchCounter = 0;
+        }
+    }
+
+    // 玉更新
+    for (const ball of state.balls) {
+        if (!ball.active) continue;
+        ball.update(GRAVITY, DAMPING, BOUNDS);
+
+        for (const nail of state.board.nails) { collideBallNail(ball, nail); }
+        for (const wm of state.board.windmills) { collideBallWindmill(ball, wm); }
+        checkStage(ball);
+        for (const pocket of state.pockets) {
+            if (pocket.checkBall(ball)) { handlePocketEntry(ball, pocket); break; }
+        }
+    }
+
+    state.board.update();
+    if (state.frameCount % 60 === 0) { state.balls = state.balls.filter(b => b.active); }
+
+    state.reelSet.update();
+    state.reelSet.updateFlash();
+    if (state.holdCount > 0 && state.reelSet.isIdle() && state.mode !== 'bonus') { startSpin(); }
+    if (state.announceTimer > 0) state.announceTimer--;
+    if (state.frameCount % 15 === 0) updateUI();
+}
+
+// ========== 描画 ==========
+function draw() {
+    const ctx = state.ctx;
+
+    // 外側（筐体色）
+    ctx.fillStyle = '#1a1a2a';
+    ctx.fillRect(0, 0, BOARD_SIZE, BOARD_SIZE);
+
+    // 盤面（円形）
+    drawBoard(ctx);
+
+    // 発射レール
+    drawLaunchRail(ctx);
+
+    // 釘・風車
+    state.board.draw(ctx);
+
+    // ステージ
+    drawStage(ctx);
+
+    // 入賞口
+    for (const pocket of state.pockets) { pocket.draw(ctx); }
+
+    // 保留ランプ
+    drawHoldLamps(ctx);
+
+    // 液晶
+    drawLCD(ctx);
+    state.reelSet.draw(ctx, LCD.x + 10, LCD.y + 16, LCD.w - 20, LCD.h - 28);
+
+    // 玉
+    for (const ball of state.balls) { ball.draw(ctx); }
+
+    // アウト穴
+    drawOutHole(ctx);
+
+    // オーバーレイ
+    if (state.mode === 'bonus') drawBonusOverlay(ctx);
+    if (state.isRush && state.mode !== 'bonus') drawRushIndicator(ctx);
+    if (state.announceTimer > 0) drawAnnounce(ctx);
+}
+
+function drawBoard(ctx) {
+    // 盤面は円形（実機のガラスの中）
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(BOARD_CX, BOARD_CY, BOARD_R, 0, Math.PI * 2);
+
+    // 緑の盤面
+    const boardGrad = ctx.createRadialGradient(BOARD_CX, BOARD_CY, 0, BOARD_CX, BOARD_CY, BOARD_R);
+    boardGrad.addColorStop(0, '#1e4a2e');
+    boardGrad.addColorStop(1, '#0e2a1a');
+    ctx.fillStyle = boardGrad;
+    ctx.fill();
+
+    // 外レール（金属色の円弧）
+    ctx.strokeStyle = '#999';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    ctx.strokeStyle = '#bbb';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+}
+
+function drawLaunchRail(ctx) {
+    // 左下から上へ弧を描くレール
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    // レールの弧（左下から盤面上部へ）
+    const startX = 16;
+    const startY = BOARD_CY + BOARD_R - 15;
+    ctx.moveTo(startX, startY);
+    // 左外レールに沿って上昇
+    ctx.quadraticCurveTo(8, BOARD_CY, BOARD_CX - 50, BOARD_CY - BOARD_R + 15);
+    ctx.stroke();
+
+    // 内レールのハイライト
+    ctx.strokeStyle = '#aaa';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(startX + 2, startY);
+    ctx.quadraticCurveTo(10, BOARD_CY, BOARD_CX - 48, BOARD_CY - BOARD_R + 17);
+    ctx.stroke();
+}
+
+function drawLCD(ctx) {
+    ctx.fillStyle = '#050510';
+    const pad = 4;
+    ctx.fillRect(LCD.x - pad, LCD.y - pad, LCD.w + pad * 2, LCD.h + pad * 2);
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(LCD.x - pad, LCD.y - pad, LCD.w + pad * 2, LCD.h + pad * 2);
+    ctx.fillStyle = '#444';
+    ctx.font = '7px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`1/${SPEC.prob}`, LCD.x + LCD.w / 2, LCD.y + 10);
+}
+
+function drawStage(ctx) {
+    const sx = LCD.x + 15;
+    const sy = LCD.y + LCD.h + 2;
+    const sw = LCD.w - 30;
+    const sh = 5;
+
+    const grad = ctx.createLinearGradient(sx, sy, sx, sy + sh);
+    grad.addColorStop(0, '#666');
+    grad.addColorStop(0.5, '#aaa');
+    grad.addColorStop(1, '#555');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.quadraticCurveTo(sx + sw / 2, sy + 3, sx + sw, sy);
+    ctx.lineTo(sx + sw, sy + sh);
+    ctx.lineTo(sx, sy + sh);
+    ctx.closePath();
+    ctx.fill();
+}
+
+function drawHoldLamps(ctx) {
+    const lampY = LCD.y + LCD.h + 14;
+    const lampR = 3.5;
+    const startX = BOARD_CX - (state.maxHold * 10) / 2;
+
+    for (let i = 0; i < state.maxHold; i++) {
+        const x = startX + i * 10 + lampR;
+        ctx.beginPath();
+        ctx.arc(x, lampY, lampR, 0, Math.PI * 2);
+        if (i < state.holdCount) {
+            const colors = ['#ff3333', '#3366ff', '#ff3333', '#3366ff'];
+            ctx.fillStyle = colors[i];
+            ctx.fill();
+            ctx.shadowColor = colors[i];
+            ctx.shadowBlur = 5;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        } else {
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fill();
+        }
+        ctx.strokeStyle = '#333';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+    }
+}
+
+function drawOutHole(ctx) {
+    const cx = BOARD_CX;
+    const y = BOARD_CY + BOARD_R - 16;
+    ctx.fillStyle = '#0a0a0a';
+    ctx.beginPath();
+    ctx.ellipse(cx, y, 18, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+}
+
+function drawBonusOverlay(ctx) {
+    ctx.fillStyle = 'rgba(200, 30, 30, 0.9)';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${state.bonusType}  R${state.bonusRound + 1}/${state.bonusMaxRound}`, BOARD_CX, 22);
+    ctx.fillStyle = '#fff';
+    ctx.font = '10px sans-serif';
+    ctx.fillText(`${state.bonusCount}/${state.bonusMaxCount}C`, BOARD_CX, 35);
+}
+
+function drawRushIndicator(ctx) {
+    const glow = Math.sin(state.frameCount * 0.1) * 0.3 + 0.7;
+    ctx.fillStyle = `rgba(0, 200, 255, ${glow})`;
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`★ IMPACT MODE ★ 残${state.rushRemaining}回`, BOARD_CX, 20);
+}
+
+function drawAnnounce(ctx) {
+    const alpha = Math.min(1, state.announceTimer / 15);
+    ctx.fillStyle = `rgba(0, 0, 0, ${0.7 * alpha})`;
+    ctx.fillRect(BOARD_CX - 80, BOARD_CY - 15, 160, 30);
+    ctx.fillStyle = `rgba(255, 215, 0, ${alpha})`;
+    ctx.font = 'bold 15px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(state.announceText, BOARD_CX, BOARD_CY);
+    ctx.textBaseline = 'alphabetic';
+}
+
+function updateUI() {
+    const set = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+    set('balls-count', state.totalBalls.toLocaleString());
+    set('spins-count', state.totalSpins.toLocaleString());
+    set('hits-count', state.totalHits.toLocaleString());
+    set('payout-count', state.totalPayout.toLocaleString());
+
+    const modeEl = document.getElementById('mode-display');
+    if (modeEl) {
+        const names = {
+            normal: '通常', spinning: '変動中',
+            bonus: `${state.bonusType} R${state.bonusRound + 1}`,
+            rush: `IMPACT 残${state.rushRemaining}`,
+        };
+        modeEl.textContent = names[state.mode] || state.mode;
+        modeEl.className = `mode-badge mode-${state.mode}`;
+    }
+}
