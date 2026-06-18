@@ -924,6 +924,17 @@ a:hover {
     color: white !important;
 }
 
+/* --- 執筆裏話メモ --- */
+.novels-behind-note {
+    font-size: 0.9rem;
+    color: var(--lab-text-muted);
+    padding: 0.6rem 1rem;
+    background: var(--lab-bg-card);
+    border-left: 3px solid var(--lab-accent);
+    border-radius: 0 var(--lab-radius-sm) var(--lab-radius-sm) 0;
+    margin: 1.5rem 0 2rem;
+}
+
 /* --- セクション --- */
 .novels-section {
     margin-bottom: 2.5rem;

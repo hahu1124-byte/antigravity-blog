@@ -1353,6 +1353,79 @@ function labWrap({
 </html>`;
 }
 
+/** timeline.md を ## 見出しで週ごとに分割してタブUIのHTMLを生成 */
+async function buildTimelineTabsHtml(filePath) {
+  const src = readFileSync(filePath, "utf-8");
+  const { content } = matter(src);
+
+  // ## で始まるセクションに分割
+  const parts = content.split(/(?=\n## )/);
+  const preamble = parts[0]; // ## より前の部分（注記・区切り線など）
+  const sections = parts.slice(1);
+
+  // 週セクションが1つ以下ならそのままHTML変換して返す
+  if (sections.length <= 1) {
+    const result = await remark()
+      .use(remarkGfm)
+      .use(remarkHtml, { sanitize: false })
+      .process(content);
+    return result.toString();
+  }
+
+  // preamble をHTML変換
+  const preambleHtml = preamble.trim()
+    ? (await remark().use(remarkGfm).use(remarkHtml, { sanitize: false }).process(preamble)).toString()
+    : "";
+
+  // 各セクションのタイトルとHTMLを収集
+  const weekData = [];
+  for (const section of sections) {
+    const titleMatch = section.match(/^## (.+)/m);
+    const title = titleMatch ? titleMatch[1].trim() : "不明";
+    const result = await remark()
+      .use(remarkGfm)
+      .use(remarkHtml, { sanitize: false })
+      .process(section);
+    weekData.push({ title, html: result.toString() });
+  }
+
+  const tabButtons = weekData
+    .map((w, i) => `<button class="tl-tab${i === 0 ? " tl-tab-active" : ""}" data-week="${i}">${escapeHtml(w.title)}</button>`)
+    .join("");
+
+  const tabContents = weekData
+    .map((w, i) => `<div class="tl-content${i === 0 ? " tl-content-active" : ""}" data-week="${i}">${w.html}</div>`)
+    .join("");
+
+  return `
+<style>
+.tl-tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
+.tl-tab{padding:.45rem 1rem;background:var(--lab-bg-card,rgba(30,32,48,.8));border:1px solid var(--lab-border,rgba(99,102,241,.2));border-radius:8px;color:var(--lab-text-muted,#8b8fa0);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.tl-tab:hover{border-color:var(--lab-accent,#58a6ff);color:var(--lab-text,#e0e0e8)}
+.tl-tab-active{background:rgba(88,166,255,.15);border-color:var(--lab-accent,#58a6ff);color:var(--lab-text,#e0e0e8)}
+.tl-content{display:none}.tl-content-active{display:block}
+</style>
+${preambleHtml}
+<div class="tl-tabs">${tabButtons}</div>
+<div class="tl-contents">
+${tabContents}
+</div>
+<script>
+(function(){
+  var tabs=document.querySelectorAll('.tl-tab');
+  tabs.forEach(function(tab){
+    tab.addEventListener('click',function(){
+      var w=this.dataset.week;
+      tabs.forEach(function(t){t.classList.remove('tl-tab-active');});
+      document.querySelectorAll('.tl-content').forEach(function(c){c.classList.remove('tl-content-active');});
+      this.classList.add('tl-tab-active');
+      document.querySelector('.tl-content[data-week="'+w+'"]').classList.add('tl-content-active');
+    });
+  });
+})();
+</script>`;
+}
+
 async function buildNovelsPages() {
   if (!existsSync(NOVELS_SRC_DIR)) {
     console.log("⏭️  src/lab/novels/ なし — novelsページ生成スキップ");
@@ -1361,7 +1434,7 @@ async function buildNovelsPages() {
 
   const introHtml = await mdToHtml(join(NOVELS_SRC_DIR, "intro.md"));
   const structureHtml = await mdToHtml(join(NOVELS_SRC_DIR, "structure.md"));
-  const timelineHtml = await mdToHtml(join(NOVELS_SRC_DIR, "timeline.md"));
+  const timelineTabsHtml = await buildTimelineTabsHtml(join(NOVELS_SRC_DIR, "timeline.md"));
 
   // --- novels/index.html ---
   const novelsDir = join(OUTPUT_DIR, "lab", "novels");
@@ -1373,7 +1446,7 @@ async function buildNovelsPages() {
             <span class="novels-sep">›</span>
             <a href="/lab/">LAB</a>
             <span class="novels-sep">›</span>
-            <span class="novels-current">AI小説執筆ログ</span>
+            <span class="novels-current">AI小説</span>
         </nav>
 
         <div class="novels-hero">
@@ -1384,6 +1457,8 @@ async function buildNovelsPages() {
             <p class="novels-hero-sub">ふたつのAIが同じ話を書き、人間が統合する。</p>
             <a href="https://kakuyomu.jp/works/2912051602055329793" target="_blank" rel="noopener noreferrer" class="novels-cta">カクヨムで読む →</a>
         </div>
+
+        <p class="novels-behind-note">執筆裏話をここに記載していきます。</p>
 
         <section class="novels-section novels-markdown">
             ${introHtml}
@@ -1417,13 +1492,13 @@ async function buildNovelsPages() {
   writeFileSync(
     join(novelsDir, "index.html"),
     labWrap({
-      title: "AI小説執筆ログ — 廃城の王 | LAB | Gravity Portal",
+      title: "AI小説 — 廃城の王 | LAB | Gravity Portal",
       description:
         "2つのAIが同じ話を書き、人間が統合する。カクヨム連載中「廃城の王」の制作プロセスと修正履歴を公開。",
       backHref: "/lab/",
       backLabel: "LABに戻る",
       titleIcon: "📖",
-      titleText: "AI小説執筆ログ",
+      titleText: "AI小説",
       bodyHtml: novelsBody,
     }),
     "utf-8",
@@ -1439,27 +1514,27 @@ async function buildNovelsPages() {
             <span class="novels-sep">›</span>
             <a href="/lab/">LAB</a>
             <span class="novels-sep">›</span>
-            <a href="/lab/novels/">AI小説執筆ログ</a>
+            <a href="/lab/novels/">AI小説</a>
             <span class="novels-sep">›</span>
             <span class="novels-current">制作タイムライン</span>
         </nav>
 
         <section class="novels-section novels-markdown novels-timeline-body">
-            ${timelineHtml}
+            ${timelineTabsHtml}
         </section>
 
         <div class="novels-footer">
-            <a href="/lab/novels/" class="novels-back-link">← AI小説執筆ログに戻る</a>
+            <a href="/lab/novels/" class="novels-back-link">← AI小説に戻る</a>
         </div>`;
 
   writeFileSync(
     join(timelineDir, "index.html"),
     labWrap({
-      title: "制作タイムライン — 廃城の王 | AI小説執筆ログ | Gravity Portal",
+      title: "制作タイムライン — 廃城の王 | AI小説 | Gravity Portal",
       description:
         "「廃城の王」制作タイムライン。いつ・どの話を書き・何を修正したか、週ごとにまとめた制作記録。",
       backHref: "/lab/novels/",
-      backLabel: "AI小説執筆ログに戻る",
+      backLabel: "AI小説に戻る",
       titleIcon: "📅",
       titleText: "制作タイムライン",
       bodyHtml: timelineBody,
