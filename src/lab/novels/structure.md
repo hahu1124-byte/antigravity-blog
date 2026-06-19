@@ -1,4 +1,4 @@
----
+﻿---
 title: 現在のフォルダ構成
 ---
 
@@ -20,18 +20,21 @@ novels/
     ├── writing_prompt.md       # AI執筆指示書
     └── episodes/
         └── 1-50/
-            ├── 1-10/           # ep01C〜ep10C
-            ├── 11-20/          # ep11C〜ep20C
+            ├── 1-10/                # ep01~ep10
+            ├── 11-20/               # ep11~ep20
             └── 21-30/
                 ├── ep21C.md
                 ├── ep22C.md
-                ├── ep23T.md    # T版（正式版）
-                ├── ep24T.md    # T版（正式版）
-                └── archive/    # A版・C版の退避先
+                ├── ep23T.md    # T-ban (seishiki-ban)
+                ├── ep24T.md    # T-ban (seishiki-ban)
+                ├── ep25T.md    # T-ban (seishiki-ban)
+                └── archive/    # A-ban / C-ban
                     ├── ep23A.md
                     ├── ep23C.md
                     ├── ep24A.md
-                    └── ep24C.md
+                    ├── ep24C.md
+                    ├── ep25A.md
+                    └── ep25C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
