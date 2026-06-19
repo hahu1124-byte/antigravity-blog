@@ -13,15 +13,55 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>(function(){try{var t=localStorage.getItem("gp-theme");t&&document.documentElement.setAttribute("data-theme",t)}catch{}})();
-</script>
-    <style>.hub-layout{min-height:100vh;background:var(--lab-bg)}.hub-content{max-width:800px;width:100%;margin:0 auto;padding:2rem 1.5rem 3rem}.hub-heading{font-size:1.4rem;font-weight:700;color:var(--lab-text);text-align:center;margin-bottom:.5rem}.hub-subtext{font-size:.9rem;color:var(--lab-text-muted);text-align:center;margin-bottom:2rem;line-height:1.6}.hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}.hub-card{display:flex;flex-direction:column;align-items:center;text-align:center;padding:2rem 1.5rem;background:var(--lab-bg-card);border:1px solid var(--lab-border);border-radius:16px;transition:all .25s ease;text-decoration:none;color:inherit}.hub-card:hover{border-color:var(--lab-accent);transform:translateY(-4px);box-shadow:var(--lab-shadow)}.hub-card-icon{font-size:3rem;margin-bottom:.75rem}.hub-card-title{font-size:1.2rem;font-weight:700;color:var(--lab-text);margin-bottom:.5rem}.hub-card-desc{font-size:.85rem;color:var(--lab-text-muted);line-height:1.5;margin-bottom:1rem}.hub-links{display:flex;flex-direction:column;gap:.5rem;width:100%;margin-top:.25rem}.hub-link-item{display:flex;align-items:center;justify-content:space-between;padding:.6rem 1rem;background:var(--lab-bg);border:1px solid var(--lab-border);border-radius:10px;text-decoration:none;transition:all .2s ease}.hub-link-item:hover{border-color:var(--lab-accent);background:#58a6ff14;transform:translate(4px)}.hub-link-label{font-size:.9rem;font-weight:600;color:var(--lab-text)}.hub-link-date{font-size:.75rem;color:var(--lab-text-muted)}.hub-badge{font-size:.75rem;padding:.25rem .6rem;background:var(--lab-bg);border:1px solid var(--lab-border);border-radius:9999px;color:var(--lab-text-muted)}.hub-card-meta{display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center}@media(max-width:600px){.hub-grid{grid-template-columns:1fr}.hub-heading{font-size:1.2rem}.hub-content{padding:1.5rem 1rem 2rem}}
-</style>
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
+    <style>
+        /* ハブ専用スタイル */
+        .hub-layout { min-height: 100vh; background: var(--lab-bg); }
+        .hub-content { max-width: 800px; width: 100%; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+        .hub-heading { font-size: 1.4rem; font-weight: 700; color: var(--lab-text); text-align: center; margin-bottom: 0.5rem; }
+        .hub-subtext { font-size: 0.9rem; color: var(--lab-text-muted); text-align: center; margin-bottom: 2rem; line-height: 1.6; }
+        .hub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .hub-card {
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            padding: 2rem 1.5rem; background: var(--lab-bg-card); border: 1px solid var(--lab-border);
+            border-radius: 16px; transition: all 0.25s ease; text-decoration: none; color: inherit;
+        }
+        .hub-card:hover { border-color: var(--lab-accent); transform: translateY(-4px); box-shadow: var(--lab-shadow); }
+        .hub-card-icon { font-size: 3rem; margin-bottom: 0.75rem; }
+        .hub-card-title { font-size: 1.2rem; font-weight: 700; color: var(--lab-text); margin-bottom: 0.5rem; }
+        .hub-card-desc { font-size: 0.85rem; color: var(--lab-text-muted); line-height: 1.5; margin-bottom: 1rem; }
+        .hub-links { display: flex; flex-direction: column; gap: 0.5rem; width: 100%; margin-top: 0.25rem; }
+        .hub-link-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.6rem 1rem; background: var(--lab-bg); border: 1px solid var(--lab-border);
+            border-radius: 10px; text-decoration: none; transition: all 0.2s ease;
+        }
+        .hub-link-item:hover { border-color: var(--lab-accent); background: rgba(88,166,255,0.08); transform: translateX(4px); }
+        .hub-link-label { font-size: 0.9rem; font-weight: 600; color: var(--lab-text); }
+        .hub-link-date { font-size: 0.75rem; color: var(--lab-text-muted); }
+        .hub-badge { font-size: 0.75rem; padding: 0.25rem 0.6rem; background: var(--lab-bg); border: 1px solid var(--lab-border); border-radius: 9999px; color: var(--lab-text-muted); }
+        .hub-card-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; }
+        @media (max-width: 600px) { .hub-grid { grid-template-columns: 1fr; } .hub-heading { font-size: 1.2rem; } .hub-content { padding: 1.5rem 1rem 2rem; } }
+    </style>
 </head>
 <body>
     <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
-    <script>(function(){var e=document.getElementById("themeToggle");function n(){var t=document.documentElement.getAttribute("data-theme");e.textContent=t==="light"?"\u{1F319}":"\u2600\uFE0F"}n(),e.addEventListener("click",function(){var t=document.documentElement.getAttribute("data-theme"),m=t==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",m);try{localStorage.setItem("gp-theme",m)}catch{}n()})})();
-</script>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
 
     <div class="hub-layout">
         <header class="lab-header">
@@ -34,7 +74,7 @@
             <p class="hub-subtext">AI開発ツールの調査・比較レビュー、注目の開発者紹介、トレンド情報をまとめています。</p>
 
             <div class="hub-grid">
-                
+                <!-- AI開発ツール比較 -->
                 <a href="/lab/ai-tools/" class="hub-card">
                     <span class="hub-card-icon">🛠️</span>
                     <h3 class="hub-card-title">AI開発ツール比較</h3>
@@ -48,7 +88,7 @@
                     </div>
                 </a>
 
-                
+                <!-- AI開発者ピックアップ -->
                 <a href="/lab/ai-developers/" class="hub-card">
                     <span class="hub-card-icon">👤</span>
                     <h3 class="hub-card-title">AI開発者ピックアップ</h3>
@@ -62,7 +102,7 @@
                     </div>
                 </a>
 
-                
+                <!-- AI開発トレンド -->
                 <a href="/lab/ai-trends/" class="hub-card">
                     <span class="hub-card-icon">📊</span>
                     <h3 class="hub-card-title">AI開発トレンド</h3>
@@ -76,7 +116,7 @@
                     </div>
                 </a>
 
-                
+                <!-- AI小説執筆ログ -->
                 <a href="/lab/novels/" class="hub-card">
                     <span class="hub-card-icon">📖</span>
                     <h3 class="hub-card-title">AI小説</h3>

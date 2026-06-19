@@ -25,10 +25,10 @@ novels/
             └── 21-30/
                 ├── ep21C.md
                 ├── ep22C.md
-                ├── ep23T.md    # T-ban (seishiki-ban)
-                ├── ep24T.md    # T-ban (seishiki-ban)
-                ├── ep25T.md    # T-ban (seishiki-ban)
-                └── archive/    # A-ban / C-ban
+                ├── ep23T.md
+                ├── ep24T.md
+                ├── ep25T.md
+                └── archive/
                     ├── ep23A.md
                     ├── ep23C.md
                     ├── ep24A.md
