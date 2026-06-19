@@ -1219,8 +1219,15 @@ ${m.yutimeTrigger > 0 ? `<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回�
     "utf-8",
   );
 
-  // stats.json — GP等が機種数を動的取得するための軽量ファイル
-  const stats = { machineCount: generated, builtAt: BUILD_STAMP };
+  // stats.json — GP等が各種カウントを動的取得するための軽量ファイル
+  // toolCount/gameCount/labCount はGPサイトのカード数（Vercelデプロイなしで更新するためここで管理）
+  const stats = {
+    machineCount: generated,
+    toolCount: 9,
+    gameCount: 2,
+    labCount: 4,
+    builtAt: BUILD_STAMP,
+  };
   writeFileSync(
     join(OUTPUT_DIR, "data", "stats.json"),
     JSON.stringify(stats),
