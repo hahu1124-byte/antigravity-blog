@@ -87,7 +87,7 @@
 
         <nav class="pagination" id="pagination"></nav>
     </div>
-    <script>(function(){var r=10,t=1,o=Array.from(document.querySelectorAll(".article-card")),i=document.getElementById("pagination");function c(){var a=Math.ceil(o.length/r);t>a&&(t=a||1);var g=(t-1)*r,s=g+r;o.forEach(function(d,l){d.style.display=l>=g&&l<s?"":"none"});var n="";if(a>1){t>1&&(n+='<button class="page-btn" data-page="'+(t-1)+'">\u2190 \u524D</button>');for(var e=1;e<=a;e++)n+='<button class="page-btn'+(e===t?" page-active":"")+'" data-page="'+e+'">'+e+"</button>";t<a&&(n+='<button class="page-btn" data-page="'+(t+1)+'">\u6B21 \u2192</button>')}i.innerHTML=n}i.addEventListener("click",function(a){a.target.dataset.page&&(t=parseInt(a.target.dataset.page),c(),window.scrollTo({top:0,behavior:"smooth"}))}),c()})();
+    <script>(function(){var o=10,t=1,r=Array.from(document.querySelectorAll(".article-card")),c=document.getElementById("pagination");function i(){var a=Math.ceil(r.length/o);t>a&&(t=a||1);var u=(t-1)*o,s=u+o;r.forEach(function(l,g){l.style.display=g>=u&&g<s?"":"none"});var e="";if(a>1){t>1&&(e+='<button class="page-btn" data-page="'+(t-1)+'">\u2190 \u524D</button>');for(var n=1;n<=a;n++)e+='<button class="page-btn'+(n===t?" page-active":"")+'" data-page="'+n+'">'+n+"</button>";t<a&&(e+='<button class="page-btn" data-page="'+(t+1)+'">\u6B21 \u2192</button>')}c.innerHTML=e}c.addEventListener("click",function(a){a.target.dataset.page&&(t=parseInt(a.target.dataset.page),i(),window.scrollTo({top:0,behavior:"smooth"}))}),i()})();
 </script>
 </body>
 </html>
