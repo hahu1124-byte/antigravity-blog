@@ -29,6 +29,7 @@ novels/
                 ├── ep24T.md
                 ├── ep25T.md
                 ├── ep26T.md
+                ├── ep27T.md
                 └── archive/
                     ├── ep23A.md
                     ├── ep23C.md
@@ -37,7 +38,9 @@ novels/
                     ├── ep25A.md
                     ├── ep25C.md
                     ├── ep26A.md
-                    └── ep26C.md
+                    ├── ep26C.md
+                    ├── ep27A.md
+                    └── ep27C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
