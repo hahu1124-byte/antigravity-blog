@@ -23,10 +23,10 @@ novels/
             ├── 1-10/                # ep01~ep10
             ├── 11-20/               # ep11~ep20
             └── 21-30/
-                ├── ... (6 older files)
-                ├── ep27T.md
+                ├── ... (7 older files)
                 ├── ep28T.md
                 ├── ep29A.md
+                ├── ep29C.md
                 └── archive/
                     ├── ... (10 older files)
                     ├── ep28A.md
