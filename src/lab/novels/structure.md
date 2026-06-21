@@ -33,16 +33,7 @@ novels/
                 ├── ep28T.md
                 ├── ep29A.md
                 └── archive/
-                    ├── ep23A.md
-                    ├── ep23C.md
-                    ├── ep24A.md
-                    ├── ep24C.md
-                    ├── ep25A.md
-                    ├── ep25C.md
-                    ├── ep26A.md
-                    ├── ep26C.md
-                    ├── ep27A.md
-                    ├── ep27C.md
+                    ├── ... (10 older files)
                     ├── ep28A.md
                     └── ep28C.md
 ```
