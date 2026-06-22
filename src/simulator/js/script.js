@@ -460,6 +460,7 @@ const MACHINES = {
         if (r < 0.55) {
           // 55%: RUSH突入（3000個）
           bonusBall = 3000;
+          addLog(`>> ジャッジ成功！！ RUSH突入！`);
           // フリーズ上乗せループ（25%ごとに+1500）
           while (Math.random() < 0.25) {
             rushBonus += 1500;
@@ -471,7 +472,7 @@ const MACHINES = {
           await new Promise((r) => setTimeout(r, 800));
           document.getElementById("machine").classList.remove("vibe-rainbow");
           document.getElementById("lamp").classList.remove("lamp-active");
-          addLog(`>> ジャッジ成功！！ RUSH突入！ 出玉: ${bonusBall}個`);
+          addLog(`>> 出玉: ${bonusBall}個`);
           totalBall += bonusBall;
           currentRot = 0;
           mode = "ST";
@@ -498,6 +499,8 @@ const MACHINES = {
         if (r < 0.25) {
           // 25%: 3000個+α（超強欲3000BONUS）
           bonusBall = 3000;
+          addLog(`>> 超強欲3000BONUS！！`);
+          // フリーズ上乗せループ（25%ごとに+1500）
           while (Math.random() < 0.25) {
             rushBonus += 1500;
             addLog(`>> 超強欲フリーズ！！ +1500上乗せ！`);
@@ -513,7 +516,7 @@ const MACHINES = {
           await new Promise((r) => setTimeout(r, 1000));
           document.getElementById("machine").classList.remove("vibe-rainbow");
           document.getElementById("lamp").classList.remove("lamp-active");
-          addLog(`>> 超強欲3000BONUS！！ 出玉: ${bonusBall}個 RUSH継続！`);
+          addLog(`>> 出玉: ${bonusBall}個 RUSH継続！`);
         } else if (r < 0.8) {
           // 55%: 1500個
           bonusBall = 1500;
@@ -567,7 +570,8 @@ let slumpData = [0],
 let sChart,
   hChart,
   firstHitRot = 0,
-  rushSeriesCount = 0;
+  rushSeriesCount = 0,
+  rushStartBall = 0;
 
 // ============================================================
 // 正しい抽選フロー：先に当たり外れを決め、演出を機種別に抽選
@@ -615,7 +619,10 @@ async function startProcess() {
   if (!isAuto || isAnim) return;
   if (mode !== "通常" && rRem <= 0) {
     const modeLabel = M.modeLabel(mode);
-    addLog(`【${modeLabel}終了】 ${currentRushHits}連`);
+    const rushNetBall = Math.floor(totalBall - rushStartBall);
+    addLog(
+      `【${modeLabel}終了】 ${currentRushHits}連 出玉: ${rushNetBall.toLocaleString()}個`,
+    );
     rushSeriesCount++;
     historyData.push(firstHitRot);
     historyLabels.push(`${rushSeriesCount}回目(${currentRushHits}連)`);
@@ -757,6 +764,7 @@ async function startProcess() {
     hits++;
     if (mode === "通常") {
       firstHitRot = lcdCount;
+      rushStartBall = totalBall;
       if (currentRot > maxHamari) {
         maxHamari = currentRot;
         document.getElementById("max-hamari-box").innerText =
@@ -1005,6 +1013,7 @@ function resetState() {
   historyLabels = [];
   rushSeriesCount = 0;
   firstHitRot = 0;
+  rushStartBall = 0;
   document.getElementById("max-hamari-box").innerText = "最大ハマリ: 0";
   document.getElementById("log").innerHTML = "> システム起動完了";
   // チャート再構築（テーマ色も反映）
