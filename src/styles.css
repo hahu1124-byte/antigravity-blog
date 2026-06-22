@@ -704,20 +704,42 @@ html[data-theme="light"] .content img {
     transition: all var(--transition-fast);
 }
 
-.page-btn:hover {
+.page-btn.page-arrow {
+    width: 2.4rem;
+    height: 2.4rem;
+    min-width: 2.4rem;
+    padding: 0;
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.page-btn:hover:not(:disabled) {
     border-color: var(--accent);
     color: var(--accent);
     background: var(--accent-glow);
 }
 
-.page-active {
-    background: var(--accent);
-    color: white;
-    border-color: var(--accent);
+.page-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
 
-.page-active:hover {
-    background: var(--accent-hover);
+.page-select {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.4rem 0.8rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-family: var(--font-sans);
+    cursor: pointer;
+    outline: none;
+    min-width: 5rem;
+    text-align: center;
+}
+
+.page-select:hover {
+    border-color: var(--accent);
 }
 
 /* タグフィルタのbuttonリセット */

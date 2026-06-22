@@ -668,7 +668,7 @@ function buildArticleListHtml(
             ${cards}
         </section>
 
-        <nav class="pagination" id="pagination"></nav>
+        <div class="pagination" id="pagination"></div>
     </div>
     <script>
     (function() {
@@ -679,7 +679,8 @@ function buildArticleListHtml(
 
         function render() {
             var totalPages = Math.ceil(cards.length / PER_PAGE);
-            if (currentPage > totalPages) currentPage = totalPages || 1;
+            if (totalPages <= 0) totalPages = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
             var start = (currentPage - 1) * PER_PAGE;
             var end = start + PER_PAGE;
 
@@ -687,28 +688,32 @@ function buildArticleListHtml(
                 c.style.display = (i >= start && i < end) ? '' : 'none';
             });
 
-            var html = '';
-            if (totalPages > 1) {
-                if (currentPage > 1) {
-                    html += '<button class="page-btn" data-page="' + (currentPage - 1) + '">← 前</button>';
-                }
-                for (var p = 1; p <= totalPages; p++) {
-                    html += '<button class="page-btn' + (p === currentPage ? ' page-active' : '') + '" data-page="' + p + '">' + p + '</button>';
-                }
-                if (currentPage < totalPages) {
-                    html += '<button class="page-btn" data-page="' + (currentPage + 1) + '">次 →</button>';
-                }
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
             }
-            pagination.innerHTML = html;
-        }
 
-        pagination.addEventListener('click', function(e) {
-            if (e.target.dataset.page) {
-                currentPage = parseInt(e.target.dataset.page);
+            var opts = '';
+            for (var p = 1; p <= totalPages; p++) {
+                opts += '<option value="' + p + '"' + (p === currentPage ? ' selected' : '') + '>' + p + ' / ' + totalPages + '</option>';
+            }
+            pagination.innerHTML =
+                '<button class="page-btn page-arrow" id="pg-prev" ' + (currentPage <= 1 ? 'disabled' : '') + '>&#8249;</button>' +
+                '<select class="page-select" id="pg-select">' + opts + '</select>' +
+                '<button class="page-btn page-arrow" id="pg-next" ' + (currentPage >= totalPages ? 'disabled' : '') + '>&#8250;</button>';
+
+            document.getElementById('pg-prev').addEventListener('click', function() {
+                if (currentPage > 1) { currentPage--; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+            });
+            document.getElementById('pg-next').addEventListener('click', function() {
+                if (currentPage < totalPages) { currentPage++; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+            });
+            document.getElementById('pg-select').addEventListener('change', function() {
+                currentPage = parseInt(this.value);
                 render();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        });
+            });
+        }
 
         render();
     })();
