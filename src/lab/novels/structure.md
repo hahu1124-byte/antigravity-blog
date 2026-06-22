@@ -26,6 +26,7 @@ novels/
             ├── 21-30/               # ep21~ep30
             └── 31-40/
                 ├── ep31T.md
+                ├── ep32A.md
                 └── archive/
                     ├── ep31A.md
                     └── ep31C.md
