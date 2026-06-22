@@ -1401,6 +1401,13 @@ async function buildTimelineTabsHtml(filePath) {
     weekData.push({ title, html: result.toString() });
   }
 
+  // 日付セクション（年で始まるもの）を逆順にし、その他（メモ等）は末尾に残す
+  const dateWeeks = weekData.filter(w => /^\d{4}年/.test(w.title));
+  const otherWeeks = weekData.filter(w => !/^\d{4}年/.test(w.title));
+  weekData.length = 0;
+  dateWeeks.reverse().forEach(w => weekData.push(w));
+  otherWeeks.forEach(w => weekData.push(w));
+
   const tabButtons = weekData
     .map((w, i) => `<button class="tl-tab${i === 0 ? " tl-tab-active" : ""}" data-week="${i}">${escapeHtml(w.title)}</button>`)
     .join("");
