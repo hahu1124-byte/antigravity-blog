@@ -139,3 +139,55 @@ bash h:/gravity/.agent/scripts/hgit.sh h:/gravity/projects/antigravity-blog push
 
 - **X**: `https://twitter.com/intent/tweet?text=...` のURLエンコードリンクを生成
 - **Bluesky**: コピペ用テキストを用意（`https://bsky.app/` から投稿）
+
+### 10. Obsidian保存（weekly_trend記事のみ）
+
+スラッグに `weekly_trend` が含まれる場合のみ実行。
+
+#### 10a. Markdownノート作成
+
+`h:/gravity/docs/knowledge/projects/weekly-trends/weekly-trend-wNN.md` を作成。
+
+```markdown
+---
+name: weekly-trend-wNN
+description: 週間テックトレンド WNN（YYYY年M月D日〜M月D日）
+tags: [週間トレンド, テック, AI開発, Webデザイン, UI/UX, 個人開発]
+created: YYYY-MM-DD
+week: WNN
+period: YYYY-MM-DD〜YYYY-MM-DD
+source: https://antigravity-portal.com/blog/YYYYMM/記事スラッグ/
+total_articles: NNN
+top_category: カテゴリ名（NN件）
+---
+
+# 週間テックトレンド WNN（MM/DD〜MM/DD）
+
+[[INDEX]]
+
+（記事本文をHTML→Markdown変換して全文貼り付け）
+```
+
+変換ルール:
+- `<h2>` → `## `
+- `<ul><li>` → `- `
+- `<a href="URL">テキスト</a>` → `[テキスト](URL)`
+- `<strong>` → `**テキスト**`
+- `<small>` → `（小文字テキスト）`
+- `<hr>` → `---`
+- `⭐` マーク・カテゴリ見出し・各リンクを全て保持
+
+#### 10b. INDEX.md更新
+
+`h:/gravity/docs/knowledge/INDEX.md` の `projects/weekly-trends/` テーブルに先頭行として追加:
+
+```markdown
+| [projects/weekly-trends/weekly-trend-wNN.md](projects/weekly-trends/weekly-trend-wNN.md) | 週間テックトレンド WNN（YYYY-MM-DD〜MM-DD）NNN件 / トップカテゴリ |
+```
+
+#### 10c. gravity リポジトリコミット
+
+```bash
+bash h:/gravity/.agent/scripts/hgit.sh h:/gravity add docs/knowledge/projects/weekly-trends/weekly-trend-wNN.md docs/knowledge/INDEX.md
+bash h:/gravity/.agent/scripts/hgit.sh h:/gravity commit -m "save: 週間テックトレンド WNN をObsidianに保存"
+```
