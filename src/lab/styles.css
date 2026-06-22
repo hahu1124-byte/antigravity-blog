@@ -126,7 +126,7 @@ a:hover {
 
 /* --- メインコンテンツ --- */
 .lab-content {
-    max-width: 900px;
+    max-width: 1200px;
     width: 100%;
     margin: 0 auto;
     padding: 2rem 1.5rem 4rem;
@@ -832,7 +832,7 @@ a:hover {
    ============================================================ */
 
 .novels-content {
-    max-width: 800px;
+    max-width: 1200px;
 }
 
 /* --- パンくず --- */
