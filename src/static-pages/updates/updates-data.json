@@ -1,5 +1,20 @@
 [
     {
+        "date": "2026-06-22",
+        "title": "v0.10.1 — LAB第10回公開（Fable 5停止・Windsurf→Devin Desktop・OpenCode 160K Stars）",
+        "sections": [
+            {
+                "version": "v0.10.1",
+                "items": [
+                    "🔬 LAB第10回公開！AI開発ツール比較・開発者ピックアップ・トレンドの第9回（v9）3ページとまとめ記事を追加",
+                    "🚨 Fable 5 & Mythos 5 輸出規制停止（6月12日）のレポートを掲載",
+                    "🦾 Windsurf → Devin Desktop 消滅（6月2日）の詳細レポートを掲載",
+                    "🚀 OpenCode 160K Stars突破・モデル非依存設計の大衆化を特集"
+                ]
+            }
+        ]
+    },
+    {
         "date": "2026-06-06",
         "title": "v0.10.0 — Claude Code開発体制移行・ツール拡充・UI改善",
         "sections": [

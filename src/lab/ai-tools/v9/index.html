@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発ツール比較 2026 第9回 | LAB | Gravity Portal</title>
+    <meta name="description" content="AI開発ツール比較 第9回（2026年6月更新）。Fable 5輸出規制停止・WindsurfがDevin Desktopへ消滅・OpenCode 160K Stars台頭。AI政府規制介入の時代が始まった。">
+    <meta property="og:title" content="AI開発ツール比較 2026 第9回 — 政府介入・ツール消滅・OSS台頭">
+    <meta property="og:description" content="Fable 5 & Mythos 5が米国輸出規制で全停止。WindsurfがDevin Desktopへ消滅。OpenCode 160K Starsで7.5M開発者がモデル非依存へ。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-tools/v9/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-tools.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-tools/v9/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>(function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()</script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">🛠️ AI開発ツール比較 第9回</h1>
+    </header>
+    <main class="lab-content">
+        <section class="lab-hero">
+            <div class="lab-hero-icon">🛠️</div>
+            <h1>AI開発ツール — 政府介入・ツール消滅・OSS台頭 第9回</h1>
+            <p>第8回（6月3日）からわずか3週間で、AI開発ツール業界は再び激変しました。<br>
+               米国政府がFable 5 & Mythos 5へのアクセスを輸出規制で全世界停止（6月12日）。<br>
+               WindsurfがCognitionによってDevin Desktopへ完全リブランド（6月2日）。<br>
+               そしてOpenCodeが160K Starsを突破し、モデル非依存OSSが大衆化への扉を開けました。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年6月22日更新</span>
+                <span>🔧 7ツール比較</span>
+                <span>📝 <a href="/lab/ai-tools/v8/" style="color:inherit;text-decoration:underline">前回（第8回）はこちら</a></span>
+            </div>
+        </section>
+
+        <section class="lab-section">
+            <h2>🔥 6月前半の3大事件</h2>
+            <p><strong>① Fable 5 & Mythos 5 全世界アクセス停止（6月12日）🚨</strong> — 米国政府が国家安全保障を根拠にAnthropicへ輸出規制指令。ジェイルブレイク手法の発見を受け、<strong>外国籍者への提供が全面禁止</strong>されたため、Anthropicは全ユーザーのアクセスを一夜で無効化。Claude Code・Sonnet 4.6・Opus 4.8 等のClaude 4系モデルは影響なし。Anthropicは「商用モデルをジェイルブレイク1件で停止するのは過剰」と公式に反論したが、政府命令には従わざるを得なかった。</p>
+            <p><strong>② Windsurf → Devin Desktop（6月2日）🦾</strong> — Cognitionが2025年12月に約$250Mで買収したWindsurfを「Devin Desktop」に正式リブランド。UIの設計思想が「コードエディタ＋エージェント補助」から<strong>「エージェントコマンドセンター＋内蔵エディタ」へ反転</strong>。ローカルエージェント「Devin Local」をRustで完全再実装（トークン効率30%向上）。既存の「Cascade」は2026年7月1日にEOL。</p>
+            <p><strong>③ OpenCode 160K Stars突破（OSSコーディングエージェント最多）🚀</strong> — モデル非依存のCLIファーストエージェント。75以上のAIプロバイダーを単一設定で切り替えられ、エアギャップ環境にも対応。月間アクティブ開発者7.5Mを記録し、<strong>商用ツールへのロックインを拒否する開発者の受け皿</strong>として急成長中。</p>
+        </section>
+
+        <section class="lab-section">
+            <h2>🔍 各ツール最新状況（2026年6月）</h2>
+
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🤖</div>
+                    <div class="tool-card-info"><h3>Claude Code</h3><div class="tool-maker">Anthropic</div></div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">Opus 4.8 / Dynamic Workflows</span>
+                    <span class="badge badge-free">Fable 5停止も Sonnet 4.6 / Opus 4.8 は継続</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 6月の主要アップデート</h3>
+                    <ul>
+                        <li><strong>Claude Opus 4.8リリース</strong>: Dynamic Workflowsに対応。エージェントループのルーティング精度が向上し、長期タスクの自律完了率が改善</li>
+                        <li><strong>Fable 5 & Mythos 5停止（6月12日）の影響</strong>: Claude CodeのデフォルトモデルはSonnet 4.6 / Opus 4.8。Fable系は実験的プレビューだったため実運用への影響はほぼなし</li>
+                        <li><strong>GitHub Actions統合GA</strong>: CIワークフロー内からClaude Codeを呼び出せる正式版がリリース</li>
+                        <li><strong>iOS / Slack連携継続</strong>: 7サーフェスすべてで安定動作中。MCP成熟度も業界トップを維持</li>
+                    </ul>
+                    <h3>💰 価格（2026年6月）</h3>
+                    <ul>
+                        <li>Pro: $20/月 | Max 5x: $100/月 | Max 20x: $200/月</li>
+                        <li>SWE-bench Verified: <strong>87.6%（カテゴリ1位）</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">⚡</div>
+                    <div class="tool-card-info"><h3>Cursor</h3><div class="tool-maker">Anysphere</div></div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">Team Standard / Premium 二極化</span>
+                    <span class="badge badge-type">$32 〜 $96 / シート</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 6月：Teamsプランを Standard / Premium に再編</h3>
+                    <ul>
+                        <li><strong>Standard席</strong>: $32/シート（年間） / $40（月額）— 通常の利用量</li>
+                        <li><strong>Premium席</strong>: $96/シート（年間）— Standard比5倍の使用量。大規模リファクタリングや並列Background Agent使用向け</li>
+                        <li><strong>Background Agents（最大8並列）</strong>: Cloud VM環境での自律コーディングは引き続き最前線</li>
+                        <li><strong>マルチモデル継続</strong>: Claude 4.6 Sonnet / Opus 4.8、GPT-5.5、Gemini 3.5 Flash、Kimi K2.5から選択可能</li>
+                    </ul>
+                    <h3>⚠️ 課題</h3>
+                    <ul>
+                        <li>Premium席の価格上昇（$40→$96）で中小チームのコスト増加</li>
+                        <li>Composer 2 = Kimi K2.5（中国モデル）論争は継続</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🦾</div>
+                    <div class="tool-card-info"><h3>Devin Desktop（旧Windsurf）</h3><div class="tool-maker">Cognition</div></div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">🆕 6月2日リブランド</span>
+                    <span class="badge badge-free">Devin Local（Rust製）</span>
+                    <span class="badge badge-paid">Cascade EOL 7月1日</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 Windsurf消滅 — Devin Desktopへ</h3>
+                    <ul>
+                        <li><strong>OTAアップデートで即時移行</strong>: 6月2日に自動更新が配信。再インストール不要でデスクトップアプリのUI・名称が変更</li>
+                        <li><strong>設計思想の転換</strong>: 起動画面が「エディタキャンバス」から「Agent Command Center」へ。エージェント管理ハブが前面に</li>
+                        <li><strong>Devin Local（Rust製）</strong>: ローカルエージェントをゼロから書き直し。トークン効率30%向上・サブエージェント対応</li>
+                        <li><strong>Cascade EOL：7月1日</strong>: 旧ローカルエージェントCascadeは7月1日に終了。Devin Localへの移行が必要</li>
+                        <li><strong>Devin Cloud</strong>: $20 Proプランから利用可能に（以前はエンタープライズのみ）</li>
+                    </ul>
+                    <h3>💰 価格</h3>
+                    <ul>
+                        <li>Free / Pro $20 / Max $200 / Teams $80（ベース）+ $40/シート</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">💻</div>
+                    <div class="tool-card-info"><h3>GitHub Copilot</h3><div class="tool-maker">Microsoft / GitHub</div></div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">6月1日 従量課金 GA</span>
+                    <span class="badge badge-type">$100 Max プラン新設</span>
+                </div>
+                <div class="tool-card-body">
+                    <ul>
+                        <li><strong>Flex Billing GA（6月1日）</strong>: フラット定額モデルを完全廃止。使用量ベース課金が正式スタート</li>
+                        <li><strong>$100 Maxプラン</strong>: 大量利用者向けの新上位プランを追加</li>
+                        <li><strong>マルチモデル継続</strong>: Claude Opus 4.6/4.8・Sonnet 4.6・GPTシリーズを選択可能</li>
+                        <li><strong>企業コンプライアンス最強</strong>: 4エージェントタイプ（Local/Background/Cloud/Sub-Agents）で組織内展開がもっとも安全</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🟢</div>
+                    <div class="tool-card-info"><h3>OpenCode</h3><div class="tool-maker">OSSコミュニティ</div></div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">160K+ Stars（OSS最多）</span>
+                    <span class="badge badge-free">75+ プロバイダー / MIT</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 OSSコーディングエージェント頂点へ</h3>
+                    <ul>
+                        <li><strong>160K+ GitHub Stars</strong>: OSS AIコーディングエージェントカテゴリでトップ。900+コントリビューター</li>
+                        <li><strong>7.5M 月間アクティブ開発者</strong>: Cursor・Copilotに次ぐ規模を維持しながら完全無料（BYOK）</li>
+                        <li><strong>75+ LLMプロバイダー対応</strong>: OpenAI / Anthropic / Google / Mistral / Ollama（ローカル）などを単一設定で切り替え</li>
+                        <li><strong>エアギャップデプロイ対応</strong>: 外部ネットワーク接続ゼロで稼働可能。金融・医療など規制業種でも採用可</li>
+                        <li><strong>LSP統合</strong>: エディタ補完と同等の型情報をエージェントが活用。精度の高いコード生成を実現</li>
+                        <li><strong>MIT License</strong>: 商用利用・改変・再配布が完全自由</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🚀</div>
+                    <div class="tool-card-info"><h3>Antigravity 2.0</h3><div class="tool-maker">Google DeepMind</div></div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-type">Gemini CLI 6月18日終了完了</span>
+                    <span class="badge badge-free">移行期安定化フェーズ</span>
+                </div>
+                <div class="tool-card-body">
+                    <ul>
+                        <li><strong>Gemini CLI終了（6月18日）</strong>: 予告通り個人向けGemini CLIが終了。Antigravity CLI（agy）への移行が完了</li>
+                        <li><strong>agy（Antigravity CLI）</strong>: Go言語で再実装。非同期ワークフロー・統合アーキテクチャに刷新</li>
+                        <li><strong>Agent Teams</strong>: サブエージェントをロール別に組成し並列実行。5サーフェス対応は変わらず</li>
+                        <li><strong>法人Gmailの対応待ち</strong>: 2.0 Previewは個人Gmailのみ。法人アカウント対応は6月末〜7月予定</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tool-card">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🤖</div>
+                    <div class="tool-card-info"><h3>Grok Build（xAI）</h3><div class="tool-maker">xAI</div></div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-type">継続稼働（主要変更なし）</span>
+                </div>
+                <div class="tool-card-body">
+                    <ul>
+                        <li>8並列Gitワークツリー・ローカルファースト設計は変わらず継続</li>
+                        <li>Arena Mode（複数エージェントの出力を競合させる機能）の正式公開待ち</li>
+                        <li>コンプライアンス書類の整備が遅れており、規制業種での採用は依然困難</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="lab-section">
+            <h2>📊 全ツール総合比較（2026年6月）</h2>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>ツール</th><th>月額目安</th><th>最新動向</th><th>SWE-bench</th><th>特徴</th></tr></thead>
+                    <tbody>
+                        <tr><td class="tool-name">Claude Code</td><td>$20〜$200</td><td>Opus 4.8・Dynamic Workflows</td><td>87.6% ✅ #1</td><td>Fable 5停止も無影響・MCP最成熟</td></tr>
+                        <tr><td class="tool-name">Cursor</td><td>Free〜$200</td><td>Team再編（Standard/Premium）</td><td>79.8% (Multilingual)</td><td>IDE体験最強・8並列Cloud Agent</td></tr>
+                        <tr><td class="tool-name">Devin Desktop</td><td>Free〜$200</td><td>旧Windsurf・6/2リブランド</td><td>—</td><td>コマンドセンター設計・Devin Local Rust製</td></tr>
+                        <tr><td class="tool-name">GitHub Copilot</td><td>$10〜$100</td><td>6/1 従量課金GA・Max新設</td><td>—</td><td>企業コンプライアンス最強</td></tr>
+                        <tr><td class="tool-name">Antigravity 2.0</td><td>Free〜$200</td><td>Gemini CLI 6/18終了完了</td><td>—</td><td>GCP/Firebase向け・5サーフェス</td></tr>
+                        <tr><td class="tool-name">OpenCode</td><td>無料（BYOK）</td><td>160K Stars・OSS最多</td><td>—</td><td>75+プロバイダー・MIT・エアギャップ</td></tr>
+                        <tr><td class="tool-name">Grok Build</td><td>SuperGrok込</td><td>継続（Arena Mode待ち）</td><td>70.8%</td><td>8並列worktree・ローカルファースト</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="lab-section">
+            <h2>🎯 第9回時点のおすすめ（2026年6月）</h2>
+            <div class="summary-box">
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">🔥 安定・深い推論・大規模開発</div>
+                        <div class="summary-value">Claude Code（Max 5x $100/月）</div>
+                        <p>Fable 5停止の影響ゼロ。Opus 4.8・MCP・iOS・Discord連携で個人〜チーム向け最良</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🖥️ IDE体験・並列エージェント</div>
+                        <div class="summary-value">Cursor（$32〜$96/シート）</div>
+                        <p>8並列Cloud Agent・Composer 2.5。無料Hobbyから試せる唯一の大手</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🆓 ロックインゼロ・BYOK</div>
+                        <div class="summary-value">OpenCode（無料）</div>
+                        <p>75+プロバイダー・MIT・エアギャップ。規制業種・コスト重視の上級者に</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🏢 企業コンプライアンス重視</div>
+                        <div class="summary-value">GitHub Copilot（$10〜$100）</div>
+                        <p>6/1従量課金GA。監査・SSO必須の組織での第一候補</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="lab-section">
+            <h2>📝 調査にあたって</h2>
+            <p>本記事は<strong>2026年6月22日時点</strong>の情報を基に更新しました。当サイトはClaude Codeで開発中です。Fable 5停止に関する情報はAnthropicの公式声明および各社報道を参照しています。<a href="/lab/">アーカイブはこちら</a>。</p>
+        </section>
+    </main>
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-tools/v8/">🛠️ 第8回</a>
+            <a href="/lab/ai-developers/v9/">👤 開発者 第9回</a>
+            <a href="/lab/ai-trends/v9/">📊 トレンド 第9回</a>
+        </nav>
+    </footer>
+    <script>(function(){var btn=document.getElementById('themeToggle');function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}update();btn.addEventListener('click',function(){var cur=document.documentElement.getAttribute('data-theme');var next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('gp-theme',next)}catch(e){}update()})})()</script>
+</body>
+</html>
