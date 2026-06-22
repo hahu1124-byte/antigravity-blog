@@ -924,6 +924,13 @@ a:hover {
     color: white !important;
 }
 
+.novels-cta-group {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
 /* --- 執筆裏話メモ --- */
 .novels-behind-note {
     font-size: 0.9rem;

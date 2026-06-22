@@ -1474,7 +1474,10 @@ async function buildNovelsPages() {
             </div>
             <h1 class="novels-hero-title">廃城の王</h1>
             <p class="novels-hero-sub">ふたつのAIが同じ話を書き、人間が統合する。</p>
-            <a href="https://kakuyomu.jp/works/2912051602055329793" target="_blank" rel="noopener noreferrer" class="novels-cta">カクヨムで読む →</a>
+            <div class="novels-cta-group">
+                <a href="https://kakuyomu.jp/works/2912051602055329793" target="_blank" rel="noopener noreferrer" class="novels-cta">カクヨムで読む →</a>
+                <a href="/lab/novels/timeline/" class="novels-cta">制作タイムラインを見る →</a>
+            </div>
         </div>
 
         <p class="novels-behind-note">執筆裏話をここに記載していきます。</p>
