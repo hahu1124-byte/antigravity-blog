@@ -8,9 +8,30 @@ title: 現在のフォルダ構成
 novels/
 ├── world-setting/              # 共通世界観「エルダリア」
 │   ├── lore/                   # 世界の法則・歴史・魔法体系
+│   │   ├── calendar.md         # 暦・月名・季節区分
+│   │   ├── gods.md             # 神々・創界神エルダリア・魔神アリダエル
+│   │   ├── heroes.md           # 歴代勇者
+│   │   ├── history.md          # 歴史年表・魔王特攻スキルの真実
+│   │   ├── memory-stone.md     # 記憶石の設定
+│   │   └── world.md            # 世界概要・魔力体系
 │   ├── geography/              # 地理・地名・マップ
+│   │   ├── eldaria_world_map.md  # 世界地図（テキスト版）
+│   │   ├── eldaria_world_map.png # 世界地図（画像）
+│   │   ├── geography.md        # 地理・地形・気候
+│   │   ├── guild.md            # 冒険者ギルド制度
+│   │   ├── nations.md          # 国家一覧
+│   │   └── society.md          # 社会構造・文化
 │   ├── beings/                 # 種族・生物
+│   │   ├── demon-kings.md      # 歴代魔王（人間時代・背景詳細）
+│   │   ├── demons.md           # 魔族設定
+│   │   ├── monsters.md         # 魔物・存在格レベル対応表
+│   │   └── races.md            # 種族一覧
 │   └── rules/                  # 封石・ギフト・暦のルール
+│       ├── combat.md           # 戦闘ルール
+│       ├── items.md            # アイテム・道具
+│       ├── kingdom-law.md      # 王国法（10本50条）
+│       ├── level-system.md     # 存在格レベル体系・シーリング・突破条件
+│       └── skills.md           # ギフト段階詳細（弱〜真）・全スキル一覧
 │
 └── story-03-haijo-no-ou/       # 廃城の王
     ├── appraisal-format.md     # 鑑定眼《トゥルー・サイト》の表示フォーマット
@@ -26,7 +47,10 @@ novels/
             ├── 21-30/               # ep21C〜ep22C（統合版未作成）
             │   │                    # ep23T〜ep30T（統合版あり）
             │   └── archive/         # ep23A/C〜ep30A/C（T版完成後に退避）
-            └── 31-40/               # ep31T〜ep36T（第1章終盤・統合版あり）
+            └── 31-40/               # 第1章終盤（統合版あり）
+                ├── ep34T.md
+                ├── ep35T.md
+                ├── ep36T.md         # 第1章エピローグ「廃城の王」
                 └── archive/         # ep31A/C〜ep36A/C（T版完成後に退避）
 ```
 
