@@ -9,7 +9,7 @@ novels/
 ├── world-setting/              # 共通世界観「エルダリア」
 │   ├── lore/                   # 世界の法則・歴史・魔法体系
 │   │   ├── calendar.md         # 暦・月名・季節区分
-│   │   ├── gods.md             # 神々・創界神エルダリア・魔神アリダエル
+│   │   ├── gods.md             # 神々の設定
 │   │   ├── heroes.md           # 歴代勇者
 │   │   ├── history.md          # 歴史年表・魔王特攻スキルの真実
 │   │   ├── memory-stone.md     # 記憶石の設定
@@ -29,7 +29,7 @@ novels/
 │   └── rules/                  # 封石・ギフト・暦のルール
 │       ├── combat.md           # 戦闘ルール
 │       ├── items.md            # アイテム・道具
-│       ├── kingdom-law.md      # 王国法（10本50条）
+│       ├── kingdom-law.md      # ラングリア王国法（10本50条）
 │       ├── level-system.md     # 存在格レベル体系・シーリング・突破条件
 │       └── skills.md           # ギフト段階詳細（弱〜真）・全スキル一覧
 │
