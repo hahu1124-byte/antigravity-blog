@@ -66,7 +66,7 @@ ep01〜ep22 は現在 C版のみ存在。今後 A版・T版の作成予定あり
 
 舞台となる「エルダリア」の世界地図。Gemini にて作成。
 
-![エルダリア世界地図](/lab/novels/eldaria_world_map.png)
+![エルダリア世界地図](/eldaria_world_map.png)
 
 ---
 
