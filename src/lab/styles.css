@@ -1041,6 +1041,14 @@ a:hover {
     color: var(--lab-text-muted);
 }
 
+.novels-markdown img {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+}
+
 /* --- タイムライン表 --- */
 .novels-timeline-body table {
     width: 100%;

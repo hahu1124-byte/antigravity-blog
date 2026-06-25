@@ -13,26 +13,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
-    </script>
+    <script>(function(){try{var t=localStorage.getItem("gp-theme");t&&document.documentElement.setAttribute("data-theme",t)}catch{}})();
+</script>
 </head>
 <body>
     <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
-    <script>
-        (function(){
-            var btn=document.getElementById('themeToggle');
-            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
-            update();
-            btn.addEventListener('click',function(){
-                var cur=document.documentElement.getAttribute('data-theme');
-                var next=cur==='light'?'dark':'light';
-                document.documentElement.setAttribute('data-theme',next);
-                try{localStorage.setItem('gp-theme',next)}catch(e){}
-                update();
-            });
-        })()
-    </script>
+    <script>(function(){var e=document.getElementById("themeToggle");function n(){var t=document.documentElement.getAttribute("data-theme");e.textContent=t==="light"?"\u{1F319}":"\u2600\uFE0F"}n(),e.addEventListener("click",function(){var t=document.documentElement.getAttribute("data-theme"),m=t==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",m);try{localStorage.setItem("gp-theme",m)}catch{}n()})})();
+</script>
 
     <header class="lab-header">
         <a href="/lab/" class="lab-back">← LABに戻る</a>
@@ -190,18 +177,42 @@ AI執筆は「書く速度が上がる」だけでなく、<strong>自分一人�
 </code></pre>
 <p><strong>T版</strong>（<code>ep◯◯T.md</code>）がカクヨムに掲載している正式版。A版・C版はT版完成後に <code>archive/</code> へ退避。</p>
 <p>ep01〜ep22 は現在 C版のみ存在。今後 A版・T版の作成予定あり。</p>
+<hr>
 <h2>世界地図</h2>
 <p>舞台となる「エルダリア」の世界地図。Gemini にて作成。</p>
-<p><img src="/lab/novels/eldaria_world_map.png" alt="エルダリア世界地図" style="max-width:100%;border-radius:8px;"></p>
+<p><img src="/blog/images/eldaria_world_map.webp" alt="エルダリア世界地図"></p>
+<hr>
 <h2>第1章完結（2026年6月24日）</h2>
 <p>ep01〜ep36（全36話）で第1章「廃城の王」が完結。</p>
 <table>
-<thead><tr><th>パート</th><th>話数</th><th>内容</th></tr></thead>
+<thead>
+<tr>
+<th>パート</th>
+<th>話数</th>
+<th>内容</th>
+</tr>
+</thead>
 <tbody>
-<tr><td>起</td><td>ep01〜ep10</td><td>廃城への流れ着き・封石との出会い</td></tr>
-<tr><td>承</td><td>ep11〜ep22</td><td>封石解放・ギフト継承の開始</td></tr>
-<tr><td>転</td><td>ep23〜ep34</td><td>接収阻止・絶対結界・王権確立</td></tr>
-<tr><td>結</td><td>ep35〜ep36</td><td>村との同盟・第1章エピローグ「廃城の王」</td></tr>
+<tr>
+<td>起</td>
+<td>ep01〜ep10</td>
+<td>廃城への流れ着き・封石との出会い</td>
+</tr>
+<tr>
+<td>承</td>
+<td>ep11〜ep22</td>
+<td>封石解放・ギフト継承の開始</td>
+</tr>
+<tr>
+<td>転</td>
+<td>ep23〜ep34</td>
+<td>接収阻止・絶対結界・王権確立</td>
+</tr>
+<tr>
+<td>結</td>
+<td>ep35〜ep36</td>
+<td>村との同盟・第1章エピローグ「廃城の王」</td>
+</tr>
 </tbody>
 </table>
 
