@@ -231,9 +231,9 @@ function getGasPriceCache() {
     const cacheDate = new Date(data.fetchDate);
     const diffDays = (today - cacheDate) / (1000 * 60 * 60 * 24);
     if (diffDays > 8) {
-      log('⛽ ガソリン価格キャッシュが古め（' + Math.floor(diffDays) + '日前）。gas-price-cache.json の手動更新を推奨');
+      log('⛽ ガソリン価格キャッシュが古め（' + Math.floor(diffDays) + '日前）。auto-gas-update.ps1 が実行済みか確認を推奨');
     }
-    // キャッシュが古くてもデータがあれば使用（経産省CSVは自動取得不可のため）
+    // キャッシュが古くてもデータがあれば使用（毎週水曜21:00に auto-gas-update.ps1 が自動更新）
     return data;
   } catch {
     return null;
