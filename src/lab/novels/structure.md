@@ -46,14 +46,14 @@ novels/
             ├── 11-20/               # ep11~ep20
             ├── 21-30/               # ep21~ep30
             └── 31-40/
-                ├── ... (7 older files)
+                ├── ... (6 older files)
+                ├── ep37T.md
                 ├── ep38T.md
-                ├── ep39A.md
-                ├── ep39C.md
+                ├── ep39T.md
                 └── archive/
-                    ├── ... (14 older files)
-                    ├── ep38A.md
-                    └── ep38C.md
+                    ├── ... (16 older files)
+                    ├── ep39A.md
+                    └── ep39C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
