@@ -6,11 +6,9 @@
  * gas-price-cache.json を更新する。
  *
  * Usage:
- *   node scripts/update-gas-price.cjs                           # デフォルトパス
- *   node scripts/update-gas-price.cjs "G:/マイドライブ/gas/260318.xlsx"  # 指定パス
+ *   node scripts/update-gas-price.cjs "G:/マイドライブ/gas/260624.xlsx"
  *
- * xlsx は経産省から毎週水曜に公開されるファイルを
- * G:\マイドライブ\gas に保存しておく想定。
+ * 自動実行は auto-gas-update.ps1 経由で呼び出す。
  */
 const XLSX = require('xlsx');
 const fs = require('fs');
@@ -20,34 +18,19 @@ const ROOT = path.resolve(__dirname, '..');
 const CACHE_FILE = path.join(ROOT, 'scripts/gas-price-cache.json');
 const REGION = '愛知';
 
-// --- xlsx ファイルパスの決定 ---
-let xlsxPath = process.argv[2];
+const xlsxPath = process.argv[2];
 if (!xlsxPath) {
-  // デフォルト: G:\マイドライブ\gas の最新 xlsx を探す
-  const gasDir = 'G:/マイドライブ/gas';
-  try {
-    const files = fs.readdirSync(gasDir)
-      .filter(f => f.endsWith('.xlsx'))
-      .sort()
-      .reverse();
-    if (files.length > 0) {
-      xlsxPath = path.join(gasDir, files[0]);
-    }
-  } catch {
-    // G: ドライブが無い場合（GitHub Actions等）
-  }
-}
-
-if (!xlsxPath) {
-  console.error('❌ xlsx ファイルが見つかりません。パスを引数で指定してください。');
+  console.error('❌ xlsx ファイルパスを引数で指定してください。');
   console.error('   node scripts/update-gas-price.cjs "path/to/file.xlsx"');
+  console.error('   自動取得は auto-gas-update.ps1 を使用してください。');
   process.exit(1);
 }
 
 console.log(`📂 読み込み: ${xlsxPath}`);
 
 // --- xlsx 読み取り ---
-const wb = XLSX.readFile(xlsxPath);
+const buf = fs.readFileSync(xlsxPath);
+const wb = XLSX.read(buf, { type: 'buffer' });
 
 // 都道府県別シートを使用（2枚目）
 const sheetName = wb.SheetNames.find(n => n.includes('都道府県')) || wb.SheetNames[1] || wb.SheetNames[0];
@@ -68,7 +51,6 @@ for (let i = 0; i < Math.min(10, data.length); i++) {
   const row = data[i];
   for (const cell of row) {
     if (typeof cell === 'number' && cell > 40000 && cell < 60000) {
-      // Excel シリアル値 → JS Date
       const d = new Date((cell - 25569) * 86400000);
       const latest = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
       if (!surveyDate || latest > surveyDate) surveyDate = latest;
@@ -91,10 +73,10 @@ for (let i = 0; i <= lastRow; i++) {
   const name = String(row[1] || '').replace(/\s+/g, '');
   if (name.includes(REGION)) {
     found = {
-      regular: row[5],    // レギュラー（今週）
-      premium: row[3],    // ハイオク（今週）
-      diesel: row[7],     // 軽油（今週）
-      kerosene: row[9],   // 灯油 店頭（今週）
+      regular: row[5],
+      premium: row[3],
+      diesel: row[7],
+      kerosene: row[9],
     };
     break;
   }
@@ -130,7 +112,7 @@ console.log('');
 console.log(`  📅 調査日: ${cache.fetchDate}`);
 console.log(`  ⛽ レギュラー: ${cache.regular} 円/L`);
 console.log(`  ⛽ ハイオク:   ${cache.premium} 円/L`);
-console.log(`  🛢️ 軽油:       ${cache.diesel} 円/L`);
+console.log(`  🛢️  軽油:       ${cache.diesel} 円/L`);
 console.log(`  🔥 灯油(18L):  ${cache.kerosene} 円`);
 console.log('');
 
