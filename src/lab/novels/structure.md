@@ -48,6 +48,8 @@ novels/
             ├── 31-40/               # ep31~ep40
             └── 41-50/
                 ├── ep41T.md
+                ├── ep42A.md
+                ├── ep42N.md
                 └── archive/
                     ├── ep41A.md
                     └── ep41N.md
