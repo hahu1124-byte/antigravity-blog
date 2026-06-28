@@ -46,8 +46,8 @@ novels/
             ├── 11-20/               # ep11~ep20
             ├── 21-30/               # ep21~ep30
             └── 31-40/
-                ├── ... (8 older files)
-                ├── ep39T.md
+                ├── ... (9 older files)
+                ├── ep40A.md
                 ├── ep40N.md
                 ├── ep40NE.md
                 └── archive/
