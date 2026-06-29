@@ -47,9 +47,10 @@ novels/
             ├── 21-30/               # ep21~ep30
             ├── 31-40/               # ep31~ep40
             └── 41-50/
-                ├── ep41T.md
+                ├── ... (1 older files)
                 ├── ep42T.md
                 ├── ep43A.md
+                ├── ep43N.md
                 └── archive/
                     ├── ... (2 older files)
                     ├── ep42A.md
