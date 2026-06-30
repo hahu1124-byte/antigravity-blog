@@ -6,6 +6,8 @@
 const REZERO_NORMAL_ODDS = 349.9;
 const REZERO_SAIBARE_TRUST = 0.4;
 const REZERO_SAIBARE_HIT_RATE = 0.938;
+const FREEZE_BONUS_ANIMATION_MS = 1000;
+const POST_BONUS_HOLD_MS = 500;
 const REZERO_NORMAL_EFFECTS = [
   { name: "ベアトリスランプ", trust: 0.92, hitRate: 0.15, flash: true },
   {
@@ -59,6 +61,20 @@ function applyRezeroEffect(res, effect) {
   res.flash = effect.flash || false;
   res.vibe = effect.vibe || false;
   res.vibeColor = effect.vibeColor || "none";
+}
+
+async function showFreezeBonus() {
+  const overlay = document.getElementById("freeze-bonus-overlay");
+  if (!overlay) return;
+  overlay.classList.remove("freeze-bonus-active");
+  void overlay.offsetWidth;
+  overlay.style.display = "block";
+  overlay.classList.add("freeze-bonus-active");
+  await new Promise((resolve) =>
+    setTimeout(resolve, FREEZE_BONUS_ANIMATION_MS),
+  );
+  overlay.classList.remove("freeze-bonus-active");
+  overlay.style.display = "none";
 }
 
 const MACHINES = {
@@ -363,35 +379,49 @@ const MACHINES = {
         flash: false,
         text: "",
         isRushSure: false,
+        bonusType: null,
+        deferHitLog: false,
       };
       if (mode === "通常") {
         applyRezeroEffect(res, pickRezeroEffect(true));
       } else {
         if (rushStyle === "強欲RUSH") {
           if (rMain < 25) {
+            res.bonusType = 3000;
+            res.deferHitLog = true;
             res.name.push("超強欲3000BONUS");
             res.vibe = true;
             res.vibeColor = "rainbow";
             res.text = "3000+";
             res.trust = 100;
-          } else if (rMain < 60) {
+          } else if (rMain < 80) {
+            res.bonusType = 1500;
+            res.deferHitLog = true;
             res.name.push("Re:ゼロBONUS");
             res.trust = 100;
           } else {
+            res.bonusType = 300;
+            res.deferHitLog = true;
             res.name.push("BONUS");
             res.trust = 100;
           }
         } else {
-          if (rMain < 20) {
+          if (rMain < 25) {
+            res.bonusType = 3000;
+            res.deferHitLog = true;
             res.name.push("ドナぷる");
             res.vibe = true;
             res.vibeColor = "red";
             res.trust = 100;
-          } else if (rMain < 52) {
+          } else if (rMain < 80) {
+            res.bonusType = 1500;
+            res.deferHitLog = true;
             res.name.push("落ちブル");
             res.text = "落ちブル";
             res.trust = 100;
           } else {
+            res.bonusType = 300;
+            res.deferHitLog = true;
             res.name.push("エミリア告知");
             res.trust = 100;
           }
@@ -459,46 +489,39 @@ const MACHINES = {
         await new Promise((r) => setTimeout(r, 600));
       } else {
         // RUSH中当り（特図2）: 25%/55%/20%、当選後は145回へ戻す。
-        if (rushStyle === "強欲RUSH") {
-          const r = Math.random();
-          if (r < 0.25) {
-            bonusBall = 3000;
+        addLog(
+          `${M.modeLabel(mode)} ${lcdCount}回転【${eff.displayName}】信頼度:${eff.trust.toFixed(1)}%`,
+        );
+        if (eff.bonusType === 3000) {
+          bonusBall = 3000;
+          if (rushStyle === "強欲RUSH") {
             addLog(">> 超強欲3000BONUS！！");
-            while (Math.random() < 0.25) {
-              rushBonus += 1500;
-              addLog(">> 超強欲フリーズ！！ +1500上乗せ！");
-            }
-            bonusBall += rushBonus;
-            document.getElementById("machine").classList.add("vibe-rainbow");
-            document.getElementById("lamp").classList.add("lamp-active");
-            [1, 2, 3].forEach((i) => {
-              const el = document.getElementById("d" + i);
-              el.innerText = hitDigit;
-              el.className = "digit gold";
-            });
-            await new Promise((r) => setTimeout(r, 1000));
-            document.getElementById("machine").classList.remove("vibe-rainbow");
-            document.getElementById("lamp").classList.remove("lamp-active");
-            addLog(`>> 出玉: ${bonusBall}個 RUSH継続！`);
-          } else if (r < 0.8) {
-            bonusBall = 1500;
-            addLog(`>> Re:ゼロBONUS！ 出玉: ${bonusBall}個 RUSH継続！`);
           } else {
-            bonusBall = 300;
-            addLog(`>> BONUS 出玉: ${bonusBall}個 RUSH継続！`);
-          }
-        } else {
-          const r = Math.random();
-          if (r < 0.2) {
-            bonusBall = 3000;
             addLog(">> ドナぷる発生！ 3000BONUS！！");
-          } else if (r < 0.75) {
-            bonusBall = 1500;
-            addLog(`>> Re:ゼロBONUS！ 出玉: ${bonusBall}個 RUSH継続！`);
-          } else {
-            bonusBall = 300;
-            addLog(`>> BONUS 出玉: ${bonusBall}個 RUSH継続！`);
           }
+          document.getElementById("machine").classList.add("vibe-rainbow");
+          document.getElementById("lamp").classList.add("lamp-active");
+          [1, 2, 3].forEach((i) => {
+            const el = document.getElementById("d" + i);
+            el.innerText = hitDigit;
+            el.className = "digit gold";
+          });
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          while (Math.random() < 0.25) {
+            rushBonus += 1500;
+            addLog(">> 超強欲フリーズ！！ +1500上乗せ！");
+            await showFreezeBonus();
+          }
+          bonusBall += rushBonus;
+          document.getElementById("machine").classList.remove("vibe-rainbow");
+          document.getElementById("lamp").classList.remove("lamp-active");
+          addLog(`>> 出玉: ${bonusBall}個 RUSH継続！`);
+        } else if (eff.bonusType === 1500) {
+          bonusBall = 1500;
+          addLog(`>> Re:ゼロBONUS！ 出玉: ${bonusBall}個 RUSH継続！`);
+        } else {
+          bonusBall = 300;
+          addLog(`>> BONUS 出玉: ${bonusBall}個 RUSH継続！`);
         }
         totalBall += bonusBall;
         currentRot = 0;
@@ -508,7 +531,7 @@ const MACHINES = {
         currentRushHits++;
         lcdCount = 0;
         updateUI();
-        await new Promise((r) => setTimeout(r, 600));
+        await new Promise((resolve) => setTimeout(resolve, POST_BONUS_HOLD_MS));
       }
     },
   },
@@ -570,6 +593,8 @@ function createJob(isRight = false) {
     holdType: extras.holdType || "none",
     currentView: "none",
     isRushSure: extras.isRushSure || false,
+    bonusType: extras.bonusType || null,
+    deferHitLog: extras.deferHitLog || false,
     saibare: false,
   };
 
@@ -657,7 +682,7 @@ async function startProcess() {
     addLog(`${M.modeLabel(mode)} ${lcdCount}回転【先バレ】信頼度:40.0%`);
   }
   // trustが50以上（激熱以上）、または当落が確定している場合のみログに出力
-  if (eff.trust >= 50.0 || eff.isHit) {
+  if ((eff.trust >= 50.0 || eff.isHit) && !eff.deferHitLog) {
     const modeLabel = M.modeLabel(mode);
     addLog(
       `${modeLabel} ${lcdCount}回転【${eff.displayName}】信頼度:${eff.trust.toFixed(1)}%`,
@@ -1010,6 +1035,11 @@ function resetState() {
   rushStartBall = 0;
   document.getElementById("max-hamari-box").innerText = "最大ハマリ: 0";
   document.getElementById("log").innerHTML = "> システム起動完了";
+  const freezeOverlay = document.getElementById("freeze-bonus-overlay");
+  if (freezeOverlay) {
+    freezeOverlay.classList.remove("freeze-bonus-active");
+    freezeOverlay.style.display = "none";
+  }
   const saibareBtn = document.getElementById("btn-saibare");
   if (saibareBtn) saibareBtn.classList.remove("active");
   // チャート再構築（テーマ色も反映）

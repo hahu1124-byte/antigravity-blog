@@ -8,6 +8,7 @@ function createElement() {
     style: {},
     innerText: "",
     innerHTML: "",
+    offsetWidth: 0,
     getContext() {
       return {};
     },
@@ -38,7 +39,9 @@ const context = vm.createContext({
   confirm: () => true,
   setInterval: () => 1,
   clearInterval() {},
-  setTimeout(callback) {
+  timeoutCalls: [],
+  setTimeout(callback, delay) {
+    context.timeoutCalls.push(delay);
     callback();
     return 1;
   },
@@ -129,6 +132,61 @@ function assertClose(label, actual, expected, tolerance) {
   const saibareTrust = saibare.hitsSeen / saibare.totalSeen;
   assertClose("先バレ trust", saibareTrust, 0.4, 0.025);
 
+  const rushDistribution = await run(`
+    mode = "ST";
+    rushStyle = "強欲RUSH";
+    Math.random = nativeRandom;
+    const counts = { 300: 0, 1500: 0, 3000: 0 };
+    const spins = 1000000;
+    for (let i = 0; i < spins; i++) {
+      const effect = M.createJobHits(mode);
+      counts[effect.bonusType]++;
+    }
+    return { spins, counts };
+  `);
+  assertClose(
+    "RUSH 3000 distribution",
+    rushDistribution.counts[3000] / rushDistribution.spins,
+    0.25,
+    0.003,
+  );
+  assertClose(
+    "RUSH 1500 distribution",
+    rushDistribution.counts[1500] / rushDistribution.spins,
+    0.55,
+    0.003,
+  );
+  assertClose(
+    "RUSH 300 distribution",
+    rushDistribution.counts[300] / rushDistribution.spins,
+    0.2,
+    0.003,
+  );
+
+  await run(`
+    rushStyle = "強欲RUSH";
+    Math.random = () => 0.1;
+    const strong3000 = M.createJobHits("ST");
+    if (strong3000.bonusType !== 3000 || !strong3000.name.includes("超強欲3000BONUS")) throw new Error("Strong RUSH 3000 mapping failed");
+    Math.random = () => 0.5;
+    const strong1500 = M.createJobHits("ST");
+    if (strong1500.bonusType !== 1500 || !strong1500.name.includes("Re:ゼロBONUS")) throw new Error("Strong RUSH 1500 mapping failed");
+    Math.random = () => 0.9;
+    const strong300 = M.createJobHits("ST");
+    if (strong300.bonusType !== 300 || !strong300.name.includes("BONUS")) throw new Error("Strong RUSH 300 mapping failed");
+
+    rushStyle = "ドキドキRUSH";
+    Math.random = () => 0.1;
+    const doki3000 = M.createJobHits("ST");
+    if (doki3000.bonusType !== 3000 || !doki3000.name.includes("ドナぷる")) throw new Error("Doki RUSH 3000 mapping failed");
+    Math.random = () => 0.5;
+    const doki1500 = M.createJobHits("ST");
+    if (doki1500.bonusType !== 1500 || !doki1500.name.includes("落ちブル")) throw new Error("Doki RUSH 1500 mapping failed");
+    Math.random = () => 0.9;
+    const doki300 = M.createJobHits("ST");
+    if (doki300.bonusType !== 300 || !doki300.name.includes("エミリア告知")) throw new Error("Doki RUSH 300 mapping failed");
+  `);
+
   await run(`
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs;
     mode = "通常"; lcdCount = 25; totalBall = 0; currentRot = 25;
@@ -148,8 +206,19 @@ function assertClose(label, actual, expected, tolerance) {
 
     mode = "ST"; lcdCount = 30; totalBall = 0; currentRot = 30; rushStyle = "強欲RUSH";
     Math.random = () => 0.5;
-    await M.resolveHit({ eff: { isRight: true, saibare: false }, hitDigit: 3 });
+    await M.resolveHit({ eff: { isRight: true, saibare: false, bonusType: 1500, displayName: "Re:ゼロBONUS", trust: 100 }, hitDigit: 3 });
     if (mode !== "ST" || rRem !== 145 || currentRot !== 0 || totalBall !== 1500) throw new Error("ReZero RUSH hit failed");
+
+    mode = "ST"; lcdCount = 8; totalBall = 0; currentRot = 8; rushStyle = "強欲RUSH";
+    timeoutCalls.length = 0;
+    const freezeValues = [0.1, 0.1, 0.9]; Math.random = () => freezeValues.shift() ?? 0.9;
+    await M.resolveHit({ eff: { isRight: true, saibare: false, bonusType: 3000, displayName: "超強欲3000BONUS", trust: 100 }, hitDigit: 7 });
+    if (totalBall !== 6000) throw new Error("ReZero freeze bonus total failed");
+    const freezeLogs = document.getElementById("log").innerHTML.split("超強欲フリーズ！！ +1500上乗せ！").length - 1;
+    if (freezeLogs !== 2) throw new Error("ReZero freeze bonus log count failed");
+    const animationWaits = timeoutCalls.filter((delay) => delay === FREEZE_BONUS_ANIMATION_MS).length;
+    if (animationWaits !== 3) throw new Error("ReZero bonus and freeze wait count failed");
+    if (!timeoutCalls.includes(POST_BONUS_HOLD_MS)) throw new Error("Post bonus hold missing");
   `);
 
   console.log(
@@ -159,6 +228,9 @@ function assertClose(label, actual, expected, tolerance) {
         trust: measuredTrust,
         saibareTrust,
         hitPaths: 4,
+        rushDistribution,
+        freezeLoops: 2,
+        postBonusHoldMs: 500,
         coloredHolds: simulation.coloredHolds,
       },
       null,
