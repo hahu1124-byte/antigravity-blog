@@ -297,138 +297,6 @@ const MACHINES = {
     modeLabel(m) {
       return m === "ST" ? rushStyle : m;
     },
-    createJobRoll(mode, isRight = false) {
-      const pick = (patterns) => {
-        const total = patterns.reduce((sum, p) => sum + p.weight, 0);
-        let r = Math.random() * total;
-        for (const p of patterns) {
-          r -= p.weight;
-          if (r < 0) return p;
-        }
-        return patterns[patterns.length - 1];
-      };
-
-      const normalPatterns = [
-        {
-          weight: 2,
-          name: ["先バレ"],
-          trust: 92,
-          hitChance: 0.92,
-          flash: true,
-          vibe: true,
-          vibeColor: "red",
-          saibare: true,
-        },
-        {
-          weight: 3,
-          name: ["ベアトリスランプ"],
-          trust: 92,
-          hitChance: 0.92,
-          holdType: "vibe",
-        },
-        {
-          weight: 5,
-          name: ["強欲保留"],
-          trust: 76,
-          hitChance: 0.76,
-          holdType: "red",
-        },
-        {
-          weight: 10,
-          name: ["死に戻り保留"],
-          trust: 58,
-          hitChance: 0.58,
-          holdType: "green",
-        },
-        {
-          weight: 20,
-          name: ["エミリア保留"],
-          trust: 18,
-          hitChance: 0.18,
-          holdType: "blue",
-        },
-        {
-          weight: 9960,
-          name: ["スバルATTACK"],
-          trust: 0.1,
-          hitChance: 0.001082,
-        },
-      ];
-
-      const rushPatterns = [
-        {
-          weight: 2,
-          name: ["強欲RUSH先バレ"],
-          trust: 92,
-          hitChance: 0.92,
-          flash: true,
-          vibe: true,
-          vibeColor: "red",
-          saibare: true,
-        },
-        {
-          weight: 4,
-          name: ["超強欲3000BONUS"],
-          trust: 76,
-          hitChance: 0.76,
-          vibe: true,
-          vibeColor: "rainbow",
-          text: "3000+",
-        },
-        {
-          weight: 8,
-          name: ["Re:ゼロBONUS"],
-          trust: 58,
-          hitChance: 0.58,
-        },
-        {
-          weight: 10,
-          name: ["ドナぷる"],
-          trust: 18,
-          hitChance: 0.18,
-        },
-        {
-          weight: 20,
-          name: ["落ちブル"],
-          trust: 10,
-          hitChance: 0.10,
-          text: "落ちブル",
-        },
-        {
-          weight: 9956,
-          name: ["BONUS"],
-          trust: 0.1,
-          hitChance: 0.008717,
-        },
-      ];
-
-      const pool =
-        mode === "通常"
-          ? optSaibare
-            ? normalPatterns
-            : normalPatterns.filter((p) => p.name[0] !== "先バレ")
-          : optSaibare
-            ? rushPatterns
-            : rushPatterns.filter((p) => p.name[0] !== "強欲RUSH先バレ");
-
-      const pat = pick(pool);
-      const isHit = Math.random() < pat.hitChance;
-      return {
-        isHit,
-        isRight,
-        heavy: pat.trust >= 50,
-        name: [...pat.name],
-        trust: pat.trust,
-        vibe: pat.vibe || false,
-        vibeColor: pat.vibeColor || "none",
-        flash: pat.flash || false,
-        text: pat.text || "",
-        holdType: pat.holdType || "none",
-        currentView: "none",
-        isRushSure: pat.isRushSure || false,
-        saibare: pat.saibare || false,
-      };
-    },
     createJobHits(mode) {
       const rMain = Math.random() * 100;
       const rSub = Math.random() * 100;
@@ -751,29 +619,41 @@ let sChart,
 // 正しい抽選フロー：先に当たり外れを決め、演出を機種別に抽選
 // ============================================================
 function createJob(isRight = false) {
-  let res;
-  if (typeof M.createJobRoll === "function") {
-    res = M.createJobRoll(mode, isRight);
-  } else {
-    const isHit =
-      Math.random() <
-      1 / (mode === "通常" || mode === "時短" ? SPECS.n : SPECS.s);
-    let extras = isHit ? M.createJobHits(mode) : M.createJobMiss(mode);
-    res = {
-      isHit,
-      isRight,
-      heavy: false,
-      name: extras.name || [],
-      trust: extras.trust || 0,
-      vibe: extras.vibe || false,
-      vibeColor: extras.vibeColor || "none",
-      flash: extras.flash || false,
-      text: extras.text || "",
-      holdType: extras.holdType || "none",
-      currentView: "none",
-      isRushSure: extras.isRushSure || false,
-      saibare: false,
-    };
+  const isHit =
+    Math.random() <
+    1 / (mode === "通常" || mode === "時短" ? SPECS.n : SPECS.s);
+  let extras = isHit ? M.createJobHits(mode) : M.createJobMiss(mode);
+  let res = {
+    isHit,
+    isRight,
+    heavy: false,
+    name: extras.name || [],
+    trust: extras.trust || 0,
+    vibe: extras.vibe || false,
+    vibeColor: extras.vibeColor || "none",
+    flash: extras.flash || false,
+    text: extras.text || "",
+    holdType: extras.holdType || "none",
+    currentView: "none",
+    isRushSure: extras.isRushSure || false,
+    saibare: false,
+  };
+
+  if (
+    currentMachine === "rezero" &&
+    optSaibare &&
+    isHit &&
+    mode === "通常" &&
+    Math.random() < 0.938
+  ) {
+    res.saibare = true;
+    if (!res.name.includes("先バレ")) {
+      res.name.unshift("先バレ");
+    }
+    res.flash = true;
+    res.vibe = true;
+    res.vibeColor = "red";
+    res.trust = Math.max(res.trust, 40);
   }
 
   // 保留の見た目決定
@@ -826,6 +706,10 @@ async function startProcess() {
   refillStock();
   updateUI();
   let eff = activeJob;
+  if (optSaibare && currentMachine === "rezero" && eff.isHit) {
+    eff.flash = true;
+    eff.trust = Math.max(eff.trust, 40);
+  }
   totalRot++;
   currentRot++;
   lcdCount++;
