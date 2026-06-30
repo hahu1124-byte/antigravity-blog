@@ -308,12 +308,15 @@ const MACHINES = {
         return patterns[patterns.length - 1];
       };
 
-      const normalPatterns = [
+      const baseOdds =
+        mode === "通常" || mode === "時短" ? this.specs.n : this.specs.s;
+      const isHit = Math.random() < 1 / baseOdds;
+
+      const hitPatterns = [
         {
           weight: 2,
           name: ["先バレ"],
           trust: 92,
-          hitChance: 0.92,
           flash: true,
           vibe: true,
           vibeColor: "red",
@@ -323,44 +326,71 @@ const MACHINES = {
           weight: 3,
           name: ["ベアトリスランプ"],
           trust: 92,
-          hitChance: 0.92,
           holdType: "vibe",
         },
         {
           weight: 5,
           name: ["強欲保留"],
           trust: 76,
-          hitChance: 0.76,
           holdType: "red",
         },
         {
           weight: 10,
           name: ["死に戻り保留"],
           trust: 58,
-          hitChance: 0.58,
           holdType: "green",
         },
         {
           weight: 20,
           name: ["エミリア保留"],
           trust: 18,
-          hitChance: 0.18,
           holdType: "blue",
         },
         {
           weight: 9960,
           name: ["スバルATTACK"],
           trust: 0.1,
-          hitChance: 0.001082,
         },
       ];
 
-      const rushPatterns = [
+      const missPatterns = [
+        {
+          weight: 40,
+          name: ["通常"],
+          trust: 0.1,
+        },
+        {
+          weight: 25,
+          name: ["エミリア保留(煽り)"],
+          trust: 18,
+          holdType: "blue",
+        },
+        {
+          weight: 20,
+          name: ["死に戻り保留(煽り)"],
+          trust: 10,
+          holdType: "green",
+        },
+        {
+          weight: 10,
+          name: ["強欲保留(煽り)"],
+          trust: 8,
+          holdType: "red",
+        },
+        {
+          weight: 5,
+          name: ["ベアトリスランプ(煽り)"],
+          trust: 12,
+          holdType: "vibe",
+          vibe: true,
+        },
+      ];
+
+      const hitRushPatterns = [
         {
           weight: 2,
           name: ["強欲RUSH先バレ"],
           trust: 92,
-          hitChance: 0.92,
           flash: true,
           vibe: true,
           vibeColor: "red",
@@ -370,7 +400,6 @@ const MACHINES = {
           weight: 4,
           name: ["超強欲3000BONUS"],
           trust: 76,
-          hitChance: 0.76,
           vibe: true,
           vibeColor: "rainbow",
           text: "3000+",
@@ -379,40 +408,57 @@ const MACHINES = {
           weight: 8,
           name: ["Re:ゼロBONUS"],
           trust: 58,
-          hitChance: 0.58,
         },
         {
           weight: 10,
           name: ["ドナぷる"],
           trust: 18,
-          hitChance: 0.18,
         },
         {
           weight: 20,
           name: ["落ちブル"],
           trust: 10,
-          hitChance: 0.10,
           text: "落ちブル",
         },
         {
           weight: 9956,
           name: ["BONUS"],
           trust: 0.1,
-          hitChance: 0.008717,
+        },
+      ];
+
+      const missRushPatterns = [
+        {
+          weight: 55,
+          name: ["RUSH継続"],
+          trust: 18,
+        },
+        {
+          weight: 25,
+          name: ["ドキドキRUSH"],
+          trust: 10,
+        },
+        {
+          weight: 20,
+          name: ["通常"],
+          trust: 0.1,
         },
       ];
 
       const pool =
-        mode === "通常"
-          ? optSaibare
-            ? normalPatterns
-            : normalPatterns.filter((p) => p.name[0] !== "先バレ")
-          : optSaibare
-            ? rushPatterns
-            : rushPatterns.filter((p) => p.name[0] !== "強欲RUSH先バレ");
+        mode === "通常" || mode === "時短"
+          ? isHit
+            ? optSaibare
+              ? hitPatterns
+              : hitPatterns.filter((p) => p.name[0] !== "先バレ")
+            : missPatterns
+          : isHit
+            ? optSaibare
+              ? hitRushPatterns
+              : hitRushPatterns.filter((p) => p.name[0] !== "強欲RUSH先バレ")
+            : missRushPatterns;
 
       const pat = pick(pool);
-      const isHit = Math.random() < pat.hitChance;
       return {
         isHit,
         isRight,

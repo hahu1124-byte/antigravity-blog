@@ -13,13 +13,26 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>(function(){try{var t=localStorage.getItem("gp-theme");t&&document.documentElement.setAttribute("data-theme",t)}catch{}})();
-</script>
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
 </head>
 <body>
     <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
-    <script>(function(){var e=document.getElementById("themeToggle");function n(){var t=document.documentElement.getAttribute("data-theme");e.textContent=t==="light"?"\u{1F319}":"\u2600\uFE0F"}n(),e.addEventListener("click",function(){var t=document.documentElement.getAttribute("data-theme"),m=t==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",m);try{localStorage.setItem("gp-theme",m)}catch{}n()})})();
-</script>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
 
     <header class="lab-header">
         <a href="/lab/" class="lab-back">← LABに戻る</a>
@@ -114,6 +127,21 @@ Antigravity（A版執筆） ─┘       ↓
 <p><strong>NotebookLM ブレイン</strong>：全設定と本文をNotebookLMに読み込ませた「AI副編集」。執筆前に1クエリで「登場人物の現在地・前話の末尾・次話の課題」をまとめたブリーフィングを取得できる。T版が完成するたびに自動同期スクリプトで更新される。</p>
 <p><strong>ClaudeCode（C版）→ Antigravity（A版）→ 統合</strong>：並行執筆の基本フローは変わらないが、ブリーフィング取得・設定確認・推敲チェックをすべてNLMに委譲したことで、各AIが毎回大量のファイルを読み込む必要がなくなった。</p>
 <p><strong>自動同期</strong>：T版完成後のNLM更新・structure.md更新・あらすじ更新は専用スクリプトで処理。人間の手作業を最小化している。</p>
+<h2>Obsidian × NLM × ClaudeCode × Antigravity の変化</h2>
+<p>第1章後半（ep37〜）でフローが大きく変わった。</p>
+<pre><code>Obsidian（ナレッジ管理）
+  ↓ 設定メモ・キャラ資料を蓄積
+NotebookLM ブレイン（haijo-no-ou-brain）
+  ↓ 執筆前ブリーフィング・設定照会
+  ↓ 執筆担当：生データ（N版）を出力
+NLM（N版）  ─┐
+              ├→ NLM 編集担当（A+Nをマージ・推敲 → T版）
+Antigravity ──┘（A版）            ↓
+（A版執筆）             NLM 自動同期（T版・設定を更新）
+</code></pre>
+<p><strong>ClaudeCode の役割変化</strong>：C版（ClaudeCode執筆分）は原則新規作成しない方向になった。インフラ管理・スクリプト整備・セッション引き継ぎに特化する形だ。</p>
+<p><strong>NLMが執筆と編集を兼任</strong>：並行執筆の片翼は「NLM執筆担当が生成したN版」が担う。A版とN版をNLM編集担当に投げてマージ・推敲し、それをT版として確定する。中間産物（NE版）が生まれることもある。</p>
+<p><strong>ファイル命名の拡張</strong>：<code>ep◯◯N.md</code>（NLM生データ）・<code>ep◯◯NE.md</code>（推敲済み中間版）が加わり、T版完成後はA/C/N/NE全バージョンをarchiveへ移動する。</p>
 <h2>今後</h2>
 <p>まだ実験の途中だ。
 AI執筆は「書く速度が上がる」だけでなく、<strong>自分一人では生まれなかった描写</strong>が出てくることがある。それが最大の収穫で、最大の楽しみになっている。</p>
@@ -165,15 +193,16 @@ AI執筆は「書く速度が上がる」だけでなく、<strong>自分一人�
             ├── 1-10/                # ep01~ep10
             ├── 11-20/               # ep11~ep20
             ├── 21-30/               # ep21~ep30
-            └── 31-40/
-                ├── ... (3 older files)
-                ├── ep34T.md
-                ├── ep35T.md
-                ├── ep36T.md
+            ├── 31-40/               # ep31~ep40
+            └── 41-50/
+                ├── ... (4 older files)
+                ├── ep45A.md
+                ├── ep45N.md
+                ├── ep45T.md
                 └── archive/
-                    ├── ... (10 older files)
-                    ├── ep36A.md
-                    └── ep36C.md
+                    ├── ... (6 older files)
+                    ├── ep44A.md
+                    └── ep44N.md
 </code></pre>
 <p><strong>T版</strong>（<code>ep◯◯T.md</code>）がカクヨムに掲載している正式版。A版・C版はT版完成後に <code>archive/</code> へ退避。</p>
 <p>ep01〜ep22 は現在 C版のみ存在。今後 A版・T版の作成予定あり。</p>
