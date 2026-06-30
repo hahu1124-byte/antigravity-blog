@@ -314,7 +314,7 @@ const MACHINES = {
 
       const hitPatterns = [
         {
-          weight: 92,
+          weight: 2,
           name: ["先バレ"],
           trust: 92,
           flash: true,
@@ -323,31 +323,31 @@ const MACHINES = {
           saibare: true,
         },
         {
-          weight: 76,
+          weight: 3,
           name: ["ベアトリスランプ"],
           trust: 92,
           holdType: "vibe",
         },
         {
-          weight: 58,
+          weight: 5,
           name: ["強欲保留"],
           trust: 76,
           holdType: "red",
         },
         {
-          weight: 18,
+          weight: 10,
           name: ["死に戻り保留"],
           trust: 58,
           holdType: "green",
         },
         {
-          weight: 5,
+          weight: 20,
           name: ["エミリア保留"],
           trust: 18,
           holdType: "blue",
         },
         {
-          weight: 0.1,
+          weight: 9960,
           name: ["スバルATTACK"],
           trust: 0.1,
         },
@@ -388,7 +388,7 @@ const MACHINES = {
 
       const hitRushPatterns = [
         {
-          weight: 92,
+          weight: 2,
           name: ["強欲RUSH先バレ"],
           trust: 92,
           flash: true,
@@ -397,7 +397,7 @@ const MACHINES = {
           saibare: true,
         },
         {
-          weight: 76,
+          weight: 4,
           name: ["超強欲3000BONUS"],
           trust: 76,
           vibe: true,
@@ -405,23 +405,23 @@ const MACHINES = {
           text: "3000+",
         },
         {
-          weight: 58,
+          weight: 8,
           name: ["Re:ゼロBONUS"],
           trust: 58,
         },
         {
-          weight: 18,
+          weight: 10,
           name: ["ドナぷる"],
           trust: 18,
         },
         {
-          weight: 10,
+          weight: 20,
           name: ["落ちブル"],
           trust: 10,
           text: "落ちブル",
         },
         {
-          weight: 0.1,
+          weight: 9956,
           name: ["BONUS"],
           trust: 0.1,
         },
@@ -694,7 +694,6 @@ const MACHINES = {
         } else {
           bonusBall = 420;
         }
-        currentRot = 0;
       } else {
         if (rushStyle === "強欲RUSH") {
           const r = Math.random();
@@ -825,13 +824,14 @@ function createJob(isRight = false) {
   }
 
   // 保留の見た目決定
-      if (res.holdType && res.holdType !== "none") {
-        res.currentView = res.holdType;
-      } else if (res.vibe) {
-        res.currentView = "vibe";
-      } else {
-        res.currentView = "none";
-      }
+  if (res.holdType === "red" || (res.vibe && !res.isRushSure)) {
+    let rr = Math.random();
+    res.currentView = rr < 0.4 ? "blue" : rr < 0.8 ? "green" : "red";
+  } else if (res.holdType === "vibe") {
+    res.currentView = "vibe";
+  } else {
+    res.currentView = res.holdType;
+  }
 
   res.heavy = res.trust >= 50;
   res.displayName =
