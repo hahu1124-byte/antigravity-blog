@@ -459,7 +459,7 @@ const MACHINES = {
             : missRushPatterns;
 
       const pat = pick(pool);
-      const isHit = baseHit ? Math.random() < pat.trust / 100 : false;
+      const isHit = baseHit;
       return {
         isHit,
         isRight,
