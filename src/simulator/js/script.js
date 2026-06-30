@@ -3,6 +3,64 @@
 // ============================================================
 // 機種データ定義
 // ============================================================
+const REZERO_NORMAL_ODDS = 349.9;
+const REZERO_SAIBARE_TRUST = 0.4;
+const REZERO_SAIBARE_HIT_RATE = 0.938;
+const REZERO_NORMAL_EFFECTS = [
+  { name: "ベアトリスランプ", trust: 0.92, hitRate: 0.15, flash: true },
+  {
+    name: "強欲SP",
+    trust: 0.78,
+    hitRate: 0.1,
+    vibe: true,
+    vibeColor: "red",
+  },
+  { name: "死に戻りSP", trust: 0.52, hitRate: 0.15 },
+  {
+    name: "俺を選べSP",
+    trust: 0.26,
+    hitRate: 0.18,
+    vibe: true,
+    vibeColor: "red",
+  },
+  { name: "氷結の絆SP", trust: 0.18, hitRate: 0.2 },
+  { name: "スバルATTACK", trust: 0.1, hitRate: 0.22 },
+];
+
+function missRateForTrust(hitRate, trust, odds) {
+  const hitProbability = 1 / odds;
+  const missProbability = 1 - hitProbability;
+  return (
+    (hitProbability * hitRate * (1 - trust)) / (trust * missProbability)
+  );
+}
+
+function pickRezeroEffect(isHit) {
+  const roll = Math.random();
+  let cumulative = 0;
+  for (const effect of REZERO_NORMAL_EFFECTS) {
+    const rate = isHit
+      ? effect.hitRate
+      : missRateForTrust(effect.hitRate, effect.trust, REZERO_NORMAL_ODDS);
+    cumulative += rate;
+    if (roll < cumulative) return effect;
+  }
+  return null;
+}
+
+function applyRezeroEffect(res, effect) {
+  if (!effect) {
+    res.name.push("通常");
+    res.trust = 0.1;
+    return;
+  }
+  res.name.push(effect.name);
+  res.trust = effect.trust * 100;
+  res.flash = effect.flash || false;
+  res.vibe = effect.vibe || false;
+  res.vibeColor = effect.vibeColor || "none";
+}
+
 const MACHINES = {
   eva: {
     title: "EVANGELION Sim -2025 Final-",
@@ -289,14 +347,13 @@ const MACHINES = {
   rezero: {
     title: "Re:ゼロ Sim -season2-",
     theme: "theme-rezero",
-    specs: { n: 349.9, s: 99.9, st: 145, jt: 0 },
+    specs: { n: REZERO_NORMAL_ODDS, s: 99.9, st: 145, jt: 0 },
     type: "MIXED",
     modeLabel(m) {
       return m === "ST" ? rushStyle : m;
     },
     createJobHits(mode) {
       const rMain = Math.random() * 100;
-      const rSub = Math.random() * 100;
       let res = {
         trust: 0,
         name: [],
@@ -308,50 +365,7 @@ const MACHINES = {
         isRushSure: false,
       };
       if (mode === "通常") {
-        if (optSaibare && rMain < 93.8) {
-          res.name.push("先バレ");
-          res.flash = true;
-          res.vibe = true;
-          res.vibeColor = "red";
-          res.trust = 40;
-        }
-        if (rMain < 6) {
-          res.name.push("強欲SP");
-          res.vibe = true;
-          res.vibeColor = "red";
-          res.trust = Math.max(res.trust, 78);
-        } else if (rMain < 18) {
-          res.name.push("死に戻りSP");
-          res.trust = Math.max(res.trust, 52);
-        } else if (rMain < 36) {
-          res.name.push("俺を選べSP");
-          res.vibe = true;
-          res.vibeColor = "red";
-          res.trust = Math.max(res.trust, 26);
-        } else if (rMain < 56) {
-          res.name.push("氷結の絆SP");
-          res.trust = Math.max(res.trust, 18);
-        } else {
-          res.name.push("スバルATTACK");
-          res.trust = Math.max(res.trust, 10);
-        }
-        if (rSub < 15) {
-          res.name.push("ベアトリスランプ");
-          res.holdType = "vibe";
-          res.trust = Math.max(res.trust, 92);
-        } else if (rSub < 40) {
-          res.name.push("強欲保留");
-          res.holdType = "red";
-          res.trust = Math.max(res.trust, 76);
-        } else if (rSub < 68) {
-          res.name.push("死に戻り保留");
-          res.holdType = "green";
-          res.trust = Math.max(res.trust, 58);
-        } else if (rSub < 88) {
-          res.name.push("エミリア保留");
-          res.holdType = "blue";
-          res.trust = Math.max(res.trust, 18);
-        }
+        applyRezeroEffect(res, pickRezeroEffect(true));
       } else {
         if (rushStyle === "強欲RUSH") {
           if (rMain < 25) {
@@ -367,11 +381,6 @@ const MACHINES = {
             res.name.push("BONUS");
             res.trust = 100;
           }
-          if (rSub < 32) {
-            res.name.push("強欲保留");
-            res.holdType = "red";
-            res.trust = Math.max(res.trust, 95);
-          }
         } else {
           if (rMain < 20) {
             res.name.push("ドナぷる");
@@ -386,18 +395,11 @@ const MACHINES = {
             res.name.push("エミリア告知");
             res.trust = 100;
           }
-          if (rSub < 32) {
-            res.name.push("落ちブルアップ");
-            res.holdType = "blue";
-            res.trust = Math.max(res.trust, 95);
-          }
         }
       }
       return res;
     },
     createJobMiss(mode) {
-      const rMain = Math.random() * 100;
-      const rSub = Math.random() * 100;
       let res = {
         trust: 0,
         name: [],
@@ -409,63 +411,10 @@ const MACHINES = {
         isRushSure: false,
       };
       if (mode === "通常") {
-        if (rMain < 1) {
-          res.name.push("テンパイ煽り");
-          res.trust = 8;
-        } else if (rMain < 4) {
-          res.name.push("死に戻り失敗");
-          res.trust = 12;
-        } else if (rMain < 7) {
-          res.name.push("空回り保留");
-          res.trust = 10;
-        }
-        if (rSub < 0.8) {
-          res.name.push("ベアトリスランプ");
-          res.holdType = "vibe";
-          res.trust = Math.max(res.trust, 92);
-        } else if (rSub < 2.5) {
-          res.name.push("強欲保留");
-          res.holdType = "red";
-          res.trust = Math.max(res.trust, 76);
-        } else if (rSub < 6) {
-          res.name.push("死に戻り保留");
-          res.holdType = "green";
-          res.trust = Math.max(res.trust, 58);
-        } else if (rSub < 12) {
-          res.name.push("エミリア保留");
-          res.holdType = "blue";
-          res.trust = Math.max(res.trust, 18);
-        }
-        if (res.name.length === 0) {
-          res.name.push("通常");
-          res.trust = 0.1;
-        }
+        applyRezeroEffect(res, pickRezeroEffect(false));
       } else {
-        if (rushStyle === "強欲RUSH") {
-          if (rSub < 0.05) {
-            res.name.push("強欲保留");
-            res.holdType = "red";
-            res.trust = Math.max(res.trust, 90);
-          } else if (rSub < 0.9) {
-            res.name.push("死に戻り保留");
-            res.holdType = "green";
-            res.trust = Math.max(res.trust, 18);
-          }
-        } else {
-          if (rSub < 0.05) {
-            res.name.push("落ちブルアップ");
-            res.holdType = "blue";
-            res.trust = Math.max(res.trust, 90);
-          } else if (rSub < 0.9) {
-            res.name.push("ドナぷる");
-            res.holdType = "green";
-            res.trust = Math.max(res.trust, 18);
-          }
-        }
-        if (res.name.length === 0) {
-          res.name.push("通常");
-          res.trust = 0.1;
-        }
+        res.name.push("通常");
+        res.trust = 0.1;
       }
       return res;
     },
@@ -473,10 +422,6 @@ const MACHINES = {
       const { eff, hitDigit } = ctx;
       let bonusBall = 0;
       let rushBonus = 0;
-      if (eff.saibare) {
-        addLog(">> 先バレ発生！！");
-      }
-
       if (!eff.isRight) {
         // 通常時初当り（特図1）: 55%でRUSH、45%で通常へ戻る。
         rushCount = 1;
@@ -628,25 +573,26 @@ function createJob(isRight = false) {
     saibare: false,
   };
 
-  if (
-    currentMachine === "rezero" &&
-    optSaibare &&
-    isHit &&
-    mode === "通常" &&
-    Math.random() < 0.938
-  ) {
-    res.saibare = true;
-    if (!res.name.includes("先バレ")) {
-      res.name.unshift("先バレ");
+  if (currentMachine === "rezero" && optSaibare && mode === "通常") {
+    const saibareRate = isHit
+      ? REZERO_SAIBARE_HIT_RATE
+      : missRateForTrust(
+          REZERO_SAIBARE_HIT_RATE,
+          REZERO_SAIBARE_TRUST,
+          REZERO_NORMAL_ODDS,
+        );
+    if (Math.random() < saibareRate) {
+      res.saibare = true;
+      res.flash = true;
+      res.vibe = true;
+      res.vibeColor = "red";
     }
-    res.flash = true;
-    res.vibe = true;
-    res.vibeColor = "red";
-    res.trust = Math.max(res.trust, 40);
   }
 
   // 保留の見た目決定
-  if (res.holdType === "red" || (res.vibe && !res.isRushSure)) {
+  if (currentMachine === "rezero") {
+    res.currentView = "none";
+  } else if (res.holdType === "red" || (res.vibe && !res.isRushSure)) {
     let rr = Math.random();
     res.currentView = rr < 0.4 ? "blue" : rr < 0.8 ? "green" : "red";
   } else if (res.holdType === "vibe") {
@@ -655,7 +601,7 @@ function createJob(isRight = false) {
     res.currentView = res.holdType;
   }
 
-  res.heavy = res.trust >= 50;
+  res.heavy = res.trust >= 50 || res.saibare;
   res.displayName =
     Array.from(new Set(res.name)).join("+").replace(/ST/g, "") || "通常";
   return res;
@@ -695,10 +641,6 @@ async function startProcess() {
   refillStock();
   updateUI();
   let eff = activeJob;
-  if (optSaibare && currentMachine === "rezero" && eff.isHit) {
-    eff.flash = true;
-    eff.trust = Math.max(eff.trust, 40);
-  }
   totalRot++;
   currentRot++;
   lcdCount++;
@@ -711,6 +653,9 @@ async function startProcess() {
     totalBall -= 13.8;
   }
   updateCharts();
+  if (eff.saibare) {
+    addLog(`${M.modeLabel(mode)} ${lcdCount}回転【先バレ】信頼度:40.0%`);
+  }
   // trustが50以上（激熱以上）、または当落が確定している場合のみログに出力
   if (eff.trust >= 50.0 || eff.isHit) {
     const modeLabel = M.modeLabel(mode);
@@ -743,7 +688,7 @@ async function startProcess() {
         ? leftStock[0]
         : null;
   for (let j of [eff, nextJob]) {
-    if (j && j.trust >= 50.0) {
+    if (j && (j.trust >= 50.0 || j.saibare)) {
       hasSakiyomiOrIkiatsu = true;
       break;
     }
