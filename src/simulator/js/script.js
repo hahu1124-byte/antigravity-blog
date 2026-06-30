@@ -310,7 +310,7 @@ const MACHINES = {
 
       const baseOdds =
         mode === "通常" || mode === "時短" ? this.specs.n : this.specs.s;
-      const baseHit = Math.random() < 1 / baseOdds;
+      const isHit = Math.random() < 1 / baseOdds;
 
       const hitPatterns = [
         {
@@ -447,19 +447,18 @@ const MACHINES = {
 
       const pool =
         mode === "通常" || mode === "時短"
-          ? baseHit
+          ? isHit
             ? optSaibare
               ? hitPatterns
               : hitPatterns.filter((p) => p.name[0] !== "先バレ")
             : missPatterns
-          : baseHit
+          : isHit
             ? optSaibare
               ? hitRushPatterns
               : hitRushPatterns.filter((p) => p.name[0] !== "強欲RUSH先バレ")
             : missRushPatterns;
 
       const pat = pick(pool);
-      const isHit = baseHit ? Math.random() < pat.trust / 100 : false;
       return {
         isHit,
         isRight,
