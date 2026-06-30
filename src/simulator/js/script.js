@@ -195,13 +195,10 @@ const MACHINES = {
     async resolveHit(ctx) {
       const { eff, hitDigit } = ctx;
       let bonusBall = 0;
-      let rushBonus = 0;
       let isST = false;
       let needsUpgrade = false;
+      let isRightUpgrade = false;
       const originalHit = hitDigit;
-      if (eff.saibare) {
-        addLog(">> 先バレ発生！！");
-      }
       if (!eff.isRight) {
         rushCount = 1;
         if (eff.isRushSure) {
@@ -356,17 +353,6 @@ const MACHINES = {
           res.trust = Math.max(res.trust, 18);
         }
       } else {
-        isST = true;
-        isRightUpgrade = true;
-        if (mode === "通常") {
-          rushStyle = Math.random() < 0.5 ? "強欲RUSH" : "ドキドキRUSH";
-          rushCount = 1;
-          addLog(`>> 右打ち残保留（特図2）で引き戻し！！ 【${originalHit}】`);
-        } else if (mode === "時短") {
-          addLog(`>> 時短引き戻し成功！ 【${originalHit}】`);
-        } else {
-          rushCount++;
-        }
         if (rushStyle === "強欲RUSH") {
           if (rMain < 25) {
             res.name.push("超強欲3000BONUS");
@@ -487,35 +473,47 @@ const MACHINES = {
       const { eff, hitDigit } = ctx;
       let bonusBall = 0;
       let rushBonus = 0;
-      let isST = false;
-      let needsUpgrade = false;
-      const originalHit = hitDigit;
       if (eff.saibare) {
         addLog(">> 先バレ発生！！");
       }
 
       if (!eff.isRight) {
+        // 通常時初当り（特図1）: 55%でRUSH、45%で通常へ戻る。
         rushCount = 1;
-        addLog(">> 大兎殲滅戦BONUS！");
-        if (eff.isRushSure) {
-          isST = true;
-          bonusBall = 420;
+        addLog(`>> 大兎殲滅戦BONUS！ 【${hitDigit}】${lcdCount}回転`);
+        await new Promise((r) => setTimeout(r, 1000));
+        if (Math.random() < 0.55) {
+          bonusBall = 3000;
           addLog(">> ジャッジ成功！！ RUSH突入！");
-        } else if (originalHit === 7) {
-          isST = true;
-          bonusBall = 1400;
-          addLog(">> 全回転！！");
-        } else if (originalHit % 2 !== 0) {
-          isST = true;
-          bonusBall = 420;
-        } else if (Math.random() < 0.2) {
-          isST = true;
-          needsUpgrade = true;
-          bonusBall = 420;
+          while (Math.random() < 0.25) {
+            rushBonus += 1500;
+            addLog(">> 超強欲フリーズ！！ +1500上乗せ！");
+          }
+          bonusBall += rushBonus;
+          document.getElementById("machine").classList.add("vibe-rainbow");
+          document.getElementById("lamp").classList.add("lamp-active");
+          await new Promise((r) => setTimeout(r, 800));
+          document.getElementById("machine").classList.remove("vibe-rainbow");
+          document.getElementById("lamp").classList.remove("lamp-active");
+          addLog(`>> 出玉: ${bonusBall}個`);
+          totalBall += bonusBall;
+          currentRot = 0;
+          mode = "ST";
+          rRem = SPECS.st;
+          currentRushHits++;
         } else {
-          bonusBall = 420;
+          bonusBall = 1500;
+          addLog(`>> ジャッジ失敗… 通常へ 出玉: ${bonusBall}個`);
+          totalBall += bonusBall;
+          currentRot = 0;
+          mode = "通常";
+          rRem = 0;
         }
+        lcdCount = 0;
+        updateUI();
+        await new Promise((r) => setTimeout(r, 600));
       } else {
+        // RUSH中当り（特図2）: 25%/55%/20%、当選後は145回へ戻す。
         if (rushStyle === "強欲RUSH") {
           const r = Math.random();
           if (r < 0.25) {
@@ -560,17 +558,8 @@ const MACHINES = {
         totalBall += bonusBall;
         currentRot = 0;
         rushCount++;
-        if (isST) {
-          if (mode !== "ST") {
-            rushStyle = Math.random() < 0.5 ? "強欲RUSH" : "ドキドキRUSH";
-            addLog(`>> ${rushStyle}突入！`);
-          }
-          mode = "ST";
-          rRem = SPECS.st;
-        } else {
-          mode = "時短";
-          rRem = SPECS.jt;
-        }
+        mode = "ST";
+        rRem = SPECS.st;
         currentRushHits++;
         lcdCount = 0;
         updateUI();
