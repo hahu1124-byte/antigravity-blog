@@ -585,17 +585,18 @@ body.light-mode .log {
   background: #eee;
   border: 2px solid var(--accent-dark);
   width: 92%;
-  max-width: 450px;
+  max-width: 540px;
   padding: 15px;
   border-radius: 12px;
   overflow-y: auto;
   max-height: 90vh;
   color: #111;
+  box-sizing: border-box;
 }
 
 .graph-area {
   background: #fff;
-  height: 200px;
+  height: clamp(190px, 44vw, 240px);
   margin-bottom: 20px;
   border: 1px solid #ccc;
 }

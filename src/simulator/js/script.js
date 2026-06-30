@@ -577,10 +577,19 @@ let sChart,
 function recordInitialHitHistory(resultLabel) {
   if (activeInitialHitNumber <= 0) return;
   historyData.push(firstHitRot);
-  historyLabels.push(`${activeInitialHitNumber}回目(${resultLabel})`);
+  historyLabels.push(
+    `${activeInitialHitNumber} - ${firstHitRot}回転（${resultLabel}）`,
+  );
   hChart.update();
   firstHitRot = 0;
   activeInitialHitNumber = 0;
+}
+
+function normalRotationAfterModeEnd(endedMode) {
+  if (endedMode === "ST") {
+    return Math.max(0, currentRot - SPECS.st);
+  }
+  return currentRot;
 }
 
 // ============================================================
@@ -649,6 +658,7 @@ function createJob(isRight = false) {
 async function startProcess() {
   if (!isAuto || isAnim) return;
   if (mode !== "通常" && rRem <= 0) {
+    const endedMode = mode;
     const modeLabel = M.modeLabel(mode);
     const rushNetBall = Math.floor(totalBall - rushStartBall);
     addLog(
@@ -656,6 +666,7 @@ async function startProcess() {
     );
     recordInitialHitHistory(`${currentRushHits}連`);
     mode = "通常";
+    lcdCount = normalRotationAfterModeEnd(endedMode);
     currentRushHits = 0;
     firstHitRot = 0;
     updateUI();

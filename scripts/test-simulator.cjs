@@ -2,6 +2,14 @@ const fs = require("fs");
 const vm = require("vm");
 
 const elements = new Map();
+function makeRandom(initialSeed) {
+  let seed = initialSeed >>> 0;
+  return () => {
+    seed = (seed * 1664525 + 1013904223) >>> 0;
+    return seed / 4294967296;
+  };
+}
+
 function createElement() {
   return {
     classList: { add() {}, remove() {}, toggle() {} },
@@ -47,6 +55,7 @@ const context = vm.createContext({
   },
   Math: Object.create(Math),
   nativeRandom: Math.random,
+  makeRandom,
 });
 
 const source = fs.readFileSync("src/simulator/js/script.js", "utf8");
@@ -71,7 +80,7 @@ function assertClose(label, actual, expected, tolerance) {
     SPECS = M.specs;
     mode = "通常";
     optSaibare = false;
-    Math.random = nativeRandom;
+    Math.random = makeRandom(20260701);
     const counts = {};
     let hitsSeen = 0;
     let coloredHolds = 0;
@@ -117,7 +126,7 @@ function assertClose(label, actual, expected, tolerance) {
 
   const saibare = await run(`
     optSaibare = true;
-    Math.random = nativeRandom;
+    Math.random = makeRandom(20260702);
     let hitsSeen = 0;
     let totalSeen = 0;
     for (let i = 0; i < 3000000; i++) {
@@ -135,7 +144,7 @@ function assertClose(label, actual, expected, tolerance) {
   const rushDistribution = await run(`
     mode = "ST";
     rushStyle = "強欲RUSH";
-    Math.random = nativeRandom;
+    Math.random = makeRandom(20260703);
     const counts = { 300: 0, 1500: 0, 3000: 0 };
     const spins = 1000000;
     for (let i = 0; i < spins; i++) {
@@ -204,7 +213,19 @@ function assertClose(label, actual, expected, tolerance) {
     initialHitCount = 1; activeInitialHitNumber = 1; firstHitRot = 40;
     Math.random = () => 0.9;
     await M.resolveHit({ eff: { isRight: false, saibare: false }, hitDigit: 2 });
-    if (historyData.length !== 1 || historyData[0] !== 40 || historyLabels[0] !== "1回目(通常)") throw new Error("ReZero normal history failed");
+    if (historyData.length !== 1 || historyData[0] !== 40 || historyLabels[0] !== "1 - 40回転（通常）") throw new Error("ReZero normal history failed");
+
+    currentMachine = "rezero"; M = MACHINES.rezero; SPECS = M.specs; currentRot = 145;
+    if (normalRotationAfterModeEnd("ST") !== 0) throw new Error("ReZero RUSH rotation correction failed");
+    currentRot = 190;
+    if (normalRotationAfterModeEnd("ST") !== 45) throw new Error("ReZero RUSH overflow rotation correction failed");
+
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; currentRot = 163;
+    if (normalRotationAfterModeEnd("ST") !== 0) throw new Error("Eva ST rotation correction failed");
+    currentRot = 100;
+    if (normalRotationAfterModeEnd("時短") !== 100) throw new Error("Eva time-short rotation correction failed");
+
+    currentMachine = "rezero"; M = MACHINES.rezero; SPECS = M.specs;
 
     mode = "通常"; lcdCount = 88; totalBall = 0; currentRot = 88;
     initialHitCount = 2; activeInitialHitNumber = 2; firstHitRot = 88;
