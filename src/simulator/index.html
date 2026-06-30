@@ -6,12 +6,12 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>EVANGELION Sim -2025 Final-</title>
+    <title>Re:ゼロ Sim -season2-</title>
     <!-- 分割したCSSを読み込み -->
     <link rel="stylesheet" href="css/style.css" />
   </head>
 
-  <body>
+  <body class="theme-rezero">
     <header>
       <button class="header-btn" onclick="openMachineModal()">機種選択</button>
       <button class="header-btn btn-graph" onclick="openModal()">
@@ -68,10 +68,10 @@
           data-machine="rezero"
           onclick="selectMachine('rezero')"
         >
-          <span class="machine-name">🔵 Re:ゼロ season2 風</span>
-          <span class="machine-spec"
-            >通常 1/349.9 ｜ RUSH145回 ｜ 継続率約77%</span
-          >
+            <span class="machine-name">🔵 Re:ゼロ season2 風</span>
+            <span class="machine-spec"
+              >通常 1/349.9 ｜ RUSH145回 ｜ 継続率約77%</span
+            >
         </button>
         <button class="machine-modal-close" onclick="closeMachineModal()">
           閉じる
@@ -155,11 +155,11 @@
               全
             </button>
             <button
-              id="btn-kokuchi"
+              id="btn-saibare"
               class="side-btn"
-              onclick="toggleOpt('kokuchi')"
+              onclick="toggleOpt('saibare')"
             >
-              告知
+              先バレ
             </button>
           </div>
           <button class="btn-auto" id="btn-slow" onclick="toggleAuto('slow')">

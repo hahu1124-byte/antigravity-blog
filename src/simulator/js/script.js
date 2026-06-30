@@ -194,11 +194,14 @@ const MACHINES = {
     },
     async resolveHit(ctx) {
       const { eff, hitDigit } = ctx;
-      let bonusBall,
-        isST = false,
-        needsUpgrade = false,
-        isRightUpgrade = false,
-        originalHit = hitDigit;
+      let bonusBall = 0;
+      let rushBonus = 0;
+      let isST = false;
+      let needsUpgrade = false;
+      const originalHit = hitDigit;
+      if (eff.saibare) {
+        addLog(">> 先バレ発生！！");
+      }
       if (!eff.isRight) {
         rushCount = 1;
         if (eff.isRushSure) {
@@ -287,12 +290,12 @@ const MACHINES = {
   },
 
   rezero: {
-    title: "e Re:ゼロ season2",
+    title: "Re:ゼロ Sim -season2-",
     theme: "theme-rezero",
     specs: { n: 349.9, s: 99.9, st: 145, jt: 0 },
     type: "MIXED",
     modeLabel(m) {
-      return m === "ST" ? "RUSH" : m;
+      return m === "ST" ? rushStyle : m;
     },
     createJobHits(mode) {
       const rMain = Math.random() * 100;
@@ -308,75 +311,100 @@ const MACHINES = {
         isRushSure: false,
       };
       if (mode === "通常") {
-        // 通常時（特図1）当り演出
-        if (rMain < 3) {
-          res.name.push("超強欲フリーズ");
-          res.isRushSure = true;
-          res.vibe = true;
-          res.vibeColor = "rainbow";
-          res.text = "フリーズ";
-          res.trust = 100;
-        } else if (rMain < 8) {
-          res.name.push("俺を選べSPリーチ");
+        if (optSaibare && rMain < 93.8) {
+          res.name.push("先バレ");
+          res.flash = true;
           res.vibe = true;
           res.vibeColor = "red";
-          res.isRushSure = true;
-          res.trust = 100;
-        } else if (rMain < 15) {
-          res.name.push("激熱ジャッジ");
-          res.text = "ジャッジ成功";
-          res.isRushSure = true;
-          res.trust = 100;
-        } else if (rMain < 35) {
-          res.name.push("強欲SPリーチ");
-          res.vibe = true;
-          res.vibeColor = "red";
-          res.trust = 90;
-        } else if (rMain < 60) {
-          res.name.push("死に戻りSP");
-          res.trust = 75;
-        } else {
-          res.name.push("ゼロ系演出");
-          res.trust = 55;
+          res.trust = 40;
         }
-        if (rSub < 25) {
+        if (rMain < 6) {
+          res.name.push("強欲SP");
+          res.vibe = true;
+          res.vibeColor = "red";
+          res.trust = Math.max(res.trust, 78);
+        } else if (rMain < 18) {
+          res.name.push("死に戻りSP");
+          res.trust = Math.max(res.trust, 52);
+        } else if (rMain < 36) {
+          res.name.push("俺を選べSP");
+          res.vibe = true;
+          res.vibeColor = "red";
+          res.trust = Math.max(res.trust, 26);
+        } else if (rMain < 56) {
+          res.name.push("氷結の絆SP");
+          res.trust = Math.max(res.trust, 18);
+        } else {
+          res.name.push("スバルATTACK");
+          res.trust = Math.max(res.trust, 10);
+        }
+        if (rSub < 15) {
           res.name.push("ベアトリスランプ");
           res.holdType = "vibe";
           res.trust = Math.max(res.trust, 92);
-        } else if (rSub < 55) {
-          res.name.push("赤保留");
+        } else if (rSub < 40) {
+          res.name.push("強欲保留");
           res.holdType = "red";
-          res.trust = Math.max(res.trust, 80);
-        } else if (rSub < 80) {
-          res.name.push("緑保留");
+          res.trust = Math.max(res.trust, 76);
+        } else if (rSub < 68) {
+          res.name.push("死に戻り保留");
           res.holdType = "green";
-          res.trust = Math.max(res.trust, 55);
+          res.trust = Math.max(res.trust, 58);
+        } else if (rSub < 88) {
+          res.name.push("エミリア保留");
+          res.holdType = "blue";
+          res.trust = Math.max(res.trust, 18);
         }
       } else {
-        // RUSH中（特図2）当り演出 — 全て当たり確定表示
-        if (rMain < 5) {
-          res.name.push("強欲フリーズ");
-          res.vibe = true;
-          res.vibeColor = "rainbow";
-          res.text = "超強欲3000";
-          res.trust = 100;
-        } else if (rMain < 20) {
-          res.name.push("RUSH俺を選べ");
-          res.vibe = true;
-          res.vibeColor = "red";
-          res.trust = 100;
-        } else if (rMain < 50) {
-          res.name.push("私の名前はエミリア");
-          res.text = "エミリア";
-          res.trust = 100;
+        isST = true;
+        isRightUpgrade = true;
+        if (mode === "通常") {
+          rushStyle = Math.random() < 0.5 ? "強欲RUSH" : "ドキドキRUSH";
+          rushCount = 1;
+          addLog(`>> 右打ち残保留（特図2）で引き戻し！！ 【${originalHit}】`);
+        } else if (mode === "時短") {
+          addLog(`>> 時短引き戻し成功！ 【${originalHit}】`);
         } else {
-          res.name.push("RUSH連荘");
-          res.trust = 100;
+          rushCount++;
         }
-        if (rSub < 40) {
-          res.name.push("RUSH赤保留");
-          res.holdType = "red";
-          res.trust = Math.max(res.trust, 95);
+        if (rushStyle === "強欲RUSH") {
+          if (rMain < 25) {
+            res.name.push("超強欲3000BONUS");
+            res.vibe = true;
+            res.vibeColor = "rainbow";
+            res.text = "3000+";
+            res.trust = 100;
+          } else if (rMain < 60) {
+            res.name.push("Re:ゼロBONUS");
+            res.trust = 100;
+          } else {
+            res.name.push("BONUS");
+            res.trust = 100;
+          }
+          if (rSub < 32) {
+            res.name.push("強欲保留");
+            res.holdType = "red";
+            res.trust = Math.max(res.trust, 95);
+          }
+        } else {
+          if (rMain < 20) {
+            res.name.push("ドナぷる");
+            res.vibe = true;
+            res.vibeColor = "red";
+            res.trust = 100;
+          } else if (rMain < 52) {
+            res.name.push("落ちブル");
+            res.text = "落ちブル";
+            res.trust = 100;
+          } else {
+            res.name.push("エミリア告知");
+            res.trust = 100;
+          }
+          if (rSub < 32) {
+            res.name.push("落ちブルアップ");
+            res.holdType = "blue";
+            res.trust = Math.max(res.trust, 95);
+          }
         }
       }
       return res;
@@ -395,49 +423,58 @@ const MACHINES = {
         isRushSure: false,
       };
       if (mode === "通常") {
-        if (rMain < 0.003) {
-          res.name.push("強欲SPリーチ");
-          res.vibe = true;
-          res.vibeColor = "red";
-          res.trust = 80;
-        } else if (rMain < 0.012) {
-          res.name.push("死に戻りSP");
-          res.trust = 60;
-        } else if (rMain < 0.03) {
-          res.name.push("私の名前はただのエミリア予告");
-          res.trust = 35;
+        if (rMain < 1) {
+          res.name.push("テンパイ煽り");
+          res.trust = 8;
+        } else if (rMain < 4) {
+          res.name.push("死に戻り失敗");
+          res.trust = 12;
+        } else if (rMain < 7) {
+          res.name.push("空回り保留");
+          res.trust = 10;
         }
-        if (rSub < 0.004) {
+        if (rSub < 0.8) {
           res.name.push("ベアトリスランプ");
           res.holdType = "vibe";
           res.trust = Math.max(res.trust, 92);
-        } else if (rSub < 0.018) {
-          res.name.push("赤保留");
+        } else if (rSub < 2.5) {
+          res.name.push("強欲保留");
           res.holdType = "red";
-          res.trust = Math.max(res.trust, 80);
-        } else if (rSub < 0.2) {
-          res.name.push("緑保留");
+          res.trust = Math.max(res.trust, 76);
+        } else if (rSub < 6) {
+          res.name.push("死に戻り保留");
           res.holdType = "green";
-          res.trust = Math.max(res.trust, 18);
-        } else if (rSub < 5.0) {
-          res.name.push("青保留");
+          res.trust = Math.max(res.trust, 58);
+        } else if (rSub < 12) {
+          res.name.push("エミリア保留");
           res.holdType = "blue";
-          res.trust = Math.max(res.trust, 4);
+          res.trust = Math.max(res.trust, 18);
         }
         if (res.name.length === 0) {
           res.name.push("通常");
           res.trust = 0.1;
         }
       } else {
-        // RUSH中外れ（145回転消化中）
-        if (rSub < 0.05) {
-          res.name.push("RUSH赤保留");
-          res.holdType = "red";
-          res.trust = Math.max(res.trust, 90);
-        } else if (rSub < 1.0) {
-          res.name.push("RUSH緑保留");
-          res.holdType = "green";
-          res.trust = Math.max(res.trust, 18);
+        if (rushStyle === "強欲RUSH") {
+          if (rSub < 0.05) {
+            res.name.push("強欲保留");
+            res.holdType = "red";
+            res.trust = Math.max(res.trust, 90);
+          } else if (rSub < 0.9) {
+            res.name.push("死に戻り保留");
+            res.holdType = "green";
+            res.trust = Math.max(res.trust, 18);
+          }
+        } else {
+          if (rSub < 0.05) {
+            res.name.push("落ちブルアップ");
+            res.holdType = "blue";
+            res.trust = Math.max(res.trust, 90);
+          } else if (rSub < 0.9) {
+            res.name.push("ドナぷる");
+            res.holdType = "green";
+            res.trust = Math.max(res.trust, 18);
+          }
         }
         if (res.name.length === 0) {
           res.name.push("通常");
@@ -450,86 +487,90 @@ const MACHINES = {
       const { eff, hitDigit } = ctx;
       let bonusBall = 0;
       let rushBonus = 0;
+      let isST = false;
+      let needsUpgrade = false;
+      const originalHit = hitDigit;
+      if (eff.saibare) {
+        addLog(">> 先バレ発生！！");
+      }
 
       if (!eff.isRight) {
-        // 通常時初当り（特図1）— 全て「大兎殲滅戦BONUS」
         rushCount = 1;
-        addLog(`>> 大兎殲滅戦BONUS！ 【${hitDigit}】${lcdCount}回転`);
-        await new Promise((r) => setTimeout(r, 1000));
-        const r = Math.random();
-        if (r < 0.55) {
-          // 55%: RUSH突入（3000個）
-          bonusBall = 3000;
-          addLog(`>> ジャッジ成功！！ RUSH突入！`);
-          // フリーズ上乗せループ（25%ごとに+1500）
-          while (Math.random() < 0.25) {
-            rushBonus += 1500;
-            addLog(`>> 超強欲フリーズ！！ +1500上乗せ！`);
-          }
-          bonusBall += rushBonus;
-          document.getElementById("machine").classList.add("vibe-rainbow");
-          document.getElementById("lamp").classList.add("lamp-active");
-          await new Promise((r) => setTimeout(r, 800));
-          document.getElementById("machine").classList.remove("vibe-rainbow");
-          document.getElementById("lamp").classList.remove("lamp-active");
-          addLog(`>> 出玉: ${bonusBall}個`);
-          totalBall += bonusBall;
-          currentRot = 0;
-          mode = "ST";
-          rRem = SPECS.st;
-          currentRushHits++;
-          lcdCount = 0;
-          updateUI();
-          await new Promise((r) => setTimeout(r, 600));
+        addLog(">> 大兎殲滅戦BONUS！");
+        if (eff.isRushSure) {
+          isST = true;
+          bonusBall = 420;
+          addLog(">> ジャッジ成功！！ RUSH突入！");
+        } else if (originalHit === 7) {
+          isST = true;
+          bonusBall = 1400;
+          addLog(">> 全回転！！");
+        } else if (originalHit % 2 !== 0) {
+          isST = true;
+          bonusBall = 420;
+        } else if (Math.random() < 0.2) {
+          isST = true;
+          needsUpgrade = true;
+          bonusBall = 420;
         } else {
-          // 45%: 通常へ（1500個）
-          bonusBall = 1500;
-          addLog(`>> ジャッジ失敗… 通常へ 出玉: ${bonusBall}個`);
-          totalBall += bonusBall;
-          currentRot = 0;
-          mode = "通常";
-          rRem = 0;
-          lcdCount = 0;
-          updateUI();
-          await new Promise((r) => setTimeout(r, 600));
+          bonusBall = 420;
         }
       } else {
-        // RUSH中当り（特図2）— 全てモードループ（rRem=145リセット）
-        const r = Math.random();
-        if (r < 0.25) {
-          // 25%: 3000個+α（超強欲3000BONUS）
-          bonusBall = 3000;
-          addLog(`>> 超強欲3000BONUS！！`);
-          // フリーズ上乗せループ（25%ごとに+1500）
-          while (Math.random() < 0.25) {
-            rushBonus += 1500;
-            addLog(`>> 超強欲フリーズ！！ +1500上乗せ！`);
+        if (rushStyle === "強欲RUSH") {
+          const r = Math.random();
+          if (r < 0.25) {
+            bonusBall = 3000;
+            addLog(">> 超強欲3000BONUS！！");
+            while (Math.random() < 0.25) {
+              rushBonus += 1500;
+              addLog(">> 超強欲フリーズ！！ +1500上乗せ！");
+            }
+            bonusBall += rushBonus;
+            document.getElementById("machine").classList.add("vibe-rainbow");
+            document.getElementById("lamp").classList.add("lamp-active");
+            [1, 2, 3].forEach((i) => {
+              const el = document.getElementById("d" + i);
+              el.innerText = hitDigit;
+              el.className = "digit gold";
+            });
+            await new Promise((r) => setTimeout(r, 1000));
+            document.getElementById("machine").classList.remove("vibe-rainbow");
+            document.getElementById("lamp").classList.remove("lamp-active");
+            addLog(`>> 出玉: ${bonusBall}個 RUSH継続！`);
+          } else if (r < 0.8) {
+            bonusBall = 1500;
+            addLog(`>> Re:ゼロBONUS！ 出玉: ${bonusBall}個 RUSH継続！`);
+          } else {
+            bonusBall = 300;
+            addLog(`>> BONUS 出玉: ${bonusBall}個 RUSH継続！`);
           }
-          bonusBall += rushBonus;
-          document.getElementById("machine").classList.add("vibe-rainbow");
-          document.getElementById("lamp").classList.add("lamp-active");
-          [1, 2, 3].forEach((i) => {
-            const el = document.getElementById("d" + i);
-            el.innerText = hitDigit;
-            el.className = "digit gold";
-          });
-          await new Promise((r) => setTimeout(r, 1000));
-          document.getElementById("machine").classList.remove("vibe-rainbow");
-          document.getElementById("lamp").classList.remove("lamp-active");
-          addLog(`>> 出玉: ${bonusBall}個 RUSH継続！`);
-        } else if (r < 0.8) {
-          // 55%: 1500個
-          bonusBall = 1500;
-          addLog(`>> 1500BONUS！ 出玉: ${bonusBall}個 RUSH継続！`);
         } else {
-          // 20%: 300個
-          bonusBall = 300;
-          addLog(`>> 300BONUS 出玉: ${bonusBall}個 RUSH継続！`);
+          const r = Math.random();
+          if (r < 0.2) {
+            bonusBall = 3000;
+            addLog(">> ドナぷる発生！ 3000BONUS！！");
+          } else if (r < 0.75) {
+            bonusBall = 1500;
+            addLog(`>> Re:ゼロBONUS！ 出玉: ${bonusBall}個 RUSH継続！`);
+          } else {
+            bonusBall = 300;
+            addLog(`>> BONUS 出玉: ${bonusBall}個 RUSH継続！`);
+          }
         }
         totalBall += bonusBall;
         currentRot = 0;
         rushCount++;
-        rRem = SPECS.st; // 145回転リセット（モードループ）
+        if (isST) {
+          if (mode !== "ST") {
+            rushStyle = Math.random() < 0.5 ? "強欲RUSH" : "ドキドキRUSH";
+            addLog(`>> ${rushStyle}突入！`);
+          }
+          mode = "ST";
+          rRem = SPECS.st;
+        } else {
+          mode = "時短";
+          rRem = SPECS.jt;
+        }
         currentRushHits++;
         lcdCount = 0;
         updateUI();
@@ -542,9 +583,10 @@ const MACHINES = {
 // ============================================================
 // グローバル状態
 // ============================================================
-let currentMachine = "eva";
+let currentMachine = "rezero";
 let M = MACHINES[currentMachine];
 let SPECS = M.specs;
+let rushStyle = "強欲RUSH";
 
 let hits = 0,
   rushCount = 0,
@@ -559,7 +601,7 @@ let mode = "通常",
   autoSpeed = "slow",
   isAnim = false;
 let lcdCount = 0,
-  optKokuchi = false;
+  optSaibare = false;
 let leftStock = [],
   rightStock = [];
 let activeJob = null;
@@ -594,7 +636,25 @@ function createJob(isRight = false) {
     holdType: extras.holdType || "none",
     currentView: "none",
     isRushSure: extras.isRushSure || false,
+    saibare: false,
   };
+
+  if (
+    currentMachine === "rezero" &&
+    optSaibare &&
+    isHit &&
+    mode === "通常" &&
+    Math.random() < 0.938
+  ) {
+    res.saibare = true;
+    if (!res.name.includes("先バレ")) {
+      res.name.unshift("先バレ");
+    }
+    res.flash = true;
+    res.vibe = true;
+    res.vibeColor = "red";
+    res.trust = Math.max(res.trust, 40);
+  }
 
   // 保留の見た目決定
   if (res.holdType === "red" || (res.vibe && !res.isRushSure)) {
@@ -646,10 +706,9 @@ async function startProcess() {
   refillStock();
   updateUI();
   let eff = activeJob;
-  if (optKokuchi && eff.isHit) {
+  if (optSaibare && currentMachine === "rezero" && eff.isHit) {
     eff.flash = true;
-    eff.trust = 100;
-    eff.displayName = "インフラ告知";
+    eff.trust = Math.max(eff.trust, 40);
   }
   totalRot++;
   currentRot++;
@@ -874,7 +933,7 @@ function updateAutoBtns() {
 }
 
 function toggleOpt(t) {
-  if (t === "kokuchi") optKokuchi = !optKokuchi;
+  if (t === "saibare") optSaibare = !optSaibare;
   document.getElementById("btn-" + t).classList.toggle("active");
 }
 
@@ -1003,7 +1062,8 @@ function resetState() {
   mode = "通常";
   rRem = 0;
   lcdCount = 0;
-  optKokuchi = false;
+  optSaibare = false;
+  rushStyle = "強欲RUSH";
   leftStock = [];
   rightStock = [];
   activeJob = null;
@@ -1016,6 +1076,8 @@ function resetState() {
   rushStartBall = 0;
   document.getElementById("max-hamari-box").innerText = "最大ハマリ: 0";
   document.getElementById("log").innerHTML = "> システム起動完了";
+  const saibareBtn = document.getElementById("btn-saibare");
+  if (saibareBtn) saibareBtn.classList.remove("active");
   // チャート再構築（テーマ色も反映）
   if (sChart) sChart.destroy();
   if (hChart) hChart.destroy();
@@ -1042,6 +1104,8 @@ function toggleTheme() {
 }
 
 window.onload = () => {
+  document.body.classList.add(M.theme);
+  document.title = M.title;
   initCharts();
   refillStock();
   updateUI();
