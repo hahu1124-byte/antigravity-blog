@@ -483,6 +483,7 @@ const MACHINES = {
           currentRot = 0;
           mode = "通常";
           rRem = 0;
+          recordInitialHitHistory("通常");
         }
         lcdCount = 0;
         updateUI();
@@ -569,8 +570,18 @@ let slumpData = [0],
 let sChart,
   hChart,
   firstHitRot = 0,
-  rushSeriesCount = 0,
+  initialHitCount = 0,
+  activeInitialHitNumber = 0,
   rushStartBall = 0;
+
+function recordInitialHitHistory(resultLabel) {
+  if (activeInitialHitNumber <= 0) return;
+  historyData.push(firstHitRot);
+  historyLabels.push(`${activeInitialHitNumber}回目(${resultLabel})`);
+  hChart.update();
+  firstHitRot = 0;
+  activeInitialHitNumber = 0;
+}
 
 // ============================================================
 // 正しい抽選フロー：先に当たり外れを決め、演出を機種別に抽選
@@ -643,10 +654,7 @@ async function startProcess() {
     addLog(
       `【${modeLabel}終了】 ${currentRushHits}連 出玉: ${rushNetBall.toLocaleString()}個`,
     );
-    rushSeriesCount++;
-    historyData.push(firstHitRot);
-    historyLabels.push(`${rushSeriesCount}回目(${currentRushHits}連)`);
-    hChart.update();
+    recordInitialHitHistory(`${currentRushHits}連`);
     mode = "通常";
     currentRushHits = 0;
     firstHitRot = 0;
@@ -781,6 +789,8 @@ async function startProcess() {
     isAnim = true;
     hits++;
     if (mode === "通常") {
+      initialHitCount++;
+      activeInitialHitNumber = initialHitCount;
       firstHitRot = lcdCount;
       rushStartBall = totalBall;
       if (currentRot > maxHamari) {
@@ -1030,7 +1040,8 @@ function resetState() {
   slumpLabels = ["0"];
   historyData = [];
   historyLabels = [];
-  rushSeriesCount = 0;
+  initialHitCount = 0;
+  activeInitialHitNumber = 0;
   firstHitRot = 0;
   rushStartBall = 0;
   document.getElementById("max-hamari-box").innerText = "最大ハマリ: 0";

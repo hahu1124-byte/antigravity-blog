@@ -199,7 +199,15 @@ function assertClose(label, actual, expected, tolerance) {
     if (mode !== "ST" || rRem !== 163 || totalBall !== 1400) throw new Error("Eva ST hit failed");
 
     currentMachine = "rezero"; M = MACHINES.rezero; SPECS = M.specs;
+    hChart = new Chart(); historyData = []; historyLabels = [];
+    mode = "通常"; lcdCount = 40; totalBall = 0; currentRot = 40;
+    initialHitCount = 1; activeInitialHitNumber = 1; firstHitRot = 40;
+    Math.random = () => 0.9;
+    await M.resolveHit({ eff: { isRight: false, saibare: false }, hitDigit: 2 });
+    if (historyData.length !== 1 || historyData[0] !== 40 || historyLabels[0] !== "1回目(通常)") throw new Error("ReZero normal history failed");
+
     mode = "通常"; lcdCount = 88; totalBall = 0; currentRot = 88;
+    initialHitCount = 2; activeInitialHitNumber = 2; firstHitRot = 88;
     const values = [0.1, 0.9]; Math.random = () => values.shift() ?? 0.9;
     await M.resolveHit({ eff: { isRight: false, saibare: true }, hitDigit: 5 });
     if (mode !== "ST" || rRem !== 145 || currentRot !== 0 || totalBall !== 3000) throw new Error("ReZero normal hit failed");
