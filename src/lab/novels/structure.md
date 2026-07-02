@@ -38,6 +38,7 @@ novels/
     ├── characters.md           # キャラクター一覧
     ├── episodes-summary.md     # 各話あらすじ一覧
     ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
+    ├── setting-ch1.md          
     ├── setting.md              # プロット・ブロック構成
     ├── writing_prompt.md       # AI執筆指示書
     └── episodes/
@@ -47,10 +48,10 @@ novels/
             ├── 21-30/               # ep21~ep30
             ├── 31-40/               # ep31~ep40
             └── 41-50/
-                ├── ... (6 older files)
-                ├── ep45T.md
-                ├── ep46T.md
-                ├── ep47T.md
+                ├── ... (9 older files)
+                ├── ep48A.md
+                ├── ep48N.md
+                ├── ep48T.md
                 └── archive/
                     ├── ... (10 older files)
                     ├── ep47A.md
