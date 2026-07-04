@@ -50,13 +50,12 @@ novels/
         │   └── 41-50/               # ep41~ep50
         └── 51-100/
             └── 51-60/
-                ├── ... (1 older files)
-                ├── ep52A.md
-                ├── ep52N.md
+                ├── ep51T.md
                 ├── ep52T.md
                 └── archive/
-                    ├── ep51A.md
-                    └── ep51N.md
+                    ├── ... (2 older files)
+                    ├── ep52A.md
+                    └── ep52N.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
