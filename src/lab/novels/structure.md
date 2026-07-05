@@ -45,14 +45,14 @@ novels/
         ├── 1-50/               # ep01~ep50
         └── 51-100/
             └── 51-60/
-                ├── ... (4 older files)
-                ├── ep55A.md
-                ├── ep55N.md
+                ├── ... (2 older files)
+                ├── ep53T.md
+                ├── ep54T.md
                 ├── ep55T.md
                 └── archive/
-                    ├── ... (6 older files)
-                    ├── ep54A.md
-                    └── ep54N.md
+                    ├── ... (8 older files)
+                    ├── ep55A.md
+                    └── ep55N.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
