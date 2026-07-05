@@ -140,54 +140,29 @@ bash h:/gravity/.agent/scripts/hgit.sh h:/gravity/projects/antigravity-blog push
 - **X**: `https://twitter.com/intent/tweet?text=...` のURLエンコードリンクを生成
 - **Bluesky**: コピペ用テキストを用意（`https://bsky.app/` から投稿）
 
-### 10. Obsidian保存（weekly_trend記事のみ）
+### 10. Obsidian保存（weekly_trend記事のみ・週1回手動指示）
 
-スラッグに `weekly_trend` が含まれる場合のみ実行。
+`週刊テックトレンド記事自動生成`ワークフロー（gravity-portal）が日曜22:00 JSTに実行されると、`scripts/generate-weekly-trend.mjs` が記事生成と同時に `antigravity-blog/src/obsidian/weekly-trends/weekly-trend-wNN.md` も自動生成してantigravity-blogにpushする（2026-07-06〜対応）。
 
-#### 10a. Markdownノート作成
+ローカルの `H:/gravity` にはGitHub Actions側の変更は自動反映されないため、ユーザーから週1回「Obsidianに保存して」等の指示があったら以下を実行する。
 
-`h:/gravity/docs/knowledge/projects/weekly-trends/weekly-trend-wNN.md` を作成。
-
-```markdown
----
-name: weekly-trend-wNN
-description: 週間テックトレンド WNN（YYYY年M月D日〜M月D日）
-tags: [週間トレンド, テック, AI開発, Webデザイン, UI/UX, 個人開発]
-created: YYYY-MM-DD
-week: WNN
-period: YYYY-MM-DD〜YYYY-MM-DD
-source: https://antigravity-portal.com/blog/YYYYMM/記事スラッグ/
-total_articles: NNN
-top_category: カテゴリ名（NN件）
----
-
-# 週間テックトレンド WNN（MM/DD〜MM/DD）
-
-[[INDEX]]
-
-（記事本文をHTML→Markdown変換して全文貼り付け）
-```
-
-変換ルール:
-- `<h2>` → `## `
-- `<ul><li>` → `- `
-- `<a href="URL">テキスト</a>` → `[テキスト](URL)`
-- `<strong>` → `**テキスト**`
-- `<small>` → `（小文字テキスト）`
-- `<hr>` → `---`
-- `⭐` マーク・カテゴリ見出し・各リンクを全て保持
-
-#### 10b. INDEX.md更新
-
-`h:/gravity/docs/knowledge/INDEX.md` の `projects/weekly-trends/` テーブルに先頭行として追加:
-
-```markdown
-| [projects/weekly-trends/weekly-trend-wNN.md](projects/weekly-trends/weekly-trend-wNN.md) | 週間テックトレンド WNN（YYYY-MM-DD〜MM-DD）NNN件 / トップカテゴリ |
-```
-
-#### 10c. gravity リポジトリコミット
+#### 10a. antigravity-blogをpullして新規ノートを取得
 
 ```bash
-bash h:/gravity/.agent/scripts/hgit.sh h:/gravity add docs/knowledge/projects/weekly-trends/weekly-trend-wNN.md docs/knowledge/INDEX.md
-bash h:/gravity/.agent/scripts/hgit.sh h:/gravity commit -m "save: 週間テックトレンド WNN をObsidianに保存"
+bash h:/gravity/.agent/scripts/hgit.sh h:/gravity/projects/antigravity-blog pull
 ```
+
+#### 10b. 同期スクリプト実行
+
+```bash
+pwsh -File h:/gravity/.agent/scripts/sync-weekly-trend-obsidian.ps1
+```
+
+このスクリプトが `antigravity-blog/src/obsidian/weekly-trends/` の未取り込みファイルを `docs/knowledge/projects/weekly-trends/` にコピーし、`INDEX.md` を更新し、gravityリポジトリへcommit（hgit.sh経由）まで行う。**pushは含まれないため、実行後に手動でpushすること：**
+
+```bash
+bash h:/gravity/.agent/scripts/hgit.sh h:/gravity push
+```
+
+> [!NOTE]
+> `src/obsidian/weekly-trends/` フォルダが存在しない場合（＝該当週のGitHub Actions実行がまだ新スクリプトを反映していない場合）は「同期元フォルダが存在しません」と出力してスキップする。その場合は該当週の記事を手動でMarkdown化する（旧手順は git履歴の本ファイル過去版を参照）。
