@@ -673,20 +673,25 @@ function buildArticleListHtml(
     <script>
     (function() {
         var PER_PAGE = 10;
-        var currentPage = 1;
+        var STORAGE_KEY = 'blog-page:' + location.pathname;
+        var storedPage = parseInt(sessionStorage.getItem(STORAGE_KEY), 10);
+        var currentPage = storedPage > 0 ? storedPage : 1;
         var cards = Array.from(document.querySelectorAll('.article-card'));
         var pagination = document.getElementById('pagination');
 
-        function render() {
+        function render(scrollTop) {
             var totalPages = Math.ceil(cards.length / PER_PAGE);
             if (totalPages <= 0) totalPages = 1;
             if (currentPage > totalPages) currentPage = totalPages;
+            sessionStorage.setItem(STORAGE_KEY, String(currentPage));
             var start = (currentPage - 1) * PER_PAGE;
             var end = start + PER_PAGE;
 
             cards.forEach(function(c, i) {
                 c.style.display = (i >= start && i < end) ? '' : 'none';
             });
+
+            if (scrollTop) window.scrollTo({ top: 0, behavior: 'smooth' });
 
             if (totalPages <= 1) {
                 pagination.innerHTML = '';
@@ -703,19 +708,18 @@ function buildArticleListHtml(
                 '<button class="page-btn page-arrow" id="pg-next" ' + (currentPage >= totalPages ? 'disabled' : '') + '>&#8250;</button>';
 
             document.getElementById('pg-prev').addEventListener('click', function() {
-                if (currentPage > 1) { currentPage--; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+                if (currentPage > 1) { currentPage--; render(true); }
             });
             document.getElementById('pg-next').addEventListener('click', function() {
-                if (currentPage < totalPages) { currentPage++; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+                if (currentPage < totalPages) { currentPage++; render(true); }
             });
             document.getElementById('pg-select').addEventListener('change', function() {
                 currentPage = parseInt(this.value);
-                render();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                render(true);
             });
         }
 
-        render();
+        render(false);
     })();
     </script>
 </body>
