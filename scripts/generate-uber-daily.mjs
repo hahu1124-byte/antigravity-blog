@@ -224,10 +224,10 @@ function renderTrafficSection() {
 
 // ===== 4. ガソリン価格 =====
 
-// 経産省サイトはAWS WAFのボット判定があり、GitHub Actions/curl/node fetch等の
-// プログラムからの直接ダウンロードは不安定（成功したり202 challengeで弾かれたりする）。
-// そのため自動フェッチは行わず、scripts/update-gas-price.cjs による手動更新
-// （実ブラウザでxlsxをダウンロード→スクリプト実行、実行後は自動コミット・プッシュ）を前提とする。
+// ガソリン価格の取得はこのスクリプトでは行わない。
+// Windowsタスクスケジューラ「GasPriceAutoUpdate」が毎週水曜21:00に
+// auto-gas-update.ps1（BITS転送で経産省xlsxを取得）→ update-gas-price.cjs
+// （キャッシュ更新＋自動コミット・プッシュ）を実行し、このキャッシュファイルを更新する。
 function getGasPriceCache() {
   const cachePath = path.join(ROOT, CONFIG.gasoline.cacheFile);
   try {

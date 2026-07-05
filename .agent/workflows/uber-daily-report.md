@@ -39,22 +39,19 @@ git push
 
 ---
 
-## ガソリン価格を更新する場合（毎週水曜推奨）
+## ガソリン価格の更新（完全自動）
 
-1. 経産省サイトから最新の xlsx をダウンロード
-   - https://www.enecho.meti.go.jp/statistics/petroleum_and_lpgas/pl007/results.html
-   - `G:\マイドライブ\gas\` に保存
-
-2. キャッシュ更新スクリプトを実行（xlsxパスを直接指定）
+- **Windowsタスクスケジューラ「GasPriceAutoUpdate」が毎週水曜21:00に自動実行**
+  - 実体: `scripts/auto-gas-update.ps1`
+  - 経産省の結果ページ（results.html）をBITS転送で取得 → 最新xlsxのURLを抽出 → xlsxをBITS転送でダウンロード
+    （curl/node fetch/GitHub Actions直接アクセスはAWS WAFのボット判定で弾かれるが、BITS経由は成功している）
+  - `update-gas-price.cjs` でキャッシュ更新 → **v2以降は自動で `git add / commit / push` まで実行**（コミット忘れ防止）
+  - xlsx実体は `G:\マイドライブ\gas\`（不可の場合 `scripts/gas-archive\`）に最大5世代アーカイブ
+- タスク状態確認: PowerShellで `Get-ScheduledTask -TaskName GasPriceAutoUpdate | Get-ScheduledTaskInfo`
+- 手動で即時更新したい場合は、タスクスケジューラから「実行」するか、xlsxを直接指定して以下を実行:
 ```bash
 node scripts/update-gas-price.cjs "G:/マイドライブ/gas/260701.xlsx"
 ```
-   - 実行後、スクリプトが自動で `git add / commit / push` まで行う（コミット忘れ防止のため v2 で追加）
-   - 失敗した場合のみ手動で `git add scripts/gas-price-cache.json && git commit && git push`
-
-⚠️ **経産省サイトの直接ダウンロードは自動化不可**: enecho.meti.go.jp は AWS WAF のボット判定があり、
-curl/node fetch/GitHub Actions からの直接ダウンロードは 202 challenge で弾かれ不安定。
-必ず実ブラウザで手動ダウンロードすること（自動フェッチのコードは組み込まない）。
 
 ---
 
