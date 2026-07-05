@@ -38,16 +38,11 @@ novels/
     ├── characters.md           # キャラクター一覧
     ├── episodes-summary.md     # 各話あらすじ一覧
     ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
-    ├── setting-ch1.md          # 第1章 詳細プロット（全30話構成）
     ├── setting.md              # プロット・ブロック構成
+    ├── setting-ch1.md          # 第1章 詳細プロット（全30話構成）
     ├── writing_prompt.md       # AI執筆指示書
     └── episodes/
-        ├── 1-50/
-        │   ├── 1-10/                # ep01~ep10
-        │   ├── 11-20/               # ep11~ep20
-        │   ├── 21-30/               # ep21~ep30
-        │   ├── 31-40/               # ep31~ep40
-        │   └── 41-50/               # ep41~ep50
+        ├── 1-50/               # ep01~ep50
         └── 51-100/
             └── 51-60/
                 ├── ... (1 older files)
