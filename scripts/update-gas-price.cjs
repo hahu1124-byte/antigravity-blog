@@ -13,9 +13,11 @@
 const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..');
 const CACHE_FILE = path.join(ROOT, 'scripts/gas-price-cache.json');
+const HGIT = 'h:/gravity/.agent/scripts/hgit.sh';
 const REGION = '愛知';
 
 const xlsxPath = process.argv[2];
@@ -115,5 +117,16 @@ console.log(`  ⛽ ハイオク:   ${cache.premium} 円/L`);
 console.log(`  🛢️  軽油:       ${cache.diesel} 円/L`);
 console.log(`  🔥 灯油(18L):  ${cache.kerosene} 円`);
 console.log('');
+
+// キャッシュ更新のコミット忘れを防ぐため、ここで自動コミット・プッシュまで行う。
+try {
+  execFileSync('bash', [HGIT, ROOT, 'add', 'scripts/gas-price-cache.json'], { stdio: 'inherit' });
+  execFileSync('bash', [HGIT, ROOT, 'commit', '-m', `⛽ Update gas prices (調査日: ${cache.fetchDate})`], { stdio: 'inherit' });
+  execFileSync('bash', [HGIT, ROOT, 'push'], { stdio: 'inherit' });
+  console.log('✅ gas-price-cache.json を自動コミット・プッシュしました。');
+} catch (e) {
+  console.error('⚠️ 自動コミット・プッシュに失敗しました。手動で `git add scripts/gas-price-cache.json && git commit && git push` を実行してください。');
+  console.error(e.message);
+}
 
 process.exit(0);

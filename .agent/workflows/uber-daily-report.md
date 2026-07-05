@@ -45,19 +45,16 @@ git push
    - https://www.enecho.meti.go.jp/statistics/petroleum_and_lpgas/pl007/results.html
    - `G:\マイドライブ\gas\` に保存
 
-2. キャッシュ更新スクリプトを実行
+2. キャッシュ更新スクリプトを実行（xlsxパスを直接指定）
 ```bash
-node scripts/update-gas-price.cjs
+node scripts/update-gas-price.cjs "G:/マイドライブ/gas/260701.xlsx"
 ```
-   - 引数なしで `G:\マイドライブ\gas\` の最新 xlsx を自動検出
-   - パス指定も可: `node scripts/update-gas-price.cjs "path/to/file.xlsx"`
+   - 実行後、スクリプトが自動で `git add / commit / push` まで行う（コミット忘れ防止のため v2 で追加）
+   - 失敗した場合のみ手動で `git add scripts/gas-price-cache.json && git commit && git push`
 
-3. キャッシュファイルをコミット
-```bash
-git add scripts/gas-price-cache.json
-git commit -m "⛽ Update gas prices"
-git push
-```
+⚠️ **経産省サイトの直接ダウンロードは自動化不可**: enecho.meti.go.jp は AWS WAF のボット判定があり、
+curl/node fetch/GitHub Actions からの直接ダウンロードは 202 challenge で弾かれ不安定。
+必ず実ブラウザで手動ダウンロードすること（自動フェッチのコードは組み込まない）。
 
 ---
 

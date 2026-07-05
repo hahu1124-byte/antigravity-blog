@@ -224,6 +224,10 @@ function renderTrafficSection() {
 
 // ===== 4. ガソリン価格 =====
 
+// 経産省サイトはAWS WAFのボット判定があり、GitHub Actions/curl/node fetch等の
+// プログラムからの直接ダウンロードは不安定（成功したり202 challengeで弾かれたりする）。
+// そのため自動フェッチは行わず、scripts/update-gas-price.cjs による手動更新
+// （実ブラウザでxlsxをダウンロード→スクリプト実行、実行後は自動コミット・プッシュ）を前提とする。
 function getGasPriceCache() {
   const cachePath = path.join(ROOT, CONFIG.gasoline.cacheFile);
   try {
@@ -231,66 +235,16 @@ function getGasPriceCache() {
     const cacheDate = new Date(data.fetchDate);
     const diffDays = (today - cacheDate) / (1000 * 60 * 60 * 24);
     if (diffDays > 8) {
-      log('⛽ ガソリン価格キャッシュが古め（' + Math.floor(diffDays) + '日前）。auto-gas-update.ps1 が実行済みか確認を推奨');
+      log('⛽ ガソリン価格キャッシュが古め（' + Math.floor(diffDays) + '日前）。scripts/update-gas-price.cjs での更新を推奨');
     }
-    // キャッシュが古くてもデータがあれば使用（毎週水曜21:00に auto-gas-update.ps1 が自動更新）
     return data;
   } catch {
     return null;
   }
 }
 
-async function updateGasPriceCache() {
-  log('⛽ 経産省ガソリン価格データを取得中...');
-  // 経産省の石油製品価格調査（毎週水曜発表）
-  // CSVファイルのURLパターン: 最新データのURL
-  const url = 'https://www.enecho.meti.go.jp/statistics/petroleum_and_lpgas/pl007/csv/sekiyu_kakaku_latest.csv';
-  const csv = await fetchText(url);
-
-  if (!csv) {
-    log('⚠️ 経産省データ取得失敗。代替価格データを使用');
-    return null;
-  }
-
-  // CSV解析（愛知県の行を探す）
-  const lines = csv.split('\n');
-  let prices = null;
-  for (const line of lines) {
-    if (line.includes(CONFIG.gasoline.region)) {
-      const cols = line.split(',');
-      // 一般的なCSVフォーマット: 地域, レギュラー, ハイオク, 軽油, 灯油
-      prices = {
-        regular: cols[1]?.trim(),
-        premium: cols[2]?.trim(),
-        diesel: cols[3]?.trim(),
-        kerosene: cols[4]?.trim()
-      };
-      break;
-    }
-  }
-
-  if (prices) {
-    const cacheData = {
-      fetchDate: DATE_DISPLAY,
-      region: CONFIG.gasoline.region,
-      source: '経済産業省 石油製品価格調査',
-      ...prices
-    };
-    if (!DRY_RUN) {
-      fs.writeFileSync(path.join(ROOT, CONFIG.gasoline.cacheFile), JSON.stringify(cacheData, null, 2));
-    }
-    return cacheData;
-  }
-
-  return null;
-}
-
 async function getGasPrice() {
-  let cache = getGasPriceCache();
-  if (!cache) {
-    cache = await updateGasPriceCache();
-  }
-  return cache;
+  return getGasPriceCache();
 }
 
 function renderGasSection(gas) {
