@@ -6,11 +6,39 @@ param(
   [string]$BlogRoot  = (Split-Path $PSScriptRoot -Parent),
   [string]$GasDir    = "G:\マイドライブ\gas",
   [string]$Fallback  = "H:\gravity\projects\antigravity-blog\scripts\gas-archive",
-  [int]$MaxFiles     = 5
+  [int]$MaxFiles     = 5,
+  [int]$BitsTimeoutSec = 120
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+# 経産省サイト無応答時にタスクが無期限ブロックされないよう、非同期BITS転送+ポーリングでタイムアウトを課す
+function Invoke-BitsTransferWithTimeout {
+    param(
+        [string]$Source,
+        [string]$Destination,
+        [int]$TimeoutSec
+    )
+    $job = Start-BitsTransfer -Source $Source -Destination $Destination -TransferType Download -Asynchronous
+    $waited = 0
+    try {
+        while ($job.JobState -in @('Connecting', 'Transferring', 'Queued') -and $waited -lt $TimeoutSec) {
+            Start-Sleep -Seconds 2
+            $waited += 2
+            $job = Get-BitsTransfer -JobId $job.JobId
+        }
+        if ($job.JobState -eq 'Transferred') {
+            Complete-BitsTransfer -BitsJob $job
+        } else {
+            throw "BITS transfer timed out or failed: $Source (state: $($job.JobState), waited: ${waited}s)"
+        }
+    } finally {
+        if (Get-BitsTransfer -JobId $job.JobId -ErrorAction SilentlyContinue) {
+            Remove-BitsTransfer -BitsJob $job -ErrorAction SilentlyContinue
+        }
+    }
+}
 
 $ResultsUrl = "https://www.enecho.meti.go.jp/statistics/petroleum_and_lpgas/pl007/results.html"
 $BaseUrl    = "https://www.enecho.meti.go.jp"
@@ -24,7 +52,7 @@ try {
     # --- 1. 経産省ページを取得して最新 xlsx URL を抽出 ---
     Write-Host "1. Fetching results page..."
     if (Test-Path $tmpHtml) { Remove-Item $tmpHtml -Force }
-    Start-BitsTransfer -Source $ResultsUrl -Destination $tmpHtml -TransferType Download
+    Invoke-BitsTransferWithTimeout -Source $ResultsUrl -Destination $tmpHtml -TimeoutSec $BitsTimeoutSec
     $html = Get-Content $tmpHtml -Encoding UTF8 -Raw
 
     $match = [regex]::Match($html, 'href="(/statistics/petroleum_and_lpgas/pl007/xlsx/(\d{6})\.xlsx)"')
@@ -41,7 +69,7 @@ try {
     # --- 2. xlsx を %TEMP% にダウンロード ---
     Write-Host "2. Downloading xlsx..."
     if (Test-Path $tmpXlsx) { Remove-Item $tmpXlsx -Force }
-    Start-BitsTransfer -Source $xlsxUrl -Destination $tmpXlsx -TransferType Download
+    Invoke-BitsTransferWithTimeout -Source $xlsxUrl -Destination $tmpXlsx -TimeoutSec $BitsTimeoutSec
     Write-Host "   Downloaded: $tmpXlsx"
 
     # --- 3. キャッシュ更新（%TEMP のファイルを直接使用 - 保存先に依存しない） ---
