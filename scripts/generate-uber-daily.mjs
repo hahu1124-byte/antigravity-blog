@@ -459,7 +459,7 @@ function buildArticleHtml({
   title, weatherHtml, trafficHtml, newsHtml, gasHtml,
   peakHtml, eventsHtml, heatHtml, dayTipHtml, commentText
 }) {
-  const fullTitle = `🚴 Uber配達日報 ${title}`;
+  const fullTitle = `🚴 Uber配達情報 ${title}`;
   const description = `名古屋のUber配達に役立つ今日の情報をまとめました。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`;
   const articleUrl = `https://www.antigravity-portal.com/blog/${YYYYMM}/${DATE_STR}_uber_daily/`;
   const encodedTag = encodeURIComponent('Uber配達');
@@ -586,7 +586,7 @@ function buildArticleHtml({
             <span class="separator">/</span>
             <a href="../../">ブログ</a>
             <span class="separator">/</span>
-            <span class="current">🚴 Uber配達日報 ${title}</span>
+            <span class="current">🚴 Uber配達情報 ${title}</span>
         </nav>
 
         <article class="article">
@@ -597,7 +597,7 @@ function buildArticleHtml({
                         <a href="../../tag/${encodedTag}/" class="tag">Uber配達</a>
                     </div>
                 </div>
-                <h1 class="title">🚴 Uber配達日報 ${title}</h1>
+                <h1 class="title">🚴 Uber配達情報 ${title}</h1>
             </header>
 
             <div class="content">
@@ -717,7 +717,7 @@ function updateBlogData(title) {
     return;
   }
 
-  const fullTitle = `🚴 Uber配達日報 ${title}`;
+  const fullTitle = `🚴 Uber配達情報 ${title}`;
   const entry = {
     slug,
     title: fullTitle,
@@ -751,7 +751,7 @@ function updateBlogIndex(title) {
     return;
   }
 
-  const fullTitle = `🚴 Uber配達日報 ${title}`;
+  const fullTitle = `🚴 Uber配達情報 ${title}`;
   const excerpt = `名古屋のUber配達に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をまとめました。`;
 
   const newCard = `<a href="${slug}" class="article-card" data-tags="Uber配達" data-index="0">
@@ -846,7 +846,7 @@ async function main() {
     updateBlogIndex(title);
   } else {
     log(`📄 [dry-run] 出力先: ${outputFile}`);
-    log(`📄 [dry-run] タイトル: 🚴 Uber配達日報 ${title}`);
+    log(`📄 [dry-run] タイトル: 🚴 Uber配達情報 ${title}`);
     log(`📄 [dry-run] 一言: ${commentText}`);
     // dry-run でもHTMLを表示
     console.log('\n--- 生成HTML（先頭200行）---');
