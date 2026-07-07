@@ -38,6 +38,7 @@ novels/
     ├── appraisal-format.md     # 鑑定眼《トゥルー・サイト》の表示フォーマット
     ├── characters-npc-crowd.md 
     ├── characters.md           # キャラクター一覧
+    ├── EP-timeline.md          
     ├── episodes-summary.md     # 各話あらすじ一覧
     ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
     ├── setting-ch1.md          # 第1章 詳細プロット（全30話構成）
