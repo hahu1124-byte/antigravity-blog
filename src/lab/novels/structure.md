@@ -12,18 +12,19 @@ novels/
 │   │   ├── gods.md             # 神々の設定
 │   │   ├── heroes.md           # 歴代勇者
 │   │   ├── history.md          # 歴史年表・魔王特攻スキルの真実
-│   │   ├── memory-stone.md     # 記憶石の設定
+│   │   ├── memory-stone.md     # 遺言石の設定
 │   │   └── world.md            # 世界概要・魔力体系
 │   ├── geography/              # 地理・地名・マップ
 │   │   ├── eldaria_world_map.md  # 世界地図（テキスト版）
 │   │   ├── eldaria_world_map.png # 世界地図（画像）
 │   │   ├── geography.md        # 地理・地形・気候
-│   │   ├── guild.md            # 冒険者ギルド制度
+│   │   ├── guild.md            # 冒険者ギルド制度（支部・ランク・依頼システム）
 │   │   ├── nations.md          # 国家一覧
 │   │   └── society.md          # 社会構造・文化
 │   ├── beings/                 # 種族・生物
 │   │   ├── demon-kings.md      # 歴代魔王（人間時代・背景詳細）
 │   │   ├── demons.md           # 魔族設定
+│   │   ├── high-rank-adventurers.md # 高ランク冒険者（S・R・Zランク）
 │   │   ├── monsters.md         # 魔物・存在格レベル対応表
 │   │   └── races.md            # 種族一覧
 │   └── rules/                  # 封石・ギフト・暦のルール
@@ -35,7 +36,8 @@ novels/
 │
 └── story-03-haijo-no-ou/       # 廃城の王
     ├── appraisal-format.md     # 鑑定眼《トゥルー・サイト》の表示フォーマット
-    ├── characters.md           # キャラクター一覧
+    ├── characters.md           # キャラクター一覧（ストーリーキャラ）
+    ├── characters-npc-crowd.md # 3章冒険者名簿（背景キャラ大量追加分）
     ├── episodes-summary.md     # 各話あらすじ一覧
     ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
     ├── setting-ch1.md          # 第1章 詳細プロット（全30話構成）

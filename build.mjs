@@ -1449,6 +1449,133 @@ ${tabContents}
 </script>`;
 }
 
+/** 設定詳細ハブ＋個別ページを生成。src/lab/novels/settings/*.md を読み込む */
+async function buildSettingsPages() {
+  const settingsSrcDir = join(NOVELS_SRC_DIR, "settings");
+  if (!existsSync(settingsSrcDir)) {
+    console.log("⏭️  src/lab/novels/settings/ なし — 設定詳細ページ生成スキップ");
+    return;
+  }
+
+  const files = readdirSync(settingsSrcDir).filter((f) => f.endsWith(".md"));
+  const settings = [];
+  for (const file of files) {
+    const filePath = join(settingsSrcDir, file);
+    const src = readFileSync(filePath, "utf-8");
+    const { content, data } = matter(src);
+    const html = (
+      await remark().use(remarkGfm).use(remarkHtml, { sanitize: false }).process(content)
+    ).toString();
+    const slug = file.replace(/\.md$/, "");
+    settings.push({
+      slug,
+      title: data.title || slug,
+      icon: data.icon || "📄",
+      updated: data.updated || "",
+      html,
+    });
+  }
+
+  const settingsDir = join(OUTPUT_DIR, "lab", "novels", "settings");
+  mkdirSync(settingsDir, { recursive: true });
+
+  // --- settings/index.html（ハブ） ---
+  const cardsHtml = settings
+    .map(
+      (s) => `
+            <a href="/lab/novels/settings/${s.slug}/" class="novels-timeline-link">
+                <span class="novels-timeline-icon">${s.icon}</span>
+                <div>
+                    <div class="novels-timeline-link-title">${escapeHtml(s.title)}</div>
+                    <div class="novels-timeline-link-sub">最終更新: ${escapeHtml(s.updated)}</div>
+                </div>
+                <span class="novels-timeline-arrow">→</span>
+            </a>`,
+    )
+    .join("");
+
+  const settingsHubBody = `
+        <nav class="novels-breadcrumb">
+            <a href="/">トップ</a>
+            <span class="novels-sep">›</span>
+            <a href="/lab/">LAB</a>
+            <span class="novels-sep">›</span>
+            <a href="/lab/novels/">AI小説</a>
+            <span class="novels-sep">›</span>
+            <span class="novels-current">設定詳細</span>
+        </nav>
+
+        <section class="novels-section">
+            <h2 class="novels-section-title">設定詳細</h2>
+            <p class="novels-timeline-desc">「廃城の王」の世界観設定を公開しています。物語内現在：ep56時点。今後も随時追加していきます。</p>
+            <div class="novels-settings-grid">${cardsHtml}
+            </div>
+        </section>
+
+        <div class="novels-footer">
+            <a href="/lab/novels/" class="novels-back-link">← AI小説に戻る</a>
+        </div>`;
+
+  writeFileSync(
+    join(settingsDir, "index.html"),
+    labWrap({
+      title: "設定詳細 — 廃城の王 | AI小説 | Gravity Portal",
+      description:
+        "「廃城の王」の世界観設定（マルチバース・エルダリア暦・神々・遺言石）を公開。",
+      backHref: "/lab/novels/",
+      backLabel: "AI小説に戻る",
+      titleIcon: "📚",
+      titleText: "設定詳細",
+      bodyHtml: settingsHubBody,
+    }),
+    "utf-8",
+  );
+
+  // --- settings/<slug>/index.html（個別ページ） ---
+  for (const s of settings) {
+    const dir = join(settingsDir, s.slug);
+    mkdirSync(dir, { recursive: true });
+
+    const body = `
+        <nav class="novels-breadcrumb">
+            <a href="/">トップ</a>
+            <span class="novels-sep">›</span>
+            <a href="/lab/">LAB</a>
+            <span class="novels-sep">›</span>
+            <a href="/lab/novels/">AI小説</a>
+            <span class="novels-sep">›</span>
+            <a href="/lab/novels/settings/">設定詳細</a>
+            <span class="novels-sep">›</span>
+            <span class="novels-current">${escapeHtml(s.title)}</span>
+        </nav>
+
+        <section class="novels-section novels-markdown">
+            <p class="novels-timeline-desc">最終更新: ${escapeHtml(s.updated)}</p>
+            ${s.html}
+        </section>
+
+        <div class="novels-footer">
+            <a href="/lab/novels/settings/" class="novels-back-link">← 設定詳細に戻る</a>
+        </div>`;
+
+    writeFileSync(
+      join(dir, "index.html"),
+      labWrap({
+        title: `${s.title} — 廃城の王 | AI小説 | Gravity Portal`,
+        description: `「廃城の王」の世界観設定「${s.title}」の詳細。`,
+        backHref: "/lab/novels/settings/",
+        backLabel: "設定詳細に戻る",
+        titleIcon: s.icon,
+        titleText: s.title,
+        bodyHtml: body,
+      }),
+      "utf-8",
+    );
+  }
+
+  console.log(`📚 設定詳細ページ生成完了 (settings/index.html + ${settings.length}件の個別ページ)`);
+}
+
 async function buildNovelsPages() {
   if (!existsSync(NOVELS_SRC_DIR)) {
     console.log("⏭️  src/lab/novels/ なし — novelsページ生成スキップ");
@@ -1481,6 +1608,7 @@ async function buildNovelsPages() {
             <div class="novels-cta-group">
                 <a href="https://kakuyomu.jp/works/2912051602055329793" target="_blank" rel="noopener noreferrer" class="novels-cta">カクヨムで読む →</a>
                 <a href="/lab/novels/timeline/" class="novels-cta">制作タイムラインを見る →</a>
+                <a href="/lab/novels/settings/" class="novels-cta">設定詳細を見る →</a>
             </div>
         </div>
 
@@ -1574,6 +1702,7 @@ async function buildNovelsPages() {
 }
 
 await buildNovelsPages();
+await buildSettingsPages();
 
 // ==========================================
 // CSS / JS / HTML Minify（ビルド後処理）

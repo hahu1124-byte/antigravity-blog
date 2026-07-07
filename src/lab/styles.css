@@ -1132,6 +1132,16 @@ a:hover {
     transition: all var(--lab-transition);
 }
 
+.novels-settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.novels-settings-grid .novels-timeline-link {
+    margin: 0;
+}
+
 .novels-timeline-link:hover .novels-timeline-arrow {
     color: var(--lab-accent);
     transform: translateX(4px);
