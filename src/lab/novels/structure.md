@@ -4,6 +4,10 @@ title: 現在のフォルダ構成
 
 ## 現在のフォルダ構成
 
+<!-- このファイルは h:/gravity/.agent/scripts/novels/update-novels-structure.ps1 が自動生成します。
+     直接編集しても次回のスクリプト実行で上書き消失します。
+     ファイル説明の追加・修正は同スクリプトの $fileDescriptions マップに対して行ってください。 -->
+
 ```
 novels/
 ├── world-setting/              # 共通世界観「エルダリア」
