@@ -43,9 +43,9 @@ novels/
 │
 ├── story-03-haijo-no-ou/       # 廃城の王
     ├── appraisal-format.md     # 鑑定眼《トゥルー・サイト》の表示フォーマット
-    ├── characters-npc-crowd.md 
+    ├── characters-npc-crowd.md # 背景キャラ名簿（冒険者パーティー群、名前と一言特徴のみ）
     ├── characters.md           # キャラクター一覧
-    ├── EP-timeline.md          
+    ├── EP-timeline.md          # 詳細タイムライン（BG暦・日付ベースの設定専用管理表）
     ├── episodes-summary.md     # 各話あらすじ一覧
     ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
     ├── setting-ch1.md          # 第1章 詳細プロット（全30話構成）
