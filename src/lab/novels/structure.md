@@ -52,17 +52,17 @@ novels/
     ├── EP-timeline.md          # 詳細タイムライン（BG暦・日付ベースの設定専用管理表）
     ├── episodes-summary.md     # 各話あらすじ一覧
     ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
-    ├── setting-ch1.md          # 第1章 詳細プロット（全30話構成）
+    ├── setting-ch1-2.md        
     ├── setting.md              # プロット・ブロック構成
     ├── writing_prompt.md       # AI執筆指示書
 │   └── episodes/
         ├── 1-50/               # ep01~ep50
         └── 51-100/
             └── 51-60/
-                ├── ... (6 older files)
-                ├── ep57T.md
+                ├── ... (7 older files)
                 ├── ep58T.md
                 ├── ep59T.md
+                ├── setting-ch2-reveal.md
                 └── archive/
                     ├── ... (16 older files)
                     ├── ep59A.md
