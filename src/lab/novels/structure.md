@@ -42,39 +42,27 @@ novels/
 │   └── multiverse.md           # 確定5世界の設定
 │
 ├── story-03-haijo-no-ou/       # 廃城の王
-│   ├── appraisal-format.md     # 鑑定眼《トゥルー・サイト》の表示フォーマット
-│   ├── characters-npc-crowd.md # 背景キャラ名簿（冒険者パーティー等・characters.mdから分割）
-│   ├── characters.md           # キャラクター一覧
-│   ├── EP-timeline.md          # 詳細タイムライン（設定専用・日付根拠の把握用）
-│   ├── episodes-summary.md     # 各話あらすじ一覧
-│   ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
-│   ├── setting-ch1.md          # 第1章 詳細プロット（全30話構成）
-│   ├── setting.md              # プロット・ブロック構成
-│   ├── writing_prompt.md       # AI執筆指示書
-│   └── episodes/
-│       ├── 1-50/               # ep01~ep50
-│       └── 51-100/
-│           └── 51-60/
-│               ├── ... (4 older files)
-│               ├── ep55T.md
-│               ├── ep56T.md
-│               ├── ep57T.md
-│               └── archive/
-│                   ├── ... (12 older files)
-│                   ├── ep57A.md
-│                   └── ep57N.md
-│
-├── story-04-yuigon-ishi/       # 案4「遺言石の商人」（構想段階）
-│   ├── characters.md           # キャラクター設定
-│   └── setting.md              # コンセプト・タイトル案
-│
-└── story-05-maseki-musou/      # 『落ちこぼれ精霊憑きの魔石無双』
-    ├── battle_guidelines.md    # 戦闘描写ガイドライン
+    ├── appraisal-format.md     # 鑑定眼《トゥルー・サイト》の表示フォーマット
+    ├── characters-npc-crowd.md 
     ├── characters.md           # キャラクター一覧
+    ├── EP-timeline.md          
     ├── episodes-summary.md     # 各話あらすじ一覧
-    ├── MASTER.md               # 設定ハブ
-    ├── setting.md              # コンセプト・タイトル
-    └── episodes/                # 執筆準備中
+    ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
+    ├── setting-ch1.md          # 第1章 詳細プロット（全30話構成）
+    ├── setting.md              # プロット・ブロック構成
+    ├── writing_prompt.md       # AI執筆指示書
+│   └── episodes/
+        ├── 1-50/               # ep01~ep50
+        └── 51-100/
+            └── 51-60/
+                ├── ... (5 older files)
+                ├── ep56T.md
+                ├── ep57T.md
+                ├── ep58A.md
+                └── archive/
+                    ├── ... (12 older files)
+                    ├── ep57A.md
+                    └── ep57N.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
