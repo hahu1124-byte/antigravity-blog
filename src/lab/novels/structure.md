@@ -59,14 +59,15 @@ novels/
         ├── 1-50/               # ep01~ep50
         └── 51-100/
             └── 51-60/
-                ├── ... (9 older files)
-                ├── ep59C.md
-                ├── ep59N.md
+                ├── ... (6 older files)
+                ├── ep57T.md
+                ├── ep58T.md
                 ├── ep59T.md
                 └── archive/
-                    ├── ... (14 older files)
-                    ├── ep58A.md
-                    └── ep58N.md
+                    ├── ... (16 older files)
+                    ├── ep59A.md
+                    ├── ep59C.md
+                    └── ep59N.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
