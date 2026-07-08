@@ -9,6 +9,7 @@ novels/
 ├── world-setting/              # 共通世界観「エルダリア」
 │   ├── lore/                   # 世界の法則・歴史・魔法体系
 │   │   ├── calendar.md         # 暦・月名・季節区分
+│   │   ├── communication.md    # 通信・連絡手段の設定
 │   │   ├── gods.md             # 神々の設定
 │   │   ├── heroes.md           # 歴代勇者
 │   │   ├── history.md          # 歴史年表・魔王特攻スキルの真実
@@ -19,7 +20,10 @@ novels/
 │   │   ├── eldaria_world_map.png # 世界地図（画像）
 │   │   ├── geography.md        # 地理・地形・気候
 │   │   ├── guild.md            # 冒険者ギルド制度（支部・ランク・依頼システム）
-│   │   ├── nations.md          # 国家一覧
+│   │   ├── nations.md          # 国家一覧（総論・関係図。詳細は分割ファイル参照）
+│   │   ├── nations-langria.md  # ラングリア王国（歴代国王・現王家・貴族階層）
+│   │   ├── nations-arden.md    # アルデン大陸その他国家（東方三候国・フロスト連邦ほか）
+│   │   ├── nations-vern.md     # 西方大陸「ヴェルン」の国家・勢力
 │   │   └── society.md          # 社会構造・文化
 │   ├── beings/                 # 種族・生物
 │   │   ├── demon-kings.md      # 歴代魔王（人間時代・背景詳細）
@@ -34,27 +38,31 @@ novels/
 │       ├── level-system.md     # 存在格レベル体系・シーリング・突破条件
 │       └── skills.md           # ギフト段階詳細（弱〜真）・全スキル一覧
 │
-└── story-03-haijo-no-ou/       # 廃城の王
+├── multiverse-setting/         # 自作品を全てつなげるマルチバース構想（アイデア段階）
+│   └── multiverse.md           # 確定5世界の設定
+│
+├── story-03-haijo-no-ou/       # 廃城の王
     ├── appraisal-format.md     # 鑑定眼《トゥルー・サイト》の表示フォーマット
-    ├── characters.md           # キャラクター一覧（ストーリーキャラ）
-    ├── characters-npc-crowd.md # 3章冒険者名簿（背景キャラ大量追加分）
+    ├── characters-npc-crowd.md 
+    ├── characters.md           # キャラクター一覧
+    ├── EP-timeline.md          
     ├── episodes-summary.md     # 各話あらすじ一覧
     ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
     ├── setting-ch1.md          # 第1章 詳細プロット（全30話構成）
     ├── setting.md              # プロット・ブロック構成
     ├── writing_prompt.md       # AI執筆指示書
-    └── episodes/
+│   └── episodes/
         ├── 1-50/               # ep01~ep50
         └── 51-100/
             └── 51-60/
-                ├── ... (3 older files)
-                ├── ep54T.md
-                ├── ep55T.md
-                ├── ep56T.md
+                ├── ... (7 older files)
+                ├── ep58A.md
+                ├── ep58N.md
+                ├── ep58T.md
                 └── archive/
-                    ├── ... (10 older files)
-                    ├── ep56A.md
-                    └── ep56N.md
+                    ├── ... (12 older files)
+                    ├── ep57A.md
+                    └── ep57N.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
