@@ -3,64 +3,20 @@
 // ============================================================
 // 機種データ定義
 // ============================================================
-const REZERO_NORMAL_ODDS = 349.9;
 const REZERO_SAIBARE_TRUST = 0.4;
 const REZERO_SAIBARE_HIT_RATE = 0.938;
 const FREEZE_BONUS_ANIMATION_MS = 1000;
 const POST_BONUS_HOLD_MS = 500;
-const REZERO_NORMAL_EFFECTS = [
-  { name: "ベアトリスランプ", trust: 0.92, hitRate: 0.15, flash: true },
-  {
-    name: "強欲SP",
-    trust: 0.78,
-    hitRate: 0.1,
-    vibe: true,
-    vibeColor: "red",
-  },
-  { name: "死に戻りSP", trust: 0.52, hitRate: 0.15 },
-  {
-    name: "俺を選べSP",
-    trust: 0.26,
-    hitRate: 0.18,
-    vibe: true,
-    vibeColor: "red",
-  },
-  { name: "氷結の絆SP", trust: 0.18, hitRate: 0.2 },
-  { name: "スバルATTACK", trust: 0.1, hitRate: 0.22 },
-];
 
+// missRateForTrust: 「この演出が出た時の信頼度(trust)」を満たすために、
+// ハズレ側でその演出が出現すべき確率をベイズの定理から逆算する。
+// （リゼロの先バレ演出のみで使用。通常の演出テーブルは信頼度帯方式に統一済み）
 function missRateForTrust(hitRate, trust, odds) {
   const hitProbability = 1 / odds;
   const missProbability = 1 - hitProbability;
   return (
     (hitProbability * hitRate * (1 - trust)) / (trust * missProbability)
   );
-}
-
-function pickRezeroEffect(isHit) {
-  const roll = Math.random();
-  let cumulative = 0;
-  for (const effect of REZERO_NORMAL_EFFECTS) {
-    const rate = isHit
-      ? effect.hitRate
-      : missRateForTrust(effect.hitRate, effect.trust, REZERO_NORMAL_ODDS);
-    cumulative += rate;
-    if (roll < cumulative) return effect;
-  }
-  return null;
-}
-
-function applyRezeroEffect(res, effect) {
-  if (!effect) {
-    res.name.push("通常");
-    res.trust = 0.1;
-    return;
-  }
-  res.name.push(effect.name);
-  res.trust = effect.trust * 100;
-  res.flash = effect.flash || false;
-  res.vibe = effect.vibe || false;
-  res.vibeColor = effect.vibeColor || "none";
 }
 
 async function showFreezeBonus() {
@@ -77,194 +33,334 @@ async function showFreezeBonus() {
   overlay.style.display = "none";
 }
 
+// ============================================================
+// 信頼度帯抽選エンジン（2^n整数カウント方式）
+//
+// 「当り確率」「各演出の出現率」「信頼度(trust)表示」を別々に手打ちすると
+// 三者が矛盾しうるため、単一の整数テーブルから全て導出する。
+// 各帯は { hit本数, miss本数 } を持ち、trust = hit/(hit+miss) は自動導出値。
+// Σ(hit+miss) は機種のbit幅（2^n）に厳密一致させ、Σhit が目標当り本数になる。
+// 1回のMath.random()*2^n で帯を引き、その帯のhit本数/総本数で当落を即確定する
+// （＝当落と信頼度が構造的に一致する）。
+// ============================================================
+function finalizeBands(rows) {
+  return rows.map((r) => ({
+    ...r,
+    trust: (r.hit / (r.hit + r.miss)) * 100,
+  }));
+}
+function bandHitTotal(bands) {
+  return bands.reduce((s, b) => s + b.hit, 0);
+}
+function bandGrandTotal(bands) {
+  return bands.reduce((s, b) => s + b.hit + b.miss, 0);
+}
+function oddsFromBands(bands) {
+  return bandGrandTotal(bands) / bandHitTotal(bands);
+}
+function drawBand(bands) {
+  const total = bandGrandTotal(bands);
+  let r = Math.floor(Math.random() * total);
+  for (const b of bands) {
+    const span = b.hit + b.miss;
+    if (r < span) return { band: b, isHit: r < b.hit };
+    r -= span;
+  }
+  // 丸め誤差対策のフォールバック（理論上到達しない）
+  const last = bands[bands.length - 1];
+  return { band: last, isHit: false };
+}
+
+// --- EVA機 通常/時短 演出軸（2^16=65536, 当り205本 → 1/319.688） ---
+// 「保留色・背景予告・カウントダウン・群予告・レバブル・リーチ」は互いに独立した軸として
+// それぞれ個別にBayes整合の整数カウントを持つ。1回転につき各軸を独立抽選するため、
+// 複数の軸が同時に発火すれば自然に複合演出（例：レイ背景＋赤保留＋赤レバブル）になる。
+// リーチ演出のみ軸内が排他（1回転で1種類のみ）。各軸の信頼度は他の軸の結果に一切依存しないため、
+// 何個重なっても軸ごとのΣhit=205・Σ(hit+miss)=65536は不変＝当り確率と信頼度表示の矛盾が起きない。
+const EVA_BIT_N = 65536;
+const EVA_HIT_N = 205; // 通常/時短 1/319.688
+const EVA_HIT_S = 659; // ST 1/99.448（ビット幅はEVA_BIT_Nと共通）
+function finalizeAxis(hitBudget, bitTotal, states) {
+  const hitUsed = states.reduce((s, x) => s + x.hit, 0);
+  const missUsed = states.reduce((s, x) => s + x.miss, 0);
+  const none = {
+    name: "なし",
+    hit: hitBudget - hitUsed,
+    miss: bitTotal - hitBudget - missUsed,
+  };
+  return [...states, none].map((s) => ({
+    ...s,
+    trust: (s.hit / (s.hit + s.miss)) * 100,
+  }));
+}
+function drawAxisComposite(axes, hitTotal, grandTotal) {
+  const missTotal = grandTotal - hitTotal;
+  const isHit = Math.floor(Math.random() * grandTotal) < hitTotal;
+  const picks = {};
+  for (const key of Object.keys(axes)) {
+    const states = axes[key];
+    let r = Math.floor(Math.random() * (isHit ? hitTotal : missTotal));
+    let chosen = states[states.length - 1];
+    for (const s of states) {
+      const span = isHit ? s.hit : s.miss;
+      if (r < span) {
+        chosen = s;
+        break;
+      }
+      r -= span;
+    }
+    picks[key] = chosen;
+  }
+  return { isHit, picks };
+}
+// --- 通常/時短（EVA_HIT_N=205） ---
+// 保留色：赤90%・緑20%・青5%（「レバブル保留」は独立状態を持たず、
+// 保留なし×レバブル独立発生の組み合わせ時にcreateEvaJob側で表示のみ格上げする。
+// これにより赤/緑/青の信頼度は一切歪まず、レバブル保留の表示信頼度は
+// 常にレバブル自身の信頼度と一致する＝逆算不要で確実に一致する）
+const EVA_AXIS_HOLD_N = finalizeAxis(EVA_HIT_N, EVA_BIT_N, [
+  { name: "赤保留", hit: 90, miss: 10, holdType: "red" },
+  { name: "緑保留", hit: 40, miss: 160, holdType: "green" },
+  { name: "青保留", hit: 10, miss: 190, holdType: "blue" },
+]);
+// レバブル：全大当りの約66.7%に絡む。出現数は白＞赤＞虹の順（液晶が揺れるのはレバブル発生時のみ）
+const EVA_AXIS_LEVER_N = finalizeAxis(EVA_HIT_N, EVA_BIT_N, [
+  { name: "白レバブル", hit: 90, miss: 10, vibe: true, vibeColor: "white" },
+  { name: "赤レバブル", hit: 40, miss: 1, vibe: true, vibeColor: "red" },
+  {
+    name: "虹レバブル",
+    hit: 7,
+    miss: 0,
+    vibe: true,
+    vibeColor: "rainbow",
+    isRushSure: true,
+  },
+]);
+// 背景予告：レイ背景85%・プレミア背景/渚カヲルは100%＆ST確定
+const EVA_AXIS_BG_N = finalizeAxis(EVA_HIT_N, EVA_BIT_N, [
+  { name: "レイ背景", hit: 34, miss: 6, text: "レイ背景" },
+  {
+    name: "プレミア背景",
+    hit: 6,
+    miss: 0,
+    text: "警報プレミア",
+    isRushSure: true,
+  },
+  {
+    name: "渚カヲル",
+    hit: 6,
+    miss: 0,
+    text: "来なさい",
+    isRushSure: true,
+  },
+]);
+// 先読み予告（カウントダウンを内包）：通常回転数400以下では群予告は出現しない
+const EVA_AXIS_PRECURSOR_N_LOW = finalizeAxis(EVA_HIT_N, EVA_BIT_N, [
+  { name: "カウントダウン", hit: 26, miss: 14, text: "３２１０" },
+]);
+const EVA_AXIS_PRECURSOR_N_HIGH = finalizeAxis(EVA_HIT_N, EVA_BIT_N, [
+  { name: "カウントダウン", hit: 26, miss: 14, text: "３２１０" },
+  { name: "群予告", hit: 15, miss: 5, text: "群予告" },
+]);
+// リーチ演出（排他）：全回転100%＆ST確定／vsアルミサエル56.8%／vsサハクィエル65.2%／最終号機リーチ70.5%
+const EVA_AXIS_REACH_N = finalizeAxis(EVA_HIT_N, EVA_BIT_N, [
+  { name: "全回転リーチ", hit: 2, miss: 0, isRushSure: true, text: "祝" },
+  { name: "vsアルミサエル", hit: 21, miss: 16 },
+  { name: "vsサハクィエル", hit: 15, miss: 8 },
+  { name: "最終号機リーチ", hit: 31, miss: 13, text: "最終号機\n画ブレ金" },
+]);
+
+// --- ST（EVA_HIT_S=659）：通常時の各信頼度に+25pt（上限100%） ---
+// ST中は「なし」の割合をできる限り減らす（各軸を大幅増量。信頼度100%の状態はmiss不要なので
+// 制約なく増量できる分、他の状態より優先的に厚くしている）
+const EVA_AXIS_HOLD_S = finalizeAxis(EVA_HIT_S, EVA_BIT_N, [
+  { name: "赤保留", hit: 300, miss: 0, holdType: "red" }, // 100%
+  { name: "緑保留", hit: 200, miss: 244, holdType: "green" }, // 45.0%
+  { name: "青保留", hit: 100, miss: 233, holdType: "blue" }, // 30.0%
+]);
+const EVA_AXIS_LEVER_S = finalizeAxis(EVA_HIT_S, EVA_BIT_N, [
+  { name: "白レバブル", hit: 420, miss: 0, vibe: true, vibeColor: "white" },
+  { name: "赤レバブル", hit: 180, miss: 0, vibe: true, vibeColor: "red" },
+  {
+    name: "虹レバブル",
+    hit: 50,
+    miss: 0,
+    vibe: true,
+    vibeColor: "rainbow",
+    isRushSure: true,
+  },
+]);
+const EVA_AXIS_BG_S = finalizeAxis(EVA_HIT_S, EVA_BIT_N, [
+  { name: "レイ背景", hit: 420, miss: 0, text: "レイ背景" },
+  { name: "プレミア背景", hit: 120, miss: 0, text: "警報プレミア", isRushSure: true },
+  { name: "渚カヲル", hit: 100, miss: 0, text: "来なさい", isRushSure: true },
+]);
+// STでは400回転ゲートは適用しない（RUSH中は経過回転の意味合いが通常時と異なるため）
+const EVA_AXIS_PRECURSOR_S = finalizeAxis(EVA_HIT_S, EVA_BIT_N, [
+  { name: "カウントダウン", hit: 420, miss: 47, text: "３２１０" }, // 89.9%
+  { name: "群予告", hit: 180, miss: 0, text: "群予告" }, // 100%
+]);
+const EVA_AXIS_REACH_S = finalizeAxis(EVA_HIT_S, EVA_BIT_N, [
+  { name: "全回転リーチ", hit: 32, miss: 0, isRushSure: true, text: "祝" },
+  { name: "vsアルミサエル", hit: 180, miss: 40 }, // 81.8%
+  { name: "vsサハクィエル", hit: 184, miss: 20 }, // 90.2%
+  { name: "最終号機リーチ", hit: 252, miss: 12, text: "最終号機\n画ブレ金" }, // 95.5%
+]);
+
+const EVA_AXIS_ORDER = ["hold", "background", "precursor", "lever", "reach"];
+
+function createEvaJob(isRight, regime) {
+  const hitBudget = regime === "n" ? EVA_HIT_N : EVA_HIT_S;
+  const axes =
+    regime === "n"
+      ? {
+          hold: EVA_AXIS_HOLD_N,
+          background: EVA_AXIS_BG_N,
+          precursor:
+            currentRot > 400
+              ? EVA_AXIS_PRECURSOR_N_HIGH
+              : EVA_AXIS_PRECURSOR_N_LOW,
+          lever: EVA_AXIS_LEVER_N,
+          reach: EVA_AXIS_REACH_N,
+        }
+      : {
+          hold: EVA_AXIS_HOLD_S,
+          background: EVA_AXIS_BG_S,
+          precursor: EVA_AXIS_PRECURSOR_S,
+          lever: EVA_AXIS_LEVER_S,
+          reach: EVA_AXIS_REACH_S,
+        };
+  const { isHit, picks } = drawAxisComposite(axes, hitBudget, EVA_BIT_N);
+
+  // 保留が無地(なし)で、なおかつレバブルが独立して発生した場合のみ「レバブル保留」に表示格上げする。
+  // 赤/緑/青保留は一切書き換えないため信頼度は歪まず、レバブル保留の信頼度は
+  // 下のmax()計算でlever軸の値がそのまま採用される（＝レバブルの信頼度と常に一致）
+  if (picks.hold.name === "なし" && picks.lever.name !== "なし") {
+    picks.hold = { ...picks.hold, name: "レバブル保留", holdType: "vibe" };
+  }
+
+  let name = [];
+  let trust = 0,
+    holdType = "none",
+    vibe = false,
+    vibeColor = "none",
+    text = "",
+    isRushSure = false,
+    flash = false;
+  let bestVibeTrust = -1;
+  for (const key of EVA_AXIS_ORDER) {
+    const p = picks[key];
+    if (p.name === "なし") continue;
+    name.push(p.name);
+    trust = Math.max(trust, p.trust);
+    if (p.holdType) holdType = p.holdType;
+    if (p.isRushSure) isRushSure = true;
+    if (p.flash) flash = true;
+    if (p.text) text = text ? text + "\n" + p.text : p.text;
+    // 液晶の揺れ（vibe）はレバブル軸由来の場合のみ発生させる
+    if (key === "lever" && p.vibe && p.trust > bestVibeTrust) {
+      vibe = true;
+      vibeColor = p.vibeColor;
+      bestVibeTrust = p.trust;
+    }
+  }
+  return {
+    isHit,
+    isRight,
+    heavy: false,
+    name,
+    trust,
+    vibe,
+    vibeColor,
+    flash,
+    text,
+    holdType,
+    // 保留色軸そのものが既にBayes整合の信頼度を持つため、見た目をそのまま採用する
+    currentView: holdType,
+    isRushSure,
+    bonusType: null,
+    deferHitLog: false,
+    saibare: false,
+  };
+}
+
+// --- リゼロ機 通常 帯テーブル（2^20=1048576, 当り2997本 → 1/349.875） ---
+const REZERO_BANDS_N = finalizeBands([
+  {
+    name: "ベアトリスランプ",
+    hit: 450,
+    miss: 39,
+    effects: { name: ["ベアトリスランプ"], flash: true },
+  },
+  {
+    name: "強欲SP",
+    hit: 300,
+    miss: 85,
+    effects: { name: ["強欲SP"], vibe: true, vibeColor: "red" },
+  },
+  {
+    name: "死に戻りSP",
+    hit: 450,
+    miss: 415,
+    effects: { name: ["死に戻りSP"] },
+  },
+  {
+    name: "俺を選べSP",
+    hit: 539,
+    miss: 1534,
+    effects: { name: ["俺を選べSP"], vibe: true, vibeColor: "red" },
+  },
+  {
+    name: "氷結の絆SP",
+    hit: 599,
+    miss: 2729,
+    effects: { name: ["氷結の絆SP"] },
+  },
+  {
+    name: "スバルATTACK",
+    hit: 659,
+    miss: 5931,
+    effects: { name: ["スバルATTACK"] },
+  },
+  {
+    name: "通常(無演出)",
+    hit: 0,
+    miss: 1034846,
+    effects: { name: [] },
+  },
+]);
+
+// --- リゼロ機 ST(RUSH) 帯テーブル（2^20=1048576, 当り10496本 → 1/99.902） ---
+// RUSH中の当りは「継続確定」自体が信頼度100%の演出のため、帯は1本のみ。
+// 具体的なボーナス階級（300/1500/3000）は当り確定後に pickRushBonus() で決める。
+const REZERO_BANDS_S = finalizeBands([
+  {
+    name: "RUSH継続(ボーナス)",
+    hit: 10496,
+    miss: 0,
+    effects: {},
+  },
+  {
+    name: "通常(無演出)",
+    hit: 0,
+    miss: 1038080,
+    effects: { name: ["通常"] },
+  },
+]);
+
 const MACHINES = {
   eva: {
     title: "EVANGELION Sim -2025 Final-",
     theme: "theme-eva",
-    specs: { n: 319.7, s: 99.4, st: 163, jt: 100 },
+    specs: {
+      n: EVA_BIT_N / EVA_HIT_N,
+      s: EVA_BIT_N / EVA_HIT_S,
+      st: 163,
+      jt: 100,
+    },
     type: "ST",
     modeLabel(m) {
       return m;
-    },
-    createJobHits(mode) {
-      const rMain = Math.random() * 100;
-      const rSub = Math.random() * 100;
-      let res = {
-        trust: 0,
-        name: [],
-        holdType: "none",
-        vibe: false,
-        vibeColor: "none",
-        flash: false,
-        text: "",
-        isRushSure: false,
-      };
-      if (mode === "通常" || mode === "時短") {
-        if (rMain < 1) {
-          res.name.push("全回転リーチ");
-          res.isRushSure = true;
-          res.text = "祝";
-          res.trust = 100;
-        } else if (rMain < 3) {
-          res.name.push("突発当り");
-          res.isRushSure = true;
-          res.vibe = true;
-          res.vibeColor = "rainbow";
-          res.trust = 100;
-        } else if (rMain < 6) {
-          res.name.push("虹レバ");
-          res.vibe = true;
-          res.vibeColor = "rainbow";
-          res.isRushSure = true;
-          res.trust = 100;
-        } else if (rMain < 10) {
-          res.name.push("渚カヲル");
-          res.isRushSure = true;
-          res.trust = 100;
-        } else if (rMain < 15) {
-          res.name.push("最終号機リーチ");
-          res.text = "最終号機\n画ブレ金";
-          res.vibe = true;
-          res.vibeColor = "red";
-          res.trust = 98.0;
-        } else if (rMain < 25) {
-          res.name.push("赤レバ");
-          res.vibe = true;
-          res.vibeColor = "red";
-          res.trust = 96.5;
-        } else if (rMain < 40) {
-          res.name.push("白レバ");
-          res.vibe = true;
-          res.vibeColor = "white";
-          res.trust = 90.0;
-        } else if (rMain < 55) {
-          res.name.push("レイ背景");
-          res.text = "レイ背景";
-          res.trust = 85.0;
-        }
-        if (rSub < 30.4) {
-          res.name.push("ロンギヌスの槍保留");
-          res.holdType = "vibe";
-          res.trust = Math.max(res.trust, 95.0);
-        } else if (rSub < 56.0) {
-          res.name.push("震える保留");
-          res.holdType = "vibe";
-          res.trust = Math.max(res.trust, 80.0);
-        } else if (rSub < 85.4) {
-          res.name.push("カウントダウン");
-          res.text = (res.text ? res.text + "\n" : "") + "３２１０";
-          res.trust = Math.max(res.trust, 92.0);
-        } else if (rSub < 95.0) {
-          res.name.push("赤保留");
-          res.holdType = "red";
-          res.trust = Math.max(res.trust, 90.0);
-        }
-      } else {
-        if (rMain < 5) {
-          res.name.push("突発当り");
-          res.vibe = true;
-          res.vibeColor = "rainbow";
-          res.trust = 100;
-        } else if (rMain < 15) {
-          res.name.push("ST次回予告");
-          res.text = "次回予告";
-          res.trust = 100;
-        } else if (rMain < 30) {
-          res.name.push("STレイ背景");
-          res.text = "レイ背景";
-          res.trust = 100;
-        } else if (rMain < 50) {
-          res.name.push("ST赤レバ");
-          res.vibe = true;
-          res.vibeColor = "red";
-          res.trust = 99.0;
-        }
-        if (rSub < 60) {
-          res.name.push("ST赤保留");
-          res.holdType = "red";
-          res.trust = Math.max(res.trust, 95.0);
-        }
-      }
-      return res;
-    },
-    createJobMiss(mode) {
-      const rMain = Math.random() * 100;
-      const rSub = Math.random() * 100;
-      let res = {
-        trust: 0,
-        name: [],
-        holdType: "none",
-        vibe: false,
-        vibeColor: "none",
-        flash: false,
-        text: "",
-        isRushSure: false,
-      };
-      if (mode === "通常" || mode === "時短") {
-        if (rMain < 0.001) {
-          res.name.push("最終号機リーチ");
-          res.text = "最終号機\n画ブレ銀";
-          res.trust = 98.0;
-        } else if (rMain < 0.005) {
-          res.name.push("赤レバ");
-          res.vibe = true;
-          res.vibeColor = "red";
-          res.trust = 96.5;
-        } else if (rMain < 0.012) {
-          res.name.push("白レバ");
-          res.vibe = true;
-          res.vibeColor = "white";
-          res.trust = 90.0;
-        } else if (rMain < 0.035) {
-          res.name.push("レイ背景");
-          res.text = "レイ背景";
-          res.trust = 85.0;
-        }
-        if (rSub < 0.005) {
-          res.name.push("ロンギヌスの槍保留");
-          res.holdType = "vibe";
-          res.trust = Math.max(res.trust, 95.0);
-        } else if (rSub < 0.025) {
-          res.name.push("震える保留");
-          res.holdType = "vibe";
-          res.trust = Math.max(res.trust, 80.0);
-        } else if (rSub < 0.033) {
-          res.name.push("カウントダウン");
-          res.text = (res.text ? res.text + "\n" : "") + "３２１・";
-          res.trust = Math.max(res.trust, 92.0);
-        } else if (rSub < 0.04) {
-          res.name.push("赤保留");
-          res.holdType = "red";
-          res.trust = Math.max(res.trust, 90.0);
-        } else if (rSub < 0.84) {
-          res.name.push("緑保留");
-          res.holdType = "green";
-          res.trust = Math.max(res.trust, 11.0);
-        } else if (rSub < 4.84) {
-          res.name.push("青保留");
-          res.holdType = "blue";
-          res.trust = Math.max(res.trust, 3.0);
-        }
-        if (res.name.length === 0) {
-          res.name.push("通常");
-          res.trust = 0.1;
-        }
-      } else {
-        if (rSub < 0.032) {
-          res.name.push("ST赤保留");
-          res.holdType = "red";
-          res.trust = Math.max(res.trust, 95.0);
-        } else if (rSub < 1.032) {
-          res.name.push("ST緑保留");
-          res.holdType = "green";
-          res.trust = Math.max(res.trust, 20.0);
-        }
-        if (res.name.length === 0) {
-          res.name.push("通常");
-          res.trust = 0.1;
-        }
-      }
-      return res;
     },
     async resolveHit(ctx) {
       const { eff, hitDigit } = ctx;
@@ -363,90 +459,57 @@ const MACHINES = {
   rezero: {
     title: "Re:ゼロ Sim -season2-",
     theme: "theme-rezero",
-    specs: { n: REZERO_NORMAL_ODDS, s: 99.9, st: 145, jt: 0 },
+    specs: {
+      n: oddsFromBands(REZERO_BANDS_N),
+      s: oddsFromBands(REZERO_BANDS_S),
+      st: 145,
+      jt: 0,
+    },
     type: "MIXED",
+    bands: { n: REZERO_BANDS_N, s: REZERO_BANDS_S },
     modeLabel(m) {
       return m === "ST" ? rushStyle : m;
     },
-    createJobHits(mode) {
+    // RUSH中の当りは帯抽選で「継続確定」までしか決まらないため、
+    // ボーナス階級（300/1500/3000）はここで別途抽選する。
+    pickRushBonus() {
       const rMain = Math.random() * 100;
-      let res = {
-        trust: 0,
-        name: [],
-        holdType: "none",
-        vibe: false,
-        vibeColor: "none",
-        flash: false,
-        text: "",
-        isRushSure: false,
-        bonusType: null,
-        deferHitLog: false,
-      };
-      if (mode === "通常") {
-        applyRezeroEffect(res, pickRezeroEffect(true));
-      } else {
-        if (rushStyle === "強欲RUSH") {
-          if (rMain < 25) {
-            res.bonusType = 3000;
-            res.deferHitLog = true;
-            res.name.push("超強欲3000BONUS");
-            res.vibe = true;
-            res.vibeColor = "rainbow";
-            res.text = "3000+";
-            res.trust = 100;
-          } else if (rMain < 80) {
-            res.bonusType = 1500;
-            res.deferHitLog = true;
-            res.name.push("Re:ゼロBONUS");
-            res.trust = 100;
-          } else {
-            res.bonusType = 300;
-            res.deferHitLog = true;
-            res.name.push("BONUS");
-            res.trust = 100;
-          }
-        } else {
-          if (rMain < 25) {
-            res.bonusType = 3000;
-            res.deferHitLog = true;
-            res.name.push("ドナぷる");
-            res.vibe = true;
-            res.vibeColor = "red";
-            res.trust = 100;
-          } else if (rMain < 80) {
-            res.bonusType = 1500;
-            res.deferHitLog = true;
-            res.name.push("落ちブル");
-            res.text = "落ちブル";
-            res.trust = 100;
-          } else {
-            res.bonusType = 300;
-            res.deferHitLog = true;
-            res.name.push("エミリア告知");
-            res.trust = 100;
-          }
+      if (rushStyle === "強欲RUSH") {
+        if (rMain < 25) {
+          return {
+            bonusType: 3000,
+            name: "超強欲3000BONUS",
+            vibe: true,
+            vibeColor: "rainbow",
+            text: "3000+",
+          };
+        } else if (rMain < 80) {
+          return { bonusType: 1500, name: "Re:ゼロBONUS" };
         }
+        return { bonusType: 300, name: "BONUS" };
       }
-      return res;
+      if (rMain < 25) {
+        return {
+          bonusType: 3000,
+          name: "ドナぷる",
+          vibe: true,
+          vibeColor: "red",
+        };
+      } else if (rMain < 80) {
+        return { bonusType: 1500, name: "落ちブル", text: "落ちブル" };
+      }
+      return { bonusType: 300, name: "エミリア告知" };
     },
-    createJobMiss(mode) {
-      let res = {
-        trust: 0,
-        name: [],
-        holdType: "none",
-        vibe: false,
-        vibeColor: "none",
-        flash: false,
-        text: "",
-        isRushSure: false,
-      };
-      if (mode === "通常") {
-        applyRezeroEffect(res, pickRezeroEffect(false));
-      } else {
-        res.name.push("通常");
-        res.trust = 0.1;
-      }
-      return res;
+    postDraw(res, currentMode) {
+      if (currentMode === "通常" || !res.isHit) return;
+      const b = this.pickRushBonus();
+      res.bonusType = b.bonusType;
+      res.deferHitLog = true;
+      res.name = [b.name];
+      res.vibe = b.vibe || false;
+      res.vibeColor = b.vibeColor || "none";
+      res.text = b.text || "";
+      res.trust = 100;
     },
     async resolveHit(ctx) {
       const { eff, hitDigit } = ctx;
@@ -593,38 +656,60 @@ function normalRotationAfterModeEnd(endedMode) {
 }
 
 // ============================================================
-// 正しい抽選フロー：先に当たり外れを決め、演出を機種別に抽選
+// 抽選フロー：信頼度帯（またはEVA通常時は演出軸）を1回引き、
+// 当落・信頼度・演出を同時に確定
 // ============================================================
-function createJob(isRight = false) {
-  const isHit =
-    Math.random() <
-    1 / (mode === "通常" || mode === "時短" ? SPECS.n : SPECS.s);
-  let extras = isHit ? M.createJobHits(mode) : M.createJobMiss(mode);
-  let res = {
+function buildResFromBand(band, isHit, isRight) {
+  const effects = band.effects;
+  return {
     isHit,
     isRight,
     heavy: false,
-    name: extras.name || [],
-    trust: extras.trust || 0,
-    vibe: extras.vibe || false,
-    vibeColor: extras.vibeColor || "none",
-    flash: extras.flash || false,
-    text: extras.text || "",
-    holdType: extras.holdType || "none",
+    name: [...(effects.name || [])],
+    trust: band.trust,
+    vibe: effects.vibe || false,
+    vibeColor: effects.vibeColor || "none",
+    flash: effects.flash || false,
+    text: effects.text || "",
+    holdType: effects.holdType || "none",
     currentView: "none",
-    isRushSure: extras.isRushSure || false,
-    bonusType: extras.bonusType || null,
-    deferHitLog: extras.deferHitLog || false,
+    isRushSure: effects.isRushSure || false,
+    bonusType: effects.bonusType || null,
+    deferHitLog: effects.deferHitLog || false,
     saibare: false,
   };
+}
+
+function createJob(isRight = false) {
+  const regime = mode === "通常" || mode === "時短" ? "n" : "s";
+  let res;
+  if (currentMachine === "eva") {
+    res = createEvaJob(isRight, regime);
+  } else {
+    const bands = M.bands[regime];
+    const { band, isHit } = drawBand(bands);
+    res = buildResFromBand(band, isHit, isRight);
+    if (M.postDraw) M.postDraw(res, mode);
+    // 保留の見た目決定（EVA-ST/リゼロの帯方式では色そのものに厳密な信頼度を割り当てていないため従来ロジックを維持）
+    if (currentMachine === "rezero") {
+      res.currentView = "none";
+    } else if (res.holdType === "red" || (res.vibe && !res.isRushSure)) {
+      let rr = Math.random();
+      res.currentView = rr < 0.4 ? "blue" : rr < 0.8 ? "green" : "red";
+    } else if (res.holdType === "vibe") {
+      res.currentView = "vibe";
+    } else {
+      res.currentView = res.holdType;
+    }
+  }
 
   if (currentMachine === "rezero" && optSaibare && mode === "通常") {
-    const saibareRate = isHit
+    const saibareRate = res.isHit
       ? REZERO_SAIBARE_HIT_RATE
       : missRateForTrust(
           REZERO_SAIBARE_HIT_RATE,
           REZERO_SAIBARE_TRUST,
-          REZERO_NORMAL_ODDS,
+          SPECS.n,
         );
     if (Math.random() < saibareRate) {
       res.saibare = true;
@@ -632,18 +717,6 @@ function createJob(isRight = false) {
       res.vibe = true;
       res.vibeColor = "red";
     }
-  }
-
-  // 保留の見た目決定
-  if (currentMachine === "rezero") {
-    res.currentView = "none";
-  } else if (res.holdType === "red" || (res.vibe && !res.isRushSure)) {
-    let rr = Math.random();
-    res.currentView = rr < 0.4 ? "blue" : rr < 0.8 ? "green" : "red";
-  } else if (res.holdType === "vibe") {
-    res.currentView = "vibe";
-  } else {
-    res.currentView = res.holdType;
   }
 
   res.heavy = res.trust >= 50 || res.saibare;
@@ -763,8 +836,11 @@ async function startProcess() {
     } else {
       let rand = Math.random() * 100;
       if (mode === "通常" || mode === "時短") {
-        if (rand < 3) hitDigit = 7;
-        else if (rand < 44) {
+        // プレミア演出(isRushSure、全hit中約9.96%)も56%の枠内に含めた上で
+        // 全体が全回転3%・ST突入56%(内20%が偶数図柄からの昇格)・時短41%になるよう
+        // 非プレミア母集団(残り約90.04%)向けに調整した閾値
+        if (rand < 3.332) hitDigit = 7;
+        else if (rand < 60.248) {
           hitDigit = [2, 4, 6, 8][Math.floor(Math.random() * 4)];
         } else {
           hitDigit = [1, 3, 5, 9][Math.floor(Math.random() * 4)];
