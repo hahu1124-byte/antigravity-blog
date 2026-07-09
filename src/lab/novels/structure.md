@@ -59,9 +59,9 @@ novels/
         ├── 1-50/               # ep01~ep50
         └── 51-100/
             └── 51-60/
-                ├── ... (8 older files)
-                ├── ep59T.md
+                ├── ... (9 older files)
                 ├── ep60A.md
+                ├── ep60C.md
                 ├── setting-ch2-reveal.md
                 └── archive/
                     ├── ... (16 older files)
