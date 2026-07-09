@@ -52,7 +52,7 @@ novels/
     ├── EP-timeline.md          # 詳細タイムライン（BG暦・日付ベースの設定専用管理表）
     ├── episodes-summary.md     # 各話あらすじ一覧
     ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
-    ├── setting-ch1-2.md        
+    ├── setting-ch1-2.md        # 第1章・第2章 詳細プロット
     ├── setting.md              # プロット・ブロック構成
     ├── writing_prompt.md       # AI執筆指示書
 │   └── episodes/
