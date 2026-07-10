@@ -49,6 +49,7 @@ novels/
     ├── appraisal-format.md     # 鑑定眼《トゥルー・サイト》の表示フォーマット
     ├── characters-npc-crowd.md # 背景キャラ名簿（冒険者パーティー群、名前と一言特徴のみ）
     ├── characters.md           # キャラクター一覧
+    ├── codex.md                
     ├── EP-timeline.md          # 詳細タイムライン（BG暦・日付ベースの設定専用管理表）
     ├── episodes-summary.md     # 各話あらすじ一覧
     ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
@@ -60,8 +61,10 @@ novels/
         └── 51-100/
             ├── 51-60/               # ep51~ep60
             └── 61-70/
-                ├── ep61T.md
+                ├── ... (1 older files)
                 ├── ep62T.md
+                ├── ep63A.md
+                ├── ep63C.md
                 └── archive/
                     ├── ... (2 older files)
                     ├── ep62A.md
