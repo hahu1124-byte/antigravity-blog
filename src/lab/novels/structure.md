@@ -61,14 +61,14 @@ novels/
         └── 51-100/
             ├── 51-60/               # ep51~ep60
             └── 61-70/
-                ├── ... (6 older files)
-                ├── ep67A.md
-                ├── ep67C.md
+                ├── ... (4 older files)
+                ├── ep65T.md
+                ├── ep66T.md
                 ├── ep67T.md
                 └── archive/
-                    ├── ... (10 older files)
-                    ├── ep66A.md
-                    └── ep66C.md
+                    ├── ... (12 older files)
+                    ├── ep67A.md
+                    └── ep67C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
