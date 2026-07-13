@@ -3,12 +3,6 @@
     "cityCode": "230010",
     "apiUrl": "https://weather.tsukumijima.net/api/forecast/city/230010"
   },
-  "gasoline": {
-    "source": "enecho",
-    "enechoApiUrl": "https://www.enecho.meti.go.jp/statistics/petroleum_and_lpgas/pl007/csv/",
-    "region": "愛知",
-    "cacheFile": "scripts/gas-price-cache.json"
-  },
   "news": {
     "sources": [
       {

@@ -1,5 +1,5 @@
 ---
-description: Uber配達デイリーレポートの手動生成・ガソリン価格更新・トラブルシュート手順
+description: Uber配達デイリーレポートの手動生成・トラブルシュート手順
 ---
 // turbo-all
 
@@ -32,25 +32,9 @@ npx serve dist/blog -l 3456
 
 4. コミット＆プッシュ
 ```bash
-git add -f dist/ src/ scripts/gas-price-cache.json
+git add -f dist/ src/
 git commit -m "🚴 Uber daily: YYYYMMDD"
 git push
-```
-
----
-
-## ガソリン価格の更新（完全自動）
-
-- **Windowsタスクスケジューラ「GasPriceAutoUpdate」が毎週水曜21:00に自動実行**
-  - 実体: `scripts/auto-gas-update.ps1`
-  - 経産省の結果ページ（results.html）をBITS転送で取得 → 最新xlsxのURLを抽出 → xlsxをBITS転送でダウンロード
-    （curl/node fetch/GitHub Actions直接アクセスはAWS WAFのボット判定で弾かれるが、BITS経由は成功している）
-  - `update-gas-price.cjs` でキャッシュ更新 → **v2以降は自動で `git add / commit / push` まで実行**（コミット忘れ防止）
-  - xlsx実体は `G:\マイドライブ\gas\`（不可の場合 `scripts/gas-archive\`）に最大5世代アーカイブ
-- タスク状態確認: PowerShellで `Get-ScheduledTask -TaskName GasPriceAutoUpdate | Get-ScheduledTaskInfo`
-- 手動で即時更新したい場合は、タスクスケジューラから「実行」するか、xlsxを直接指定して以下を実行:
-```bash
-node scripts/update-gas-price.cjs "G:/マイドライブ/gas/260701.xlsx"
 ```
 
 ---
@@ -66,8 +50,9 @@ node scripts/update-gas-price.cjs "G:/マイドライブ/gas/260701.xlsx"
 | 道路交通情報 | JARTIC リンク | 固定 |
 | ニュース | NHK + Google News RSS | 自動 |
 | イベント情報 | Walker Plus リンク | 固定 |
-| ガソリン価格 | gas-price-cache.json | 週次手動 |
 | Amazon アフィリエイト | uber-daily-config.json | 固定 |
+
+※ ガソリン価格セクションは2026-07-13に廃止。経産省サイトがAWS WAFの人間検証を導入し無人自動取得ができなくなったため削除（詳細は`docs/knowledge/reference/`参照）。
 
 ---
 
@@ -92,14 +77,6 @@ node scripts/update-gas-price.cjs "G:/マイドライブ/gas/260701.xlsx"
 - `generate-uber-daily.mjs` は同日スキップ機能あり（blog-data.json + index.html 両方チェック）
 - 重複した場合は `dist/blog/YYYYMM/YYYYMMDD_uber_daily/` を削除して再実行
 
-### ガソリン価格が表示されない
-- `scripts/gas-price-cache.json` が存在するか確認
-- `node scripts/update-gas-price.cjs` で再取得
-
-### xlsx 読み取りでフリーズする
-- bash ワンライナーで xlsx を扱う場合 `!` がヒストリ展開される → スクリプトファイル経由で実行すること
-- `process.exit(0)` を末尾に必ず入れる
-
 ---
 
 ## ファイル一覧
@@ -108,6 +85,4 @@ node scripts/update-gas-price.cjs "G:/マイドライブ/gas/260701.xlsx"
 |---------|------|
 | `scripts/generate-uber-daily.mjs` | メイン生成スクリプト |
 | `scripts/uber-daily-config.json` | ルール・キーワード・テンプレート設定 |
-| `scripts/gas-price-cache.json` | ガソリン価格キャッシュ |
-| `scripts/update-gas-price.cjs` | 経産省 xlsx → キャッシュ更新 |
 | `.github/workflows/uber-daily-report.yml` | 毎朝自動実行ワークフロー |
