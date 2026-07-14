@@ -222,6 +222,45 @@ function renderTrafficSection() {
 <p class="section-note">名古屋市内の最新交通規制情報は <a href="https://www.jartic.or.jp/" target="_blank" rel="noopener">JARTIC</a> をご確認ください。</p>`;
 }
 
+// ===== 4. ガソリン価格 =====
+
+// ガソリン価格は独立した週次ワークフロー (update-gas-price.yml) がキャッシュを更新する。
+// このスクリプトはキャッシュを読むだけで、外部の経産省サイトへは一切アクセスしない。
+function getGasPriceCache() {
+  const cachePath = path.join(ROOT, CONFIG.gasoline.cacheFile);
+  try {
+    const data = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+    const cacheDate = new Date(data.fetchDate);
+    const diffDays = (today - cacheDate) / (1000 * 60 * 60 * 24);
+    if (diffDays > 8) {
+      log('⛽ ガソリン価格キャッシュが古め（' + Math.floor(diffDays) + '日前）。経産省側の取得に失敗している可能性があります');
+    }
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+async function getGasPrice() {
+  return getGasPriceCache();
+}
+
+function renderGasSection(gas) {
+  if (!gas) {
+    return `<p>ガソリン価格情報を取得できませんでした。</p>
+<p class="section-note"><a href="https://gogo.gs/" target="_blank" rel="noopener">gogo.gs</a> で最寄りのスタンドをチェック！</p>`;
+  }
+
+  return `<table class="gas-table">
+  <tr><th>種別</th><th>価格（円/L）</th></tr>
+  <tr><td>⛽ レギュラー</td><td><strong>${gas.regular || '---'}</strong></td></tr>
+  <tr><td>⛽ ハイオク</td><td>${gas.premium || '---'}</td></tr>
+  <tr><td>🛢️ 軽油</td><td>${gas.diesel || '---'}</td></tr>
+  <tr><td>🔥 灯油（18L）</td><td>${gas.kerosene || '---'}</td></tr>
+</table>
+<p class="section-note">出典: 経済産業省 石油製品価格調査（${gas.region}地域平均・週次更新）<br>調査日: ${gas.fetchDate}</p>`;
+}
+
 // ===== 5. ピーク予測 =====
 
 function getPeakPredictions(weather) {
@@ -369,11 +408,11 @@ function generateTitle(weather) {
 // ===== HTML生成 =====
 
 function buildArticleHtml({
-  title, weatherHtml, trafficHtml, newsHtml,
+  title, weatherHtml, trafficHtml, newsHtml, gasHtml,
   peakHtml, eventsHtml, heatHtml, dayTipHtml, commentText
 }) {
   const fullTitle = `🚴 Uber配達情報 ${title}`;
-  const description = `名古屋のUber配達に役立つ今日の情報をまとめました。天気・交通・ニュース・需要予測をチェック！`;
+  const description = `名古屋のUber配達に役立つ今日の情報をまとめました。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`;
   const articleUrl = `https://www.antigravity-portal.com/blog/${YYYYMM}/${DATE_STR}_uber_daily/`;
   const encodedTag = encodeURIComponent('Uber配達');
 
@@ -434,6 +473,12 @@ function buildArticleHtml({
       .weather-next-telop { display: block; font-weight: 600; margin-top: 0.3rem; color: inherit; }
       .weather-next-temp { display: block; font-size: 0.85rem; color: #555; }
       [data-theme="dark"] .weather-next-temp { color: #bbb; }
+
+      .gas-table { width: 100%; max-width: 320px; border-collapse: collapse; margin: 0.8rem 0; }
+      .gas-table th, .gas-table td { padding: 0.5rem 0.8rem; border: 1px solid #ccc; color: inherit; }
+      .gas-table th { background: #e8eaed; text-align: left; }
+      [data-theme="dark"] .gas-table th { background: #35383f; }
+      [data-theme="dark"] .gas-table th, [data-theme="dark"] .gas-table td { border-color: #444; }
 
       .section-note { font-size: 0.85rem; color: #777; margin-top: 0.4rem; }
       [data-theme="dark"] .section-note { color: #999; }
@@ -550,6 +595,11 @@ function buildArticleHtml({
                   ${eventsHtml}
                 </div>
 
+                <div class="uber-section">
+                  <h2>⛽ ガソリン価格（${CONFIG.gasoline.region}地域平均）</h2>
+                  ${gasHtml}
+                </div>
+
             </div>
 
             <div class="ninja-ad-slot">
@@ -624,7 +674,7 @@ function updateBlogData(title) {
     slug,
     title: fullTitle,
     date: DATE_DISPLAY,
-    excerpt: `名古屋のUber配達に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・需要予測をチェック！`,
+    excerpt: `名古屋のUber配達に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`,
     tags: ['Uber配達']
   };
 
@@ -654,7 +704,7 @@ function updateBlogIndex(title) {
   }
 
   const fullTitle = `🚴 Uber配達情報 ${title}`;
-  const excerpt = `名古屋のUber配達に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・需要予測をまとめました。`;
+  const excerpt = `名古屋のUber配達に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をまとめました。`;
 
   const newCard = `<a href="${slug}" class="article-card" data-tags="Uber配達" data-index="0">
             <div class="card-header">
@@ -703,9 +753,10 @@ async function main() {
   if (DRY_RUN) log('⚠️ ドライランモード: ファイル出力なし');
 
   // 1. データ収集（並列）
-  const [weather, news, events] = await Promise.all([
+  const [weather, news, gasPrice, events] = await Promise.all([
     getWeather(),
     getNews(),
+    getGasPrice(),
     getEvents()
   ]);
 
@@ -719,6 +770,7 @@ async function main() {
   const weatherHtml = renderWeatherSection(weather);
   const trafficHtml = renderTrafficSection();
   const newsHtml = renderNewsSection(news);
+  const gasHtml = renderGasSection(gasPrice);
   const peakHtml = renderPeakSection(predictions);
   const eventsHtml = renderEventsSection(events);
   const heatHtml = renderHeatSection(heatAdvice);
@@ -726,7 +778,7 @@ async function main() {
 
   // 4. HTML組み立て
   const html = buildArticleHtml({
-    title, weatherHtml, trafficHtml, newsHtml,
+    title, weatherHtml, trafficHtml, newsHtml, gasHtml,
     peakHtml, eventsHtml, heatHtml, dayTipHtml, commentText
   });
 

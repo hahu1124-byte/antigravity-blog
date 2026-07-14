@@ -1,5 +1,5 @@
 ---
-description: Uber配達デイリーレポートの手動生成・トラブルシュート手順
+description: Uber配達デイリーレポートの手動生成・ガソリン価格更新・トラブルシュート手順
 ---
 // turbo-all
 
@@ -39,6 +39,24 @@ git push
 
 ---
 
+## ガソリン価格の更新（独立した週次ワークフロー・自動）
+
+- 独立したGitHub Actionsワークフロー `.github/workflows/update-gas-price.yml` が**毎週水曜 JST 18:00**（UTC 9:00、経産省の公表は水曜14:00なので余裕を持たせて設定）に自動実行され、キャッシュを更新する
+  - `generate-uber-daily.mjs`（日次記事生成）は `scripts/gas-price-cache.json` を読むだけで、外部の経産省サイトへは一切アクセスしない（責務分離。日次実行のたびにWAF/レート制限リスクを高めていた旧設計を解消）
+- 実体: `scripts/fetch-gas-price.py`
+  - 経産省の結果ページ（results.html）を `curl_cffi`（TLS fingerprintをChromeに偽装）で取得 → 最新xlsxのURLを抽出 → xlsxをダウンロード
+    （素のcurl/node fetch/PlaywrightヘッドレスはAWS WAFのボット判定で弾かれるが、TLS fingerprint偽装は通過する）
+  - `update-gas-price.cjs` がxlsxをパースしてキャッシュ更新し、`update-gas-price.yml` ワークフロー内で git commit/push される
+  - xlsx実体は `G:\マイドライブ\gas\`（不可の場合 `scripts/gas-archive\`）に最大5世代アーカイブ
+- **前提**: 実行環境にPython 3 + `curl_cffi`（`pip install curl_cffi`）が必要。`update-gas-price.yml` ワークフローには `actions/setup-python` + インストールステップ済み。ローカルWindows環境は導入済み確認済み
+- 取得失敗時（WAF強化・ネットワークエラー等）は既存キャッシュを使い続ける。8日以上更新が無いとログに警告が出る
+- 手動で即時更新したい場合:
+```bash
+node scripts/update-gas-price.cjs
+```
+
+---
+
 ## 生成される記事の構成
 
 | セクション | データソース | 自動/手動 |
@@ -50,9 +68,8 @@ git push
 | 道路交通情報 | JARTIC リンク | 固定 |
 | ニュース | NHK + Google News RSS | 自動 |
 | イベント情報 | Walker Plus リンク | 固定 |
+| ガソリン価格 | gas-price-cache.json（週次ワークフローがcurl_cffiで自動取得） | 自動 |
 | Amazon アフィリエイト | uber-daily-config.json | 固定 |
-
-※ ガソリン価格セクションは2026-07-13に廃止。経産省サイトがAWS WAFの人間検証を導入し無人自動取得ができなくなったため削除（詳細は`docs/knowledge/reference/`参照）。
 
 ---
 
@@ -77,6 +94,11 @@ git push
 - `generate-uber-daily.mjs` は同日スキップ機能あり（blog-data.json + index.html 両方チェック）
 - 重複した場合は `dist/blog/YYYYMM/YYYYMMDD_uber_daily/` を削除して再実行
 
+### ガソリン価格が表示されない
+- `scripts/gas-price-cache.json` が存在するか確認
+- `node scripts/update-gas-price.cjs` を単体実行し、標準出力のエラーを確認（`curl_cffi` 未インストールならまずそれを疑う）
+- 経産省サイト側のWAF強化で取得できなくなった場合は既存キャッシュのまま表示される（記事生成自体は止まらない）
+
 ---
 
 ## ファイル一覧
@@ -85,4 +107,8 @@ git push
 |---------|------|
 | `scripts/generate-uber-daily.mjs` | メイン生成スクリプト |
 | `scripts/uber-daily-config.json` | ルール・キーワード・テンプレート設定 |
-| `.github/workflows/uber-daily-report.yml` | 毎朝自動実行ワークフロー |
+| `scripts/gas-price-cache.json` | ガソリン価格キャッシュ |
+| `scripts/update-gas-price.cjs` | fetch-gas-price.py呼び出し＋xlsxパース→キャッシュ更新 |
+| `scripts/fetch-gas-price.py` | curl_cffiでAWS WAFを回避しxlsxを直接取得 |
+| `.github/workflows/uber-daily-report.yml` | 毎朝自動実行ワークフロー（記事生成） |
+| `.github/workflows/update-gas-price.yml` | 毎週水曜自動実行ワークフロー（ガソリン価格キャッシュ更新） |

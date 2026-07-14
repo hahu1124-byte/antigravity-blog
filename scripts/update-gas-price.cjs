@@ -1,0 +1,164 @@
+#!/usr/bin/env node
+/**
+ * ガソリン価格キャッシュ更新スクリプト
+ *
+ * scripts/fetch-gas-price.py（curl_cffiでAWS WAFを回避しxlsxを直接取得）を
+ * 呼び出し、取得したxlsxをパースして gas-price-cache.json を更新する。
+ * xlsx実体は G:\マイドライブ\gas\（無ければ scripts/gas-archive\）に最大5世代アーカイブする。
+ *
+ * 取得に失敗しても異常終了はしない（既存キャッシュを使い続ける）。
+ * generate-uber-daily.mjs から呼ばれる想定。単体実行も可:
+ *   node scripts/update-gas-price.cjs
+ */
+const XLSX = require('xlsx');
+const fs = require('fs');
+const path = require('path');
+const { execFileSync } = require('child_process');
+
+const ROOT = path.resolve(__dirname, '..');
+const CACHE_FILE = path.join(ROOT, 'scripts/gas-price-cache.json');
+const FETCH_SCRIPT = path.join(__dirname, 'fetch-gas-price.py');
+const G_DRIVE_ARCHIVE_DIR = 'G:/マイドライブ/gas';
+const FALLBACK_ARCHIVE_DIR = path.join(ROOT, 'scripts/gas-archive');
+const MAX_GENERATIONS = 5;
+const REGION = '愛知';
+
+function resolveArchiveDir() {
+  try {
+    fs.mkdirSync(G_DRIVE_ARCHIVE_DIR, { recursive: true });
+    fs.accessSync(G_DRIVE_ARCHIVE_DIR, fs.constants.W_OK);
+    return G_DRIVE_ARCHIVE_DIR;
+  } catch {
+    fs.mkdirSync(FALLBACK_ARCHIVE_DIR, { recursive: true });
+    return FALLBACK_ARCHIVE_DIR;
+  }
+}
+
+function pruneOldGenerations(archiveDir) {
+  const files = fs.readdirSync(archiveDir)
+    .filter(f => f.toLowerCase().endsWith('.xlsx'))
+    .map(f => {
+      const full = path.join(archiveDir, f);
+      return { full, mtime: fs.statSync(full).mtimeMs };
+    })
+    .sort((a, b) => b.mtime - a.mtime);
+
+  for (const old of files.slice(MAX_GENERATIONS)) {
+    try { fs.unlinkSync(old.full); } catch { /* 削除失敗は無視 */ }
+  }
+}
+
+function runFetchScript(archiveDir) {
+  const candidates = process.platform === 'win32' ? ['python', 'python3'] : ['python3', 'python'];
+  for (const bin of candidates) {
+    try {
+      const stdout = execFileSync(bin, [FETCH_SCRIPT, archiveDir], {
+        encoding: 'utf8',
+        env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
+      });
+      const savedPath = stdout.trim().split('\n').pop();
+      if (savedPath && fs.existsSync(savedPath)) return savedPath;
+    } catch (e) {
+      console.error(`⚠️ ${bin} での取得に失敗: ${e.message}`);
+      if (e.stderr) console.error(e.stderr.toString());
+    }
+  }
+  return null;
+}
+
+function parseXlsx(xlsxPath) {
+  const buf = fs.readFileSync(xlsxPath);
+  const wb = XLSX.read(buf, { type: 'buffer' });
+
+  // 都道府県別シートを使用（2枚目）
+  const sheetName = wb.SheetNames.find(n => n.includes('都道府県')) || wb.SheetNames[1] || wb.SheetNames[0];
+  const ws = wb.Sheets[sheetName];
+  const data = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+  // 空行打ち切り
+  let lastRow = 0;
+  let emptyCount = 0;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].some(c => c !== '' && c != null)) { lastRow = i; emptyCount = 0; }
+    else { emptyCount++; if (emptyCount >= 10) break; }
+  }
+
+  // 日付行を探す（Excelシリアル値 → 日付変換）
+  let surveyDate = '';
+  for (let i = 0; i < Math.min(10, data.length); i++) {
+    for (const cell of data[i]) {
+      if (typeof cell === 'number' && cell > 40000 && cell < 60000) {
+        const d = new Date((cell - 25569) * 86400000);
+        const candidate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        if (!surveyDate || candidate > surveyDate) surveyDate = candidate;
+      }
+    }
+  }
+
+  // 愛知の行を探す
+  // カラム構造（都道府県別シート）:
+  //   [1] 地域名
+  //   [2] ハイオク（前週） [3] ハイオク（今週）
+  //   [4] レギュラー（前週） [5] レギュラー（今週）
+  //   [6] 軽油（前週） [7] 軽油（今週）
+  //   [8] 灯油 店頭（前週） [9] 灯油 店頭（今週）
+  let found = null;
+  for (let i = 0; i <= lastRow; i++) {
+    const row = data[i];
+    const name = String(row[1] || '').replace(/\s+/g, '');
+    if (name.includes(REGION)) {
+      found = { regular: row[5], premium: row[3], diesel: row[7], kerosene: row[9] };
+      break;
+    }
+  }
+
+  if (!found) {
+    throw new Error(`${REGION} のデータが見つかりませんでした`);
+  }
+
+  return {
+    fetchDate: surveyDate || new Date().toISOString().slice(0, 10),
+    region: REGION,
+    source: '経済産業省 石油製品価格調査（週次）',
+    regular: String(found.regular),
+    premium: String(found.premium),
+    diesel: String(found.diesel),
+    kerosene: String(found.kerosene),
+    note: '灯油は18L店頭価格。毎週水曜に経産省が発表するxlsxから自動取得。',
+  };
+}
+
+function main() {
+  console.log('⛽ ガソリン価格取得を開始...');
+
+  const archiveDir = resolveArchiveDir();
+  console.log(`  📂 アーカイブ先: ${archiveDir}`);
+
+  const xlsxPath = runFetchScript(archiveDir);
+  if (!xlsxPath) {
+    console.error('⚠️ xlsx取得に失敗しました。既存のキャッシュをそのまま使用します。');
+    return;
+  }
+
+  let cache;
+  try {
+    cache = parseXlsx(xlsxPath);
+  } catch (e) {
+    console.error(`⚠️ xlsxパースに失敗しました: ${e.message}`);
+    console.error('   既存のキャッシュをそのまま使用します。');
+    return;
+  } finally {
+    pruneOldGenerations(archiveDir);
+  }
+
+  fs.writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2));
+
+  console.log('✅ gas-price-cache.json を更新しました');
+  console.log(`  📅 調査日: ${cache.fetchDate}`);
+  console.log(`  ⛽ レギュラー: ${cache.regular} 円/L`);
+  console.log(`  ⛽ ハイオク:   ${cache.premium} 円/L`);
+  console.log(`  🛢️  軽油:       ${cache.diesel} 円/L`);
+  console.log(`  🔥 灯油(18L):  ${cache.kerosene} 円`);
+}
+
+main();

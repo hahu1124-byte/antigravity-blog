@@ -1,0 +1,50 @@
+name: Update Gas Price
+
+on:
+  schedule:
+    # JST 18:00 = UTC 9:00、水曜（経産省の公表は水曜14:00なので余裕を持たせて18:00）
+    - cron: '0 9 * * 3'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install curl_cffi
+        run: pip install curl_cffi
+
+      - name: Update gas price cache
+        run: node scripts/update-gas-price.cjs
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add scripts/gas-price-cache.json
+          CHANGES=$(git diff --cached --name-only)
+          if [ -n "$CHANGES" ]; then
+            git commit -m "⛽ Update gas prices ($(TZ=Asia/Tokyo date +%Y%m%d))"
+            git push
+          else
+            echo "No changes to commit"
+          fi

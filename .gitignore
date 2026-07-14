@@ -3,3 +3,4 @@ dist/
 .env
 .x-posted.json
 remove_b_article.cjs
+scripts/gas-archive/
