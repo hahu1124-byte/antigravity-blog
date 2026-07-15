@@ -61,10 +61,10 @@ novels/
         └── 51-100/
             ├── 51-60/               # ep51~ep60
             └── 61-70/
-                ├── ... (5 older files)
-                ├── ep66T.md
+                ├── ... (6 older files)
                 ├── ep67T.md
                 ├── ep68T.md
+                ├── ep69A.md
                 └── archive/
                     ├── ... (14 older files)
                     ├── ep68A.md
