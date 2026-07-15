@@ -4,7 +4,7 @@
  *
  * scripts/fetch-gas-price.py（curl_cffiでAWS WAFを回避しxlsxを直接取得）を
  * 呼び出し、取得したxlsxをパースして gas-price-cache.json を更新する。
- * xlsx実体は G:\マイドライブ\gas\（無ければ scripts/gas-archive\）に最大5世代アーカイブする。
+ * xlsx実体は G:\マイドライブ\gas\（無ければ scripts/gas-archive\）に1年分アーカイブする。
  *
  * 取得に失敗しても異常終了はしない（既存キャッシュを使い続ける）。
  * generate-uber-daily.mjs から呼ばれる想定。単体実行も可:
@@ -20,7 +20,7 @@ const CACHE_FILE = path.join(ROOT, 'scripts/gas-price-cache.json');
 const FETCH_SCRIPT = path.join(__dirname, 'fetch-gas-price.py');
 const G_DRIVE_ARCHIVE_DIR = 'G:/マイドライブ/gas';
 const FALLBACK_ARCHIVE_DIR = path.join(ROOT, 'scripts/gas-archive');
-const MAX_GENERATIONS = 5;
+const MAX_AGE_DAYS = 365;
 const REGION = '愛知';
 
 function resolveArchiveDir() {
@@ -34,17 +34,15 @@ function resolveArchiveDir() {
   }
 }
 
-function pruneOldGenerations(archiveDir) {
-  const files = fs.readdirSync(archiveDir)
-    .filter(f => f.toLowerCase().endsWith('.xlsx'))
-    .map(f => {
-      const full = path.join(archiveDir, f);
-      return { full, mtime: fs.statSync(full).mtimeMs };
-    })
-    .sort((a, b) => b.mtime - a.mtime);
+function pruneOldFiles(archiveDir) {
+  const cutoff = Date.now() - MAX_AGE_DAYS * 24 * 60 * 60 * 1000;
+  const files = fs.readdirSync(archiveDir).filter(f => f.toLowerCase().endsWith('.xlsx'));
 
-  for (const old of files.slice(MAX_GENERATIONS)) {
-    try { fs.unlinkSync(old.full); } catch { /* 削除失敗は無視 */ }
+  for (const f of files) {
+    const full = path.join(archiveDir, f);
+    if (fs.statSync(full).mtimeMs < cutoff) {
+      try { fs.unlinkSync(full); } catch { /* 削除失敗は無視 */ }
+    }
   }
 }
 
@@ -148,7 +146,7 @@ function main() {
     console.error('   既存のキャッシュをそのまま使用します。');
     return;
   } finally {
-    pruneOldGenerations(archiveDir);
+    pruneOldFiles(archiveDir);
   }
 
   fs.writeFileSync(CACHE_FILE, JSON.stringify(cache, null, 2));

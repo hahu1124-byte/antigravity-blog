@@ -41,18 +41,31 @@ git push
 
 ## ガソリン価格の更新（独立した週次ワークフロー・自動）
 
-- 独立したGitHub Actionsワークフロー `.github/workflows/update-gas-price.yml` が**毎週水曜 JST 18:00**（UTC 9:00、経産省の公表は水曜14:00なので余裕を持たせて設定）に自動実行され、キャッシュを更新する
+- 独立したGitHub Actionsワークフロー `.github/workflows/update-gas-price.yml` が**毎週水曜 JST 18:00**（UTC 9:00、経産省の公表は水曜14:00なので余裕を持たせて設定）に自動実行され、**`gas-price-cache.json`（価格データ）のみ**更新してcommit/pushする
   - `generate-uber-daily.mjs`（日次記事生成）は `scripts/gas-price-cache.json` を読むだけで、外部の経産省サイトへは一切アクセスしない（責務分離。日次実行のたびにWAF/レート制限リスクを高めていた旧設計を解消）
+  - **xlsx実体のアーカイブはこのワークフローでは機能しない**（後述）。GitHub Actionsのクラウドランナーには `G:\マイドライブ` が存在せず、`update-gas-price.cjs` 側のアーカイブ先判定（`G:/マイドライブ/gas` への書き込み試行）がLinux上では単なる文字列パスとしてランナーの一時ディレクトリ内に作成されて「成功」してしまうため、ジョブ終了と同時に消える。2026-07-15にこの事象を確認し、xlsxアーカイブ処理をローカル側に完全分離した
 - 実体: `scripts/fetch-gas-price.py`
   - 経産省の結果ページ（results.html）を `curl_cffi`（TLS fingerprintをChromeに偽装）で取得 → 最新xlsxのURLを抽出 → xlsxをダウンロード
     （素のcurl/node fetch/PlaywrightヘッドレスはAWS WAFのボット判定で弾かれるが、TLS fingerprint偽装は通過する）
   - `update-gas-price.cjs` がxlsxをパースしてキャッシュ更新し、`update-gas-price.yml` ワークフロー内で git commit/push される
-  - xlsx実体は `G:\マイドライブ\gas\`（不可の場合 `scripts/gas-archive\`）に最大5世代アーカイブ
 - **前提**: 実行環境にPython 3 + `curl_cffi`（`pip install curl_cffi`）が必要。`update-gas-price.yml` ワークフローには `actions/setup-python` + インストールステップ済み。ローカルWindows環境は導入済み確認済み
 - 取得失敗時（WAF強化・ネットワークエラー等）は既存キャッシュを使い続ける。8日以上更新が無いとログに警告が出る
 - 手動で即時更新したい場合:
 ```bash
 node scripts/update-gas-price.cjs
+```
+
+### xlsx実体のアーカイブ（ローカルWindowsタスクスケジューラ・独立系統）
+
+- xlsx実体を `G:\マイドライブ\gas\` に保存する処理は、上記GitHub Actionsとは完全に別系統として **ローカルPC側のWindowsタスクスケジューラ**が担う
+  - タスク名: `AntigravityBlog_GasPriceArchive`（PowerShellの `Register-ScheduledTask` で登録済み、管理者権限不要）
+  - トリガー: 毎週水曜 18:30、現在ユーザー権限で実行。`StartWhenAvailable` 設定済みのため、その時刻にPCが起動していなくても次回起動時に実行される
+  - 実行内容: `node scripts/local-gas-archive.cjs`（作業ディレクトリ `H:\gravity\projects\antigravity-blog`）
+  - `scripts/local-gas-archive.cjs` は `fetch-gas-price.py` を呼んでxlsxを `G:\マイドライブ\gas\` に保存するだけで、`gas-price-cache.json` の更新は行わない（それはGitHub Actions側の責務のまま）
+- **保持期間**: 直近1年分（365日）。それより古いxlsxはアーカイブ時に自動削除される（`local-gas-archive.cjs` / `update-gas-price.cjs` 双方の `pruneOldFiles`）。以前は直近5世代（約5週間分）のみ保持する設計だったが、長期保存の要望により2026-07-15に1年基準へ変更した
+- 手動実行:
+```bash
+node scripts/local-gas-archive.cjs
 ```
 
 ---
@@ -99,6 +112,11 @@ node scripts/update-gas-price.cjs
 - `node scripts/update-gas-price.cjs` を単体実行し、標準出力のエラーを確認（`curl_cffi` 未インストールならまずそれを疑う）
 - 経産省サイト側のWAF強化で取得できなくなった場合は既存キャッシュのまま表示される（記事生成自体は止まらない）
 
+### xlsxアーカイブがG:\マイドライブ\gas\に保存されていない
+- ローカルタスクスケジューラのタスク `AntigravityBlog_GasPriceArchive` が有効か確認（`Get-ScheduledTask -TaskName AntigravityBlog_GasPriceArchive`）
+- 水曜18:30にPCが起動していなかった場合は `StartWhenAvailable` により次回起動時に実行される。それでも反映されない場合は `node scripts/local-gas-archive.cjs` を手動実行
+- GitHub Actions側（`update-gas-price.yml`）はxlsx実体の保存を担当しないため、Actionsの実行成功はxlsxアーカイブの成功を意味しない
+
 ---
 
 ## ファイル一覧
@@ -108,7 +126,8 @@ node scripts/update-gas-price.cjs
 | `scripts/generate-uber-daily.mjs` | メイン生成スクリプト |
 | `scripts/uber-daily-config.json` | ルール・キーワード・テンプレート設定 |
 | `scripts/gas-price-cache.json` | ガソリン価格キャッシュ |
-| `scripts/update-gas-price.cjs` | fetch-gas-price.py呼び出し＋xlsxパース→キャッシュ更新 |
+| `scripts/update-gas-price.cjs` | fetch-gas-price.py呼び出し＋xlsxパース→キャッシュ更新（GitHub Actions側） |
+| `scripts/local-gas-archive.cjs` | fetch-gas-price.py呼び出し＋xlsx実体をG:\マイドライブ\gas\へ保存（ローカルタスクスケジューラ側、cache.json更新なし） |
 | `scripts/fetch-gas-price.py` | curl_cffiでAWS WAFを回避しxlsxを直接取得 |
 | `.github/workflows/uber-daily-report.yml` | 毎朝自動実行ワークフロー（記事生成） |
-| `.github/workflows/update-gas-price.yml` | 毎週水曜自動実行ワークフロー（ガソリン価格キャッシュ更新） |
+| `.github/workflows/update-gas-price.yml` | 毎週水曜自動実行ワークフロー（ガソリン価格キャッシュ更新のみ。xlsx実体のクラウド保存は機能しない） |
