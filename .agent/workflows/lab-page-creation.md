@@ -34,7 +34,10 @@ v9ページ作成時に **カテゴリ一覧ページ（ai-tools/index.html 等�
 
 前回LABページ公開日以降のAI開発ニュースを調査する。
 
+> **⚠️ 教訓（2026-07-20）**: v10作成時、AIコーディングツール（Claude Code/Cursor/Copilot等）のみ調査し、**基盤モデル自体の動向を調査せず公開**。ユーザー指摘（「Fable5とかGPT-5.6 SolとかKimi K3とか一切ないんですけど」）で発覚し、後から追加調査・全ページ修正する手戻りが発生した。**下記4観点は必ず両方調査すること。**
+
 調査観点：
+- **基盤モデル自体の動向（最重要・見落としやすい）**: 各社フロンティアモデルの新リリース・規制解除／発動・ベンチマーク更新（Anthropic Claude / OpenAI GPT / xAI Grok / Google Gemini / Moonshot Kimi 等）
 - 主要ツールのアップデート（Claude Code / Cursor / Copilot / Devin 等）
 - 注目OSSプロジェクト（Stars数、新機能）
 - 業界トレンド（規制・価格・設計思想の変化）
