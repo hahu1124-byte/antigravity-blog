@@ -54,6 +54,9 @@ novels/
     ├── episodes-summary.md     # 各話あらすじ一覧
     ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
     ├── setting-ch1-2.md        # 第1章・第2章 詳細プロット
+    ├── setting-ch3.md          
+    ├── setting-ch4.md          
+    ├── setting-ch5.md          
     ├── setting.md              # プロット・ブロック構成
     ├── writing_prompt.md       # AI執筆指示書
 │   └── episodes/
@@ -62,9 +65,10 @@ novels/
             ├── 51-60/               # ep51~ep60
             ├── 61-70/               # ep61~ep70
             └── 71-80/
-                ├── ep71T.md
+                ├── ... (1 older files)
                 ├── ep72T.md
                 ├── ep73T.md
+                ├── ep74A.md
                 └── archive/
                     ├── ... (5 older files)
                     ├── ep73A.md
