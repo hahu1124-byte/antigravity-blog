@@ -6,15 +6,15 @@
     <title>AI開発ツール比較 2026 第10回 | LAB | Gravity Portal</title>
     <meta
       name="description"
-      content="AI開発ツール比較 第10回（2026年7月更新）。MCP最大改訂（ステートレス化）・「Friendly Fire」攻撃でエージェント自律承認モードのリスク露見・Cursor Continue買収でM&A加速。"
+      content="AI開発ツール比較 第10回（2026年7月更新）。Fable 5復活・GPT-5.6 Sol・Grok 4.5・Kimi K3の基盤モデル世代交代ラッシュ。MCP最大改訂・「Friendly Fire」攻撃でセキュリティ危機。Cursor Continue買収でM&A加速。"
     />
     <meta
       property="og:title"
-      content="AI開発ツール比較 2026 第10回 — MCP大改訂・エージェントセキュリティ危機・M&A加速"
+      content="AI開発ツール比較 2026 第10回 — 基盤モデル世代交代・MCP大改訂・セキュリティ危機"
     />
     <meta
       property="og:description"
-      content="MCP 2026-07-28仕様がステートレスコアへ最大改訂。Claude Code/Codexを狙う「Friendly Fire」攻撃が公表。CursorはContinueを買収しARR3000億円規模へ。"
+      content="Fable 5復活・GPT-5.6 Sol・Grok 4.5・Kimi K3が同時期に登場。MCP 2026-07-28仕様がステートレスコアへ最大改訂。「Friendly Fire」攻撃が公表。CursorはContinueを買収しARR3000億円規模へ。"
     />
     <meta property="og:type" content="article" />
     <meta
@@ -62,13 +62,14 @@
       <section class="lab-hero">
         <div class="lab-hero-icon">🛠️</div>
         <h1>
-          AI開発ツール — MCP大改訂・エージェントセキュリティ危機・M&A加速 第10回
+          AI開発ツール — 基盤モデル世代交代・MCP大改訂・セキュリティ危機 第10回
         </h1>
         <p>
-          第9回（7月22日）から4週間、AI開発ツール業界は「エージェントの信頼性」を問われる局面に入りました。<br />
-          MCPが2026-07-28仕様でステートレスコアへ最大級の改訂。<br />
-          自律承認モードを突く「Friendly Fire」攻撃がClaude
-          Code・Codexを標的として公表。<br />
+          第9回（6月22日）から4週間、AI開発ツール業界は基盤モデルの一斉世代交代と「エージェントの信頼性」を同時に問われる局面に入りました。<br />
+          Fable 5が輸出規制解除で復活（7/1）、GPT-5.6 Sol・Grok 4.5・Kimi
+          K3が立て続けに登場。<br />
+          MCPが2026-07-28仕様でステートレスコアへ最大級の改訂、自律承認モードを突く「Friendly
+          Fire」攻撃も公表。<br />
           そしてCursorがOSSのContinueを買収し、ARR3000億円規模でM&Aが加速しています。
         </p>
         <div class="lab-hero-meta">
@@ -86,10 +87,29 @@
       </section>
 
       <section class="lab-section">
-        <h2>🔥 7月の3大トピック</h2>
+        <h2>🔥 7月の4大トピック</h2>
         <p>
           <strong
-            >① MCP 2026-07-28仕様リリース候補 — プロトコル最大の改訂 📡</strong
+            >① 基盤モデル世代交代ラッシュ — Fable 5復活・GPT-5.6・Grok 4.5・Kimi
+            K3 🌋</strong
+          >
+          —
+          7月上旬だけで基盤モデルが総入れ替わりした。米政府の輸出規制が解除され<strong
+            >Fable 5が7月1日に全世界復活</strong
+          >（Pro/Max/Team等は週次利用枠の50%まで利用可、以降は利用クレジット経由）。直前の6月30日には<strong
+            >Claude Sonnet 5</strong
+          >がOpus級性能をSonnet価格で提供開始（1Mコンテキスト・128K出力・xhigh推論）。7月8日に<strong
+            >xAIがGrok 4.5</strong
+          >を公開（Cursorのコーディングデータで学習したV9-Medium、$2/$6の低価格・80TPS）。7月9日には<strong>OpenAIがGPT-5.6ファミリー</strong>（Luna/Terra/Sol）を発表し、最上位のSolはFable
+          5をベンチマークスコアで2.8点上回りつつ、トークン半分以下・時間半分以下・コスト1/3を実現。極めつけは7月16日、中国Moonshot
+          AIが<strong>Kimi K3</strong
+          >（2.8兆パラメータ・1Mコンテキスト）を公開し、Frontend Code
+          ArenaでFable
+          5を上回る首位を獲得。オープンウェイト版は7月27日公開予定。
+        </p>
+        <p>
+          <strong
+            >② MCP 2026-07-28仕様リリース候補 — プロトコル最大の改訂 📡</strong
           >
           — 発表以来最大級の見直しとなるRC（Release Candidate）が公開。<strong
             >Streamable HTTPからセッション概念を撤廃</strong
@@ -99,7 +119,7 @@
         </p>
         <p>
           <strong
-            >② 「Friendly Fire」攻撃の公表 — 自律承認モードの死角 🚨</strong
+            >③ 「Friendly Fire」攻撃の公表 — 自律承認モードの死角 🚨</strong
           >
           — AI Now Instituteが公表した攻撃手法「Friendly Fire」は、Claude
           CodeやOpenAI
@@ -108,7 +128,7 @@
           Actionのサプライチェーン汚染や、50万以上のOSSデプロイに影響する「GuardFall」シェルインジェクション脆弱性も判明し、7月は業界全体で権限設計の見直しが進んだ月となった。
         </p>
         <p>
-          <strong>③ Cursor、Continueを買収しM&A加速 💰</strong> —
+          <strong>④ Cursor、Continueを買収しM&A加速 💰</strong> —
           CursorがOSSコーディングアシスタント「Continue」（34K
           Stars）を静かに買収（アクハイア）し製品終了、コードベースはコミュニティへ移管。CursorはARR30億ドル（約3000億円）超・評価額は293億ドルから600億ドルへ急伸。同時にSlack連携強化（7月17日）・自動化機能「Automations」・iOS公開ベータを立て続けに投入し、統合と淘汰のフェーズに入った。
         </p>
@@ -126,12 +146,23 @@
             </div>
           </div>
           <div class="tool-card-badges">
-            <span class="badge badge-hot">安定性・安全性アップデート</span>
+            <span class="badge badge-hot">Fable 5復活（7/1）</span>
+            <span class="badge badge-hot">Claude Sonnet 5</span>
             <span class="badge badge-free">EndConversationツール追加</span>
           </div>
           <div class="tool-card-body">
             <h3>📢 7月の主要アップデート</h3>
             <ul>
+              <li>
+                <strong>Fable 5輸出規制解除・全世界復活（7月1日）</strong>:
+                米政府の輸出規制が6月30日付で解除。Pro/Max/Team・一部Enterpriseは週次利用枠の50%までFable
+                5込みで利用可能（以降は利用クレジット経由）
+              </li>
+              <li>
+                <strong>Claude Sonnet 5登場（6月30日）</strong>:
+                Opus級性能をSonnet価格で提供。1Mコンテキスト・128K出力・xhigh推論に対応し、Claude
+                Codeのデフォルトモデル群に追加
+              </li>
               <li>
                 <strong>広範な安定性・安全性アップデート</strong>:
                 Bash/PowerShell実行のより厳格な権限チェック、バックグラウンドセッションのクリーンアップ改善、テレメトリ強化、リモート・プラグインの信頼性向上を一括実施
@@ -198,6 +229,10 @@
               <li>
                 <strong>サイドチャット追加</strong>:
                 メインチャットと並行して動く独立エージェント会話。後から見返し可能
+              </li>
+              <li>
+                <strong>Grok 4.5との連携</strong>: xAIが7月8日公開したGrok
+                4.5（V9-Medium）はCursorのコーディングデータで学習された経緯があり、モデル選択肢としても提供
               </li>
             </ul>
             <h3>💰 経営指標</h3>
@@ -268,7 +303,10 @@
             <ul>
               <li>
                 <strong>Kimi K2.7 Code一般提供開始</strong>:
-                オープンウェイトモデルが正式ラインナップ入り
+                オープンウェイトモデルが正式ラインナップ入り。7月16日には後継の<strong
+                  >Kimi K3</strong
+                >（2.8兆パラメータ・1Mコンテキスト）がMoonshot
+                AIから公開され、オープンウェイト版は7月27日提供予定
               </li>
               <li>
                 <strong>Copilot Vision GA</strong>:
@@ -403,14 +441,14 @@
               <tr>
                 <td class="tool-name">Claude Code</td>
                 <td>$20〜$200</td>
-                <td>安定性・安全性アップデート一括実施</td>
+                <td>Fable 5復活・Sonnet 5追加・安全性アップデート</td>
                 <td>87.6% ✅ #1</td>
                 <td>EndConversation追加・GitHub Action汚染対応済み</td>
               </tr>
               <tr>
                 <td class="tool-name">Cursor</td>
                 <td>Free〜$200</td>
-                <td>Continue買収・Automations新設</td>
+                <td>Continue買収・Grok 4.5対応・Automations新設</td>
                 <td>79.8% (Multilingual)</td>
                 <td>ARR$3B超・評価額$60B・iOS公開ベータ</td>
               </tr>

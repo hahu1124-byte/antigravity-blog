@@ -1,20 +1,36 @@
 <p>
-  前回（第10回）は2026年6月22日。その後4週間で、AI開発ツール業界は「信頼性」を根底から問われる局面に入りました。<strong
-    >MCP最大改訂・「Friendly Fire」攻撃によるセキュリティ危機・Cursorの
-    Continue買収</strong
+  前回（第10回）は2026年6月22日。その後4週間で、AI開発ツール業界は基盤モデルの総入れ替えと「信頼性」を根底から問われる局面に入りました。<strong
+    >Fable 5復活・GPT-5.6・Grok 4.5・Kimi
+    K3の基盤モデル世代交代、MCP最大改訂・「Friendly
+    Fire」攻撃によるセキュリティ危機、Cursorの Continue買収</strong
   >——第11回はこの1ヶ月をまとめます。
 </p>
 
-<h2>🔥 7月の3大トピック</h2>
+<h2>🔥 7月の4大トピック</h2>
 
-<h3>📡 ① MCP 2026-07-28仕様リリース候補 — プロトコル最大の改訂</h3>
+<h3>
+  🌋 ① 基盤モデル世代交代ラッシュ — Fable 5復活・GPT-5.6・Grok 4.5・Kimi K3
+</h3>
+<p>
+  7月上旬だけで基盤モデルが総入れ替わりしました。米政府の輸出規制が解除され<strong
+    >Fable 5が7月1日に全世界復活</strong
+  >（6月30日には<strong>Claude Sonnet 5</strong
+  >もOpus級性能をSonnet価格で提供開始）。7月8日に<strong>xAIがGrok 4.5</strong
+  >を公開（Cursorのコーディングデータで学習したV9-Medium、$2/$6の低価格）。7月9日には<strong>OpenAIがGPT-5.6ファミリー</strong>（Luna/Terra/Sol）を発表し、最上位のSolはFable
+  5をスコアで2.8点上回りつつ、トークン半分以下・時間半分以下・コスト1/3を実現。極めつけは7月16日、中国Moonshot
+  AIが<strong>Kimi K3</strong
+  >（2.8兆パラメータ・1Mコンテキスト）を公開し、Frontend Code ArenaでFable
+  5を上回る首位を獲得しました。オープンウェイト版は7月27日公開予定です。
+</p>
+
+<h3>📡 ② MCP 2026-07-28仕様リリース候補 — プロトコル最大の改訂</h3>
 <p>
   発表以来最大級の見直しとなるRCが公開されました。Streamable
   HTTPからセッション概念を撤廃（Mcp-Session-Idヘッダー廃止）し、通常のHTTPインフラだけでスケールする「ステートレスコア」へ移行。初期化ハンドシェイクも撤廃され、サーバーがサンドボックス化されたHTML
   UIを配信できる「MCP Apps」が新設されました。正式仕様は7月28日公開です。
 </p>
 
-<h3>🚨 ② 「Friendly Fire」攻撃の公表 — 自律承認モードの死角</h3>
+<h3>🚨 ③ 「Friendly Fire」攻撃の公表 — 自律承認モードの死角</h3>
 <p>
   AI Now Instituteが公表した攻撃手法「Friendly Fire」は、Claude CodeやOpenAI
   Codexが自律モードで自分自身のコマンドを承認してしまう設計を悪用するもの。本来「信頼できないコードを検査する」役目のエージェント自身が侵入経路になり得ることが実証されました。同時期にClaude
@@ -22,7 +38,7 @@
   Actionのサプライチェーン汚染、50万以上のOSSデプロイに影響する「GuardFall」脆弱性も発覚し、7月は業界全体で権限設計の見直しが進んだ月となりました。
 </p>
 
-<h3>💰 ③ Cursor、Continueを買収しM&A加速</h3>
+<h3>💰 ④ Cursor、Continueを買収しM&A加速</h3>
 <p>
   CursorがOSSコーディングアシスタント「Continue」（34K
   Stars）を買収し製品終了、コードベースはコミュニティへ移管。CursorはARR30億ドル超・評価額は293億ドルから600億ドルへ急伸しました。同時にAutomations・iOS公開ベータ・Slack連携強化を投入し、統合と淘汰のフェーズに入っています。
@@ -41,12 +57,12 @@
     <tbody>
       <tr>
         <td><strong>Claude Code</strong></td>
-        <td>安定性・安全性アップデート一括実施。EndConversation追加</td>
+        <td>Fable 5復活（7/1）・Sonnet 5追加・安全性アップデート</td>
         <td>✅ SWE-bench 87.6% #1。当サイト本番稼働中</td>
       </tr>
       <tr>
         <td><strong>Cursor</strong></td>
-        <td>Continue買収・Automations新設・iOS公開ベータ</td>
+        <td>Continue買収・Grok 4.5対応・Automations新設</td>
         <td>💰 ARR$3B超・評価額$60B</td>
       </tr>
       <tr>
@@ -122,7 +138,7 @@
   をご覧ください。
 </p>
 
-<h2>📊 5大トレンド — 信頼性の再定義</h2>
+<h2>📊 6大トレンド — 信頼性の再定義</h2>
 <div class="table-scroll">
   <table>
     <thead>
@@ -135,6 +151,14 @@
     <tbody>
       <tr>
         <td>01</td>
+        <td><strong>基盤モデル世代交代ラッシュ</strong></td>
+        <td>
+          Fable 5復活・Sonnet 5・GPT-5.6 Sol・Grok 4.5・Kimi
+          K3が4週間で総入れ替わり
+        </td>
+      </tr>
+      <tr>
+        <td>02</td>
         <td><strong>MCP最大改訂</strong></td>
         <td>
           ステートレスコア化・ハンドシェイク撤廃・MCP
@@ -142,21 +166,21 @@
         </td>
       </tr>
       <tr>
-        <td>02</td>
+        <td>03</td>
         <td><strong>エージェントセキュリティ危機</strong></td>
         <td>
           Friendly Fire・GitHub Action汚染・GuardFall・VulMaskが立て続けに発覚
         </td>
       </tr>
       <tr>
-        <td>03</td>
+        <td>04</td>
         <td><strong>M&Aによる淘汰・統合</strong></td>
         <td>
           CursorのContinue買収が象徴。ARR3000億円規模の資本力で業界地図が変化
         </td>
       </tr>
       <tr>
-        <td>04</td>
+        <td>05</td>
         <td><strong>マルチモーダル化</strong></td>
         <td>
           Copilot Vision GA・Kimi K2.7
@@ -164,7 +188,7 @@
         </td>
       </tr>
       <tr>
-        <td>05</td>
+        <td>06</td>
         <td><strong>OpenCode継続成長</strong></td>
         <td>
           182K
@@ -179,8 +203,12 @@
   <a href="/lab/ai-trends/v10/">AI開発トレンド 第10回</a> をご覧ください。
 </p>
 
-<h2>🔑 第11回の4断層</h2>
+<h2>🔑 第11回の5断層</h2>
 <ul>
+  <li>
+    <strong>モデル断層</strong>: Fable 5復活からKimi
+    K3公開までわずか半月で「最強モデル」の座が入れ替わり続け、単一モデルへの最適化がリスクになる時代に
+  </li>
   <li>
     <strong>信頼断層</strong>:
     「エージェントの自律承認は信用できるか」が初めて業界全体の議題に。Friendly
@@ -202,6 +230,11 @@
 
 <h2>🎯 第11回の結論</h2>
 <ul>
+  <li>
+    <strong>基盤モデルの選び方</strong>: 「今の最強」に固定せず、Fable
+    5・GPT-5.6 Sol・Grok 4.5・Kimi
+    K3を用途別に使い分ける、あるいはOpenCode等モデル非依存ツールで切り替えコストを下げておくのが得策
+  </li>
   <li>
     <strong>当面の推奨体制</strong>:
     自律承認フローの権限設計を必ず点検した上でClaude Code / Devin Security
