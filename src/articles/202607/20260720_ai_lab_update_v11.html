@@ -1,0 +1,235 @@
+<p>
+  前回（第10回）は2026年6月22日。その後4週間で、AI開発ツール業界は「信頼性」を根底から問われる局面に入りました。<strong
+    >MCP最大改訂・「Friendly Fire」攻撃によるセキュリティ危機・Cursorの
+    Continue買収</strong
+  >——第11回はこの1ヶ月をまとめます。
+</p>
+
+<h2>🔥 7月の3大トピック</h2>
+
+<h3>📡 ① MCP 2026-07-28仕様リリース候補 — プロトコル最大の改訂</h3>
+<p>
+  発表以来最大級の見直しとなるRCが公開されました。Streamable
+  HTTPからセッション概念を撤廃（Mcp-Session-Idヘッダー廃止）し、通常のHTTPインフラだけでスケールする「ステートレスコア」へ移行。初期化ハンドシェイクも撤廃され、サーバーがサンドボックス化されたHTML
+  UIを配信できる「MCP Apps」が新設されました。正式仕様は7月28日公開です。
+</p>
+
+<h3>🚨 ② 「Friendly Fire」攻撃の公表 — 自律承認モードの死角</h3>
+<p>
+  AI Now Instituteが公表した攻撃手法「Friendly Fire」は、Claude CodeやOpenAI
+  Codexが自律モードで自分自身のコマンドを承認してしまう設計を悪用するもの。本来「信頼できないコードを検査する」役目のエージェント自身が侵入経路になり得ることが実証されました。同時期にClaude
+  Code GitHub
+  Actionのサプライチェーン汚染、50万以上のOSSデプロイに影響する「GuardFall」脆弱性も発覚し、7月は業界全体で権限設計の見直しが進んだ月となりました。
+</p>
+
+<h3>💰 ③ Cursor、Continueを買収しM&A加速</h3>
+<p>
+  CursorがOSSコーディングアシスタント「Continue」（34K
+  Stars）を買収し製品終了、コードベースはコミュニティへ移管。CursorはARR30億ドル超・評価額は293億ドルから600億ドルへ急伸しました。同時にAutomations・iOS公開ベータ・Slack連携強化を投入し、統合と淘汰のフェーズに入っています。
+</p>
+
+<h2>🛠️ AI開発ツール — 第10回（2026年7月20日時点）</h2>
+<div class="table-scroll">
+  <table>
+    <thead>
+      <tr>
+        <th>ツール</th>
+        <th>7月の主要変化</th>
+        <th>評価</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Claude Code</strong></td>
+        <td>安定性・安全性アップデート一括実施。EndConversation追加</td>
+        <td>✅ SWE-bench 87.6% #1。当サイト本番稼働中</td>
+      </tr>
+      <tr>
+        <td><strong>Cursor</strong></td>
+        <td>Continue買収・Automations新設・iOS公開ベータ</td>
+        <td>💰 ARR$3B超・評価額$60B</td>
+      </tr>
+      <tr>
+        <td><strong>Devin Desktop</strong></td>
+        <td>Devin Security Swarm公開。Cascade完全EOL</td>
+        <td>🔐 セキュリティ強化フェーズへ</td>
+      </tr>
+      <tr>
+        <td><strong>GitHub Copilot</strong></td>
+        <td>Copilot Vision GA・Kimi K2.7 Code GA</td>
+        <td>✅ マルチモーダル化・企業導入強化</td>
+      </tr>
+      <tr>
+        <td><strong>Antigravity 2.0</strong></td>
+        <td>起動不具合修正・キュー機能追加</td>
+        <td>🔄 安定化フェーズ継続</td>
+      </tr>
+      <tr>
+        <td><strong>OpenCode</strong></td>
+        <td>182K Stars・8M開発者へ成長継続</td>
+        <td>🚀 OSSコーディングエージェント最多</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  詳細は
+  <a href="/lab/ai-tools/v10/">AI開発ツール比較 第10回</a> をご覧ください。
+</p>
+
+<h2>👤 AI開発者ピックアップ — 「作る側」から「検証する側」へ</h2>
+<div class="table-scroll">
+  <table>
+    <thead>
+      <tr>
+        <th>プロジェクト/人物</th>
+        <th>動向</th>
+        <th>意味</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>OpenCode</strong></td>
+        <td>182K+★・8M開発者</td>
+        <td>モデル非依存設計が標準として定着</td>
+      </tr>
+      <tr>
+        <td><strong>AI Now Institute</strong></td>
+        <td>「Friendly Fire」攻撃を公表</td>
+        <td>自律承認モードの死角を実証。セキュリティ研究者の存在感拡大</td>
+      </tr>
+      <tr>
+        <td><strong>GuardFall発見コミュニティ</strong></td>
+        <td>シェルインジェクション設計欠陥を公表</td>
+        <td>50万+ OSSデプロイに影響する欠陥を可視化</td>
+      </tr>
+      <tr>
+        <td><strong>Cline</strong></td>
+        <td>58K+★</td>
+        <td>Continue買収後、独立系OSSとして相対的地位上昇</td>
+      </tr>
+      <tr>
+        <td><strong>Goose</strong></td>
+        <td>32K+★</td>
+        <td>MCP 2026-07-28対応を財団主導で計画的に準備</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  詳細は
+  <a href="/lab/ai-developers/v10/">AI開発者ピックアップ 第10回</a>
+  をご覧ください。
+</p>
+
+<h2>📊 5大トレンド — 信頼性の再定義</h2>
+<div class="table-scroll">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>トレンド</th>
+        <th>インパクト</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>01</td>
+        <td><strong>MCP最大改訂</strong></td>
+        <td>
+          ステートレスコア化・ハンドシェイク撤廃・MCP
+          Apps新設。プロトコル発表以来最大の書き換え
+        </td>
+      </tr>
+      <tr>
+        <td>02</td>
+        <td><strong>エージェントセキュリティ危機</strong></td>
+        <td>
+          Friendly Fire・GitHub Action汚染・GuardFall・VulMaskが立て続けに発覚
+        </td>
+      </tr>
+      <tr>
+        <td>03</td>
+        <td><strong>M&Aによる淘汰・統合</strong></td>
+        <td>
+          CursorのContinue買収が象徴。ARR3000億円規模の資本力で業界地図が変化
+        </td>
+      </tr>
+      <tr>
+        <td>04</td>
+        <td><strong>マルチモーダル化</strong></td>
+        <td>
+          Copilot Vision GA・Kimi K2.7
+          GAで画像/PDF入力・オープンウェイトモデルが標準機能に
+        </td>
+      </tr>
+      <tr>
+        <td>05</td>
+        <td><strong>OpenCode継続成長</strong></td>
+        <td>
+          182K
+          Stars・8M開発者。セキュリティ危機が皮肉にもOSS・ローカル完結設計への追い風に
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  詳細は
+  <a href="/lab/ai-trends/v10/">AI開発トレンド 第10回</a> をご覧ください。
+</p>
+
+<h2>🔑 第11回の4断層</h2>
+<ul>
+  <li>
+    <strong>信頼断層</strong>:
+    「エージェントの自律承認は信用できるか」が初めて業界全体の議題に。Friendly
+    Fireが突きつけた問いは根本的
+  </li>
+  <li>
+    <strong>プロトコル断層</strong>:
+    MCPのステートレス化により、旧セッション前提の実装は大規模な書き換えが必要に
+  </li>
+  <li>
+    <strong>資本断層</strong>:
+    中堅OSSプロジェクトの生存戦略が「財団移管」（Goose）と「大手買収」（Continue）の二極化へ
+  </li>
+  <li>
+    <strong>検証断層</strong>:
+    「エージェントを作れる」から「エージェントの弱点を見抜ける」へ、開発者に求められるスキルの重心が移動
+  </li>
+</ul>
+
+<h2>🎯 第11回の結論</h2>
+<ul>
+  <li>
+    <strong>当面の推奨体制</strong>:
+    自律承認フローの権限設計を必ず点検した上でClaude Code / Devin Security
+    Swarm等のセキュリティ対応済みツールを使う。無審査の自律承認は避ける
+  </li>
+  <li>
+    <strong>Friendly Fireの教訓</strong>:
+    「エージェントが自分のコマンドを承認する」設計は便利さとリスクが表裏一体。人間のレビューを外す判断は慎重に
+  </li>
+  <li>
+    <strong>MCP移行の実務</strong>:
+    自作MCPサーバーがある場合、セッション・ハンドシェイク撤廃を前提に10週間の移行猶予内での対応計画を立てる
+  </li>
+  <li>
+    <strong>OpenCodeの意味</strong>:
+    セキュリティ危機の中でOSS・ローカル完結設計の価値がさらに上昇。182K
+    Stars・8M開発者という数字はその裏付け
+  </li>
+</ul>
+
+<p>
+  当サイトはClaude
+  Codeで開発中。7月の安定性・安全性アップデートの恩恵を受け、引き続き快適に稼働しています。次回もお楽しみに！
+</p>
+
+<p><strong>LAB第10回の全ページ:</strong></p>
+<ul>
+  <li><a href="/lab/ai-tools/v10/">🛠️ AI開発ツール比較 第10回</a></li>
+  <li><a href="/lab/ai-developers/v10/">👤 AI開発者ピックアップ 第10回</a></li>
+  <li><a href="/lab/ai-trends/v10/">📊 AI開発トレンド 第10回</a></li>
+</ul>

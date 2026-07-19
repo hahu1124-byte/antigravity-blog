@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI開発トレンド 2026 第10回 | LAB | Gravity Portal</title>
+    <meta
+      name="description"
+      content="AI開発トレンド 第10回（2026年7月更新）。MCP最大改訂・「Friendly Fire」攻撃でエージェントセキュリティ危機・Cursor Continue買収でM&A加速・マルチモーダル化・OpenCode継続成長。"
+    />
+    <meta
+      property="og:title"
+      content="AI開発トレンド 2026 第10回 — MCP大改訂・セキュリティ危機・M&A加速"
+    />
+    <meta
+      property="og:description"
+      content="MCP 2026-07-28仕様がステートレス化。Friendly Fire攻撃で自律承認モードの死角が露見。CursorはContinueを買収しARR3000億円規模へ。5大トレンドで7月を総括。"
+    />
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://www.antigravity-portal.com/lab/ai-trends/v10/"
+    />
+    <meta property="og:site_name" content="Gravity Portal" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link
+      rel="canonical"
+      href="https://www.antigravity-portal.com/lab/ai-trends/v10/"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css"
+    />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("gp-theme");
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
+      🌙
+    </button>
+    <header class="lab-header">
+      <a href="/lab/" class="lab-back">← LAB</a>
+      <h1 class="lab-title">📊 AI開発トレンド 第10回</h1>
+    </header>
+    <main class="lab-content">
+      <section class="lab-hero">
+        <div class="lab-hero-icon">📈</div>
+        <h1>AI開発トレンド — MCP大改訂・セキュリティ危機・M&A加速 第10回</h1>
+        <p>
+          第9回（7月22日）から4週間、AI開発業界は「信頼性の再定義」を迫られました。<br />
+          MCPが仕様発表以来最大の改訂でステートレスコアへ移行。<br />
+          自律承認モードを突く「Friendly Fire」攻撃が業界の前提を揺さぶり。<br />
+          CursorはOSSのContinueを買収し、M&Aによる淘汰・統合フェーズが本格化しています。
+        </p>
+        <div class="lab-hero-meta">
+          <span>📅 2026年7月20日更新</span>
+          <span>📰 5大トレンド</span>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>📈 トレンド1：MCP最大改訂 — ステートレスコアへの移行</h2>
+        <div class="trend-card">
+          <div class="trend-card-header">
+            <div class="trend-number">01</div>
+            <div class="trend-info">
+              <h3>MCP 2026-07-28仕様リリース候補</h3>
+              <div class="trend-subtitle">
+                発表以来最大の改訂 — セッション・ハンドシェイクを撤廃
+              </div>
+            </div>
+          </div>
+          <div class="trend-card-body">
+            <p>
+              2026-07-28に正式公開予定のMCP新仕様のリリース候補（RC）が公開されました。プロトコル発表以来<strong>最大級の書き換え</strong>です。
+            </p>
+            <h3>🔑 何が変わったか</h3>
+            <ul>
+              <li>
+                <strong>セッション撤廃（SEP-2567）</strong>: Streamable
+                HTTPトランスポートからプロトコルレベルのセッション概念とMcp-Session-Idヘッダーを削除。スティッキーセッションや共有セッションストアが不要になり、通常のラウンドロビンLB上でスケール可能に
+              </li>
+              <li>
+                <strong>初期化ハンドシェイク撤廃（SEP-2575）</strong>:
+                これまで必須だった<code>initialize/initialized</code>の2段階ハンドシェイクを完全削除
+              </li>
+              <li>
+                <strong>MCP Apps新設（SEP-1865）</strong>:
+                サーバーがサンドボックス化されたiframe内でインタラクティブなHTML
+                UIを配信可能に。ツールがUIテンプレートを事前宣言し、ホスト側でプリフェッチ・キャッシュ・セキュリティレビューができる設計
+              </li>
+              <li>
+                <strong>Tasksの拡張機能化</strong>:
+                2025年11月に実験的コア機能として導入されたTasksは、本番利用の知見を踏まえコア仕様から「拡張機能」へ位置づけを変更
+              </li>
+            </ul>
+            <h3>🌍 業界への影響</h3>
+            <ul>
+              <li>
+                SDK各社に10週間の移行猶予。Tier 1
+                SDKはこの期間内の対応が求められる
+              </li>
+              <li>
+                公式レジストリサーバー数・SDK月次DLとも6月から引き続き増加基調
+              </li>
+              <li>
+                Goose等、財団主導ガバナンスのプロジェクトが計画的な追従を進行中
+              </li>
+            </ul>
+            <div class="trend-impact">
+              <span class="trend-impact-label">業界インパクト</span>
+              <div class="trend-impact-bar">
+                <div class="trend-impact-fill trend-impact-100"></div>
+              </div>
+              <span class="trend-impact-score">10/10</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>📈 トレンド2：AIコーディングエージェント、セキュリティ危機の夏</h2>
+        <div class="trend-card">
+          <div class="trend-card-header">
+            <div class="trend-number">02</div>
+            <div class="trend-info">
+              <h3>「Friendly Fire」攻撃・サプライチェーン汚染・GuardFall</h3>
+              <div class="trend-subtitle">
+                自律承認モードの死角が一気に露見した1ヶ月
+              </div>
+            </div>
+          </div>
+          <div class="trend-card-body">
+            <p>
+              7月は業界全体にとって「エージェントの自律性は信頼できるか」を突きつけられた月になりました。
+            </p>
+            <ul>
+              <li>
+                <strong>Friendly Fire攻撃（AI Now Institute）</strong>: Claude
+                CodeやOpenAI
+                Codexが自律モードで自分自身のコマンドを承認してしまう設計を悪用。「サードパーティコードを検査するはずのエージェントが侵入経路になる」ことを実証
+              </li>
+              <li>
+                <strong>Claude Code GitHub Actionのサプライチェーン汚染</strong
+                >:
+                CI/CDに組み込まれるActionの信頼性が問題視され、署名・権限検証の強化が急務に
+              </li>
+              <li>
+                <strong>GuardFall脆弱性</strong>:
+                50万以上のOSSデプロイに影響する普遍的シェルインジェクション設計欠陥が発覚
+              </li>
+              <li>
+                <strong>VulMask攻撃</strong>:
+                悪意あるコードを「脆弱性っぽいコード」に偽装してスキャナー・自動レビュアーを回避する手法が公表
+              </li>
+              <li>
+                <strong>各社の対応</strong>: DevinはSecurity
+                Swarm・脆弱性修復プログラムを公開、Claude
+                Codeは権限チェック強化を含む安定性・安全性アップデートを一括実施
+              </li>
+            </ul>
+            <div class="trend-impact">
+              <span class="trend-impact-label">業界インパクト</span>
+              <div class="trend-impact-bar">
+                <div class="trend-impact-fill trend-impact-100"></div>
+              </div>
+              <span class="trend-impact-score">10/10</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>
+          📈 トレンド3：M&Aによる淘汰・統合フェーズ — Cursor、Continueを買収
+        </h2>
+        <div class="trend-card">
+          <div class="trend-card-header">
+            <div class="trend-number">03</div>
+            <div class="trend-info">
+              <h3>CursorがOSSのContinueを買収・製品終了</h3>
+              <div class="trend-subtitle">
+                ARR30億ドル・評価額600億ドルの資本力で業界地図を塗り替え
+              </div>
+            </div>
+          </div>
+          <div class="trend-card-body">
+            <p>
+              CursorはOSSコーディングアシスタント「Continue」（34K
+              Stars）を静かに買収し、製品を終了してコードベースをコミュニティへ移管しました。
+            </p>
+            <ul>
+              <li>
+                <strong>Cursorの経営指標</strong>:
+                ARR30億ドル超（2026年初頭時点）、評価額は293億ドルから600億ドルへ急伸
+              </li>
+              <li>
+                <strong>同時投入した機能群</strong>:
+                Automations（コードベース変更・Slack・タイマー起点の自動エージェント起動）、Cursor
+                for iOS公開ベータ、Slack連携強化
+              </li>
+              <li>
+                <strong>業界への示唆</strong>:
+                資本力を持つ大手が中堅OSSプロジェクトを次々に吸収する構図。単独OSSプロジェクトの存続戦略として「財団移管」（Goose）と「大手買収」（Continue）の二極化が明確になった
+              </li>
+            </ul>
+            <div class="trend-impact">
+              <span class="trend-impact-label">業界インパクト</span>
+              <div class="trend-impact-bar">
+                <div class="trend-impact-fill trend-impact-80"></div>
+              </div>
+              <span class="trend-impact-score">8/10</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>
+          📈 トレンド4：マルチモーダル化の加速 — Copilot Vision GA・Kimi K2.7
+        </h2>
+        <div class="trend-card">
+          <div class="trend-card-header">
+            <div class="trend-number">04</div>
+            <div class="trend-info">
+              <h3>コード以外の入力を扱う機能が続々GA</h3>
+              <div class="trend-subtitle">
+                画像・PDF入力、オープンウェイトモデルの正式採用
+              </div>
+            </div>
+          </div>
+          <div class="trend-card-body">
+            <ul>
+              <li>
+                <strong>GitHub Copilot Vision GA</strong>:
+                画像・PDFをチャットに直接添付し、コードと合わせて推論可能に
+              </li>
+              <li>
+                <strong>Kimi K2.7 Code GA</strong>:
+                オープンウェイトモデルがCopilotの正式ラインナップ入り。モデル選択の多様化が進行
+              </li>
+              <li>
+                <strong>VS Code：Agentic Browser Tools GA</strong>:
+                エージェントがブラウザ操作・スクリーンショット取得・Webアプリ検証をIDE内で完結
+              </li>
+              <li>
+                コードだけでなくUI・ドキュメント・ブラウザ状態まで扱える「マルチモーダルエージェント」が実用段階に入った
+              </li>
+            </ul>
+            <div class="trend-impact">
+              <span class="trend-impact-label">業界インパクト</span>
+              <div class="trend-impact-bar">
+                <div class="trend-impact-fill trend-impact-70"></div>
+              </div>
+              <span class="trend-impact-score">7/10</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>📈 トレンド5：OpenCode継続成長 — モデル非依存が「標準」へ定着</h2>
+        <div class="trend-card">
+          <div class="trend-card-header">
+            <div class="trend-number">05</div>
+            <div class="trend-info">
+              <h3>182K Stars・8M開発者、成長ペースは衰えず</h3>
+              <div class="trend-subtitle">
+                セキュリティ危機がOSS・ローカル完結設計への追い風に
+              </div>
+            </div>
+          </div>
+          <div class="trend-card-body">
+            <p>
+              前回160K Starsから1ヶ月で182K Starsへ。Friendly
+              Fire攻撃等でエージェントの自律承認リスクが可視化されたことが、皮肉にも「自分の目で検証できる」OSS設計への追い風となりました。
+            </p>
+            <ul>
+              <li>
+                <strong>OpenCode</strong>: 182K
+                Stars・8M月間アクティブ開発者。75+プロバイダー・エアギャップ対応で規制業種の採用が継続拡大
+              </li>
+              <li>
+                <strong>LLM AI Router等の普及</strong>:
+                特定モデル・特定ベンダーが問題を起こしても即座に切り替えられる設計が「当たり前」の水準に
+              </li>
+              <li>
+                <strong>ローカルLLM運用の一般化</strong>:
+                Ollama等と組み合わせたエアギャップ環境構築が、セキュリティ意識の高い開発者の標準スキルに
+              </li>
+            </ul>
+            <div class="trend-impact">
+              <span class="trend-impact-label">業界インパクト</span>
+              <div class="trend-impact-bar">
+                <div class="trend-impact-fill trend-impact-80"></div>
+              </div>
+              <span class="trend-impact-score">8/10</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>📊 2026年7月の市場全景</h2>
+        <div class="market-overview">
+          <div class="market-stats">
+            <div class="market-stat">
+              <div class="market-stat-value">182K</div>
+              <div class="market-stat-label">OpenCode Stars</div>
+            </div>
+            <div class="market-stat market-stat-arrow">
+              <div class="market-stat-value">→</div>
+            </div>
+            <div class="market-stat market-stat-highlight">
+              <div class="market-stat-value">50万+</div>
+              <div class="market-stat-label">GuardFall影響デプロイ数</div>
+            </div>
+            <div class="market-stat market-stat-arrow">
+              <div class="market-stat-value">→</div>
+            </div>
+            <div class="market-stat">
+              <div class="market-stat-value">$60B</div>
+              <div class="market-stat-label">Cursor評価額</div>
+            </div>
+          </div>
+          <p>
+            2026年7月が示したのは、<strong>「エージェントの自律性」がもろ刃の剣になったこと</strong>。MCPのステートレス化は運用スケールを容易にし、Cursorの買収攻勢は市場統合を加速させました。一方でFriendly
+            Fire・GuardFall・VulMaskといった一連の発見は、「自律的に動くエージェントほど、検証プロセスなしには信頼できない」という当たり前の原則を業界全体に再認識させています。
+          </p>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>📝 まとめ</h2>
+        <p>
+          2026年7月のAI開発トレンドを一言で表すと：<strong>「信頼性の再定義」</strong>。MCPのステートレス化・Copilot
+          Visionのマルチモーダル化は「できることを増やす」方向の進化ですが、Friendly
+          Fire・GuardFallの発覚は「できることが増えるほど検証が必要になる」という逆説を突きつけました。次の四半期は、機能拡張とセキュリティ検証のどちらに投資配分するかが各社の差別化ポイントになるでしょう。
+        </p>
+        <p>
+          →
+          <a href="/blog/202607/20260720_ai_lab_update_v11/"
+            >📋
+            LAB第11回まとめ記事でツール比較・開発者・トレンドを一気に俯瞰する</a
+          >
+        </p>
+      </section>
+    </main>
+    <footer class="lab-footer">
+      <p>© 2026 Gravity Portal — LAB</p>
+      <nav class="lab-footer-nav">
+        <a href="/">🏠 TOP</a>
+        <a href="/lab/">🔬 LAB</a>
+        <a href="/blog/202607/20260720_ai_lab_update_v11/">📋 第11回まとめ</a>
+        <a href="/lab/ai-tools/v10/">🛠️ ツール 第10回</a>
+        <a href="/lab/ai-developers/v10/">👤 開発者 第10回</a>
+      </nav>
+    </footer>
+    <script>
+      (function () {
+        var btn = document.getElementById("themeToggle");
+        function update() {
+          var t = document.documentElement.getAttribute("data-theme");
+          btn.textContent = t === "light" ? "🌙" : "☀️";
+        }
+        update();
+        btn.addEventListener("click", function () {
+          var cur = document.documentElement.getAttribute("data-theme");
+          var next = cur === "light" ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", next);
+          try {
+            localStorage.setItem("gp-theme", next);
+          } catch (e) {}
+          update();
+        });
+      })();
+    </script>
+  </body>
+</html>
