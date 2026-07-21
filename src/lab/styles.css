@@ -1241,24 +1241,26 @@ a:hover {
     font-weight: 600;
 }
 
-/* メインコンテナ */
+/* メインコンテナ（高さ統一） */
 .wm-container {
     display: grid;
-    grid-template-columns: 1.5fr 1fr;
+    grid-template-columns: 1.4fr 1fr;
     gap: 1.5rem;
     margin-bottom: 2rem;
+    align-items: stretch;
 }
 
-/* マップビューポート */
+/* マップビューポート（右側のサイドパネルと縦幅を等しく揃える） */
 .wm-map-viewport {
     position: relative;
     width: 100%;
+    height: 100%;
+    min-height: 580px;
     border-radius: 16px;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
     background: #0d1117;
-    aspect-ratio: 16 / 10;
 }
 
 .wm-map-stage {
@@ -1359,9 +1361,10 @@ a:hover {
     z-index: 5;
 }
 
-.wm-pin:hover {
+.wm-pin:hover,
+.wm-pin.active {
     transform: translate(-50%, -50%) scale(1.18);
-    z-index: 10;
+    z-index: 999 !important;
 }
 
 .wm-pin-icon {
@@ -1398,18 +1401,55 @@ a:hover {
     100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
 }
 
+/* 個別ラベル位置の設定 */
 .wm-pin-label {
-    background: rgba(13, 17, 23, 0.85);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: absolute;
+    background: rgba(13, 17, 23, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     color: #ffffff;
-    font-size: 0.7rem;
-    padding: 0.15rem 0.45rem;
-    border-radius: 4px;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
     white-space: nowrap;
-    margin-top: 2px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    backdrop-filter: blur(4px);
-    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    transition: opacity 0.25s ease, transform 0.2s ease, background 0.2s ease;
+    pointer-events: none;
+}
+
+/* ラベル方向別の配置 */
+.wm-pin.pos-top .wm-pin-label {
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-6px);
+}
+
+.wm-pin.pos-bottom .wm-pin-label {
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(6px);
+}
+
+.wm-pin.pos-left .wm-pin-label {
+    right: 100%;
+    top: 50%;
+    transform: translateY(-50%) translateX(-6px);
+}
+
+.wm-pin.pos-right .wm-pin-label {
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%) translateX(6px);
+}
+
+/* ラベル非表示モード時の挙動（ホバー時・選択時のみ表示） */
+.wm-pin.hide-label .wm-pin-label {
+    opacity: 0;
+}
+
+.wm-pin.hide-label:hover .wm-pin-label,
+.wm-pin.hide-label.active .wm-pin-label {
+    opacity: 1;
 }
 
 .wm-pin:hover .wm-pin-label,
@@ -1418,9 +1458,10 @@ a:hover {
     border-color: #ffffff;
     color: #ffffff;
     font-weight: 600;
+    box-shadow: 0 0 14px rgba(98, 0, 234, 0.6);
 }
 
-/* サイドバー情報パネル */
+/* サイドバー情報パネル（高さ100%統一） */
 .wm-sidebar {
     background: rgba(22, 27, 34, 0.85);
     border: 1px solid var(--lab-border);
@@ -1430,6 +1471,8 @@ a:hover {
     flex-direction: column;
     backdrop-filter: blur(12px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    height: 100%;
+    min-height: 580px;
 }
 
 .wm-sidebar-header {

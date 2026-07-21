@@ -1717,6 +1717,11 @@ async function buildNovelsPages() {
                 <button id="btn-layer-surface" class="wm-btn active" onclick="switchLayer('surface')">🏰 地上構造</button>
                 <button id="btn-layer-underground" class="wm-btn" onclick="switchLayer('underground')">🕳️ 地下排水路・倉庫街</button>
             </div>
+            <div class="wm-control-group">
+                <span class="wm-control-label">ピン表示:</span>
+                <button id="btn-label-all" class="wm-btn active" onclick="switchLabelMode('all')">🏷️ 全表示</button>
+                <button id="btn-label-select" class="wm-btn" onclick="switchLabelMode('select')">🎯 選択中・ホバーのみ</button>
+            </div>
         </div>
 
         <!-- メインマップ＆サイドパネルコンテナ -->
@@ -1750,7 +1755,8 @@ async function buildNovelsPages() {
                     <div class="wm-empty-hint">
                         💡 <strong>操作ヒント:</strong><br>
                         ・「アルデン東部・廃境拡大」で廃城やグラウド周辺にフォーカスできます。<br>
-                        ・「地下排水路・倉庫街」ボタンで、地上と地下の隠し構造が切り替わります。
+                        ・「地下排水路・倉庫街」ボタンで、地上と地下の隠し構造が切り替わります。<br>
+                        ・ピンのラベルが重なる場合は「選択中・ホバーのみ」表示に切り替えられます。
                     </div>
                 </div>
             </aside>
@@ -1764,8 +1770,10 @@ async function buildNovelsPages() {
             nameEn: "Graud City",
             category: "市街・都市",
             layer: "both",
-            coords: { x: 58, y: 42 },
-            zoomCoords: { x: 42, y: 48 },
+            coords: { x: 56, y: 44 },
+            zoomCoords: { x: 38, y: 52 },
+            labelPos: "left",
+            showInWorld: true,
             desc: "ラングリア王国東部の国境に近い主要都市。かつて古い王国の排水路や地下施設が網の目のように張り巡らされており、地上は活気ある市場や書庫棟、商業区が広がる。",
             characters: ["アシュ", "ミラ", "ヴォルフ"],
             episodes: [
@@ -1780,8 +1788,10 @@ async function buildNovelsPages() {
             nameEn: "Underground Warehouses & Sewers",
             category: "地下・遺構",
             layer: "underground",
-            coords: { x: 57, y: 44 },
-            zoomCoords: { x: 40, y: 52 },
+            coords: { x: 55, y: 47 },
+            zoomCoords: { x: 36, y: 58 },
+            labelPos: "bottom",
+            showInWorld: true,
             desc: "グラウド市街の地下深くに眠る巨大な旧排水管網および密輸業者や冒険者が利用する地下倉庫街。魔力バイパスや隠し通路が点在する。",
             characters: ["アシュ", "ミラ", "ドルク"],
             episodes: [
@@ -1796,8 +1806,10 @@ async function buildNovelsPages() {
             nameEn: "Arkane Temple",
             category: "神聖領域・解呪",
             layer: "surface",
-            coords: { x: 61, y: 38 },
-            zoomCoords: { x: 52, y: 36 },
+            coords: { x: 59, y: 38 },
+            zoomCoords: { x: 50, y: 36 },
+            labelPos: "top",
+            showInWorld: true,
             desc: "古の神々の祈りと声が呼応する神秘的な神殿。解呪の儀式や「声の解放段階」と深く連動しており、封石の継承者が訪れる重要拠点。",
             characters: ["アシュ", "神殿の神官たち"],
             episodes: [
@@ -1811,8 +1823,10 @@ async function buildNovelsPages() {
             nameEn: "The Obsidian Wastes",
             category: "危険地帯・黒岩",
             layer: "surface",
-            coords: { x: 68, y: 45 },
-            zoomCoords: { x: 70, y: 50 },
+            coords: { x: 67, y: 47 },
+            zoomCoords: { x: 68, y: 52 },
+            labelPos: "bottom",
+            showInWorld: true,
             desc: "奇妙な黒い岩肌（黒曜石）が延々と連なる死の丘陵地帯。廃魔国跡地（廃境）への入口であり、凶悪な魔物や歪んだ魔力が渦巻く。",
             characters: ["アシュ", "ミラ", "廃境の巡回兵"],
             episodes: [
@@ -1826,8 +1840,10 @@ async function buildNovelsPages() {
             nameEn: "The Demon Realm / Ruined Castle",
             category: "旧魔国・中心地",
             layer: "surface",
-            coords: { x: 76, y: 42 },
-            zoomCoords: { x: 85, y: 44 },
+            coords: { x: 74, y: 40 },
+            zoomCoords: { x: 84, y: 42 },
+            labelPos: "right",
+            showInWorld: true,
             desc: "かつての大魔帝国ダルネインの遺領であり、物語の核心たる「廃城」が鎮座する極限の領域。強力な封印と古代の秘密が眠る。",
             characters: ["アシュ（廃城の王）", "ミラ", "七人の封石の主"],
             episodes: [
@@ -1841,8 +1857,10 @@ async function buildNovelsPages() {
             nameEn: "Central Langria",
             category: "王国・大平原",
             layer: "surface",
-            coords: { x: 48, y: 45 },
-            zoomCoords: { x: 22, y: 50 },
+            coords: { x: 47, y: 53 },
+            zoomCoords: { x: 20, y: 60 },
+            labelPos: "bottom",
+            showInWorld: true,
             desc: "アルデン大陸の中央部に広がる最も肥沃な大平原と、それを統治するラングリア王国の領土。騎士団と貴族政治の中心地。",
             characters: ["王国騎士団", "中央商人組合"],
             episodes: [
@@ -1856,8 +1874,10 @@ async function buildNovelsPages() {
             nameEn: "Auros Isles / Coral Archipelago",
             category: "南方諸島・貿易",
             layer: "surface",
-            coords: { x: 62, y: 72 },
-            zoomCoords: { x: 60, y: 85 },
+            coords: { x: 60, y: 76 },
+            zoomCoords: { x: 58, y: 88 },
+            labelPos: "right",
+            showInWorld: true,
             desc: "アルデン大陸南部のカリン湾を抜けた先に広がる温暖な諸島。遺言石の流通拠点であり、異国船や自由貿易商が集う。",
             characters: ["南方貿易商", "自由冒険者"],
             episodes: [
@@ -1871,8 +1891,10 @@ async function buildNovelsPages() {
             nameEn: "The Sunscald Desert / Wern Continent",
             category: "西の大陸・砂漠",
             layer: "surface",
-            coords: { x: 24, y: 68 },
-            zoomCoords: { x: 10, y: 75 },
+            coords: { x: 20, y: 70 },
+            zoomCoords: { x: 10, y: 78 },
+            labelPos: "bottom",
+            showInWorld: true,
             desc: "ヴェルン大陸南部に広がる広大な白砂漠。専制国家ヴァルディア帝国と対峙するアルタン神聖王国が存在する。",
             characters: ["ヴェルン大陸の使者"],
             episodes: [
@@ -1884,6 +1906,7 @@ async function buildNovelsPages() {
 
         let currentMapMode = "world";
         let currentLayer = "surface";
+        let currentLabelMode = "all";
         let activeLocationId = null;
 
         function renderPins() {
@@ -1895,7 +1918,13 @@ async function buildNovelsPages() {
             if (currentLayer === "underground" && loc.layer === "surface") return;
 
             const pin = document.createElement("div");
-            pin.className = "wm-pin " + (activeLocationId === loc.id ? "active" : "") + " layer-" + loc.layer;
+            const isActive = activeLocationId === loc.id;
+            
+            let pinClasses = ["wm-pin", "pos-" + (loc.labelPos || "top"), "layer-" + loc.layer];
+            if (isActive) pinClasses.push("active");
+            if (currentLabelMode === "select" && !isActive) pinClasses.push("hide-label");
+
+            pin.className = pinClasses.join(" ");
             
             const pos = currentMapMode === "arden" ? loc.zoomCoords : loc.coords;
             pin.style.left = pos.x + "%";
@@ -1988,6 +2017,13 @@ async function buildNovelsPages() {
             overlay.classList.remove("visible");
           }
 
+          renderPins();
+        }
+
+        function switchLabelMode(mode) {
+          currentLabelMode = mode;
+          document.getElementById("btn-label-all").classList.toggle("active", mode === "all");
+          document.getElementById("btn-label-select").classList.toggle("active", mode === "select");
           renderPins();
         }
 
