@@ -1390,7 +1390,12 @@ async function buildTimelineTabsHtml(filePath) {
 
   // preamble をHTML変換
   const preambleHtml = preamble.trim()
-    ? (await remark().use(remarkGfm).use(remarkHtml, { sanitize: false }).process(preamble)).toString()
+    ? (
+        await remark()
+          .use(remarkGfm)
+          .use(remarkHtml, { sanitize: false })
+          .process(preamble)
+      ).toString()
     : "";
 
   // 各セクションのタイトルとHTMLを収集
@@ -1406,18 +1411,24 @@ async function buildTimelineTabsHtml(filePath) {
   }
 
   // 日付セクション（年で始まるもの）を逆順にし、その他（メモ等）は末尾に残す
-  const dateWeeks = weekData.filter(w => /^\d{4}年/.test(w.title));
-  const otherWeeks = weekData.filter(w => !/^\d{4}年/.test(w.title));
+  const dateWeeks = weekData.filter((w) => /^\d{4}年/.test(w.title));
+  const otherWeeks = weekData.filter((w) => !/^\d{4}年/.test(w.title));
   weekData.length = 0;
-  dateWeeks.reverse().forEach(w => weekData.push(w));
-  otherWeeks.forEach(w => weekData.push(w));
+  dateWeeks.reverse().forEach((w) => weekData.push(w));
+  otherWeeks.forEach((w) => weekData.push(w));
 
   const tabButtons = weekData
-    .map((w, i) => `<button class="tl-tab${i === 0 ? " tl-tab-active" : ""}" data-week="${i}">${escapeHtml(w.title)}</button>`)
+    .map(
+      (w, i) =>
+        `<button class="tl-tab${i === 0 ? " tl-tab-active" : ""}" data-week="${i}">${escapeHtml(w.title)}</button>`,
+    )
     .join("");
 
   const tabContents = weekData
-    .map((w, i) => `<div class="tl-content${i === 0 ? " tl-content-active" : ""}" data-week="${i}">${w.html}</div>`)
+    .map(
+      (w, i) =>
+        `<div class="tl-content${i === 0 ? " tl-content-active" : ""}" data-week="${i}">${w.html}</div>`,
+    )
     .join("");
 
   return `
@@ -1453,7 +1464,9 @@ ${tabContents}
 async function buildSettingsPages() {
   const settingsSrcDir = join(NOVELS_SRC_DIR, "settings");
   if (!existsSync(settingsSrcDir)) {
-    console.log("⏭️  src/lab/novels/settings/ なし — 設定詳細ページ生成スキップ");
+    console.log(
+      "⏭️  src/lab/novels/settings/ なし — 設定詳細ページ生成スキップ",
+    );
     return;
   }
 
@@ -1464,7 +1477,10 @@ async function buildSettingsPages() {
     const src = readFileSync(filePath, "utf-8");
     const { content, data } = matter(src);
     const html = (
-      await remark().use(remarkGfm).use(remarkHtml, { sanitize: false }).process(content)
+      await remark()
+        .use(remarkGfm)
+        .use(remarkHtml, { sanitize: false })
+        .process(content)
     ).toString();
     const slug = file.replace(/\.md$/, "");
     settings.push({
@@ -1573,7 +1589,9 @@ async function buildSettingsPages() {
     );
   }
 
-  console.log(`📚 設定詳細ページ生成完了 (settings/index.html + ${settings.length}件の個別ページ)`);
+  console.log(
+    `📚 設定詳細ページ生成完了 (settings/index.html + ${settings.length}件の個別ページ)`,
+  );
 }
 
 async function buildNovelsPages() {
@@ -1584,7 +1602,9 @@ async function buildNovelsPages() {
 
   const introHtml = await mdToHtml(join(NOVELS_SRC_DIR, "intro.md"));
   const structureHtml = await mdToHtml(join(NOVELS_SRC_DIR, "structure.md"));
-  const timelineTabsHtml = await buildTimelineTabsHtml(join(NOVELS_SRC_DIR, "timeline.md"));
+  const timelineTabsHtml = await buildTimelineTabsHtml(
+    join(NOVELS_SRC_DIR, "timeline.md"),
+  );
 
   // --- novels/index.html ---
   const novelsDir = join(OUTPUT_DIR, "lab", "novels");
@@ -1770,9 +1790,9 @@ async function buildNovelsPages() {
             nameEn: "Graud City",
             category: "市街・都市",
             layer: "both",
-            coords: { x: 56, y: 40 },
+            coords: { x: 72, y: 37 },
             labelPos: "left",
-            zoomCoords: { x: 16, y: 54 },
+            zoomCoords: { x: 19, y: 55 },
             zoomLabelPos: "right",
             showInWorld: true,
             showInZoom: true,
@@ -1790,9 +1810,9 @@ async function buildNovelsPages() {
             nameEn: "Underground Warehouses & Sewers",
             category: "地下・遺構",
             layer: "underground",
-            coords: { x: 56, y: 46 },
+            coords: { x: 72, y: 42 },
             labelPos: "bottom",
-            zoomCoords: { x: 22, y: 74 },
+            zoomCoords: { x: 25, y: 66 },
             zoomLabelPos: "right",
             showInWorld: true,
             showInZoom: true,
@@ -1810,9 +1830,9 @@ async function buildNovelsPages() {
             nameEn: "Arkane Temple",
             category: "神聖領域・解呪",
             layer: "surface",
-            coords: { x: 52, y: 32 },
+            coords: { x: 76, y: 39 },
             labelPos: "top",
-            zoomCoords: { x: 16, y: 72 },
+            zoomCoords: { x: 45, y: 58 },
             zoomLabelPos: "top",
             showInWorld: true,
             showInZoom: true,
@@ -1829,9 +1849,9 @@ async function buildNovelsPages() {
             nameEn: "The Obsidian Wastes",
             category: "危険地帯・黒岩",
             layer: "surface",
-            coords: { x: 78, y: 44 },
+            coords: { x: 87, y: 27 },
             labelPos: "bottom",
-            zoomCoords: { x: 36, y: 12 },
+            zoomCoords: { x: 57, y: 27 },
             zoomLabelPos: "bottom",
             showInWorld: true,
             showInZoom: true,
@@ -1844,20 +1864,39 @@ async function buildNovelsPages() {
           },
           {
             id: "demon-realm",
-            name: "廃魔国跡地・廃城（廃境）",
-            nameEn: "The Demon Realm / Ruined Castle",
-            category: "旧魔国・中心地",
+            name: "廃魔国跡地（廃境）",
+            nameEn: "The Demon Realm",
+            category: "旧魔国・無主の地",
             layer: "surface",
-            coords: { x: 78, y: 52 },
+            coords: { x: 84, y: 44 },
             labelPos: "left",
-            zoomCoords: { x: 52, y: 64 },
+            zoomCoords: { x: 70, y: 60 },
             zoomLabelPos: "top",
             showInWorld: true,
             showInZoom: true,
-            desc: "かつての大魔帝国ダルネインの遺領であり、物語の核心たる「廃城」が鎮座する極限の領域。強力な封印と古代の秘密が眠る。",
+            desc: "かつて七代の魔王が支配した大魔帝国ダルネインの遺領。濃度の高い魔力が大地に染み込み、廃城・廃村が点在する。支配者なき無主の地で、竜人・角人族・アウトローが自治的に暮らす。",
+            characters: ["廃境の巡回兵", "廃境の民"],
+            episodes: [
+              { code: "ep50-ep60", title: "廃境突入", text: "魔骨丘陵を越え、無主の地・廃境へ足を踏み入れる。" }
+            ],
+            items: ["魔力溜まり"]
+          },
+          {
+            id: "ruined-castle",
+            name: "廃城（ダルネイン城塞）",
+            nameEn: "Ruined Castle (Dalnain Fortress)",
+            category: "廃城・封石の間",
+            layer: "surface",
+            coords: { x: 88, y: 45 },
+            labelPos: "right",
+            zoomCoords: { x: 79, y: 54 },
+            zoomLabelPos: "right",
+            showInWorld: true,
+            showInZoom: true,
+            desc: "廃境の最深部に鎮座する、物語『廃城の王』の核心舞台。七代目魔王ライガス以来、初代を除く六代分の残留思念が統合されて宿っており、封石の継承者アシュが「廃城の王」として覚醒する場所。",
             characters: ["アシュ（廃城の王）", "ミラ", "七人の封石の主"],
             episodes: [
-              { code: "全体プロット", title: "廃城の王の覚醒", text: "二つのAIと人間が統合する物語の核心部。" }
+              { code: "全体プロット", title: "廃城の王の覚醒", text: "二つのAIと人間が統合する物語の核心部。六代分の残留思念がここに眠る。" }
             ],
             items: ["封石（七人の声）", "廃王の座"]
           },
@@ -1867,7 +1906,7 @@ async function buildNovelsPages() {
             nameEn: "Central Langria",
             category: "王国・大平原",
             layer: "surface",
-            coords: { x: 64, y: 52 },
+            coords: { x: 60, y: 40 },
             labelPos: "bottom",
             zoomCoords: { x: 10, y: 20 },
             zoomLabelPos: "bottom",
@@ -1886,7 +1925,7 @@ async function buildNovelsPages() {
             nameEn: "Auros Isles / Coral Archipelago",
             category: "南方諸島・貿易",
             layer: "surface",
-            coords: { x: 64, y: 76 },
+            coords: { x: 80, y: 84 },
             labelPos: "top",
             zoomCoords: { x: 50, y: 90 },
             zoomLabelPos: "top",
@@ -1905,7 +1944,7 @@ async function buildNovelsPages() {
             nameEn: "The Sunscald Desert / Wern Continent",
             category: "西の大陸・砂漠",
             layer: "surface",
-            coords: { x: 22, y: 64 },
+            coords: { x: 18, y: 84 },
             labelPos: "top",
             zoomCoords: { x: 10, y: 90 },
             zoomLabelPos: "top",
@@ -1917,6 +1956,63 @@ async function buildNovelsPages() {
               { code: "世界観設定", title: "二大大陸の均衡", text: "アルデン大陸とヴェルン大陸を隔てる海と砂漠。" }
             ],
             items: ["白砂漠のオアシス水"]
+          },
+          {
+            id: "silvermoon",
+            name: "銀月都市（シルバームーン）",
+            nameEn: "Silvermoon",
+            category: "都市・中央アルデン",
+            layer: "surface",
+            coords: { x: 53, y: 45 },
+            labelPos: "bottom",
+            zoomCoords: { x: 0, y: 0 },
+            zoomLabelPos: "bottom",
+            showInWorld: true,
+            showInZoom: false,
+            desc: "中央アルデンに広がる肥沃な平原地帯の主要都市のひとつ。ラングリア王国の経済・文化を支える中心地。",
+            characters: ["中央アルデンの商人組合"],
+            episodes: [
+              { code: "世界観設定", title: "アルデン大陸の秩序", text: "王国の支配が及ぶ中央アルデンの主要都市。" }
+            ],
+            items: []
+          },
+          {
+            id: "aethelburg",
+            name: "エーテルブルク",
+            nameEn: "Aethelburg",
+            category: "城砦都市・中央アルデン",
+            layer: "surface",
+            coords: { x: 48, y: 37 },
+            labelPos: "top",
+            zoomCoords: { x: 0, y: 0 },
+            zoomLabelPos: "top",
+            showInWorld: true,
+            showInZoom: false,
+            desc: "中央アルデン北西部、囁きの森に近い城砦都市。フロスト山脈方面への玄関口にあたる。",
+            characters: ["中央アルデンの守備隊"],
+            episodes: [
+              { code: "世界観設定", title: "アルデン大陸の秩序", text: "フロスト山脈方面を睨む城砦都市。" }
+            ],
+            items: []
+          },
+          {
+            id: "zolara",
+            name: "ゾラーラ",
+            nameEn: "Zolara",
+            category: "都市・ヴェルン大陸",
+            layer: "surface",
+            coords: { x: 15, y: 50 },
+            labelPos: "right",
+            zoomCoords: { x: 0, y: 0 },
+            zoomLabelPos: "right",
+            showInWorld: true,
+            showInZoom: false,
+            desc: "西の大陸ヴェルン、カルギア草原地帯（ヴェルダント・ステップス）に位置する主要都市。ヴェルン大陸西側の交易拠点。",
+            characters: ["ヴェルン大陸の使者"],
+            episodes: [
+              { code: "世界観設定", title: "二大大陸の均衡", text: "アルデン大陸とヴェルン海を挟んで対峙するヴェルン大陸の都市。" }
+            ],
+            items: []
           }
         ];
 
