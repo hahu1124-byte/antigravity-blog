@@ -1724,7 +1724,7 @@ async function buildNovelsPages() {
             <!-- マップ表示エリア -->
             <div class="wm-map-viewport" id="wm-viewport">
                 <div class="wm-map-stage" id="wm-stage">
-                    <img src="/images/eldaria_world_map.webp" alt="エルダリア世界地図" class="wm-map-bg" id="wm-map-bg">
+                    <img src="/images/eldaria_world_map_v2.png" alt="エルダリア世界地図" class="wm-map-bg" id="wm-map-bg">
                     
                     <!-- 地下構造オーバーレイキャンバス -->
                     <div class="wm-underground-overlay" id="wm-underground-overlay">
@@ -1964,10 +1964,13 @@ async function buildNovelsPages() {
           document.getElementById("btn-view-arden").classList.toggle("active", mode === "arden");
 
           const stage = document.getElementById("wm-stage");
+          const bgImg = document.getElementById("wm-map-bg");
           if (mode === "arden") {
             stage.classList.add("mode-arden");
+            bgImg.src = "/images/arden_region_detail_map.png";
           } else {
             stage.classList.remove("mode-arden");
+            bgImg.src = "/images/eldaria_world_map_v2.png";
           }
 
           renderPins();
