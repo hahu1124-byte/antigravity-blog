@@ -81,6 +81,21 @@ ep01〜ep22 は現在 C版のみ存在。今後 A版・T版の作成予定あり
 
 `story-04-yuigon-ishi/`・`story-05-maseki-musou/` は「廃城の王」に続く次回作候補。現時点では設定・プロットのみのアイデア段階で、執筆（episodes/）は未着手。
 
+```
+story-04-yuigon-ishi/       # 案4「遺言石の商人」（アイデア段階・執筆未着手）
+├── setting.md               # コンセプト・プロット設定
+├── characters.md            # キャラクター一覧
+└── episodes/                # 執筆開始前のため空
+
+story-05-maseki-musou/      # 「落ちこぼれ精霊憑きの魔石無双」（アイデア段階・執筆未着手）
+├── MASTER.md                # 設定ハブ
+├── setting.md               # コンセプト・プロット設定
+├── characters.md            # キャラクター一覧
+├── battle_guidelines.md     # 戦闘描写ガイドライン
+├── episodes-summary.md      # 各話あらすじ一覧
+└── episodes/                # 執筆開始前のため空
+```
+
 ---
 
 ## 世界地図
