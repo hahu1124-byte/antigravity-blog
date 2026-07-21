@@ -1771,15 +1771,21 @@ async function buildNovelsPages() {
                     <span class="wm-sidebar-sub" id="wm-info-name-en">Select a location on the map</span>
                 </div>
                 <div class="wm-sidebar-body" id="wm-info-body">
-                    <p class="wm-sidebar-desc">地図上のノード（ピン）をクリックすると、その土地の歴史・地理概要、関連する登場人物、エピソードの記憶が表示されます。</p>
+                    <p class="wm-sidebar-desc">地図上のノード（ピン）または下の地点一覧をクリックすると、その土地の歴史・地理概要、関連する登場人物、エピソードの記憶が表示されます。</p>
                     <div class="wm-empty-hint">
                         💡 <strong>操作ヒント:</strong><br>
                         ・「アルデン東部・廃境拡大」で廃城やグラウド周辺にフォーカスできます。<br>
                         ・「地下排水路・倉庫街」ボタンで、地上と地下の隠し構造が切り替わります。<br>
-                        ・ピンのラベルが重なる場合は「選択中・ホバーのみ」表示に切り替えられます。
+                        ・ピンが重なって選択しづらい場合は、下の「地点一覧」から選んでください。
                     </div>
                 </div>
             </aside>
+        </div>
+
+        <!-- 地点一覧（ピン重なり回避用） -->
+        <div class="wm-location-list-wrap">
+            <span class="wm-control-label">📌 地点一覧（クリックで選択）:</span>
+            <div class="wm-location-list" id="wm-location-list"></div>
         </div>
 
         <script>
@@ -1796,7 +1802,7 @@ async function buildNovelsPages() {
             zoomLabelPos: "right",
             showInWorld: true,
             showInZoom: true,
-            desc: "ラングリア王国東部の国境に近い主要都市。かつて古い王国の排水路や地下施設が網の目のように張り巡らされており、地上は活気ある市場や書庫棟、商業区が広がる。",
+            desc: "ダルク候国（東方三候国の一つ）の商業中心地。ラングリア王国東部の国境に近く、廃魔国跡地（廃境）にも隣接する交易拠点。かつて古い王国の排水路や地下施設が網の目のように張り巡らされており、地上は活気ある市場や書庫棟、商業区が広がる。",
             characters: ["アシュ", "ミラ", "ヴォルフ"],
             episodes: [
               { code: "ep01-ep10", title: "物語の開幕", text: "アシュが書庫棟で古い排水管の見取り図を解読。" },
@@ -1874,7 +1880,7 @@ async function buildNovelsPages() {
             zoomLabelPos: "top",
             showInWorld: true,
             showInZoom: true,
-            desc: "かつて七代の魔王が支配した大魔帝国ダルネインの遺領。濃度の高い魔力が大地に染み込み、廃城・廃村が点在する。支配者なき無主の地で、竜人・角人族・アウトローが自治的に暮らす。",
+            desc: "かつて七代の魔王が支配した旧魔国の遺領。濃度の高い魔力が大地に染み込み、廃城・廃村が点在する。支配者なき無主の地で、竜人・角人族・アウトローが自治的に暮らす。",
             characters: ["廃境の巡回兵", "廃境の民"],
             episodes: [
               { code: "ep50-ep60", title: "廃境突入", text: "魔骨丘陵を越え、無主の地・廃境へ足を踏み入れる。" }
@@ -2013,6 +2019,66 @@ async function buildNovelsPages() {
               { code: "世界観設定", title: "二大大陸の均衡", text: "アルデン大陸とヴェルン海を挟んで対峙するヴェルン大陸の都市。" }
             ],
             items: []
+          },
+          {
+            id: "carn-village",
+            name: "カルン村",
+            nameEn: "Carn Village",
+            category: "村・出身地",
+            layer: "surface",
+            coords: { x: 63, y: 39 },
+            labelPos: "top",
+            zoomCoords: { x: 0, y: 0 },
+            zoomLabelPos: "top",
+            showInWorld: true,
+            showInZoom: false,
+            desc: "廃城近くの小村。カルン男爵家の旧領であり、アシュとミラの出身地。2章ではカルン村の若者トルク・ガント・ノルを迎え入れ、地下倉庫での共同採掘を始める拠点となる。",
+            characters: ["アシュ", "ミラ", "トルク", "ガント", "ノル"],
+            episodes: [
+              { code: "ep01", title: "男爵と呼ばれた乞食", text: "「俺はカルン男爵だ」——アシュが廃城の門前で家督にまつわる経緯を独白する物語の起点。" },
+              { code: "2章「起」", title: "共同採掘の始動", text: "カルン村の若者トルク・ガント・ノルを迎え入れ、地下倉庫での共同採掘初日を迎える。" }
+            ],
+            items: ["カルン男爵の権利書"]
+          },
+          {
+            id: "bortan",
+            name: "ボルタン",
+            nameEn: "Bortan",
+            category: "交易町・最寄りの町",
+            layer: "surface",
+            coords: { x: 66, y: 40 },
+            labelPos: "bottom",
+            zoomCoords: { x: 0, y: 0 },
+            zoomLabelPos: "bottom",
+            showInWorld: true,
+            showInZoom: false,
+            desc: "廃城から徒歩約1日の中規模交易町。市場・冒険者ギルド小支部・商業ギルド支部があり、ダイネン伯爵家の影響が強い。アシュたちの日常拠点。",
+            characters: ["ダイネン伯爵家", "セルド", "グルス", "ドルク"],
+            episodes: [
+              { code: "ep04", title: "廃棄魔石を売りに行く", text: "近くの町ボルタンの鑑定師・冒険者ギルドに廃棄魔石を持ち込み、最低限の生活費を確保する。" },
+              { code: "2章「承」", title: "ボルタン経済戦", text: "ダイネン伯爵家の市場圧力とドルクの独占契約要求を「道化」の情報戦で切り抜ける。" }
+            ],
+            items: ["廃棄魔石", "加工魔石"]
+          },
+          {
+            id: "worga",
+            name: "ウォルガ",
+            nameEn: "Worga",
+            category: "地方都市",
+            layer: "surface",
+            coords: { x: 69, y: 39 },
+            labelPos: "top",
+            zoomCoords: { x: 0, y: 0 },
+            zoomLabelPos: "top",
+            showInWorld: true,
+            showInZoom: false,
+            desc: "ボルタンからさらに半日〜1日の地方都市（ボルタンの3〜4倍規模）。監査院出張所・地方裁判所・王国軍小規模駐屯地があり、国の統制が強い。ローザ商会が拠点を置く。",
+            characters: ["ローザ商会（エレーナ・セリン）", "コドー・ラシュ", "監察官ガルツ"],
+            episodes: [
+              { code: "ep55-56", title: "旅立ちの風・商会の懸念", text: "ローザ商会のエレーナ・セリンを訪ね、闇市場で変色魔石が買い漁られている実態を知る。" },
+              { code: "ep57-58", title: "路地裏の感知・裏街のネズミ", text: "廃石感知で変色魔石の取引現場を特定し、情報屋コドー・ラシュと遭遇して協力者に加える。" }
+            ],
+            items: ["変色魔石"]
           }
         ];
 
@@ -2023,23 +2089,25 @@ async function buildNovelsPages() {
 
         function renderPins() {
           const container = document.getElementById("wm-pins-layer");
+          const listContainer = document.getElementById("wm-location-list");
           container.innerHTML = "";
+          listContainer.innerHTML = "";
 
           MAP_LOCATIONS.forEach(loc => {
             if (currentLayer === "surface" && loc.layer === "underground") return;
             if (currentLayer === "underground" && loc.layer === "surface") return;
             if (currentMapMode === "arden" && loc.showInZoom === false) return;
 
-            const pin = document.createElement("div");
             const isActive = activeLocationId === loc.id;
-            
+
+            const pin = document.createElement("div");
             const labelPos = currentMapMode === "arden" ? (loc.zoomLabelPos || loc.labelPos) : loc.labelPos;
             let pinClasses = ["wm-pin", "pos-" + (labelPos || "top"), "layer-" + loc.layer];
             if (isActive) pinClasses.push("active");
             if (currentLabelMode === "select" && !isActive) pinClasses.push("hide-label");
 
             pin.className = pinClasses.join(" ");
-            
+
             const pos = currentMapMode === "arden" ? loc.zoomCoords : loc.coords;
             pin.style.left = pos.x + "%";
             pin.style.top = pos.y + "%";
@@ -2053,6 +2121,13 @@ async function buildNovelsPages() {
             \`;
 
             container.appendChild(pin);
+
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = "wm-location-chip" + (isActive ? " active" : "");
+            chip.innerHTML = \`<span class="wm-location-chip-icon">\${loc.layer === "underground" ? "🕳️" : "📍"}</span><span class="wm-location-chip-name">\${loc.name}</span>\`;
+            chip.onclick = () => selectLocation(loc.id);
+            listContainer.appendChild(chip);
           });
         }
 
