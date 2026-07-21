@@ -1609,6 +1609,7 @@ async function buildNovelsPages() {
                 <a href="https://kakuyomu.jp/works/2912051602055329793" target="_blank" rel="noopener noreferrer" class="novels-cta">カクヨムで読む →</a>
                 <a href="/lab/novels/timeline/" class="novels-cta">制作タイムラインを見る →</a>
                 <a href="/lab/novels/settings/" class="novels-cta">設定詳細を見る →</a>
+                <a href="/lab/novels/world-map/" class="novels-cta">ワールドマップを見る →</a>
             </div>
         </div>
 
@@ -1681,23 +1682,339 @@ async function buildNovelsPages() {
             <a href="/lab/novels/" class="novels-back-link">← AI小説に戻る</a>
         </div>`;
 
+  // --- novels/world-map/index.html ---
+  const worldMapDir = join(novelsDir, "world-map");
+  mkdirSync(worldMapDir, { recursive: true });
+
+  const worldMapBody = `
+        <nav class="novels-breadcrumb">
+            <a href="/">トップ</a>
+            <span class="novels-sep">›</span>
+            <a href="/lab/">LAB</a>
+            <span class="novels-sep">›</span>
+            <a href="/lab/novels/">AI小説</a>
+            <span class="novels-sep">›</span>
+            <span class="novels-current">ワールドマップ</span>
+        </nav>
+
+        <div class="wm-hero">
+            <div class="novels-hero-meta">
+                <span class="novels-badge">🗺️ エルダリア大陸 公式地図</span>
+            </div>
+            <h1 class="novels-hero-title">「廃城の王」ワールドマップ</h1>
+            <p class="novels-hero-sub">主人公アシュたちが駆け抜けるエルダリア世界、廃境、グラウド市街、地下倉庫街のインタラクティブマップ。</p>
+        </div>
+
+        <!-- コントロールバー -->
+        <div class="wm-controls">
+            <div class="wm-control-group">
+                <span class="wm-control-label">表示範囲:</span>
+                <button id="btn-view-world" class="wm-btn active" onclick="switchMapMode('world')">🗺️ エルダリア全体図</button>
+                <button id="btn-view-arden" class="wm-btn" onclick="switchMapMode('arden')">📍 アルデン東部・廃境拡大</button>
+            </div>
+            <div class="wm-control-group">
+                <span class="wm-control-label">構造レイヤー:</span>
+                <button id="btn-layer-surface" class="wm-btn active" onclick="switchLayer('surface')">🏰 地上構造</button>
+                <button id="btn-layer-underground" class="wm-btn" onclick="switchLayer('underground')">🕳️ 地下排水路・倉庫街</button>
+            </div>
+        </div>
+
+        <!-- メインマップ＆サイドパネルコンテナ -->
+        <div class="wm-container">
+            <!-- マップ表示エリア -->
+            <div class="wm-map-viewport" id="wm-viewport">
+                <div class="wm-map-stage" id="wm-stage">
+                    <img src="/images/eldaria_world_map.webp" alt="エルダリア世界地図" class="wm-map-bg" id="wm-map-bg">
+                    
+                    <!-- 地下構造オーバーレイキャンバス -->
+                    <div class="wm-underground-overlay" id="wm-underground-overlay">
+                        <div class="wm-tunnel-grid"></div>
+                        <div class="wm-tunnel-glow"></div>
+                        <div class="wm-tunnel-label">⚡ 地下排水管網 & 汚染魔力バイパス（旧王国遺構）</div>
+                    </div>
+
+                    <!-- ピンコンテナ -->
+                    <div class="wm-pins-layer" id="wm-pins-layer"></div>
+                </div>
+            </div>
+
+            <!-- サイド情報パネル -->
+            <aside class="wm-sidebar" id="wm-sidebar">
+                <div class="wm-sidebar-header">
+                    <span class="wm-badge" id="wm-info-category">エリア分類</span>
+                    <h2 class="wm-sidebar-title" id="wm-info-name">ピンを選択してください</h2>
+                    <span class="wm-sidebar-sub" id="wm-info-name-en">Select a location on the map</span>
+                </div>
+                <div class="wm-sidebar-body" id="wm-info-body">
+                    <p class="wm-sidebar-desc">地図上のノード（ピン）をクリックすると、その土地の歴史・地理概要、関連する登場人物、エピソードの記憶が表示されます。</p>
+                    <div class="wm-empty-hint">
+                        💡 <strong>操作ヒント:</strong><br>
+                        ・「アルデン東部・廃境拡大」で廃城やグラウド周辺にフォーカスできます。<br>
+                        ・「地下排水路・倉庫街」ボタンで、地上と地下の隠し構造が切り替わります。
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <script>
+        const MAP_LOCATIONS = [
+          {
+            id: "graud-city",
+            name: "グラウド市街",
+            nameEn: "Graud City",
+            category: "市街・都市",
+            layer: "both",
+            coords: { x: 58, y: 42 },
+            zoomCoords: { x: 42, y: 48 },
+            desc: "ラングリア王国東部の国境に近い主要都市。かつて古い王国の排水路や地下施設が網の目のように張り巡らされており、地上は活気ある市場や書庫棟、商業区が広がる。",
+            characters: ["アシュ", "ミラ", "ヴォルフ"],
+            episodes: [
+              { code: "ep01-ep10", title: "物語の開幕", text: "アシュが書庫棟で古い排水管の見取り図を解読。" },
+              { code: "ep73A", title: "地下排水管の見取り図", text: "記憶の中の見取り図と現場の構造を論理的に重ね合わせて脱出路を思考。" }
+            ],
+            items: ["グラウド排水管見取り図", "古書庫の記録"]
+          },
+          {
+            id: "underground-warehouses",
+            name: "地下倉庫街・旧排水路網",
+            nameEn: "Underground Warehouses & Sewers",
+            category: "地下・遺構",
+            layer: "underground",
+            coords: { x: 57, y: 44 },
+            zoomCoords: { x: 40, y: 52 },
+            desc: "グラウド市街の地下深くに眠る巨大な旧排水管網および密輸業者や冒険者が利用する地下倉庫街。魔力バイパスや隠し通路が点在する。",
+            characters: ["アシュ", "ミラ", "ドルク"],
+            episodes: [
+              { code: "ep73A", title: "地下倉庫街の攻防", text: "魔力バイパスと汚染水の流れを利用した秘密の脱出戦。" },
+              { code: "ep77T", title: "灰色の石と断絶された記憶", text: "地下深奥にて封石の七人の声とは異なる歪んだ記憶の石（灰色の石）を発見。" }
+            ],
+            items: ["灰色の石", "汚染魔力バイパス"]
+          },
+          {
+            id: "arkane-temple",
+            name: "アルカネ神殿",
+            nameEn: "Arkane Temple",
+            category: "神聖領域・解呪",
+            layer: "surface",
+            coords: { x: 61, y: 38 },
+            zoomCoords: { x: 52, y: 36 },
+            desc: "古の神々の祈りと声が呼応する神秘的な神殿。解呪の儀式や「声の解放段階」と深く連動しており、封石の継承者が訪れる重要拠点。",
+            characters: ["アシュ", "神殿の神官たち"],
+            episodes: [
+              { code: "設定資料", title: "アルカネ神殿の祈りシステム", text: "祈りの深さに応じて応答する神が段階的に増える。" }
+            ],
+            items: ["声の解放段階", "神聖遺言石"]
+          },
+          {
+            id: "obsidian-wastes",
+            name: "魔骨丘陵（まこつきゅうりょう）",
+            nameEn: "The Obsidian Wastes",
+            category: "危険地帯・黒岩",
+            layer: "surface",
+            coords: { x: 68, y: 45 },
+            zoomCoords: { x: 70, y: 50 },
+            desc: "奇妙な黒い岩肌（黒曜石）が延々と連なる死の丘陵地帯。廃魔国跡地（廃境）への入口であり、凶悪な魔物や歪んだ魔力が渦巻く。",
+            characters: ["アシュ", "ミラ", "廃境の巡回兵"],
+            episodes: [
+              { code: "ep50-ep60", title: "魔骨丘陵突破戦", text: "黒岩の影に潜む魔物を警戒しながら廃境を目指す行軍。" }
+            ],
+            items: ["黒曜魔石", "魔骨の残骸"]
+          },
+          {
+            id: "demon-realm",
+            name: "廃魔国跡地・廃城（廃境）",
+            nameEn: "The Demon Realm / Ruined Castle",
+            category: "旧魔国・中心地",
+            layer: "surface",
+            coords: { x: 76, y: 42 },
+            zoomCoords: { x: 85, y: 44 },
+            desc: "かつての大魔帝国ダルネインの遺領であり、物語の核心たる「廃城」が鎮座する極限の領域。強力な封印と古代の秘密が眠る。",
+            characters: ["アシュ（廃城の王）", "ミラ", "七人の封石の主"],
+            episodes: [
+              { code: "全体プロット", title: "廃城の王の覚醒", text: "二つのAIと人間が統合する物語の核心部。" }
+            ],
+            items: ["封石（七人の声）", "廃王の座"]
+          },
+          {
+            id: "langria-kingdom",
+            name: "ラングリア王国 中央平原",
+            nameEn: "Central Langria",
+            category: "王国・大平原",
+            layer: "surface",
+            coords: { x: 48, y: 45 },
+            zoomCoords: { x: 22, y: 50 },
+            desc: "アルデン大陸の中央部に広がる最も肥沃な大平原と、それを統治するラングリア王国の領土。騎士団と貴族政治の中心地。",
+            characters: ["王国騎士団", "中央商人組合"],
+            episodes: [
+              { code: "世界観設定", title: "アルデン大陸の秩序", text: "王国の支配と廃境への警戒体制。" }
+            ],
+            items: ["王国通行手形"]
+          },
+          {
+            id: "auros-isles",
+            name: "アウロス諸島（珊瑚諸島）",
+            nameEn: "Auros Isles / Coral Archipelago",
+            category: "南方諸島・貿易",
+            layer: "surface",
+            coords: { x: 62, y: 72 },
+            zoomCoords: { x: 60, y: 85 },
+            desc: "アルデン大陸南部のカリン湾を抜けた先に広がる温暖な諸島。遺言石の流通拠点であり、異国船や自由貿易商が集う。",
+            characters: ["南方貿易商", "自由冒険者"],
+            episodes: [
+              { code: "世界観設定", title: "遺言石の流通ルート", text: "アウロス諸島を経由して世界中に広がる遺言石。" }
+            ],
+            items: ["流通遺言石", "海産宝石"]
+          },
+          {
+            id: "sunscald-desert",
+            name: "白砂漠・アルタン神聖王国",
+            nameEn: "The Sunscald Desert / Wern Continent",
+            category: "西の大陸・砂漠",
+            layer: "surface",
+            coords: { x: 24, y: 68 },
+            zoomCoords: { x: 10, y: 75 },
+            desc: "ヴェルン大陸南部に広がる広大な白砂漠。専制国家ヴァルディア帝国と対峙するアルタン神聖王国が存在する。",
+            characters: ["ヴェルン大陸の使者"],
+            episodes: [
+              { code: "世界観設定", title: "二大大陸の均衡", text: "アルデン大陸とヴェルン大陸を隔てる海と砂漠。" }
+            ],
+            items: ["白砂漠のオアシス水"]
+          }
+        ];
+
+        let currentMapMode = "world";
+        let currentLayer = "surface";
+        let activeLocationId = null;
+
+        function renderPins() {
+          const container = document.getElementById("wm-pins-layer");
+          container.innerHTML = "";
+
+          MAP_LOCATIONS.forEach(loc => {
+            if (currentLayer === "surface" && loc.layer === "underground") return;
+            if (currentLayer === "underground" && loc.layer === "surface") return;
+
+            const pin = document.createElement("div");
+            pin.className = "wm-pin " + (activeLocationId === loc.id ? "active" : "") + " layer-" + loc.layer;
+            
+            const pos = currentMapMode === "arden" ? loc.zoomCoords : loc.coords;
+            pin.style.left = pos.x + "%";
+            pin.style.top = pos.y + "%";
+
+            pin.onclick = () => selectLocation(loc.id);
+
+            pin.innerHTML = \`
+              <div class="wm-pin-pulse"></div>
+              <div class="wm-pin-icon">\${loc.layer === "underground" ? "🕳️" : "📍"}</div>
+              <div class="wm-pin-label">\${loc.name}</div>
+            \`;
+
+            container.appendChild(pin);
+          });
+        }
+
+        function selectLocation(id) {
+          activeLocationId = id;
+          renderPins();
+
+          const loc = MAP_LOCATIONS.find(l => l.id === id);
+          if (!loc) return;
+
+          document.getElementById("wm-info-category").textContent = loc.category;
+          document.getElementById("wm-info-name").textContent = loc.name;
+          document.getElementById("wm-info-name-en").textContent = loc.nameEn;
+
+          let html = \`
+            <p class="wm-sidebar-desc">\${loc.desc}</p>
+
+            <div class="wm-info-section">
+                <h4>👥 主な関連人物</h4>
+                <div class="wm-tag-list">
+                    \${loc.characters.map(c => \`<span class="wm-tag">\${c}</span>\`).join("")}
+                </div>
+            </div>
+
+            <div class="wm-info-section">
+                <h4>📜 関連エピソード・記憶</h4>
+                <ul class="wm-ep-list">
+                    \${loc.episodes.map(ep => \`
+                        <li>
+                            <span class="wm-ep-code">\${ep.code}</span>
+                            <strong>\${ep.title}</strong>
+                            <p>\${ep.text}</p>
+                        </li>
+                    \`).join("")}
+                </ul>
+            </div>
+
+            <div class="wm-info-section">
+                <h4>✨ キーワード・アイテム</h4>
+                <div class="wm-tag-list">
+                    \${loc.items.map(item => \`<span class="wm-tag item">\${item}</span>\`).join("")}
+                </div>
+            </div>
+          \`;
+
+          document.getElementById("wm-info-body").innerHTML = html;
+        }
+
+        function switchMapMode(mode) {
+          currentMapMode = mode;
+          document.getElementById("btn-view-world").classList.toggle("active", mode === "world");
+          document.getElementById("btn-view-arden").classList.toggle("active", mode === "arden");
+
+          const stage = document.getElementById("wm-stage");
+          if (mode === "arden") {
+            stage.classList.add("mode-arden");
+          } else {
+            stage.classList.remove("mode-arden");
+          }
+
+          renderPins();
+        }
+
+        function switchLayer(layer) {
+          currentLayer = layer;
+          document.getElementById("btn-layer-surface").classList.toggle("active", layer === "surface");
+          document.getElementById("btn-layer-underground").classList.toggle("active", layer === "underground");
+
+          const overlay = document.getElementById("wm-underground-overlay");
+          if (layer === "underground") {
+            overlay.classList.add("visible");
+          } else {
+            overlay.classList.remove("visible");
+          }
+
+          renderPins();
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+          renderPins();
+          selectLocation("graud-city");
+        });
+        </script>
+
+        <div class="novels-footer">
+            <a href="/lab/novels/" class="novels-back-link">← AI小説に戻る</a>
+        </div>`;
+
   writeFileSync(
-    join(timelineDir, "index.html"),
+    join(worldMapDir, "index.html"),
     labWrap({
-      title: "制作タイムライン — 廃城の王 | AI小説 | Gravity Portal",
+      title: "ワールドマップ — 廃城の王 | AI小説 | Gravity Portal",
       description:
-        "「廃城の王」制作タイムライン。いつ・どの話を書き・何を修正したか、週ごとにまとめた制作記録。",
+        "カクヨム連載中「廃城の王」の舞台エルダリア大陸、廃境、グラウド市街、地下倉庫街のインタラクティブマップ。",
       backHref: "/lab/novels/",
       backLabel: "AI小説に戻る",
-      titleIcon: "📅",
-      titleText: "制作タイムライン",
-      bodyHtml: timelineBody,
+      titleIcon: "🗺️",
+      titleText: "ワールドマップ",
+      bodyHtml: worldMapBody,
     }),
     "utf-8",
   );
 
   console.log(
-    "📖 novelsページ生成完了 (novels/index.html + novels/timeline/index.html)",
+    "📖 novelsページ生成完了 (novels/index.html + novels/timeline/index.html + novels/world-map/index.html)",
   );
 }
 

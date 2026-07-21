@@ -49,14 +49,14 @@ novels/
     ├── appraisal-format.md     # 鑑定眼《トゥルー・サイト》の表示フォーマット
     ├── characters-npc-crowd.md # 背景キャラ名簿（冒険者パーティー群、名前と一言特徴のみ）
     ├── characters.md           # キャラクター一覧
-    ├── codex.md                
+    ├── codex.md                # 現場データ集（封石・廃城構造・執筆注意ルール）
     ├── EP-timeline.md          # 詳細タイムライン（BG暦・日付ベースの設定専用管理表）
     ├── episodes-summary.md     # 各話あらすじ一覧
     ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
     ├── setting-ch1-2.md        # 第1章・第2章 詳細プロット
-    ├── setting-ch3.md          
-    ├── setting-ch4.md          
-    ├── setting-ch5.md          
+    ├── setting-ch3.md          # 第3章「深淵の糸」詳細プロット
+    ├── setting-ch4.md          # 第4章「久遠の覚醒」詳細プロット
+    ├── setting-ch5.md          # 第5章 詳細プロット
     ├── setting.md              # プロット・ブロック構成
     ├── writing_prompt.md       # AI執筆指示書
 │   └── episodes/
@@ -65,19 +65,36 @@ novels/
             ├── 51-60/               # ep51~ep60
             ├── 61-70/               # ep61~ep70
             └── 71-80/
-                ├── ... (5 older files)
-                ├── ep76A.md
-                ├── ep76C.md
+                ├── ... (4 older files)
+                ├── ep75T.md
                 ├── ep76T.md
+                ├── ep77T.md
                 └── archive/
-                    ├── ... (9 older files)
-                    ├── ep75A.md
-                    └── ep75C.md
+                    ├── ... (13 older files)
+                    ├── ep77A.md
+                    └── ep77C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
 
 ep01〜ep22 は現在 C版のみ存在。今後 A版・T版の作成予定あり。
+
+`story-04-yuigon-ishi/`・`story-05-maseki-musou/` は「廃城の王」に続く次回作候補。現時点では設定・プロットのみのアイデア段階で、執筆（episodes/）は未着手。
+
+```
+story-04-yuigon-ishi/       # 案4「遺言石の商人」（アイデア段階・執筆未着手）
+├── setting.md               # コンセプト・プロット設定
+├── characters.md            # キャラクター一覧
+└── episodes/                # 執筆開始前のため空
+
+story-05-maseki-musou/      # 「落ちこぼれ精霊憑きの魔石無双」（アイデア段階・執筆未着手）
+├── MASTER.md                # 設定ハブ
+├── setting.md               # コンセプト・プロット設定
+├── characters.md            # キャラクター一覧
+├── battle_guidelines.md     # 戦闘描写ガイドライン
+├── episodes-summary.md      # 各話あらすじ一覧
+└── episodes/                # 執筆開始前のため空
+```
 
 ---
 
