@@ -1770,9 +1770,10 @@ async function buildNovelsPages() {
             nameEn: "Graud City",
             category: "市街・都市",
             layer: "both",
-            coords: { x: 55, y: 35 },
-            zoomCoords: { x: 15, y: 46 },
+            coords: { x: 57, y: 36 },
             labelPos: "left",
+            zoomCoords: { x: 16, y: 46 },
+            zoomLabelPos: "right",
             showInWorld: true,
             showInZoom: true,
             desc: "ラングリア王国東部の国境に近い主要都市。かつて古い王国の排水路や地下施設が網の目のように張り巡らされており、地上は活気ある市場や書庫棟、商業区が広がる。",
@@ -1789,9 +1790,10 @@ async function buildNovelsPages() {
             nameEn: "Underground Warehouses & Sewers",
             category: "地下・遺構",
             layer: "underground",
-            coords: { x: 55, y: 40 },
-            zoomCoords: { x: 15, y: 54 },
+            coords: { x: 57, y: 41 },
             labelPos: "bottom",
+            zoomCoords: { x: 16, y: 55 },
+            zoomLabelPos: "right",
             showInWorld: true,
             showInZoom: true,
             desc: "グラウド市街の地下深くに眠る巨大な旧排水管網および密輸業者や冒険者が利用する地下倉庫街。魔力バイパスや隠し通路が点在する。",
@@ -1808,9 +1810,10 @@ async function buildNovelsPages() {
             nameEn: "Arkane Temple",
             category: "神聖領域・解呪",
             layer: "surface",
-            coords: { x: 50, y: 22 },
-            zoomCoords: { x: 15, y: 70 },
+            coords: { x: 54, y: 28 },
             labelPos: "top",
+            zoomCoords: { x: 16, y: 72 },
+            zoomLabelPos: "right",
             showInWorld: true,
             showInZoom: true,
             desc: "古の神々の祈りと声が呼応する神秘的な神殿。解呪の儀式や「声の解放段階」と深く連動しており、封石の継承者が訪れる重要拠点。",
@@ -1826,9 +1829,10 @@ async function buildNovelsPages() {
             nameEn: "The Obsidian Wastes",
             category: "危険地帯・黒岩",
             layer: "surface",
-            coords: { x: 75, y: 36 },
-            zoomCoords: { x: 36, y: 20 },
+            coords: { x: 74, y: 44 },
             labelPos: "bottom",
+            zoomCoords: { x: 38, y: 22 },
+            zoomLabelPos: "bottom",
             showInWorld: true,
             showInZoom: true,
             desc: "奇妙な黒い岩肌（黒曜石）が延々と連なる死の丘陵地帯。廃魔国跡地（廃境）への入口であり、凶悪な魔物や歪んだ魔力が渦巻く。",
@@ -1844,9 +1848,10 @@ async function buildNovelsPages() {
             nameEn: "The Demon Realm / Ruined Castle",
             category: "旧魔国・中心地",
             layer: "surface",
-            coords: { x: 75, y: 15 },
-            zoomCoords: { x: 48, y: 72 },
-            labelPos: "top",
+            coords: { x: 74, y: 32 },
+            labelPos: "left",
+            zoomCoords: { x: 48, y: 74 },
+            zoomLabelPos: "top",
             showInWorld: true,
             showInZoom: true,
             desc: "かつての大魔帝国ダルネインの遺領であり、物語の核心たる「廃城」が鎮座する極限の領域。強力な封印と古代の秘密が眠る。",
@@ -1862,9 +1867,10 @@ async function buildNovelsPages() {
             nameEn: "Central Langria",
             category: "王国・大平原",
             layer: "surface",
-            coords: { x: 63, y: 44 },
-            zoomCoords: { x: 10, y: 20 },
+            coords: { x: 62, y: 48 },
             labelPos: "bottom",
+            zoomCoords: { x: 10, y: 20 },
+            zoomLabelPos: "bottom",
             showInWorld: true,
             showInZoom: false,
             desc: "アルデン大陸の中央部に広がる最も肥沃な大平原と、それを統治するラングリア王国の領土。騎士団と貴族政治の中心地。",
@@ -1881,8 +1887,9 @@ async function buildNovelsPages() {
             category: "南方諸島・貿易",
             layer: "surface",
             coords: { x: 64, y: 76 },
-            zoomCoords: { x: 50, y: 90 },
             labelPos: "top",
+            zoomCoords: { x: 50, y: 90 },
+            zoomLabelPos: "top",
             showInWorld: true,
             showInZoom: false,
             desc: "アルデン大陸南部のカリン湾を抜けた先に広がる温暖な諸島。遺言石の流通拠点であり、異国船や自由貿易商が集う。",
@@ -1898,9 +1905,10 @@ async function buildNovelsPages() {
             nameEn: "The Sunscald Desert / Wern Continent",
             category: "西の大陸・砂漠",
             layer: "surface",
-            coords: { x: 24, y: 64 },
-            zoomCoords: { x: 10, y: 90 },
+            coords: { x: 22, y: 64 },
             labelPos: "top",
+            zoomCoords: { x: 10, y: 90 },
+            zoomLabelPos: "top",
             showInWorld: true,
             showInZoom: false,
             desc: "ヴェルン大陸南部に広がる広大な白砂漠。専制国家ヴァルディア帝国と対峙するアルタン神聖王国が存在する。",
@@ -1929,7 +1937,8 @@ async function buildNovelsPages() {
             const pin = document.createElement("div");
             const isActive = activeLocationId === loc.id;
             
-            let pinClasses = ["wm-pin", "pos-" + (loc.labelPos || "top"), "layer-" + loc.layer];
+            const labelPos = currentMapMode === "arden" ? (loc.zoomLabelPos || loc.labelPos) : loc.labelPos;
+            let pinClasses = ["wm-pin", "pos-" + (labelPos || "top"), "layer-" + loc.layer];
             if (isActive) pinClasses.push("active");
             if (currentLabelMode === "select" && !isActive) pinClasses.push("hide-label");
 
@@ -2001,13 +2010,10 @@ async function buildNovelsPages() {
           document.getElementById("btn-view-world").classList.toggle("active", mode === "world");
           document.getElementById("btn-view-arden").classList.toggle("active", mode === "arden");
 
-          const stage = document.getElementById("wm-stage");
           const bgImg = document.getElementById("wm-map-bg");
           if (mode === "arden") {
-            stage.classList.add("mode-arden");
             bgImg.src = "/blog/images/arden_region_detail_map.webp";
           } else {
-            stage.classList.remove("mode-arden");
             bgImg.src = "/blog/images/eldaria_world_map.webp";
           }
 
