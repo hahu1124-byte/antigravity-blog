@@ -1702,6 +1702,21 @@ async function buildNovelsPages() {
             <a href="/lab/novels/" class="novels-back-link">← AI小説に戻る</a>
         </div>`;
 
+  writeFileSync(
+    join(timelineDir, "index.html"),
+    labWrap({
+      title: "制作タイムライン — 廃城の王 | AI小説 | Gravity Portal",
+      description:
+        "カクヨム連載中「廃城の王」の制作タイムライン。いつ・どの話を書き・何を修正したか週ごとにまとめた制作記録。",
+      backHref: "/lab/novels/",
+      backLabel: "AI小説に戻る",
+      titleIcon: "📅",
+      titleText: "制作タイムライン",
+      bodyHtml: timelineBody,
+    }),
+    "utf-8",
+  );
+
   // --- novels/world-map/index.html ---
   const worldMapDir = join(novelsDir, "world-map");
   mkdirSync(worldMapDir, { recursive: true });
