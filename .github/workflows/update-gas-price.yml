@@ -2,8 +2,8 @@ name: Update Gas Price
 
 on:
   schedule:
-    # JST 18:00 = UTC 9:00、水曜（経産省の公表は水曜14:00なので余裕を持たせて18:00）
-    - cron: '0 9 * * 3'
+    # JST 18:00 = UTC 9:00、水曜+木曜（経産省の公表は原則水曜14:00だが木曜にずれる週があるためリトライとして木曜も実行。前週と同一なら下記Commitステップでスキップされる）
+    - cron: '0 9 * * 3,4'
   workflow_dispatch:
 
 permissions:
