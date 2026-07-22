@@ -1731,6 +1731,8 @@ async function buildNovelsPages() {
                 <span class="wm-control-label">表示範囲:</span>
                 <button id="btn-view-world" class="wm-btn active" onclick="switchMapMode('world')">🗺️ エルダリア全体図</button>
                 <button id="btn-view-arden" class="wm-btn" onclick="switchMapMode('arden')">📍 アルデン東部・廃境拡大</button>
+                <button id="btn-view-west" class="wm-btn" onclick="switchMapMode('west')">🌾 西部拡大（カルン街道）</button>
+                <button id="btn-view-east" class="wm-btn" onclick="switchMapMode('east')">🌫️ 東部拡張（廃境最深部）</button>
             </div>
             <div class="wm-control-group">
                 <span class="wm-control-label">構造レイヤー:</span>
@@ -1866,7 +1868,10 @@ async function buildNovelsPages() {
             episodes: [
               { code: "ep50-ep60", title: "魔骨丘陵突破戦", text: "黒岩の影に潜む魔物を警戒しながら廃境を目指す行軍。" }
             ],
-            items: ["黒曜魔石", "魔骨の残骸"]
+            items: ["黒曜魔石", "魔骨の残骸"],
+            showInEast: true,
+            eastCoords: { x: 27, y: 61 },
+            eastLabelPos: "bottom"
           },
           {
             id: "demon-realm",
@@ -1904,7 +1909,32 @@ async function buildNovelsPages() {
             episodes: [
               { code: "全体プロット", title: "廃城の王の覚醒", text: "二つのAIと人間が統合する物語の核心部。六代分の残留思念がここに眠る。" }
             ],
-            items: ["封石（七人の声）", "廃王の座"]
+            items: ["封石（七人の声）", "廃王の座"],
+            showInEast: true,
+            eastCoords: { x: 32, y: 36 },
+            eastLabelPos: "bottom"
+          },
+          {
+            id: "tower-of-unanswered-question",
+            name: "問答の廃塔",
+            nameEn: "Tower of the Unanswered Question",
+            category: "廃境最深部・存在の抹消",
+            layer: "surface",
+            coords: { x: 0, y: 0 },
+            labelPos: "top",
+            zoomCoords: { x: 0, y: 0 },
+            zoomLabelPos: "top",
+            showInWorld: false,
+            showInZoom: false,
+            showInEast: true,
+            eastCoords: { x: 88, y: 36 },
+            eastLabelPos: "left",
+            desc: "廃魔国跡地の最深部、大陸最東端に位置する初代魔王アルクの終焉の地。冥王による「存在の抹消」を受けたため、他の廃城と異なり残留思念が「見えない」。近づいても何も感じないが、長時間滞在した者が「知りたくなかったものを知った」と錯乱して帰還する事例が複数ある。",
+            characters: ["初代アルク（存在抹消済み）"],
+            episodes: [
+              { code: "世界観設定", title: "存在の抹消", text: "冥王により初代魔王のみ「なかったこと」にされた唯一の廃城。" }
+            ],
+            items: []
           },
           {
             id: "langria-kingdom",
@@ -2038,7 +2068,10 @@ async function buildNovelsPages() {
               { code: "ep01", title: "男爵と呼ばれた乞食", text: "「俺はカルン男爵だ」——アシュが廃城の門前で家督にまつわる経緯を独白する物語の起点。" },
               { code: "2章「起」", title: "共同採掘の始動", text: "カルン村の若者トルク・ガント・ノルを迎え入れ、地下倉庫での共同採掘初日を迎える。" }
             ],
-            items: ["カルン男爵の権利書"]
+            items: ["カルン男爵の権利書"],
+            showInWest: true,
+            westCoords: { x: 81, y: 46 },
+            westLabelPos: "top"
           },
           {
             id: "bortan",
@@ -2058,7 +2091,10 @@ async function buildNovelsPages() {
               { code: "ep04", title: "廃棄魔石を売りに行く", text: "近くの町ボルタンの鑑定師・冒険者ギルドに廃棄魔石を持ち込み、最低限の生活費を確保する。" },
               { code: "2章「承」", title: "ボルタン経済戦", text: "ダイネン伯爵家の市場圧力とドルクの独占契約要求を「道化」の情報戦で切り抜ける。" }
             ],
-            items: ["廃棄魔石", "加工魔石"]
+            items: ["廃棄魔石", "加工魔石"],
+            showInWest: true,
+            westCoords: { x: 55, y: 49 },
+            westLabelPos: "bottom"
           },
           {
             id: "worga",
@@ -2078,7 +2114,10 @@ async function buildNovelsPages() {
               { code: "ep55-56", title: "旅立ちの風・商会の懸念", text: "ローザ商会のエレーナ・セリンを訪ね、闇市場で変色魔石が買い漁られている実態を知る。" },
               { code: "ep57-58", title: "路地裏の感知・裏街のネズミ", text: "廃石感知で変色魔石の取引現場を特定し、情報屋コドー・ラシュと遭遇して協力者に加える。" }
             ],
-            items: ["変色魔石"]
+            items: ["変色魔石"],
+            showInWest: true,
+            westCoords: { x: 18, y: 37 },
+            westLabelPos: "top"
           }
         ];
 
@@ -2086,6 +2125,27 @@ async function buildNovelsPages() {
         let currentLayer = "surface";
         let currentLabelMode = "all";
         let activeLocationId = null;
+
+        function isShownInMode(loc, mode) {
+          if (mode === "arden") return loc.showInZoom !== false;
+          if (mode === "west") return loc.showInWest === true;
+          if (mode === "east") return loc.showInEast === true;
+          return loc.showInWorld !== false;
+        }
+
+        function getModeCoords(loc, mode) {
+          if (mode === "arden") return loc.zoomCoords;
+          if (mode === "west") return loc.westCoords;
+          if (mode === "east") return loc.eastCoords;
+          return loc.coords;
+        }
+
+        function getModeLabelPos(loc, mode) {
+          if (mode === "arden") return loc.zoomLabelPos || loc.labelPos;
+          if (mode === "west") return loc.westLabelPos || loc.labelPos;
+          if (mode === "east") return loc.eastLabelPos || loc.labelPos;
+          return loc.labelPos;
+        }
 
         function renderPins() {
           const container = document.getElementById("wm-pins-layer");
@@ -2096,19 +2156,19 @@ async function buildNovelsPages() {
           MAP_LOCATIONS.forEach(loc => {
             if (currentLayer === "surface" && loc.layer === "underground") return;
             if (currentLayer === "underground" && loc.layer === "surface") return;
-            if (currentMapMode === "arden" && loc.showInZoom === false) return;
+            if (!isShownInMode(loc, currentMapMode)) return;
 
             const isActive = activeLocationId === loc.id;
 
             const pin = document.createElement("div");
-            const labelPos = currentMapMode === "arden" ? (loc.zoomLabelPos || loc.labelPos) : loc.labelPos;
+            const labelPos = getModeLabelPos(loc, currentMapMode);
             let pinClasses = ["wm-pin", "pos-" + (labelPos || "top"), "layer-" + loc.layer];
             if (isActive) pinClasses.push("active");
             if (currentLabelMode === "select" && !isActive) pinClasses.push("hide-label");
 
             pin.className = pinClasses.join(" ");
 
-            const pos = currentMapMode === "arden" ? loc.zoomCoords : loc.coords;
+            const pos = getModeCoords(loc, currentMapMode);
             pin.style.left = pos.x + "%";
             pin.style.top = pos.y + "%";
 
@@ -2180,10 +2240,16 @@ async function buildNovelsPages() {
           currentMapMode = mode;
           document.getElementById("btn-view-world").classList.toggle("active", mode === "world");
           document.getElementById("btn-view-arden").classList.toggle("active", mode === "arden");
+          document.getElementById("btn-view-west").classList.toggle("active", mode === "west");
+          document.getElementById("btn-view-east").classList.toggle("active", mode === "east");
 
           const bgImg = document.getElementById("wm-map-bg");
           if (mode === "arden") {
             bgImg.src = "/blog/images/arden_region_detail_map.webp";
+          } else if (mode === "west") {
+            bgImg.src = "/blog/images/western_arden_carn_road_map.webp";
+          } else if (mode === "east") {
+            bgImg.src = "/blog/images/demon_realm_beyond_ruined_castle_map.webp";
           } else {
             bgImg.src = "/blog/images/eldaria_world_map.webp";
           }
