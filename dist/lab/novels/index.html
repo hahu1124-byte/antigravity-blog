@@ -13,26 +13,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
-    </script>
+    <script>(function(){try{var t=localStorage.getItem("gp-theme");t&&document.documentElement.setAttribute("data-theme",t)}catch{}})();
+</script>
 </head>
 <body>
     <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
-    <script>
-        (function(){
-            var btn=document.getElementById('themeToggle');
-            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
-            update();
-            btn.addEventListener('click',function(){
-                var cur=document.documentElement.getAttribute('data-theme');
-                var next=cur==='light'?'dark':'light';
-                document.documentElement.setAttribute('data-theme',next);
-                try{localStorage.setItem('gp-theme',next)}catch(e){}
-                update();
-            });
-        })()
-    </script>
+    <script>(function(){var e=document.getElementById("themeToggle");function n(){var t=document.documentElement.getAttribute("data-theme");e.textContent=t==="light"?"\u{1F319}":"\u2600\uFE0F"}n(),e.addEventListener("click",function(){var t=document.documentElement.getAttribute("data-theme"),m=t==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",m);try{localStorage.setItem("gp-theme",m)}catch{}n()})})();
+</script>
 
     <header class="lab-header">
         <a href="/lab/" class="lab-back">← LABに戻る</a>
@@ -155,9 +142,7 @@ AI執筆は「書く速度が上がる」だけでなく、<strong>自分一人�
 
         <section class="novels-section novels-markdown">
             <h2>現在のフォルダ構成</h2>
-<!-- このファイルは h:/gravity/.agent/scripts/novels/update-novels-structure.ps1 が自動生成します。
-     直接編集しても次回のスクリプト実行で上書き消失します。
-     ファイル説明の追加・修正は同スクリプトの $fileDescriptions マップに対して行ってください。 -->
+
 <pre><code>novels/
 ├── world-setting/              # 共通世界観「エルダリア」
 │   ├── lore/                   # 世界の法則・歴史・魔法体系
@@ -214,10 +199,10 @@ AI執筆は「書く速度が上がる」だけでなく、<strong>自分一人�
             ├── 51-60/               # ep51~ep60
             ├── 61-70/               # ep61~ep70
             └── 71-80/
-                ├── ... (5 older files)
-                ├── ep76T.md
-                ├── ep77T.md
-                ├── ep78T.md
+                ├── ... (8 older files)
+                ├── ep79A.md
+                ├── ep79C.md
+                ├── ep79T.md
                 └── archive/
                     ├── ... (15 older files)
                     ├── ep78A.md
