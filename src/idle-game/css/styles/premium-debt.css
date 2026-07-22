@@ -1,0 +1,254 @@
+/* --- Phase 4: プレミアムバッジ --- */
+.premium-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.15);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  text-align: center;
+  animation: premiumGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes premiumGlow {
+  0% {
+    box-shadow: 0 0 4px rgba(167, 139, 250, 0.2);
+  }
+
+  100% {
+    box-shadow: 0 0 12px rgba(167, 139, 250, 0.4);
+  }
+}
+
+/* --- 借金セクション（スティッキーバー） --- */
+#debtSection {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid rgba(255, 51, 102, 0.3);
+  animation: debtPulse 2s ease-in-out infinite alternate;
+}
+
+#debtSection.hidden {
+  display: none;
+}
+
+@keyframes debtPulse {
+  0% {
+    border-color: rgba(255, 51, 102, 0.3);
+  }
+
+  100% {
+    border-color: rgba(255, 51, 102, 0.6);
+  }
+}
+
+.debt-sticky-bar {
+  padding: 6px 4px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 51, 102, 0.08),
+    rgba(255, 136, 0, 0.05)
+  );
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.debt-sticky-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.debt-sticky-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent-red);
+}
+
+.debt-value {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.debt-value.danger {
+  color: var(--accent-red);
+  text-shadow: 0 0 6px rgba(255, 51, 102, 0.4);
+}
+
+.debt-row-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.debt-row-rate {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--accent-orange);
+  text-shadow: 0 0 4px rgba(255, 136, 0, 0.3);
+}
+
+.debt-row-detail {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.debt-sticky-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+}
+
+.debt-btn-mini {
+  padding: 5px 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    transform 0.1s,
+    opacity 0.2s;
+  white-space: nowrap;
+}
+
+.debt-btn-mini:active {
+  transform: scale(0.95);
+}
+
+.debt-btn-mini.repay-partial {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+  color: #000;
+}
+
+.debt-btn-mini.repay {
+  background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+  color: #000;
+}
+
+.debt-btn-mini.loan {
+  background: linear-gradient(135deg, var(--accent-orange), var(--accent-red));
+  color: #fff;
+}
+
+.debt-btn-mini:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* --- バージョン表示 --- */
+.version-row {
+  border: none;
+  background: transparent;
+}
+
+.info-version {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+/* --- レート選択 --- */
+#rateSection {
+  margin-top: 20px;
+}
+
+#rateSection.hidden {
+  display: none;
+}
+
+#rateGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.rate-btn {
+  padding: 12px 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rate-btn:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--accent-cyan);
+}
+
+.rate-btn.active {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 229, 255, 0.15),
+    rgba(0, 255, 136, 0.1)
+  );
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+/* --- 機種選択ボタン --- */
+.info-icon-btn {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 229, 255, 0.2),
+    rgba(0, 255, 136, 0.15)
+  );
+  border: 1px solid var(--accent-cyan);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-left: 8px;
+  transition: all 0.2s;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.2);
+}
+
+.info-icon-btn:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 229, 255, 0.35),
+    rgba(0, 255, 136, 0.25)
+  );
+  box-shadow: var(--glow-cyan);
+  transform: translateY(-1px);
+}
+
+/* --- 機種情報ポップアップ: ロック機種 --- */
+.machine-info-item.locked {
+  opacity: 0.8;
+  border: 1px solid rgba(144, 144, 176, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: rgba(26, 26, 53, 0.6);
+}
+
+.machine-info-item.locked .machine-info-name {
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.machine-info-item.locked .machine-info-desc {
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
