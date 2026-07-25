@@ -67,6 +67,7 @@ novels/
             ├── 71-80/               # ep71~ep80
             └── 81-90/
                 ├── ep81T.md
+                ├── ep82A.md
                 └── archive/
                     ├── ep81A.md
                     └── ep81C.md
