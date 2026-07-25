@@ -68,6 +68,7 @@ novels/
             └── 81-90/
                 ├── ep81T.md
                 ├── ep82A.md
+                ├── ep82C.md
                 └── archive/
                     ├── ep81A.md
                     └── ep81C.md
