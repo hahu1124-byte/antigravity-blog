@@ -468,9 +468,11 @@ export async function buildNovelsPages() {
             <div class="wm-control-group">
                 <span class="wm-control-label">表示範囲:</span>
                 <button id="btn-view-world" class="wm-btn active" onclick="switchMapMode('world')">🗺️ エルダリア全体図</button>
-                <button id="btn-view-arden" class="wm-btn" onclick="switchMapMode('arden')">📍 アルデン東部・廃境拡大</button>
-                <button id="btn-view-west" class="wm-btn" onclick="switchMapMode('west')">🌾 西部拡大（カルン街道）</button>
-                <button id="btn-view-east" class="wm-btn" onclick="switchMapMode('east')">🌫️ 東部拡張（廃境最深部）</button>
+                <!-- 2026-07-26: 地理設定確定に伴いworld全体図の配置を修正。拡大図3種（arden/west/east）の背景画像は
+                     旧配置のまま未更新のため、新しい画像ができるまでボタンを非表示にする（todo.md参照） -->
+                <button id="btn-view-arden" class="wm-btn" style="display:none" onclick="switchMapMode('arden')">📍 アルデン東部・廃境拡大</button>
+                <button id="btn-view-west" class="wm-btn" style="display:none" onclick="switchMapMode('west')">🌾 西部拡大（カルン街道）</button>
+                <button id="btn-view-east" class="wm-btn" style="display:none" onclick="switchMapMode('east')">🌫️ 東部拡張（廃境最深部）</button>
             </div>
             <div class="wm-control-group">
                 <span class="wm-control-label">構造レイヤー:</span>
@@ -514,7 +516,6 @@ export async function buildNovelsPages() {
                     <p class="wm-sidebar-desc">地図上のノード（ピン）または下の地点一覧をクリックすると、その土地の歴史・地理概要、関連する登場人物、エピソードの記憶が表示されます。</p>
                     <div class="wm-empty-hint">
                         💡 <strong>操作ヒント:</strong><br>
-                        ・「アルデン東部・廃境拡大」で廃城やグラウド周辺にフォーカスできます。<br>
                         ・「地下排水路・倉庫街」ボタンで、地上と地下の隠し構造が切り替わります。<br>
                         ・ピンが重なって選択しづらい場合は、下の「地点一覧」から選んでください。
                     </div>
@@ -536,7 +537,7 @@ export async function buildNovelsPages() {
             nameEn: "Graud City",
             category: "市街・都市",
             layer: "both",
-            coords: { x: 72, y: 37 },
+            coords: { x: 64, y: 53 },
             labelPos: "left",
             zoomCoords: { x: 19, y: 55 },
             zoomLabelPos: "right",
@@ -556,7 +557,7 @@ export async function buildNovelsPages() {
             nameEn: "Underground Warehouses & Sewers",
             category: "地下・遺構",
             layer: "underground",
-            coords: { x: 72, y: 42 },
+            coords: { x: 64, y: 58 },
             labelPos: "bottom",
             zoomCoords: { x: 25, y: 66 },
             zoomLabelPos: "right",
@@ -576,7 +577,7 @@ export async function buildNovelsPages() {
             nameEn: "Arkane Temple",
             category: "神聖領域・解呪",
             layer: "surface",
-            coords: { x: 76, y: 39 },
+            coords: { x: 67, y: 55 },
             labelPos: "top",
             zoomCoords: { x: 45, y: 58 },
             zoomLabelPos: "top",
@@ -595,7 +596,7 @@ export async function buildNovelsPages() {
             nameEn: "The Obsidian Wastes",
             category: "危険地帯・黒岩",
             layer: "surface",
-            coords: { x: 87, y: 27 },
+            coords: { x: 84, y: 27 },
             labelPos: "bottom",
             zoomCoords: { x: 57, y: 27 },
             zoomLabelPos: "bottom",
@@ -617,7 +618,7 @@ export async function buildNovelsPages() {
             nameEn: "The Demon Realm",
             category: "旧魔国・無主の地",
             layer: "surface",
-            coords: { x: 84, y: 44 },
+            coords: { x: 90, y: 44 },
             labelPos: "left",
             zoomCoords: { x: 70, y: 60 },
             zoomLabelPos: "top",
@@ -636,7 +637,7 @@ export async function buildNovelsPages() {
             nameEn: "Ruined Castle (Dalnain Fortress)",
             category: "廃城・封石の間",
             layer: "surface",
-            coords: { x: 88, y: 45 },
+            coords: { x: 87, y: 45 },
             labelPos: "right",
             zoomCoords: { x: 79, y: 54 },
             zoomLabelPos: "right",
@@ -794,7 +795,7 @@ export async function buildNovelsPages() {
             nameEn: "Carn Village",
             category: "村・出身地",
             layer: "surface",
-            coords: { x: 63, y: 39 },
+            coords: { x: 73, y: 39 },
             labelPos: "top",
             zoomCoords: { x: 0, y: 0 },
             zoomLabelPos: "top",
@@ -817,7 +818,7 @@ export async function buildNovelsPages() {
             nameEn: "Bortan",
             category: "交易町・最寄りの町",
             layer: "surface",
-            coords: { x: 66, y: 40 },
+            coords: { x: 70, y: 40 },
             labelPos: "bottom",
             zoomCoords: { x: 0, y: 0 },
             zoomLabelPos: "bottom",
@@ -840,7 +841,7 @@ export async function buildNovelsPages() {
             nameEn: "Worga",
             category: "地方都市",
             layer: "surface",
-            coords: { x: 69, y: 39 },
+            coords: { x: 67, y: 39 },
             labelPos: "top",
             zoomCoords: { x: 0, y: 0 },
             zoomLabelPos: "top",
