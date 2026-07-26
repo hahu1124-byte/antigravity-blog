@@ -984,7 +984,7 @@ export async function buildNovelsPages() {
 
           const bgImg = document.getElementById("wm-map-bg");
           if (mode === "arden") {
-            bgImg.src = "/blog/images/eastern_arden_detail_map.webp";
+            bgImg.src = "/blog/images/arden_region_detail_map.webp";
           } else if (mode === "west") {
             bgImg.src = "/blog/images/western_arden_carn_road_map.webp";
           } else if (mode === "east") {
