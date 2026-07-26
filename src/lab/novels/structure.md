@@ -68,10 +68,11 @@ novels/
             └── 81-90/
                 ├── ep81T.md
                 ├── ep82T.md
+                ├── ep83T.md
                 └── archive/
-                    ├── ... (2 older files)
-                    ├── ep82A.md
-                    └── ep82C.md
+                    ├── ... (4 older files)
+                    ├── ep83A.md
+                    └── ep83C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
