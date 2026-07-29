@@ -66,14 +66,14 @@ novels/
             ├── 61-70/               # ep61~ep70
             ├── 71-80/               # ep71~ep80
             └── 81-90/
-                ├── ... (3 older files)
-                ├── ep84A.md
-                ├── ep84C.md
-                ├── ep84T.md
+                ├── ... (5 older files)
+                ├── ep85C.md
+                ├── ep85T.md
+                ├── setting-ch3-reveal.md
                 └── archive/
-                    ├── ... (4 older files)
-                    ├── ep83A.md
-                    └── ep83C.md
+                    ├── ... (6 older files)
+                    ├── ep84A.md
+                    └── ep84C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
