@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発者ピックアップ 第3回 | LAB | Gravity Portal</title>
+    <meta name="description"
+        content="AI開発者ピックアップ第3回。OpenHands 68.5k★、Cline 58.6k★の急成長、Devinのプラットフォーム化、OSSの光と影を詳細解説。">
+    <meta property="og:title" content="AI開発者ピックアップ 第3回">
+    <meta property="og:description" content="OSSコーディングエージェントの成長と課題。OpenHands、Cline、Roo Code の最新動向に加え、Devin分析も。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-developers/v3/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-developers.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/og-lab-ai-developers.png">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-developers/v3/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>
+        (function () { try { var t = localStorage.getItem('gp-theme'); if (t) document.documentElement.setAttribute('data-theme', t) } catch (e) { } })()
+    </script>
+</head>
+
+<body>
+    <!-- テーマトグル -->
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+
+    <!-- ヘッダー -->
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">👤 AI開発者ピックアップ 第3回</h1>
+    </header>
+
+    <main class="lab-content">
+        <!-- ヒーロー -->
+        <section class="lab-hero">
+            <div class="lab-hero-icon">👤</div>
+            <h1>OSSコーディングエージェント — 成長と現実</h1>
+            <p><a href="/lab/ai-developers/v2/" style="color:inherit;text-decoration:underline">第2回（昨日）</a>で紹介したOSSプロジェクトが、<strong>もう次のフェーズに突入している</strong>。<br>
+                Roo CodeはOrchestratorモードを追加し、OpenHandsはSWE-Bench 50%を突破し、<br>
+                ClineはBYOKモデルでエンタープライズを制圧中。<br><br>
+                第3回では成長の数字だけでなく、<strong>OSSエコシステムが直面する構造的課題</strong>にも踏み込みます。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月12日更新</span>
+                <span>🔧 7プロジェクト＋Devin</span>
+                <span>📝 <a href="/lab/ai-developers/v2/"
+                        style="color:inherit;text-decoration:underline">第2回（3/11）はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- ===== GitHub Stars ランキング ===== -->
+        <section class="lab-section">
+            <h2>⭐ OSSコーディングエージェント人気ランキング</h2>
+            <p>2026年3月時点のGitHub Stars比較。前回からの急成長ぶりが顕著。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>順位</th>
+                            <th>プロジェクト</th>
+                            <th>⭐ Stars</th>
+                            <th>ライセンス</th>
+                            <th>特徴</th>
+                            <th>得意分野</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>🥇 1位</td>
+                            <td class="tool-name">OpenHands</td>
+                            <td>~68,500</td>
+                            <td>MIT</td>
+                            <td>クラウドエージェント基盤</td>
+                            <td>GitHub Issue自動修正</td>
+                        </tr>
+                        <tr>
+                            <td>🥈 2位</td>
+                            <td class="tool-name">Cline</td>
+                            <td>~58,600</td>
+                            <td>Apache-2.0</td>
+                            <td>Plan & Act ワークフロー</td>
+                            <td>精密な段階的作業</td>
+                        </tr>
+                        <tr>
+                            <td>🥉 3位</td>
+                            <td class="tool-name">Roo Code</td>
+                            <td>~22,500</td>
+                            <td>Apache-2.0</td>
+                            <td>ロール別5モード</td>
+                            <td>高速・大規模タスク</td>
+                        </tr>
+                        <tr>
+                            <td>4位</td>
+                            <td class="tool-name">Aider</td>
+                            <td>安定</td>
+                            <td>Apache-2.0</td>
+                            <td>Git自動コミット</td>
+                            <td>個人開発・安定性</td>
+                        </tr>
+                        <tr>
+                            <td>5位</td>
+                            <td class="tool-name">Continue.dev</td>
+                            <td>安定</td>
+                            <td>Apache-2.0</td>
+                            <td>ローカルAI Copilot</td>
+                            <td>プライバシー・オフライン</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ===== OSS選び方ガイド ===== -->
+        <section class="lab-section">
+            <h2>🧭 OSSコーディングエージェント 選び方ガイド</h2>
+            <p>用途に応じて最適なOSSツールが異なります。「どれが一番」ではなく「何に使うか」で選びましょう。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>用途</th>
+                            <th>おすすめ</th>
+                            <th>理由</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>GitHub Issue自動修正</td>
+                            <td class="tool-name">OpenHands</td>
+                            <td>SWE-Bench 50%突破。サンドボックスで安全に実行</td>
+                        </tr>
+                        <tr>
+                            <td>精密な段階的コーディング</td>
+                            <td class="tool-name">Cline</td>
+                            <td>Plan and Actで暴走防止。初心者にも安心</td>
+                        </tr>
+                        <tr>
+                            <td>大規模・高速タスク</td>
+                            <td class="tool-name">Roo Code</td>
+                            <td>5モード分離でAI精度向上。全体設計→実装の自動化</td>
+                        </tr>
+                        <tr>
+                            <td>プライバシー最優先</td>
+                            <td class="tool-name">Cline / Continue.dev</td>
+                            <td>ローカル完結。コードがサーバーに送信されない</td>
+                        </tr>
+                        <tr>
+                            <td>安定した日常利用</td>
+                            <td class="tool-name">Aider</td>
+                            <td>派手さはないが確実に動く。Git自動コミットが便利</td>
+                        </tr>
+                        <tr>
+                            <td>エンタープライズ向け</td>
+                            <td class="tool-name">OpenHands / Cline</td>
+                            <td>セキュリティ・スケーラビリティ・コンプライアンス対応</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ===== 注目プロジェクト詳細 ===== -->
+        <section class="lab-section">
+            <h2>🔍 注目プロジェクト詳細分析</h2>
+
+            <!-- OpenHands -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🤲</div>
+                    <div class="dev-info">
+                        <h3>OpenHands</h3>
+                        <div class="dev-role">クラウドコーディングエージェントプラットフォーム — ⭐ 68,500</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 第3回アップデート</h3>
+                    <p>旧名OpenDevin。GitHub issue解決率<strong>50%以上</strong>を達成した唯一のOSSプラットフォーム。
+                        サンドボックス内でコード変更・コマンド実行・Web閲覧・API操作を安全に実行する仮想開発者。</p>
+                    <ul>
+                        <li><strong>SWE-Bench 50%突破</strong> — 実際のGitHub issueの50%以上を自律解決。業界最高水準</li>
+                        <li><strong>100%透明なエージェント推論</strong> — MITライセンスでコード全公開。エージェントの思考過程を完全追跡可能</li>
+                        <li><strong>モジュラーアーキテクチャ</strong> — カスタムワークフロー、外部ツール統合が柔軟。APIファースト設計</li>
+                        <li><strong>Docker/Kubernetes隔離</strong> — エージェントが隔離環境で実行されるため、本番環境への影響なし</li>
+                        <li><strong>モデルアグノスティック</strong> — 特定のLLMに依存しない設計。用途に応じてモデル選択可能</li>
+                        <li><strong>用途多様化</strong> — コード生成・デバッグ・テスト・大規模リファクタリング・マージコンフリクト解決・ドキュメント生成・レガシーコード近代化に対応</li>
+                        <li><strong>ヘッドレスモード</strong> — スクリプタブルな自動化に対応。CI/CDパイプラインに組み込み可能</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声（X・Reddit・GitHub）</h3>
+                    <ul>
+                        <li>✅「GitHubのissue自動修正が本当に動く。他のツールとは次元が違う」</li>
+                        <li>✅「ブログ移行作業をOpenHandsに任せたら、高レベルの指示だけで重労働をこなしてくれた」</li>
+                        <li>⚠️「Docker環境のセットアップが初心者にはハードル高い」</li>
+                        <li>⚠️「大規模プロジェクトではトークン消費が激しく、API費用がかさむ」（ループ回数に比例）</li>
+                        <li>⚠️「明確なテスト駆動タスクには強いが、曖昧な要件には弱い。人間のレビューは必須」</li>
+                        <li>⚠️「Git操作やコードレビューコメント対応で直接入力が必要な場合がある」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <a href="https://github.com/All-Hands-AI/OpenHands" target="_blank" rel="noopener noreferrer"
+                            class="dev-link">🐙 GitHub</a>
+                        <a href="https://openhands.dev/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐
+                            公式サイト</a>
+                        <span class="badge badge-free">MIT License</span>
+                        <span class="badge badge-hot">🔥 SWE-Bench 50%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cline -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🔗</div>
+                    <div class="dev-info">
+                        <h3>Cline</h3>
+                        <div class="dev-role">自律型VSCodeエージェント — ⭐ 58,600</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 第3回アップデート</h3>
+                    <p>ハッカソンプロジェクトから始まり、今やVS Code AI拡張の代名詞に成長。
+                        「BYOK（Bring Your Own Key）」モデルで、ユーザーの自前APIキーで動作する透明な設計が支持の要因。</p>
+                    <ul>
+                        <li><strong>数百万インストール達成</strong> — VS Code Marketplaceでトップクラスのインストール数</li>
+                        <li><strong>BYOKモデルが支持される理由</strong> — Claude、GPT-4、Gemini等を自前APIキーで利用。サブスクリプション不要でコスト管理可能。「透明な料金」がCursorとの最大差別化</li>
+                        <li><strong>Plan and Actの進化</strong> — 計画→実行の2フェーズワークフロー。開発者のステップバイステップ承認で「暴走」を抑制。初心者にも推薦</li>
+                        <li><strong>クライアントサイド完結</strong> — コードがローカルから離れない設計。プライバシー重視の企業・セキュリティチームに支持</li>
+                        <li><strong>MCP Marketplace</strong> — Model Context Protocol対応のプラグインマーケットプレイス。エンタープライズのデータソース・ドキュメント接続に強み</li>
+                        <li><strong>エンタープライズ採用拡大</strong> — 精密な制御性と透明性が大企業の開発チームに評価され、導入事例が増加中</li>
+                        <li><strong>VS Code + JetBrains対応</strong> — 両主要IDEをカバー</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声（X・Reddit）</h3>
+                    <ul>
+                        <li>✅「BYOKなので料金が透明。高いサブスクに悩まされない」</li>
+                        <li>✅「Plan and Actのおかげで『暴走』が少ない。安心して使える」</li>
+                        <li>✅「Cursorより安定していて、統合が洗練されている」</li>
+                        <li>⚠️「APIキー管理が面倒。初心者はセットアップで詰まる」</li>
+                        <li>⚠️「Roo Codeに比べてモードのカスタマイズ性が低い」</li>
+                        <li>⚠️「BYOKだからこそ、API費用が予想以上にかさむケースがある」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <a href="https://github.com/cline/cline" target="_blank" rel="noopener noreferrer"
+                            class="dev-link">🐙 GitHub</a>
+                        <a href="https://cline.bot/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐
+                            公式サイト</a>
+                        <span class="badge badge-free">Apache-2.0</span>
+                        <span class="badge badge-type">BYOK</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roo Code -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🦘</div>
+                    <div class="dev-info">
+                        <h3>Roo Code</h3>
+                        <div class="dev-role">AIソフトウェアエンジニアリングチーム — ⭐ 22,500</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 第3回アップデート</h3>
+                    <p>Clineのフォークから独自進化を遂げ、「5モード体制」でAIの役割を明確に分離するアプローチが支持拡大中。
+                        「ジュニアエンジニア」のように、全体の機能構築やマルチステップワークフローをこなす。</p>
+                    <ul>
+                        <li><strong>5モード体制</strong> — Architect（設計）、Code（実装）、Ask（質問）、Debug（デバッグ）、Orchestrator（統括）。目的に特化したプロンプトで精度向上・ハルシネーション抑制</li>
+                        <li><strong>Orchestratorモード（新）</strong> — 複数モードを統括し、複雑なタスクを適切なモードに振り分ける上位エージェント</li>
+                        <li><strong>クラウドエージェント対応</strong> — GitHub・Webから自律的に動作するクラウドエージェント。チームの並列開発を強力に支援</li>
+                        <li><strong>JetBrains対応開発中</strong> — VS Code以外のIDEへの展開を推進</li>
+                        <li><strong>カスタムモード</strong> — 各モードの役割・プロンプトを自由にカスタマイズ可能。チーム独自のワークフローを構築</li>
+                        <li><strong>高速実行</strong> — 開発者のベンチマークで複雑なタスクはClineより高速との報告。スキャフォールディングや大規模アーキテクチャ更新に強み</li>
+                        <li><strong>自動デバッグ・パッチ生成</strong> — バグの自動検出→修正パッチ生成→テスト実行のサイクル</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声（X・Reddit）</h3>
+                    <ul>
+                        <li>✅「モード分離が神。設計と実装を分けるだけでAIの精度が段違い」</li>
+                        <li>✅「Clineより柔軟にカスタマイズできる」</li>
+                        <li>✅「クラウドエージェントで並列タスクが可能。チーム開発が加速」</li>
+                        <li>⚠️「Clineからのフォークなので、長期的な独自性が心配」</li>
+                        <li>⚠️「ドキュメントがまだ追いついていない部分がある」</li>
+                        <li>⚠️「Clineに比べて学習曲線がやや急」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <a href="https://github.com/RooVetGit/Roo-Code" target="_blank" rel="noopener noreferrer"
+                            class="dev-link">🐙 GitHub</a>
+                        <a href="https://roocode.com/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐
+                            公式サイト</a>
+                        <span class="badge badge-free">Apache-2.0</span>
+                        <span class="badge badge-hot">🔥 急成長</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Devin -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🧠</div>
+                    <div class="dev-info">
+                        <h3>Devin（Cognition）</h3>
+                        <div class="dev-role">自律型AIソフトウェアエンジニア — 商用</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 第3回アップデート</h3>
+                    <p>Windsurf買収後、IDE+自律エージェントの統合プラットフォームとして本格始動。
+                        「AIソフトウェアエンジニア」として最も完成度の高い商用ソリューション。</p>
+                    <ul>
+                        <li><strong>Windsurf IDE統合</strong> — IDE（対話的コーディング）+ Devin（自律的タスク実行）の「完全AI開発ソリューション」</li>
+                        <li><strong>PWA対応</strong> — Progressive Web Appとしてインストール可能。ブラウザからのシームレスアクセス</li>
+                        <li><strong>Linear ネイティブ統合</strong> — プロジェクト管理→コード→レビューの全自動ワークフロー</li>
+                        <li><strong>永続メモリ</strong> — セッション跨ぎでコードベース理解を保持。長時間タスクでも文脈喪失なし</li>
+                        <li><strong>自律バグ修正</strong> — バグの発見→修正→テスト→PRまでを自律実行。コードマイグレーションにも対応</li>
+                        <li><strong>ARR $82M + 350+ エンタープライズ顧客</strong> — Windsurf買収で獲得した大規模顧客基盤</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声</h3>
+                    <ul>
+                        <li>✅「本当に人間のエンジニアのようにバグを直してくれる」</li>
+                        <li>⚠️「エンタープライズ価格が公開されておらず、個人開発者には手が出ない」</li>
+                        <li>⚠️「OSSではないため、ブラックボックス的な不安がある」</li>
+                        <li>⚠️「Windsurf買収後の統合がまだ不完全」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <a href="https://devin.ai/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐
+                            公式サイト</a>
+                        <span class="badge badge-paid">商用</span>
+                        <span class="badge badge-type">Windsurf統合</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== Cline vs Roo Code 比較 ===== -->
+        <section class="lab-section">
+            <h2>🆚 Cline vs Roo Code — フォーク兄弟の比較</h2>
+            <p>同じ血統から分かれた2つのプロジェクト。設計思想の違いが明確に。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>項目</th>
+                            <th>Cline</th>
+                            <th>Roo Code</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>設計思想</td>
+                            <td>制御・安全・透明性</td>
+                            <td>自律性・速度・大規模実行</td>
+                        </tr>
+                        <tr>
+                            <td>開発者ロール</td>
+                            <td>対話的アシスタント</td>
+                            <td>ジュニアエンジニアとして自律動作</td>
+                        </tr>
+                        <tr>
+                            <td>タスク承認</td>
+                            <td>ステップバイステップ承認</td>
+                            <td>高自律で一括実行</td>
+                        </tr>
+                        <tr>
+                            <td>モード数</td>
+                            <td>Plan & Act の2モード</td>
+                            <td>5モード（+カスタム）</td>
+                        </tr>
+                        <tr>
+                            <td>速度</td>
+                            <td>正確だが慎重</td>
+                            <td>複雑タスクで高速</td>
+                        </tr>
+                        <tr>
+                            <td>実行環境</td>
+                            <td>完全ローカル</td>
+                            <td>ローカル + クラウドエージェント</td>
+                        </tr>
+                        <tr>
+                            <td>初心者向き</td>
+                            <td>✅ 推薦</td>
+                            <td>やや学習曲線あり</td>
+                        </tr>
+                        <tr>
+                            <td>IDE対応</td>
+                            <td>VS Code + JetBrains</td>
+                            <td>VS Code（JetBrains開発中）</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p><strong>結論:</strong> 「安全に確実に」ならCline、「速く大きく」ならRoo Code。</p>
+        </section>
+
+        <!-- ===== 前回プロジェクトの進展 ===== -->
+        <section class="lab-section">
+            <h2>📈 前回プロジェクトの進展</h2>
+            <p><a href="/lab/ai-developers/v2/" style="color:var(--accent);text-decoration:underline">第2回</a>で紹介したプロジェクトの最新状況。</p>
+
+            <div class="tool-card">
+                <div class="tool-card-body">
+                    <h3>💻 OpenCode</h3>
+                    <p>月間500万ユーザーを維持。75以上のモデル対応とベンダーロックインなしの方針は変わらず。
+                        ローカルモデル対応の強化で、プライバシー重視コミュニティでの支持がさらに拡大中。</p>
+
+                    <h3>🔧 Aider</h3>
+                    <p>成熟したOSSとして安定。Git自動コミットが個人開発者のメインツールとして定着。
+                        「派手さはないが確実に動く」という信頼性が最大の武器。</p>
+
+                    <h3>🔌 Continue.dev</h3>
+                    <p>Ollama連携でプライバシー完全保護。VS Code / JetBrains双方のIDE対応が強み。
+                        ローカルAIを重視する企業での採用が増加中。データ主権を重視するチームの選択肢として確立。</p>
+
+                    <h3>🎨 Stable Diffusion / FLUX.2</h3>
+                    <p>画像生成分野は引き続き活発。カスタマイズ性（SD）vs プロダクション品質（FLUX.2）の棲み分けが定着。</p>
+
+                    <h3>🎵 ACE-Step</h3>
+                    <p>v1.5でVRAM 4GB未満対応を実現済み。軽量環境でのAI音楽生成の定番として地位を確立。
+                        4分楽曲を20秒で生成する速度は依然競合をリード。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== OSSエコシステムの課題 ===== -->
+        <section class="lab-section">
+            <h2>⚠️ OSSコーディングエージェントの構造的課題</h2>
+            <p>成長の裏側にある問題を整理。「光」だけでなく「影」も知ることが重要です。</p>
+            <div class="summary-box">
+                <h3>成長の影に潜む6つの課題</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">💸 BYOKの罠</div>
+                        <div class="summary-value">API費用の不透明さ</div>
+                        <p>サブスクは不要だが、LLM APIの利用料が予想以上にかさむケースが続出。$100/月を超える報告も。ループ回数に比例してコストが増大</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🔧 セットアップ障壁</div>
+                        <div class="summary-value">初心者には高ハードル</div>
+                        <p>APIキー取得・環境構築・Docker設定など、商用ツールに比べて導入が複雑。「5分で使い始められる」Cursorとの差は歴然</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🔄 フォーク分裂</div>
+                        <div class="summary-value">Cline vs Roo Code問題</div>
+                        <p>人気プロジェクトのフォークが独自進化。コミュニティの分裂と開発リソースの分散リスク</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🛡️ 生成コードの脆弱性</div>
+                        <div class="summary-value">45%に脆弱性の可能性</div>
+                        <p>OSSツール自体は安全でも、生成されるコードの品質はLLMに依存。セキュリティスキャン機能の組み込みが急務</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">📉 曖昧さへの弱さ</div>
+                        <div class="summary-value">「よしなに」が苦手</div>
+                        <p>明確なテスト・仕様があれば強力だが、曖昧な要件定義には弱い。人間のレビューは依然として必須</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🏢 商用ツールとの競争</div>
+                        <div class="summary-value">エコシステムの差</div>
+                        <p>Cursor（$500M+ ARR）やCopilot（42%シェア）の資金力に対して、OSSのメンテナンスリソースは限られる</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 この記事について</h2>
+            <p>本記事の情報は<strong>2026年3月12日時点</strong>のものです。過去の調査は<a href="/lab/ai-developers/v1/"
+                    style="color:var(--accent);text-decoration:underline">第1回（3/9）</a>・<a href="/lab/ai-developers/v2/"
+                    style="color:var(--accent);text-decoration:underline">第2回（3/11）</a>をご覧ください。</p>
+            <p>GitHub Stars数は調査時点の概数です。当サイトも<strong>AIペアプログラミング（Antigravity）</strong>を活用した個人開発プロジェクトです。</p>
+            <p>開発者の声はX（Twitter）、Reddit、Medium、GitHub Issues等から収集しています。</p>
+        </section>
+    </main>
+
+    <!-- フッター -->
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-developers/v1/">👤 第1回</a>
+            <a href="/lab/ai-developers/v2/">👤 第2回</a>
+            <a href="/lab/ai-tools/v3/">🛠️ ツール比較 第3回</a>
+            <a href="/lab/ai-trends/v3/">📊 トレンド 第3回</a>
+        </nav>
+    </footer>
+
+    <!-- テーマトグルスクリプト -->
+    <script>
+            (function () {
+                var btn = document.getElementById('themeToggle');
+                function update() { var t = document.documentElement.getAttribute('data-theme'); btn.textContent = t === 'light' ? '🌙' : '☀️' }
+                update();
+                btn.addEventListener('click', function () {
+                    var cur = document.documentElement.getAttribute('data-theme');
+                    var next = cur === 'light' ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', next);
+                    try { localStorage.setItem('gp-theme', next) } catch (e) { }
+                    update();
+                });
+            })()
+    </script>
+</body>
+
+</html>

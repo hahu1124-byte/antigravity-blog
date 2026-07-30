@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発トレンド 2026年3月 第4回 | LAB | Gravity Portal</title>
+    <meta name="description"
+        content="AI開発トレンド第4回。Claude長文サーチャージ撤廃、DeepSeek V4 1兆パラメータ公開、エージェントAI40%搭載予測、日本政府Gennai始動、Nvidia Rubinロードマップを徹底解説。">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-trends/v4/">
+    <link rel="icon" href="/favicon.ico">
+    <meta property="og:title" content="AI開発トレンド 2026年3月 第4回 | Gravity Portal">
+    <meta property="og:description"
+        content="コストの壁が崩壊。Claude長文無料化、DeepSeek V4オープンウェイト、エージェントAI主流化。2026年3月のAI開発トレンド第4回。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-trends/v4/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-trends.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/og-lab-ai-trends.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+JP:wght@400;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>
+        (function () { try { var t = localStorage.getItem('gp-theme'); if (t) document.documentElement.setAttribute('data-theme', t) } catch (e) { } })()
+    </script>
+</head>
+
+<body>
+    <!-- テーマトグル -->
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+
+    <!-- ヘッダー -->
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">📊 AI開発トレンド 第4回</h1>
+    </header>
+
+    <main class="lab-content">
+        <!-- ヒーロー -->
+        <section class="lab-hero">
+            <div class="lab-hero-icon">📊</div>
+            <h1>AI開発トレンド 2026年3月 — 第4回</h1>
+            <p><a href="/lab/ai-trends/v3/" style="color:inherit;text-decoration:underline">第3回</a>では「光と影」——GPT-5.4のPC操作とAI生成コードの45%脆弱性を追いました。<br>
+                第4回のキーワードは<strong>「コストの崩壊」</strong>。<br>
+                Claude長文サーチャージ撤廃、DeepSeek V4の1兆パラメータ公開、MiniMax M2.5の低コスト高性能——<br>
+                <strong>AIの利用コストが史上最速で下がっている</strong>。その先に何が起きるのかを追います。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月16日更新</span>
+                <span>📰 6トピック</span>
+                <span>📝 <a href="/lab/ai-trends/v3/"
+                        style="color:inherit;text-decoration:underline">第3回（3/12）はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- 前回からの変化 -->
+        <section class="lab-section">
+            <h2>🔄 前回からの変化まとめ — コストが壊れる</h2>
+            <div class="market-overview">
+                <div class="market-stats">
+                    <div class="market-stat">
+                        <div class="market-stat-value">$2.52T</div>
+                        <div class="market-stat-label">2026年 世界AI支出予測</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">44%</div>
+                        <div class="market-stat-label">前年比増加率</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">88%</div>
+                        <div class="market-stat-label">AI導入済み企業</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">40%</div>
+                        <div class="market-stat-label">エージェントAI搭載予測（年末）</div>
+                    </div>
+                </div>
+                <p>「試す年」から「組み込む年」に完全移行。AI支出2.52兆ドル（前年比44%増）、企業の88%がAI導入済み。</p>
+            </div>
+        </section>
+
+        <!-- 第3回→第4回 変化比較表 -->
+        <section class="lab-section">
+            <h2>📊 第3回→第4回 トレンド変化比較</h2>
+            <p><a href="/lab/ai-trends/v3/" style="color:var(--accent);text-decoration:underline">第3回</a>で取り上げた7トレンドが第4回でどう変化したか。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>第3回トレンド</th><th>第4回での進展</th><th>ステータス</th></tr></thead>
+                    <tbody>
+                        <tr><td>GPT-5.4 PC操作</td><td>安定化。Jira連携も安定フェーズに</td><td>✅ 成熟</td></tr>
+                        <tr><td>Cursor Automations</td><td>安定化進行中。コスト問題は未解決</td><td>⚠️ 高コスト</td></tr>
+                        <tr><td>AI生成コード45%脆弱性</td><td>Codex Securityがプレビュー版で登場。対策始動</td><td>📈 改善着手</td></tr>
+                        <tr><td>Claude Co-Work</td><td>長文サーチャージ撤廃で利用障壁が激減</td><td>🔥 コスト革命</td></tr>
+                        <tr><td>OSSエージェント急成長</td><td>OpenClaw急浮上。DeepSeek V4でBYOK加速</td><td>🔥 加速中</td></tr>
+                        <tr><td>#QuitGPT ムーブメント</td><td>余波継続中。Anthropicが恩恵を享受</td><td>📉 沈静化</td></tr>
+                        <tr><td>Vibe Codingの影</td><td>Codex Security等で対策が具体化</td><td>📈 対策進行</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ===== トレンド ===== -->
+        <section class="lab-section">
+            <h2>🔥 注目トレンド TOP 6</h2>
+
+            <!-- トレンド 1: コスト崩壊 -->
+            <div class="trend-card">
+                <div class="trend-card-header">
+                    <div class="trend-number">01</div>
+                    <div class="trend-info">
+                        <h3>AIコストの崩壊 — 100万トークンが追加料金なしに</h3>
+                        <p class="trend-subtitle">Claude長文サーチャージ撤廃、DeepSeek V4オープンウェイト、MiniMax M2.5低コスト高性能</p>
+                    </div>
+                    <span class="badge badge-hot">🔥 最重要</span>
+                </div>
+                <div class="trend-card-body">
+                    <p>3月16日、Anthropicが<strong>Claude Opus 4.6 / Sonnet 4.6の長文サーチャージを撤廃</strong>。
+                        100万トークンが標準料金で利用可能になりました。同時にダブル使用量キャンペーン（3/13〜27）も実施中。</p>
+                    <ul>
+                        <li><strong>Claude長文サーチャージ撤廃（3/16）</strong> — 100万トークンが追加料金なし。大規模コードベース解析のコスト障壁が消滅</li>
+                        <li><strong>ダブル使用量CP（3/13〜27）</strong> — 全プラン対象でオフピーク＆週末は使用量2倍。Claude Web/Desktop/Mobile/Code/Excel/PPTすべて対象</li>
+                        <li><strong>DeepSeek V4</strong> — 1兆パラメータ、100万トークン、マルチモーダル対応をオープンウェイトで公開。クローズドモデルに迫る性能</li>
+                        <li><strong>MiniMax M2.5</strong> — Claude Opus 4.6と同等性能を大幅に低コストで実現。「安いClaude」として注目</li>
+                        <li><strong>Gemini 3.1 Flash-Lite</strong> — 大型モデルの数分の1のコストで大量ワークロード処理に最適化</li>
+                    </ul>
+                    <h4>⚠️ コスト崩壊の「影」</h4>
+                    <ul>
+                        <li>低コスト化により「とりあえずAIに投げる」文化が加速 → 品質管理の希薄化リスク</li>
+                        <li>オープンウェイト1兆パラメータの「自由さ」は悪用にもつながる</li>
+                        <li>API価格競争による各社の収益悪化 → サービス持続性への懸念</li>
+                        <li>OpenAIは年間140億ドルの損失見通し。コスト競争の消耗戦はいつまで続くのか</li>
+                    </ul>
+                    <h4>😤 ユーザーの声</h4>
+                    <ul>
+                        <li>✅「100万トークン追加料金なしは神。これでClaudeがLLMの主力に確定」</li>
+                        <li>✅「DeepSeek V4 + ClineでAPI費用が$30/月以下。半年前の1/5」</li>
+                        <li>⚠️「安くなった分、AIに丸投げする人が増えてコードレビューの質が落ちる」</li>
+                    </ul>
+                    <div class="trend-impact">
+                        <span class="trend-impact-label">インパクト度</span>
+                        <div class="trend-impact-bar">
+                            <div class="trend-impact-fill trend-impact-100"></div>
+                        </div>
+                        <span class="trend-impact-score">★★★★★</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- トレンド 2: エージェントAI主流化 -->
+            <div class="trend-card">
+                <div class="trend-card-header">
+                    <div class="trend-number">02</div>
+                    <div class="trend-info">
+                        <h3>エージェントAIの主流化 — 40%搭載予測</h3>
+                        <p class="trend-subtitle">「ツール」から「同僚」へ。AIが自律的にタスクを遂行する時代</p>
+                    </div>
+                    <span class="badge badge-hot">🔥 パラダイムシフト</span>
+                </div>
+                <div class="trend-card-body">
+                    <p>Gartnerが<strong>2026年末までに企業アプリの40%がタスク特化型エージェントAIを搭載する</strong>と予測。
+                        前回報告したCursor Automations、Claude Co-Workに加え、新たなエージェント型ソリューションが続々と登場。</p>
+                    <ul>
+                        <li><strong>OpenClaw</strong> — フルコンピュータアクセス型の自律AIエージェントがGitHubスターでLinux/Reactを超え話題に。ファイルシステム・ターミナル・ブラウザ・システム設定をAIが直接操作</li>
+                        <li><strong>Microsoft Copilot Wave 3</strong> — 指示を自律的に遂行する「Copilot Cowork」機能を導入。中小企業向けプランも発表</li>
+                        <li><strong>Zhipu AI GLM-5-Turbo</strong> — 複雑な自動ワークフロー向けに特化したコスト効率の高いエージェントモデル</li>
+                        <li><strong>Anthropicビジネスサブスク4倍成長</strong> — 2026年初頭から企業でのAI活用が加速。Claude Code年間売上25億ドル</li>
+                    </ul>
+                    <h4>⚠️ エージェント暴走リスク</h4>
+                    <ul>
+                        <li>OpenClawの「常時オン」+「フルアクセス」はセキュリティ議論を白熱させている</li>
+                        <li>前回報告のAmazonインシデント（意図しない決定で障害）は引き続き教訓。ガードレールの設計が急務</li>
+                        <li>「AIレイオフ」議論が浮上 — エージェント自動化がホワイトカラーの大規模人員削減につながる可能性</li>
+                        <li>Cursorプロジェクト削除事件（第3回）を彷彿とさせるリスクがPC全体に拡大される危険</li>
+                    </ul>
+                    <h4>😤 ユーザーの声</h4>
+                    <ul>
+                        <li>✅「Cursor Automationsで夜間のセキュリティレビューが自動化された。ゲームチェンジャー」</li>
+                        <li>⚠️「OpenClawは実験室では最高だが、本番環境では絶対使わない。リスクが高すぎる」</li>
+                        <li>⚠️「エージェントAIで仕事が奪われる。今年中にチームが半分になるかも」</li>
+                    </ul>
+                    <div class="trend-impact">
+                        <span class="trend-impact-label">インパクト度</span>
+                        <div class="trend-impact-bar">
+                            <div class="trend-impact-fill trend-impact-100"></div>
+                        </div>
+                        <span class="trend-impact-score">★★★★★</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- トレンド 3: Gemini × Workspace -->
+            <div class="trend-card">
+                <div class="trend-card-header">
+                    <div class="trend-number">03</div>
+                    <div class="trend-info">
+                        <h3>Gemini × Google Workspace 統合 — AIが仕事を書き換える</h3>
+                        <p class="trend-subtitle">Docs・Sheets・Slides・DriveがAIネイティブに</p>
+                    </div>
+                    <span class="badge badge-type">💡 生産性革命</span>
+                </div>
+                <div class="trend-card-body">
+                    <p>3月10日、GoogleがWorkspaceアプリケーション全体にGeminiを統合。
+                        <strong>ドキュメント作成・データ分析・プレゼン生成がAI主導</strong>で行われる時代に。</p>
+                    <ul>
+                        <li><strong>Docs「Help me create」</strong> — ドライブ/Gmail/Chat/Webの情報を合成してドラフト自動生成。複数ソースから一貫性のあるドキュメントを数秒で作成</li>
+                        <li><strong>Sheets AI構築</strong> — スプレッドシート全体をAIで構築・編集。SpreadsheetBenchで70.48%達成。GoogleSearchからデータ取得も可能。「表を作って」で完全なスプレッドシートが生成される</li>
+                        <li><strong>Slides AI生成</strong> — スライドコンテンツ＋レイアウトをAIが生成。フルプレゼン自動作成も予定。デザイン知識なしで見栄えの良いプレゼンが作れる</li>
+                        <li><strong>Ask Gemini in Drive</strong> — ファイル横断セマンティック検索＋要約回答。「先月の売上データどこ？」で即座に検索・要約</li>
+                        <li><strong>Gemini Embedding 2</strong> — テキスト・画像・動画・音声・PDFを統一ベクトル空間で処理するマルチモーダル埋め込み。RAGアプリの精度が劇的に向上</li>
+                    </ul>
+                    <h4>📊 Google vs Microsoft の比較</h4>
+                    <ul>
+                        <li><strong>Google</strong>: Gemini × Workspace（Docs/Sheets/Slides/Drive）— 統合的なAI体験</li>
+                        <li><strong>Microsoft</strong>: Copilot × 365（Word/Excel/PowerPoint/Teams）— Copilot Coworkでエージェント機能追加</li>
+                        <li><strong>対決ポイント</strong>: Sheets AI（70.48%精度）vs ChatGPT for Excel。今のところSheetsが精度で優位</li>
+                    </ul>
+                    <h4>😤 ユーザーの声</h4>
+                    <ul>
+                        <li>✅「Sheetsで丸ごとスプレッドシート構築はすごい。30分かかってた作業が数秒」</li>
+                        <li>✅「Ask Gemini in Driveで過去のドキュメントが一瞬で見つかる。検索体験が革命的」</li>
+                        <li>⚠️「Geminiアプリに広告が入ると聞いて萎えた。無料の品質が下がりそう」</li>
+                    </ul>
+                    <div class="trend-impact">
+                        <span class="trend-impact-label">インパクト度</span>
+                        <div class="trend-impact-bar">
+                            <div class="trend-impact-fill trend-impact-90"></div>
+                        </div>
+                        <span class="trend-impact-score">★★★★☆</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- トレンド 4: 日本のAI政策 -->
+            <div class="trend-card">
+                <div class="trend-card-header">
+                    <div class="trend-number">04</div>
+                    <div class="trend-info">
+                        <h3>日本のAI政策が本格始動</h3>
+                        <p class="trend-subtitle">Gennai 18万人、GENIAC-PRIZE 8億円、ガイドライン改定</p>
+                    </div>
+                    <span class="badge badge-type">🇯🇵 政策</span>
+                </div>
+                <div class="trend-card-body">
+                    <p>日本政府が生成AIの社会実装を加速。<strong>「試す段階」から「全員が使う段階」</strong>へ明確に移行。</p>
+                    <ul>
+                        <li><strong>デジタル庁「Gennai（ゲンアイ）」</strong> — 2026年5月から全府省庁の約18万人が生成AIを業務利用。国産LLM 7モデルを選定。「信頼できるAI」の実証を目的とした行政DXの画期的な一歩</li>
+                        <li><strong>経産省「GENIAC-PRIZE」</strong> — 総額約8億円の生成AI社会実装加速プログラム。実証段階から社会実装フェーズへの移行を支援</li>
+                        <li><strong>AI事業者ガイドライン改定</strong> — 安全管理措置・説明責任・個人データ取り扱いを明確化。中小企業向け簡易チェックリストも新設。「使いたいけど何に気をつけるかわからない」中小企業の懸念に直接対応</li>
+                        <li><strong>NRI Claude for Enterprise全社展開</strong> — 日本のエンタープライズAI市場でClaude採用が拡大。金融・コンサルティング分野での本格導入</li>
+                    </ul>
+                    <h4>🌏 海外との比較</h4>
+                    <ul>
+                        <li><strong>EU</strong>: AI Act施行で規制先行。リスク分類と違反時の罰則を明確化</li>
+                        <li><strong>米国</strong>: 大統領令でAI安全性を要求。だが議会での包括的AI法案は停滞</li>
+                        <li><strong>日本</strong>: 「使って良い」方向に舵を切った。規制よりも利活用促進を優先するアプローチ</li>
+                        <li><strong>中国</strong>: DeepSeekの成功でオープンソースAI大国としての地位を確立</li>
+                    </ul>
+                    <h4>😤 開発者への影響</h4>
+                    <ul>
+                        <li>✅ Gennaiが成功すれば、日本のAI市場が一気に拡大。国産AI開発の需要が急増する可能性</li>
+                        <li>✅ ガイドラインの明確化で「AIを使って良いのか」の不安が解消</li>
+                        <li>⚠️ 18万人規模の導入で、初期のトラブルやセキュリティインシデントに要注目</li>
+                    </ul>
+                    <div class="trend-impact">
+                        <span class="trend-impact-label">インパクト度</span>
+                        <div class="trend-impact-bar">
+                            <div class="trend-impact-fill trend-impact-85"></div>
+                        </div>
+                        <span class="trend-impact-score">★★★★☆</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- トレンド 5: ハードウェア進化 -->
+            <div class="trend-card">
+                <div class="trend-card-header">
+                    <div class="trend-number">05</div>
+                    <div class="trend-info">
+                        <h3>AIハードウェア戦争 — Nvidia Rubin vs AMD Ryzen AI</h3>
+                        <p class="trend-subtitle">データセンターからノートPCまで、AIチップの全面戦争</p>
+                    </div>
+                    <span class="badge badge-type">⚡ ハードウェア</span>
+                </div>
+                <div class="trend-card-body">
+                    <p>AIモデルの巨大化に伴い、それを支えるハードウェアの進化も加速。DeepSeek V4（1兆パラメータ）のローカル実行を誰もが目指す時代に。</p>
+                    <ul>
+                        <li><strong>Nvidia「Rubin」</strong> — GTC 2026で次世代スーパーコンピュータプラットフォーム発表。H300 GPUは1兆パラメータモデルのトレーニングと推論に最適化</li>
+                        <li><strong>Nvidia ロードマップ</strong> — 現行Rubin → 次世代Feynman。「AI工場」コンセプトでデータセンター・エッジ・ロボティクスを統合</li>
+                        <li><strong>AMD Ryzen AI 400シリーズ</strong> — コンシューマ向けノートPCにNPU搭載。大規模モデルのオンデバイス実行を実現。SLMの普及を加速</li>
+                        <li><strong>英国「Sunrise」</strong> — 4500万ポンド投資のAIスーパーコンピュータ。核融合研究用、2026年6月稼働予定。科学研究へのAI活用を加速</li>
+                        <li><strong>Microsoft Phi-4-reasoning-vision-15B</strong> — コンパクトなマルチモーダルモデル。GUIナビゲーションに最適化。エッジデバイスでの活用を想定</li>
+                    </ul>
+                    <h4>💻 開発者への影響</h4>
+                    <ul>
+                        <li>DeepSeek V4（1兆パラメータ）のローカル実行には高性能GPUが不可欠。ハードウェアがボトルネックに</li>
+                        <li>AMD NPU搭載ノートPCで中規模モデル（SLM）のオンデバイス推論が現実に</li>
+                        <li>「クラウドで推論→API費用」vs「ローカルで推論→ハードウェア投資」のトレードオフが鮮明に</li>
+                    </ul>
+                    <div class="trend-impact">
+                        <span class="trend-impact-label">インパクト度</span>
+                        <div class="trend-impact-bar">
+                            <div class="trend-impact-fill trend-impact-80"></div>
+                        </div>
+                        <span class="trend-impact-score">★★★★☆</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- トレンド 6: OpenAI新ツール -->
+            <div class="trend-card">
+                <div class="trend-card-header">
+                    <div class="trend-number">06</div>
+                    <div class="trend-info">
+                        <h3>OpenAI ツール拡張 — Excelから教育まで</h3>
+                        <p class="trend-subtitle">GPT-5.4をあらゆる場所に統合</p>
+                    </div>
+                    <span class="badge badge-type">🛠️ ツール</span>
+                </div>
+                <div class="trend-card-body">
+                    <p>#QuitGPTの余波が続く中でも、OpenAIは<strong>GPT-5.4の統合先を急速に拡大</strong>。ユーザー離れを新機能で挽回する戦略。</p>
+                    <ul>
+                        <li><strong>ChatGPT for Excel</strong> — GPT-5.4搭載でスプレッドシート内から直接AI活用。Google Sheets AIへの対抗策</li>
+                        <li><strong>Codex Security（3/6）</strong> — AI搭載コード監査ツールがプレビュー版で公開。Veracodeの「45%脆弱性」問題への直接的な回答</li>
+                        <li><strong>インタラクティブ数学学習（3/10）</strong> — 70以上の数学・科学トピックでリアルタイム実験。教育分野への本格参入</li>
+                        <li><strong>GPT-5.3 Instant</strong> — 「説教臭いトーン」排除、ハルシネーション大幅削減。日常会話の品質改善</li>
+                        <li><strong>旧モデル引退</strong> — GPT-4oは引退済み。GPT-5シリーズに集中</li>
+                    </ul>
+                    <h4>⚠️ OpenAIの光と影</h4>
+                    <ul>
+                        <li>✅ ChatGPT月間ユーザー数は依然としてAIチャットボット最多</li>
+                        <li>⚠️ 年間140億ドルの損失見通し。収益化の道筋が不透明</li>
+                        <li>⚠️ #QuitGPTの影響で「デフォルトはChatGPT」の慣習が崩れ始めている</li>
+                        <li>⚠️ Claude Code売上25億ドル、Anthropicサブスク4倍成長。競合が急追</li>
+                    </ul>
+                    <div class="trend-impact">
+                        <span class="trend-impact-label">インパクト度</span>
+                        <div class="trend-impact-bar">
+                            <div class="trend-impact-fill trend-impact-75"></div>
+                        </div>
+                        <span class="trend-impact-score">★★★☆☆</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI情勢マップ -->
+        <section class="lab-section">
+            <h2>🌐 AI情勢マップ（2026年3月16日時点）</h2>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>企業/組織</th><th>✅ ポジティブ</th><th>⚠️ ネガティブ</th></tr></thead>
+                    <tbody>
+                        <tr><td class="tool-name">Anthropic</td><td>長文サーチャージ撤廃、ダブル使用量CP、App Store 1位維持、サブスク4倍成長</td><td>中国ラボの蒸留問題、障害頻度（改善傾向）</td></tr>
+                        <tr><td class="tool-name">OpenAI</td><td>ChatGPT for Excel、Codex Security、インタラクティブ学習</td><td>#QuitGPT余波、年間140億ドル損失見通し</td></tr>
+                        <tr><td class="tool-name">Google</td><td>Gemini×Workspace統合、Embedding 2、Flash-Lite好評</td><td>Geminiアプリに広告導入の懸念、Pro版週間制限</td></tr>
+                        <tr><td class="tool-name">DeepSeek</td><td>V4 1兆パラメータ オープンウェイト公開</td><td>中国発モデルへの信頼性・安全性議論</td></tr>
+                        <tr><td class="tool-name">MiniMax</td><td>M2.5がClaude Opus級を低コストで実現</td><td>知名度の低さ、持続的な開発体制への懸念</td></tr>
+                        <tr><td class="tool-name">日本政府</td><td>Gennai 18万人、GENIAC-PRIZE 8億円、ガイドライン改定</td><td>18万人規模の初期トラブルリスク</td></tr>
+                        <tr><td class="tool-name">Nvidia</td><td>Rubin/Feynman ロードマップ公開</td><td>GPU供給のボトルネック</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- まとめ -->
+        <section class="lab-section">
+            <h2>📝 第4回 まとめ — コストの壁が壊れる時</h2>
+            <div class="summary-box">
+                <h3>第3回→第4回の変化ポイント</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">最大の衝撃</div>
+                        <div class="summary-value">コスト崩壊</div>
+                        <p>Claude長文無料化・DeepSeek V4オープン・MiniMax低コスト</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">最大のシフト</div>
+                        <div class="summary-value">エージェントAI 40%</div>
+                        <p>Gartner予測。企業アプリの4割がエージェントAI搭載へ</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">最大の統合</div>
+                        <div class="summary-value">Gemini × Workspace</div>
+                        <p>Docs・Sheets・Slides・DriveがAIネイティブに</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">最大の政策変化</div>
+                        <div class="summary-value">日本 Gennai 18万人</div>
+                        <p>政府が「全員がAIを使う」フェーズへ踏み出した</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">AI支出</div>
+                        <div class="summary-value">$2.52兆（+44%）</div>
+                        <p>「先進企業の話」ではなく「全員の話」に</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">最大の問い</div>
+                        <div class="summary-value">使わない＝遅れる</div>
+                        <p>もはや「AIを使うか」ではなく「どう活かすか」</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 この記事について</h2>
+            <p>本記事の情報は<strong>2026年3月16日時点</strong>のものです。過去の調査は<a href="/lab/ai-trends/v1/"
+                    style="color:var(--accent);text-decoration:underline">第1回（3/9）</a>・<a href="/lab/ai-trends/v2/"
+                    style="color:var(--accent);text-decoration:underline">第2回（3/11）</a>・<a href="/lab/ai-trends/v3/"
+                    style="color:var(--accent);text-decoration:underline">第3回（3/12）</a>をご覧ください。</p>
+            <p>統計データの出典: Gartner, buildez.ai, lovable.app 等。
+                ユーザーの声はX（Twitter）、Reddit、Hacker News、GitHub Issues、Stack Overflow、開発者ブログ等から収集。</p>
+            <p>当サイトも<strong>AIペアプログラミング（Antigravity）</strong>を活用した個人開発プロジェクトです。</p>
+        </section>
+    </main>
+
+    <!-- フッター -->
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-trends/v1/">📊 第1回</a>
+            <a href="/lab/ai-trends/v2/">📊 第2回</a>
+            <a href="/lab/ai-trends/v3/">📊 第3回</a>
+            <a href="/lab/ai-tools/v4/">🛠️ ツール比較 第4回</a>
+            <a href="/lab/ai-developers/v4/">👤 AI開発者 第4回</a>
+        </nav>
+    </footer>
+
+    <script>
+        // テーマトグル
+        const toggle = document.getElementById('themeToggle');
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            toggle.textContent = theme === 'light' ? '☀️' : '🌙';
+            localStorage.setItem('gp-theme', theme);
+        }
+        const saved = localStorage.getItem('gp-theme');
+        if (saved) applyTheme(saved);
+        toggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            applyTheme(current === 'light' ? 'dark' : 'light');
+        });
+    </script>
+</body>
+
+</html>

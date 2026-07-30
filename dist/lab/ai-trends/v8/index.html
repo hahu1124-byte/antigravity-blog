@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発トレンド 2026 第8回 | LAB | Gravity Portal</title>
+    <meta name="description" content="AI開発トレンド 第8回（2026年6月更新）。MCP 2026-07-28 RC発表・ステートレス化・Gemini CLI終了・SWE-bench収束・エージェント並列化競争・A2A vs MCP標準化戦争。">
+    <meta property="og:title" content="AI開発トレンド 2026 第8回 — MCP 2.0時代・エージェント並列化・標準化戦争">
+    <meta property="og:description" content="MCPがステートレス化でエンタープライズ対応。Gemini CLI終了6/18。SWE-benchが収束し「モデル神話」が崩壊。エージェント並列化競争が激化。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-trends/v8/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-trends/v8/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>(function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()</script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">📊 AI開発トレンド 第8回</h1>
+    </header>
+    <main class="lab-content">
+        <section class="lab-hero">
+            <div class="lab-hero-icon">📈</div>
+            <h1>AI開発トレンド — MCP 2.0時代・エージェント並列化・標準化戦争 第8回</h1>
+            <p>3月の「スケーリングの壁・使い放題崩壊」から2ヶ月。2026年4〜6月のAI開発業界は次の局面に移行しました。<br>
+               MCPが「2026-07-28 RC」を発表しステートレス化でエンタープライズ対応を強化。<br>
+               エージェント並列化競争が本格化し、Gemini CLIは6月18日に終了。<br>
+               SWE-benchmark上のスコアが収束し「モデル神話」が崩壊しています。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年6月3日更新</span>
+                <span>📰 8大トレンド</span>
+            </div>
+        </section>
+
+        <section class="lab-section">
+            <h2>📈 トレンド1：MCP 2026-07-28 RC — ステートレス化で本格エンタープライズ対応</h2>
+            <p>2026年5月21日、Model Context Protocol（MCP）が<strong>次期仕様「2026-07-28」のリリース候補</strong>を公開。今回の改訂はMCP発足以来最大規模の変更です。</p>
+            <div class="market-overview">
+                <h3>🔑 主要変更点</h3>
+                <ul>
+                    <li><strong>プロトコルのステートレス化</strong>: `initialize`ハンドシェイクと`Mcp-Session-Id`を廃止。すべてのリクエストが自己完結型になり、ラウンドロビン負荷分散で動作可能に。水平スケールが劇的に容易に</li>
+                    <li><strong>MCP Apps（SEP-1865）</strong>: サーバーがインタラクティブなHTMLインターフェースを提供できる新機能。ツール呼び出しと同じ監査・承認パスを通る</li>
+                    <li><strong>Tasksエクステンション</strong>: 長時間非同期タスクのライフサイクル管理。`tasks/get`・`tasks/update`・`tasks/cancel`でクライアントが制御</li>
+                    <li><strong>Full JSON Schema 2020-12</strong>: ツールスキーマで複合・条件・参照が使えるように。型安全なAPI定義が可能に</li>
+                    <li><strong>W3C Trace Context伝搬</strong>: `traceparent`・`tracestate`・`baggage`を`_meta`で標準化。OpenTelemetry互換の分散トレーシング</li>
+                    <li><strong>OAuth/OIDC強化</strong>: RFC 9207準拠のissue検証・Dynamic Client Registration改善</li>
+                </ul>
+            </div>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>変更前（現行仕様）</th><th>変更後（RC）</th><th>効果</th></tr></thead>
+                    <tbody>
+                        <tr><td>ステートフルセッション（スティッキーセッション必須）</td><td>ステートレス（ラウンドロビンLB対応）</td><td>水平スケールが容易に</td></tr>
+                        <tr><td>tools/listのキャッシュなし</td><td>ttlMs・cacheScopeでキャッシュ制御</td><td>レイテンシと帯域幅の削減</td></tr>
+                        <tr><td>Roots/Sampling/Loggingがコア</td><td>非推奨化（12ヶ月後に削除可能）</td><td>プロトコルの軽量化</td></tr>
+                        <tr><td>エクステンションプロセスが非公式</td><td>逆DNSid・ext-*リポジトリ・SEPプロセス</td><td>エコシステムの秩序ある拡張</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3>📊 MCP採用状況（2026年5月24日時点）</h3>
+            <ul>
+                <li>公式レジストリ最新サーバー数: <strong>9,652件</strong></li>
+                <li>GitHubリポジトリ（mcp-serverトピック）: <strong>15,926件</strong></li>
+                <li>SDK月次DL: <strong>9700万件以上</strong></li>
+                <li>ソフトウェア企業での本番採用: <strong>41%</strong>（Stacklok調査、限定本番29%+広範本番12%）</li>
+            </ul>
+        </section>
+
+        <section class="lab-section">
+            <h2>📈 トレンド2：エージェント並列化競争の本格化</h2>
+            <p>2026年4〜5月、主要ツールが一斉に「並列エージェント数」を競い始めました。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>ツール</th><th>並列エージェント数</th><th>実行環境</th><th>特徴</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Cursor v3</strong></td><td>最大8</td><td>Cloud VM（Desktop+Browser付き）</td><td>各エージェントが独自ブラウザでUI確認可能</td></tr>
+                        <tr><td><strong>Grok Build</strong></td><td>最大8</td><td>独立Gitワークツリー（ローカル）</td><td>ローカルファースト・ソースコード外部送信なし</td></tr>
+                        <tr><td><strong>Antigravity 2.0</strong></td><td>制限なし（Agent Teams）</td><td>サンドボックス（クラウド）</td><td>ロール別サブエージェント・Chromiumブラウザ検証</td></tr>
+                        <tr><td><strong>Claude Code</strong></td><td>制限なし（tmux / amux）</td><td>ローカル端末 / CLI並列</td><td>Git worktreeでの並列実行。amuxでオーケストレーション</td></tr>
+                        <tr><td><strong>OpenHands v1.7</strong></td><td>TaskToolSetで委任</td><td>サンドボックス（Docker）</td><td>専門タスクをサブエージェントに委任</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p><strong>実質的な並列度制限</strong>: 並列化の限界はエージェント数ではなくAPIレート制限・クォータに移行しています。$200/月プランでも大量並列使用時はすぐに制限に達します。</p>
+        </section>
+
+        <section class="lab-section">
+            <h2>📈 トレンド3：Gemini CLI終了（6月18日）とAntigravity CLIへの移行強制</h2>
+            <p>2026年5月12日、Googleは<strong>Gemini CLI（個人向け）の6月18日終了</strong>を発表。Google AI Pro/Ultra・無料Gemini Code Assist個人向けがすべてAntigravity CLIに移行されます。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>ユーザー種別</th><th>6月18日以降の扱い</th><th>対応</th></tr></thead>
+                    <tbody>
+                        <tr><td>Google AI Pro/Ultra有料ユーザー</td><td>Gemini CLIサービス終了</td><td>Antigravity CLI（agy）へ移行</td></tr>
+                        <tr><td>無料Gemini Code Assist個人ユーザー</td><td>サービス終了</td><td>Antigravity CLI無料ティアへ移行</td></tr>
+                        <tr><td>APIキーBYOKユーザー</td><td>OSSコミュニティ版は継続</td><td>Google推奨パスはAntigravity CLIに</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>2024年11月のAntigravity登場から7ヶ月でGemini CLIの個人向けが完全に統合。Googleの「ローカルコーディングエージェントからマネージドエージェントランタイム（Google Cloud）への道筋」戦略が明確になりました。</p>
+        </section>
+
+        <section class="lab-section">
+            <h2>📈 トレンド4：SWE-benchスコアの収束 — 「モデル神話」の崩壊</h2>
+            <p>2026年5月中旬、主要ツールのSWE-benchmark Verifiedスコアが<strong>狭いバンドに収束</strong>。「どのモデルが一番賢いか」から「どのワークフローが一番生産的か」に評価軸が移行しています。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>ツール / モデル</th><th>ベンチマーク</th><th>スコア</th><th>備考</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Claude Code (Opus 4.6)</strong></td><td>SWE-bench Verified</td><td><strong>87.6%</strong></td><td>カテゴリトップ</td></tr>
+                        <tr><td>Codex CLI (GPT-5.5)</td><td>Terminal-Bench 2.0</td><td>82.7%</td><td>長時間無人実行で強み</td></tr>
+                        <tr><td>Cursor Composer 2.5 (Kimi K2.5)</td><td>SWE-Bench Multilingual</td><td>79.8%</td><td>5月18日出荷</td></tr>
+                        <tr><td>Grok Build (grok-build-0.1A)</td><td>SWE-bench</td><td>70.8%</td><td>初期第三者検証</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>スコアが収束した結果、競合は<strong>価格・並列度・ワークフロー・エコシステム</strong>の差別化へ。「SWE-benchのローンチスライドの数字」より「1週間の実際のコストと生産性」が重要指標になっています。</p>
+        </section>
+
+        <section class="lab-section">
+            <h2>📈 トレンド5：A2A vs MCP — エージェント通信の標準化戦争</h2>
+            <p>MCPはツール←→エージェント間の通信を標準化しますが、<strong>エージェント←→エージェント間の通信</strong>（A2A: Agent-to-Agent Protocol）は別の標準が必要です。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>プロトコル</th><th>発案元</th><th>目的</th><th>現状</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>MCP</strong></td><td>Anthropic</td><td>エージェント↔ツール・データソース</td><td>Linux Foundation AAIF傘下。9,652公式サーバー。デファクト化</td></tr>
+                        <tr><td><strong>A2A</strong></td><td>Google</td><td>エージェント↔エージェント</td><td>AWS・Google・Cloudflareが支持。MCPと補完関係</td></tr>
+                        <tr><td><strong>ACP</strong></td><td>IBM/Linux Foundation</td><td>エージェント通信全般</td><td>Linux Foundation AAIF傘下。A2A・MCPと並立</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>実際の採用状況では「A2AはエージェントオーケストレーションにMCPはツール層」という棲み分けが形成されつつあります。AWS・Google・Cloudflareは2026年4月時点でMCPへのダブルダウンを継続しており、どちらかを選ぶのではなく<strong>両方使い分け</strong>が主流になりそうです。</p>
+        </section>
+
+        <section class="lab-section">
+            <h2>📈 トレンド6：フラット定額の完全崩壊 — 全社で従量課金移行</h2>
+            <p>Gartner予測「AI単価は90%下がるが総支出は80%増」が現実になりつつあります。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>ツール</th><th>変化</th><th>時期</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>GitHub Copilot</strong></td><td>フラット定額→使用量ベース課金</td><td>2026年6月〜</td></tr>
+                        <tr><td><strong>Antigravity</strong></td><td>$250 Ultraプランでもクォータ削減継続</td><td>2026年3月〜継続</td></tr>
+                        <tr><td><strong>Cursor</strong></td><td>Fast Premium request枯渇問題</td><td>2026年3月〜継続</td></tr>
+                        <tr><td><strong>Claude Code Max</strong></td><td>Max 5x/20xの階層化。Proプランで急ドレイン報告</td><td>2026年春〜</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>エージェント化で1回の操作が大量のAPIコール・大規模コンテキスト読み込みを行うようになり、フラット定額では採算が合わなくなっています。「$20/月で使い放題」は完全に過去の話です。</p>
+        </section>
+
+        <section class="lab-section">
+            <h2>📈 トレンド7：ミニマリストフレームワークの台頭</h2>
+            <p>「177+もあるエージェントフレームワーク疲れ」に対する反動として、<strong>超軽量フレームワーク</strong>が注目を集めています。</p>
+            <ul>
+                <li><strong>smolagents（HuggingFace）</strong>: 1,000行のPythonで実装。コードファーストエージェントでタスクを30%少ないLLM呼び出しで完了</li>
+                <li><strong>PocketFlow</strong>: 100行のLLMフレームワーク。マルチエージェント・ワークフロー・RAGをシングルGraphで実現。TypeScript/Java/Go/Rust/PHPポートが即日登場</li>
+                <li><strong>Aider</strong>: ターミナルネイティブ。git diffを読んでコードを出荷するシンプルな哲学で50K+ Stars</li>
+            </ul>
+            <p>「プラットフォームを構築する」か「パイプラインを実行する」かによってOpenHands vs smolagentsのどちらが適切かが決まります。複雑性疲れのある上級者は小さいフレームワークで実験し、成熟したらOpenHands等の本番向けプラットフォームに移行するパターンが増えています。</p>
+        </section>
+
+        <section class="lab-section">
+            <h2>📈 トレンド8：「記憶と継続性」が競争軸に</h2>
+            <p>エージェントがセッションをまたいでコンテキストを保持できるかどうかが、生産性の大きな差になっています。</p>
+            <ul>
+                <li><strong>Claude Code</strong>: CLAUDE.md・handoff.md・`/memory`コマンド・MCP Memoryサーバーで多層的な記憶管理</li>
+                <li><strong>Antigravity 2.0</strong>: Persistent isolated environment（セッション再開可能なサンドボックス）</li>
+                <li><strong>OpenHands v1.7</strong>: Sandbox Grouping Strategy UIでセッション管理を可視化・制御</li>
+                <li><strong>Mem0</strong>: エージェント記憶を外部管理するサービスとして台頭。OpenHands/Cline等と組み合わせ可能</li>
+            </ul>
+            <p>「会話が切れたらゼロリセット」の時代から「前回の続きから自然に再開できる」エージェントへの移行が2026年の大きなテーマです。</p>
+        </section>
+
+        <section class="lab-section">
+            <h2>📝 まとめ</h2>
+            <p>2026年6月時点のAI開発トレンドを一言で表すと：<strong>「インフラとしての成熟」</strong>。MCPがステートレス化でエンタープライズ水準に近づき、エージェント並列化が標準機能になり、SWE-benchスコアが収束してモデル中心の議論が終わり始めています。次の12ヶ月は「どこのエコシステムに乗るか」「コンテキスト管理と継続性をどう設計するか」がAI開発者の主要課題になるでしょう。</p>
+        </section>
+    </main>
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-tools/v8/">🛠️ ツール 第8回</a>
+            <a href="/lab/ai-developers/v8/">👤 開発者 第8回</a>
+            <a href="/lab/ai-trends/v7/">📊 第7回アーカイブ</a>
+        </nav>
+    </footer>
+    <script>(function(){var btn=document.getElementById('themeToggle');function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}update();btn.addEventListener('click',function(){var cur=document.documentElement.getAttribute('data-theme');var next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('gp-theme',next)}catch(e){}update()})})()</script>
+</body>
+</html>

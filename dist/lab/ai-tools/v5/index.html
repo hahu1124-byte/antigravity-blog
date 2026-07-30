@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発ツール比較 2026 第5回 | LAB | Gravity Portal</title>
+    <meta name="description" content="AI開発ツール比較 第5回。Cursor自社モデルComposer 2、Claude Code voice mode、Gemini CLI有料化、GPT-5.4 mini/nano。5大ツールの自社モデル戦争を解説。">
+    <meta property="og:title" content="AI開発ツール比較 2026 第5回 — 自社モデル戦争">
+    <meta property="og:description" content="Cursor Composer 2、Claude Code voice mode、Gemini CLI有料化。5大AI開発ツールの最新動向。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-tools/v5/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-tools.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-tools/v5/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>(function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()</script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">🛠️ AI開発ツール比較 第5回</h1>
+    </header>
+    <main class="lab-content">
+        <section class="lab-hero">
+            <div class="lab-hero-icon">🛠️</div>
+            <h1>AI開発ツール — 自社モデル戦争の幕開け 第5回</h1>
+            <p><a href="/lab/ai-tools/v4/" style="color:inherit;text-decoration:underline">第4回</a>では「コスト戦争」を追いました。<br>
+                第5回は<strong>「自社モデル」</strong>がテーマ。CursorがComposer 2で独自LLMに参入、<br>
+                Claude Codeはvoice mode＋auto-planでワークフロー革命、<br>
+                Gemini CLIは3/25から無料枠縮小——各社が「囲い込み」で勝負を仕掛ける。<br><br>
+                第4回で浮上した各ツールの「不満・課題」も継続フォロー。改善されたか、悪化したか。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月21日更新</span>
+                <span>🔧 5ツール徹底分析</span>
+                <span>📝 <a href="/lab/ai-tools/v4/" style="color:inherit;text-decoration:underline">第4回（3/16）はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- 業界数字 -->
+        <section class="lab-section">
+            <h2>📊 AI開発ツール業界の現在地（更新）</h2>
+            <p>第4回からの変化を数字で。</p>
+            <div class="market-overview">
+                <div class="market-stats">
+                    <div class="market-stat">
+                        <div class="market-stat-value">$50B</div>
+                        <div class="market-stat-label">Cursor評価額（交渉中）</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">1M+</div>
+                        <div class="market-stat-label">Cursor 日次アクティブユーザー</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">86%</div>
+                        <div class="market-stat-label">AI予算増加予定の企業</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">75%</div>
+                        <div class="market-stat-label">AIツール正答率（上限）</div>
+                    </div>
+                </div>
+                <p>Waterloo大の研究でAIコーディングツールの正答率は最良でも約75%。4回に1回は間違える——それでも全企業の86%がAI予算を増やす。「完璧じゃなくても使う」フェーズに完全移行。</p>
+            </div>
+        </section>
+
+        <!-- 第4回→第5回 変化 -->
+        <section class="lab-section">
+            <h2>🔥 第4回→第5回 主要変化サマリ</h2>
+            <p><a href="/lab/ai-tools/v4/" style="color:var(--accent);text-decoration:underline">第4回</a>からの変化を一覧で。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>ツール</th><th>主なアップデート</th><th>⚠️ 第4回の課題の進展</th></tr></thead>
+                    <tbody>
+                        <tr><td class="tool-name">Antigravity</td><td>CLI有料化（3/25〜）、Mac版Desktop Intelligence開発中</td><td>⚠️ 無料枠縮小で「無料最強」の地位に影。Pro版週間制限は継続</td></tr>
+                        <tr><td class="tool-name">Claude Code</td><td>🔥 auto-plan/auto-memory/voice mode、Channels（Discord/Telegram）</td><td>⚠️ 3/17パフォーマンス低下報告。シークレット漏洩リスク2倍</td></tr>
+                        <tr><td class="tool-name">Cursor</td><td>🔥 Composer 2自社モデル、100万DAU、$50B評価額交渉</td><td>⚠️ コスト問題は継続。自社モデルでロックイン懸念</td></tr>
+                        <tr><td class="tool-name">GitHub Copilot</td><td>GPT-5.3-Codex LTS、セマンティック検索、Agent 50%高速化</td><td>⚠️ Student Plan有料モデル制限。愛され率は未改善</td></tr>
+                        <tr><td class="tool-name">Windsurf</td><td>OpenAI Astral買収でPythonツール強化</td><td>⚠️ Devin統合の具体像は依然不透明</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 各ツール詳細 -->
+        <section class="lab-section">
+            <h2>🔍 各ツール最新アップデート＆ユーザーの声</h2>
+
+            <!-- Antigravity -->
+            <div class="tool-card" id="antigravity-v5">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🚀</div>
+                    <div class="tool-card-info">
+                        <h3>Antigravity</h3>
+                        <div class="tool-maker">Google DeepMind — 第5回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プレビュー継続（縮小）</span>
+                    <span class="badge badge-type">CLI有料化 🆕</span>
+                    <span class="badge badge-hot">⚠️ 無料枠縮小</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Gemini CLI有料化（3/25発効）🔥</strong> — 無料ユーザーはFlashモデルのみ利用可能に。Proモデル（Gemini 3.1 Pro等）は有料サブスクリプション必須。ライセンスタイプに基づくトラフィック優先制御も導入</li>
+                        <li><strong>Gemini for Mac開発中</strong> — プライベートテスト段階の「Desktop Intelligence」機能。画面コンテンツやアプリケーションとの深い統合を実現。macOSネイティブのAI体験を目指す</li>
+                        <li><strong>Apple Siri統合交渉</strong> — GeminiモデルをApple Siriに統合する交渉が進行中。実現すれば数十億デバイスにGeminiが搭載される</li>
+                        <li><strong>Samsung Agentic AI統合</strong> — 2026年末までに8億デバイスにGemini AIを統合するSamsungの計画が発表。スマート家電へのエージェントAI拡大</li>
+                        <li><strong>Google AI ProサブスクでJules/Gemini Code Assist/CLI/Antigravityの利用上限拡大</strong> — 有料ユーザー向けの優遇策を強化</li>
+                    </ul>
+
+                    <h3>💰 価格体系（CLI有料化で変更あり）</h3>
+                    <ul>
+                        <li><strong>Individual（無料）</strong>: Flashモデルのみ（3/25〜）。Proモデルは利用不可に</li>
+                        <li><strong>Google AI Pro ($19.99/月)</strong>: Proモデル＋CLI/Jules/Code Assist利用上限拡大</li>
+                        <li><strong>Google AI Ultra ($49.99/月)</strong>: 最大クォータ＋新機能優先アクセス</li>
+                        <li><strong>Team / Organization</strong>: Workspace / Google Cloud経由</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題（継続フォロー）</h3>
+                    <ul>
+                        <li><strong>⚠️ CLI有料化への反発</strong> — 「無料で全モデル使えるのがAntigravityの最大の魅力だったのに」「結局他と同じ課金モデルか」との失望の声。無料ユーザーがFlash限定になることで実用性が大幅低下</li>
+                        <li><strong>⚠️ Pro版 週間制限問題（継続）</strong> — 第4回から未解決。有料ユーザーでさえ数日間ロックアウトされる報告は依然として多い</li>
+                        <li><strong>⚠️ Geminiアプリ広告導入（継続）</strong> — 第4回で報告した広告導入の懸念は継続。「無料は広告＋Flash限定」の二重制限</li>
+                        <li><strong>✅ Workspace統合は好評（継続）</strong> — Docs/Sheets/Slides連携の評価は引き続き高い</li>
+                        <li><strong>⚠️ MCP未サポート（継続）</strong> — Model Context Protocol未対応。Cursor/Copilot/Claudeに差をつけられている</li>
+                    </ul>
+
+                    <h3>🔑 第5回の所感</h3>
+                    <p>CLI有料化は<strong>「無料最強」の看板を自ら下ろす</strong>決断。
+                        Workspace統合やApple/Samsung連携で「エコシステム」の広さは5ツール中No.1だが、
+                        無料枠の魅力が薄れたことで、無料ユーザーのClaude Code/Copilotへの流出が加速する可能性がある。
+                        当サイトは引き続きAntigravityで開発中だが、CLI有料化の影響は要注視。</p>
+                </div>
+            </div>
+
+            <!-- Claude Code -->
+            <div class="tool-card" id="claude-code-v5">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🤖</div>
+                    <div class="tool-card-info">
+                        <h3>Claude Code</h3>
+                        <div class="tool-maker">Anthropic — 第5回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-paid">Pro $20/月</span>
+                    <span class="badge badge-hot">🔥 ワークフロー革命</span>
+                    <span class="badge badge-hot">❤️ 愛され率46%</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>auto-plan機能 🔥</strong> — 複雑なタスクをClaude Codeが自動的に計画・分解。「何をどの順番でやるべきか」をAIが判断し、開発者は承認するだけ。計画→実行の効率が劇的に向上</li>
+                        <li><strong>auto-memory機能</strong> — 過去のやりとりからClaudeが自動学習。セッション跨ぎでプロジェクトの文脈を保持。他AIアシスタントからの会話履歴インポートツールも提供</li>
+                        <li><strong>voice mode（音声コーディング）</strong> — ハンズフリーでClaude Codeに指示。コーディング中にキーボードから手を離さず音声で補足指示。開発者ワークフローの新しい形</li>
+                        <li><strong>Claude Code Channels（Discord/Telegram統合）</strong> — メッセージングアプリ経由でClaude Codeと対話。OSS的なエージェントフレームワークに近い機能を商用ツールとして提供</li>
+                        <li><strong>v2.1.79/v2.1.70 安定化アップデート</strong> — CLI/voice/streaming/VSCodeの安定性修正、API エラー処理改善、新VSCodeビジュアル、MCP管理強化</li>
+                    </ul>
+
+                    <h3>💰 価格体系（変更なし）</h3>
+                    <ul>
+                        <li><strong>Pro $20/月</strong>: Sonnet/Opus利用可 — 長文サーチャージなしで100万トークン</li>
+                        <li><strong>Max $100/月</strong>: 5〜20倍のクォータ</li>
+                        <li><strong>Team $125/人/月</strong>（Premium seat、年間契約）</li>
+                        <li><strong>Spring Break CP（3/13〜28）</strong>: オフピーク＆週末は使用量2倍（継続中）</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題（継続フォロー）</h3>
+                    <ul>
+                        <li><strong>⚠️ 3/17パフォーマンス低下 🆕</strong> — 障害またはデプロイ後にClaude Codeの認識力・パフォーマンスが低下したとの報告。「前より明らかにバカになった」との声も</li>
+                        <li><strong>⚠️ シークレット漏洩リスク2倍 🆕</strong> — Claude Codeで共同著作された公開コミットは、ベースラインと比較してシークレット漏洩率が2倍。AIコーディングの新たなセキュリティ課題</li>
+                        <li><strong>⚠️ Proプラン レート制限（継続）</strong> — ヘビーユーザーの作業中断は未解決。Max ($100/月) 移行推奨の構図は変わらず</li>
+                        <li><strong>⚠️ Anthropic vs Pentagon 🆕</strong> — 軍事利用を制限するAnthropicをペンタゴンが「サプライチェーンリスク」に指定。Claude Codeが機密ネットワークで承認済みにもかかわらず、企業としてブラックリスト化。AI倫理と国防の正面衝突</li>
+                        <li><strong>✅ auto-plan/voice modeは好評</strong> — 「計画→実行のフローが劇的に効率化された」「音声でコーディング指示できるのは革命的」との声</li>
+                    </ul>
+
+                    <h3>🔑 第5回の所感</h3>
+                    <p>auto-plan + auto-memory + voice modeの三位一体は<strong>ワークフロー革命</strong>と呼ぶにふさわしい。
+                        Claude Codeが単なるコード生成ツールから「開発パートナー」に進化した。
+                        一方で3/17のパフォーマンス低下とシークレット漏洩リスクは、信頼性の面で課題を残す。
+                        Pentagon紛争はAI業界全体の倫理議論に波紋を広げている。</p>
+                </div>
+            </div>
+
+            <!-- Cursor -->
+            <div class="tool-card" id="cursor-v5">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">⚡</div>
+                    <div class="tool-card-info">
+                        <h3>Cursor</h3>
+                        <div class="tool-maker">Anysphere — 第5回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プランあり</span>
+                    <span class="badge badge-hot">🔥 自社モデル Composer 2</span>
+                    <span class="badge badge-paid">1M+ DAU / $50B評価額</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Composer 2 自社コーディングモデル 🔥🔥</strong> — AnysphereがCursor専用のコーディングモデル「Composer 2」を発表。Composer 1.5を大幅に上回るベンチマーク。複雑な長期コーディングタスクに特化した設計。Standard/Fastの2バリアントで価格差別化</li>
+                        <li><strong>100万DAU突破</strong> — 日次アクティブユーザーが100万人を超え、AI開発ツール市場で最大規模のユーザーベースに成長</li>
+                        <li><strong>$50B評価額の新ラウンド交渉</strong> — 初期段階の資金調達交渉で約500億ドルの企業価値が議論されている。AI開発ツール企業として異例の評価</li>
+                        <li><strong>JetBrains ACP対応</strong> — Agent Client Protocol経由でJetBrains IDEからCursorのフロンティアモデルを利用可能に。VS Code以外の選択肢が拡大</li>
+                        <li><strong>Marketplace 30+プラグイン</strong> — Atlassian、Hugging Face等のパートナーからプリビルトプラグインが30以上追加。カスタムワークフロー構築がさらに容易に</li>
+                        <li><strong>Money Forwardの全社導入事例</strong> — エンジニアの週15-20時間短縮、QAチームのテスト生成時間70%削減を実証</li>
+                    </ul>
+
+                    <h3>💰 価格体系（Composer 2で追加）</h3>
+                    <ul>
+                        <li><strong>Hobby（無料）</strong>: 限定リクエスト + 7日間Pro体験</li>
+                        <li><strong>Pro $20/月</strong>: 無制限Tab補完 + $20クレジットプール</li>
+                        <li><strong>Pro+ $60/月</strong>: 3倍のクレジットプール</li>
+                        <li><strong>Ultra $200/月</strong>: 20倍の使用量 + 新機能優先アクセス</li>
+                        <li><strong>Composer 2</strong>: Standard/Fastの2バリアント（クレジット消費型）</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題（継続フォロー）</h3>
+                    <ul>
+                        <li><strong>⚠️ 自社モデルのロックイン懸念 🆕</strong> — Composer 2がCursor専用モデルであることから「ベンダーロックイン」を懸念する声。BYOKの自由度とのトレードオフ</li>
+                        <li><strong>⚠️ コスト問題は継続（最大の不満）</strong> — 実質$60-80/月のヘビーユーザー。Composer 2のクレジット消費でさらにコスト増の可能性</li>
+                        <li><strong>⚠️ セキュリティ脆弱性（継続監視）</strong> — MCPoison/CurXecuteの修正後も、フォント描画攻撃によるAIアシスタント汚染の新たなリスクが報告</li>
+                        <li><strong>⚠️ メモリ使用量（継続）</strong> — 大規模コードベースのインデックスでRAM枯渇問題は継続</li>
+                        <li><strong>✅ Composer 2の評価は高い</strong> — 「長時間タスクでの精度がClaude/GPT並み」「自社モデルなのにこの品質は驚き」との好評</li>
+                    </ul>
+
+                    <h3>🔑 第5回の所感</h3>
+                    <p>Composer 2は<strong>「IDEメーカーが最強のAIモデルを持つ」新時代</strong>の始まり。
+                        100万DAU・$50B評価額は市場の期待の高さを示す。
+                        ただし自社モデル偏重はロックインリスクを伴い、BYOKの透明性を重視するユーザーとの溝が広がる可能性がある。
+                        コスト問題も依然として最大の課題。</p>
+                </div>
+            </div>
+
+            <!-- GitHub Copilot -->
+            <div class="tool-card" id="copilot-v5">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🐙</div>
+                    <div class="tool-card-info">
+                        <h3>GitHub Copilot</h3>
+                        <div class="tool-maker">GitHub / OpenAI — 第5回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プランあり</span>
+                    <span class="badge badge-type">セマンティック検索 🆕</span>
+                    <span class="badge badge-paid">シェア42% / 愛され9%</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>GPT-5.3-Codex LTSモデル（〜2027/2/4）</strong> — 開発向けの長期サポートモデルを指定。2026年5月17日からCopilot Business/Enterpriseの標準モデルに。安定性を重視するエンタープライズ向け</li>
+                        <li><strong>コーディングエージェント 50%高速化</strong> — タスク開始速度が従来の2倍に。セマンティックコード検索ツールも搭載し、意味ベースで関連コードを発見</li>
+                        <li><strong>Student Plan変更（3/12）</strong> — 学生向け無料プランでGPT-5.4やClaude Opus/Sonnetの自己選択が不可に。AutoモードでOpenAI/Anthropic/Googleの各モデルにアクセスはできるが、モデル指定不可</li>
+                        <li><strong>ネットワークルール更新</strong> — コーディングエージェント向けのネットワークルールを更新。GitHub CLIからレビューリクエストも可能に</li>
+                        <li><strong>OpenAI Astral買収</strong> — OpenAIがオープンソースPythonツールのAstralを買収。Codexとの統合でPython開発ワークフローを強化。AIリード開発の「現実」への回答</li>
+                    </ul>
+
+                    <h3>💰 価格体系（変更なし）</h3>
+                    <ul>
+                        <li><strong>Free</strong>: 月2,000補完 + 50プレミアムリクエスト</li>
+                        <li><strong>Pro $10/月</strong>: 無制限補完 + 300プレミアムリクエスト</li>
+                        <li><strong>Pro+ $39/月</strong>: 1,500リクエスト + 優先アクセス</li>
+                        <li><strong>Business $19/人/月</strong>: 組織管理 + ポリシー制御</li>
+                        <li><strong>Enterprise $39/人/月</strong>: （⚠️ GH Enterprise Cloud $21必須 → 実質$60/人/月）</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題（継続フォロー）</h3>
+                    <ul>
+                        <li><strong>⚠️ Student Plan制限への批判 🆕</strong> — 「学生が最新モデルを自由に選べなくなった」「AI教育の機会を奪う」との批判。Autoモードでのアクセスは可能だが、選択の自由がなくなった</li>
+                        <li><strong>⚠️ 愛され率9%（継続）</strong> — 「使われているが好かれていない」構図は変わらず。シークレット漏洩34%増加問題もCopilot起因の一因</li>
+                        <li><strong>⚠️ 超過課金への混乱（継続）</strong> — 300リクエスト超過後の$0.04/件課金は依然ユーザーの不満ポイント</li>
+                        <li><strong>✅ セマンティック検索は好評</strong> — 「コードの意味で検索できるのは便利」「リファクタリング時に関連箇所が一発で見つかる」</li>
+                        <li><strong>⚠️ コード品質（継続）</strong> — 表面的なレビューで重要なアーキテクチャ問題を見逃す傾向は未解決</li>
+                    </ul>
+
+                    <h3>🔑 第5回の所感</h3>
+                    <p>GPT-5.3-Codex LTSで<strong>エンタープライズの安定性</strong>を全面に押し出した。
+                        セマンティック検索とAgent高速化は着実な改善。
+                        しかしStudent Plan制限は「教育への貢献」というGitHubのブランド価値を毀損するリスクがある。
+                        $10/月の安さは依然として魅力だが、AI品質では引き続きClaude/Cursorに劣後。</p>
+                </div>
+            </div>
+
+            <!-- Windsurf -->
+            <div class="tool-card" id="windsurf-v5">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🏄</div>
+                    <div class="tool-card-info">
+                        <h3>Windsurf</h3>
+                        <div class="tool-maker">Cognition (元Codeium) — 第5回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プランあり</span>
+                    <span class="badge badge-type">Devin統合</span>
+                    <span class="badge badge-paid">⚠️ 方向性変化</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>OpenAI Astral買収の影響</strong> — OpenAIがPythonツールのAstralを買収。Codex強化がWindsurf/Devinにとって競争激化要因。OpenAIが開発者ツールスタックを垂直統合する動き</li>
+                        <li><strong>Devin統合の安定化が継続</strong> — IDE + 自律エージェントの統合は引き続き進行中。大規模な発表は少ないが、エンタープライズ向けの信頼性向上に注力</li>
+                        <li><strong>350+エンタープライズ顧客を維持</strong> — 買収した大規模顧客基盤は安定しているが、新規獲得の勢いはCursor/Claude Codeに劣る</li>
+                    </ul>
+
+                    <h3>💰 価格体系（変更なし）</h3>
+                    <ul>
+                        <li><strong>Windsurf Free</strong>: 基本機能（制限付き）</li>
+                        <li><strong>Windsurf Pro $15/月</strong>: フル機能 — 5ツール中2番目に安い</li>
+                        <li><strong>Devin</strong>: エンタープライズ向け（要問い合わせ）</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題（継続フォロー）</h3>
+                    <ul>
+                        <li><strong>⚠️ 将来の不透明さ（継続・最大の課題）</strong> — Cursor Composer 2の登場とOpenAIのAstral買収で、Windsurfの差別化ポイントがさらに曖昧に</li>
+                        <li><strong>⚠️ 既存ユーザーの離脱（継続）</strong> — CursorやAntigravityへの乗り換え報告が引き続きあり。Cursor 100万DAUの勢いとの差は拡大傾向</li>
+                        <li><strong>⚠️ 個人開発者の軽視リスク（継続）</strong> — エンタープライズ優先の姿勢は変わらず</li>
+                        <li><strong>✅ $15/月の手頃さ</strong> — コスト面では引き続き2番目に安い。価格重視ユーザーには選択肢</li>
+                    </ul>
+
+                    <h3>🔑 第5回の所感</h3>
+                    <p>Cursorの自社モデル参入とOpenAIのAstral買収で、Windsurfの<strong>ポジションがさらに厳しく</strong>なった。
+                        IDE + 自律エージェントの統合構想は理論上最強だが、具体的な差別化が見えないまま競合に先を越されている。
+                        $15/月の安さは残る魅力だが、長期的な投資先としてのリスクは前回以上に高い。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 価格比較 -->
+        <section class="lab-section">
+            <h2>💰 価格比較（2026年3月21日時点）</h2>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>ツール</th><th>無料プラン</th><th>個人（標準）</th><th>個人（上位）</th><th>チーム</th><th>⚠️ 実質コスト</th></tr></thead>
+                    <tbody>
+                        <tr><td class="tool-name">Antigravity</td><td>⚠️ Flash限定🆕</td><td>$19.99/月</td><td>$49.99/月</td><td>Workspace連携</td><td>⚠️ 無料枠大幅縮小</td></tr>
+                        <tr><td class="tool-name">Claude Code</td><td>制限付き</td><td>$20/月</td><td>$100/月</td><td>$125/人/月</td><td>✅ サーチャージなし</td></tr>
+                        <tr><td class="tool-name">Cursor</td><td>7日間Pro</td><td>$20/月</td><td>$60〜200/月</td><td>$40/人/月</td><td>⚠️ 実質$60-80/月+</td></tr>
+                        <tr><td class="tool-name">Copilot</td><td>2,000補完+50req</td><td>$10/月</td><td>$39/月</td><td>$39→実質$60</td><td>⚠️ 超過$0.04/件</td></tr>
+                        <tr><td class="tool-name">Windsurf</td><td>基本機能</td><td>$15/月</td><td>—</td><td>Devin Enterprise</td><td>統合後は未定</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>🔥 <strong>Gemini CLI有料化で「無料最強のAntigravity」の時代が終わる。</strong>無料枠ではCopilot Free（2,000補完+50req）が最も充実した選択肢に。有料では引き続きClaude Code $20/月がコスパ最強。</p>
+        </section>
+
+        <!-- 機能比較 -->
+        <section class="lab-section">
+            <h2>🆚 機能比較マトリクス（更新）</h2>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>機能</th><th>Antigravity</th><th>Claude Code</th><th>Cursor</th><th>Copilot</th><th>Windsurf</th></tr></thead>
+                    <tbody>
+                        <tr><td>自社モデル</td><td>Gemini</td><td>Claude</td><td>✅ Composer 2🆕</td><td>—</td><td>—</td></tr>
+                        <tr><td>常時オンエージェント</td><td>—</td><td>Co-Work</td><td>✅ Automations</td><td>Copilot Cowork</td><td>Devin</td></tr>
+                        <tr><td>auto-plan</td><td>—</td><td>✅🆕</td><td>—</td><td>—</td><td>—</td></tr>
+                        <tr><td>voice mode</td><td>—</td><td>✅🆕</td><td>—</td><td>—</td><td>—</td></tr>
+                        <tr><td>セマンティック検索</td><td>—</td><td>—</td><td>—</td><td>✅🆕</td><td>—</td></tr>
+                        <tr><td>100万トークン</td><td>✅</td><td>✅ 追加料金なし</td><td>モデル依存</td><td>✅ GPT-5.4</td><td>—</td></tr>
+                        <tr><td>統合ブラウザ</td><td>✅</td><td>—</td><td>✅ Chrome</td><td>—</td><td>—</td></tr>
+                        <tr><td>JetBrains対応</td><td>—</td><td>VS Code</td><td>✅ ACP🆕</td><td>✅ GA</td><td>—</td></tr>
+                        <tr><td>MCP対応</td><td>❌</td><td>✅</td><td>✅</td><td>✅</td><td>—</td></tr>
+                        <tr><td>LTSモデル</td><td>—</td><td>—</td><td>—</td><td>✅ GPT-5.3-Codex🆕</td><td>—</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- おすすめ -->
+        <section class="lab-section">
+            <h2>🎯 第5回時点のおすすめ（更新）</h2>
+            <div class="summary-box">
+                <h3>前回からの変化ポイント</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">🔥 最大のニュース</div>
+                        <div class="summary-value">Cursor Composer 2</div>
+                        <p>IDEメーカーが自社LLMを持つ時代。100万DAU・$50B評価額は市場を牽引。ただしロックイン懸念も</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">💰 コスト最強</div>
+                        <div class="summary-value">Claude Code（変わらず）</div>
+                        <p>auto-plan + voice modeでワークフロー効率も向上。長文サーチャージなし$20/月は最強コスパ</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">⚠️ 最大の変化</div>
+                        <div class="summary-value">Gemini CLI有料化</div>
+                        <p>「無料最強」の終焉。3/25からFlash限定で無料ユーザーの実用性が大幅低下</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🏢 企業向け</div>
+                        <div class="summary-value">GitHub Copilot</div>
+                        <p>GPT-5.3-Codex LTSで安定性を担保。$10/月の安さとGitHub統合は変わらぬ強み</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🚨 最も心配</div>
+                        <div class="summary-value">Windsurf</div>
+                        <p>Cursor自社モデル参入+OpenAI Astral買収で差別化がさらに困難に。$15/月は残る魅力</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🤔 結論</div>
+                        <div class="summary-value">自社モデル＋ワークフロー革新</div>
+                        <p>「どのモデルを使うか」から「どのエコシステムに入るか」に問いが変わった。複数ツール併用は引き続き最適解</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 調査にあたって</h2>
+            <p>本記事は<strong>2026年3月21日時点</strong>の情報です。過去の調査は
+                <a href="/lab/ai-tools/v1/" style="color:var(--accent);text-decoration:underline">第1回（3/9）</a>・
+                <a href="/lab/ai-tools/v2/" style="color:var(--accent);text-decoration:underline">第2回（3/11）</a>・
+                <a href="/lab/ai-tools/v3/" style="color:var(--accent);text-decoration:underline">第3回（3/12）</a>・
+                <a href="/lab/ai-tools/v4/" style="color:var(--accent);text-decoration:underline">第4回（3/16）</a>をご覧ください。</p>
+            <p>当サイト「Gravity Portal」は <strong>Antigravity</strong> を使って開発されています。</p>
+            <p>ユーザーの不満・課題はX（Twitter）、Reddit、GitHub Issues、Google AI Developer Forum、Stack Overflow等から収集。特定ツールの推奨・攻撃の意図はありません。</p>
+        </section>
+    </main>
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-tools/v1/">🛠️ 第1回</a>
+            <a href="/lab/ai-tools/v2/">🛠️ 第2回</a>
+            <a href="/lab/ai-tools/v3/">🛠️ 第3回</a>
+            <a href="/lab/ai-tools/v4/">🛠️ 第4回</a>
+            <a href="/lab/ai-developers/v5/">👤 AI開発者 第5回</a>
+            <a href="/lab/ai-trends/v5/">📊 トレンド 第5回</a>
+        </nav>
+    </footer>
+    <script>
+        (function(){var btn=document.getElementById('themeToggle');function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}update();btn.addEventListener('click',function(){var cur=document.documentElement.getAttribute('data-theme');var next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('gp-theme',next)}catch(e){}update()})})()
+    </script>
+</body>
+</html>

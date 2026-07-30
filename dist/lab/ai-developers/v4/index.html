@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発者ピックアップ 第4回 | LAB | Gravity Portal</title>
+    <meta name="description" content="AI開発者ピックアップ第4回。OpenClaw急浮上、DeepSeek V4オープンウェイト、OSSエージェント6プロジェクト＋Devinの最新動向と選び方ガイド。">
+    <meta property="og:title" content="AI開発者ピックアップ 第4回 — エージェント競争激化">
+    <meta property="og:description" content="OSSコーディングエージェントの最新動向。OpenClaw急浮上、DeepSeek V4でBYOKが加速。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-developers/v4/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-developers.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-developers/v4/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>(function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()</script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">👤 AI開発者ピックアップ 第4回</h1>
+    </header>
+    <main class="lab-content">
+        <section class="lab-hero">
+            <div class="lab-hero-icon">👤</div>
+            <h1>OSSエージェント — 低コスト化と新プレイヤー 第4回</h1>
+            <p><a href="/lab/ai-developers/v3/" style="color:inherit;text-decoration:underline">第3回</a>ではOSSの「成長と現実」を追いました。<br>
+                第4回のテーマは<strong>「低コスト化がOSSに与えるインパクト」</strong>。<br>
+                DeepSeek V4の1兆パラメータ公開でBYOKの選択肢が劇的に拡大し、<br>
+                OpenClawがGitHubスターでLinux/Reactを超え話題に。<br><br>
+                「コストが壊れた時代」にOSSエージェントの立ち位置はどう変わるのか。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月16日更新</span>
+                <span>🔧 7プロジェクト＋Devin</span>
+                <span>📝 <a href="/lab/ai-developers/v3/" style="color:inherit;text-decoration:underline">第3回（3/12）はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- ランキング -->
+        <section class="lab-section">
+            <h2>⭐ OSSコーディングエージェント人気ランキング（更新）</h2>
+            <p>2026年3月16日時点のGitHub Stars比較。第3回からの変化と新プレイヤーの登場に注目。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>順位</th><th>プロジェクト</th><th>⭐ Stars</th><th>前回差</th><th>ライセンス</th><th>得意分野</th></tr></thead>
+                    <tbody>
+                        <tr><td>🥇 1位</td><td class="tool-name">OpenHands</td><td>~69,000</td><td>📈 +500</td><td>MIT</td><td>GitHub Issue自動修正</td></tr>
+                        <tr><td>🥈 2位</td><td class="tool-name">Cline</td><td>~59,000</td><td>📈 +400</td><td>Apache-2.0</td><td>精密な段階的作業</td></tr>
+                        <tr><td>🥉 3位</td><td class="tool-name">Roo Code</td><td>~23,000</td><td>📈 +500</td><td>Apache-2.0</td><td>高速・大規模タスク</td></tr>
+                        <tr><td>🆕 注目</td><td class="tool-name">OpenClaw</td><td>急上昇中</td><td>🔥 NEW</td><td>—</td><td>フルコンピュータアクセス</td></tr>
+                        <tr><td>4位</td><td class="tool-name">Aider</td><td>安定</td><td>→</td><td>Apache-2.0</td><td>個人開発・安定性</td></tr>
+                        <tr><td>5位</td><td class="tool-name">Continue.dev</td><td>安定</td><td>→</td><td>Apache-2.0</td><td>プライバシー・オフライン</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>Top 3は安定成長。特筆すべきはRoo Codeの成長速度（+500★）がOpenHandsと並んでいること。</p>
+        </section>
+
+        <!-- OSS選び方ガイド -->
+        <section class="lab-section">
+            <h2>🧭 OSSコーディングエージェント 選び方ガイド（更新）</h2>
+            <p>DeepSeek V4公開により「コスト最優先」カテゴリが新規追加。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>用途</th><th>おすすめ</th><th>理由</th></tr></thead>
+                    <tbody>
+                        <tr><td>GitHub Issue自動修正</td><td class="tool-name">OpenHands</td><td>SWE-Bench 50%突破。Dockerサンドボックスで安全に実行</td></tr>
+                        <tr><td>精密な段階的コーディング</td><td class="tool-name">Cline</td><td>Plan and Actで暴走防止。初心者にも安心。BYOK対応</td></tr>
+                        <tr><td>大規模・高速タスク</td><td class="tool-name">Roo Code</td><td>5モード分離でAI精度向上。Orchestratorモードで統括</td></tr>
+                        <tr><td>🆕 コスト最優先</td><td class="tool-name">Cline + DeepSeek V4</td><td>DeepSeek V4のBYOK利用でAPI費用を大幅削減</td></tr>
+                        <tr><td>🆕 フルPC自動化</td><td class="tool-name">OpenClaw ⚠️</td><td>革新的だがセキュリティリスクに要注意</td></tr>
+                        <tr><td>プライバシー最優先</td><td class="tool-name">Cline / Continue.dev</td><td>ローカル完結。コードがサーバーに送信されない</td></tr>
+                        <tr><td>安定した日常利用</td><td class="tool-name">Aider</td><td>派手さはないが確実に動く。Git自動コミットが便利</td></tr>
+                        <tr><td>エンタープライズ</td><td class="tool-name">OpenHands / Cline</td><td>セキュリティ・スケーラビリティ・コンプライアンス対応</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 注目プロジェクト詳細 -->
+        <section class="lab-section">
+            <h2>🔍 注目プロジェクト詳細分析</h2>
+
+            <!-- OpenClaw 新規 -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🦀</div>
+                    <div class="dev-info">
+                        <h3>OpenClaw 🆕</h3>
+                        <div class="dev-role">フルコンピュータアクセス型AIエージェント — 急上昇中</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 なぜ話題？</h3>
+                    <p>GitHubスターでLinux/Reactを超える勢いで急浮上。<strong>フルコンピュータアクセス型</strong>の自律AIエージェントとして、開発者コミュニティに衝撃を与えています。</p>
+                    <ul>
+                        <li><strong>フルコンピュータアクセス</strong> — ファイルシステム・ターミナル・ブラウザ・システム設定をAIが直接操作。従来のコーディングエージェントの枠を超えた自律性</li>
+                        <li><strong>コーディング以外のタスクも実行</strong> — インフラ管理、データ処理、テスト環境構築、アプリ間連携など幅広い自動化</li>
+                        <li><strong>人間の監視なしでの長時間実行</strong> — 数時間にわたるタスクを自律的に遂行。OpenHandsのサンドボックスとは異なり、実環境で直接操作</li>
+                        <li><strong>GPT-5.4のPC操作機能との親和性</strong> — GPT-5.4のネイティブPC操作と組み合わせることで、より高度な自律実行が可能</li>
+                    </ul>
+
+                    <h3>⚠️ セキュリティ議論</h3>
+                    <ul>
+                        <li>⚠️「システム全体へのアクセス権限」の安全性にセキュリティ研究者から強い懸念</li>
+                        <li>⚠️ 第3回で報告したCursorプロジェクト削除事件の規模が拡大する可能性</li>
+                        <li>⚠️ サンドボックス化なしのフルアクセスは、障害が「コードベース」ではなく「システム全体」に波及するリスク</li>
+                        <li>⚠️ 企業環境では承認フローなしのフルアクセスは受け入れられないとの指摘</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声（X・Reddit・Hacker News）</h3>
+                    <ul>
+                        <li>✅「Docker環境構築からデプロイまで全部自動でやってくれた。革命的」</li>
+                        <li>✅「サーバー設定の自動化がこれまでのツールと桁違い」</li>
+                        <li>⚠️「本番環境では絶対使わない。テスト環境限定」</li>
+                        <li>⚠️「Reactのスター数を超えたからって品質が保証されるわけじゃない。バズって終わる可能性も」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <span class="badge badge-hot">🔥 急上昇</span>
+                        <span class="badge badge-type">フルアクセス型</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DeepSeek V4 -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🐋</div>
+                    <div class="dev-info">
+                        <h3>DeepSeek V4 🆕</h3>
+                        <div class="dev-role">1兆パラメータ オープンウェイトLLM</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 OSSエコシステムへのインパクト</h3>
+                    <p>DeepSeek V4の1兆パラメータ公開は、<strong>BYOKモデルで利用するOSSツール全体に地殻変動</strong>をもたらします。</p>
+                    <ul>
+                        <li><strong>1兆パラメータ / 100万トークン / マルチモーダル</strong> — 商用フロンティアモデル（Claude Opus 4.6、GPT-5.4）に匹敵する規模をオープンウェイトで公開</li>
+                        <li><strong>Cline / Roo Code / Aider / Continue.dev のBYOKモデルで利用可能</strong> — Claude/GPT-5に依存しないコスト効率の高い選択肢が劇的に拡充</li>
+                        <li><strong>API費用の大幅削減</strong> — 自前ホスティングまたは低コストAPIプロバイダー経由で利用可能。BYOKの「API費用が予想以上にかさむ」問題に対する答え</li>
+                        <li><strong>プライバシー完全保護</strong> — ローカル実行でコードが外部に一切送信されない。セキュリティ規制の厳しい業界での採用が加速</li>
+                        <li><strong>MiniMax M2.5との組み合わせ</strong> — 低コストで高性能なLLMの選択肢がさらに拡大。「フロンティアモデルの民主化」が本格化</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声</h3>
+                    <ul>
+                        <li>✅「ClineでDeepSeek V4使ってみたら、Claude Proと遜色ない品質。これでAPI費用が1/3以下」</li>
+                        <li>✅「会社のセキュリティポリシーでクラウドAI使えなかったけど、DeepSeek V4のローカル実行でついに解禁された」</li>
+                        <li>⚠️「1兆パラメータのローカル実行にはかなりのGPUリソースが必要。RTX 4090でもギリギリ」</li>
+                        <li>⚠️「中国発のモデルに対する信頼性・安全性の懸念は依然ある」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <span class="badge badge-free">オープンウェイト</span>
+                        <span class="badge badge-hot">🔥 ゲームチェンジャー</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OpenHands -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🤲</div>
+                    <div class="dev-info">
+                        <h3>OpenHands</h3>
+                        <div class="dev-role">クラウドコーディングエージェントプラットフォーム — ⭐ 69,000</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 第4回アップデート</h3>
+                    <p>SWE-Bench 50%突破後も着実に改善中。GitHub Issue自動修正の精度がさらに向上し、CI/CDパイプラインへの組み込み事例が増加。</p>
+                    <ul>
+                        <li><strong>SWE-Bench精度向上</strong> — 50%突破後もチューニングが継続。コードベースの複雑さに応じた適応的解決が改善</li>
+                        <li><strong>ヘッドレスモード活用拡大</strong> — スクリプタブルな自動化としてCI/CDに組み込む企業が増加。Jenkins/GitHub Actionsとの統合パターンが確立</li>
+                        <li><strong>Docker/Kubernetes隔離の信頼性向上</strong> — OpenClawのフルアクセスとは対照的に、サンドボックス隔離で安全性を担保し続ける設計思想</li>
+                        <li><strong>MITライセンスの透明性</strong> — エンタープライズ採用の障壁を低くする要因として引き続き評価</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声</h3>
+                    <ul>
+                        <li>✅「GitHubのissue 100件をバッチで投げたら40%以上が自動修正された。人間のレビュー込みでも効率10倍」</li>
+                        <li>✅「サンドボックスなのでOpenClawより安心して使える」</li>
+                        <li>⚠️「Docker環境のセットアップが初心者にはハードル高い（第3回から変わらず）」</li>
+                        <li>⚠️「大規模プロジェクトではトークン消費が激しい（DeepSeek V4で軽減可能）」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <a href="https://github.com/All-Hands-AI/OpenHands" target="_blank" rel="noopener noreferrer" class="dev-link">🐙 GitHub</a>
+                        <a href="https://openhands.dev/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐 公式</a>
+                        <span class="badge badge-free">MIT License</span>
+                        <span class="badge badge-hot">🔥 SWE-Bench 50%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cline -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🔗</div>
+                    <div class="dev-info">
+                        <h3>Cline</h3>
+                        <div class="dev-role">自律型VSCodeエージェント — ⭐ 59,000</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 第4回アップデート</h3>
+                    <p>BYOKモデルの強みがDeepSeek V4公開で大幅に拡大。「透明な料金」というCursorとの最大のブランディング差が、コスト崩壊時代にさらに輝く。</p>
+                    <ul>
+                        <li><strong>DeepSeek V4対応</strong> — BYOKでDeepSeek V4を選択可能に。API費用がClaude/GPT-5の1/3以下で同等品質</li>
+                        <li><strong>Plan and Actの進化が継続</strong> — 計画→実行の2フェーズワークフロー。「暴走防止」設計はOpenClawの台頭で価値が再認識</li>
+                        <li><strong>MCP Marketplace拡大</strong> — エンタープライズのデータソース・ドキュメント接続プラグインが増加</li>
+                        <li><strong>エンタープライズ採用拡大</strong> — BYOKの透明性と精密な制御性が大企業の開発チームに評価</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声</h3>
+                    <ul>
+                        <li>✅「DeepSeek V4 + Clineで月のAPI費用が$30以下に。Cursor持ちより安い」</li>
+                        <li>✅「Plan and Actがあるおかげで安心。OpenClawは怖くて使えない」</li>
+                        <li>⚠️「APIキー管理が面倒。初心者はセットアップで詰まる（第3回から変わらず）」</li>
+                        <li>⚠️「BYOKだからこそ、モデル選択で迷うことが増えた」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <a href="https://github.com/cline/cline" target="_blank" rel="noopener noreferrer" class="dev-link">🐙 GitHub</a>
+                        <a href="https://cline.bot/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐 公式</a>
+                        <span class="badge badge-free">Apache-2.0</span>
+                        <span class="badge badge-type">BYOK</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roo Code -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🦘</div>
+                    <div class="dev-info">
+                        <h3>Roo Code</h3>
+                        <div class="dev-role">AIソフトウェアエンジニアリングチーム — ⭐ 23,000</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 第4回アップデート</h3>
+                    <p>Orchestratorモードの安定化が進行。5モード体制で「AIの役割分離」という独自のポジションを確立中。</p>
+                    <ul>
+                        <li><strong>Orchestratorモードの安定化</strong> — 複数モードを統括する上位エージェントの信頼性が向上。複雑なタスクを適切なモードに振り分ける精度が改善</li>
+                        <li><strong>クラウドエージェント対応の強化</strong> — GitHub/Webから自律的に動作するクラウドエージェント。チームの並列開発支援が本格化</li>
+                        <li><strong>DeepSeek V4対応</strong> — BYOKモードでDeepSeek V4を選択可能。5モード分離＋低コストモデルの組み合わせ</li>
+                        <li><strong>カスタムモード数の増加</strong> — コミュニティ作成のカスタムモードが増加中</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声</h3>
+                    <ul>
+                        <li>✅「モード分離が神。設計と実装を分けるだけでAIの精度が段違い（第3回に続き最多の好評）」</li>
+                        <li>✅「Orchestratorが安定してきた。複雑なリファクタリングが一発で通るようになった」</li>
+                        <li>⚠️「Clineからのフォークなので独自性が心配（第3回から変わらず）」</li>
+                        <li>⚠️「JetBrains対応がまだ開発中。VSCode以外のIDE使いには不便」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <a href="https://github.com/RooVetGit/Roo-Code" target="_blank" rel="noopener noreferrer" class="dev-link">🐙 GitHub</a>
+                        <a href="https://roocode.com/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐 公式</a>
+                        <span class="badge badge-free">Apache-2.0</span>
+                        <span class="badge badge-hot">🔥 急成長</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Devin -->
+            <div class="dev-card">
+                <div class="dev-card-header">
+                    <div class="dev-avatar">🧠</div>
+                    <div class="dev-info">
+                        <h3>Devin（Cognition）</h3>
+                        <div class="dev-role">自律型AIソフトウェアエンジニア — 商用</div>
+                    </div>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 第4回アップデート</h3>
+                    <p>Windsurf統合が進展し、IDE+自律エージェントの形が見え始めた。しかしオープンソース勢の急成長で競争環境は激化。</p>
+                    <ul>
+                        <li><strong>Windsurf IDE統合の進展</strong> — 対話的コーディング（IDE）+ 自律的タスク実行（Devin）の統合が具体化</li>
+                        <li><strong>APIセッション管理強化</strong> — エンタープライズ向けのセッション管理・分析機能が向上</li>
+                        <li><strong>永続メモリ改善</strong> — セッション跨ぎでコードベース理解を保持する精度が向上</li>
+                        <li><strong>ARR $82M + 350+ エンタープライズ顧客</strong> — Windsurf買収で獲得した大規模顧客基盤が安定</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの声</h3>
+                    <ul>
+                        <li>✅「本当に人間のエンジニアのようにバグを直してくれる（第3回に続き最多好評）」</li>
+                        <li>⚠️「エンタープライズ価格が公開されておらず、個人開発者には手が出ない」</li>
+                        <li>⚠️「OSSではないためブラックボックス。DeepSeek V4 + ClineのBYOKの方が透明」</li>
+                        <li>⚠️「OpenClaw等の急成長OSSが、Devinの差別化ポイントを侵食し始めている」</li>
+                    </ul>
+
+                    <div class="dev-links">
+                        <a href="https://devin.ai/" target="_blank" rel="noopener noreferrer" class="dev-link">🌐 公式サイト</a>
+                        <span class="badge badge-paid">商用</span>
+                        <span class="badge badge-type">Windsurf統合</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cline vs Roo Code vs OpenClaw -->
+        <section class="lab-section">
+            <h2>🆚 Cline vs Roo Code vs OpenClaw — 3つのアプローチ</h2>
+            <p>第3回の「Cline vs Roo Code」に新プレイヤーOpenClawを加えた3者比較。設計思想が根本から異なる。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>項目</th><th>Cline</th><th>Roo Code</th><th>OpenClaw</th></tr></thead>
+                    <tbody>
+                        <tr><td>設計思想</td><td>制御・安全・透明性</td><td>自律性・速度・大規模</td><td>フルアクセス・最大自律</td></tr>
+                        <tr><td>アクセス範囲</td><td>コードベースのみ</td><td>コードベースのみ</td><td>⚠️ PC全体</td></tr>
+                        <tr><td>安全設計</td><td>✅ Plan and Act</td><td>5モード分離</td><td>❌ サンドボックスなし</td></tr>
+                        <tr><td>タスク承認</td><td>ステップバイステップ</td><td>高自律で一括実行</td><td>最小限の監視</td></tr>
+                        <tr><td>初心者向き</td><td>✅ 推薦</td><td>やや学習曲線あり</td><td>❌ 上級者のみ</td></tr>
+                        <tr><td>コスト効率</td><td>✅ BYOK最安</td><td>BYOK対応</td><td>モデル依存</td></tr>
+                        <tr><td>リスク</td><td>低リスク</td><td>中リスク</td><td>⚠️ 高リスク</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p><strong>結論:</strong> 「安全に確実に」ならCline、「速く大きく」ならRoo Code、「全部任せたい（リスク覚悟）」ならOpenClaw。</p>
+        </section>
+
+        <!-- 前回プロジェクト進展 -->
+        <section class="lab-section">
+            <h2>📈 前回プロジェクトの進展</h2>
+            <div class="tool-card">
+                <div class="tool-card-body">
+                    <h3>💻 OpenCode</h3>
+                    <p>月間500万ユーザーを維持。75以上のモデル対応とベンダーロックインなしの方針は変わらず。ローカルモデル対応強化でプライバシー重視コミュニティでの支持拡大中。</p>
+
+                    <h3>🔧 Aider</h3>
+                    <p>成熟したOSSとして安定運用。Git自動コミットが個人開発者のメインツールとして定着。DeepSeek V4との組み合わせでコスト効率も改善。</p>
+
+                    <h3>🔌 Continue.dev</h3>
+                    <p>Ollama連携でプライバシー完全保護。VS Code / JetBrains双方対応。DeepSeek V4のローカル実行と組み合わせることで、完全オフラインのAI開発環境が現実に。</p>
+
+                    <h3>🎨 Stable Diffusion / FLUX.2</h3>
+                    <p>画像生成分野は引き続き活発。カスタマイズ性（SD）vs プロダクション品質（FLUX.2）の棲み分けが定着。</p>
+
+                    <h3>🎵 ACE-Step</h3>
+                    <p>v1.5でVRAM 4GB未満対応を実現済み。軽量環境でのAI音楽生成の定番として地位を確立。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- OSSの課題 -->
+        <section class="lab-section">
+            <h2>⚠️ OSSコーディングエージェントの構造的課題（更新）</h2>
+            <p>第3回の6つの課題に「フルアクセスリスク」が新規追加。</p>
+            <div class="summary-box">
+                <h3>成長の影に潜む7つの課題</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">🆕 フルアクセスリスク</div>
+                        <div class="summary-value">OpenClawの教訓</div>
+                        <p>サンドボックスなしのPC全体操作。障害時の被害範囲が「コード」から「システム」に拡大</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">💸 BYOKの罠</div>
+                        <div class="summary-value">改善傾向</div>
+                        <p>DeepSeek V4とMiniMax M2.5の登場でAPI費用は低下傾向。ただし1兆パラメータのローカル実行にはGPUが必要</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🔧 セットアップ障壁</div>
+                        <div class="summary-value">依然として高い</div>
+                        <p>APIキー取得・環境構築・Docker設定。「5分で使えるCursor」との差は歴然</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🔄 フォーク分裂</div>
+                        <div class="summary-value">Cline vs Roo Code</div>
+                        <p>両者とも成長中だが、コミュニティ分裂のリスクは変わらず</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🛡️ 生成コードの脆弱性</div>
+                        <div class="summary-value">45%に脆弱性</div>
+                        <p>ツール自体は安全でも、生成コードの品質はLLMに依存。Codex Securityのような監査ツールとの併用が必須</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🏢 商用ツールとの競争</div>
+                        <div class="summary-value">コスト差が縮小</div>
+                        <p>Claude長文サーチャージ撤廃でOSSの「コスト優位」が相対的に薄まっている</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 この記事について</h2>
+            <p>本記事は<strong>2026年3月16日時点</strong>の情報です。過去の調査は
+                <a href="/lab/ai-developers/v1/" style="color:var(--accent);text-decoration:underline">第1回（3/9）</a>・
+                <a href="/lab/ai-developers/v2/" style="color:var(--accent);text-decoration:underline">第2回（3/11）</a>・
+                <a href="/lab/ai-developers/v3/" style="color:var(--accent);text-decoration:underline">第3回（3/12）</a>をご覧ください。</p>
+            <p>GitHub Stars数は調査時点の概数です。当サイトも<strong>AIペアプログラミング（Antigravity）</strong>を活用した個人開発プロジェクトです。</p>
+            <p>開発者の声はX（Twitter）、Reddit、Medium、GitHub Issues、Hacker News等から収集しています。</p>
+        </section>
+    </main>
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-developers/v1/">👤 第1回</a>
+            <a href="/lab/ai-developers/v2/">👤 第2回</a>
+            <a href="/lab/ai-developers/v3/">👤 第3回</a>
+            <a href="/lab/ai-tools/v4/">🛠️ ツール比較 第4回</a>
+            <a href="/lab/ai-trends/v4/">📊 トレンド 第4回</a>
+        </nav>
+    </footer>
+    <script>
+        (function(){var btn=document.getElementById('themeToggle');function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}update();btn.addEventListener('click',function(){var cur=document.documentElement.getAttribute('data-theme');var next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('gp-theme',next)}catch(e){}update()})})()
+    </script>
+</body>
+</html>

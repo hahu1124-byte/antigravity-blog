@@ -1,0 +1,965 @@
+:root {
+    --bg: #0a0a14;
+    --bg-card: #12122a;
+    --bg-step: #1a1a35;
+    --bg-step-on: rgba(99, 102, 241, 0.25);
+    --accent: #6366f1;
+    --accent-hover: #818cf8;
+    --accent-glow: rgba(99, 102, 241, 0.15);
+    --green: #22c55e;
+    --green-glow: rgba(34, 197, 94, 0.3);
+    --orange: #f59e0b;
+    --red: #ef4444;
+    --text: #e8e8f0;
+    --text2: #9a9ab8;
+    --text-muted: #6a6a88;
+    --border: rgba(255, 255, 255, 0.08);
+    --radius: 12px;
+    --font-sans: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    /* パートカラー */
+    --clr-kick: #ef4444;
+    --clr-snare: #f59e0b;
+    --clr-hihat-c: #22c55e;
+    --clr-hihat-o: #06b6d4;
+    --clr-clap: #a855f7;
+    --clr-tom: #ec4899;
+    --clr-bass: #f97316;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+    overscroll-behavior: none;
+}
+
+.container {
+    max-width: 900px;
+    width: 100%;
+}
+
+/* --- ヘッダー --- */
+.header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: var(--accent);
+}
+
+h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #e8e8f0, #a5b4fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    color: var(--text2);
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+.badge-phase {
+    display: inline-block;
+    padding: 2px 8px;
+    margin-top: 6px;
+    border-radius: 9999px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--orange);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+/* --- コントロールバー --- */
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 18px;
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    color: var(--text);
+}
+
+.btn:hover {
+    border-color: var(--accent);
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn-play {
+    background: var(--green);
+    color: #000;
+    border-color: var(--green);
+}
+
+.btn-play:hover {
+    background: #16a34a;
+    border-color: #16a34a;
+    box-shadow: 0 0 16px var(--green-glow);
+}
+
+.btn-play.playing {
+    background: var(--red);
+    border-color: var(--red);
+}
+
+.btn-play.playing:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.3);
+}
+
+.bpm-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bpm-label {
+    font-size: 0.75rem;
+    color: var(--text2);
+    font-family: var(--font-mono);
+}
+
+.bpm-value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--accent);
+    min-width: 36px;
+    text-align: center;
+}
+
+.bpm-slider {
+    width: 100px;
+    accent-color: var(--accent);
+}
+
+.swing-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.swing-label {
+    font-size: 0.7rem;
+    color: var(--text2);
+}
+
+.swing-value {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--orange);
+    min-width: 28px;
+}
+
+.swing-slider {
+    width: 70px;
+    accent-color: var(--orange);
+}
+
+.master-vol-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.vol-icon {
+    font-size: 0.85rem;
+}
+
+.master-vol-slider {
+    width: 70px;
+    accent-color: var(--accent);
+}
+
+.track-vol-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+.track-vol-label {
+    font-size: 0.7rem;
+    color: var(--text2);
+    white-space: nowrap;
+}
+
+.track-vol-slider {
+    width: 50px;
+}
+
+.drum-vol-color {
+    accent-color: var(--green);
+}
+
+.melody-vol-color {
+    accent-color: var(--accent);
+}
+
+/* --- シーケンサーグリッド --- */
+.sequencer {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    overflow-x: auto;
+}
+
+.seq-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.seq-row:last-child {
+    margin-bottom: 0;
+}
+
+.part-label {
+    width: 70px;
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text2);
+    text-align: right;
+    padding-right: 8px;
+}
+
+.part-vol {
+    width: 50px;
+    flex-shrink: 0;
+    accent-color: var(--text2);
+}
+
+.steps {
+    display: flex;
+    gap: 3px;
+    flex: 1;
+}
+
+.step {
+    flex: 1;
+    min-width: 28px;
+    aspect-ratio: 1;
+    max-height: 40px;
+    background: var(--bg-step);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.1s;
+    position: relative;
+}
+
+.step:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.08);
+}
+
+.step.on {
+    border-color: var(--part-color, var(--accent));
+    background: var(--bg-step-on);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--part-color, var(--accent)) 30%, transparent);
+}
+
+.step.current {
+    border-color: var(--green);
+    box-shadow: 0 0 10px var(--green-glow);
+}
+
+.step.on.current {
+    background: color-mix(in srgb, var(--part-color, var(--accent)) 50%, var(--green) 50%);
+    border-color: var(--green);
+}
+
+/* ビートマーカー（1,5,9,13拍の上に薄いインジケータ） */
+.beat-marker {
+    display: flex;
+    gap: 3px;
+    margin-left: 74px;
+    margin-bottom: 6px;
+    padding-left: 54px;
+}
+
+.beat-num {
+    flex: 1;
+    min-width: 28px;
+    text-align: center;
+    font-size: 0.55rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+}
+
+.beat-num.downbeat {
+    color: var(--text2);
+    font-weight: 700;
+}
+
+/* --- プリセット・アクションボタン --- */
+.action-bar {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.preset-select {
+    padding: 8px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.preset-select:hover {
+    border-color: var(--accent);
+}
+
+.preset-select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+option {
+    background: var(--bg-card);
+    color: var(--text);
+}
+
+.btn-small {
+    padding: 6px 14px;
+    font-size: 0.75rem;
+}
+
+.btn-clear {
+    color: var(--red);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-clear:hover {
+    border-color: var(--red);
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.btn-random {
+    color: var(--orange);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.btn-random:hover {
+    border-color: var(--orange);
+    background: rgba(245, 158, 11, 0.08);
+}
+
+/* --- 情報テキスト --- */
+.info {
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: var(--bg-card);
+    border-radius: var(--radius);
+    border-left: 3px solid var(--accent);
+    font-size: 0.75rem;
+    color: var(--text2);
+    line-height: 1.6;
+}
+
+/* --- タブUI --- */
+.tab-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 16px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.tab-btn:hover {
+    color: var(--text);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.tab-btn.active {
+    background: var(--bg-card);
+    color: var(--accent);
+    border-color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+/* --- メロディエディタ --- */
+.melody-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.synth-group,
+.scale-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.synth-group label,
+.scale-group label {
+    font-size: 0.7rem;
+    color: var(--text2);
+    white-space: nowrap;
+}
+
+.melody-select {
+    padding: 5px 10px;
+    background: var(--bg-step);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.melody-select:hover,
+.melody-select:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.melody-select option {
+    background: var(--bg-card);
+    color: var(--text);
+}
+
+/* ADSRコントロール */
+.adsr-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.adsr-group .adsr-title {
+    font-size: 0.7rem;
+    color: var(--text2);
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.adsr-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.adsr-item label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    min-width: 14px;
+}
+
+.adsr-slider {
+    width: 60px;
+    accent-color: var(--accent);
+}
+
+.adsr-val {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--text2);
+    min-width: 28px;
+}
+
+/* ピアノロール */
+.piano-roll-wrap {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    overflow-x: auto;
+}
+
+.piano-roll-container {
+    display: flex;
+    gap: 0;
+    min-width: 600px;
+}
+
+.piano-keys {
+    flex-shrink: 0;
+    width: 48px;
+}
+
+.piano-key {
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 6px;
+    font-size: 0.55rem;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.piano-key.black-key {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text2);
+}
+
+.piano-key.scale-note {
+    color: var(--accent);
+}
+
+#pianoCanvas {
+    cursor: crosshair;
+    border-radius: 4px;
+}
+
+/* --- ミュート/ソロ --- */
+.track-ms-btns {
+    display: flex;
+    gap: 2px;
+}
+
+.ms-btn {
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.6rem;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    cursor: pointer;
+    transition: all 0.15s;
+    padding: 0;
+    line-height: 1;
+}
+
+.ms-btn:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text);
+}
+
+.ms-btn.muted {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+}
+
+.ms-btn.soloed {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: #000;
+}
+
+/* --- エフェクトパネル --- */
+.fx-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+}
+
+.fx-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+    transition: background 0.2s;
+}
+
+.fx-header:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.fx-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text2);
+}
+
+.fx-toggle {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+}
+
+.fx-panel.open .fx-toggle {
+    transform: rotate(180deg);
+}
+
+.fx-body {
+    display: none;
+    padding: 0 16px 14px;
+}
+
+.fx-panel.open .fx-body {
+    display: block;
+}
+
+.fx-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    flex-wrap: wrap;
+}
+
+.fx-row:last-child {
+    border-bottom: none;
+}
+
+.fx-enable {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--green);
+    cursor: pointer;
+}
+
+.fx-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text);
+    min-width: 80px;
+}
+
+.fx-param {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.fx-param label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.fx-slider {
+    width: 70px;
+    accent-color: var(--accent);
+}
+
+.fx-param-val {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    color: var(--text2);
+    min-width: 32px;
+}
+
+.fx-select {
+    padding: 3px 8px;
+    background: var(--bg-step);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.bass-vol-color {
+    accent-color: #f97316;
+}
+
+/* --- レスポンシブ --- */
+@media (max-width: 600px) {
+    .controls {
+        gap: 8px;
+        padding: 12px 14px;
+    }
+
+    .bpm-slider {
+        width: 80px;
+    }
+
+    .swing-slider {
+        width: 50px;
+    }
+
+    .master-vol-slider {
+        width: 50px;
+    }
+
+    .master-vol-group {
+        margin-left: 0;
+    }
+
+    .part-label {
+        width: 50px;
+        font-size: 0.6rem;
+    }
+
+    .part-vol {
+        width: 36px;
+    }
+
+    .step {
+        min-width: 20px;
+        max-height: 32px;
+    }
+
+    .beat-marker {
+        margin-left: 54px;
+        padding-left: 40px;
+    }
+
+    .sequencer {
+        padding: 10px;
+    }
+
+    .adsr-slider {
+        width: 44px;
+    }
+
+    .piano-roll-container {
+        min-width: 480px;
+    }
+
+    .piano-keys {
+        width: 36px;
+    }
+
+    .piano-key {
+        font-size: 0.5rem;
+        height: 18px;
+    }
+
+    .fx-slider {
+        width: 50px;
+    }
+
+    .fx-name {
+        min-width: 60px;
+        font-size: 0.7rem;
+    }
+
+    .file-bar {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .file-bar .btn {
+        font-size: 0.65rem;
+        padding: 5px 8px;
+    }
+
+    .file-bar select {
+        font-size: 0.65rem;
+    }
+}
+
+/* --- ファイル操作バー --- */
+.file-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.file-bar .file-section {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.file-bar .file-sep {
+    width: 1px;
+    height: 24px;
+    background: var(--border);
+}
+
+.file-bar .btn-export {
+    background: linear-gradient(135deg, #059669, #10b981);
+    border-color: #10b981;
+}
+
+.file-bar .btn-export:hover {
+    background: linear-gradient(135deg, #047857, #059669);
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+.file-bar .btn-export:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.file-bar .btn-save {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    border-color: #3b82f6;
+}
+
+.file-bar .btn-save:hover {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.3);
+}
+
+.file-bar .btn-load {
+    border-color: rgba(168, 85, 247, 0.4);
+    color: #a855f7;
+}
+
+.file-bar .btn-load:hover {
+    border-color: #a855f7;
+    background: rgba(168, 85, 247, 0.08);
+}
+
+.file-bar .loop-select,
+.file-bar .slot-select {
+    padding: 5px 8px;
+    background: var(--bg-step);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.75rem;
+    font-family: var(--font-sans);
+}
+
+.export-progress {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: var(--green);
+}
+
+.export-progress.active {
+    display: flex;
+}
+
+.export-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(34, 197, 94, 0.3);
+    border-top-color: var(--green);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.save-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--bg-card);
+    border: 1px solid var(--green);
+    color: var(--green);
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: var(--font-sans);
+    z-index: 1000;
+    opacity: 0;
+    transition: all 0.3s ease;
+    pointer-events: none;
+}
+
+.save-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}

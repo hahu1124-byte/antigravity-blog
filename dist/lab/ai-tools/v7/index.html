@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発ツール比較 2026 第7回 | LAB | Gravity Portal</title>
+    <meta name="description" content="AI開発ツール比較 第7回。Antigravity UltraのOpus枯渇問題が深刻化、Cursor Composer 2の中国モデル論争、Claude Max利用制限の急加速。5大ツールの3月末最新動向。">
+    <meta property="og:title" content="AI開発ツール比較 2026 第7回 — 最強モデルの代償">
+    <meta property="og:description" content="Antigravity Ultra月額$250でもOpus枠がすぐ枯渇。Composer 2のKimi K2.5問題。5大ツール最新動向（3/26更新）。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-tools/v7/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-tools.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-tools/v7/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>(function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()</script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">🛠️ AI開発ツール比較 第7回</h1>
+    </header>
+    <main class="lab-content">
+        <section class="lab-hero">
+            <div class="lab-hero-icon">🛠️</div>
+            <h1>AI開発ツール — 最強モデルの代償 第7回</h1>
+            <p><a href="/lab/ai-tools/v6/" style="color:inherit;text-decoration:underline">第6回</a>では「収束と囲い込み」を追いました。<br>
+                第7回は<strong>「最強モデルの代償」</strong>がテーマ。各社のフロンティアモデルが強力になるほど、<br>
+                推論コストの壁がユーザーのクォータ制限として直撃する構造的課題が表面化した。<br>
+                Antigravity UltraのOpus枯渇問題、Cursor Composer 2の中国モデル論争、Claude Maxの利用制限急加速——<br>
+                「使い放題サブスク」の限界が、2026年3月末に一気に可視化されている。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月26日更新</span>
+                <span>🔥 Opus枯渇問題 特集</span>
+                <span>📝 <a href="/lab/ai-tools/v6/" style="color:inherit;text-decoration:underline">第6回（3/24）はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- 業界数字 -->
+        <section class="lab-section">
+            <h2>📊 AI開発ツール業界の現在地（更新）</h2>
+            <p>第6回からの変化を数字で。</p>
+            <div class="market-overview">
+                <div class="market-stats">
+                    <div class="market-stat">
+                        <div class="market-stat-value">300M→9M</div>
+                        <div class="market-stat-label">Antigravity週間トークン割当の変動（報告値）</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">7〜10日</div>
+                        <div class="market-stat-label">Opus枯渇時のロック期間（公式5時間 vs 実態）</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">Kimi K2.5</div>
+                        <div class="market-stat-label">Cursor Composer 2のベースモデル（判明）</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">$0.50/M</div>
+                        <div class="market-stat-label">Composer 2 Standardの入力トークン単価</div>
+                    </div>
+                </div>
+                <p>2026年3月末、業界が直面しているのは「フロンティアモデルのコスト転嫁」問題。どのプラットフォームも最上位モデルの推論コストをユーザー制限で吸収し始めており、「サブスクで使い放題」という前提が構造的に崩壊しつつある。</p>
+            </div>
+        </section>
+
+        <!-- 第6回→第7回 変化 -->
+        <section class="lab-section">
+            <h2>🔥 第6回→第7回 主要変化サマリ</h2>
+            <p><a href="/lab/ai-tools/v6/" style="color:var(--accent);text-decoration:underline">第6回</a>からの変化を一覧で。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>ツール</th><th>主なアップデート</th><th>⚠️ 第6回の課題の進展</th></tr></thead>
+                    <tbody>
+                        <tr><td class="tool-name">Antigravity</td><td>⚠️ Ultra含むOpus枯渇問題が深刻化。公式フォーラムに苦情殺到</td><td>❌ 悪化。週300M→9Mトークンへ激減報告、7〜10日ロックの証言多数</td></tr>
+                        <tr><td class="tool-name">Claude Code</td><td>⚠️ Claude Max利用制限も急速ドレイン報告。Anthropicへの不満拡大</td><td>⚠️ 継続。シークレット漏洩リスクに加え、MCPスキル乗っ取り事例が発覚</td></tr>
+                        <tr><td class="tool-name">Cursor</td><td>🔥 Composer 2がKimi K2.5（中国モデル）ベースと判明。論争勃発</td><td>⚠️ N-iXとのエンタープライズ提携発表で信頼回復を模索</td></tr>
+                        <tr><td class="tool-name">GitHub Copilot</td><td>安定運用を継続。大きな変動なし</td><td>✅ Codex＋CLI正式版で着実に機能強化</td></tr>
+                        <tr><td class="tool-name">Windsurf</td><td>大きな変動なし</td><td>⚠️ Cursorとの差は依然拡大傾向</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- メインイシュー: Opus枯渇 -->
+        <section class="lab-section">
+            <h2>🚨 特集: Antigravity Opus枯渇問題の全貌</h2>
+            <p>2026年3月、Antigravityの<strong>全有料プラン</strong>でClaude Opus 4.6のクォータが急速に枯渇する問題が深刻化しています。公式フォーラム（discuss.ai.google.dev）やReddit（r/google_antigravity）に数十件の苦情スレッドが立ち、「<strong>Secret Quota Cuts</strong>（秘密のクォータ削減）」とまで呼ばれる事態になりました。</p>
+
+            <h3>📉 報告されている実態</h3>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>問題</th><th>公式の説明</th><th>ユーザーの実態報告</th></tr></thead>
+                    <tbody>
+                        <tr><td class="tool-name">週間トークン量</td><td>（非公開）</td><td>週300M→9M以下への激減報告。<strong>97%カット</strong></td></tr>
+                        <tr><td class="tool-name">リフレッシュ</td><td>5時間で回復</td><td><strong>7〜10日</strong>ロックされるケースが複数証言</td></tr>
+                        <tr><td class="tool-name">未使用消費</td><td>（未回答）</td><td>「休日に一切触っていないのにクォータが全損」のバグ疑惑</td></tr>
+                        <tr><td class="tool-name">Ultra vs Pro差</td><td>Ultraは最大クォータ</td><td>「Ultraでも1時間でOpus枠ゼロ。本番利用は不可能」</td></tr>
+                        <tr><td class="tool-name">透明性</td><td>AI Creditsを導入</td><td>「事前通知なしの削減は契約違反レベル」（公式フォーラム）</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>💡 有効な自己防衛策</h3>
+            <ul>
+                <li><strong>1. Sonnet 4.6 / Gemini 3.1 Proを常用に固定</strong> — Opusは「設計判断」「原因不明の難問」にのみ投入。ClaudeとGeminiのクォータプールは別管理のため、片方がロックしても他方で作業を継続できる</li>
+                <li><strong>2. APIYI等の外部APIプロキシの併用</strong> — Ultra（$250/月）をやめてPro（$20/月）にダウングレードし、足りない分はAPIYI等の従量課金サービスで「使った分だけ」支払い。明朗会計で安定運用する開発者が急増</li>
+                <li><strong>3. コンテキストの「ダイエット」</strong> — 不要なファイル（node_modules, dist, ログ等）をAIに渡さない。.antigravityignore や .cursorignore を設定してトークン消費を根本的に減らすテクニックが重要度を増している</li>
+                <li><strong>4. ダウングレード＋自動更新停止</strong> — AI Credits導入前のバージョン（v1.19.6等）で安定したクォータ挙動になるとの報告あり。VS Code設定 → Update: Mode を「none」に変更</li>
+            </ul>
+        </section>
+
+        <!-- 各ツール詳細 -->
+        <section class="lab-section">
+            <h2>🔍 各ツール最新アップデート＆ユーザーの声</h2>
+
+            <!-- Antigravity -->
+            <div class="tool-card" id="antigravity-v7">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🚀</div>
+                    <div class="tool-card-info">
+                        <h3>Antigravity / Gemini Code Assist</h3>
+                        <div class="tool-maker">Google DeepMind — 第7回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">⚠️ Opus枯渇問題</span>
+                    <span class="badge badge-free">Code Assist個人無料（継続）</span>
+                    <span class="badge badge-type">Gemini 3.1 Pro不安定報告</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Opus枯渇問題（最重要） 🚨</strong> — 上記特集の通り。公式フォーラムで「Secret Quota Cuts, Break Trust & Make It Unusable for Production」というスレッドが300+Viewで議論中。Ultra($250/月)ですら本番利用に耐えないとの声</li>
+                        <li><strong>Gemini 3.1 Proの予測不能な挙動</strong> — 「コードを変更するのにPythonスクリプトを生成して実行する」という危険な挙動が報告。変更が「Made Changes」タブに表示されず、git管理していないとファイルが破壊される恐れ</li>
+                        <li><strong>Antigravity Manager（非公式）v4.1の登場</strong> — 複数アカウントのクォータを輪番管理するOSSツール（GitHub: lbjlaq/Antigravity-Manager）が急成長。Ultra > Pro > Free の厳密な優先度ルーティングでOpsus枯渇を軽減する設計</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題（継続フォロー）</h3>
+                    <ul>
+                        <li><strong>❌ 透明性の完全欠如（最大の不満）</strong> — 「事前通知なしの秘密削減は、Googleのような大企業としてcontractual integrity（契約の誠実さ）に欠ける」。Anthropicは制限変更時にツイートで告知するが、Googleは一切なし</li>
+                        <li><strong>❌ AI Credits導入が解決策になっていない</strong> — 「クレジットを有効化しても結局Googleのクォータが消滅する」との報告</li>
+                        <li><strong>✅ Code Assist無料化は引き続き好評</strong> — IDE Pluginで軽い用途なら最強の無料ツール</li>
+                    </ul>
+
+                    <h3>🔑 第7回の所感</h3>
+                    <p>エディタとしてのAntigravityの完成度は依然高いが、<strong>「課金しても使えない」という根本的な信頼毀損</strong>が起きている。
+                        当サイトもAntigravityで開発を継続しているが、Opusの使用はアーキテクチャ設計時のみに限定し、日常はSonnet+Geminiで運用する「マルチモデル体制」を採用している。</p>
+                </div>
+            </div>
+
+            <!-- Cursor -->
+            <div class="tool-card" id="cursor-v7">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">⚡</div>
+                    <div class="tool-card-info">
+                        <h3>Cursor</h3>
+                        <div class="tool-maker">Anysphere — 第7回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">🔥 Composer 2 = Kimi K2.5論争</span>
+                    <span class="badge badge-paid">N-iXエンタープライズ提携</span>
+                    <span class="badge badge-type">セキュリティ課題浮上</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Composer 2のベースモデルがKimi K2.5（中国・Moonshot AI）と判明 🔥🔥</strong> — VentureBeat報道で発覚。$29.3B評価の企業が「自社研究の成果」として発表したモデルが、実はAlibaba・Tencent出資の中国AIスタートアップのオープンウェイトモデルに追加学習を施したものだった。VP Lee Robinsonは「計算力の約25%が元モデル由来」と認める</li>
+                        <li><strong>ベンチマーク性能は本物</strong> — CursorBench 61.3（v1.5比+39%）、SWE-bench Multilingual で高スコア。出自は論争だが実力は証明済み。価格も$0.50/M input（Standard）と安い</li>
+                        <li><strong>N-iXとエンタープライズ提携（3/25発表）</strong> — AI-Augmented Teamフレームワークで大企業のAI導入を加速。Cursor as Platformの戦略が本格化</li>
+                        <li><strong>セルフホスト型クラウドエージェント（3/19）</strong> — 顧客のインフラ内でCursorエージェントを動かすオプションを追加。セキュリティ懸念への対応</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題</h3>
+                    <ul>
+                        <li><strong>⚠️ 中国モデル依存の地政学リスク</strong> — 特に米国の国防・金融セクターで「Kimi K2.5ベースのツールを業務利用できるか？」という議論が発生</li>
+                        <li><strong>⚠️ AI生成コードの40%に脆弱依存</strong> — Endor Labs調べ。AIが人気度で依存パッケージを提案するため脆弱な依存関係が混入しやすい</li>
+                        <li><strong>✅ 新規実装スピードは依然最速</strong> — Tab補完の精度、Compositor UIの洗練度は業界トップ</li>
+                    </ul>
+
+                    <h3>🔑 第7回の所感</h3>
+                    <p>Composer 2の<strong>「出自論争」は技術力ではなく信頼の問題</strong>。Moonshot AIのKimi K2.5自体は優秀なOSSモデルで、それを活用すること自体は正しい。
+                        問題は「自社研究」と誤認させた発表方法。$50B評価を維持できるかは、この信頼回復にかかっている。</p>
+                </div>
+            </div>
+
+            <!-- Claude Code -->
+            <div class="tool-card" id="claude-code-v7">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🤖</div>
+                    <div class="tool-card-info">
+                        <h3>Claude Code</h3>
+                        <div class="tool-maker">Anthropic — 第7回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">⚠️ Max利用制限も急加速</span>
+                    <span class="badge badge-paid">スキル乗っ取り事例発覚</span>
+                    <span class="badge badge-type">SWE-bench 80.8%維持</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Claude Max利用制限の急速ドレイン 🚨</strong> — PiunikaWeb報道。Claude Max（$100〜$200/月）でも利用メーターが異常に速く減少する事象が14時間にわたり報告。Anthropicからの明確な説明なし</li>
+                        <li><strong>MCPスキル乗っ取り事例が発覚 🔥</strong> — GitHub上の.claude/settings.jsonを通じてAPIエンドポイントを中国Zhipu AIのBigModelに差し替え、全会話を第三者サーバーにリダイレクトするスキルが発見。「目に見えない」攻撃で極めて危険</li>
+                        <li><strong>Claude自体がコーディングエージェントに進化（3月）</strong> — チャット上でコードを書いてテストまで実行する能力が組み込まれ、Claude Code CLI不要でもエージェント的なワークフローが可能に</li>
+                        <li><strong>SWE-bench Verified 80.8%は依然トップクラス</strong> — 1Mトークンコンテキストウィンドウ + Agent Teamsの組み合わせで、複雑なリファクタリングは業界最強を維持</li>
+                    </ul>
+
+                    <h3>🔑 第7回の所感</h3>
+                    <p>技術力はNo.1を維持しているが、<strong>利用制限の急加速とMCPのセキュリティリスク</strong>が二重の懸念材料。
+                        $17/月から入れるコスパの良さは変わらないが、Max($100/$200)プランの信頼性に疑問符がついた。</p>
+                </div>
+            </div>
+
+            <!-- GitHub Copilot -->
+            <div class="tool-card" id="copilot-v7">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🐙</div>
+                    <div class="tool-card-info">
+                        <h3>GitHub Copilot + Codex</h3>
+                        <div class="tool-maker">GitHub / OpenAI — 第7回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">安定運用</span>
+                    <span class="badge badge-paid">$10/月 最安</span>
+                    <span class="badge badge-type">大きな変動なし</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 第7回の位置づけ</h3>
+                    <p>第6回で紹介したCodex復活・CLI正式版が安定稼働。Opus/Composer論争で競合が揺れる中、<strong>$10/月で安定して使える「地味だが確実な選択肢」</strong>としてのポジションが逆に強化されている。
+                        愛され率9%は変わらないが、「裏切らない」信頼性が企業ユーザーに評価されつつある。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- まとめ -->
+        <section class="lab-section">
+            <h2>🎯 第7回時点のおすすめ（更新）</h2>
+            <div class="summary-box">
+                <h3>前回からの変化ポイント</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">🚨 最大の問題</div>
+                        <div class="summary-value">フロンティアモデルのサブスク破綻</div>
+                        <p>Antigravity＆Claude双方でOpus/Max利用制限が急加速。「使い放題」は建前に</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🔥 最大の論争</div>
+                        <div class="summary-value">Composer 2 = Kimi K2.5</div>
+                        <p>$29.3B企業が中国OSSモデルベースと発覚。性能は本物だが信頼の傷は深い</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">💡 唯一の正解</div>
+                        <div class="summary-value">マルチモデル体制</div>
+                        <p>「日常はSonnet/Flash、ここぞのOpus」。単一モデル依存は2026年3月時点でハイリスク</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">💰 無料最強</div>
+                        <div class="summary-value">Gemini Code Assist（変わらず）</div>
+                        <p>IDE Plugin無料化は継続。CLI有料化の影響はあるがIDE派には最良</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🏢 企業向け最安定</div>
+                        <div class="summary-value">GitHub Copilot（変わらず）</div>
+                        <p>$10/月で炎上もロックもなし。「つまらないが裏切らない」安定枠</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🤔 結論</div>
+                        <div class="summary-value">「信頼」が新たな競争軸</div>
+                        <p>性能差は縮小し、「約束を守るか」「透明性があるか」がツール選定の決定要因に</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 調査にあたって</h2>
+            <p>本記事は<strong>2026年3月26日時点</strong>の情報です。過去の調査は
+                <a href="/lab/ai-tools/v1/" style="color:var(--accent);text-decoration:underline">第1回（3/9）</a>・
+                <a href="/lab/ai-tools/v2/" style="color:var(--accent);text-decoration:underline">第2回（3/11）</a>・
+                <a href="/lab/ai-tools/v3/" style="color:var(--accent);text-decoration:underline">第3回（3/12）</a>・
+                <a href="/lab/ai-tools/v4/" style="color:var(--accent);text-decoration:underline">第4回（3/16）</a>・
+                <a href="/lab/ai-tools/v5/" style="color:var(--accent);text-decoration:underline">第5回（3/21）</a>・
+                <a href="/lab/ai-tools/v6/" style="color:var(--accent);text-decoration:underline">第6回（3/24）</a>をご覧ください。</p>
+            <p>当サイト「Gravity Portal」は <strong>Antigravity</strong> を使って開発されています。</p>
+            <p>情報はdiscuss.ai.google.dev、Reddit r/google_antigravity、VentureBeat、PiunikaWeb、Endor Labs等より収集。</p>
+        </section>
+    </main>
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-tools/v6/">🛠️ 第6回</a>
+            <a href="/lab/ai-developers/v7/">👤 AI開発者 第7回</a>
+            <a href="/lab/ai-trends/v7/">📊 トレンド 第7回</a>
+        </nav>
+    </footer>
+    <script>
+        (function(){var btn=document.getElementById('themeToggle');function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}update();btn.addEventListener('click',function(){var cur=document.documentElement.getAttribute('data-theme');var next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('gp-theme',next)}catch(e){}update()})})()
+    </script>
+</body>
+</html>

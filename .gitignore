@@ -1,5 +1,4 @@
 node_modules/
-dist/
 .env
 .x-posted.json
 remove_b_article.cjs

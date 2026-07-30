@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一般常識クイズ | Gravity Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="general-quiz.css">
+</head>
+
+<body>
+    <div id="app">
+        <!-- カテゴリ選択画面 -->
+        <div id="category-screen" class="screen active">
+            <div class="start-hero">
+                <div class="start-icon">🧠</div>
+                <h1>一般常識クイズ</h1>
+                <p class="start-desc">5つのジャンルから選んで挑戦！<br>各カテゴリ100問からランダム出題<br>総合は10・20・30問から選べます</p>
+            </div>
+            <div class="category-grid" id="category-grid">
+                <!-- JSで動的生成 -->
+            </div>
+            <!-- 問題数選択モーダル -->
+            <div id="count-modal" class="count-modal hidden">
+                <div class="count-modal-content">
+                    <h2>🌐 総合 — 問題数を選択</h2>
+                    <p class="count-modal-desc">全400問からランダムに出題します</p>
+                    <div class="count-options">
+                        <button class="count-btn" data-count="10">10問<span class="count-sub">サクッと</span></button>
+                        <button class="count-btn" data-count="20">20問<span class="count-sub">じっくり</span></button>
+                        <button class="count-btn" data-count="30">30問<span class="count-sub">たっぷり</span></button>
+                    </div>
+                    <button id="count-modal-close" class="secondary-btn count-cancel">キャンセル</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- クイズ画面 -->
+        <div id="quiz-screen" class="screen">
+            <div class="quiz-header">
+                <div class="progress-info">
+                    <span id="current-category-label" class="category-label-header"></span>
+                    <span id="question-counter">1 / 10</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <div id="score-display" class="score-display">
+                    <span class="score-correct">⭕ <span id="correct-count">0</span></span>
+                    <span class="score-wrong">❌ <span id="wrong-count">0</span></span>
+                </div>
+            </div>
+
+            <div id="question-card" class="question-card">
+                <div class="question-category" id="question-category">教養</div>
+                <h2 class="question-text" id="question-text"></h2>
+                <div id="choices" class="choices"></div>
+            </div>
+
+            <div id="explanation-card" class="explanation-card hidden">
+                <div id="result-icon" class="result-icon"></div>
+                <div id="result-label" class="result-label"></div>
+                <div class="explanation-text" id="explanation-text"></div>
+                <button id="next-btn" class="primary-btn">次の問題へ</button>
+            </div>
+        </div>
+
+        <!-- 結果画面 -->
+        <div id="result-screen" class="screen">
+            <div class="result-hero">
+                <div id="result-rank-icon" class="result-rank-icon"></div>
+                <h1 id="result-rank-title" class="result-rank-title"></h1>
+                <div id="result-score-display" class="result-score-big"></div>
+                <p id="result-message" class="result-message"></p>
+                <div id="result-breakdown" class="result-breakdown"></div>
+                <button id="retry-btn" class="primary-btn">もう一度挑戦する</button>
+                <button id="back-category-btn" class="secondary-btn">カテゴリ選択に戻る</button>
+                <button id="back-top-btn" class="secondary-btn"
+                    onclick="window.top.location.href='/game/quiz'">クイズTOPに戻る</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 問題データ（カテゴリ別） -->
+    <script src="questions/current-events.js"></script>
+    <script src="questions/education.js"></script>
+    <script src="questions/entertainment.js"></script>
+    <script src="questions/it-tech.js"></script>
+    <script src="general-quiz.js"></script>
+</body>
+
+</html>

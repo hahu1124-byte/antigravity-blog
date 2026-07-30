@@ -1,0 +1,179 @@
+/* ============================================================
+   更新履歴ページ専用CSS
+   共通styles.cssのCSS変数を継承
+   ============================================================ */
+
+.updates-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+}
+
+.header {
+    margin-bottom: 3rem;
+}
+
+.back-link {
+    color: var(--text-muted, #6b7899);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 150ms ease;
+}
+
+.back-link:hover {
+    color: var(--accent, #7c7ff2);
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 1rem 0 0.5rem;
+    background: linear-gradient(135deg, #818CF8 0%, #6366F1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.page-desc {
+    color: var(--text-secondary, #9aa5be);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* タイムライン */
+.timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.timeline::before {
+    content: "";
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom,
+            #818CF8 0%,
+            rgba(129, 140, 248, 0.3) 80%,
+            transparent 100%);
+}
+
+/* 各エントリ */
+.update-entry {
+    position: relative;
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: var(--bg-card, rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    border-radius: 12px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.update-entry::before {
+    content: "";
+    position: absolute;
+    left: -2rem;
+    top: 1.8rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #818CF8;
+    border: 2px solid var(--bg-primary, #0c0d14);
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+}
+
+.update-entry:hover {
+    border-color: rgba(129, 140, 248, 0.3);
+    box-shadow: 0 4px 20px rgba(129, 140, 248, 0.1);
+}
+
+.date-badge {
+    margin-bottom: 0.5rem;
+}
+
+.date-badge time {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #818CF8;
+    background: rgba(129, 140, 248, 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    letter-spacing: 0.02em;
+}
+
+.update-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0.75rem 0;
+    color: var(--text-primary, #e8eaf6);
+}
+
+.update-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.update-items li {
+    padding: 0.4rem 0;
+    color: var(--text-secondary, #9aa5be);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.04));
+}
+
+.update-items li:last-child {
+    border-bottom: none;
+}
+
+/* バージョンセクション */
+.version-section {
+    margin-bottom: 1rem;
+}
+
+.version-section:last-child {
+    margin-bottom: 0;
+}
+
+.version-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #A5B4FC;
+    background: rgba(165, 180, 252, 0.1);
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    display: inline-block;
+    margin: 0.75rem 0 0.25rem;
+    letter-spacing: 0.03em;
+    border: 1px solid rgba(165, 180, 252, 0.15);
+}
+
+.version-section:first-child .version-badge {
+    margin-top: 0;
+}
+
+/* レスポンシブ */
+@media (max-width: 640px) {
+    .updates-page {
+        padding: 1.5rem 1rem 3rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+    }
+
+    .timeline {
+        padding-left: 1.5rem;
+    }
+
+    .update-entry {
+        padding: 1rem;
+    }
+
+    .update-entry::before {
+        left: -1.5rem;
+        width: 10px;
+        height: 10px;
+    }
+}

@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発ツール比較 2026 第3回 | LAB | Gravity Portal</title>
+    <meta name="description"
+        content="AI開発ツール比較の第3回。GPT-5.4登場、Cursor Automations、Claude Code障害問題、ユーザーの不満と本音を徹底取材。5大ツールの光と影を解説。">
+    <meta property="og:title" content="AI開発ツール比較 2026 第3回 — 光と影">
+    <meta property="og:description" content="5大AI開発ツールの2026年3月最新動向。新機能だけでなくユーザーの不満・課題も徹底取材。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-tools/v3/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-tools.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/og-lab-ai-tools.png">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-tools/v3/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>
+        (function () { try { var t = localStorage.getItem('gp-theme'); if (t) document.documentElement.setAttribute('data-theme', t) } catch (e) { } })()
+    </script>
+</head>
+
+<body>
+    <!-- テーマトグル -->
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+
+    <!-- ヘッダー -->
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">🛠️ AI開発ツール比較 第3回</h1>
+    </header>
+
+    <main class="lab-content">
+        <!-- ヒーロー -->
+        <section class="lab-hero">
+            <div class="lab-hero-icon">🛠️</div>
+            <h1>AI開発ツールの光と影 — 第3回</h1>
+            <p><strong>第2回の公開からたった1日</strong>。それなのに、もうこれだけの変化が起きている。<br>
+                GPT-5.4がPCを操作し始め、CursorのAIは24時間眠らず、<br>
+                Claude Codeは障害を乗り越えてHTTP Hooksを投入し、<br>
+                Windsurf+Devinの統合は本格化 —— 目まぐるしいなんてものではない。<br><br>
+                第3回では最新アップデートの裏側にも踏み込み、<br>
+                X（Twitter）やRedditで噴出する<strong>ユーザーの不満と本音</strong>にも迫ります。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月12日更新</span>
+                <span>🔧 5ツール徹底分析</span>
+                <span>📝 <a href="/lab/ai-tools/v2/" style="color:inherit;text-decoration:underline">第2回（3/11）はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- 業界数字 -->
+        <section class="lab-section">
+            <h2>📊 AI開発ツール業界の現在地</h2>
+            <p>まずは第3回時点の業界全体の数字から。</p>
+            <div class="market-overview">
+                <div class="market-stats">
+                    <div class="market-stat">
+                        <div class="market-stat-value">73%</div>
+                        <div class="market-stat-label">エンジニアリングチームが日常利用</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">29%</div>
+                        <div class="market-stat-label">AI生成コードを信頼する開発者</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">66%</div>
+                        <div class="market-stat-label">「ほぼ正解だが微妙に違う」と感じる</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">45%</div>
+                        <div class="market-stat-label">AI生成コードに脆弱性の可能性</div>
+                    </div>
+                </div>
+                <p>「73%が毎日使うが、信頼しているのは29%だけ」— この矛盾こそが2026年3月のAI開発ツール市場の現実です。</p>
+            </div>
+        </section>
+
+        <!-- 開発者満足度調査 -->
+        <section class="lab-section">
+            <h2>💟 開発者に最も愛されているツールは？</h2>
+            <p>2026年初頭の開発者調査データ「most loved」ランキング。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>順位</th>
+                            <th>ツール</th>
+                            <th>「最も愛されている」率</th>
+                            <th>特筆事項</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>🥇 1位</td>
+                            <td class="tool-name">Claude Code</td>
+                            <td><strong>46%</strong></td>
+                            <td>圧倒的支持。ただし障害問題あり</td>
+                        </tr>
+                        <tr>
+                            <td>🥈 2位</td>
+                            <td class="tool-name">Cursor</td>
+                            <td><strong>19%</strong></td>
+                            <td>ARR $500M+達成。急成長</td>
+                        </tr>
+                        <tr>
+                            <td>🥉 3位</td>
+                            <td class="tool-name">GitHub Copilot</td>
+                            <td><strong>9%</strong></td>
+                            <td>市場シェア42%なのに愛され率は低い</td>
+                        </tr>
+                        <tr>
+                            <td>—</td>
+                            <td class="tool-name">Antigravity</td>
+                            <td>データなし</td>
+                            <td>プレビュー段階のため未計測</td>
+                        </tr>
+                        <tr>
+                            <td>—</td>
+                            <td class="tool-name">Windsurf</td>
+                            <td>データなし</td>
+                            <td>Cognition統合移行中</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>注目すべきは、<strong>市場シェア42%のCopilotが「愛され率」9%</strong>という事実。「使われている」と「好かれている」は別問題であることを示しています。</p>
+        </section>
+
+        <!-- 主要アップデートまとめ -->
+        <section class="lab-section">
+            <h2>🔥 第2回→第3回 主要変化サマリ</h2>
+            <p>昨日公開した<a href="/lab/ai-tools/v2/" style="color:var(--accent);text-decoration:underline">第2回</a>から<strong>わずか1日</strong>で、各ツールにこれだけの動きがありました。</p>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>ツール</th>
+                            <th>主なアップデート</th>
+                            <th>⚠️ 主な不満・課題</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="tool-name">Antigravity</td>
+                            <td>Gemini 3.1 Flash-Lite追加、3 Pro Preview廃止</td>
+                            <td>🔥 Pro版 週間制限追加、MCP未サポート</td>
+                        </tr>
+                        <tr>
+                            <td class="tool-name">Claude Code</td>
+                            <td>HTTP Hooks、Ultrathink復活、/loop、Voice Mode</td>
+                            <td>3月障害連発、Code Review高額（$15-25/PR）</td>
+                        </tr>
+                        <tr>
+                            <td class="tool-name">Cursor</td>
+                            <td>Automations（常時オンエージェント）、統合ブラウザ</td>
+                            <td>料金不透明（実質$60-80/月）、CVE脆弱性</td>
+                        </tr>
+                        <tr>
+                            <td class="tool-name">GitHub Copilot</td>
+                            <td>GPT-5.4統合、Agent Hooks、Jira連携</td>
+                            <td>Premium Request超過課金、愛され率9%</td>
+                        </tr>
+                        <tr>
+                            <td class="tool-name">Windsurf</td>
+                            <td>Devinとの統合プラットフォーム化、PWA対応</td>
+                            <td>将来の方向性が不透明、ユーザー離れ</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ===== 各ツール詳細 ===== -->
+        <section class="lab-section">
+            <h2>🔍 各ツール最新アップデート＆ユーザーの声</h2>
+
+            <!-- Antigravity -->
+            <div class="tool-card" id="antigravity-v3">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🚀</div>
+                    <div class="tool-card-info">
+                        <h3>Antigravity</h3>
+                        <div class="tool-maker">Google DeepMind — 第3回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プレビュー継続</span>
+                    <span class="badge badge-type">Gemini 3.1 Flash-Lite</span>
+                    <span class="badge badge-hot">🔥 注目</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Gemini 3.1 Flash-Lite（3/3リリース）</strong> — 高速・低コストモデル。大量翻訳・コンテンツモデレーション・UI生成に最適化。従来モデルの数分の1のコストで動作</li>
+                        <li><strong>Gemini 3 Pro Preview 廃止（3/9）</strong> — 3.1 Proに完全移行。Deep Think推論とネイティブ画像生成を標準搭載</li>
+                        <li><strong>Nano Banana 2（2/26）</strong> — 最先端画像生成AI。AI StudioとVertex AI統合で超高速ビジュアル生成</li>
+                        <li><strong>Google Workspace統合（3/10）</strong> — Docs、Sheets、Slides、DriveにGemini統合。開発者のドキュメント作成ワークフローも変革</li>
+                        <li><strong>アーティファクト機能継続強化</strong> — メルマロダイアグラム、ブラウザ録画WebP保存、ダウンロード対応が安定化</li>
+                        <li><strong>「エージェントファースト」設計</strong> — エディタ・エージェントマネージャ・ブラウザが一体化した統合IDE。AI主導の開発がデフォルト</li>
+                    </ul>
+
+                    <h3>💰 価格体系（変更なし…だが問題あり）</h3>
+                    <ul>
+                        <li><strong>Individual（無料）</strong>: 寛大なレート制限付きで全モデル利用可</li>
+                        <li><strong>Developer</strong>: Google AI Pro ($19.99/月) / Ultra ($49.99/月) で制限緩和</li>
+                        <li><strong>Team / Organization</strong>: Workspace / Google Cloud経由</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題 — X・Reddit・開発者フォーラムから</h3>
+                    <ul>
+                        <li><strong>🔥 Pro版の週間制限問題</strong> — Googleが突然「週間キャップ」を導入。これまで5時間ごとにリフレッシュされていたクォータが、<strong>週間上限に達すると数日間ロックアウト</strong>されるように変更。Reddit・Google AI Developer Forumに不満が殺到</li>
+                        <li><strong>「隠れたトークン消費」</strong> — 複雑なタスク時にAIモデルが内部で生成する「hidden thinking tokens」がクォータを予想以上に消費。最小限の使用でもクォータがゼロに落ちるとの報告</li>
+                        <li><strong>「Pro版なのにFree版と変わらない」</strong> — 週間制限により「$19.99/月払っているのにFree版と体験が変わらない」という声。サブスク更新後に制限が変わった「ゴールポスト移動」への怒り</li>
+                        <li><strong>600 RPM → 60% グローバルキャップ</strong> — 高級モデル（Gemini 3 Pro）に説明のないグローバルクォータ制限（60%キャップ）が適用されているとの報告。ダッシュボードは「Ready」表示なのに実際は制限</li>
+                        <li><strong>429/503エラーの頻発</strong> — 「Too Many Requests」「Unavailable」エラーが多発。失敗したリクエストもクォータにカウントされるとの報告</li>
+                        <li><strong>モデル選択肢の制限</strong> — GeminiとClaudeのみ対応。GPTシリーズを好むユーザーからは不満の声</li>
+                        <li><strong>MCP未サポート</strong> — Model Context Protocolへの対応がなく、外部データソース連携に制約がある</li>
+                        <li><strong>ClaudeやCursorへの乗り換え</strong> — 制限に不満を持った一部開発者がClaude Code、Cursor、マルチモデルプラットフォームに移行中</li>
+                    </ul>
+
+                    <h3>🔑 第3回の所感</h3>
+                    <p>無料枠の寛大さは健在だが、<strong>有料プランの「週間制限」問題は深刻</strong>。
+                        Googleが「unprecedented demand（前例のない需要）」を理由に挙げたが、
+                        有料ユーザーにとっては「金を払っているのに制限される」という信頼性の問題。
+                        当サイトもAntigravityで開発しているが、この制限は今後のワークフローに影響する可能性がある。</p>
+                </div>
+            </div>
+
+            <!-- Claude Code -->
+            <div class="tool-card" id="claude-code-v3">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🤖</div>
+                    <div class="tool-card-info">
+                        <h3>Claude Code</h3>
+                        <div class="tool-maker">Anthropic — 第3回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-paid">Pro $20/月</span>
+                    <span class="badge badge-type">HTTP Hooks</span>
+                    <span class="badge badge-hot">❤️ 愛され率46%</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>HTTP Hooks</strong> — Claude Codeから外部サービスにJSON POSTし、レスポンスを受け取る新機能。シェルコマンドなしで外部APIと連携可能に</li>
+                        <li><strong>Ultrathink復活</strong> — 特定プロンプトに高負荷推論を適用。Opus 4.6はMaxプランでデフォルト「中レベルeffort」に。`/model`で切替可能</li>
+                        <li><strong>新スラッシュコマンド</strong> — `/loop`（繰り返しプロンプト）が追加。`/simplify`・`/batch`に続く第3弾</li>
+                        <li><strong>エージェントスキルクリエイター強化</strong> — ベンチマーク付きスキル進化生成、マルチエージェントテストでスキル検証・リグレッション検出</li>
+                        <li><strong>Voice Mode</strong> — 音声でClaude Codeとやりとり。ハンズフリーコーディングが可能に</li>
+                        <li><strong>Remote Control改善</strong> — スマートフォンからQRコード接続・操作の安定性が向上</li>
+                        <li><strong>VS Code統合強化</strong> — Sparkアイコンでセッション一覧、プランがMarkdownレンダリング対応、ネイティブMCPサーバー管理</li>
+                        <li><strong>メモリ機能強化</strong> — 自動保存、マルチエージェント間メモリ共有、Git worktree間でプロジェクト設定共有。無料ユーザーでもチャット履歴からのメモリ利用可能に</li>
+                        <li><strong>ベンチマーク: 近ゼロエラーレート</strong> — 内部ベンチマークでClaude Code（Opus 4.6）のコーディング能力が「near-zero error rate」を記録</li>
+                    </ul>
+
+                    <h3>💰 価格体系</h3>
+                    <ul>
+                        <li><strong>Pro $20/月</strong>: Sonnet/Opus利用可</li>
+                        <li><strong>Max $100/月</strong>: 5〜20倍のクォータ</li>
+                        <li><strong>Team $125/人/月</strong>（Premium seat、年間契約）</li>
+                        <li><strong>API利用</strong>: ヘビーユーザーは$100〜$300/月程度（使い方次第）</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題 — X・Reddit・GitHub Issues から</h3>
+                    <ul>
+                        <li><strong>3月の障害連発</strong> — 3/2、3/3に大規模障害。3/11にもエラー頻発・ログイン不可・速度低下が発生。「unprecedented demand（前例のない需要）」が原因とAnthropic説明</li>
+                        <li><strong>DSTバグ（3/8）</strong> — 夏時間切替でClaude Desktopアプリがフリーズする不具合が発生。スケジュールタスク利用者に影響</li>
+                        <li><strong>Code Reviewが高額</strong> — PRあたり平均$15〜$25。「無制限サブスクの他社ツールと値段が変わらない」との批判。一部ユーザーは「既存のGitHub Actionと差がない」と評価</li>
+                        <li><strong>「きれいなゴミ」問題</strong> — 「洗練されたフォーマットでユニットテスト付きだが中身がナンセンス」というAI生成コードの品質問題。計画が曖昧だとargument driftが発生</li>
+                        <li><strong>Co-Work Scheduler不具合</strong> — タスクがサイレントにスキップされるバグが複数報告。長時間の自律実行での信頼性に課題</li>
+                        <li><strong>単一プロバイダーリスク</strong> — Claude依存の開発体制は「single point of failure（単一障害点）」。障害時に作業が完全停止するリスクを開発者が警告</li>
+                        <li><strong>Google Drive制限</strong> — Google Driveディレクトリへのアクセスに制限があるとの報告（GitHub Issues）</li>
+                        <li><strong>Git push問題</strong> — 新しいブランチへのGit pushコマンドに不具合が発生するケースあり</li>
+                    </ul>
+
+                    <h3>🔑 第3回の所感</h3>
+                    <p>「最も愛されているツール（46%）」の地位は揺るがないが、<strong>障害頻発という信頼性リスク</strong>が最大の課題。
+                        機能追加ペースは全ツール中No.1。ただしCode Reviewの$15-25/PRは、
+                        「AIが生成したコードをAIが高額で修正する」という皮肉な構図を生んでいる。</p>
+                </div>
+            </div>
+
+            <!-- Cursor -->
+            <div class="tool-card" id="cursor-v3">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">⚡</div>
+                    <div class="tool-card-info">
+                        <h3>Cursor</h3>
+                        <div class="tool-maker">Anysphere — 第3回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プランあり</span>
+                    <span class="badge badge-type">Automations 🆕</span>
+                    <span class="badge badge-hot">⚠️ ARR $500M+</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Automations（常時オンエージェント）</strong> — Slack、Linear、GitHub、PagerDuty、カスタムWebhookからのイベントトリガーでAIエージェントが自律実行。クラウドサンドボックスで動作し、セキュリティレビュー・インシデント対応・週次ダイジェスト生成などを自動化</li>
+                        <li><strong>統合ブラウザ（Chrome内蔵）</strong> — IDE内でライブプレビュー・DevToolsデバッグ・AI連携が可能に。コンテキスト切替不要でフロントエンド開発が加速</li>
+                        <li><strong>AIデバッグモード</strong> — 複数スタック・言語対応。自動ランタイム計装、ステップバイステップデバッグトレースでバグの体系的追跡</li>
+                        <li><strong>Plan Mode Mermaid図</strong> — 計画をMermaid図で自動可視化。todo項目の細かい制御と別エージェントへのタスク委任が可能に</li>
+                        <li><strong>マルチモデル柔軟性</strong> — Claude、GPT-5、Geminiをタスクに応じて切り替え可能。Auto Premiumモードが高負荷タスクに最適モデルを自動選択</li>
+                        <li><strong>Tab補完で30-40%生産性向上</strong> — インテリジェントTab補完だけで30-40%の生産性向上を報告する開発者多数</li>
+                        <li><strong>プラグインマーケットプレイス拡大</strong> — プリビルトソリューションで機能拡張</li>
+                    </ul>
+
+                    <h3>💰 価格体系（2025年6月よりクレジット制）</h3>
+                    <ul>
+                        <li><strong>Hobby（無料）</strong>: 限定リクエスト + 7日間Pro体験</li>
+                        <li><strong>Pro $20/月</strong>: 無制限Tab補完 + $20クレジットプール</li>
+                        <li><strong>Pro+ $60/月</strong>: 3倍のクレジットプール</li>
+                        <li><strong>Ultra $200/月</strong>: 20倍の使用量 + 新機能優先アクセス</li>
+                        <li><strong>Teams $40/人/月</strong>: 共有チャット・ルール・SAML SSO・利用分析</li>
+                        <li><strong>Enterprise</strong>: カスタム価格・SCIM・監査ログ・プールクレジット</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題 — X・Reddit・開発者ブログから</h3>
+                    <ul>
+                        <li><strong>予測不能なコスト（最大の不満）</strong> — 2025年6月のクレジット制以降「community backlash（コミュニティの反発）」が継続。プレミアムモデルを手動選択するとクレジットが急速に消費され、<strong>実質$60-80/月</strong>に達するヘビーユーザーの報告多数。「$200のUltraでもレート制限にかかる」</li>
+                        <li><strong>Automationsのコスト問題</strong> — Automationsはクラウドエージェントクレジットを消費。頻繁・複雑なAutomationsを低いプランで実行すると割り当てをすぐに使い果たすリスク</li>
+                        <li><strong>アプリケーションクラッシュ</strong> — メモリ枯渇によるレンダラークラッシュ（code: '5'）が頻発。大規模コードベースのインデックスがRAMを大量消費</li>
+                        <li><strong>セキュリティ脆弱性 MCPoison/CurXecute</strong> — CVE-2025-54135/54136で、サイレントな遠隔コード実行とプロンプトインジェクションが可能に。セキュリティ重視の開発者から深刻な懸念</li>
+                        <li><strong>プロジェクトディレクトリ全削除</strong> — 重大バグとして「安全なプロンプト」後にプロジェクトディレクトリ全体が削除された事例が報告</li>
+                        <li><strong>Plan Modeのplan.md更新バグ</strong> — エージェントがplan.mdを直接更新できず、チャットで変更を説明するだけになる問題</li>
+                        <li><strong>頻繁なUI変更</strong> — UIが頻繁にアップデートされ、設定をやり直す必要がある。ベテラン開発者から「安定性が欲しい」との声</li>
+                        <li><strong>ワークフローロックイン</strong> — 「チャットサイドバー＋インラインdiff」の強制ワークフロー。ターミナル派やビジュアルキャンバス派には不便</li>
+                        <li><strong>プライバシー懸念</strong> — 一部処理がクラウドで実行されるため、機密性の高いプロジェクトには不向き</li>
+                    </ul>
+
+                    <h3>🔑 第3回の所感</h3>
+                    <p>Automationsは文句なしにゲームチェンジャー。しかしCursor最大の課題はコスト透明性。
+                        ARR $500M+の急成長を支えているのは高い顧客単価だが、その分コミュニティの「コスト批判」も最も大きい。
+                        GitHub Copilot（$10/月）の5-8倍のコストを正当化できるかが継続利用の分かれ目。</p>
+                </div>
+            </div>
+
+            <!-- GitHub Copilot -->
+            <div class="tool-card" id="copilot-v3">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🐙</div>
+                    <div class="tool-card-info">
+                        <h3>GitHub Copilot</h3>
+                        <div class="tool-maker">GitHub / OpenAI — 第3回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プランあり</span>
+                    <span class="badge badge-type">GPT-5.4 統合</span>
+                    <span class="badge badge-paid">シェア42% / 愛され9%</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>GPT-5.4統合（3/5リリース）</strong> — OpenAI初の「ネイティブPC操作」対応モデル。マウス・キーボード操作をスクリーンショットベースで自律実行（Playwright連携）。100万トークンコンテキスト、ハルシネーション33%削減、「最も正確なモデル」</li>
+                        <li><strong>GPT-5.3-Codex高速化</strong> — エージェントタスクで約25%高速化。旧モデル（Gemini 3 Pro、GPT-5.1-Codex）は段階的廃止</li>
+                        <li><strong>Agent Hooks（パブリックプレビュー）</strong> — エージェントセッションの特定タイミングでカスタムコマンドを実行。ワークフロー自動化の新たな入り口</li>
+                        <li><strong>Jira統合（パブリックプレビュー）</strong> — JiraイシューをCopilotに割り当て、AIがドラフトPRを自動生成</li>
+                        <li><strong>サードパーティエージェント全面開放</strong> — Claude by Anthropic、OpenAI Codexが全有料プランで利用可能に（以前はEnterprise/Pro+限定）</li>
+                        <li><strong>カスタムエージェント正式版</strong> — カスタムエージェント、サブエージェント、プランエージェントがJetBrains IDEでGA</li>
+                        <li><strong>自動モデル選択</strong> — リアルタイムの利用可能性とパフォーマンスに基づき最適モデルを自動選択</li>
+                        <li><strong>/memory コマンド</strong> — カスタマイゼーション設定へのクイックアクセス</li>
+                        <li><strong>Thinking Panel</strong> — 拡張推論モデル向けに思考プロセスを表示。Anthropic thinking budgetの設定も可能</li>
+                        <li><strong>永続セッションメモリ</strong> — Copilot Coding Agent、CLI、Code Review間でコンテキストが持続</li>
+                    </ul>
+
+                    <h3>💰 価格体系（2025年6月〜従量課金追加）</h3>
+                    <ul>
+                        <li><strong>Free</strong>: 月2,000補完 + 50プレミアムリクエスト</li>
+                        <li><strong>Pro $10/月</strong>: 無制限補完 + 300プレミアムリクエスト</li>
+                        <li><strong>Pro+ $39/月</strong>: 1,500リクエスト + 優先アクセス</li>
+                        <li><strong>Business $19/人/月</strong>: 組織管理 + ポリシー制御</li>
+                        <li><strong>Enterprise $39/人/月</strong>: （⚠️ 別途GitHub Enterprise Cloud $21必須 → 実質$60/人/月）</li>
+                        <li><strong>⚠️ 超過課金</strong>: 300リクエスト超過後、1件$0.04の従量課金</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題 — X・Reddit・Stack Overflow から</h3>
+                    <ul>
+                        <li><strong>Premium Request超過課金</strong> — 月300枠を超えると1件$0.04の従量課金。2025年6月の変更で「無制限だったはず」と混乱するユーザー多数</li>
+                        <li><strong>「overrated（過大評価）」の声</strong> — 2026年の開発者コミュニティで「Copilotは複雑なロジック、幅広いコンテキスト理解、セキュアなコード生成に苦戦する」との評価が増加</li>
+                        <li><strong>古い・不正確な提案</strong> — 非推奨関数や間違ったメソッドシグネチャを提案。学習データに「壊れた実験コード」が含まれるため</li>
+                        <li><strong>コンテキスト無視</strong> — プロジェクト全体の設計思想やドメイン固有のロジックを無視した提案が頻出。命名規則すら守らないことも</li>
+                        <li><strong>セキュリティリスク</strong> — SQLインジェクション脆弱性のあるコードをニアミスで生成した事例。「セキュリティ敏感な提案は重度レビュー必須」のガイドラインを設ける企業が増加</li>
+                        <li><strong>Visual Studio 2026での不具合</strong> — Copilotウィンドウの読み込みに2〜3分、フリーズ、リクエスト失敗。作業ロスト→スレッドやり直しが常態化</li>
+                        <li><strong>Enterprise隠れコスト</strong> — Enterprise $39/月の表記だが、GitHub Enterprise Cloud ($21/月) が別途必須 → 実質$60/人/月。見落としがちな「隠れた前提条件」</li>
+                        <li><strong>「excessive context scanning」</strong> — ファイルを不必要に繰り返しスキャンする問題。開発プロセスに不可解な遅延が発生</li>
+                        <li><strong>集中作業の妨げ</strong> — 常時表示される提案がノイズに。「静かに考えたい時にこそ黙っていてほしい」というベテラン開発者の声。「deep focus作業やアーキテクチャ問題のデバッグにはノイズ」</li>
+                        <li><strong>コード品質批判</strong> — コードレビュー機能はコードを高く評価するが、重要なアーキテクチャ問題を見逃す。表面的な問題だけに集中との指摘</li>
+                    </ul>
+
+                    <h3>🔑 第3回の所感</h3>
+                    <p><strong>市場シェア42%は「使われている」証拠だが、愛され率9%は「仕方なく使っている」証拠かもしれない。</strong>
+                        GPT-5.4統合やJira連携は企業向けには大きな差別化。だが「$10/月のCopilot Pro」の体験レベルでは
+                        Claude CodeやCursorに差をつけられている。GitHub Integration、VS Code・JetBrains完装は最強だが、
+                        「AI品質」はまだ物足りない。</p>
+                </div>
+            </div>
+
+            <!-- Windsurf -->
+            <div class="tool-card" id="windsurf-v3">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🏄</div>
+                    <div class="tool-card-info">
+                        <h3>Windsurf</h3>
+                        <div class="tool-maker">Cognition (元Codeium) — 第3回アップデート</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">無料プランあり</span>
+                    <span class="badge badge-type">Devin統合</span>
+                    <span class="badge badge-paid">⚠️ 方向性変化</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新アップデート</h3>
+                    <ul>
+                        <li><strong>Windsurf + Devin 統合プラットフォーム</strong> — CognitionのRussell Kaplanが3月に明言。Windsurf IDEとDevin自律エージェントを統合した「完全AI開発ソリューション」を目指す</li>
+                        <li><strong>Devin PWA化</strong> — Progressive Web Appとしてインストール可能に。ブラウザからのアクセスがよりシームレスに</li>
+                        <li><strong>Linear連携ネイティブ統合</strong> — プロジェクト管理ツールLinearとの統合。タスク→コード→レビューのワークフロー自動化</li>
+                        <li><strong>永続メモリ</strong> — コードベース理解を跨いで保持。長時間実行タスクでのパフォーマンス向上</li>
+                        <li><strong>APIセッションフィルタリング強化</strong> — エンタープライズ向けのセッション管理・分析機能が向上</li>
+                        <li><strong>ARR $82M, 350+エンタープライズ顧客</strong> — CognitionはWindsurf買収で$82M ARRと350以上のエンタープライズ顧客を獲得</li>
+                    </ul>
+
+                    <h3>💰 価格体系</h3>
+                    <ul>
+                        <li><strong>Windsurf Free</strong>: 基本機能（制限付き）</li>
+                        <li><strong>Windsurf Pro $15/月</strong>: フル機能</li>
+                        <li><strong>Devin</strong>: エンタープライズ向け（要問い合わせ）</li>
+                    </ul>
+
+                    <h3>😤 ユーザーの不満・課題 — X・Reddit から</h3>
+                    <ul>
+                        <li><strong>将来の不透明さ</strong> — Cognition買収後、Windsurf単体のロードマップが見えない。「今のWindsurfはいつまで使えるのか」という不安</li>
+                        <li><strong>買収劇の複雑さ</strong> — OpenAIの$30億買収不成立 → Cognition買収 + Googleが一部スタッフを採用、という混乱した経緯がユーザーの信頼に影響</li>
+                        <li><strong>Devinへの移行プレッシャー</strong> — 統合プラットフォーム化により、WindsurfユーザーがDevinエコシステムに移行を迫られる可能性</li>
+                        <li><strong>既存ユーザーの離脱</strong> — 買収発表後、CursorやAntigravityへ乗り換えるユーザーが増加しているとの報告</li>
+                        <li><strong>個人開発者の軽視リスク</strong> — $82M ARRと350+ エンタープライズ顧客は大きな資産だが、エンタープライズ優先で個人開発者の声が軽視されるリスク</li>
+                    </ul>
+
+                    <h3>🔑 第3回の所感</h3>
+                    <p>Cognition買収の「結果」がようやく形になり始めた。IDE（Windsurf）+ 自律エージェント（Devin）の統合は
+                        理論上は最強のソリューションだが、<strong>既存ユーザーの信頼回復</strong>が最大の課題。
+                        $15/月の手頃さはCopilot次点だが、将来が見えない不安から乗り換えを検討するユーザーが増えている。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== 価格比較表（大型） ===== -->
+        <section class="lab-section">
+            <h2>💰 価格比較（2026年3月時点）</h2>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>ツール</th>
+                            <th>無料プラン</th>
+                            <th>個人（標準）</th>
+                            <th>個人（上位）</th>
+                            <th>チーム</th>
+                            <th>⚠️ 実質コスト</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="tool-name">Antigravity</td>
+                            <td>✅ 全モデル利用可</td>
+                            <td>$19.99/月（Pro）</td>
+                            <td>$49.99/月（Ultra）</td>
+                            <td>Workspace連携</td>
+                            <td>⚠️ 週間制限あり</td>
+                        </tr>
+                        <tr>
+                            <td class="tool-name">Claude Code</td>
+                            <td>制限付き</td>
+                            <td>$20/月（Pro）</td>
+                            <td>$100/月（Max）</td>
+                            <td>$125/人/月</td>
+                            <td>API利用: $100-300/月</td>
+                        </tr>
+                        <tr>
+                            <td class="tool-name">Cursor</td>
+                            <td>✅ 7日間Pro体験</td>
+                            <td>$20/月（Pro）</td>
+                            <td>$60〜200/月</td>
+                            <td>$40/人/月</td>
+                            <td>⚠️ 実質$60-80/月</td>
+                        </tr>
+                        <tr>
+                            <td class="tool-name">Copilot</td>
+                            <td>✅ 2,000補完+50req</td>
+                            <td>$10/月（Pro）</td>
+                            <td>$39/月（Pro+）</td>
+                            <td>$39/人→実質$60</td>
+                            <td>⚠️ 超過$0.04/件</td>
+                        </tr>
+                        <tr>
+                            <td class="tool-name">Windsurf</td>
+                            <td>✅ 基本機能</td>
+                            <td>$15/月（Pro）</td>
+                            <td>—</td>
+                            <td>Devin Enterprise</td>
+                            <td>統合後は未定</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>⚠️ <strong>「額面通りの料金」で使えるツールはもはやほとんどない</strong>。クレジット超過・レート制限・隠れた前提条件を考慮した「実質コスト」の把握が必須。</p>
+        </section>
+
+        <!-- ===== 機能比較 ===== -->
+        <section class="lab-section">
+            <h2>🆚 機能比較マトリクス</h2>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead>
+                        <tr>
+                            <th>機能</th>
+                            <th>Antigravity</th>
+                            <th>Claude Code</th>
+                            <th>Cursor</th>
+                            <th>Copilot</th>
+                            <th>Windsurf</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>常時オンエージェント</td>
+                            <td>—</td>
+                            <td>Co-Work</td>
+                            <td>✅ Automations</td>
+                            <td>Agent Hooks</td>
+                            <td>Devin</td>
+                        </tr>
+                        <tr>
+                            <td>マルチモデル対応</td>
+                            <td>Gemini+Claude</td>
+                            <td>Claudeのみ</td>
+                            <td>✅ 全モデル</td>
+                            <td>✅ 全モデル</td>
+                            <td>独自</td>
+                        </tr>
+                        <tr>
+                            <td>統合ブラウザ</td>
+                            <td>✅</td>
+                            <td>—</td>
+                            <td>✅ Chrome</td>
+                            <td>—</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Voice Mode</td>
+                            <td>—</td>
+                            <td>✅</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>JetBrains対応</td>
+                            <td>—</td>
+                            <td>VS Code統合</td>
+                            <td>✅ ACP</td>
+                            <td>✅ GA</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jira統合</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>✅ プレビュー</td>
+                            <td>Linear統合</td>
+                        </tr>
+                        <tr>
+                            <td>PC操作</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>✅ GPT-5.4</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>MCP対応</td>
+                            <td>❌</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>✅</td>
+                            <td>—</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ===== 第3回 おすすめ ===== -->
+        <section class="lab-section">
+            <h2>🎯 第3回時点のおすすめ（更新）</h2>
+            <div class="summary-box">
+                <h3>前回からの変化ポイント</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">🆓 無料で最高性能</div>
+                        <div class="summary-value">Antigravity（変わらず）</div>
+                        <p>Flash-Lite追加で軽量タスクもカバー。無料枠が最も寛大。ただしPro版は判断を保留</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🚨 最も心配</div>
+                        <div class="summary-value">Windsurf → Devin移行</div>
+                        <p>統合は進むが既存ユーザーの行き先が不明確</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">📈 最も進化</div>
+                        <div class="summary-value">GitHub Copilot</div>
+                        <p>GPT-5.4 + Jira統合 + 全有料プランでサードパーティ開放は圧巻</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">⚠️ 要注意コスト</div>
+                        <div class="summary-value">Cursor</div>
+                        <p>Automationsは革新的だが実質$60-80/月。大規模プロジェクトでは予算管理必須</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">❤️ 開発者人気No.1</div>
+                        <div class="summary-value">Claude Code</div>
+                        <p>「most loved 46%」の支持。ただし障害リスクと単一プロバイダー依存に注意</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🤔 結論</div>
+                        <div class="summary-value">複数ツール併用が最適解</div>
+                        <p>1つに依存せず、用途に応じて使い分ける時代。「73%使っているが29%しか信頼していない」が現実</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Amazonインシデント -->
+        <section class="lab-section">
+            <h2>🚨 注意喚起: AIコーディングツールの実害事例</h2>
+            <p>AIツールの暴走は理論の話ではなく、<strong>実際に起きています</strong>。</p>
+            <ul>
+                <li><strong>Amazonインシデント</strong> — AIコーディングツールが意図しない決定を行い、障害とリカバリに多大な工数を要した事例が報告</li>
+                <li><strong>Cursorプロジェクト削除</strong> — 「安全なプロンプト」にもかかわらず、プロジェクトディレクトリ全体が削除された</li>
+                <li><strong>Vibe Coding事件</strong> — Moltbookで150万件のAPIキー流出、Lovableでユーザーデータ漏洩。いずれもAI生成コードが原因</li>
+                <li><strong>サイレントフェイルの増加</strong> — テストに通るがデプロイ後に壊れる「見えないバグ」が増加傾向</li>
+            </ul>
+            <p><strong>対策</strong>: AIに全権を委ねない。Git&バックアップの徹底。セキュリティ敏感領域は人間がレビュー。</p>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 調査にあたって</h2>
+            <p>本記事の情報は<strong>2026年3月12日時点</strong>のものです。過去の調査は<a href="/lab/ai-tools/v1/"
+                    style="color:var(--accent);text-decoration:underline">第1回（3/9）</a>・<a href="/lab/ai-tools/v2/"
+                    style="color:var(--accent);text-decoration:underline">第2回（3/11）</a>をご覧ください。</p>
+            <p>当サイト「Gravity Portal」は <strong>Antigravity</strong> を使って開発されています。</p>
+            <p>ユーザーの不満・課題情報は、X（Twitter）、Reddit、GitHub Issues、Google AI Developer Forum、Stack Overflow、開発者ブログ等から収集しています。
+                特定のツールを推奨・攻撃する意図はなく、購入判断の参考情報として提供しています。</p>
+            <p>開発者満足度データの出典: dev.to 2026年初頭調査、byteiota.com、medium.com 等。</p>
+        </section>
+    </main>
+
+    <!-- フッター -->
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-tools/v1/">🛠️ 第1回</a>
+            <a href="/lab/ai-tools/v2/">🛠️ 第2回</a>
+            <a href="/lab/ai-developers/v3/">👤 AI開発者 第3回</a>
+            <a href="/lab/ai-trends/v3/">📊 トレンド 第3回</a>
+        </nav>
+    </footer>
+
+    <!-- テーマトグルスクリプト -->
+    <script>
+            (function () {
+                var btn = document.getElementById('themeToggle');
+                function update() { var t = document.documentElement.getAttribute('data-theme'); btn.textContent = t === 'light' ? '🌙' : '☀️' }
+                update();
+                btn.addEventListener('click', function () {
+                    var cur = document.documentElement.getAttribute('data-theme');
+                    var next = cur === 'light' ? 'dark' : 'light';
+                    document.documentElement.setAttribute('data-theme', next);
+                    try { localStorage.setItem('gp-theme', next) } catch (e) { }
+                    update();
+                });
+            })()
+    </script>
+</body>
+
+</html>

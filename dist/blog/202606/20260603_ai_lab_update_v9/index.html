@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔬 LAB第9回レポート：使い放題崩壊・OSS覇権・Claude Code全面移行の経緯 | Gravity Portal</title>
+    <meta name="description" content="約2ヶ月ぶりのLABレポート。第8回の振り返り（Opus枯渇問題・OSS覇権・スケーリングの壁）と、Antigravity v2 UI刷新を機にClaude Codeへ全面移行した経緯を詳細にまとめます。">
+    <!-- OGP -->
+    <meta property="og:title" content="🔬 LAB第9回レポート：使い放題崩壊・OSS覇権・Claude Code全面移行の経緯">
+    <meta property="og:description" content="約2ヶ月ぶりのLABレポート。第8回の振り返り（Opus枯渇問題・OSS覇権・スケーリングの壁）と、Antigravity v2 UI刷新を機にClaude Codeへ全面移行した経緯を詳細にまとめます。">
+    <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day1.webp">
+    <meta property="og:url" content="https://www.antigravity-portal.com/blog/202606/20260603_ai_lab_update_v9/">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:locale" content="ja_JP">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="🔬 LAB第9回レポート：使い放題崩壊・OSS覇権・Claude Code全面移行の経緯">
+    <meta name="twitter:description" content="約2ヶ月ぶりのLABレポート。第8回の振り返り（Opus枯渇問題・OSS覇権・スケーリングの壁）と、Antigravity v2 UI刷新を機にClaude Codeへ全面移行した経緯を詳細にまとめます。">
+    <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day1.webp">
+    <link rel="stylesheet" href="../../styles.css?v=20260730">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://adm.shinobi.jp">
+    <link rel="preconnect" href="https://cnobi.jp">
+    <link rel="dns-prefetch" href="https://adm.shinobi.jp">
+    <link rel="dns-prefetch" href="https://cnobi.jp">
+    <script defer src="../../scripts/hero-bg.js?v=20260730"></script>
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
+</head>
+<body>
+    <div id="gp-hero-bg"></div>
+    <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
+    <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
+    <div class="article-page">
+        <nav class="breadcrumb">
+            <a href="https://antigravity-portal.com/">トップ</a>
+            <span class="separator">/</span>
+            <a href="../../">ブログ</a>
+            <span class="separator">/</span>
+            <span class="current">🔬 LAB第9回レポート：使い放題崩壊・OSS覇権・Claude Code全面移行の経緯</span>
+        </nav>
+
+        <article class="article">
+            <header class="article-header">
+                <div class="meta">
+                    <time class="date">2026-06-03</time>
+                    
+                    <div class="tags">
+                        <a href="../../tag/AI/" class="tag">AI</a><a href="../../tag/%E9%96%8B%E7%99%BA/" class="tag">開発</a><a href="../../tag/LAB/" class="tag">LAB</a><a href="../../tag/Claude%20Code/" class="tag">Claude Code</a>
+                    </div>
+                </div>
+                <h1 class="title">🔬 LAB第9回レポート：使い放題崩壊・OSS覇権・Claude Code全面移行の経緯</h1>
+            </header>
+
+            <div class="content">
+                <p>約2ヶ月ぶりのLABレポートです。前回（第8回）は2026年3月26日。その後、当サイトは開発環境を<strong>Antigravity（Gemini）からClaude Codeへ全面移行</strong>し、LAB更新が一時休止していました。第9回は第8回の振り返りに加え、2ヶ月の間に起きた主な変化と、開発環境移行の経緯をまとめます。</p>
+
+<h2>🔁 第8回LABハイライト（2026年3月末）</h2>
+<p>第8回では「<strong>最強モデルの代償</strong>」として3つのトピックを特集しました。</p>
+
+<h3>🚨 ① Antigravity Ultra Opus枯渇問題（深刻化）</h3>
+<p>月額$250のUltraプランでも1時間でOpus枠がゼロに。公式フォーラムで「Secret Quota Cuts（秘密のクォータ削減）」として議論が沸騰し、週300Mトークン→9Mトークンへの<strong>97%カット</strong>が報告されました。7〜10日間のロック期間が発生する事例も相次ぎました。</p>
+
+<div class="table-scroll"><div class="table-scroll"><table>
+<thead><tr><th>問題点</th><th>公式説明</th><th>ユーザーの実態</th></tr></thead>
+<tbody>
+<tr><td><strong>利用可能回数</strong></td><td>「通常用途で十分」</td><td>数ファイルを読み込ませた設計変更を数回行っただけで上限到達</td></tr>
+<tr><td><strong>リフレッシュ時間</strong></td><td>5時間で回復</td><td>「3日経ってもロック解除されない」という報告がSNSで散見</td></tr>
+<tr><td><strong>消費レート</strong></td><td>動的計算（非公開）</td><td>Opus 4.6はSonnet 4.6の<strong>約8倍</strong>でクレジットを消費すると推測</td></tr>
+<tr><td><strong>週間トークン枠</strong></td><td>「通常用途なら十分」</td><td>Ultra含む全プランで300M→9Mへの97%削減が発覚</td></tr>
+</tbody>
+</table></div></div>
+
+<h3>🔥 ② Cursor Composer 2 = Kimi K2.5（中国モデル）と判明</h3>
+<p>VentureBeat報道で、Anysphereが「自社研究の成果」として発表したComposer 2が、実はAlibaba・Tencent出資のMoonshot AI（月之暗面）のオープンウェイトモデル「Kimi K2.5」に追加学習を施したものと判明。性能は本物でも、<strong>信頼の傷は深く</strong>、地政学的リスクの観点からも業界に大きな波紋を呼びました。</p>
+
+<h3>💾 ③ OSSエージェント＋BYOKが自己防衛の本命へ</h3>
+<p>サブスク制限への反発でBYOK（Bring Your Own Key）型OSSエージェントへの移行が急加速。Cline（59K Stars）、OpenHands（70K Stars）、OpenCode（129K Stars）が一斉に成熟期に入り、LLM AI Routerで50以上のプロバイダーを自動切り替えする環境が個人でも実現可能になりました。</p>
+
+<h2>🛠️ AI開発ツール比較 — 第8回まとめ</h2>
+<div class="table-scroll"><div class="table-scroll"><table>
+<thead><tr><th>ツール</th><th>第8回の主なトピック</th><th>課題・評価</th></tr></thead>
+<tbody>
+<tr><td><strong>Antigravity</strong></td><td>Opus 4.6クォータ枯渇問題が最深刻化。UIの完成度は依然最高水準</td><td>❌ 週300M→9M削減、7〜10日ロック問題</td></tr>
+<tr><td><strong>Cursor</strong></td><td>Composer 2 = Kimi K2.5ベースと発覚。Fast Premium request消滅問題も</td><td>⚠️ 中国モデル依存・地政学リスク</td></tr>
+<tr><td><strong>Claude Code</strong></td><td>API直結安定動作。CLAUDE.md学習転写ノウハウが普及。Max制限急ドレインも報告</td><td>✅ $20/月コスパ最強、MCP対応</td></tr>
+<tr><td><strong>GitHub Copilot</strong></td><td>安定運用継続。$10/月で炎上もロックも無し</td><td>✅ 最も安定した選択肢</td></tr>
+<tr><td><strong>Windsurf</strong></td><td>大きな変動なし。差別化困難が続く</td><td>⚠️ Cursorとの差が拡大傾向</td></tr>
+</tbody>
+</table></div></div>
+<p>詳細は <a href='/lab/ai-tools/v8/'>AI開発ツール比較 第8回</a> をご覧ください。</p>
+
+<h2>👤 OSSエコシステム — 第8回AI開発者ピックアップ</h2>
+<div class="table-scroll"><div class="table-scroll"><table>
+<thead><tr><th>プロジェクト</th><th>Stars</th><th>注目点</th></tr></thead>
+<tbody>
+<tr><td><strong>Cline</strong></td><td>59K★</td><td>VS Code BYOK標準。サブエージェント＋CLI 2.0。多段構造タスク対応</td></tr>
+<tr><td><strong>OpenHands</strong></td><td>70K★</td><td>自律型エージェントのOSS本命。無料BYOKティア。Planning Agent搭載</td></tr>
+<tr><td><strong>OpenCode</strong></td><td>129K★</td><td>ターミナルネイティブ。75+ LLMプロバイダー対応。軽量動作</td></tr>
+<tr><td><strong>LLM AI Router</strong></td><td>完全無料</td><td>50+プロバイダーを1エンドポイントでルーティング。自動フェイルオーバー</td></tr>
+</tbody>
+</table></div></div>
+<p>詳細は <a href='/lab/ai-developers/v8/'>AI開発者ピックアップ 第8回</a> をご覧ください。</p>
+
+<h2>📊 推論コストの壁 — 第8回トレンド総括</h2>
+<div class="table-scroll"><div class="table-scroll"><table>
+<thead><tr><th>#</th><th>トレンド</th><th>インパクト</th></tr></thead>
+<tbody>
+<tr><td>01</td><td><strong>使い放題の完全崩壊</strong></td><td>Gartner:「単価は90%下がるが総支出は80%増」。サブスク定額の構造的限界が露呈</td></tr>
+<tr><td>02</td><td><strong>マルチモデル必須化</strong></td><td>日常/開発/設計の3層モデル運用が事実上の必須に。LLM AI Routerで自動フェイルオーバー</td></tr>
+<tr><td>03</td><td><strong>MCPセキュリティリスク</strong></td><td>APIリダイレクト攻撃の実例発覚。.claude/settings.json確認が必須に</td></tr>
+<tr><td>04</td><td><strong>OSSモデルの出自問題</strong></td><td>Composer 2論争で「プロベナンス（来歴）表示」が新たな業界標準要件に</td></tr>
+</tbody>
+</table></div></div>
+<p>詳細は <a href='/lab/ai-trends/v8/'>AI開発トレンド 第8回</a> をご覧ください。</p>
+
+<h2>🔄 特集：Antigravity → Claude Code 全面移行の記録</h2>
+<p>第9回のメイントピックは<strong>開発環境の移行</strong>です。LABシリーズ第1回から第8回まで、当サイトの開発はAntigravity（Gemini）が担っていました。しかし2026年5月、状況が変わりました。</p>
+
+<h3>移行の経緯</h3>
+<div class="table-scroll"><div class="table-scroll"><table>
+<thead><tr><th>時期</th><th>出来事</th></tr></thead>
+<tbody>
+<tr><td><strong>〜2026年3月末</strong></td><td>Antigravity（Gemini）メインで開発継続。LABシリーズも第8回まで執筆完了</td></tr>
+<tr><td><strong>2026年5月19日</strong></td><td>Antigravity v2リリース。VSCode風のIDEが廃止され、純粋なエージェントビューのみに刷新</td></tr>
+<tr><td><strong>2026年5月22日</strong></td><td>実際に起動して確認。従来のコーディングスタイルが維持できないと判断し、Claude Codeへ移行決定</td></tr>
+<tr><td><strong>2026年6月〜</strong></td><td>Claude Code完全移行。Windows Terminal + Discord連携の独自エージェント環境を構築・稼働中</td></tr>
+</tbody>
+</table></div></div>
+
+<h3>Claude Code移行後に実現したこと</h3>
+<ul>
+<li><strong>Discord連携（Claude Code Channels）</strong>: スマホのDiscordアプリから開発指示が出せる環境が実現。画像添付にも対応し、Uber売上スクリーンショットの解析なども可能に</li>
+<li><strong>MCP（Model Context Protocol）活用</strong>: Supabase・Playwright・Discord等のMCPサーバーを統合。データベース操作・ブラウザ操作・Discord投稿までClaude Codeから直接実行できる</li>
+<li><strong>Windows Terminal プロファイル統合</strong>: 「Claude Channels」専用プロファイルを追加し、起動するだけで <code>claude --channels</code> がH:\gravityから自動起動する環境を構築</li>
+<li><strong>handoff.md + csave.ps1 による継続性確保</strong>: セッションをまたいでも作業内容が引き継がれる独自のエージェント連携システムを構築</li>
+<li><strong>コスト最適化</strong>: Opus 4.8（アーキテクチャ設計時のみ）とSonnet 4.6（日常業務）を使い分け、クォータ枯渇問題を構造的に回避</li>
+</ul>
+
+<h3>Antigravity v2 → Claude Code で変わったこと・変わらないこと</h3>
+<div class="table-scroll"><div class="table-scroll"><table>
+<thead><tr><th>観点</th><th>Antigravity v1（旧）</th><th>Claude Code（現在）</th></tr></thead>
+<tbody>
+<tr><td><strong>IDE統合</strong></td><td>VSCode風IDE内蔵（v1のみ）</td><td>VS Code拡張 / CLI / Discord連携</td></tr>
+<tr><td><strong>モデル</strong></td><td>Gemini 3.1 Pro / Ultra中心</td><td>Claude Opus 4.8 / Sonnet 4.6</td></tr>
+<tr><td><strong>コンテキスト管理</strong></td><td>GEMINI.md・KI（Knowledge Index）</td><td>CLAUDE.md・handoff.md・MCP</td></tr>
+<tr><td><strong>外部連携</strong></td><td>ブラウザ操作・Google Drive連携</td><td>MCP（Supabase・Discord・Playwright等）</td></tr>
+<tr><td><strong>スマホ対応</strong></td><td>基本的にPC専用</td><td>Discord経由でスマホから指示可能</td></tr>
+<tr><td><strong>開発ペース</strong></td><td>変わらず（AIペアプログラミング）</td><td>変わらず（スピードは同等以上）</td></tr>
+</tbody>
+</table></div></div>
+
+<h2>📊 2026年6月時点のツール評価（独断）</h2>
+<div class="table-scroll"><div class="table-scroll"><table>
+<thead><tr><th>ツール</th><th>月額目安</th><th>特徴・強み</th><th>おすすめ度</th></tr></thead>
+<tbody>
+<tr><td><strong>Claude Code</strong></td><td>$20〜</td><td>API直結・MCP拡張・Discord連携・コスパ最強・Anthropic直系</td><td>⭐⭐⭐⭐⭐</td></tr>
+<tr><td><strong>Cursor</strong></td><td>$20〜</td><td>実装スピード最強・Composer 2・JetBrains ACP対応・エコシステム充実</td><td>⭐⭐⭐⭐</td></tr>
+<tr><td><strong>GitHub Copilot</strong></td><td>$10〜</td><td>IDE統合最強・企業向け・安定感・セキュリティ重視</td><td>⭐⭐⭐⭐</td></tr>
+<tr><td><strong>Antigravity v2</strong></td><td>$25〜$250</td><td>エージェントビュー特化・Gemini統合・Google Workspace連携</td><td>⭐⭐⭐</td></tr>
+<tr><td><strong>Cline / OpenHands</strong></td><td>無料（BYOK）</td><td>自由度最高・MCP完全対応・ローカルLLM対応・コスト最小</td><td>⭐⭐⭐⭐（上級者向け）</td></tr>
+</tbody>
+</table></div></div>
+
+<h2>🔑 第9回の4断層</h2>
+<ul>
+<li><strong>IDE断層</strong>: VSCode風UI（統合環境）vs エージェントビュー（AI専業）——Antigravity v2のUIシフトはAI開発ツールの方向性を示す</li>
+<li><strong>連携断層</strong>: 単体ツールとして使う時代から、MCP・Discord・外部APIと連携する「エージェント基盤」として活用する時代へ</li>
+<li><strong>継続性断層</strong>: セッション切れで記憶がリセットされる問題——handoff.md・CLAUDE.md・memory機能など「記憶の永続化」が開発効率の鍵に</li>
+<li><strong>コスト断層</strong>: 第8回から変わらず——サブスク定額の破綻。マルチモデル体制（Opus：設計/Sonnet：実装/Flash：補完）が正解</li>
+</ul>
+
+<h2>🎯 第9回の結論</h2>
+<ul>
+<li><strong>「AIとペアプログラミング」は当たり前になった</strong>: ツールが変わっても開発ペースは維持できる。重要なのは「どのエコシステムを選ぶか」</li>
+<li><strong>Claude Codeは個人開発者向けに最適化されている</strong>: CLI + MCP + Discord連携の組み合わせは、個人規模のWebサービス開発に非常によくフィットしている</li>
+<li><strong>Antigravityは企業・Google Workspace向けに再定義された</strong>: v2のUIシフトはコーディングツールとしての側面を削ぎ落とし、エンタープライズ向けに振り切った判断と解釈できる</li>
+<li><strong>OSSエージェント（Cline/OpenHands）は無視できない選択肢</strong>: BYOKで完全コントロール。中上級者には十分実用レベルに</li>
+</ul>
+
+<p>LABシリーズは引き続きClaude Codeで更新していきます。次回（第10回）はClaude Code環境で実際に体験した開発のリアルをより詳しくレポートする予定です。</p>
+
+<p><strong>LAB第8回の全ページ:</strong></p>
+<ul>
+<li><a href='/lab/ai-tools/v8/'>🛠️ AI開発ツール比較 第8回</a></li>
+<li><a href='/lab/ai-developers/v8/'>👤 AI開発者ピックアップ 第8回</a></li>
+<li><a href='/lab/ai-trends/v8/'>📊 AI開発トレンド 第8回</a></li>
+</ul>
+
+            </div>
+
+            
+            
+        <div class="ninja-ad-slot">
+            <span class="ninja-ad-label">PR</span>
+            <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+        </div>
+            
+        <div class="amazon-ads-section">
+            <h3 class="amazon-ads-heading">💻 技術書・開発に役立つ本</h3>
+            <div class="amazon-ads-grid">
+                
+        <a href="https://www.amazon.co.jp/s?k=AI%20%E3%83%97%E3%83%AD%E3%82%B0%E3%83%A9%E3%83%9F%E3%83%B3%E3%82%B0%20%E5%85%A5%E9%96%80%20Python&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">🤖</span>
+            <span class="amazon-ad-title">AIプログラミング入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Next.js%20React%20TypeScript%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">📘</span>
+            <span class="amazon-ad-title">Next.js実践ガイド</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+
+        <a href="https://www.amazon.co.jp/s?k=Web%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%20%E9%96%8B%E7%99%BA%20%E5%85%A5%E9%96%80&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+            <span class="amazon-ad-emoji">💻</span>
+            <span class="amazon-ad-title">Webアプリ開発入門</span>
+            <span class="amazon-ad-badge">Amazonで見る</span>
+        </a>
+            </div>
+            <div class="amazon-search-box">
+                <p class="amazon-search-label">🔍 <span class="amazon-logo-text">Amazon</span>で探す</p>
+                <form onsubmit="window.open('https://www.amazon.co.jp/s?k='+encodeURIComponent(this.q.value)+'&tag=gravity063-22','_blank');return false;" class="amazon-search-form">
+                    <input type="text" name="q" placeholder="キーワードを入力..." class="amazon-search-input" />
+                    <button type="submit" class="amazon-search-btn">検索</button>
+                </form>
+            </div>
+            <p class="amazon-ads-note">※ 上記リンクはAmazonアソシエイトリンクです</p>
+            <p class="amazon-ads-note">Amazonのアソシエイトとして、Gravity Portalは適格販売により収入を得ています。</p>
+        </div>
+        </article>
+
+        <nav class="post-nav">
+            <div class="post-nav-prev">
+            <a href="../../202605/20260531_weekly_trend_w22/" class="post-nav-link">
+                <span class="post-nav-label">← 前の記事</span>
+                <span class="post-nav-title">📰 週刊テックトレンド #22（05/25〜05/31）</span>
+            </a></div>
+            <div class="post-nav-next">
+            <a href="../../202606/20260607_weekly_trend_w23/" class="post-nav-link">
+                <span class="post-nav-label">次の記事 →</span>
+                <span class="post-nav-title">📰 週刊テックトレンド #23（06/01〜06/07）</span>
+            </a></div>
+        </nav>
+
+        <nav class="back-nav">
+            <a href="https://antigravity-portal.com/" class="back-link">🏠 TOPに戻る</a>
+            <a href="../../" class="back-link">← 記事一覧に戻る</a>
+        </nav>
+    </div>
+    
+    <script>
+    (function(){
+        var AD_ID = '06dfeeba49e20207a86cd5f651221d50';
+        var SDK_URL = 'https://adm.shinobi.jp/st/t.js';
+
+        // 課金チェック → 課金済みなら広告を全て非表示にしてSDKも読み込まない
+        function hideAllAds(){
+            document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                slot.style.display = 'none';
+            });
+        }
+
+        function initAds(){
+            // 1. admaxads配列にスロットを登録
+            if(!window.admaxads) window.admaxads = [];
+            document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
+                window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
+            });
+
+            // 2. SDKをロード（body末尾で1回だけ実行）
+            var s = document.createElement('script');
+            s.type = 'text/javascript';
+            s.charset = 'utf-8';
+            s.src = SDK_URL;
+            s.async = true;
+            document.body.appendChild(s);
+
+            // 3. 広告が返らなかったスロットを非表示に（遅延チェック）
+            function checkAdSlots(){
+                document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
+                    var ad = slot.querySelector('.admax-switch');
+                    if(ad && ad.children.length > 0){
+                        slot.classList.add('ad-loaded');
+                    } else {
+                        slot.style.display = 'none';
+                    }
+                });
+            }
+            setTimeout(checkAdSlots, 5000);
+            setTimeout(checkAdSlots, 10000);
+        }
+
+        // 課金状態をチェック（同一ドメインのAPI）
+        fetch('/api/subscription-status')
+            .then(function(res){ return res.json(); })
+            .then(function(data){
+                if(data && data.isPaid){
+                    hideAllAds();
+                } else {
+                    initAds();
+                }
+            })
+            .catch(function(){
+                // エラー時は広告を表示（未課金扱い）
+                initAds();
+            });
+    })()
+    </script>
+</body>
+</html>

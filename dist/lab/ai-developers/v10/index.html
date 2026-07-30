@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI開発者ピックアップ 2026 第10回 | LAB | Gravity Portal</title>
+    <meta
+      name="description"
+      content="AI開発者ピックアップ 第10回（2026年7月更新）。OpenCode 182K Stars・8M開発者へ継続成長。「Friendly Fire」攻撃を公表したAI Now Institute等セキュリティ研究の存在感が拡大。"
+    />
+    <meta
+      property="og:title"
+      content="AI開発者ピックアップ 2026 第10回 — OpenCode継続成長・セキュリティ研究者の台頭"
+    />
+    <meta
+      property="og:description"
+      content="OpenCodeが182K Stars・8M開発者へ。AI Now Instituteが公表した「Friendly Fire」攻撃が自律承認モードのリスクを実証し、エージェントセキュリティ研究の存在感が拡大。"
+    />
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://www.antigravity-portal.com/lab/ai-developers/v10/"
+    />
+    <meta property="og:site_name" content="Gravity Portal" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link
+      rel="canonical"
+      href="https://www.antigravity-portal.com/lab/ai-developers/v10/"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css"
+    />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("gp-theme");
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
+      🌙
+    </button>
+    <header class="lab-header">
+      <a href="/lab/" class="lab-back">← LAB</a>
+      <h1 class="lab-title">👤 AI開発者ピックアップ 第10回</h1>
+    </header>
+    <main class="lab-content">
+      <section class="lab-hero">
+        <div class="lab-hero-icon">👥</div>
+        <h1>AI開発者 — OpenCode継続成長・セキュリティ研究者の台頭 第10回</h1>
+        <p>
+          2026年7月、OSSコーディングエージェント界隈の主役はOpenCodeが続投しつつ、新たな顔ぶれが加わりました。<br />
+          OpenCodeは182K Stars・8M月間アクティブ開発者へとさらに成長。<br />
+          一方で「Friendly Fire」攻撃を公表したAI Now
+          Instituteのように、<strong>エージェントを作る側でなく監査する側</strong>の存在感が急速に拡大しています。<br />
+          「エージェントを作る」から「エージェントを検証する」へ、開発者コミュニティの重心が動き始めた1ヶ月でした。
+        </p>
+        <div class="lab-hero-meta">
+          <span>📅 2026年7月20日更新</span>
+          <span>🔐 検証・セキュリティ人材の台頭</span>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>🔥 第10回の主役：OpenCode — 182K Stars・8M開発者へ継続成長</h2>
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🟢</div>
+            <div class="tool-card-info">
+              <h3>OpenCode</h3>
+              <div class="tool-maker">OSSコミュニティ（MIT License）</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">182K+ Stars（OSS最多）</span>
+            <span class="badge badge-free">8M 月間アクティブ開発者</span>
+            <span class="badge badge-free">75+ LLMプロバイダー</span>
+          </div>
+          <div class="tool-card-body">
+            <h3>📢 成長が止まらない理由</h3>
+            <ul>
+              <li>
+                <strong>182K+ GitHub Stars</strong>:
+                前回（160K+）から1ヶ月で+22K。エージェント自律承認モードのリスクが「Friendly
+                Fire」攻撃で実証されたことで、ローカル・BYOK完結設計への関心がさらに加速
+              </li>
+              <li>
+                <strong>8M月間アクティブ開発者</strong>:
+                前回7.5Mから増加継続。900+コントリビューターの規模も拡大中
+              </li>
+              <li>
+                <strong>75+ LLMプロバイダー対応・エアギャップデプロイ</strong>:
+                金融・医療・防衛など規制業種での採用が引き続き拡大
+              </li>
+              <li>
+                <strong>MIT License</strong>:
+                フォーク・カスタマイズの自由度が「監査可能なエージェント基盤」として評価される要因に
+              </li>
+            </ul>
+            <h3>🎯 OpenCodeが語るもの</h3>
+            <p>
+              Fable 5停止・復活（6〜7月）やFriendly Fire攻撃・GitHub
+              Actionサプライチェーン汚染（7月）と、特定ベンダー・特定モデルに依存するリスクが立て続けに顕在化するなかで、「自分の目で確認できるコードベースの上で、モデルを自由に選べるエージェント」の価値が改めて見直されています。Kimi
+              K3のようなオープンウェイトモデルが7月だけで2世代進んだことも、この設計思想の追い風となりました。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>🔥 注目の顔ぶれ（7月最新）</h2>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🔬</div>
+            <div class="tool-card-info">
+              <h3>AI Now Institute（セキュリティ研究）</h3>
+              <div class="tool-maker">独立研究機関</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">「Friendly Fire」攻撃を公表</span>
+            <span class="badge badge-type">自律承認モードの死角を実証</span>
+          </div>
+          <div class="tool-card-body">
+            <h3>📢 「作る側」から「検証する側」への注目シフト</h3>
+            <ul>
+              <li>
+                <strong>Friendly Fire攻撃の公表</strong>: Claude Code・OpenAI
+                Codexが自律モードで自分自身のコマンドを承認してしまう設計を突いた攻撃手法。エージェントが「侵入経路」になり得ることを実証
+              </li>
+              <li>
+                <strong>業界への影響</strong>:
+                各社が権限設計・承認フローの見直しに着手。Devin Security
+                Swarm等の対抗製品も同時期に登場
+              </li>
+              <li>
+                <strong>研究者の存在感拡大</strong>:
+                「エージェントを作れる人」だけでなく「エージェントの弱点を見抜ける人」の市場価値が急上昇
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🛡️</div>
+            <div class="tool-card-info">
+              <h3>GuardFall発見コミュニティ</h3>
+              <div class="tool-maker">OSSセキュリティ有志</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">50万+ OSSデプロイに影響</span>
+            <span class="badge badge-type">シェルインジェクション設計欠陥</span>
+          </div>
+          <div class="tool-card-body">
+            <ul>
+              <li>
+                <strong
+                  >普遍的シェルインジェクション欠陥「GuardFall」を発見</strong
+                >: 50万を超えるOSSデプロイに影響する設計レベルの脆弱性を公表
+              </li>
+              <li>
+                <strong>スキル偽装攻撃「VulMask」も同時期に発覚</strong>:
+                コーディングエージェントのスキル補助リソースに悪意あるコードを「脆弱性っぽいコード」に偽装して隠蔽し、スキャナーやレビュアーを回避する手法
+              </li>
+              <li>
+                7月は「エージェントを守る側」の技術コミュニティが一気に可視化された月となった
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🌙</div>
+            <div class="tool-card-info">
+              <h3>Kimi K3（Moonshot AI）</h3>
+              <div class="tool-maker">中国・Moonshot AI</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">2.8兆パラメータ・1Mコンテキスト</span>
+            <span class="badge badge-free">オープンウェイト版 7/27予定</span>
+          </div>
+          <div class="tool-card-body">
+            <ul>
+              <li>
+                <strong>7月16日公開</strong>: Frontend Code ArenaでFable
+                5を上回る首位（1,679点）を記録。開発者ブラインドテストでの評価も高い
+              </li>
+              <li>
+                <strong>価格$3/$15</strong>:
+                中国製オープンウェイトモデルとして異例の高価格設定。Anthropic
+                Claude Sonnetシリーズと同水準
+              </li>
+              <li>
+                <strong>OSS開発者への意味</strong>:
+                オープンウェイト版が公開されればOpenCode等モデル非依存ツールへ即座に組み込み可能。選択肢の多様化がさらに進む
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🤝</div>
+            <div class="tool-card-info">
+              <h3>OpenHands + software-agent-SDK</h3>
+              <div class="tool-maker">All Hands AI</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">74K+ Stars</span>
+            <span class="badge badge-free">エンタープライズ対応強化中</span>
+          </div>
+          <div class="tool-card-body">
+            <ul>
+              <li>
+                <strong>software-agent-SDK</strong>:
+                独立パッケージとして継続提供。自社製品へのエージェント組み込み用途で採用が拡大
+              </li>
+              <li>
+                <strong>v1.7 Sub-agent Delegation</strong>:
+                マルチエージェントワークフローの標準的手段として定着
+              </li>
+              <li>
+                <strong>SWE-bench 53%+（Claude Opus 4.8使用時）</strong>:
+                実世界GitHubイシューの自律解決事例が引き続き増加
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">💻</div>
+            <div class="tool-card-info">
+              <h3>Cline</h3>
+              <div class="tool-maker">OSSコミュニティ</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">58K+ Stars</span>
+            <span class="badge badge-free"
+              >Cursor Continue買収で相対的注目度上昇</span
+            >
+          </div>
+          <div class="tool-card-body">
+            <ul>
+              <li>
+                <strong>VS Code BYOKエージェントの生き残り筆頭</strong>:
+                CursorによるContinue買収・製品終了を受け、独立系OSSとしての立ち位置が相対的に強まった
+              </li>
+              <li>
+                <strong>Plan/Actアーキテクチャ継続</strong>:
+                計画立案→実行の2段階設計は変わらず安定運用
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🦆</div>
+            <div class="tool-card-info">
+              <h3>Goose（Linux Foundation AAIF）</h3>
+              <div class="tool-maker">Linux Foundation AAIF</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">32K+ Stars</span>
+            <span class="badge badge-free">MCP 2026-07-28対応準備中</span>
+          </div>
+          <div class="tool-card-body">
+            <ul>
+              <li>
+                <strong>MCP-first設計の強み</strong>:
+                2026-07-28仕様のステートレスコア移行に対し、財団主導のガバナンス体制で計画的な追従を進行中
+              </li>
+              <li>
+                <strong>チーム別許可リスト・監査ログ・RBAC</strong>:
+                エンタープライズMCP特化の地位を維持
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>📊 OSSエージェント Starsランキング（2026年7月）</h2>
+        <div class="table-wrapper">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>プロジェクト</th>
+                <th>GitHub Stars</th>
+                <th>License</th>
+                <th>最新動向</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>OpenCode</strong></td>
+                <td>182K+（急増継続）</td>
+                <td>MIT</td>
+                <td>8M開発者・75+プロバイダー・エアギャップ</td>
+              </tr>
+              <tr>
+                <td><strong>OpenHands</strong></td>
+                <td>74K+</td>
+                <td>MIT</td>
+                <td>software-agent-SDK・v1.7 Sub-agent定着</td>
+              </tr>
+              <tr>
+                <td><strong>Cline</strong></td>
+                <td>58K+</td>
+                <td>Apache 2.0</td>
+                <td>Continue買収で独立系OSSの相対的地位上昇</td>
+              </tr>
+              <tr>
+                <td><strong>AutoGen（Microsoft）</strong></td>
+                <td>55K+</td>
+                <td>MIT</td>
+                <td>Microsoft Agent Framework統合継続</td>
+              </tr>
+              <tr>
+                <td><strong>CrewAI</strong></td>
+                <td>45K+</td>
+                <td>MIT</td>
+                <td>ロールベースマルチエージェント継続成長</td>
+              </tr>
+              <tr>
+                <td><strong>Aider</strong></td>
+                <td>41K+</td>
+                <td>Apache 2.0</td>
+                <td>git diff駆動・ターミナルネイティブ定番継続</td>
+              </tr>
+              <tr>
+                <td><strong>Goose</strong></td>
+                <td>32K+</td>
+                <td>Apache 2.0</td>
+                <td>MCP 2026-07-28対応準備・財団主導ガバナンス</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>🔧 2026年7月の開発者スキルトレンド</h2>
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🔐</div>
+            <div class="tool-card-info">
+              <h3>「エージェント監査力」が新たな必須スキルへ</h3>
+              <div class="tool-maker">2026年7月の新常識</div>
+            </div>
+          </div>
+          <div class="tool-card-body">
+            <p>
+              Friendly
+              Fire攻撃・GuardFall・VulMaskと、7月はエージェント自体の脆弱性が立て続けに公表された月でした。開発者に求められるスキルセットは「エージェントを使いこなす」から「エージェントを疑う」段階へ進んでいます。
+            </p>
+            <h3>新必須スキルセット（第10回版）</h3>
+            <ul>
+              <li>
+                <strong>自律承認モードのリスク評価</strong>:
+                エージェントが自分自身のコマンドを無審査で承認する設計になっていないか、権限フローを点検する能力
+              </li>
+              <li>
+                <strong>MCPステートレス移行対応</strong>:
+                2026-07-28仕様のセッション廃止・handshake撤廃に伴う既存MCPサーバー実装の見直し
+              </li>
+              <li>
+                <strong>サプライチェーン監査</strong>:
+                CIに組み込むAI関連Action・プラグインの署名検証・権限スコープの確認を標準作業に組み込む
+              </li>
+              <li>
+                <strong>マルチプロバイダー冗長設計</strong>:
+                前回に続き、ベンダー依存リスクの回避手段として引き続き重要
+              </li>
+              <li>
+                <strong>ローカルLLM運用</strong>: エアギャップ環境でのOpenCode +
+                Ollama構成は規制業種での標準スキルに定着
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>📝 まとめ</h2>
+        <p>
+          2026年7月のOSS動向を一言で表すと<strong>「作る側から検証する側へ」</strong>。OpenCodeの182K
+          Stars・8M開発者という数字は、モデル非依存設計の定着を示す一方、Friendly
+          Fire攻撃を公表したAI Now
+          InstituteやGuardFallを発見したセキュリティコミュニティの存在感が急速に拡大したのが7月最大の変化です。エージェントを「作れる」だけでなく「検証できる」開発者の市場価値が、次の四半期でさらに上昇していくでしょう。
+        </p>
+        <p>
+          →
+          <a href="/blog/202607/20260720_ai_lab_update_v11/"
+            >📋
+            LAB第11回まとめ記事でツール比較・開発者・トレンドを一気に俯瞰する</a
+          >
+        </p>
+      </section>
+    </main>
+    <footer class="lab-footer">
+      <p>© 2026 Gravity Portal — LAB</p>
+      <nav class="lab-footer-nav">
+        <a href="/">🏠 TOP</a>
+        <a href="/lab/">🔬 LAB</a>
+        <a href="/blog/202607/20260720_ai_lab_update_v11/">📋 第11回まとめ</a>
+        <a href="/lab/ai-tools/v10/">🛠️ ツール 第10回</a>
+        <a href="/lab/ai-trends/v10/">📊 トレンド 第10回</a>
+      </nav>
+    </footer>
+    <script>
+      (function () {
+        var btn = document.getElementById("themeToggle");
+        function update() {
+          var t = document.documentElement.getAttribute("data-theme");
+          btn.textContent = t === "light" ? "🌙" : "☀️";
+        }
+        update();
+        btn.addEventListener("click", function () {
+          var cur = document.documentElement.getAttribute("data-theme");
+          var next = cur === "light" ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", next);
+          try {
+            localStorage.setItem("gp-theme", next);
+          } catch (e) {}
+          update();
+        });
+      })();
+    </script>
+  </body>
+</html>

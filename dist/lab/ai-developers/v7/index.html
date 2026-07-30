@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発者ピックアップ 2026 第7回 | LAB | Gravity Portal</title>
+    <meta name="description" content="AI開発者ピックアップ 第7回。BYOKとOSSエージェントの成熟期。Cline 59K Stars、OpenHands 70K Stars、Roo Code、LLM AIルーターと自己防衛型の開発者運用が台頭。">
+    <meta property="og:title" content="AI開発者ピックアップ 2026 第7回 — BYOK自己防衛時代">
+    <meta property="og:description" content="サブスク制限への反発でOSSエージェント＋BYOK回帰。Cline・OpenHands・Roo Code・LLM AI Router（3/26更新）。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-developers/v7/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-developers.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-developers/v7/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>(function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()</script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">👤 AI開発者ピックアップ 第7回</h1>
+    </header>
+    <main class="lab-content">
+        <section class="lab-hero">
+            <div class="lab-hero-icon">👤</div>
+            <h1>AI開発者ピックアップ — BYOK自己防衛時代 第7回</h1>
+            <p><a href="/lab/ai-developers/v6/" style="color:inherit;text-decoration:underline">第6回</a>ではOSS大爆発を追いました。<br>
+                第7回は<strong>「BYOK自己防衛時代」</strong>がテーマ。Antigravity/Claude双方でクォータ制限が激化した結果、<br>
+                開発者コミュニティは「サブスク課金 → プラットフォーム依存」を脱却し、<br>
+                OSSエージェント＋自前APIキー（BYOK: Bring Your Own Key）で運用を取り戻す流れが加速している。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月26日更新</span>
+                <span>🔑 BYOK回帰トレンド</span>
+                <span>📝 <a href="/lab/ai-developers/v6/" style="color:inherit;text-decoration:underline">第6回（3/24）はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- 業界数字 -->
+        <section class="lab-section">
+            <h2>📊 OSSエージェント・BYOKエコシステムの現在地</h2>
+            <div class="market-overview">
+                <div class="market-stats">
+                    <div class="market-stat">
+                        <div class="market-stat-value">70K+</div>
+                        <div class="market-stat-label">OpenHands GitHub Stars</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">59K+</div>
+                        <div class="market-stat-label">Cline GitHub Stars（VS Code最大AIエクステンション）</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">129K+</div>
+                        <div class="market-stat-label">OpenCode GitHub Stars（11ヶ月で急成長）</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">$50〜200/月</div>
+                        <div class="market-stat-label">BYOK型ツールのヘビーユーザーAPI費用目安</div>
+                    </div>
+                </div>
+                <p>OSSコーディングエージェントのスター数が爆発的に増加。サブスクリプション制限に不満を持つ開発者が「自分の鍵で、自分の選んだモデルを、自分のペースで使う」BYOK運用に回帰するトレンドが2026年3月末に確定的になった。</p>
+            </div>
+        </section>
+
+        <!-- 第6回→第7回 変化 -->
+        <section class="lab-section">
+            <h2>🔥 第6回→第7回 注目プロジェクト変化</h2>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>プロジェクト</th><th>第6回時点</th><th>第7回 最新動向</th></tr></thead>
+                    <tbody>
+                        <tr><td class="tool-name">Cline</td><td>（初登場検討中）</td><td>🔥 59K Stars。ネイティブサブエージェント・CLI 2.0対応でBYOK最前線</td></tr>
+                        <tr><td class="tool-name">OpenHands</td><td>（初登場検討中）</td><td>🔥 70K Stars。無料BYOKティア＋ゼロマークアップ従量課金。自律型エージェントの本命</td></tr>
+                        <tr><td class="tool-name">OpenCode</td><td>（未登場）</td><td>🆕 129K Stars。ターミナルネイティブ + LSP + 75+ LLMプロバイダー対応</td></tr>
+                        <tr><td class="tool-name">Roo Code</td><td>（未登場）</td><td>🆕 カスタムモード機能でClineの「モード不足」を解決する派生プロジェクト</td></tr>
+                        <tr><td class="tool-name">LLM AI Router</td><td>（未登場）</td><td>🆕 50+プロバイダーを1エンドポイントでルーティング。クォータ枯渇時の自動フェイルオーバー</td></tr>
+                        <tr><td class="tool-name">OpenClaw</td><td>810K Stars</td><td>引き続き最大のOSSプロジェクト。ClawHubスキル拡大中</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 注目プロジェクト詳細 -->
+        <section class="lab-section">
+            <h2>🌟 注目プロジェクト詳細（第7回）</h2>
+
+            <!-- Cline -->
+            <div class="tool-card" id="cline-v7">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🔌</div>
+                    <div class="tool-card-info">
+                        <h3>Cline</h3>
+                        <div class="tool-maker">OSS（Apache-2.0） — VS Code AIエクステンション</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">🔥 59K Stars</span>
+                    <span class="badge badge-free">完全無料・BYOK</span>
+                    <span class="badge badge-type">サブエージェント・MCP対応</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 プロジェクト概要と最新動向</h3>
+                    <ul>
+                        <li><strong>BYOK型コーディングの事実上の標準 🔥</strong> — VS Code上で任意のLLMを自分のAPIキーで使える。Claude Opus、GPT-5、DeepSeek、ローカルOllama……制限なし。サブスク$0、APIコストは使った分だけ</li>
+                        <li><strong>2026年のCline: サブエージェント＋CLI 2.0</strong> — ネイティブサブエージェント機能で複雑なタスクの分割実行に対応。CLI 2.0でターミナルからも操作可能に。Plan Mode + MCP統合で、ツール連携もシームレス</li>
+                        <li><strong>ヘビーユーザーのAPI費用: $50〜200/月</strong> — Claude Sonnet 4.6で標準的な作業量。ローカルOllamaなら$0。DeepSeekなら$5〜20/月で済む</li>
+                        <li><strong>日本語ドキュメント・コミュニティ増加中</strong> — Qiita・Zenn等での日本語記事が急増。「Cursor課金をやめてCline+APIに切り替えた」体験記が話題に</li>
+                    </ul>
+
+                    <h3>🔑 注目ポイント</h3>
+                    <p>Clineの価値は<strong>「ベンダーロックインゼロ」</strong>。Antigravityのクォータが変わろうが、Claudeの料金が変わろうが、自分のAPIキーを差し替えるだけで作業を継続できる。
+                        サブスク疲れの時代に、この「自由度」が最大の武器になりつつある。</p>
+                </div>
+            </div>
+
+            <!-- OpenHands -->
+            <div class="tool-card" id="openhands-v7">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🙌</div>
+                    <div class="tool-card-info">
+                        <h3>OpenHands</h3>
+                        <div class="tool-maker">All Hands AI（MIT） — 自律型コーディングエージェント</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">🔥 70K Stars</span>
+                    <span class="badge badge-free">無料BYOKティア</span>
+                    <span class="badge badge-type">GPT-OSS-120B対応</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 プロジェクト概要と最新動向</h3>
+                    <ul>
+                        <li><strong>自律型エージェントのOSS本命 🔥</strong> — コードの読解・修正・マルチファイル編集・テスト実行・GitHub連携を単一エージェントが自律的に遂行。「Claude Codeと同じことをOSSで」が実現</li>
+                        <li><strong>無料BYOKティア（Cloud版）</strong> — 自分のAPIキーを持ち込めば無料で利用可能。ゼロマークアップの従量課金オプションもあり、Claude Sonnet 4.5、GPT-5、Qwen3-Coderが利用可能</li>
+                        <li><strong>GPT-OSS-120B + ローカル実行 🆕</strong> — ClarifaiがOpenHands + GPT-OSS-120Bの完全ローカル構築チュートリアルを公開。クラウドに一切依存しない自律エージェントが手元で動く時代</li>
+                        <li><strong>セルフホスト＋CI連携</strong> — 自社インフラで動作させ、CIパイプラインに統合する企業事例が増加。データが外部に出ない安全な自律エージェント</li>
+                    </ul>
+
+                    <h3>🔑 注目ポイント</h3>
+                    <p>OpenHandsは<strong>「エージェント型AIの民主化」</strong>を体現。70K Starsの支持は「自律型エージェントを、サブスクではなくOSSで使いたい」という開発者の切実な需要を反映している。</p>
+                </div>
+            </div>
+
+            <!-- OpenCode -->
+            <div class="tool-card" id="opencode-v7">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">💻</div>
+                    <div class="tool-card-info">
+                        <h3>OpenCode</h3>
+                        <div class="tool-maker">OSS（MIT） — ターミナルネイティブAIエージェント</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">🆕 129K Stars</span>
+                    <span class="badge badge-free">75+ LLMプロバイダー対応</span>
+                    <span class="badge badge-type">LSP統合・マルチセッション</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 プロジェクト概要と注目点</h3>
+                    <ul>
+                        <li><strong>11ヶ月で129K Stars 🔥🔥</strong> — 2025年4月にリリースされ、わずか11ヶ月でGitHub 129K Stars。ターミナルUIでLSP対応のAIコーディングエージェント</li>
+                        <li><strong>75以上のLLMプロバイダー対応</strong> — Claude Pro、OpenAI、Google、ローカルOllama……あらゆるモデルをターミナルから1つのインターフェースで</li>
+                        <li><strong>共有可能なセッションリンク</strong> — AIとのやり取りをURLで共有可能。チームでの知見共有やコードレビューに便利</li>
+                        <li><strong>CLI派の決定版</strong> — VS Code（Cline）やGUI（OpenHands）ではなくターミナルを主力にする開発者に最適なポジショニング</li>
+                    </ul>
+
+                    <h3>🔑 注目ポイント</h3>
+                    <p>OpenCodeは<strong>「Claude Codeのオープンソース対抗馬」</strong>。Claude Codeがターミナルネイティブでクローズド／有料であるのに対し、OpenCodeはMIT License・75+プロバイダーで完全に開放されている。</p>
+                </div>
+            </div>
+
+            <!-- LLM AI Router -->
+            <div class="tool-card" id="llm-router-v7">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🔀</div>
+                    <div class="tool-card-info">
+                        <h3>LLM AI Router</h3>
+                        <div class="tool-maker">llmairouter.com — マルチLLMルーティング</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">🆕 完全無料・制限なし</span>
+                    <span class="badge badge-free">50+プロバイダー対応</span>
+                    <span class="badge badge-type">自動フェイルオーバー</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 プロジェクト概要と注目点</h3>
+                    <ul>
+                        <li><strong>「1 API、すべてのLLM」🔥</strong> — OpenAI互換の単一エンドポイントに接続するだけで、50以上のLLMプロバイダーを自動ルーティング。API利用量もすべて可視化</li>
+                        <li><strong>クォータ枯渇時の自動切り替え</strong> — あるプロバイダーがリミットに達すると自動で別プロバイダーにフェイルオーバー。Antigravityの「突然のOp枯渇」を回避するインフラとして注目</li>
+                        <li><strong>完全無料、制限なし</strong> — ルーター自体は無料。利用者が自分の各プロバイダーAPIキーを登録して使う方式</li>
+                        <li><strong>コスト可視化</strong> — 全モデルの消費トークン・コストを一元管理。「月末に請求書が来てびっくり」を防ぐ</li>
+                    </ul>
+
+                    <h3>🔑 注目ポイント</h3>
+                    <p>クォータ枯渇問題の「インフラ的解決策」。単一プラットフォーム依存を脱し、<strong>「最も余裕のあるプロバイダーに自動でルーティング」</strong>する設計思想は、2026年3月の状況に対する最も合理的な回答の一つ。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- まとめ -->
+        <section class="lab-section">
+            <h2>🎯 第7回まとめ — サブスク依存からの脱却</h2>
+            <div class="summary-box">
+                <h3>BYOKエコシステムの成熟マップ</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">🔌 VS Code派</div>
+                        <div class="summary-value">Cline / Roo Code / Kilo Code</div>
+                        <p>VS Codeの中で完結。拡張カスタムモード（Roo）やオーケストレーション（Kilo）で差別化</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">💻 ターミナル派</div>
+                        <div class="summary-value">OpenCode / Aider</div>
+                        <p>Claude Codeの対抗馬。129K Stars（OpenCode）が示す開発者支持</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🤖 自律エージェント派</div>
+                        <div class="summary-value">OpenHands / Goose</div>
+                        <p>人間の介入を最小化する完全自律型。CI連携・セルフホストで企業導入も</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🔀 インフラ層</div>
+                        <div class="summary-value">LLM AI Router / APIYI</div>
+                        <p>マルチプロバイダーのルーティング・フェイルオーバーで「枯渇しない」運用を実現</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 調査にあたって</h2>
+            <p>本記事は<strong>2026年3月26日時点</strong>の情報です。過去の調査は
+                <a href="/lab/ai-developers/v1/" style="color:var(--accent);text-decoration:underline">第1回（3/9）</a>・
+                <a href="/lab/ai-developers/v2/" style="color:var(--accent);text-decoration:underline">第2回（3/11）</a>・
+                <a href="/lab/ai-developers/v3/" style="color:var(--accent);text-decoration:underline">第3回（3/12）</a>・
+                <a href="/lab/ai-developers/v4/" style="color:var(--accent);text-decoration:underline">第4回（3/16）</a>・
+                <a href="/lab/ai-developers/v5/" style="color:var(--accent);text-decoration:underline">第5回（3/21）</a>・
+                <a href="/lab/ai-developers/v6/" style="color:var(--accent);text-decoration:underline">第6回（3/24）</a>をご覧ください。</p>
+            <p>情報はGitHub、OpenAlternative、Morphllm、VentureBeat、Clarifai、Vibe Coding is Life等より収集。</p>
+        </section>
+    </main>
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-developers/v6/">👤 第6回</a>
+            <a href="/lab/ai-tools/v7/">🛠️ ツール 第7回</a>
+            <a href="/lab/ai-trends/v7/">📊 トレンド 第7回</a>
+        </nav>
+    </footer>
+    <script>
+        (function(){var btn=document.getElementById('themeToggle');function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}update();btn.addEventListener('click',function(){var cur=document.documentElement.getAttribute('data-theme');var next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('gp-theme',next)}catch(e){}update()})})()
+    </script>
+</body>
+</html>

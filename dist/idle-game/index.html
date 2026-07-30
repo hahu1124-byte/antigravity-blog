@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pachinko Idle | Gravity Portal</title>
+    <meta name="description" content="パチンコの確率・連荘メカニクスを活かした放置ゲーム。5台を打ち分けて大当たりを引こう！">
+    <link rel="stylesheet" href="css/style.css?v=20260309v">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <!-- 固定表示エリア（ステータスバー＋液晶） -->
+        <div id="stickyTop">
+            <header id="statusBar">
+                <button id="statsToggle" class="stats-toggle-btn" aria-label="統計">☰</button>
+                <div class="status-item">
+                    <span class="status-label">所持玉</span>
+                    <span class="status-value" id="ballCount">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">モード</span>
+                    <span class="mode-badge mode-normal" id="modeIndicator">通常</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">大当たり</span>
+                    <span class="status-value" id="jackpotCount">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">収支</span>
+                    <span class="status-value" id="profitDisplay">¥0</span>
+                </div>
+            </header>
+
+            <!-- 台の液晶画面 -->
+            <div id="lcdScreen">
+                <div id="lcdOverlay"></div>
+
+
+
+                <!-- RUSHバナー -->
+                <div id="rushBanner" class="hidden">
+                    <span class="rush-label" id="rushLabel">🔥 RUSH</span>
+                    <span class="rush-chain" id="rushChainDisplay">0連荘中</span>
+                    <span class="rush-prob" id="rushProbDisplay">確率 1/39</span>
+                    <span class="rush-cont" id="rushContDisplay">継続 65%</span>
+                </div>
+
+                <div id="spinDisplay">
+                    <div id="reelContainer">
+                        <span class="reel" id="reel1">7</span>
+                        <span class="reel" id="reel2">7</span>
+                        <span class="reel" id="reel3">7</span>
+                    </div>
+                </div>
+
+                <!-- 大当たり通知（リール下半分にオーバーレイ） -->
+                <div id="jackpotNotify" class="jackpot-notify hidden"></div>
+
+                <!-- アチーブメント解放通知（LCD画面内オーバーレイ） -->
+                <div id="achNotify" class="ach-notify hidden"></div>
+
+                <!-- 大当たりバナー -->
+                <div id="jackpotBanner" class="hidden">
+                    <span class="jackpot-type" id="jackpotTypeDisplay">🎉 大当たり！</span>
+                    <span class="jackpot-payout" id="jackpotPayoutDisplay">+1,500玉</span>
+                </div>
+
+                <!-- 遊タイムバナー -->
+                <div id="yutimeBanner" class="hidden">
+                    <span class="yutime-text">⏰ 遊タイム突入！</span>
+                </div>
+            </div>
+
+            <!-- 遊タイム〜借金ラッパー（通知オーバーレイ用） -->
+            <div id="gaugeDebtWrapper">
+                <!-- 遊タイムゲージ（スティッキー固定） -->
+                <div id="hamariMeter">
+                    <div class="meter-label">遊タイムゲージ <span id="hamariCount">0</span> / <span
+                            id="hamariTarget">297</span>
+                    </div>
+                    <div class="meter-bar">
+                        <div class="meter-fill" id="hamariBar"></div>
+                    </div>
+                </div>
+
+                <!-- 借金セクション（スティッキー固定・常時表示） -->
+                <section id="debtSection">
+                    <div class="debt-sticky-bar">
+                        <div class="debt-sticky-info">
+                            <div class="debt-row-main">
+                                <span class="debt-sticky-label">💸 借金</span>
+                                <span class="debt-value danger" id="debtAmount">¥0</span>
+                            </div>
+                            <div class="debt-row-rate" id="debtInterestRate">複利5%/分</div>
+                            <div class="debt-row-detail" id="debtInterestDetail"></div>
+                        </div>
+                        <div class="debt-sticky-buttons">
+                            <button id="repayPartialBtn" class="debt-btn-mini repay-partial">💴 125玉返済</button>
+                            <button id="repayBtn" class="debt-btn-mini repay">💰 全額</button>
+                            <button id="loanBtn" class="debt-btn-mini loan">💸 ¥1,000借入</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- アチーブメント解放通知（スティッキーエリアにオーバーレイ） -->
+            </div>
+        </div><!-- /stickyTop -->
+
+        <!-- メイン: 台エリア -->
+        <main id="machineArea">
+            <!-- 台情報 -->
+            <div id="machineInfo">
+                <div class="info-row">
+                    <span class="info-label">大当たり確率</span>
+                    <span class="info-value" id="probDisplay">1/99</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">出玉</span>
+                    <span class="info-value" id="payoutDisplay">800玉</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">回転速度</span>
+                    <span class="info-value" id="rateDisplay">1.0回/秒</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">回転数</span>
+                    <span class="info-value" id="spinCount">0</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">コスト</span>
+                    <span class="info-value" id="costDisplay">2玉</span>
+                </div>
+                <div class="info-row version-row">
+                    <span></span>
+                    <span class="info-version" id="versionDisplay">v0.3</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- オフライン差分バナー -->
+        <div id="offlineBanner" class="hidden">
+            <div class="offline-content">
+                <span class="offline-icon">⏰</span>
+                <div class="offline-info">
+                    <span class="offline-title">オフライン報酬</span>
+                    <span class="offline-detail" id="offlineDetail"></span>
+                </div>
+                <button id="offlineClose" class="offline-close">OK</button>
+            </div>
+        </div>
+
+        <!-- RUSH結果サマリー -->
+        <div id="rushSummary" class="hidden">
+            <div class="rush-summary-content">
+                <span class="rush-summary-icon">🏆</span>
+                <span class="rush-summary-title">RUSH終了！</span>
+                <div id="rushSummaryDetail"></div>
+                <button id="rushSummaryClose" class="rush-summary-close">OK</button>
+            </div>
+        </div>
+
+        <!-- レート選択（全機種開放後に表示） -->
+        <section id="rateSection" class="hidden">
+            <h2 class="shop-title">💴 投資金額選択</h2>
+            <div id="rateGrid">
+                <button class="rate-btn active" data-rate="1">¥1パチ</button>
+                <button class="rate-btn" data-rate="2">¥2パチ</button>
+                <button class="rate-btn" data-rate="4">¥4パチ</button>
+            </div>
+        </section>
+
+        <!-- 機種選択 (Phase 3) -->
+        <section id="machineSection" class="hidden">
+            <h2 class="shop-title">🎰 機種選択 <button id="machineInfoBtn" class="info-icon-btn">ℹ️ 選択はこちら</button> <button
+                    id="achievementBtn" class="info-icon-btn ach-btn">🏆</button></h2>
+            <div id="machineGrid">
+                <!-- JSで動的生成 -->
+            </div>
+        </section>
+
+        <!-- 機種情報ポップアップ -->
+        <div id="machineInfoPopup" class="hidden">
+            <div class="stats-popup-content machine-info-popup">
+                <div class="stats-popup-header">
+                    <span class="stats-popup-title">🎰 機種情報</span>
+                    <button id="machineInfoClose" class="stats-popup-close">✕</button>
+                </div>
+                <div id="machineInfoList">
+                    <!-- JSで動的生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- アチーブメントポップアップ -->
+        <div id="achievementPopup" class="hidden">
+            <div class="stats-popup-content ach-popup">
+                <div class="stats-popup-header">
+                    <span class="stats-popup-title">🏆 アチーブメント</span>
+                    <button id="achievementClose" class="stats-popup-close">✕</button>
+                </div>
+                <div class="ach-bonus-summary" id="achBonusSummary">初期所持玉ボーナス: +0玉</div>
+                <div id="achievementList">
+                    <!-- JSで動的生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- プレステージ発動セクション（条件達成時のみ表示） -->
+        <section id="prestigeSection" class="hidden">
+            <h2 class="shop-title">⭐ プレステージ</h2>
+            <button id="prestigeBtn" class="prestige-btn" disabled>
+                🔒 大当たり 0/100 でプレステージ解放
+            </button>
+        </section>
+
+        <!-- アップグレードショップ -->
+        <section id="shopSection">
+            <h2 class="shop-title">🛠️ アップグレード</h2>
+            <div id="shopGrid"></div>
+        </section>
+
+        <!-- 統計ポップアップ -->
+        <div id="statsPopup" class="hidden">
+            <div class="stats-popup-content">
+                <div class="stats-popup-header">
+                    <span class="stats-popup-title">📊 統計</span>
+                    <button id="statsPopupClose" class="stats-popup-close">✕</button>
+                </div>
+                <div class="stats-popup-subtitle">📊 通算</div>
+                <div id="statsGrid">
+                    <div class="stat-card">
+                        <span class="stat-label">累計獲得玉</span>
+                        <span class="stat-value" id="lifetimeBallsStat">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">累計投資</span>
+                        <span class="stat-value" id="lifetimeInvestStat">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">大当たり率</span>
+                        <span class="stat-value" id="lifetimeJackpotRateStat">-</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-label">プレイ時間</span>
+                        <span class="stat-value" id="lifetimePlayTimeStat">0秒</span>
+                    </div>
+                </div>
+
+                <!-- 今回の転生 -->
+                <div class="popup-prestige-stats">
+                    <div class="stats-popup-subtitle">🔄 今回の転生</div>
+                    <div id="currentStatsGrid">
+                        <div class="stat-card">
+                            <span class="stat-label">獲得玉</span>
+                            <span class="stat-value" id="totalBallsStat">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">投資</span>
+                            <span class="stat-value" id="totalInvestStat">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">大当たり率</span>
+                            <span class="stat-value" id="jackpotRateStat">-</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-label">プレイ時間</span>
+                            <span class="stat-value" id="playTimeStat">0秒</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- プレステージ情報 -->
+                <div class="popup-prestige">
+                    <div class="stats-popup-subtitle">⭐ プレステージ（転生）</div>
+                    <div class="prestige-info">
+                        <div class="prestige-stat">
+                            <span class="prestige-label">転生回数</span>
+                            <span class="prestige-value" id="prestigeCount">0</span>
+                        </div>
+                        <div class="prestige-stat">
+                            <span class="prestige-label">永続ボーナス</span>
+                            <span class="prestige-value prestige-bonus-text" id="prestigeBonus">+0%</span>
+                        </div>
+                    </div>
+                    <div class="prestige-bonus-detail" id="prestigeBonusDetail">出玉・回転速度に乗算</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- フッター -->
+        <footer id="gameFooter">
+            <button id="resetBtn" class="footer-btn danger">🗑️ データリセット</button>
+            <span class="footer-info">自動セーブ: <span id="saveStatus">待機中</span></span>
+        </footer>
+    </div>
+
+    <!-- JS: 依存順で読み込み -->
+    <script src="js/constants.js?v=20260309v"></script>
+    <script src="js/state.js?v=20260309v"></script>
+    <script src="js/helpers.js?v=20260309v"></script>
+    <script src="js/debt.js?v=20260309v"></script>
+    <script src="js/premium.js?v=20260309v"></script>
+    <script src="js/ui.js?v=20260309v"></script>
+    <script src="js/game-loop.js?v=20260309v"></script>
+    <script src="js/main.js?v=20260309d"></script>
+</body>
+
+</html>

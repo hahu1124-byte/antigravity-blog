@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI開発者ピックアップ 2026 第6回 | LAB | Gravity Portal</title>
+    <meta name="description" content="AI開発者ピックアップ 第6回。OpenClaw 810Kスター、GLM-5 MIT公開、n8n急成長、crewAI/LangGraph 2強。OSS大爆発の2026年3月最新情報。">
+    <meta property="og:title" content="AI開発者ピックアップ 2026 第6回 — OSS大爆発">
+    <meta property="og:description" content="OpenClaw 810K超え・GLM-5 MIT公開・n8n急成長。注目OSSプロジェクトと開発者動向（3/24更新）。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://www.antigravity-portal.com/lab/ai-developers/v6/">
+    <meta property="og:site_name" content="Gravity Portal">
+    <meta property="og:image" content="https://www.antigravity-portal.com/og-lab-ai-developers.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="canonical" href="https://www.antigravity-portal.com/lab/ai-developers/v6/">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <script>(function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()</script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
+    <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB</a>
+        <h1 class="lab-title">👤 AI開発者ピックアップ 第6回</h1>
+    </header>
+    <main class="lab-content">
+        <section class="lab-hero">
+            <div class="lab-hero-icon">👤</div>
+            <h1>AI開発者ピックアップ — OSS大爆発の春 第6回</h1>
+            <p><a href="/lab/ai-developers/v5/" style="color:inherit;text-decoration:underline">第5回</a>ではDevin/OpenCodeを中心に追いました。<br>
+                第6回は<strong>「OSS大爆発」</strong>がテーマ。OpenClawが810Kスターを突破し、<br>
+                GLM-5がMIT Licenseで公開、n8nとLangFlow がエージェント時代の基盤ツールとして急浮上。<br>
+                GitHub Trends（3/18-19）から読む、2026年春の注目プロジェクトを厳選紹介。</p>
+            <div class="lab-hero-meta">
+                <span>📅 2026年3月24日更新</span>
+                <span>🌟 注目プロジェクト7選</span>
+                <span>📝 <a href="/lab/ai-developers/v5/" style="color:inherit;text-decoration:underline">第5回（3/21）はこちら</a></span>
+            </div>
+        </section>
+
+        <!-- 業界数字 -->
+        <section class="lab-section">
+            <h2>📊 OSS AI エコシステムの現在地</h2>
+            <div class="market-overview">
+                <div class="market-stats">
+                    <div class="market-stat">
+                        <div class="market-stat-value">810K+</div>
+                        <div class="market-stat-label">OpenClaw GitHub Stars</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">5,700+</div>
+                        <div class="market-stat-label">OpenClaw ClawHub スキル登録数</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">360K+</div>
+                        <div class="market-stat-label">crewAI/LangGraph 合計スター数</div>
+                    </div>
+                    <div class="market-stat">
+                        <div class="market-stat-value">$1/M</div>
+                        <div class="market-stat-label">GLM-5 API最安価格（input）</div>
+                    </div>
+                </div>
+                <p>Hugging Faceの「Spring 2026 State of Open Source」レポートによれば、OSS AIは地理的分散が進み、ロボティクス・科学分野への拡大が顕著。「言語・画像生成のOSS」から「あらゆるドメインのOSS」への転換点が2026年。</p>
+            </div>
+        </section>
+
+        <!-- 第5回→第6回 変化 -->
+        <section class="lab-section">
+            <h2>🔥 第5回→第6回 注目プロジェクト変化</h2>
+            <div class="table-wrapper">
+                <table class="compare-table">
+                    <thead><tr><th>プロジェクト</th><th>第5回時点</th><th>第6回 最新動向</th></tr></thead>
+                    <tbody>
+                        <tr><td class="tool-name">OpenClaw</td><td>210K Stars・ClawHub 3,000スキル</td><td>🔥 810K Stars・ClawHub 5,700スキル。Xiaomi MiMo-V2-Pro無料API提供</td></tr>
+                        <tr><td class="tool-name">GLM-5（新）</td><td>—（未登場）</td><td>🆕 MIT License完全公開・SWE-bench首位・$1/M最安API</td></tr>
+                        <tr><td class="tool-name">n8n</td><td>注目ツール紹介</td><td>AI時代のワークフロー自動化定番として地位確立。エージェント連携強化</td></tr>
+                        <tr><td class="tool-name">crewAI / LangGraph</td><td>マルチエージェント2強として紹介</td><td>360K+ Stars。LangGraphのループ・動的ルーティングが業界標準に</td></tr>
+                        <tr><td class="tool-name">Ollama</td><td>ローカルLLM実行定番</td><td>引き続き上位。ローカルAIのデファクトスタンダードとして定着</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 注目プロジェクト詳細 -->
+        <section class="lab-section">
+            <h2>🌟 注目プロジェクト詳細（第6回）</h2>
+
+            <!-- OpenClaw -->
+            <div class="tool-card" id="openclaw-v6">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🦅</div>
+                    <div class="tool-card-info">
+                        <h3>OpenClaw</h3>
+                        <div class="tool-maker">OSS — パーソナルAIアシスタント</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">🔥 810K+ Stars</span>
+                    <span class="badge badge-free">ローカル動作・クロスプラットフォーム</span>
+                    <span class="badge badge-type">ClawHub 5,700スキル</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 プロジェクト概要と最新動向</h3>
+                    <ul>
+                        <li><strong>2026年最大のOSSブレイクアウト 🔥🔥</strong> — 1月に9,000→60,000スターに急増。現在810K+（GitHubオールタイム記録に迫る勢い）。個人が自分のデバイスで動かせるAIアシスタントとして爆発的普及</li>
+                        <li><strong>対応プラットフォーム</strong> — WhatsApp, Telegram, Slack, Discord, Signal, iMessage, Teamsと接続可能。自分のハードウェアで完全プライベートに動作</li>
+                        <li><strong>ClawHub スキルレジストリ 5,700+</strong> — コミュニティが作ったスキル（機能拡張）が5,700以上登録済み。App Storeのような拡張エコシステムを形成</li>
+                        <li><strong>Xiaomi MiMo-V2-Pro 無料API提供</strong> — OpenClaw統合向けに無料APIを提供開始。ハードウェアメーカーがOSS AIにベットする動きが加速</li>
+                        <li><strong>MetaがMoltbook（競合）を買収</strong> — OpenClawの成功を見て、"AIエージェントのSNS"とも称されるMoltbookをMetaが買収。競合も巻き込んだOSSエコシステムが形成されつつある</li>
+                    </ul>
+
+                    <h3>🔑 注目ポイント</h3>
+                    <p>OpenClawは<strong>「Googleもなく、AppleもなくていいAI体験」</strong>の実証。
+                        巨大テック企業依存なしで、メッセージングアプリをまたいだAIが動く。
+                        810Kスターという数字はユーザーに支持されているというだけでなく、開発者コミュニティが本気で貢献している証拠。
+                        日本でも個人開発者による日本語対応スキルが登録され始めている。</p>
+                </div>
+            </div>
+
+            <!-- GLM-5 -->
+            <div class="tool-card" id="glm5-v6">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🧠</div>
+                    <div class="tool-card-info">
+                        <h3>GLM-5（Zhipu AI）</h3>
+                        <div class="tool-maker">Zhipu AI — フロンティアOSSモデル</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">🆕 MIT License公開</span>
+                    <span class="badge badge-free">SWE-bench OSS首位</span>
+                    <span class="badge badge-type">$1/M 最安API</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 プロジェクト概要と注目点</h3>
+                    <ul>
+                        <li><strong>MIT Licenseで完全公開 🔥</strong> — 重みがHugging Faceで公開。商用利用・改変・再配布が自由。GPT/Claude対抗のClosed Weightモデルに対するOSS側の回答</li>
+                        <li><strong>SWE-bench Verified OSS首位</strong> — コーディングベンチマークで先行するOSSモデルを上回るスコア。「最強のOSSコーディングモデル」を主張</li>
+                        <li><strong>$1/M input・$3.20/M output</strong> — 同性能帯のClosed Weightモデルの約1/15コスト。LLM APIコストが課題のチームに有力な選択肢</li>
+                        <li><strong>自己ホスト可能</strong> — データが外に出ない環境で使える。医療・金融・政府向け用途での需要に応える</li>
+                    </ul>
+
+                    <h3>🔑 注目ポイント</h3>
+                    <p>GLM-5は<strong>「お金をかけずにフロンティア性能を得る」</strong>戦略の実現。
+                        Claude/GPT対比で約1/15のコストで同等のコーディング性能が得られるなら、
+                        スタートアップやOSSプロジェクトにとって選択肢は明らか。
+                        日本語性能の検証はまだ限定的だが、多言語対応は継続強化中。</p>
+                </div>
+            </div>
+
+            <!-- n8n -->
+            <div class="tool-card" id="n8n-v6">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">⚙️</div>
+                    <div class="tool-card-info">
+                        <h3>n8n</h3>
+                        <div class="tool-maker">n8n GmbH — ワークフロー自動化</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">AIエージェント連携対応</span>
+                    <span class="badge badge-free">オープンソース（セルフホスト）</span>
+                    <span class="badge badge-type">no-code + code flexibility</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 プロジェクト概要と注目点</h3>
+                    <ul>
+                        <li><strong>AI時代のワークフロー自動化定番として確立</strong> — 「no-codeのスピード + コードレベルの柔軟性」という稀有な組み合わせ。AIエージェントとの連携が容易</li>
+                        <li><strong>AIエージェント＋n8n連携事例が急増</strong> — Claude Code、OpenClaw、LangGraphとのワークフロー統合事例が2026年に急増。「AIが考えて、n8nが動かす」パターンが広まっている</li>
+                        <li><strong>内部ツール・運用自動化で特に強い</strong> — Zapier/Make.comより技術者向きだが、非エンジニアにも使える設計。スタートアップのバックオフィス自動化で採用増</li>
+                        <li><strong>セルフホスト or クラウド</strong> — 自社環境で動かして機密データを保護する使い方が特に評価される</li>
+                    </ul>
+
+                    <h3>🔑 注目ポイント</h3>
+                    <p>n8nはMCP普及と相乗効果を発揮している。AIエージェントが複数ツール・サービスをまたいで動く時代に、オーケストレーション層としてのn8nの役割が重要度を増している。</p>
+                </div>
+            </div>
+
+            <!-- crewAI / LangGraph -->
+            <div class="tool-card" id="crewai-langgraph-v6">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🤝</div>
+                    <div class="tool-card-info">
+                        <h3>crewAI / LangGraph</h3>
+                        <div class="tool-maker">OSS — マルチエージェントフレームワーク2強</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">360K+ 合計Stars</span>
+                    <span class="badge badge-free">マルチエージェント設計</span>
+                    <span class="badge badge-type">ループ・動的ルーティング対応</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 プロジェクト概要と最新動向</h3>
+                    <ul>
+                        <li><strong>LangGraph: 有向グラフ型エージェント設計が業界標準に</strong> — 線形パイプライン（LangChain）からグラフ型（LangGraph）への移行が加速。ループ・動的ルーティングにより、失敗時のリトライや役割分担が柔軟に</li>
+                        <li><strong>crewAI: 役割分担型マルチエージェント</strong> — コーディネーター/リサーチャー/ライター/レビュアーといった「チーム」として動くエージェント設定が得意。記事生成・分析・報告書作成の半自動化に活用</li>
+                        <li><strong>合計360K+スター</strong> — crewAIとLangGraphを合わせた開発者支持はGitHub上で際立つ。どちらかではなく用途で使い分けるのが実態</li>
+                        <li><strong>日本での事例増加</strong> — 記事生成の半自動化、勤怠管理のMCP自動化、情報収集エージェントなど国内エンジニアによる実装報告が増える</li>
+                    </ul>
+
+                    <h3>🔑 注目ポイント</h3>
+                    <p>「1つのLLMに全部やらせる」時代から「専門家AIチームが協働する」時代への移行を体現するフレームワーク。2026年後半はこの設計パターンがさらに一般化すると予測される。</p>
+                </div>
+            </div>
+
+            <!-- Ollama -->
+            <div class="tool-card" id="ollama-v6">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">🦙</div>
+                    <div class="tool-card-info">
+                        <h3>Ollama</h3>
+                        <div class="tool-maker">OSS — ローカルLLM実行環境</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-free">完全無料・オフライン動作</span>
+                    <span class="badge badge-type">Apple Silicon最適化</span>
+                    <span class="badge badge-hot">定番地位確立</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 最新動向</h3>
+                    <ul>
+                        <li><strong>ローカルLLM実行のデファクトスタンダード</strong> — GLM-5、Qwen、DeepSeek等の新モデルを簡単に動かせる環境として不可欠。「ollama run モデル名」一発</li>
+                        <li><strong>プライバシー重視用途で引き続き需要</strong> — 医療・法律・社内機密を扱う場面でクラウド送信なしのローカルAIが必要。Ollamaが最短経路</li>
+                        <li><strong>GLM-5との連携で注目</strong> — GLM-5のセルフホスト実行にOllamaを使う事例が増加。無料で最強コーディング性能がローカルで動く時代</li>
+                    </ul>
+
+                    <h3>🔑 注目ポイント</h3>
+                    <p>Ollamaの存在感は「新モデルが出るたびに一番早く試せる場所」として揺るぎない。
+                        GLM-5の無料API + Ollamaのローカル実行は、コスト最重視の開発者に最強の組み合わせ。</p>
+                </div>
+            </div>
+
+            <!-- GitHub Trending 注目 -->
+            <div class="tool-card" id="github-trending-v6">
+                <div class="tool-card-header">
+                    <div class="tool-card-icon">📈</div>
+                    <div class="tool-card-info">
+                        <h3>GitHub Trending（3/18-19）注目プロジェクト</h3>
+                        <div class="tool-maker">エージェント系OSSが独占</div>
+                    </div>
+                </div>
+                <div class="tool-card-badges">
+                    <span class="badge badge-hot">エージェント系が上位独占</span>
+                    <span class="badge badge-type">AIインフラOSSが急増</span>
+                </div>
+                <div class="tool-card-body">
+                    <h3>📢 3/18-19 GitHub Trending 注目</h3>
+                    <ul>
+                        <li><strong>obra/superpowers（#1トレンド 3/18）</strong> — AIエージェント向けスーパーパワー拡張ツール。詳細は非公開だが急激な注目を集めた</li>
+                        <li><strong>ruvnet/claude-flow</strong> — 複数Claude Codeセッションの並列管理CLIツール。セッション状態をリアルタイム可視化し、並列運用効率を数倍に</li>
+                        <li><strong>Dify</strong> — AIアプリ構築・デプロイ・管理プラットフォーム。RAG・モデルオーケストレーション・可観測性を統合。プロダクション向けAIアプリの定番に</li>
+                        <li><strong>Langflow</strong> — AIワークフローのビジュアルビルダー。RAG実験・エージェントパイプライン・デモ作成に最適。n8nと用途が近いがAI特化</li>
+                        <li><strong>AI音声クローニング系（GPT-SoVITS等）</strong> — 328K+スターのAI音声系カテゴリが急成長。オフライン・プライバシー保護の音声AIニーズが高まっている</li>
+                    </ul>
+
+                    <h3>🔑 傾向の読み方</h3>
+                    <p>2026年3月のGitHub Trendingは<strong>エージェント管理・並列化・可観測性</strong>ツールが台頭。
+                        「一つのAIを動かす」から「複数のAIを管理する」へ。AgentOpsという概念が具体的なOSSとして現れ始めた。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- まとめ -->
+        <section class="lab-section">
+            <h2>🎯 第6回まとめ — OSS時代の読み解き方</h2>
+            <div class="summary-box">
+                <h3>2026年春のOSSトレンド</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">🦅 注目No.1</div>
+                        <div class="summary-value">OpenClaw（810K Stars）</div>
+                        <p>巨大テック依存なし、クロスプラットフォーム、スキル拡張可能。2026年OSS最大の成果</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">💰 コスト破壊</div>
+                        <div class="summary-value">GLM-5 MIT公開</div>
+                        <p>SWE-benchmark首位のOSSコーディングモデル。$1/Mで商用利用可能</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">⚙️ 基盤ツール</div>
+                        <div class="summary-value">n8n + LangGraph</div>
+                        <p>エージェント時代の自動化基盤。AIが考えてn8nが動かす、LangGraphが制御する</p>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">🔮 次のトレンド</div>
+                        <div class="summary-value">AgentOps・並列管理</div>
+                        <p>claude-flow等の「複数AIエージェントを管理するツール」が次の急成長カテゴリ</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意 -->
+        <section class="lab-section">
+            <h2>📝 調査にあたって</h2>
+            <p>本記事は<strong>2026年3月24日時点</strong>の情報です。スター数・APIレートは変動します。</p>
+            <p>過去の調査は
+                <a href="/lab/ai-developers/v1/" style="color:var(--accent);text-decoration:underline">第1回（3/9）</a>・
+                <a href="/lab/ai-developers/v2/" style="color:var(--accent);text-decoration:underline">第2回（3/11）</a>・
+                <a href="/lab/ai-developers/v3/" style="color:var(--accent);text-decoration:underline">第3回（3/12）</a>・
+                <a href="/lab/ai-developers/v4/" style="color:var(--accent);text-decoration:underline">第4回（3/16）</a>・
+                <a href="/lab/ai-developers/v5/" style="color:var(--accent);text-decoration:underline">第5回（3/21）</a>をご覧ください。</p>
+            <p>情報はGitHub Trending、Hugging Face State of Open Source、dev.to、Medium等より収集。</p>
+        </section>
+    </main>
+    <footer class="lab-footer">
+        <p>© 2026 Gravity Portal — LAB</p>
+        <nav class="lab-footer-nav">
+            <a href="/">🏠 TOP</a>
+            <a href="/lab/">🔬 LAB</a>
+            <a href="/lab/ai-developers/v1/">👤 第1回</a>
+            <a href="/lab/ai-developers/v2/">👤 第2回</a>
+            <a href="/lab/ai-developers/v3/">👤 第3回</a>
+            <a href="/lab/ai-developers/v4/">👤 第4回</a>
+            <a href="/lab/ai-developers/v5/">👤 第5回</a>
+            <a href="/lab/ai-tools/v6/">🛠️ ツール 第6回</a>
+            <a href="/lab/ai-trends/v6/">📊 トレンド 第6回</a>
+        </nav>
+    </footer>
+    <script>
+        (function(){var btn=document.getElementById('themeToggle');function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}update();btn.addEventListener('click',function(){var cur=document.documentElement.getAttribute('data-theme');var next=cur==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',next);try{localStorage.setItem('gp-theme',next)}catch(e){}update()})})()</script>
+</body>
+</html>

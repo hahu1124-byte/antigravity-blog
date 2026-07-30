@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="スロットの天井ハイエナ期待値を概算するツール（試作）。">
+  <meta name="robots" content="noindex,nofollow">
+  <title>ハイエナ期待値計算ツール（試作）</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <h1 class="title">🐆 ハイエナ期待値計算ツール</h1>
+      <p class="subtitle">天井狙い・ゾーン狙いの期待値一覧（試作版）</p>
+    </header>
+
+    <div class="card">
+      <!-- 機種選択 -->
+      <div class="field">
+        <label class="label" for="machine">機種</label>
+        <select id="machine" class="select"></select>
+        <p class="machine-note" id="machineNote"></p>
+      </div>
+
+      <!-- バリアント選択（AT天井/リセット等、バリアントがある機種のみ表示） -->
+      <div class="field" id="variantField" style="display:none">
+        <label class="label" for="variant">狙い方</label>
+        <select id="variant" class="select"></select>
+      </div>
+
+      <!-- 換金率 -->
+      <div class="field-row">
+        <div class="field">
+          <label class="label" for="exchange">換金率</label>
+          <select id="exchange" class="select">
+            <option value="20">等価（20円/枚）</option>
+            <option value="18.18">5.5枚交換（約18.2円）</option>
+            <option value="16.67">6枚交換（約16.7円）</option>
+          </select>
+        </div>
+
+        <!-- G数刻み -->
+        <div class="field">
+          <label class="label" for="step">表示刻み</label>
+          <select id="step" class="select">
+            <option value="5">5G</option>
+            <option value="10">10G</option>
+            <option value="50" selected>50G</option>
+            <option value="100">100G</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 機種サマリー -->
+      <div class="summary-row" id="summaryRow">
+        <div class="summary-item">
+          <span class="summary-label">天井</span>
+          <span class="summary-val" id="ceilingSummary">—</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">天井期待出玉</span>
+          <span class="summary-val" id="payoutSummary">—</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">EV転換G数</span>
+          <span class="summary-val" id="breakEvenG">—</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- G数別期待値テーブル -->
+    <div class="table-wrap" id="tableWrap">
+      <table class="ev-table" id="evTable">
+        <thead>
+          <tr>
+            <th>G数</th>
+            <th>ゾーン</th>
+            <th>EV</th>
+            <th>出率</th>
+            <th>消化時間</th>
+            <th>期待時給</th>
+          </tr>
+        </thead>
+        <tbody id="evTbody"></tbody>
+      </table>
+    </div>
+
+    <p class="disclaimer">
+      ※ 概算ツールです。道中当選・出玉の振れ・設定差は未考慮のため実際の期待値は異なります。投資は自己責任で。
+    </p>
+  </div>
+
+  <script src="./specs.js"></script>
+  <script src="./script.js"></script>
+</body>
+</html>
