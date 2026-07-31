@@ -66,9 +66,9 @@ novels/
             ├── 61-70/               # ep61~ep70
             ├── 71-80/               # ep71~ep80
             └── 81-90/
-                ├── ... (5 older files)
-                ├── ep86T.md
-                ├── ep87T.md
+                ├── ... (8 older files)
+                ├── ep88C.md
+                ├── ep88T.md
                 ├── setting-ch3-reveal.md
                 └── archive/
                     ├── ... (12 older files)
