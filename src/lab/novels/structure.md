@@ -67,9 +67,10 @@ novels/
             ├── 71-80/               # ep71~ep80
             ├── 81-90/               # ep81~ep90
             └── 91-100/
-                ├── ep91A.md
-                ├── ep91C.md
-                └── ep91T.md
+                ├── ep91T.md
+                └── archive/
+                    ├── ep91A.md
+                    └── ep91C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
