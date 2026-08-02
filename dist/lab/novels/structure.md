@@ -65,15 +65,15 @@ novels/
             ├── 51-60/               # ep51~ep60
             ├── 61-70/               # ep61~ep70
             ├── 71-80/               # ep71~ep80
-            └── 81-90/
-                ├── ... (10 older files)
-                ├── ep90C.md
-                ├── ep90T.md
-                ├── setting-ch3-reveal.md
+            ├── 81-90/               # ep81~ep90
+            └── 91-100/
+                ├── ... (1 older files)
+                ├── ep92A.md
+                ├── ep92C.md
+                ├── ep92T.md
                 └── archive/
-                    ├── ... (16 older files)
-                    ├── ep89A.md
-                    └── ep89C.md
+                    ├── ep91A.md
+                    └── ep91C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。

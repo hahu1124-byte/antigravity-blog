@@ -5,9 +5,34 @@
     <link>https://www.antigravity-portal.com/blog</link>
     <description>パチンコ分析・AI開発・Uber配達の個人開発ポータル Gravity Portal の最新記事</description>
     <language>ja</language>
-    <lastBuildDate>Thu, 30 Jul 2026 15:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Sat, 01 Aug 2026 15:00:00 GMT</lastBuildDate>
     <managingEditor>hahu1124 (Gravity Portal)</managingEditor>
     <atom:link href="https://www.antigravity-portal.com/blog/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>📰 週刊テックトレンド #31（07/27〜08/02）</title>
+      <link>https://www.antigravity-portal.com/blog/202608/20260802_weekly_trend_w31/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202608/20260802_weekly_trend_w31/</guid>
+      <pubDate>Sat, 01 Aug 2026 15:00:00 GMT</pubDate>
+      <description>今週（07/27〜08/02）のWebデザイン・技術・AI・個人開発トレンド 212件から注目記事をピックアップ。</description>
+        <category>テック</category>
+        <category>トレンド</category>
+    </item>
+    <item>
+      <title>🚴 Uber配達情報 🌤️ 20260802 まずまずの1日</title>
+      <link>https://www.antigravity-portal.com/blog/202608/20260802_uber_daily/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202608/20260802_uber_daily/</guid>
+      <pubDate>Sat, 01 Aug 2026 15:00:00 GMT</pubDate>
+      <description>名古屋のUber配達に役立つ2026-08-02の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
+        <category>Uber配達</category>
+    </item>
+    <item>
+      <title>🚴 Uber配達情報 🥵 20260801 暑さ対策必須</title>
+      <link>https://www.antigravity-portal.com/blog/202608/20260801_uber_daily/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202608/20260801_uber_daily/</guid>
+      <pubDate>Fri, 31 Jul 2026 15:00:00 GMT</pubDate>
+      <description>名古屋のUber配達に役立つ2026-08-01の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
+        <category>Uber配達</category>
+    </item>
     <item>
       <title>🚴 Uber配達情報 🌤️ 20260731 まずまずの1日</title>
       <link>https://www.antigravity-portal.com/blog/202607/20260731_uber_daily/</link>
@@ -146,30 +171,6 @@
       <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202607/20260718_uber_daily/</guid>
       <pubDate>Fri, 17 Jul 2026 15:00:00 GMT</pubDate>
       <description>名古屋のUber配達に役立つ2026-07-18の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
-        <category>Uber配達</category>
-    </item>
-    <item>
-      <title>🚴 Uber配達情報 🌤️ 20260717 まずまずの1日</title>
-      <link>https://www.antigravity-portal.com/blog/202607/20260717_uber_daily/</link>
-      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202607/20260717_uber_daily/</guid>
-      <pubDate>Thu, 16 Jul 2026 15:00:00 GMT</pubDate>
-      <description>名古屋のUber配達に役立つ2026-07-17の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
-        <category>Uber配達</category>
-    </item>
-    <item>
-      <title>🚴 Uber配達情報 🥵 20260716 暑さ対策必須</title>
-      <link>https://www.antigravity-portal.com/blog/202607/20260716_uber_daily/</link>
-      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202607/20260716_uber_daily/</guid>
-      <pubDate>Wed, 15 Jul 2026 15:00:00 GMT</pubDate>
-      <description>名古屋のUber配達に役立つ2026-07-16の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
-        <category>Uber配達</category>
-    </item>
-    <item>
-      <title>🚴 Uber配達情報 🌤️ 20260715 まずまずの1日</title>
-      <link>https://www.antigravity-portal.com/blog/202607/20260715_uber_daily/</link>
-      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202607/20260715_uber_daily/</guid>
-      <pubDate>Tue, 14 Jul 2026 15:00:00 GMT</pubDate>
-      <description>名古屋のUber配達に役立つ2026-07-15の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
         <category>Uber配達</category>
     </item>
   </channel>
