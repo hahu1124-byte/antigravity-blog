@@ -57,6 +57,7 @@ novels/
     ├── setting-ch3.md          # 第3章「深淵の糸」詳細プロット
     ├── setting-ch4.md          # 第4章「久遠の覚醒」詳細プロット
     ├── setting-ch5.md          # 第5章 詳細プロット
+    ├── setting-ch6.md          
     ├── setting.md              # プロット・ブロック構成
     ├── writing_prompt.md       # AI執筆指示書
 │   └── episodes/
@@ -67,8 +68,10 @@ novels/
             ├── 71-80/               # ep71~ep80
             ├── 81-90/               # ep81~ep90
             └── 91-100/
-                ├── ep91T.md
-                ├── ep92T.md
+                ├── ... (2 older files)
+                ├── ep93A.md
+                ├── ep93C.md
+                ├── ep93T.md
                 └── archive/
                     ├── ... (2 older files)
                     ├── ep92A.md
