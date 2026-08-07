@@ -20,6 +20,7 @@ import {
   buildNovelsPages,
   buildSettingsPages,
 } from "./scripts/build/novels-pages.mjs";
+import { buildBlogNovelPages } from "./scripts/build/blog-novels.mjs";
 import { minifyAssets } from "./scripts/build/minify.mjs";
 import { checkInternalLinks } from "./scripts/build/check-links.mjs";
 
@@ -33,6 +34,9 @@ buildMachinePages();
 // LAB小説・設定ページ
 await buildNovelsPages();
 await buildSettingsPages();
+
+// 小説本文ページ（/blog/novels/）
+await buildBlogNovelPages();
 
 // ビルド後処理
 await minifyAssets();

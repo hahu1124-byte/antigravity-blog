@@ -1,23 +1,25 @@
 #!/usr/bin/env node
 /**
- * Uber配達デイリーレポート自動生成スクリプト
+ * フードデリバリーデイリーレポート自動生成スクリプト
  *
- * 毎朝 GitHub Actions (JST 6:00) で実行され、名古屋の配達関連情報を
- * 収集してブログ記事として自動生成する。
+ * 毎朝 GitHub Actions (JST 6:00) で実行され、名古屋の配達関連情報
+ * （Uber Eats・出前館・ロケットナウ・menu横断）を収集してブログ記事として自動生成する。
  *
  * Usage:
  *   node scripts/generate-uber-daily.mjs            # 通常実行
  *   node scripts/generate-uber-daily.mjs --dry-run   # ファイル出力なし
  */
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(__dirname, '..');
-const CONFIG = JSON.parse(fs.readFileSync(path.join(__dirname, 'uber-daily-config.json'), 'utf8'));
-const DRY_RUN = process.argv.includes('--dry-run');
+const ROOT = path.resolve(__dirname, "..");
+const CONFIG = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "uber-daily-config.json"), "utf8"),
+);
+const DRY_RUN = process.argv.includes("--dry-run");
 
 // ===== ユーティリティ =====
 
@@ -25,15 +27,17 @@ const DRY_RUN = process.argv.includes('--dry-run');
 const now = new Date();
 const today = new Date(now.getTime() + 9 * 60 * 60 * 1000);
 const YYYY = today.getUTCFullYear();
-const MM = String(today.getUTCMonth() + 1).padStart(2, '0');
-const DD = String(today.getUTCDate()).padStart(2, '0');
+const MM = String(today.getUTCMonth() + 1).padStart(2, "0");
+const DD = String(today.getUTCDate()).padStart(2, "0");
 const DATE_STR = `${YYYY}${MM}${DD}`;
 const DATE_DISPLAY = `${YYYY}-${MM}-${DD}`;
 const YYYYMM = `${YYYY}${MM}`;
 const DAY_OF_WEEK = today.getUTCDay(); // 0=日, 1=月, ..., 6=土
-const DAY_NAMES = ['日', '月', '火', '水', '木', '金', '土'];
+const DAY_NAMES = ["日", "月", "火", "水", "木", "金", "土"];
 
-function log(msg) { console.log(`[uber-daily] ${msg}`); }
+function log(msg) {
+  console.log(`[uber-daily] ${msg}`);
+}
 
 async function fetchJson(url, timeout = 10000) {
   const controller = new AbortController();
@@ -68,48 +72,49 @@ async function fetchText(url, timeout = 10000) {
 // ===== 1. 天気予報 =====
 
 async function getWeather() {
-  log('🌤️ 天気予報を取得中...');
+  log("🌤️ 天気予報を取得中...");
   const data = await fetchJson(CONFIG.weather.apiUrl);
   if (!data || !data.forecasts) return null;
 
   return {
-    description: data.description?.bodyText || '',
-    forecasts: data.forecasts.map(f => ({
+    description: data.description?.bodyText || "",
+    forecasts: data.forecasts.map((f) => ({
       date: f.date,
       dateLabel: f.dateLabel,
       telop: f.telop,
       weather: f.detail?.weather || f.telop,
-      wind: f.detail?.wind || '',
+      wind: f.detail?.wind || "",
       tempMin: f.temperature?.min?.celsius,
       tempMax: f.temperature?.max?.celsius,
       chanceOfRain: f.chanceOfRain || {},
-      imageUrl: f.image?.url || ''
-    }))
+      imageUrl: f.image?.url || "",
+    })),
   };
 }
 
 function getWeatherType(telop, tempMax) {
-  const t = telop || '';
-  if (t.includes('雪')) return 'snow';
-  if (t.includes('暴風') || t.includes('雷')) return 'storm';
-  if (t.includes('雨')) return 'rainy';
-  if (t.includes('曇')) return 'cloudy';
+  const t = telop || "";
+  if (t.includes("雪")) return "snow";
+  if (t.includes("暴風") || t.includes("雷")) return "storm";
+  if (t.includes("雨")) return "rainy";
+  if (t.includes("曇")) return "cloudy";
   const max = parseInt(tempMax);
   if (!isNaN(max)) {
-    if (max >= 33) return 'hot';
-    if (max <= 5) return 'cold';
+    if (max >= 33) return "hot";
+    if (max <= 5) return "cold";
   }
-  return 'sunny';
+  return "sunny";
 }
 
 function renderWeatherSection(weather) {
-  if (!weather) return '<p>天気予報の取得に失敗しました。<a href="https://www.jma.go.jp/bosai/forecast/#area_type=offices&area_code=230000" target="_blank">気象庁ページ</a>をご確認ください。</p>';
+  if (!weather)
+    return '<p>天気予報の取得に失敗しました。<a href="https://www.jma.go.jp/bosai/forecast/#area_type=offices&area_code=230000" target="_blank">気象庁ページ</a>をご確認ください。</p>';
 
   const todayFc = weather.forecasts[0];
   const tomorrowFc = weather.forecasts[1];
   const dayAfterFc = weather.forecasts[2];
 
-  let html = '';
+  let html = "";
 
   // 当日（大きく）
   if (todayFc) {
@@ -134,7 +139,7 @@ function renderWeatherSection(weather) {
     if (rain && Object.keys(rain).length > 0) {
       html += `<table class="rain-table">
   <tr><th>時間帯</th><th>0-6時</th><th>6-12時</th><th>12-18時</th><th>18-24時</th></tr>
-  <tr><td>☔ 降水確率</td><td>${rain.T00_06 || '--'}</td><td>${rain.T06_12 || '--'}</td><td>${rain.T12_18 || '--'}</td><td>${rain.T18_24 || '--'}</td></tr>
+  <tr><td>☔ 降水確率</td><td>${rain.T00_06 || "--"}</td><td>${rain.T06_12 || "--"}</td><td>${rain.T12_18 || "--"}</td><td>${rain.T18_24 || "--"}</td></tr>
 </table>`;
     }
   }
@@ -155,7 +160,7 @@ function renderWeatherSection(weather) {
       html += `</span>
 </div>`;
     }
-    html += '</div>';
+    html += "</div>";
   }
 
   return html;
@@ -169,23 +174,25 @@ function parseRssItems(xml) {
   let match;
   while ((match = itemRegex.exec(xml)) !== null) {
     const block = match[1];
-    const title = (block.match(/<title><!\[CDATA\[(.*?)\]\]>/) || block.match(/<title>(.*?)<\/title>/))?.[1] || '';
-    const link = (block.match(/<link>(.*?)<\/link>/))?.[1] || '';
-    const pubDate = (block.match(/<pubDate>(.*?)<\/pubDate>/))?.[1] || '';
+    const title =
+      (block.match(/<title><!\[CDATA\[(.*?)\]\]>/) ||
+        block.match(/<title>(.*?)<\/title>/))?.[1] || "";
+    const link = block.match(/<link>(.*?)<\/link>/)?.[1] || "";
+    const pubDate = block.match(/<pubDate>(.*?)<\/pubDate>/)?.[1] || "";
     items.push({ title, link, pubDate });
   }
   return items;
 }
 
 function filterNewsByKeywords(items, keywords) {
-  return items.filter(item => {
+  return items.filter((item) => {
     const text = item.title.toLowerCase();
-    return keywords.some(kw => text.includes(kw.toLowerCase()));
+    return keywords.some((kw) => text.includes(kw.toLowerCase()));
   });
 }
 
 async function getNews() {
-  log('📰 ニュースRSSを取得中...');
+  log("📰 ニュースRSSを取得中...");
   const allFiltered = [];
 
   for (const source of CONFIG.news.sources) {
@@ -195,7 +202,9 @@ async function getNews() {
     const items = parseRssItems(xml);
     const filtered = filterNewsByKeywords(items, CONFIG.news.deliveryKeywords);
     const limited = filtered.slice(0, source.maxItems);
-    allFiltered.push(...limited.map(item => ({ ...item, source: source.name })));
+    allFiltered.push(
+      ...limited.map((item) => ({ ...item, source: source.name })),
+    );
   }
 
   return allFiltered;
@@ -210,7 +219,7 @@ function renderNewsSection(news) {
   for (const item of news.slice(0, 8)) {
     html += `<li><a href="${item.link}" target="_blank" rel="noopener">${item.title}</a> <span class="news-source">(${item.source})</span></li>`;
   }
-  html += '</ul>';
+  html += "</ul>";
   return html;
 }
 
@@ -229,11 +238,15 @@ function renderTrafficSection() {
 function getGasPriceCache() {
   const cachePath = path.join(ROOT, CONFIG.gasoline.cacheFile);
   try {
-    const data = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+    const data = JSON.parse(fs.readFileSync(cachePath, "utf8"));
     const cacheDate = new Date(data.fetchDate);
     const diffDays = (today - cacheDate) / (1000 * 60 * 60 * 24);
     if (diffDays > 8) {
-      log('⛽ ガソリン価格キャッシュが古め（' + Math.floor(diffDays) + '日前）。経産省側の取得に失敗している可能性があります');
+      log(
+        "⛽ ガソリン価格キャッシュが古め（" +
+          Math.floor(diffDays) +
+          "日前）。経産省側の取得に失敗している可能性があります",
+      );
     }
     return data;
   } catch {
@@ -253,12 +266,27 @@ function renderGasSection(gas) {
 
   return `<table class="gas-table">
   <tr><th>種別</th><th>価格（円/L）</th></tr>
-  <tr><td>⛽ レギュラー</td><td><strong>${gas.regular || '---'}</strong></td></tr>
-  <tr><td>⛽ ハイオク</td><td>${gas.premium || '---'}</td></tr>
-  <tr><td>🛢️ 軽油</td><td>${gas.diesel || '---'}</td></tr>
-  <tr><td>🔥 灯油（18L）</td><td>${gas.kerosene || '---'}</td></tr>
+  <tr><td>⛽ レギュラー</td><td><strong>${gas.regular || "---"}</strong></td></tr>
+  <tr><td>⛽ ハイオク</td><td>${gas.premium || "---"}</td></tr>
+  <tr><td>🛢️ 軽油</td><td>${gas.diesel || "---"}</td></tr>
+  <tr><td>🔥 灯油（18L）</td><td>${gas.kerosene || "---"}</td></tr>
 </table>
 <p class="section-note">出典: 経済産業省 石油製品価格調査（${gas.region}地域平均・週次更新）<br>調査日: ${gas.fetchDate}</p>`;
+}
+
+// ===== 4b. プラットフォーム別の狙い目 =====
+
+function renderPlatformsSection() {
+  const platforms = CONFIG.platforms || [];
+  if (platforms.length === 0) return "<p>特に無し</p>";
+
+  let html = '<ul class="platform-list">';
+  for (const p of platforms) {
+    html += `<li>${p.emoji} <strong>${p.name}</strong> — ${p.note}</li>`;
+  }
+  html += "</ul>";
+  html += `<p class="section-note">各社の詳しい比較は <a href="../../202608/20260808_delivery_platform_comparison_nagoya/">名古屋のフードデリバリー配達員 4社徹底比較</a> をチェック！</p>`;
+  return html;
 }
 
 // ===== 5. ピーク予測 =====
@@ -266,28 +294,34 @@ function renderGasSection(gas) {
 function getPeakPredictions(weather) {
   const predictions = [];
   const todayFc = weather?.forecasts?.[0];
-  const telop = todayFc?.telop || '';
+  const telop = todayFc?.telop || "";
   const maxTemp = parseInt(todayFc?.tempMax);
 
   // 雨チェック
-  if (telop.includes('雨')) {
-    predictions.push(CONFIG.peakRules.find(r => r.condition === 'rain'));
+  if (telop.includes("雨")) {
+    predictions.push(CONFIG.peakRules.find((r) => r.condition === "rain"));
   }
 
   // 寒さ / 暑さ
   if (!isNaN(maxTemp)) {
-    if (maxTemp <= 8) predictions.push(CONFIG.peakRules.find(r => r.condition === 'cold'));
-    if (maxTemp >= 30) predictions.push(CONFIG.peakRules.find(r => r.condition === 'hot'));
+    if (maxTemp <= 8)
+      predictions.push(CONFIG.peakRules.find((r) => r.condition === "cold"));
+    if (maxTemp >= 30)
+      predictions.push(CONFIG.peakRules.find((r) => r.condition === "hot"));
   }
 
   // 金曜夜
   if (DAY_OF_WEEK === 5) {
-    predictions.push(CONFIG.peakRules.find(r => r.condition === 'friday_evening'));
+    predictions.push(
+      CONFIG.peakRules.find((r) => r.condition === "friday_evening"),
+    );
   }
 
   // 週末ランチ
   if (DAY_OF_WEEK === 0 || DAY_OF_WEEK === 6) {
-    predictions.push(CONFIG.peakRules.find(r => r.condition === 'weekend_lunch'));
+    predictions.push(
+      CONFIG.peakRules.find((r) => r.condition === "weekend_lunch"),
+    );
   }
 
   return predictions.filter(Boolean);
@@ -295,24 +329,29 @@ function getPeakPredictions(weather) {
 
 function renderPeakSection(predictions) {
   if (predictions.length === 0) {
-    return '<p>📊 通常レベルの需要が予想されます。</p>';
+    return "<p>📊 通常レベルの需要が予想されます。</p>";
   }
 
-  let maxMultiplier = Math.max(...predictions.map(p => p.multiplier));
-  let level = maxMultiplier >= 1.4 ? '🔥 高需要' : maxMultiplier >= 1.2 ? '📈 やや高め' : '📊 通常';
+  let maxMultiplier = Math.max(...predictions.map((p) => p.multiplier));
+  let level =
+    maxMultiplier >= 1.4
+      ? "🔥 高需要"
+      : maxMultiplier >= 1.2
+        ? "📈 やや高め"
+        : "📊 通常";
 
   let html = `<p class="peak-level"><strong>${level}</strong></p><ul class="peak-list">`;
   for (const p of predictions) {
     html += `<li>${p.emoji} ${p.message}（需要 ×${p.multiplier}）</li>`;
   }
-  html += '</ul>';
+  html += "</ul>";
   return html;
 }
 
 // ===== 6. イベント情報 =====
 
 async function getEvents() {
-  log('📍 イベント情報を取得中...');
+  log("📍 イベント情報を取得中...");
   // Walker Plus等のスクレイピングは不安定のため、初期はリンク案内
   return [];
 }
@@ -326,9 +365,9 @@ function renderEventsSection(events) {
 
   let html = '<ul class="event-list">';
   for (const event of events) {
-    html += `<li>${event.emoji || '📍'} ${event.name} — ${event.venue}</li>`;
+    html += `<li>${event.emoji || "📍"} ${event.name} — ${event.venue}</li>`;
   }
-  html += '</ul>';
+  html += "</ul>";
   return html;
 }
 
@@ -342,11 +381,15 @@ function getHeatAdvice(weather) {
   for (const advice of CONFIG.heatAdvice) {
     if (maxTemp >= advice.minTemp) return { ...advice, temp: maxTemp };
   }
-  return { emoji: '❄️', message: '極寒。路面凍結に最大限の注意を', temp: maxTemp };
+  return {
+    emoji: "❄️",
+    message: "極寒。路面凍結に最大限の注意を",
+    temp: maxTemp,
+  };
 }
 
 function renderHeatSection(advice) {
-  if (!advice) return '<p>気温情報を取得できませんでした。</p>';
+  if (!advice) return "<p>気温情報を取得できませんでした。</p>";
 
   return `<div class="heat-advice">
   <span class="heat-emoji">${advice.emoji}</span>
@@ -361,7 +404,7 @@ function renderHeatSection(advice) {
 
 function renderDayTipSection() {
   const tip = CONFIG.dayOfWeekTips[String(DAY_OF_WEEK)];
-  if (!tip) return '';
+  if (!tip) return "";
   return `<div class="day-tip">
   <span class="day-tip-emoji">${tip.emoji}</span>
   <span class="day-tip-text"><strong>${DAY_NAMES[DAY_OF_WEEK]}曜日の傾向:</strong> ${tip.tip}</span>
@@ -372,17 +415,17 @@ function renderDayTipSection() {
 
 function generateComment(weather, predictions) {
   const todayFc = weather?.forecasts?.[0];
-  const telop = todayFc?.telop || '';
+  const telop = todayFc?.telop || "";
   const dayName = DAY_NAMES[DAY_OF_WEEK];
 
-  if (telop.includes('雨') && DAY_OF_WEEK === 5) {
-    return '🔥 雨×金曜のダブルブースト！今日は稼ぎ時です！';
+  if (telop.includes("雨") && DAY_OF_WEEK === 5) {
+    return "🔥 雨×金曜のダブルブースト！今日は稼ぎ時です！";
   }
-  if (telop.includes('雨')) {
-    return '🌧️ 雨の日は注文数UP！レインウェアを装備して出発しよう！';
+  if (telop.includes("雨")) {
+    return "🌧️ 雨の日は注文数UP！レインウェアを装備して出発しよう！";
   }
   if (DAY_OF_WEEK === 5) {
-    return '🍻 金曜日！夜のピークタイムに向けて準備しよう！';
+    return "🍻 金曜日！夜のピークタイムに向けて準備しよう！";
   }
   if (DAY_OF_WEEK === 0 || DAY_OF_WEEK === 6) {
     return `☀️ ${dayName}曜日！ランチ〜夕方の時間帯をしっかり狙おう！`;
@@ -390,7 +433,7 @@ function generateComment(weather, predictions) {
   if (predictions.length > 0) {
     return `📈 需要UPの条件あり！チャンスを逃さず稼ごう！`;
   }
-  if (telop.includes('晴')) {
+  if (telop.includes("晴")) {
     return `☀️ ${dayName}曜日、天気良好！快適に配達できる1日になりそう！`;
   }
   return `📊 ${dayName}曜日、いつも通りの1日。コツコツ稼いでいこう！`;
@@ -408,13 +451,23 @@ function generateTitle(weather) {
 // ===== HTML生成 =====
 
 function buildArticleHtml({
-  title, weatherHtml, trafficHtml, newsHtml, gasHtml,
-  peakHtml, eventsHtml, heatHtml, dayTipHtml, commentText
+  title,
+  weatherHtml,
+  trafficHtml,
+  newsHtml,
+  gasHtml,
+  peakHtml,
+  eventsHtml,
+  heatHtml,
+  dayTipHtml,
+  commentText,
+  platformsHtml,
 }) {
-  const fullTitle = `🚴 Uber配達情報 ${title}`;
-  const description = `名古屋のUber配達に役立つ今日の情報をまとめました。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`;
+  const blogTag = CONFIG.blog.tag;
+  const fullTitle = `🚴 ${blogTag}情報 ${title}`;
+  const description = `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ今日の情報をまとめました。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`;
   const articleUrl = `https://www.antigravity-portal.com/blog/${YYYYMM}/${DATE_STR}_uber_daily/`;
-  const encodedTag = encodeURIComponent('Uber配達');
+  const encodedTag = encodeURIComponent(blogTag);
 
   return `<!DOCTYPE html>
 <html lang="ja">
@@ -442,6 +495,7 @@ function buildArticleHtml({
     <link rel="preconnect" href="https://cnobi.jp">
     <link rel="dns-prefetch" href="https://adm.shinobi.jp">
     <link rel="dns-prefetch" href="https://cnobi.jp">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7805361658365027" crossorigin="anonymous"></script>
     <style>
       /* Uber Daily 専用スタイル — テーマ対応 */
       /* ベース: テキスト色を明示的に指定 */
@@ -485,6 +539,9 @@ function buildArticleHtml({
       .peak-level { font-size: 1.2rem; margin: 0.5rem 0; color: inherit; }
       .peak-list { list-style: none; padding: 0; }
       .peak-list li { padding: 0.3rem 0; color: inherit; }
+      .platform-list { list-style: none; padding: 0; }
+      .platform-list li { padding: 0.4rem 0; border-bottom: 1px solid #eee; color: inherit; }
+      [data-theme="dark"] .platform-list li { border-bottom-color: #333; }
       .news-list { list-style: none; padding: 0; }
       .news-list li { padding: 0.4rem 0; border-bottom: 1px solid #eee; color: inherit; }
       [data-theme="dark"] .news-list li { border-bottom-color: #333; }
@@ -538,7 +595,7 @@ function buildArticleHtml({
             <span class="separator">/</span>
             <a href="../../">ブログ</a>
             <span class="separator">/</span>
-            <span class="current">🚴 Uber配達情報 ${title}</span>
+            <span class="current">🚴 ${blogTag}情報 ${title}</span>
         </nav>
 
         <article class="article">
@@ -546,10 +603,10 @@ function buildArticleHtml({
                 <div class="meta">
                     <time class="date">${DATE_DISPLAY}</time>
                     <div class="tags">
-                        <a href="../../tag/${encodedTag}/" class="tag">Uber配達</a>
+                        <a href="../../tag/${encodedTag}/" class="tag">${blogTag}</a>
                     </div>
                 </div>
-                <h1 class="title">🚴 Uber配達情報 ${title}</h1>
+                <h1 class="title">🚴 ${blogTag}情報 ${title}</h1>
             </header>
 
             <div class="content">
@@ -563,6 +620,11 @@ function buildArticleHtml({
                 <div class="ninja-ad-slot">
                     <span class="ninja-ad-label">PR</span>
                     <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
+                </div>
+
+                <div class="uber-section">
+                  <h2>🛵 プラットフォーム別の狙い目</h2>
+                  ${platformsHtml}
                 </div>
 
                 <div class="uber-section">
@@ -610,11 +672,17 @@ function buildArticleHtml({
             <div class="amazon-ads-section">
                 <h3 class="amazon-ads-heading">🚴 配達に役立つアイテム</h3>
                 <div class="amazon-ads-grid">
-${CONFIG.blog.amazonSearches.map(s => `                    <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(s.query)}&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
+${CONFIG.blog.amazonSearches
+  .map(
+    (
+      s,
+    ) => `                    <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(s.query)}&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
                         <span class="amazon-ad-emoji">${s.emoji}</span>
                         <span class="amazon-ad-title">${s.title}</span>
                         <span class="amazon-ad-badge">Amazonで見る</span>
-                    </a>`).join('\n')}
+                    </a>`,
+  )
+  .join("\n")}
                 </div>
                 <div class="amazon-search-box">
                     <p class="amazon-search-label">🔍 <span class="amazon-logo-text">Amazon</span>で探す</p>
@@ -656,26 +724,29 @@ ${CONFIG.blog.amazonSearches.map(s => `                    <a href="https://www.
 // ===== blog-data.json 更新 =====
 
 function updateBlogData(title) {
-  const blogDataPath = path.join(ROOT, 'src/blog-data.json');
-  const blogDataDistPath = path.join(ROOT, 'dist/blog-data.json');
+  const blogDataPath = path.join(ROOT, "src/blog-data.json");
+  const blogDataDistPath = path.join(ROOT, "dist/blog-data.json");
 
   let data = [];
-  try { data = JSON.parse(fs.readFileSync(blogDataPath, 'utf8')); } catch { }
+  try {
+    data = JSON.parse(fs.readFileSync(blogDataPath, "utf8"));
+  } catch {}
 
   const slug = `${YYYYMM}/${DATE_STR}_uber_daily`;
   // 同日の記事が既にあればスキップ
-  if (data.some(d => d.slug === slug)) {
-    log('📋 blog-data.json: 同日の記事が既に存在するためスキップ');
+  if (data.some((d) => d.slug === slug)) {
+    log("📋 blog-data.json: 同日の記事が既に存在するためスキップ");
     return;
   }
 
-  const fullTitle = `🚴 Uber配達情報 ${title}`;
+  const blogTag = CONFIG.blog.tag;
+  const fullTitle = `🚴 ${blogTag}情報 ${title}`;
   const entry = {
     slug,
     title: fullTitle,
     date: DATE_DISPLAY,
-    excerpt: `名古屋のUber配達に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`,
-    tags: ['Uber配達']
+    excerpt: `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`,
+    tags: [blogTag],
   };
 
   data.unshift(entry);
@@ -683,35 +754,41 @@ function updateBlogData(title) {
   if (!DRY_RUN) {
     fs.writeFileSync(blogDataPath, JSON.stringify(data, null, 2));
     fs.writeFileSync(blogDataDistPath, JSON.stringify(data, null, 2));
-    log('📋 blog-data.json 更新完了');
+    log("📋 blog-data.json 更新完了");
   } else {
-    log('📋 [dry-run] blog-data.json 更新スキップ');
+    log("📋 [dry-run] blog-data.json 更新スキップ");
   }
 }
 
 // ===== ブログ一覧ページ更新 =====
 
 function updateBlogIndex(title) {
-  const indexPath = path.join(ROOT, 'dist/blog/index.html');
+  const indexPath = path.join(ROOT, "dist/blog/index.html");
   let html;
-  try { html = fs.readFileSync(indexPath, 'utf8'); } catch { log('⚠️ blog/index.html が見つかりません'); return; }
+  try {
+    html = fs.readFileSync(indexPath, "utf8");
+  } catch {
+    log("⚠️ blog/index.html が見つかりません");
+    return;
+  }
 
   const slug = `${YYYYMM}/${DATE_STR}_uber_daily/`;
   // 同日の記事が既にあればスキップ
   if (html.includes(slug)) {
-    log('📄 index.html: 同日の記事カードが既に存在するためスキップ');
+    log("📄 index.html: 同日の記事カードが既に存在するためスキップ");
     return;
   }
 
-  const fullTitle = `🚴 Uber配達情報 ${title}`;
-  const excerpt = `名古屋のUber配達に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をまとめました。`;
+  const blogTag = CONFIG.blog.tag;
+  const fullTitle = `🚴 ${blogTag}情報 ${title}`;
+  const excerpt = `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をまとめました。`;
 
-  const newCard = `<a href="${slug}" class="article-card" data-tags="Uber配達" data-index="0">
+  const newCard = `<a href="${slug}" class="article-card" data-tags="${blogTag}" data-index="0">
             <div class="card-header">
                 <time class="date">${DATE_DISPLAY}</time>
-                
+
                 <div class="tags">
-                    <span class="tag">Uber配達</span>
+                    <span class="tag">${blogTag}</span>
                 </div>
             </div>
             <h2 class="card-title">${fullTitle}</h2>
@@ -721,43 +798,56 @@ function updateBlogIndex(title) {
   // article-grid セクションの先頭カードの前に挿入
   const gridStart = html.indexOf('class="article-grid"');
   if (gridStart === -1) {
-    log('⚠️ article-grid が見つかりません');
+    log("⚠️ article-grid が見つかりません");
     return;
   }
   // article-grid の閉じ > の直後に改行+カードを挿入
-  const gridTagEnd = html.indexOf('>', gridStart);
+  const gridTagEnd = html.indexOf(">", gridStart);
   if (gridTagEnd === -1) return;
   const insertPos = gridTagEnd + 1;
 
   // data-index を全て +1 する
-  html = html.replace(/data-index="(\d+)"/g, (_, n) => `data-index="${parseInt(n) + 1}"`);
+  html = html.replace(
+    /data-index="(\d+)"/g,
+    (_, n) => `data-index="${parseInt(n) + 1}"`,
+  );
 
   // 新しいカードを先頭に挿入
-  html = html.slice(0, insertPos) + '\n\n        ' + newCard + '\n' + html.slice(insertPos);
+  html =
+    html.slice(0, insertPos) +
+    "\n\n        " +
+    newCard +
+    "\n" +
+    html.slice(insertPos);
 
   // タグフィルターの「すべて」カウントを +1（aタグ形式）
-  html = html.replace(/すべて \((\d+)\)/, (_, n) => `すべて (${parseInt(n) + 1})`);
+  html = html.replace(
+    /すべて \((\d+)\)/,
+    (_, n) => `すべて (${parseInt(n) + 1})`,
+  );
 
   if (!DRY_RUN) {
     fs.writeFileSync(indexPath, html);
-    log('📄 blog/index.html 更新完了');
+    log("📄 blog/index.html 更新完了");
   } else {
-    log('📄 [dry-run] blog/index.html 更新スキップ');
+    log("📄 [dry-run] blog/index.html 更新スキップ");
   }
 }
 
 // ===== メイン実行 =====
 
 async function main() {
-  log(`🚴 Uber配達デイリーレポート生成開始 — ${DATE_DISPLAY}（${DAY_NAMES[DAY_OF_WEEK]}）`);
-  if (DRY_RUN) log('⚠️ ドライランモード: ファイル出力なし');
+  log(
+    `🚴 ${CONFIG.blog.tag}デイリーレポート生成開始 — ${DATE_DISPLAY}（${DAY_NAMES[DAY_OF_WEEK]}）`,
+  );
+  if (DRY_RUN) log("⚠️ ドライランモード: ファイル出力なし");
 
   // 1. データ収集（並列）
   const [weather, news, gasPrice, events] = await Promise.all([
     getWeather(),
     getNews(),
     getGasPrice(),
-    getEvents()
+    getEvents(),
   ]);
 
   // 2. 解析
@@ -775,16 +865,29 @@ async function main() {
   const eventsHtml = renderEventsSection(events);
   const heatHtml = renderHeatSection(heatAdvice);
   const dayTipHtml = renderDayTipSection();
+  const platformsHtml = renderPlatformsSection();
 
   // 4. HTML組み立て
   const html = buildArticleHtml({
-    title, weatherHtml, trafficHtml, newsHtml, gasHtml,
-    peakHtml, eventsHtml, heatHtml, dayTipHtml, commentText
+    title,
+    weatherHtml,
+    trafficHtml,
+    newsHtml,
+    gasHtml,
+    peakHtml,
+    eventsHtml,
+    heatHtml,
+    dayTipHtml,
+    commentText,
+    platformsHtml,
   });
 
   // 5. ファイル出力
-  const outputDir = path.join(ROOT, `dist/blog/${YYYYMM}/${DATE_STR}_uber_daily`);
-  const outputFile = path.join(outputDir, 'index.html');
+  const outputDir = path.join(
+    ROOT,
+    `dist/blog/${YYYYMM}/${DATE_STR}_uber_daily`,
+  );
+  const outputFile = path.join(outputDir, "index.html");
 
   if (!DRY_RUN) {
     fs.mkdirSync(outputDir, { recursive: true });
@@ -798,17 +901,17 @@ async function main() {
     updateBlogIndex(title);
   } else {
     log(`📄 [dry-run] 出力先: ${outputFile}`);
-    log(`📄 [dry-run] タイトル: 🚴 Uber配達情報 ${title}`);
+    log(`📄 [dry-run] タイトル: 🚴 ${CONFIG.blog.tag}情報 ${title}`);
     log(`📄 [dry-run] 一言: ${commentText}`);
     // dry-run でもHTMLを表示
-    console.log('\n--- 生成HTML（先頭200行）---');
-    console.log(html.split('\n').slice(0, 200).join('\n'));
+    console.log("\n--- 生成HTML（先頭200行）---");
+    console.log(html.split("\n").slice(0, 200).join("\n"));
   }
 
-  log('🏁 完了');
+  log("🏁 完了");
 }
 
-main().catch(e => {
-  console.error('[uber-daily] ❌ エラー:', e);
+main().catch((e) => {
+  console.error("[uber-daily] ❌ エラー:", e);
   process.exit(1);
 });

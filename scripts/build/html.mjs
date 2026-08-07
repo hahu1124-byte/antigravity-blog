@@ -357,6 +357,7 @@ export function getAmazonAdsHtml(post) {
   const tags = post.tags || [];
   const isWeekly = tags.includes("週報");
   const isUber = tags.includes("Uber");
+  const isDelivery = tags.includes("フードデリバリー");
   const isPachinko = tags.includes("パチンコ");
   const isAI = tags.includes("AI");
   const isDev = tags.includes("開発");
@@ -368,10 +369,10 @@ export function getAmazonAdsHtml(post) {
   if (isAI || isDev || isTech) {
     items = AI_DEV_ADS;
     sectionTitle = "💻 技術書・開発に役立つ本";
-  } else if (isWeekly || (isUber && isPachinko)) {
+  } else if (isWeekly || ((isUber || isDelivery) && isPachinko)) {
     items = UBER_GEAR_ADS;
-    sectionTitle = "🚗 Uber配達で使うもの一覧";
-  } else if (isUber) {
+    sectionTitle = "🚗 デリバリーで使うもの一覧";
+  } else if (isUber || isDelivery) {
     items = UBER_DAILY_ADS;
     sectionTitle = "🚗 配達に役立つアイテム";
   } else if (isPachinko) {
