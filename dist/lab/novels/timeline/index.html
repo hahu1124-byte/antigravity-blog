@@ -13,13 +13,26 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>(function(){try{var t=localStorage.getItem("gp-theme");t&&document.documentElement.setAttribute("data-theme",t)}catch{}})();
-</script>
+    <script>
+        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
+    </script>
 </head>
 <body>
     <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
-    <script>(function(){var e=document.getElementById("themeToggle");function n(){var t=document.documentElement.getAttribute("data-theme");e.textContent=t==="light"?"\u{1F319}":"\u2600\uFE0F"}n(),e.addEventListener("click",function(){var t=document.documentElement.getAttribute("data-theme"),m=t==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",m);try{localStorage.setItem("gp-theme",m)}catch{}n()})})();
-</script>
+    <script>
+        (function(){
+            var btn=document.getElementById('themeToggle');
+            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
+            update();
+            btn.addEventListener('click',function(){
+                var cur=document.documentElement.getAttribute('data-theme');
+                var next=cur==='light'?'dark':'light';
+                document.documentElement.setAttribute('data-theme',next);
+                try{localStorage.setItem('gp-theme',next)}catch(e){}
+                update();
+            });
+        })()
+    </script>
 
     <header class="lab-header">
         <a href="/lab/novels/" class="lab-back">← AI小説に戻る</a>
@@ -40,7 +53,12 @@
 
         <section class="novels-section novels-markdown novels-timeline-body">
             
-<style>.tl-tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}.tl-tab{padding:.45rem 1rem;background:var(--lab-bg-card,rgba(30,32,48,.8));border:1px solid var(--lab-border,rgba(99,102,241,.2));border-radius:8px;color:var(--lab-text-muted,#8b8fa0);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}.tl-tab:hover{border-color:var(--lab-accent,#58a6ff);color:var(--lab-text,#e0e0e8)}.tl-tab-active{background:#58a6ff26;border-color:var(--lab-accent,#58a6ff);color:var(--lab-text,#e0e0e8)}.tl-content{display:none}.tl-content-active{display:block}
+<style>
+.tl-tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
+.tl-tab{padding:.45rem 1rem;background:var(--lab-bg-card,rgba(30,32,48,.8));border:1px solid var(--lab-border,rgba(99,102,241,.2));border-radius:8px;color:var(--lab-text-muted,#8b8fa0);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.tl-tab:hover{border-color:var(--lab-accent,#58a6ff);color:var(--lab-text,#e0e0e8)}
+.tl-tab-active{background:rgba(88,166,255,.15);border-color:var(--lab-accent,#58a6ff);color:var(--lab-text,#e0e0e8)}
+.tl-content{display:none}.tl-content-active{display:block}
 </style>
 <blockquote>
 <p>このリポジトリは2026年6月17日にサブリポジトリ統合を行ったため、それ以前の ep01〜22 の執筆経緯はgit履歴として残っていません。以下は統合後に記録されたコミットを中心に手動でまとめたものです。</p>
@@ -1977,7 +1995,19 @@
 </ul>
 </div>
 </div>
-<script>(function(){var e=document.querySelectorAll(".tl-tab");e.forEach(function(c){c.addEventListener("click",function(){var a=this.dataset.week;e.forEach(function(t){t.classList.remove("tl-tab-active")}),document.querySelectorAll(".tl-content").forEach(function(t){t.classList.remove("tl-content-active")}),this.classList.add("tl-tab-active"),document.querySelector('.tl-content[data-week="'+a+'"]').classList.add("tl-content-active")})})})();
+<script>
+(function(){
+  var tabs=document.querySelectorAll('.tl-tab');
+  tabs.forEach(function(tab){
+    tab.addEventListener('click',function(){
+      var w=this.dataset.week;
+      tabs.forEach(function(t){t.classList.remove('tl-tab-active');});
+      document.querySelectorAll('.tl-content').forEach(function(c){c.classList.remove('tl-content-active');});
+      this.classList.add('tl-tab-active');
+      document.querySelector('.tl-content[data-week="'+w+'"]').classList.add('tl-content-active');
+    });
+  });
+})();
 </script>
         </section>
 
