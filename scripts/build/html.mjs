@@ -8,6 +8,12 @@ const NINJA_AD_ID = "06dfeeba49e20207a86cd5f651221d50";
 const ADMAX_SCRIPT_URL = "https://adm.shinobi.jp/st/t.js";
 
 // ==========================================
+// Google AdSense 設定（blog配下のみ・machine-db等には出さない）
+// ==========================================
+
+const ADSENSE_CLIENT_ID = "ca-pub-7805361658365027";
+
+// ==========================================
 // 共通HTMLテンプレート
 // ==========================================
 
@@ -64,6 +70,7 @@ export function htmlHead(
     <link rel="preconnect" href="https://cnobi.jp">
     <link rel="dns-prefetch" href="https://adm.shinobi.jp">
     <link rel="dns-prefetch" href="https://cnobi.jp">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}" crossorigin="anonymous"></script>
     <script defer src="${cssRelPath.replace("styles.css", "scripts/hero-bg.js")}?v=${cacheBust}"></script>
     <script>
         (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()

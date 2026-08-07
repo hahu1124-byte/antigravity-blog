@@ -102,7 +102,7 @@ export function buildMachinePages() {
 <meta property="og:description" content="${escapeHtml(desc)}">
 <meta property="og:type" content="article">
 <meta property="og:url" content="${SITE_URL}/machine-db/${slug}/">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="noindex, follow">
 <link rel="canonical" href="${SITE_URL}/machine-db/${slug}/">
 <script type="application/ld+json">${machineJsonLd(m, border, slug)}</script>
 <style>
