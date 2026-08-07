@@ -13,26 +13,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
-    </script>
+    <script>(function(){try{var t=localStorage.getItem("gp-theme");t&&document.documentElement.setAttribute("data-theme",t)}catch{}})();
+</script>
 </head>
 <body>
     <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
-    <script>
-        (function(){
-            var btn=document.getElementById('themeToggle');
-            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
-            update();
-            btn.addEventListener('click',function(){
-                var cur=document.documentElement.getAttribute('data-theme');
-                var next=cur==='light'?'dark':'light';
-                document.documentElement.setAttribute('data-theme',next);
-                try{localStorage.setItem('gp-theme',next)}catch(e){}
-                update();
-            });
-        })()
-    </script>
+    <script>(function(){var e=document.getElementById("themeToggle");function n(){var t=document.documentElement.getAttribute("data-theme");e.textContent=t==="light"?"\u{1F319}":"\u2600\uFE0F"}n(),e.addEventListener("click",function(){var t=document.documentElement.getAttribute("data-theme"),m=t==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",m);try{localStorage.setItem("gp-theme",m)}catch{}n()})})();
+</script>
 
     <header class="lab-header">
         <a href="/lab/novels/" class="lab-back">← AI小説に戻る</a>
@@ -53,12 +40,7 @@
 
         <section class="novels-section novels-markdown novels-timeline-body">
             
-<style>
-.tl-tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
-.tl-tab{padding:.45rem 1rem;background:var(--lab-bg-card,rgba(30,32,48,.8));border:1px solid var(--lab-border,rgba(99,102,241,.2));border-radius:8px;color:var(--lab-text-muted,#8b8fa0);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
-.tl-tab:hover{border-color:var(--lab-accent,#58a6ff);color:var(--lab-text,#e0e0e8)}
-.tl-tab-active{background:rgba(88,166,255,.15);border-color:var(--lab-accent,#58a6ff);color:var(--lab-text,#e0e0e8)}
-.tl-content{display:none}.tl-content-active{display:block}
+<style>.tl-tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}.tl-tab{padding:.45rem 1rem;background:var(--lab-bg-card,rgba(30,32,48,.8));border:1px solid var(--lab-border,rgba(99,102,241,.2));border-radius:8px;color:var(--lab-text-muted,#8b8fa0);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}.tl-tab:hover{border-color:var(--lab-accent,#58a6ff);color:var(--lab-text,#e0e0e8)}.tl-tab-active{background:#58a6ff26;border-color:var(--lab-accent,#58a6ff);color:var(--lab-text,#e0e0e8)}.tl-content{display:none}.tl-content-active{display:block}
 </style>
 <blockquote>
 <p>このリポジトリは2026年6月17日にサブリポジトリ統合を行ったため、それ以前の ep01〜22 の執筆経緯はgit履歴として残っていません。以下は統合後に記録されたコミットを中心に手動でまとめたものです。</p>
@@ -141,6 +123,33 @@
 <td>2</td>
 <td>ep94T</td>
 <td>AntigravityがA版×C版をマージしT版案を作成。Claude CodeがNotebookLM（ファクトチェッカー・編集担当）へ推敲を依頼し、実ファイル・<code>ep93T.md</code>・<code>setting-ch1-reveal.md</code>と照合の上で反映：ep93（氷月三日午前9:42終了）との時間経過矛盾（半刻後なのに夜の場面）を「日が暮れて久しかった」に修正して解消、「羊皮紙」の不要ルビ削除、「封石」ルビの初出以外の重複削除、「氷月」のルビ表記揺れ（「ひょうげつ」→設定上正式な「こおりづき」）統一、アシュのセリフ重複（セイラの声を挟んだ前後でほぼ同内容を繰り返していた箇所）の解消、「静かに」の多用（6回）の分散。両NLMの「見見下ろした」誤字指摘（本文に存在せず）、文字数不足指摘（実測5,626字、規定5,000字・目安5,300〜5,800字クリア）、「観測書記」「燭台」の重複ルビ削除指摘（既存話数で全出現ルール対象として扱われてきた実績と矛盾）は誤りと判断し反映せず。「氷月｜こおりづき」を<code>novels-rules3.md</code>の確定済みルビ読み一覧へ新規追記</td>
+</tr>
+<tr>
+<td>3</td>
+<td>archive</td>
+<td>T版完成に伴い、元データのA版・C版を <code>archive/</code> フォルダへ退避</td>
+</tr>
+</tbody>
+</table>
+<h3>8月7日 — 言葉を持っていた少女（A版・C版マージとT版作成）</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>対象</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>ep95A</td>
+<td>Antigravity IDEで執筆。セイラの封石を通じ、アシュが人間時代の彼女——外交官フィーヌ・ヴィルンの過去（弟リアンを救うために選んだ曖昧な条文が数千人の犠牲と自らの死を招いた経緯）を回想として体験し、「魔王は生まれながらの怪物ではなかった」と悟る。リエラの報告書問題は、アシュが両論併記の道を提案する形で決着させるところまで一気に執筆済み</td>
+</tr>
+<tr>
+<td>2</td>
+<td>ep95T</td>
+<td>A版をほぼそのまま採用しマージ。ファクトチェッカー・編集担当NLMへ推敲依頼し、指摘を検証の上で反映：代数表記（「二代目のヴァルク」等）削除、場面転換◆◆◆前後の空行を3行ルールに修正、弟の名前をリアン→リアス（命名ルール抵触のため）に改名、封石ルビの重複削除とルビ漏れ追加、自決シーンの引き延ばし等の文章表現改善、末尾「（つづく）」削除。NLM側の幻覚・誤指摘（存在しない箇所へのルビ指摘、全出現ルール対象への削除指摘等）は却下</td>
 </tr>
 <tr>
 <td>3</td>
@@ -1968,19 +1977,7 @@
 </ul>
 </div>
 </div>
-<script>
-(function(){
-  var tabs=document.querySelectorAll('.tl-tab');
-  tabs.forEach(function(tab){
-    tab.addEventListener('click',function(){
-      var w=this.dataset.week;
-      tabs.forEach(function(t){t.classList.remove('tl-tab-active');});
-      document.querySelectorAll('.tl-content').forEach(function(c){c.classList.remove('tl-content-active');});
-      this.classList.add('tl-tab-active');
-      document.querySelector('.tl-content[data-week="'+w+'"]').classList.add('tl-content-active');
-    });
-  });
-})();
+<script>(function(){var e=document.querySelectorAll(".tl-tab");e.forEach(function(c){c.addEventListener("click",function(){var a=this.dataset.week;e.forEach(function(t){t.classList.remove("tl-tab-active")}),document.querySelectorAll(".tl-content").forEach(function(t){t.classList.remove("tl-content-active")}),this.classList.add("tl-tab-active"),document.querySelector('.tl-content[data-week="'+a+'"]').classList.add("tl-content-active")})})})();
 </script>
         </section>
 

@@ -5,9 +5,49 @@
     <link>https://www.antigravity-portal.com/blog</link>
     <description>パチンコ分析・AI開発・Uber配達の個人開発ポータル Gravity Portal の最新記事</description>
     <language>ja</language>
-    <lastBuildDate>Sat, 01 Aug 2026 15:00:00 GMT</lastBuildDate>
+    <lastBuildDate>Thu, 06 Aug 2026 15:00:00 GMT</lastBuildDate>
     <managingEditor>hahu1124 (Gravity Portal)</managingEditor>
     <atom:link href="https://www.antigravity-portal.com/blog/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>🚴 Uber配達情報 🌤️ 20260807 まずまずの1日</title>
+      <link>https://www.antigravity-portal.com/blog/202608/20260807_uber_daily/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202608/20260807_uber_daily/</guid>
+      <pubDate>Thu, 06 Aug 2026 15:00:00 GMT</pubDate>
+      <description>名古屋のUber配達に役立つ2026-08-07の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
+        <category>Uber配達</category>
+    </item>
+    <item>
+      <title>🚴 Uber配達情報 🌤️ 20260806 まずまずの1日</title>
+      <link>https://www.antigravity-portal.com/blog/202608/20260806_uber_daily/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202608/20260806_uber_daily/</guid>
+      <pubDate>Wed, 05 Aug 2026 15:00:00 GMT</pubDate>
+      <description>名古屋のUber配達に役立つ2026-08-06の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
+        <category>Uber配達</category>
+    </item>
+    <item>
+      <title>🚴 Uber配達情報 🌤️ 20260805 まずまずの1日</title>
+      <link>https://www.antigravity-portal.com/blog/202608/20260805_uber_daily/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202608/20260805_uber_daily/</guid>
+      <pubDate>Tue, 04 Aug 2026 15:00:00 GMT</pubDate>
+      <description>名古屋のUber配達に役立つ2026-08-05の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
+        <category>Uber配達</category>
+    </item>
+    <item>
+      <title>🚴 Uber配達情報 🌤️ 20260804 まずまずの1日</title>
+      <link>https://www.antigravity-portal.com/blog/202608/20260804_uber_daily/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202608/20260804_uber_daily/</guid>
+      <pubDate>Mon, 03 Aug 2026 15:00:00 GMT</pubDate>
+      <description>名古屋のUber配達に役立つ2026-08-04の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
+        <category>Uber配達</category>
+    </item>
+    <item>
+      <title>🚴 Uber配達情報 🌤️ 20260803 まずまずの1日</title>
+      <link>https://www.antigravity-portal.com/blog/202608/20260803_uber_daily/</link>
+      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202608/20260803_uber_daily/</guid>
+      <pubDate>Sun, 02 Aug 2026 15:00:00 GMT</pubDate>
+      <description>名古屋のUber配達に役立つ2026-08-03の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
+        <category>Uber配達</category>
+    </item>
     <item>
       <title>📰 週刊テックトレンド #31（07/27〜08/02）</title>
       <link>https://www.antigravity-portal.com/blog/202608/20260802_weekly_trend_w31/</link>
@@ -128,49 +168,6 @@
       <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202607/20260721_uber_daily/</guid>
       <pubDate>Mon, 20 Jul 2026 15:00:00 GMT</pubDate>
       <description>名古屋のUber配達に役立つ2026-07-21の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
-        <category>Uber配達</category>
-    </item>
-    <item>
-      <title>🚴 Uber配達情報 🌤️ 20260720 まずまずの1日</title>
-      <link>https://www.antigravity-portal.com/blog/202607/20260720_uber_daily/</link>
-      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202607/20260720_uber_daily/</guid>
-      <pubDate>Sun, 19 Jul 2026 15:00:00 GMT</pubDate>
-      <description>名古屋のUber配達に役立つ2026-07-20の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
-        <category>Uber配達</category>
-    </item>
-    <item>
-      <title>🔬 LAB第11回 — MCP大改訂・エージェントセキュリティ危機・Cursor買収劇</title>
-      <link>https://www.antigravity-portal.com/blog/202607/20260720_ai_lab_update_v11/</link>
-      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202607/20260720_ai_lab_update_v11/</guid>
-      <pubDate>Sun, 19 Jul 2026 15:00:00 GMT</pubDate>
-      <description>MCP最大改訂でステートレス化。「Friendly Fire」攻撃でエージェント自律承認の死角が露見。CursorはContinueを買収しARR3000億円規模へ。OpenCode 182K Stars。</description>
-        <category>LAB</category>
-        <category>AI開発</category>
-        <category>Claude Code</category>
-    </item>
-    <item>
-      <title>📰 週刊テックトレンド #29（07/13〜07/19）</title>
-      <link>https://www.antigravity-portal.com/blog/202607/20260719_weekly_trend_w29/</link>
-      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202607/20260719_weekly_trend_w29/</guid>
-      <pubDate>Sat, 18 Jul 2026 15:00:00 GMT</pubDate>
-      <description>今週（07/13〜07/19）のWebデザイン・技術・AI・個人開発トレンド 227件から注目記事をピックアップ。</description>
-        <category>テック</category>
-        <category>トレンド</category>
-    </item>
-    <item>
-      <title>🚴 Uber配達情報 🌤️ 20260719 まずまずの1日</title>
-      <link>https://www.antigravity-portal.com/blog/202607/20260719_uber_daily/</link>
-      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202607/20260719_uber_daily/</guid>
-      <pubDate>Sat, 18 Jul 2026 15:00:00 GMT</pubDate>
-      <description>名古屋のUber配達に役立つ2026-07-19の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
-        <category>Uber配達</category>
-    </item>
-    <item>
-      <title>🚴 Uber配達情報 🌧️ 20260718 雨の日は需要UP</title>
-      <link>https://www.antigravity-portal.com/blog/202607/20260718_uber_daily/</link>
-      <guid isPermaLink="true">https://www.antigravity-portal.com/blog/202607/20260718_uber_daily/</guid>
-      <pubDate>Fri, 17 Jul 2026 15:00:00 GMT</pubDate>
-      <description>名古屋のUber配達に役立つ2026-07-18の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！</description>
         <category>Uber配達</category>
     </item>
   </channel>
