@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>機種データベース | Gravity Portal</title>
-    <link rel="stylesheet" href="machine-db.css?v=20260807">
+    <link rel="stylesheet" href="machine-db.css?v=20260810">
 </head>
 
 <body>
     <div id="app">
-        <!-- フィルターバー -->
+        
         <div class="filter-bar">
             <div class="filter-row">
                 <div class="filter-group search-group">
@@ -55,7 +55,7 @@
             <div class="filter-row filter-tags" id="active-filters"></div>
         </div>
 
-        <!-- 統計バー + 列表示切替 -->
+        
         <div class="stats-bar">
             <div class="stats-left">
                 <span id="machine-count" class="stat-badge">0 機種</span>
@@ -73,7 +73,7 @@
             </div>
         </div>
 
-        <!-- 列表示設定パネル -->
+        
         <div id="col-settings" class="col-settings hidden">
             <div class="col-settings-inner" id="col-settings-list">
                 <label draggable="true" data-col-order="type"><span class="drag-handle">☰</span><input type="checkbox"
@@ -101,13 +101,13 @@
             </div>
         </div>
 
-        <!-- テーブル -->
+        
         <div class="table-container">
             <div class="table-scroll" id="table-scroll">
                 <table id="machine-table">
                     <thead>
                         <tr id="header-row">
-                            <!-- ヘッダーはJSで動的生成（列順序対応） -->
+                            
                         </tr>
                     </thead>
                     <tbody id="machine-tbody"></tbody>
@@ -118,7 +118,7 @@
             <div class="scroll-indicator" id="scroll-indicator"></div>
         </div>
 
-        <!-- ページング -->
+        
         <div class="paging-bar" id="paging-bar">
             <button id="prev-btn" class="page-btn page-arrow" disabled>&#8249;</button>
             <select id="page-select" class="page-select"><option>1 / 1</option></select>
@@ -130,7 +130,7 @@
             </select>
         </div>
 
-        <!-- 詳細モーダル -->
+        
         <div id="detail-modal" class="modal hidden">
             <div class="modal-backdrop"></div>
             <div class="modal-content">
@@ -139,20 +139,9 @@
             </div>
         </div>
     </div>
-    <script src="machine-db.js?v=20260807"></script>
-    <script>
-        // Google Sitelinks Searchbox 対応: ?q= パラメータを検索ボックスに反映
-        (function() {
-            var q = new URLSearchParams(location.search).get('q');
-            if (q) {
-                var el = document.getElementById('search-input');
-                if (el) {
-                    el.value = q;
-                    el.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-            }
-        })();
-    </script>
+    <script src="machine-db.js?v=20260810"></script>
+    <script>(function(){var t=new URLSearchParams(location.search).get("q");if(t){var e=document.getElementById("search-input");e&&(e.value=t,e.dispatchEvent(new Event("input",{bubbles:!0})))}})();
+</script>
 </body>
 
 </html>

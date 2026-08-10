@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🔬 LAB第11回 — MCP大改訂・エージェントセキュリティ危機・Cursor買収劇 | Gravity Portal</title>
     <meta name="description" content="MCP最大改訂でステートレス化。「Friendly Fire」攻撃でエージェント自律承認の死角が露見。CursorはContinueを買収しARR3000億円規模へ。OpenCode 182K Stars。">
-    <!-- OGP -->
+    
     <meta property="og:title" content="🔬 LAB第11回 — MCP大改訂・エージェントセキュリティ危機・Cursor買収劇">
     <meta property="og:description" content="MCP最大改訂でステートレス化。「Friendly Fire」攻撃でエージェント自律承認の死角が露見。CursorはContinueを買収しARR3000億円規模へ。OpenCode 182K Stars。">
     <meta property="og:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day1.webp">
@@ -13,12 +13,12 @@
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="Gravity Portal">
     <meta property="og:locale" content="ja_JP">
-    <!-- Twitter Card -->
+    
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="🔬 LAB第11回 — MCP大改訂・エージェントセキュリティ危機・Cursor買収劇">
     <meta name="twitter:description" content="MCP最大改訂でステートレス化。「Friendly Fire」攻撃でエージェント自律承認の死角が露見。CursorはContinueを買収しARR3000億円規模へ。OpenCode 182K Stars。">
     <meta name="twitter:image" content="https://www.antigravity-portal.com/blog/images/ai_dev_day1.webp">
-    <link rel="stylesheet" href="../../styles.css?v=20260807">
+    <link rel="stylesheet" href="../../styles.css?v=20260810">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -27,29 +27,16 @@
     <link rel="dns-prefetch" href="https://adm.shinobi.jp">
     <link rel="dns-prefetch" href="https://cnobi.jp">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7805361658365027" crossorigin="anonymous"></script>
-    <script defer src="../../scripts/hero-bg.js?v=20260807"></script>
-    <script>
-        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
-    </script>
+    <script defer src="../../scripts/hero-bg.js?v=20260810"></script>
+    <script>(function(){try{var t=localStorage.getItem("gp-theme");t&&document.documentElement.setAttribute("data-theme",t)}catch{}})();
+</script>
 </head>
 <body>
     <div id="gp-hero-bg"></div>
-    <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
+    
     <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
-    <script>
-        (function(){
-            var btn=document.getElementById('themeToggle');
-            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
-            update();
-            btn.addEventListener('click',function(){
-                var cur=document.documentElement.getAttribute('data-theme');
-                var next=cur==='light'?'dark':'light';
-                document.documentElement.setAttribute('data-theme',next);
-                try{localStorage.setItem('gp-theme',next)}catch(e){}
-                update();
-            });
-        })()
-    </script>
+    <script>(function(){var e=document.getElementById("themeToggle");function n(){var t=document.documentElement.getAttribute("data-theme");e.textContent=t==="light"?"\u{1F319}":"\u2600\uFE0F"}n(),e.addEventListener("click",function(){var t=document.documentElement.getAttribute("data-theme"),m=t==="light"?"dark":"light";document.documentElement.setAttribute("data-theme",m);try{localStorage.setItem("gp-theme",m)}catch{}n()})})();
+</script>
     <div class="article-page">
         <nav class="breadcrumb">
             <a href="https://antigravity-portal.com/">トップ</a>
@@ -403,63 +390,7 @@
         </nav>
     </div>
     
-    <script>
-    (function(){
-        var AD_ID = '06dfeeba49e20207a86cd5f651221d50';
-        var SDK_URL = 'https://adm.shinobi.jp/st/t.js';
-
-        // 課金チェック → 課金済みなら広告を全て非表示にしてSDKも読み込まない
-        function hideAllAds(){
-            document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
-                slot.style.display = 'none';
-            });
-        }
-
-        function initAds(){
-            // 1. admaxads配列にスロットを登録
-            if(!window.admaxads) window.admaxads = [];
-            document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){
-                window.admaxads.push({ admax_id: el.getAttribute('data-admax-id'), type: 'switch' });
-            });
-
-            // 2. SDKをロード（body末尾で1回だけ実行）
-            var s = document.createElement('script');
-            s.type = 'text/javascript';
-            s.charset = 'utf-8';
-            s.src = SDK_URL;
-            s.async = true;
-            document.body.appendChild(s);
-
-            // 3. 広告が返らなかったスロットを非表示に（遅延チェック）
-            function checkAdSlots(){
-                document.querySelectorAll('.ninja-ad-slot').forEach(function(slot){
-                    var ad = slot.querySelector('.admax-switch');
-                    if(ad && ad.children.length > 0){
-                        slot.classList.add('ad-loaded');
-                    } else {
-                        slot.style.display = 'none';
-                    }
-                });
-            }
-            setTimeout(checkAdSlots, 5000);
-            setTimeout(checkAdSlots, 10000);
-        }
-
-        // 課金状態をチェック（同一ドメインのAPI）
-        fetch('/api/subscription-status')
-            .then(function(res){ return res.json(); })
-            .then(function(data){
-                if(data && data.isPaid){
-                    hideAllAds();
-                } else {
-                    initAds();
-                }
-            })
-            .catch(function(){
-                // エラー時は広告を表示（未課金扱い）
-                initAds();
-            });
-    })()
-    </script>
+    <script>(function(){var s="06dfeeba49e20207a86cd5f651221d50",i="https://adm.shinobi.jp/st/t.js";function c(){document.querySelectorAll(".ninja-ad-slot").forEach(function(t){t.style.display="none"})}function a(){window.admaxads||(window.admaxads=[]),document.querySelectorAll(".admax-switch[data-admax-id]").forEach(function(e){window.admaxads.push({admax_id:e.getAttribute("data-admax-id"),type:"switch"})});var t=document.createElement("script");t.type="text/javascript",t.charset="utf-8",t.src=i,t.async=!0,document.body.appendChild(t);function n(){document.querySelectorAll(".ninja-ad-slot").forEach(function(e){var d=e.querySelector(".admax-switch");d&&d.children.length>0?e.classList.add("ad-loaded"):e.style.display="none"})}setTimeout(n,5e3),setTimeout(n,1e4)}fetch("/api/subscription-status").then(function(t){return t.json()}).then(function(t){t&&t.isPaid?c():a()}).catch(function(){a()})})();
+</script>
 </body>
 </html>
