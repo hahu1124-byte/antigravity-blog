@@ -71,11 +71,11 @@ novels/
                 ├── ... (4 older files)
                 ├── ep95T.md
                 ├── ep96T.md
-                ├── ep97T.md
+                ├── ep97A.md
                 └── archive/
-                    ├── ... (12 older files)
-                    ├── ep97A.md
-                    └── ep97C.md
+                    ├── ... (10 older files)
+                    ├── ep96A.md
+                    └── ep96C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
