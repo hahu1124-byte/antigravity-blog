@@ -13,11 +13,16 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { renderOgCard } from "./lib/og-image.mjs";
+import { findRelated, getRelatedPostsHtml } from "./lib/related.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const CONFIG = JSON.parse(
   fs.readFileSync(path.join(__dirname, "uber-daily-config.json"), "utf8"),
+);
+const OG_CONFIG = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "og-image-config.json"), "utf8"),
 );
 const DRY_RUN = process.argv.includes("--dry-run");
 
@@ -462,12 +467,17 @@ function buildArticleHtml({
   dayTipHtml,
   commentText,
   platformsHtml,
+  ogImageUrl,
+  relatedHtml,
 }) {
   const blogTag = CONFIG.blog.tag;
   const fullTitle = `🚴 ${blogTag}情報 ${title}`;
   const description = `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ今日の情報をまとめました。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`;
   const articleUrl = `https://www.antigravity-portal.com/blog/${YYYYMM}/${DATE_STR}_uber_daily/`;
   const encodedTag = encodeURIComponent(blogTag);
+  const ogImage =
+    ogImageUrl ||
+    "https://www.antigravity-portal.com/blog/images/ai_dev_day1.webp";
 
   return `<!DOCTYPE html>
 <html lang="ja">
@@ -479,14 +489,16 @@ function buildArticleHtml({
     <!-- OGP -->
     <meta property="og:title" content="${fullTitle}">
     <meta property="og:description" content="${description}">
+    <meta property="og:image" content="${ogImage}">
     <meta property="og:url" content="${articleUrl}">
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="Gravity Portal">
     <meta property="og:locale" content="ja_JP">
     <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary">
+    <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${fullTitle}">
     <meta name="twitter:description" content="${description}">
+    <meta name="twitter:image" content="${ogImage}">
     <link rel="stylesheet" href="../../styles.css?v=${Date.now()}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -695,6 +707,7 @@ ${CONFIG.blog.amazonSearches
                 <p class="amazon-ads-note">Amazonのアソシエイトとして、Gravity Portalは適格販売により収入を得ています。</p>
             </div>
         </article>
+        ${relatedHtml || ""}
 
         <nav class="back-nav">
             <a href="https://antigravity-portal.com/" class="back-link">🏠 TOPに戻る</a>
@@ -723,7 +736,7 @@ ${CONFIG.blog.amazonSearches
 
 // ===== blog-data.json 更新 =====
 
-function updateBlogData(title) {
+function updateBlogData(title, ogImageRel) {
   const blogDataPath = path.join(ROOT, "src/blog-data.json");
   const blogDataDistPath = path.join(ROOT, "dist/blog-data.json");
 
@@ -747,6 +760,7 @@ function updateBlogData(title) {
     date: DATE_DISPLAY,
     excerpt: `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`,
     tags: [blogTag],
+    ...(ogImageRel ? { ogImage: ogImageRel } : {}),
   };
 
   data.unshift(entry);
@@ -856,6 +870,42 @@ async function main() {
   const title = generateTitle(weather);
   const commentText = generateComment(weather, predictions);
 
+  // 2.5 OGP画像生成（LLM/外部API不使用、フォント欠落時は null → DEFAULT_OG_IMAGE にフォールバック）
+  const slug = `${YYYYMM}/${DATE_STR}_uber_daily`;
+  const fullTitle = `🚴 ${CONFIG.blog.tag}情報 ${title}`;
+  let ogImageRel = null;
+  if (!DRY_RUN) {
+    ogImageRel = await renderOgCard({
+      title: fullTitle,
+      date: DATE_DISPLAY,
+      tags: [CONFIG.blog.tag],
+      slug,
+      imagesDir: path.join(ROOT, "src/images"),
+      config: OG_CONFIG,
+    });
+  }
+  const ogImageUrl = ogImageRel
+    ? `https://www.antigravity-portal.com/blog/images/${ogImageRel}`
+    : null;
+
+  // 2.6 関連記事（自分自身はまだ blog-data.json に無いので疑似オブジェクトで検索）
+  let relatedHtml = "";
+  try {
+    const blogData = JSON.parse(
+      fs.readFileSync(path.join(ROOT, "src/blog-data.json"), "utf8"),
+    );
+    const pseudoPost = {
+      slug,
+      title: fullTitle,
+      date: DATE_DISPLAY,
+      tags: [CONFIG.blog.tag],
+    };
+    const related = findRelated(pseudoPost, blogData, {});
+    relatedHtml = getRelatedPostsHtml(related, "../../");
+  } catch (err) {
+    log(`⚠️ 関連記事の生成に失敗（スキップ）: ${err.message}`);
+  }
+
   // 3. 各セクションHTML生成
   const weatherHtml = renderWeatherSection(weather);
   const trafficHtml = renderTrafficSection();
@@ -880,6 +930,8 @@ async function main() {
     dayTipHtml,
     commentText,
     platformsHtml,
+    ogImageUrl,
+    relatedHtml,
   });
 
   // 5. ファイル出力
@@ -895,7 +947,7 @@ async function main() {
     log(`✅ 記事生成完了: ${outputFile}`);
 
     // 6. blog-data.json 更新
-    updateBlogData(title);
+    updateBlogData(title, ogImageRel);
 
     // 7. ブログ一覧ページ更新
     updateBlogIndex(title);

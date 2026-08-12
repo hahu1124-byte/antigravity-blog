@@ -23,6 +23,7 @@ import {
 import { buildBlogNovelPages } from "./scripts/build/blog-novels.mjs";
 import { minifyAssets } from "./scripts/build/minify.mjs";
 import { checkInternalLinks } from "./scripts/build/check-links.mjs";
+import { checkDuplicateArticles } from "./scripts/build/check-duplicates.mjs";
 
 // ブログ・カテゴリ・記事・RSS・機種ページ
 buildIndexPage();
@@ -41,6 +42,7 @@ await buildBlogNovelPages();
 // ビルド後処理
 await minifyAssets();
 checkInternalLinks();
+checkDuplicateArticles();
 
 // 今回のビルド統計を保存（次回差分表示用）
 writeFileSync(BUILD_STATS_PATH, JSON.stringify(curStats), "utf-8");

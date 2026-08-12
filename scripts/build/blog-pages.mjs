@@ -21,6 +21,7 @@ import {
   getNoteBannerHtml,
   htmlHead,
 } from "./html.mjs";
+import { findRelated, getRelatedPostsHtml } from "../lib/related.mjs";
 
 // ==========================================
 // 記事一覧ページ生成 (/blog/index.html)
@@ -178,6 +179,10 @@ export function buildArticlePages() {
     const depth = post.slug.split("/").length;
     const toRoot = "../".repeat(depth); // blog/ ルートへの相対パス
 
+    // 関連記事（候補プールは全記事、前後ナビに出る2件は除外）
+    const excludeSlugs = [prev?.slug, next?.slug].filter(Boolean);
+    const related = findRelated(post, posts, { excludeSlugs });
+
     // 前後記事の相対リンクを計算
     const prevNav = next
       ? `
@@ -207,7 +212,9 @@ export function buildArticlePages() {
         .replace(/\.jpe?g$/i, ".webp");
     const ogImage = ogImageFile
       ? `${SITE_URL}/blog/images/${ogImageFile}`
-      : DEFAULT_OG_IMAGE;
+      : post.ogImage
+        ? `${SITE_URL}/blog/images/${post.ogImage}`
+        : DEFAULT_OG_IMAGE;
     const ogUrl = `${SITE_URL}/blog/${post.slug}/`;
 
     // 記事content内の絶対画像パスを相対パスに変換
@@ -270,6 +277,7 @@ export function buildArticlePages() {
             ${getNinjaAdHtml()}
             ${getAmazonAdsHtml(post)}
         </article>
+        ${getRelatedPostsHtml(related, toRoot)}
 
         <nav class="post-nav">
             <div class="post-nav-prev">${prevNav}</div>

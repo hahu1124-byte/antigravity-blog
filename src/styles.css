@@ -556,6 +556,55 @@ html[data-theme="light"] .content img {
     border-color: rgba(0, 0, 0, 0.08);
 }
 
+/* --- 関連記事 --- */
+.related-posts {
+    margin-bottom: 2rem;
+}
+
+.related-posts-heading {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.related-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.related-post-card {
+    display: block;
+    padding: 0.85rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    transition: all var(--transition-spring);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.related-post-card:hover {
+    border-color: var(--accent);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.related-post-title {
+    font-size: 0.85rem;
+    font-weight: 500;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
 /* --- 前後記事ナビゲーション --- */
 .post-nav {
     display: grid;
@@ -671,6 +720,10 @@ html[data-theme="light"] .content img {
     }
 
     .post-nav {
+        grid-template-columns: 1fr;
+    }
+
+    .related-posts-grid {
         grid-template-columns: 1fr;
     }
 }
@@ -1690,6 +1743,7 @@ html[data-theme="light"] .novel-cta {
     .novel-progress,
     .novel-toolbar,
     .post-nav,
+    .related-posts,
     .back-nav,
     .breadcrumb,
     .ninja-ad-slot,

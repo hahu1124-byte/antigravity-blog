@@ -1,0 +1,25 @@
+{
+  "size": { "width": 1200, "height": 630 },
+  "quality": 78,
+  "sinceDate": "2026-08-13",
+  "font": { "family": "Noto Sans CJK JP, Noto Sans JP, sans-serif" },
+  "layout": {
+    "maxLines": 3,
+    "unitsPerLine": 18,
+    "titleSize": 58,
+    "titleLineHeight": 1.32,
+    "metaSize": 28,
+    "labelSize": 24,
+    "padding": 80
+  },
+  "paletteOrder": ["AI", "テック", "個人開発", "パチンコ", "LAB", "フードデリバリー"],
+  "palettes": {
+    "AI": { "bg1": "#1e1b4b", "bg2": "#4c1d95", "accent": "#a78bfa", "pattern": "circuit", "label": "AI" },
+    "テック": { "bg1": "#0c1e3d", "bg2": "#1e40af", "accent": "#60a5fa", "pattern": "grid", "label": "TECH" },
+    "個人開発": { "bg1": "#052e2b", "bg2": "#0f766e", "accent": "#5eead4", "pattern": "dots", "label": "INDIE" },
+    "パチンコ": { "bg1": "#3f0d12", "bg2": "#9f1239", "accent": "#fda4af", "pattern": "diagonal", "label": "PACHINKO" },
+    "LAB": { "bg1": "#2e1065", "bg2": "#7e22ce", "accent": "#e9d5ff", "pattern": "wave", "label": "LAB" },
+    "フードデリバリー": { "bg1": "#1a2e05", "bg2": "#3f6212", "accent": "#bef264", "pattern": "dots", "label": "DELIVERY" },
+    "_default": { "bg1": "#111827", "bg2": "#374151", "accent": "#93c5fd", "pattern": "dots", "label": "BLOG" }
+  }
+}

@@ -67,13 +67,16 @@ mkdirSync(join(OUTPUT_DIR, "blog"), { recursive: true });
 writeFileSync(join(OUTPUT_DIR, ".nojekyll"), "", "utf-8");
 
 // blog-data.json（メタデータのみ版）をdistに出力（Vercel側からfetch用）
-export const metaOnly = posts.map(({ slug, title, date, excerpt, tags }) => ({
-  slug,
-  title,
-  date,
-  excerpt,
-  tags,
-}));
+export const metaOnly = posts.map(
+  ({ slug, title, date, excerpt, tags, ogImage }) => ({
+    slug,
+    title,
+    date,
+    excerpt,
+    tags,
+    ...(ogImage ? { ogImage } : {}),
+  }),
+);
 writeFileSync(
   join(OUTPUT_DIR, "blog-data.json"),
   JSON.stringify(metaOnly),
