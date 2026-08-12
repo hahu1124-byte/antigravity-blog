@@ -68,14 +68,14 @@ novels/
             ├── 71-80/               # ep71~ep80
             ├── 81-90/               # ep81~ep90
             └── 91-100/
-                ├── ... (7 older files)
-                ├── ep98A.md
-                ├── ep98C.md
+                ├── ... (5 older files)
+                ├── ep96T.md
+                ├── ep97T.md
                 ├── ep98T.md
                 └── archive/
-                    ├── ... (12 older files)
-                    ├── ep97A.md
-                    └── ep97C.md
+                    ├── ... (14 older files)
+                    ├── ep98A.md
+                    └── ep98C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
