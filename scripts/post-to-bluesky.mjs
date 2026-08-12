@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 /**
- * Bluesky 自動投稿スクリプト（Note記事専用）
- * Note.com RSSフィードから新着記事を検出し、Blueskyに自動投稿する
+ * Bluesky 自動投稿スクリプト（ブログ記事 + Note記事）
+ * ブログの新着記事（src/blog-data.json）と Note.com RSSフィードの新着記事を検出し、
+ * Blueskyに自動投稿する。
  *
- * ※ ブログ記事はXと同様に手動投稿に変更済み（2026-03-11）
+ * ※ ブログ記事の自動投稿は2026-03-11に一度廃止されたが、2026-08にデプロイ完了検知
+ *    方式（旧: 固定sleepによる推測）で再設計のうえ復活。Uber日次レポートは対象外
+ *    （BLOG_EXCLUDE_TAGS）、対象は BLOG_POST_SINCE 以降 かつ 直近3日以内の記事のみ。
  *
  * 投稿済み管理:
  *   posted-items.json に投稿済みURLを記録。
@@ -16,6 +19,7 @@
  *
  * 使い方:
  *   node scripts/post-to-bluesky.mjs
+ *   node scripts/post-to-bluesky.mjs --dry-run   # 投稿候補の確認のみ（ログイン・投稿なし）
  */
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
@@ -29,13 +33,20 @@ const ROOT = join(__dirname, '..');
 // 設定
 const POSTED_ITEMS_PATH = join(ROOT, 'posted-items.json');
 const BLUESKY_API = 'bsky.social';
+const SITE_URL = 'https://www.antigravity-portal.com';
+// ブログ記事投稿の対象は導入日以降のみ（旧実装は日付ガードが無く既存全記事が
+// 投稿候補になっていたため、機能復活にあたり二重ガードを追加する）
+const BLOG_POST_SINCE = '2026-08-13';
+// Uber日次レポートはタイムラインが日報で埋まるのを避けるため対象外
+const BLOG_EXCLUDE_TAGS = ['フードデリバリー'];
 
 // 環境変数チェック
 const IDENTIFIER = process.env.BLUESKY_IDENTIFIER;
 const APP_PASSWORD = process.env.BLUESKY_APP_PASSWORD;
 const NOTE_USERNAME = process.env.NOTE_USERNAME || 'hahu1124';
+const DRY_RUN = process.argv.includes('--dry-run');
 
-if (!IDENTIFIER || !APP_PASSWORD) {
+if (!DRY_RUN && (!IDENTIFIER || !APP_PASSWORD)) {
     console.log('⚠️ Bluesky認証情報が設定されていません。スキップします。');
     process.exit(0);
 }
@@ -88,6 +99,61 @@ function fetchUrl(url) {
     });
 }
 
+// fetchUrl のバイナリ版（サムネイル画像取得用。リダイレクト追従あり）
+function fetchBuffer(url) {
+    return new Promise((resolve, reject) => {
+        const mod = url.startsWith('https') ? https : http;
+        mod.get(url, { headers: { 'User-Agent': 'AntigravityBot/1.0' } }, (res) => {
+            if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                return fetchBuffer(res.headers.location).then(resolve).catch(reject);
+            }
+            const chunks = [];
+            res.on('data', chunk => chunks.push(chunk));
+            res.on('end', () => resolve({
+                buffer: Buffer.concat(chunks),
+                contentType: (res.headers['content-type'] || 'application/octet-stream').split(';')[0],
+            }));
+        }).on('error', reject);
+    });
+}
+
+// 今日から N日前の日付文字列（YYYY-MM-DD）
+function daysAgo(n) {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() - n);
+    return d.toISOString().slice(0, 10);
+}
+
+// --- ソース1: ブログ記事の新着を blog-data.json から取得 ---
+// 対象は週次トレンド記事等のみ（Uber日次はBLOG_EXCLUDE_TAGSで除外）。
+// 旧実装は日付ガードが無く既存全記事が投稿候補になる欠陥があったため、
+// 導入日以降 かつ 直近3日以内 の二重ガードを設ける。
+function getNewBlogPosts(postedUrls) {
+    try {
+        const blogDataPath = join(ROOT, 'src', 'blog-data.json');
+        const blogData = JSON.parse(readFileSync(blogDataPath, 'utf-8'));
+        const recentThreshold = daysAgo(3);
+
+        const items = blogData
+            .filter(post => post.date >= BLOG_POST_SINCE)
+            .filter(post => post.date >= recentThreshold)
+            .filter(post => !(post.tags || []).some(t => BLOG_EXCLUDE_TAGS.includes(t)))
+            .map(post => ({
+                title: post.title,
+                url: `${SITE_URL}/blog/${post.slug}/`,
+                tags: post.tags || [],
+                source: 'blog',
+                ogImage: post.ogImage || null,
+            }))
+            .filter(item => !postedUrls.includes(item.url));
+
+        console.log(`📰 ブログ: ${items.length} 件の未投稿記事を検出`);
+        return items;
+    } catch (err) {
+        console.error(`⚠️ blog-data.jsonの取得に失敗: ${err.message}`);
+        return [];
+    }
+}
 
 // --- ソース2: Note記事の新着をRSSから取得 ---
 async function getNewNotePosts(postedUrls) {
@@ -149,9 +215,64 @@ async function fetchOgpMeta(url) {
             || html.match(/<title>([^<]*?)<\/title>/i)?.[1] || '';
         const description = html.match(/<meta\s+property="og:description"\s+content="([^"]*?)"/i)?.[1]
             || html.match(/<meta\s+name="description"\s+content="([^"]*?)"/i)?.[1] || '';
-        return { title, description, uri: url };
+        const image = html.match(/<meta\s+property="og:image"\s+content="([^"]*?)"/i)?.[1] || '';
+        return { title, description, uri: url, image };
     } catch {
-        return { title: '', description: '', uri: url };
+        return { title: '', description: '', uri: url, image: '' };
+    }
+}
+
+// --- Bluesky API: 画像blobアップロード ---
+async function uploadBlob(session, buffer, mimeType) {
+    const res = await httpsRequest({
+        hostname: BLUESKY_API,
+        path: '/xrpc/com.atproto.repo.uploadBlob',
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${session.accessJwt}`,
+            'Content-Type': mimeType,
+            'Content-Length': buffer.length,
+        },
+    }, buffer);
+
+    if (res.status !== 200) {
+        throw new Error(`uploadBlob失敗 (${res.status}): ${JSON.stringify(res.data)}`);
+    }
+    return res.data.blob;
+}
+
+// --- リンクカード用サムネイル取得（失敗時は null を返し thumb 無しで投稿続行） ---
+// blog記事: OGP画像をローカルファイルから読む（デプロイ済みURLへのHTTP依存を1つ減らす）
+// note記事: og:image をHTTP取得する
+async function resolveThumb(session, item) {
+    try {
+        let buffer;
+        let mimeType;
+
+        if (item.source === 'blog' && item.ogImage) {
+            const imgPath = join(ROOT, 'src', 'images', item.ogImage);
+            if (!existsSync(imgPath)) return null;
+            buffer = readFileSync(imgPath);
+            mimeType = 'image/webp';
+        } else if (item.source === 'note') {
+            const ogp = await fetchOgpMeta(item.url);
+            if (!ogp.image) return null;
+            const fetched = await fetchBuffer(ogp.image);
+            buffer = fetched.buffer;
+            mimeType = fetched.contentType || 'image/jpeg';
+        } else {
+            return null;
+        }
+
+        if (buffer.length > 1_000_000) {
+            console.warn(`⚠️ サムネイルが1MBを超えるためスキップ: ${item.url}`);
+            return null;
+        }
+
+        return await uploadBlob(session, buffer, mimeType);
+    } catch (err) {
+        console.warn(`⚠️ サムネイル取得に失敗（thumb無しで続行）: ${item.url} — ${err.message}`);
+        return null;
     }
 }
 
@@ -184,7 +305,7 @@ function detectFacets(text) {
 }
 
 // --- Bluesky API: ポスト作成 ---
-async function createPost(session, text, articleUrl) {
+async function createPost(session, text, articleUrl, thumb) {
     const ogp = await fetchOgpMeta(articleUrl);
     const record = {
         $type: 'app.bsky.feed.post',
@@ -193,7 +314,12 @@ async function createPost(session, text, articleUrl) {
         facets: detectFacets(text),
         embed: {
             $type: 'app.bsky.embed.external',
-            external: { uri: ogp.uri, title: ogp.title, description: ogp.description },
+            external: {
+                uri: ogp.uri,
+                title: ogp.title,
+                description: ogp.description,
+                ...(thumb ? { thumb } : {}),
+            },
         },
         langs: ['ja'],
     };
@@ -239,28 +365,44 @@ async function main() {
     const postedItems = loadPostedItems();
     const postedUrls = postedItems.map(i => i.url);
 
-    // Note記事の新着を取得（ブログ記事は手動投稿に移行済み）
-    const allNewPosts = await getNewNotePosts(postedUrls);
+    // ブログ記事（週次トレンド等）とNote記事の新着を取得
+    const [blogPosts, notePosts] = await Promise.all([
+        Promise.resolve(getNewBlogPosts(postedUrls)),
+        getNewNotePosts(postedUrls),
+    ]);
+    const allNewPosts = [...blogPosts, ...notePosts];
 
     if (allNewPosts.length === 0) {
-        console.log('📝 新しいNote記事はありません。スキップします。');
+        console.log('📝 新しい記事はありません。スキップします。');
         return;
     }
 
-    console.log(`🦋 ${allNewPosts.length} 件のNote新着を Bluesky に投稿します...`);
+    if (DRY_RUN) {
+        console.log(`🔍 [dry-run] ${allNewPosts.length} 件の投稿候補（実際の投稿・ログインは行いません）:`);
+        for (const item of allNewPosts) {
+            const postText = buildPostText(item);
+            console.log(`  [${item.source}] ${item.title}`);
+            console.log(`    URL: ${item.url}`);
+            console.log(`    本文(${postText.length}字): ${postText.replace(/\n/g, ' / ')}`);
+        }
+        return;
+    }
+
+    console.log(`🦋 ${allNewPosts.length} 件を Bluesky に投稿します...`);
 
     // Blueskyログイン
     const session = await createSession();
     console.log(`✅ Blueskyログイン成功 (${IDENTIFIER})`);
 
-    // 最大5件まで投稿（安全制限）
-    const toPost = allNewPosts.slice(0, 5);
+    // 最大3件まで投稿（安全制限）
+    const toPost = allNewPosts.slice(0, 3);
     const newlyPosted = [];
 
     for (const item of toPost) {
         const postText = buildPostText(item);
         try {
-            const result = await createPost(session, postText, item.url);
+            const thumb = await resolveThumb(session, item);
+            const result = await createPost(session, postText, item.url, thumb);
             console.log(`✅ [${item.source}] 投稿成功: ${item.title} (URI: ${result.uri})`);
             newlyPosted.push({
                 url: item.url,
@@ -285,8 +427,8 @@ async function main() {
         console.log(`💾 posted-items.json を更新しました（${newlyPosted.length} 件追加、合計 ${updated.length} 件）`);
     }
 
-    if (allNewPosts.length > 5) {
-        console.log(`⚠️ ${allNewPosts.length - 5} 件は投稿上限(5件/回)により次回に持ち越し`);
+    if (allNewPosts.length > 3) {
+        console.log(`⚠️ ${allNewPosts.length - 3} 件は投稿上限(3件/回)により次回に持ち越し`);
     }
 }
 

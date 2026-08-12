@@ -3,6 +3,8 @@ name: Deploy Blog to GitHub Pages
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'posted-items.json' # notifyジョブ自身のコミットで再発火させない
   workflow_dispatch:
 
 permissions:
@@ -54,3 +56,50 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Bluesky 投稿
+        continue-on-error: true
+        env:
+          BLUESKY_IDENTIFIER: ${{ secrets.BLUESKY_IDENTIFIER }}
+          BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
+          NOTE_USERNAME: hahu1124
+        run: node scripts/post-to-bluesky.mjs
+
+      - name: posted-items.json をコミット
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add posted-items.json
+          CHANGES=$(git diff --cached --name-only)
+          if [ -n "$CHANGES" ]; then
+            git commit -m "🤖 Bluesky投稿済みリスト更新 [skip ci]"
+            PUSHED=false
+            for i in 1 2 3; do
+              if git pull --rebase --autostash && git push; then
+                PUSHED=true
+                break
+              fi
+              sleep 5
+            done
+            if [ "$PUSHED" != "true" ]; then
+              echo "::error::posted-items.json の push に3回失敗しました（次回二重投稿の恐れ）"
+              exit 1
+            fi
+          else
+            echo "変更なし — スキップ"
+          fi
