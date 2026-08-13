@@ -111,13 +111,7 @@
     { "minTemp": 0, "emoji": "❄️", "message": "凍結注意。路面状況に細心の注意を" }
   ],
   "blog": {
-    "tag": "フードデリバリー",
-    "articlePathPrefix": "uber-daily",
-    "amazonSearches": [
-      { "emoji": "🚴", "title": "配達バッグ・グッズ", "query": "フードデリバリー 配達 バッグ 保温" },
-      { "emoji": "📱", "title": "スマホホルダー", "query": "バイク スマホホルダー 防水" },
-      { "emoji": "🧤", "title": "防寒・防水グッズ", "query": "バイク 防寒 防水 グローブ" }
-    ]
+    "tag": "フードデリバリー"
   },
   "platforms": [
     { "name": "Uber Eats", "emoji": "🟢", "note": "案件量が最多。クエスト・ブーストで上振れを狙う" },
