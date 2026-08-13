@@ -1,5 +1,5 @@
 ---
-description: ブログ記事の新規追加手順（記事HTML作成→一覧ページ更新→プッシュ）
+description: ブログ記事の新規追加手順（記事HTML作成→OGP自動生成→ビルド確認→プッシュ）
 ---
 
 # ブログ記事追加ワークフロー
@@ -8,87 +8,22 @@ description: ブログ記事の新規追加手順（記事HTML作成→一覧ペ
 
 ## 前提
 
-- 記事のHTMLデータは `src/articles/YYYYMM/` に格納（プロジェクトルート: `h:/gravity/projects/antigravity-blog`）
-- 最終的な公開ページは `dist/blog/YYYYMM/記事スラッグ/index.html` に配置
-- ブログ一覧ページは `dist/blog/index.html`（静的HTML、手動更新が必要）
+- 記事のHTMLデータは `src/articles/YYYYMM/記事スラッグ.html` に格納（プロジェクトルート: `h:/gravity/projects/antigravity-blog`）
+- 記事メタデータは `src/blog-data.json` に集約する。一覧ページ・タグページ・OGPメタタグ・関連記事・前後ナビは全てここと`src/articles/`から`node build.mjs`が自動生成する
+- **`dist/` を手動編集・手動addする必要はない。** `node build.mjs`がsrc/配下から毎回全ページを再生成し、push後はGitHub Actionsの`deploy.yml`が同じビルドを実行してデプロイする
 - `/blog/*` はGravity PortalのNext.js rewriteで `https://hahu1124-byte.github.io/antigravity-blog/blog/*` にプロキシ
-- OGP画像は `dist/blog/images/` に配置
 
 ## 手順
 
 ### 1. 記事コンテンツHTML作成
 
-`src/articles/YYYYMM/` に記事の本文HTMLフラグメントを作成する。
-これはBlogger投稿用フォーマット（`<p>`, `<h2>`, `<ul>` 等のHTMLタグのみ、`<html>`や`<head>`は不要）。
+`src/articles/YYYYMM/記事スラッグ.html` に記事の本文HTMLフラグメントを作成する。
+`<p>`, `<h2>`, `<ul>` 等の本文タグのみを書く（`<html>`・`<head>`・`<style>`は不要。head/OGP/広告/ナビはbuild.mjs側のテンプレートが付与する）。
 
-### 2. OGP画像の配置 ⚠️重要
-
-**`build.mjs` は記事内の画像拡張子を `.png`/`.jpg` → `.webp` に自動変換する。**
-そのため画像は **WebP 形式で `src/images/` に配置** する必要がある。
-
-手順:
-1. OGP画像を生成（generate_image ツール等）
-2. PNG → WebP に変換して `src/images/` に配置:
-
-```bash
-ffmpeg -i "元画像.png" -quality 85 "h:/gravity/projects/antigravity-blog/src/images/画像名.webp" -y
-```
-
-3. 記事ソース（`src/articles/`）の先頭に画像タグを追加:
-
-```html
-<p><img src="/blog/images/画像名.png" alt="説明"></p>
-```
-
-> **注意**: 記事ソースでは `.png` で書いてOK。`build.mjs` がビルド時に自動で `.webp` に変換し、相対パスにも変換する。
-
-### 3. 公開用ページ作成
-
-`dist/blog/YYYYMM/記事スラッグ/index.html` に完全なHTMLページを作成する。
-
-テンプレートとして `dist/blog/202603/20260311_ai_lab_update_v2/index.html` を参照。
-以下の要素を必ず含める：
-
-- `<head>`: OGPメタタグ、Twitter Cardメタタグ、styles.css読み込み
-- テーマ切替ボタン + スクリプト
-- パンくずナビゲーション（トップ → ブログ → 記事タイトル）
-- 記事ヘッダー（日付、タグ、タイトル）
-- 記事本文（`src/articles/` のHTMLをそのまま埋め込み）
-- 忍者AdMaxの広告スロット（本文中 + 記事後）
-- Amazon検索ボックス + アフィリエイトリンク（tag=gravity063-22）
-- 前後の記事ナビゲーション
-- 広告の課金チェックスクリプト（/api/subscription-status）
-
-### 4. ブログ一覧ページ更新 ⚠️重要
-
-`dist/blog/index.html` を編集して新しい記事カードを追加する。
-
-**必ず行うこと：**
-1. 記事カードを日付順の正しい位置に挿入（最新が先頭）
-2. `data-tags` 属性に適切なタグをカンマ区切りで設定
-3. `data-index` を全カードで連番に更新
-4. ヘッダーのタグフィルターボタンのカウントを更新（「すべて」の件数を+1、該当タグの件数を+1）
-5. 新しいタグカテゴリがあれば、フィルターボタンを追加
-
-記事カードのHTMLテンプレート：
-```html
-<a href="YYYYMM/記事スラッグ/" class="article-card" data-tags="タグ1,タグ2" data-index="0">
-    <div class="card-header">
-        <time class="date">YYYY-MM-DD</time>
-        <div class="tags">
-            <span class="tag">タグ1</span><span class="tag">タグ2</span>
-        </div>
-    </div>
-    <h2 class="card-title">絵文字 タイトル</h2>
-    <p class="card-excerpt">記事の概要（120文字程度）</p>
-</a>
-```
-
-### 5. blog-data.json 更新 ⚠️重要
+### 2. blog-data.json 更新 ⚠️重要
 
 `src/blog-data.json` の配列先頭に新しい記事のエントリを追加する。
-このファイルはポータルTOPページの「最新記事」セクションのデータソース。
-**更新しないとポータルTOPに記事が表示されない。**
+このファイルはブログ一覧・ポータルTOPの「最新記事」・タグページ・関連記事選定すべての元データ。
 
 エントリのフォーマット:
 ```json
@@ -101,20 +36,51 @@ ffmpeg -i "元画像.png" -quality 85 "h:/gravity/projects/antigravity-blog/src/
 }
 ```
 
-追加後、distにもコピーする:
+### 3. ヒーロー画像（使う場合のみ）
+
+記事本文にヒーロー画像を入れる場合：
+
+1. 画像をWebP形式で `src/images/` に配置する。PNG/JPEGから変換する場合:
+```bash
+ffmpeg -i "元画像.png" -quality 85 "h:/gravity/projects/antigravity-blog/src/images/画像名.webp" -y
 ```
-cp src/blog-data.json dist/blog-data.json
+2. 記事ソース（`src/articles/`）の先頭に画像タグを追加:
+```html
+<p><img src="/blog/images/画像名.png" alt="説明"></p>
 ```
+> **注意**: 記事ソースでは`.png`のまま書いてOK。`build.mjs`がビルド時に自動で`.webp`へ変換し、相対パスにも変換する。
 
-### 6. 前の記事の「次の記事」ナビ更新
+ヒーロー画像を使わない記事は、次のステップでOGP画像がタイトルから自動生成される。
 
-直前の記事の `dist/blog/YYYYMM/前記事スラッグ/index.html` の `post-nav-next` セクションを更新して、新しい記事へのリンクを追加する。
+### 4. OGP画像の自動生成 ⚠️重要
 
-### 7. Git コミット＋プッシュ（hgit.sh 経由、個別実行）
+**画像生成ツールでの手動作成は不要。** sharpによる自動生成CLI（LLM/外部API不使用、CJKフォント対応）を実行する:
 
 // turbo
 ```bash
-bash h:/gravity/.agent/scripts/hgit.sh h:/gravity/projects/antigravity-blog add -f dist/ src/
+bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/generate-og-images.mjs --slug YYYYMM/記事スラッグ
+```
+
+タイトル・タグからカード画像を動的生成して `src/images/og/YYYYMM/記事スラッグ.webp` に保存し、`src/blog-data.json`の該当エントリへ`ogImage`フィールドを自動追記する。
+ヒーロー画像がある記事（ステップ3を使った記事）は`hasHeroImage()`判定で自動スキップされるため、このコマンドを実行しても上書きされない。
+
+複数記事のOGP画像をまとめて生成したい場合は `--slug` の代わりに `--missing` を使う（新規かつヒーロー画像なし・OGP未生成の記事を一括処理）。
+
+### 5. ローカルビルドで確認
+
+// turbo
+```bash
+bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node build.mjs
+```
+
+出力の `🔗 内部リンクチェックOK` を確認する（リンク切れがあるとビルド失敗扱いになる）。
+`::warning::重複の疑いがある記事ペア` が新記事について出た場合は、タイトル・タグの重複度が高いということなので見直しを検討する（他の既存警告は無視してよい）。
+
+### 6. Git コミット＋プッシュ（hgit.sh 経由、個別実行）
+
+// turbo
+```bash
+bash h:/gravity/.agent/scripts/hgit.sh h:/gravity/projects/antigravity-blog add src/
 ```
 
 ```bash
@@ -127,32 +93,32 @@ bash h:/gravity/.agent/scripts/hgit.sh h:/gravity/projects/antigravity-blog push
 
 > [!CAUTION]
 > **`&&` チェーンは絶対禁止。** 必ず個別の `run_command` に分割する。
-> `dist/` はgitignore対象のため `-f` で強制追加する。
+> `dist/` はコミット対象に含めない（push後にGitHub Actionsの`deploy.yml`が`node build.mjs`で本番分を再生成するため）。
 
-### 8. GitHub Pagesデプロイ確認
+### 7. GitHub Pagesデプロイ確認
 
 プッシュ後、GitHub Actions完了を待ってからSNS投稿する（デプロイ前に投稿するとOGPカードが「Page not found」になる）。
 
 確認URL: `https://www.antigravity-portal.com/blog/YYYYMM/記事スラッグ/`
 
-### 9. SNS投稿（手動）
+### 8. SNS投稿（手動）
 
 - **X**: `https://twitter.com/intent/tweet?text=...` のURLエンコードリンクを生成
 - **Bluesky**: コピペ用テキストを用意（`https://bsky.app/` から投稿）
 
-### 10. Obsidian保存（weekly_trend記事のみ・週1回手動指示）
+### 9. Obsidian保存（weekly_trend記事のみ・週1回手動指示）
 
 `週刊テックトレンド記事自動生成`ワークフロー（gravity-portal）が日曜22:00 JSTに実行されると、`scripts/generate-weekly-trend.mjs` が記事生成と同時に `antigravity-blog/src/obsidian/weekly-trends/weekly-trend-wNN.md` も自動生成してantigravity-blogにpushする（2026-07-06〜対応）。
 
 ローカルの `H:/gravity` にはGitHub Actions側の変更は自動反映されないため、ユーザーから週1回「Obsidianに保存して」等の指示があったら以下を実行する。
 
-#### 10a. antigravity-blogをpullして新規ノートを取得
+#### 9a. antigravity-blogをpullして新規ノートを取得
 
 ```bash
 bash h:/gravity/.agent/scripts/hgit.sh h:/gravity/projects/antigravity-blog pull
 ```
 
-#### 10b. 同期スクリプト実行
+#### 9b. 同期スクリプト実行
 
 ```bash
 pwsh -File h:/gravity/.agent/scripts/sync-weekly-trend-obsidian.ps1
