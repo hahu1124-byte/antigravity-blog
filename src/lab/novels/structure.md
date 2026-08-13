@@ -68,7 +68,7 @@ novels/
             ├── 71-80/               # ep71~ep80
             ├── 81-90/               # ep81~ep90
             └── 91-100/
-                ├── ... (6 older files)
+                ├── ... (9 older files)
                 ├── ep97T.md
                 ├── ep98T.md
                 ├── ep99T.md
