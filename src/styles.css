@@ -1824,3 +1824,230 @@ html[data-theme="light"] .novel-cta {
         text-align: center;
     }
 }
+
+/* ============================================================
+   Uber / フードデリバリー日報 専用（generate-uber-daily.mjs 由来）
+   ダークが既定（:root）／ライトは html[data-theme="light"] で上書き
+   ※ .article-page への色指定は移設しない（.content が既に本文色を管理しているため）
+   ============================================================ */
+.uber-section {
+    margin: 1.5rem 0;
+}
+
+.uber-section h2 {
+    border-bottom-color: var(--border);
+}
+
+.uber-section p,
+.uber-section li,
+.uber-section td {
+    color: inherit;
+}
+
+.daily-comment {
+    background: linear-gradient(135deg, var(--accent-glow), var(--accent-glow));
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin: 1.2rem 0;
+    font-size: 1.1rem;
+    text-align: center;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.uber-section .weather-today {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin: 1rem 0;
+    color: var(--text-primary);
+}
+.uber-section .weather-main {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.uber-section .weather-icon-large {
+    width: 80px;
+    height: 60px;
+}
+.uber-section .weather-telop-large {
+    font-size: 1.5rem;
+    font-weight: 700;
+    display: block;
+    color: inherit;
+}
+.uber-section .weather-temp-large {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    display: block;
+}
+.uber-section .weather-detail,
+.uber-section .weather-wind {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0.3rem 0;
+}
+
+.uber-section .rain-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.8rem 0;
+    font-size: 0.9rem;
+    color: inherit;
+}
+.uber-section .rain-table th,
+.uber-section .rain-table td {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-primary);
+}
+.uber-section .rain-table th {
+    background: var(--bg-secondary);
+    font-weight: 600;
+}
+
+.uber-section .weather-next-days {
+    display: flex;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+.uber-section .weather-next-day {
+    flex: 1;
+    background: var(--bg-card);
+    border-radius: 8px;
+    padding: 0.8rem;
+    text-align: center;
+    color: var(--text-primary);
+}
+.uber-section .weather-next-label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+}
+.uber-section .weather-icon-small {
+    width: 50px;
+    height: 38px;
+}
+.uber-section .weather-next-telop {
+    display: block;
+    font-weight: 600;
+    margin-top: 0.3rem;
+    color: inherit;
+}
+.uber-section .weather-next-temp {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.uber-section .gas-table {
+    width: 100%;
+    max-width: 320px;
+    border-collapse: collapse;
+    margin: 0.8rem 0;
+}
+.uber-section .gas-table th,
+.uber-section .gas-table td {
+    padding: 0.5rem 0.8rem;
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+}
+.uber-section .gas-table th {
+    background: var(--bg-secondary);
+    text-align: left;
+}
+
+.uber-section .section-note {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+}
+.uber-section .peak-level {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+    color: inherit;
+}
+.uber-section .peak-list {
+    list-style: none;
+    padding: 0;
+}
+.uber-section .peak-list li {
+    padding: 0.3rem 0;
+    color: inherit;
+}
+.uber-section .platform-list {
+    list-style: none;
+    padding: 0;
+}
+.uber-section .platform-list li {
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    color: inherit;
+}
+.uber-section .news-list {
+    list-style: none;
+    padding: 0;
+}
+.uber-section .news-list li {
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    color: inherit;
+}
+.uber-section .news-list a {
+    color: var(--accent);
+    text-decoration: none;
+}
+.uber-section .news-list a:hover {
+    text-decoration: underline;
+}
+.uber-section .news-source {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.uber-section .heat-advice {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1rem;
+    margin: 0.8rem 0;
+    color: var(--text-primary);
+}
+.uber-section .heat-emoji {
+    font-size: 2rem;
+}
+.uber-section .heat-temp {
+    display: block;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: inherit;
+}
+.uber-section .heat-message {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.uber-section .day-tip {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: var(--accent-glow);
+    border-radius: 10px;
+    padding: 1rem;
+    margin: 0.8rem 0;
+    border-left: 4px solid var(--accent);
+    color: var(--text-primary);
+}
+.uber-section .day-tip-emoji {
+    font-size: 1.5rem;
+}
+.uber-section .day-tip-text {
+    font-size: 0.95rem;
+    color: inherit;
+}
