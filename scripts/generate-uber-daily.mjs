@@ -14,7 +14,6 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { renderOgCard } from "./lib/og-image.mjs";
-import { findRelated, getRelatedPostsHtml } from "./lib/related.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -453,292 +452,89 @@ function generateTitle(weather) {
   return `${tmpl.emoji} ${DATE_STR} ${tmpl.text}`;
 }
 
-// ===== HTML生成 =====
+// ===== 本文フラグメント生成 =====
+// buildArticlePages()（scripts/build/blog-pages.mjs）が head/広告/関連記事/前後ナビ等を
+// 付与するため、ここでは .daily-comment + .uber-section×8 の本文だけを組み立てる。
+// 天気セクション直後の <hr> は、build.mjs 側が最初の<hr>直後に中間広告を自動挿入する
+// トリガーとして機能する（既存記事の慣行と同じ）。
 
-function buildArticleHtml({
-  title,
+function buildFragment({
+  commentText,
   weatherHtml,
-  trafficHtml,
-  newsHtml,
-  gasHtml,
+  platformsHtml,
   peakHtml,
-  eventsHtml,
   heatHtml,
   dayTipHtml,
-  commentText,
-  platformsHtml,
-  ogImageUrl,
-  relatedHtml,
+  trafficHtml,
+  newsHtml,
+  eventsHtml,
+  gasHtml,
 }) {
-  const blogTag = CONFIG.blog.tag;
-  const fullTitle = `🚴 ${blogTag}情報 ${title}`;
-  const description = `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ今日の情報をまとめました。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`;
-  const articleUrl = `https://www.antigravity-portal.com/blog/${YYYYMM}/${DATE_STR}_uber_daily/`;
-  const encodedTag = encodeURIComponent(blogTag);
-  const ogImage =
-    ogImageUrl ||
-    "https://www.antigravity-portal.com/blog/images/ai_dev_day1.webp";
+  return `<div class="daily-comment">${commentText}</div>
 
-  return `<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${fullTitle} | Gravity Portal</title>
-    <meta name="description" content="${description}">
-    <!-- OGP -->
-    <meta property="og:title" content="${fullTitle}">
-    <meta property="og:description" content="${description}">
-    <meta property="og:image" content="${ogImage}">
-    <meta property="og:url" content="${articleUrl}">
-    <meta property="og:type" content="article">
-    <meta property="og:site_name" content="Gravity Portal">
-    <meta property="og:locale" content="ja_JP">
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${fullTitle}">
-    <meta name="twitter:description" content="${description}">
-    <meta name="twitter:image" content="${ogImage}">
-    <link rel="stylesheet" href="../../styles.css?v=${Date.now()}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://adm.shinobi.jp">
-    <link rel="preconnect" href="https://cnobi.jp">
-    <link rel="dns-prefetch" href="https://adm.shinobi.jp">
-    <link rel="dns-prefetch" href="https://cnobi.jp">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7805361658365027" crossorigin="anonymous"></script>
-    <style>
-      /* Uber Daily 専用スタイル — テーマ対応 */
-      /* ベース: テキスト色を明示的に指定 */
-      .article-page { color: #1a1a1a; }
-      [data-theme="dark"] .article-page { color: #e8e8e8; }
+<div class="uber-section">
+  <h2>🌤️ 今日の天気 — 名古屋</h2>
+  ${weatherHtml}
+</div>
 
-      .weather-today { background: #f0f2f5; border-radius: 12px; padding: 1.2rem; margin: 1rem 0; color: #1a1a1a; }
-      [data-theme="dark"] .weather-today { background: #2a2d35; color: #e8e8e8; }
-      .weather-main { display: flex; align-items: center; gap: 1rem; }
-      .weather-icon-large { width: 80px; height: 60px; }
-      .weather-telop-large { font-size: 1.5rem; font-weight: 700; display: block; color: inherit; }
-      .weather-temp-large { font-size: 1.2rem; color: #555; display: block; }
-      [data-theme="dark"] .weather-temp-large { color: #bbb; }
-      .weather-detail, .weather-wind { font-size: 0.9rem; color: #555; margin: 0.3rem 0; }
-      [data-theme="dark"] .weather-detail, [data-theme="dark"] .weather-wind { color: #bbb; }
+<hr>
 
-      .rain-table { width: 100%; border-collapse: collapse; margin: 0.8rem 0; font-size: 0.9rem; color: inherit; }
-      .rain-table th, .rain-table td { padding: 0.4rem 0.6rem; border: 1px solid #ccc; text-align: center; color: inherit; }
-      .rain-table th { background: #e8eaed; font-weight: 600; }
-      [data-theme="dark"] .rain-table th { background: #35383f; }
-      [data-theme="dark"] .rain-table th, [data-theme="dark"] .rain-table td { border-color: #444; color: #e8e8e8; }
+<div class="uber-section">
+  <h2>🛵 プラットフォーム別の狙い目</h2>
+  ${platformsHtml}
+</div>
 
-      .weather-next-days { display: flex; gap: 1rem; margin: 1rem 0; }
-      .weather-next-day { flex: 1; background: #f0f2f5; border-radius: 8px; padding: 0.8rem; text-align: center; color: #1a1a1a; }
-      [data-theme="dark"] .weather-next-day { background: #2a2d35; color: #e8e8e8; }
-      .weather-next-label { display: block; font-size: 0.8rem; color: #666; margin-bottom: 0.3rem; }
-      [data-theme="dark"] .weather-next-label { color: #aaa; }
-      .weather-icon-small { width: 50px; height: 38px; }
-      .weather-next-telop { display: block; font-weight: 600; margin-top: 0.3rem; color: inherit; }
-      .weather-next-temp { display: block; font-size: 0.85rem; color: #555; }
-      [data-theme="dark"] .weather-next-temp { color: #bbb; }
+<div class="uber-section">
+  <h2>🎯 需要予測</h2>
+  ${peakHtml}
+</div>
 
-      .gas-table { width: 100%; max-width: 320px; border-collapse: collapse; margin: 0.8rem 0; }
-      .gas-table th, .gas-table td { padding: 0.5rem 0.8rem; border: 1px solid #ccc; color: inherit; }
-      .gas-table th { background: #e8eaed; text-align: left; }
-      [data-theme="dark"] .gas-table th { background: #35383f; }
-      [data-theme="dark"] .gas-table th, [data-theme="dark"] .gas-table td { border-color: #444; }
+<div class="uber-section">
+  <h2>🌡️ 体感指数・配達アドバイス</h2>
+  ${heatHtml}
+</div>
 
-      .section-note { font-size: 0.85rem; color: #777; margin-top: 0.4rem; }
-      [data-theme="dark"] .section-note { color: #999; }
-      .peak-level { font-size: 1.2rem; margin: 0.5rem 0; color: inherit; }
-      .peak-list { list-style: none; padding: 0; }
-      .peak-list li { padding: 0.3rem 0; color: inherit; }
-      .platform-list { list-style: none; padding: 0; }
-      .platform-list li { padding: 0.4rem 0; border-bottom: 1px solid #eee; color: inherit; }
-      [data-theme="dark"] .platform-list li { border-bottom-color: #333; }
-      .news-list { list-style: none; padding: 0; }
-      .news-list li { padding: 0.4rem 0; border-bottom: 1px solid #eee; color: inherit; }
-      [data-theme="dark"] .news-list li { border-bottom-color: #333; }
-      .news-list a { color: #0066cc; text-decoration: none; }
-      [data-theme="dark"] .news-list a { color: #6db3f2; }
-      .news-list a:hover { text-decoration: underline; }
-      .news-source { font-size: 0.8rem; color: #888; }
-      [data-theme="dark"] .news-source { color: #999; }
+<div class="uber-section">
+  <h2>📈 曜日別傾向</h2>
+  ${dayTipHtml}
+</div>
 
-      .heat-advice { display: flex; align-items: center; gap: 1rem; background: #f0f2f5; border-radius: 12px; padding: 1rem; margin: 0.8rem 0; color: #1a1a1a; }
-      [data-theme="dark"] .heat-advice { background: #2a2d35; color: #e8e8e8; }
-      .heat-emoji { font-size: 2rem; }
-      .heat-temp { display: block; font-weight: 700; font-size: 1.1rem; color: inherit; }
-      .heat-message { display: block; color: #555; font-size: 0.95rem; }
-      [data-theme="dark"] .heat-message { color: #bbb; }
+<div class="uber-section">
+  <h2>🚗 名古屋市 道路交通情報</h2>
+  ${trafficHtml}
+</div>
 
-      .day-tip { display: flex; align-items: center; gap: 0.8rem; background: #eef4ff; border-radius: 10px; padding: 1rem; margin: 0.8rem 0; border-left: 4px solid #4a9eff; color: #1a1a1a; }
-      [data-theme="dark"] .day-tip { background: #1e2a3a; color: #e8e8e8; }
-      .day-tip-emoji { font-size: 1.5rem; }
-      .day-tip-text { font-size: 0.95rem; color: inherit; }
+<div class="uber-section">
+  <h2>📰 配達に影響しそうなニュース</h2>
+  ${newsHtml}
+</div>
 
-      .daily-comment { background: linear-gradient(135deg, #667eea22, #764ba222); border-radius: 12px; padding: 1.2rem; margin: 1.2rem 0; font-size: 1.1rem; text-align: center; font-weight: 600; color: inherit; }
-      .uber-section { margin: 1.5rem 0; }
-      .uber-section h2 { border-bottom: 2px solid #ddd; padding-bottom: 0.4rem; color: inherit; }
-      [data-theme="dark"] .uber-section h2 { border-bottom-color: #444; }
-      .uber-section p, .uber-section li, .uber-section td { color: inherit; }
-    </style>
-    <script>
-        (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
-    </script>
-</head>
-<body>
-    <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
-    <script>
-        (function(){
-            var btn=document.getElementById('themeToggle');
-            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
-            update();
-            btn.addEventListener('click',function(){
-                var cur=document.documentElement.getAttribute('data-theme');
-                var next=cur==='light'?'dark':'light';
-                document.documentElement.setAttribute('data-theme',next);
-                try{localStorage.setItem('gp-theme',next)}catch(e){}
-                update();
-            });
-        })()
-    </script>
-    <div class="article-page">
-        <nav class="breadcrumb">
-            <a href="https://antigravity-portal.com/">トップ</a>
-            <span class="separator">/</span>
-            <a href="../../">ブログ</a>
-            <span class="separator">/</span>
-            <span class="current">🚴 ${blogTag}情報 ${title}</span>
-        </nav>
+<div class="uber-section">
+  <h2>📍 名古屋イベント情報</h2>
+  ${eventsHtml}
+</div>
 
-        <article class="article">
-            <header class="article-header">
-                <div class="meta">
-                    <time class="date">${DATE_DISPLAY}</time>
-                    <div class="tags">
-                        <a href="../../tag/${encodedTag}/" class="tag">${blogTag}</a>
-                    </div>
-                </div>
-                <h1 class="title">🚴 ${blogTag}情報 ${title}</h1>
-            </header>
+<div class="uber-section">
+  <h2>⛽ ガソリン価格（${CONFIG.gasoline.region}地域平均）</h2>
+  ${gasHtml}
+</div>
+`;
+}
 
-            <div class="content">
-                <div class="daily-comment">${commentText}</div>
+// ===== フラグメント書き込み =====
+// src/articles/<YYYYMM>/<DATE_STR>_uber_daily.html へ常に上書きする
+// （同日再実行時も最新データで更新される。build.mjs 側が dist へのHTML組み立てを担う）
 
-                <div class="uber-section">
-                  <h2>🌤️ 今日の天気 — 名古屋</h2>
-                  ${weatherHtml}
-                </div>
-
-                <div class="ninja-ad-slot">
-                    <span class="ninja-ad-label">PR</span>
-                    <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
-                </div>
-
-                <div class="uber-section">
-                  <h2>🛵 プラットフォーム別の狙い目</h2>
-                  ${platformsHtml}
-                </div>
-
-                <div class="uber-section">
-                  <h2>🎯 需要予測</h2>
-                  ${peakHtml}
-                </div>
-
-                <div class="uber-section">
-                  <h2>🌡️ 体感指数・配達アドバイス</h2>
-                  ${heatHtml}
-                </div>
-
-                <div class="uber-section">
-                  <h2>📈 曜日別傾向</h2>
-                  ${dayTipHtml}
-                </div>
-
-                <div class="uber-section">
-                  <h2>🚗 名古屋市 道路交通情報</h2>
-                  ${trafficHtml}
-                </div>
-
-                <div class="uber-section">
-                  <h2>📰 配達に影響しそうなニュース</h2>
-                  ${newsHtml}
-                </div>
-
-                <div class="uber-section">
-                  <h2>📍 名古屋イベント情報</h2>
-                  ${eventsHtml}
-                </div>
-
-                <div class="uber-section">
-                  <h2>⛽ ガソリン価格（${CONFIG.gasoline.region}地域平均）</h2>
-                  ${gasHtml}
-                </div>
-
-            </div>
-
-            <div class="ninja-ad-slot">
-                <span class="ninja-ad-label">PR</span>
-                <div class="admax-switch" data-admax-id="06dfeeba49e20207a86cd5f651221d50" style="display:inline-block;"></div>
-            </div>
-
-            <div class="amazon-ads-section">
-                <h3 class="amazon-ads-heading">🚴 配達に役立つアイテム</h3>
-                <div class="amazon-ads-grid">
-${CONFIG.blog.amazonSearches
-  .map(
-    (
-      s,
-    ) => `                    <a href="https://www.amazon.co.jp/s?k=${encodeURIComponent(s.query)}&tag=gravity063-22" target="_blank" rel="noopener noreferrer" class="amazon-ad-card">
-                        <span class="amazon-ad-emoji">${s.emoji}</span>
-                        <span class="amazon-ad-title">${s.title}</span>
-                        <span class="amazon-ad-badge">Amazonで見る</span>
-                    </a>`,
-  )
-  .join("\n")}
-                </div>
-                <div class="amazon-search-box">
-                    <p class="amazon-search-label">🔍 <span class="amazon-logo-text">Amazon</span>で探す</p>
-                    <form onsubmit="window.open('https://www.amazon.co.jp/s?k='+encodeURIComponent(this.q.value)+'&tag=gravity063-22','_blank');return false;" class="amazon-search-form">
-                        <input type="text" name="q" placeholder="キーワードを入力..." class="amazon-search-input" />
-                        <button type="submit" class="amazon-search-btn">検索</button>
-                    </form>
-                </div>
-                <p class="amazon-ads-note">※ 上記リンクはAmazonアソシエイトリンクです</p>
-                <p class="amazon-ads-note">Amazonのアソシエイトとして、Gravity Portalは適格販売により収入を得ています。</p>
-            </div>
-        </article>
-        ${relatedHtml || ""}
-
-        <nav class="back-nav">
-            <a href="https://antigravity-portal.com/" class="back-link">🏠 TOPに戻る</a>
-            <a href="../../" class="back-link">← 記事一覧に戻る</a>
-        </nav>
-    </div>
-
-    <script>
-    (function(){
-        var AD_ID = '06dfeeba49e20207a86cd5f651221d50';
-        var SDK_URL = 'https://adm.shinobi.jp/st/t.js';
-        function hideAllAds(){document.querySelectorAll('.ninja-ad-slot').forEach(function(s){s.style.display='none'})}
-        function initAds(){
-            if(!window.admaxads) window.admaxads=[];
-            document.querySelectorAll('.admax-switch[data-admax-id]').forEach(function(el){window.admaxads.push({admax_id:el.getAttribute('data-admax-id'),type:'switch'})});
-            var s=document.createElement('script');s.type='text/javascript';s.charset='utf-8';s.src=SDK_URL;s.async=true;document.body.appendChild(s);
-            function check(){document.querySelectorAll('.ninja-ad-slot').forEach(function(s){var a=s.querySelector('.admax-switch');if(a&&a.children.length>0)s.classList.add('ad-loaded');else s.style.display='none'})}
-            setTimeout(check,5000);setTimeout(check,10000);
-        }
-        fetch('/api/subscription-status').then(function(r){return r.json()}).then(function(d){if(d&&d.isPaid)hideAllAds();else initAds()}).catch(function(){initAds()});
-    })()
-    </script>
-</body>
-</html>`;
+function writeFragment(html) {
+  const dir = path.join(ROOT, "src/articles", YYYYMM);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, `${DATE_STR}_uber_daily.html`), html);
 }
 
 // ===== blog-data.json 更新 =====
 
 function updateBlogData(title, ogImageRel) {
   const blogDataPath = path.join(ROOT, "src/blog-data.json");
-  const blogDataDistPath = path.join(ROOT, "dist/blog-data.json");
 
   let data = [];
   try {
@@ -746,12 +542,6 @@ function updateBlogData(title, ogImageRel) {
   } catch {}
 
   const slug = `${YYYYMM}/${DATE_STR}_uber_daily`;
-  // 同日の記事が既にあればスキップ
-  if (data.some((d) => d.slug === slug)) {
-    log("📋 blog-data.json: 同日の記事が既に存在するためスキップ");
-    return;
-  }
-
   const blogTag = CONFIG.blog.tag;
   const fullTitle = `🚴 ${blogTag}情報 ${title}`;
   const entry = {
@@ -763,88 +553,20 @@ function updateBlogData(title, ogImageRel) {
     ...(ogImageRel ? { ogImage: ogImageRel } : {}),
   };
 
-  data.unshift(entry);
+  // 同日の記事が既にあれば置換（冪等）、無ければ先頭に追加
+  const existingIdx = data.findIndex((d) => d.slug === slug);
+  if (existingIdx >= 0) {
+    data[existingIdx] = entry;
+    log("📋 blog-data.json: 同日の記事エントリを更新（冪等）");
+  } else {
+    data.unshift(entry);
+  }
 
   if (!DRY_RUN) {
     fs.writeFileSync(blogDataPath, JSON.stringify(data, null, 2));
-    fs.writeFileSync(blogDataDistPath, JSON.stringify(data, null, 2));
     log("📋 blog-data.json 更新完了");
   } else {
     log("📋 [dry-run] blog-data.json 更新スキップ");
-  }
-}
-
-// ===== ブログ一覧ページ更新 =====
-
-function updateBlogIndex(title) {
-  const indexPath = path.join(ROOT, "dist/blog/index.html");
-  let html;
-  try {
-    html = fs.readFileSync(indexPath, "utf8");
-  } catch {
-    log("⚠️ blog/index.html が見つかりません");
-    return;
-  }
-
-  const slug = `${YYYYMM}/${DATE_STR}_uber_daily/`;
-  // 同日の記事が既にあればスキップ
-  if (html.includes(slug)) {
-    log("📄 index.html: 同日の記事カードが既に存在するためスキップ");
-    return;
-  }
-
-  const blogTag = CONFIG.blog.tag;
-  const fullTitle = `🚴 ${blogTag}情報 ${title}`;
-  const excerpt = `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をまとめました。`;
-
-  const newCard = `<a href="${slug}" class="article-card" data-tags="${blogTag}" data-index="0">
-            <div class="card-header">
-                <time class="date">${DATE_DISPLAY}</time>
-
-                <div class="tags">
-                    <span class="tag">${blogTag}</span>
-                </div>
-            </div>
-            <h2 class="card-title">${fullTitle}</h2>
-            <p class="card-excerpt">${excerpt}</p>
-        </a>`;
-
-  // article-grid セクションの先頭カードの前に挿入
-  const gridStart = html.indexOf('class="article-grid"');
-  if (gridStart === -1) {
-    log("⚠️ article-grid が見つかりません");
-    return;
-  }
-  // article-grid の閉じ > の直後に改行+カードを挿入
-  const gridTagEnd = html.indexOf(">", gridStart);
-  if (gridTagEnd === -1) return;
-  const insertPos = gridTagEnd + 1;
-
-  // data-index を全て +1 する
-  html = html.replace(
-    /data-index="(\d+)"/g,
-    (_, n) => `data-index="${parseInt(n) + 1}"`,
-  );
-
-  // 新しいカードを先頭に挿入
-  html =
-    html.slice(0, insertPos) +
-    "\n\n        " +
-    newCard +
-    "\n" +
-    html.slice(insertPos);
-
-  // タグフィルターの「すべて」カウントを +1（aタグ形式）
-  html = html.replace(
-    /すべて \((\d+)\)/,
-    (_, n) => `すべて (${parseInt(n) + 1})`,
-  );
-
-  if (!DRY_RUN) {
-    fs.writeFileSync(indexPath, html);
-    log("📄 blog/index.html 更新完了");
-  } else {
-    log("📄 [dry-run] blog/index.html 更新スキップ");
   }
 }
 
@@ -872,9 +594,9 @@ async function main() {
 
   // 2.5 OGP画像生成（LLM/外部API不使用、フォント欠落時は null → DEFAULT_OG_IMAGE にフォールバック）
   const slug = `${YYYYMM}/${DATE_STR}_uber_daily`;
-  const fullTitle = `🚴 ${CONFIG.blog.tag}情報 ${title}`;
   let ogImageRel = null;
   if (!DRY_RUN) {
+    const fullTitle = `🚴 ${CONFIG.blog.tag}情報 ${title}`;
     ogImageRel = await renderOgCard({
       title: fullTitle,
       date: DATE_DISPLAY,
@@ -883,27 +605,6 @@ async function main() {
       imagesDir: path.join(ROOT, "src/images"),
       config: OG_CONFIG,
     });
-  }
-  const ogImageUrl = ogImageRel
-    ? `https://www.antigravity-portal.com/blog/images/${ogImageRel}`
-    : null;
-
-  // 2.6 関連記事（自分自身はまだ blog-data.json に無いので疑似オブジェクトで検索）
-  let relatedHtml = "";
-  try {
-    const blogData = JSON.parse(
-      fs.readFileSync(path.join(ROOT, "src/blog-data.json"), "utf8"),
-    );
-    const pseudoPost = {
-      slug,
-      title: fullTitle,
-      date: DATE_DISPLAY,
-      tags: [CONFIG.blog.tag],
-    };
-    const related = findRelated(pseudoPost, blogData, {});
-    relatedHtml = getRelatedPostsHtml(related, "../../");
-  } catch (err) {
-    log(`⚠️ 関連記事の生成に失敗（スキップ）: ${err.message}`);
   }
 
   // 3. 各セクションHTML生成
@@ -917,47 +618,41 @@ async function main() {
   const dayTipHtml = renderDayTipSection();
   const platformsHtml = renderPlatformsSection();
 
-  // 4. HTML組み立て
-  const html = buildArticleHtml({
-    title,
+  // 4. 本文フラグメント組み立て（head/広告/関連記事/前後ナビは build.mjs 側が付与）
+  const fragment = buildFragment({
+    commentText,
     weatherHtml,
-    trafficHtml,
-    newsHtml,
-    gasHtml,
+    platformsHtml,
     peakHtml,
-    eventsHtml,
     heatHtml,
     dayTipHtml,
-    commentText,
-    platformsHtml,
-    ogImageUrl,
-    relatedHtml,
+    trafficHtml,
+    newsHtml,
+    eventsHtml,
+    gasHtml,
   });
 
   // 5. ファイル出力
-  const outputDir = path.join(
+  const outputFile = path.join(
     ROOT,
-    `dist/blog/${YYYYMM}/${DATE_STR}_uber_daily`,
+    "src/articles",
+    YYYYMM,
+    `${DATE_STR}_uber_daily.html`,
   );
-  const outputFile = path.join(outputDir, "index.html");
 
   if (!DRY_RUN) {
-    fs.mkdirSync(outputDir, { recursive: true });
-    fs.writeFileSync(outputFile, html);
+    writeFragment(fragment);
     log(`✅ 記事生成完了: ${outputFile}`);
 
     // 6. blog-data.json 更新
     updateBlogData(title, ogImageRel);
-
-    // 7. ブログ一覧ページ更新
-    updateBlogIndex(title);
   } else {
     log(`📄 [dry-run] 出力先: ${outputFile}`);
     log(`📄 [dry-run] タイトル: 🚴 ${CONFIG.blog.tag}情報 ${title}`);
     log(`📄 [dry-run] 一言: ${commentText}`);
-    // dry-run でもHTMLを表示
-    console.log("\n--- 生成HTML（先頭200行）---");
-    console.log(html.split("\n").slice(0, 200).join("\n"));
+    // dry-run でもフラグメントを表示
+    console.log("\n--- 生成フラグメント ---");
+    console.log(fragment);
   }
 
   log("🏁 完了");
