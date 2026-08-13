@@ -342,6 +342,43 @@ export function buildTagPages() {
         : "";
     console.log(`🏷️  カテゴリ ${tagEntries.length}件${diff}`);
   }
+
+  buildLegacyTagRedirects(tagEntries);
+}
+
+// リブランディング等でタグ名が変わった旧URLへのリダイレクトスタブ。
+// dist/ 直書き時代の被リンク・検索インデックスが指す先を維持するために生成する
+// （現行タグとして生きているタグ名は上書きしないよう自動でスキップする）。
+const LEGACY_TAG_REDIRECTS = {
+  Uber配達: "フードデリバリー",
+};
+
+function buildLegacyTagRedirects(tagEntries) {
+  const liveTagNames = new Set(tagEntries.map(([tag]) => tag));
+
+  for (const [oldTag, newTag] of Object.entries(LEGACY_TAG_REDIRECTS)) {
+    if (liveTagNames.has(oldTag)) continue; // 現行タグとして生きているなら何もしない
+    if (!liveTagNames.has(newTag)) continue; // 移行先が存在しないなら何もしない
+
+    const targetPath = `../${encodeURIComponent(newTag)}/`;
+    const targetAbsUrl = `${SITE_URL}/blog/tag/${encodeURIComponent(newTag)}/`;
+    const tagDir = join(OUTPUT_DIR, "blog", "tag", oldTag);
+    mkdirSync(tagDir, { recursive: true });
+
+    const html = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="0; url=${targetPath}">
+<link rel="canonical" href="${targetAbsUrl}">
+<title>リダイレクト中... | Gravity Portal</title>
+</head>
+<body>
+<p>このタグは「${escapeHtml(newTag)}」に統合されました。<a href="${targetPath}">こちらへ移動</a>してください。</p>
+</body>
+</html>`;
+    writeFileSync(join(tagDir, "index.html"), html, "utf-8");
+  }
 }
 
 // ==========================================
