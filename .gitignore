@@ -3,3 +3,4 @@ node_modules/
 .x-posted.json
 remove_b_article.cjs
 scripts/gas-archive/
+dist/
