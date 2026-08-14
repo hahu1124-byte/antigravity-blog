@@ -3,7 +3,7 @@
     "slug": "202608/20260815_three_ai_multiverse_dev",
     "title": "🚀 1人で開発チームを率いる：Claude Code・Codex・Geminiを同時並行で回す「3大AIマルチ運用」のリアル",
     "date": "2026-08-15",
-    "excerpt": "単一AIの限界を超え、Claude Code・Codex・Geminiの3体を「設計」「実装」「監査・インフラ」に役割分担させて爆速で個人開発を回すマルチエージェント運用の全貌と使い分けの基準を解説！",
+    "excerpt": "ルールを設定しても同一ミスを繰り返すClaudeやGeminiの限界をどう突破したか？「設計（Claude）」「実装（Codex）」「軍師（Gemini）」の役割分担で爆速かつ堅牢に個人開発を回す3大AI運用のリアル！",
     "tags": [
       "AI開発",
       "テック",
