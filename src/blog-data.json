@@ -1,5 +1,19 @@
 [
   {
+    "slug": "202608/20260815_three_ai_multiverse_dev",
+    "title": "🚀 1人で開発チームを率いる：Claude Code・Codex・Geminiを同時並行で回す「3大AIマルチ運用」のリアル",
+    "date": "2026-08-15",
+    "excerpt": "単一AIの限界を超え、Claude Code・Codex・Geminiの3体を「設計」「実装」「監査・インフラ」に役割分担させて爆速で個人開発を回すマルチエージェント運用の全貌と使い分けの基準を解説！",
+    "tags": [
+      "AI開発",
+      "テック",
+      "Claude Code",
+      "Gemini",
+      "個人開発"
+    ],
+    "ogImage": "og/202608/20260815_three_ai_multiverse_dev.webp"
+  },
+  {
     "slug": "202608/20260814_uber_daily",
     "title": "🚴 フードデリバリー情報 🌤️ 20260814 まずまずの1日",
     "date": "2026-08-14",
