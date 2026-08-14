@@ -70,15 +70,30 @@ export function wrapTitle(title, unitsPerLine, maxLines) {
   return lines.length ? lines : [clean || "Gravity Portal Blog"];
 }
 
-/** タグ配列 → paletteOrder の優先順位でパレットを1つ選ぶ */
-export function resolvePalette(tags, config) {
+/** "YYYY-MM-DD" → 曜日インデックス（0=日〜6=土、JST固定）。パース不可時は0 */
+export function dayOfWeekIndex(dateStr) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(dateStr || ""));
+  if (!m) return 0;
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  const idx = d.getUTCDay();
+  return Number.isNaN(idx) ? 0 : idx;
+}
+
+/** タグに紐づくパレット（配列）から曜日インデックスに応じて1色を決定的に選ぶ */
+function pickVariant(variants, dayIdx) {
+  if (!Array.isArray(variants)) return variants;
+  return variants[((dayIdx % variants.length) + variants.length) % variants.length];
+}
+
+/** タグ配列 → paletteOrder の優先順位でパレットを1つ選ぶ（曜日で同系統内の配色をローテーション） */
+export function resolvePalette(tags, config, dayIdx = 0) {
   const list = tags || [];
   for (const key of config.paletteOrder) {
     if (list.includes(key) && config.palettes[key]) {
-      return config.palettes[key];
+      return pickVariant(config.palettes[key], dayIdx);
     }
   }
-  return config.palettes._default;
+  return pickVariant(config.palettes._default, dayIdx);
 }
 
 function patternDef(id, pattern, accent) {
@@ -213,7 +228,7 @@ export async function renderOgCard({
       const ok = await assertCjkFont(config);
       if (!ok) return null;
     }
-    const palette = resolvePalette(tags, config);
+    const palette = resolvePalette(tags, config, dayOfWeekIndex(date));
     const svg = buildOgSvg({
       title,
       date,

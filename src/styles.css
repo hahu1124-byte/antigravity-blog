@@ -525,10 +525,11 @@ html[data-theme="light"] .article-og-hero img {
 
 /* 画像 */
 .content img {
+    display: block;
     max-width: 100%;
     height: auto;
     border-radius: var(--radius-md);
-    margin: 1.25rem 0;
+    margin: 1.25rem auto;
     border: 1px solid var(--border);
 }
 

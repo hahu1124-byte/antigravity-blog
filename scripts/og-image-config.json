@@ -14,12 +14,68 @@
   },
   "paletteOrder": ["AI", "テック", "個人開発", "パチンコ", "LAB", "フードデリバリー"],
   "palettes": {
-    "AI": { "bg1": "#1e1b4b", "bg2": "#4c1d95", "accent": "#a78bfa", "pattern": "circuit", "label": "AI" },
-    "テック": { "bg1": "#0c1e3d", "bg2": "#1e40af", "accent": "#60a5fa", "pattern": "grid", "label": "TECH" },
-    "個人開発": { "bg1": "#052e2b", "bg2": "#0f766e", "accent": "#5eead4", "pattern": "dots", "label": "INDIE" },
-    "パチンコ": { "bg1": "#3f0d12", "bg2": "#9f1239", "accent": "#fda4af", "pattern": "diagonal", "label": "PACHINKO" },
-    "LAB": { "bg1": "#2e1065", "bg2": "#7e22ce", "accent": "#e9d5ff", "pattern": "wave", "label": "LAB" },
-    "フードデリバリー": { "bg1": "#1a2e05", "bg2": "#3f6212", "accent": "#bef264", "pattern": "dots", "label": "DELIVERY" },
-    "_default": { "bg1": "#111827", "bg2": "#374151", "accent": "#93c5fd", "pattern": "dots", "label": "BLOG" }
+    "AI": [
+      { "bg1": "#1e1b4b", "bg2": "#4c1d95", "accent": "#a78bfa", "pattern": "circuit", "label": "AI" },
+      { "bg1": "#1e293b", "bg2": "#3730a3", "accent": "#818cf8", "pattern": "circuit", "label": "AI" },
+      { "bg1": "#3b0764", "bg2": "#86198f", "accent": "#f0abfc", "pattern": "circuit", "label": "AI" },
+      { "bg1": "#1e1b4b", "bg2": "#6d28d9", "accent": "#c4b5fd", "pattern": "circuit", "label": "AI" },
+      { "bg1": "#312e81", "bg2": "#4338ca", "accent": "#a5b4fc", "pattern": "circuit", "label": "AI" },
+      { "bg1": "#2e1065", "bg2": "#7e22ce", "accent": "#d8b4fe", "pattern": "circuit", "label": "AI" },
+      { "bg1": "#1e0a3c", "bg2": "#5b21b6", "accent": "#c084fc", "pattern": "circuit", "label": "AI" }
+    ],
+    "テック": [
+      { "bg1": "#0c1e3d", "bg2": "#1e40af", "accent": "#60a5fa", "pattern": "grid", "label": "TECH" },
+      { "bg1": "#083344", "bg2": "#0e7490", "accent": "#67e8f9", "pattern": "grid", "label": "TECH" },
+      { "bg1": "#0f172a", "bg2": "#1e3a8a", "accent": "#93c5fd", "pattern": "grid", "label": "TECH" },
+      { "bg1": "#082f49", "bg2": "#0369a1", "accent": "#7dd3fc", "pattern": "grid", "label": "TECH" },
+      { "bg1": "#1e3a8a", "bg2": "#2563eb", "accent": "#bfdbfe", "pattern": "grid", "label": "TECH" },
+      { "bg1": "#164e63", "bg2": "#0891b2", "accent": "#a5f3fc", "pattern": "grid", "label": "TECH" },
+      { "bg1": "#0c1e3d", "bg2": "#1d4ed8", "accent": "#93c5fd", "pattern": "grid", "label": "TECH" }
+    ],
+    "個人開発": [
+      { "bg1": "#052e2b", "bg2": "#0f766e", "accent": "#5eead4", "pattern": "dots", "label": "INDIE" },
+      { "bg1": "#022c22", "bg2": "#065f46", "accent": "#6ee7b7", "pattern": "dots", "label": "INDIE" },
+      { "bg1": "#083344", "bg2": "#155e75", "accent": "#67e8f9", "pattern": "dots", "label": "INDIE" },
+      { "bg1": "#042f2e", "bg2": "#0d9488", "accent": "#99f6e4", "pattern": "dots", "label": "INDIE" },
+      { "bg1": "#052e16", "bg2": "#047857", "accent": "#6ee7b7", "pattern": "dots", "label": "INDIE" },
+      { "bg1": "#0c2b2b", "bg2": "#0e7490", "accent": "#a5f3fc", "pattern": "dots", "label": "INDIE" },
+      { "bg1": "#022c22", "bg2": "#0f766e", "accent": "#5eead4", "pattern": "dots", "label": "INDIE" }
+    ],
+    "パチンコ": [
+      { "bg1": "#3f0d12", "bg2": "#9f1239", "accent": "#fda4af", "pattern": "diagonal", "label": "PACHINKO" },
+      { "bg1": "#431407", "bg2": "#c2410c", "accent": "#fdba74", "pattern": "diagonal", "label": "PACHINKO" },
+      { "bg1": "#450a0a", "bg2": "#b91c1c", "accent": "#fca5a5", "pattern": "diagonal", "label": "PACHINKO" },
+      { "bg1": "#4c0519", "bg2": "#be123c", "accent": "#fecdd3", "pattern": "diagonal", "label": "PACHINKO" },
+      { "bg1": "#431407", "bg2": "#ea580c", "accent": "#fed7aa", "pattern": "diagonal", "label": "PACHINKO" },
+      { "bg1": "#3f0d12", "bg2": "#dc2626", "accent": "#fca5a5", "pattern": "diagonal", "label": "PACHINKO" },
+      { "bg1": "#500724", "bg2": "#9d174d", "accent": "#fbcfe8", "pattern": "diagonal", "label": "PACHINKO" }
+    ],
+    "LAB": [
+      { "bg1": "#2e1065", "bg2": "#7e22ce", "accent": "#e9d5ff", "pattern": "wave", "label": "LAB" },
+      { "bg1": "#1e1b4b", "bg2": "#5b21b6", "accent": "#ddd6fe", "pattern": "wave", "label": "LAB" },
+      { "bg1": "#4a044e", "bg2": "#a21caf", "accent": "#f5d0fe", "pattern": "wave", "label": "LAB" },
+      { "bg1": "#3b0764", "bg2": "#9333ea", "accent": "#e9d5ff", "pattern": "wave", "label": "LAB" },
+      { "bg1": "#312e81", "bg2": "#6d28d9", "accent": "#ddd6fe", "pattern": "wave", "label": "LAB" },
+      { "bg1": "#500724", "bg2": "#a21caf", "accent": "#fbcfe8", "pattern": "wave", "label": "LAB" },
+      { "bg1": "#2e1065", "bg2": "#c026d3", "accent": "#f5d0fe", "pattern": "wave", "label": "LAB" }
+    ],
+    "フードデリバリー": [
+      { "bg1": "#1a2e05", "bg2": "#3f6212", "accent": "#bef264", "pattern": "dots", "label": "DELIVERY" },
+      { "bg1": "#052e16", "bg2": "#15803d", "accent": "#86efac", "pattern": "dots", "label": "DELIVERY" },
+      { "bg1": "#1a2e05", "bg2": "#4d7c0f", "accent": "#d9f99d", "pattern": "dots", "label": "DELIVERY" },
+      { "bg1": "#022c22", "bg2": "#059669", "accent": "#6ee7b7", "pattern": "dots", "label": "DELIVERY" },
+      { "bg1": "#132a13", "bg2": "#166534", "accent": "#bbf7d0", "pattern": "dots", "label": "DELIVERY" },
+      { "bg1": "#1a2e05", "bg2": "#65a30d", "accent": "#ecfccb", "pattern": "dots", "label": "DELIVERY" },
+      { "bg1": "#052e16", "bg2": "#16a34a", "accent": "#bbf7d0", "pattern": "dots", "label": "DELIVERY" }
+    ],
+    "_default": [
+      { "bg1": "#111827", "bg2": "#374151", "accent": "#93c5fd", "pattern": "dots", "label": "BLOG" },
+      { "bg1": "#18181b", "bg2": "#3f3f46", "accent": "#a5b4fc", "pattern": "dots", "label": "BLOG" },
+      { "bg1": "#1e293b", "bg2": "#475569", "accent": "#cbd5e1", "pattern": "dots", "label": "BLOG" },
+      { "bg1": "#171717", "bg2": "#404040", "accent": "#d4d4d8", "pattern": "dots", "label": "BLOG" },
+      { "bg1": "#0f172a", "bg2": "#334155", "accent": "#94a3b8", "pattern": "dots", "label": "BLOG" },
+      { "bg1": "#1c1917", "bg2": "#44403c", "accent": "#d6d3d1", "pattern": "dots", "label": "BLOG" },
+      { "bg1": "#111827", "bg2": "#4b5563", "accent": "#c7d2fe", "pattern": "dots", "label": "BLOG" }
+    ]
   }
 }
