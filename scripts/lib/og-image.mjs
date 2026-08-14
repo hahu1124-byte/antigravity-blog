@@ -82,7 +82,9 @@ export function dayOfWeekIndex(dateStr) {
 /** タグに紐づくパレット（配列）から曜日インデックスに応じて1色を決定的に選ぶ */
 function pickVariant(variants, dayIdx) {
   if (!Array.isArray(variants)) return variants;
-  return variants[((dayIdx % variants.length) + variants.length) % variants.length];
+  return variants[
+    ((dayIdx % variants.length) + variants.length) % variants.length
+  ];
 }
 
 /** タグ配列 → paletteOrder の優先順位でパレットを1つ選ぶ（曜日で同系統内の配色をローテーション） */
