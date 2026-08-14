@@ -216,6 +216,8 @@ export function buildArticlePages() {
         ? `${SITE_URL}/blog/images/${post.ogImage}`
         : DEFAULT_OG_IMAGE;
     const ogUrl = `${SITE_URL}/blog/${post.slug}/`;
+    // 本文にヒーロー画像がない記事は、自動生成OGP画像をタイトル下にフォールバック表示する
+    const showOgHero = !heroMatch && !!post.ogImage;
 
     // 記事content内の絶対画像パスを相対パスに変換
     let content = post.content.replace(
@@ -268,6 +270,8 @@ export function buildArticlePages() {
                 </div>
                 <h1 class="title">${escapeHtml(post.title)}</h1>
             </header>
+
+            ${showOgHero ? `<div class="article-og-hero"><img src="${toRoot}images/${post.ogImage}" alt="${escapeHtml(post.title)}" loading="lazy" width="1200" height="630"></div>` : ""}
 
             <div class="content">
                 ${content}
