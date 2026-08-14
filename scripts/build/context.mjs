@@ -91,11 +91,25 @@ if (existsSync(imgSrc)) {
   cpSync(imgSrc, imgDst, { recursive: true });
 }
 
-// CSSをコピー
+// CSSパーシャルを記載順に結合し、公開物は従来どおり1ファイルにする
 const cssSrc = join(PROJECT_DIR, "src", "styles.css");
 const cssDst = join(OUTPUT_DIR, "blog", "styles.css");
 if (existsSync(cssSrc)) {
-  cpSync(cssSrc, cssDst);
+  const cssManifest = readFileSync(cssSrc, "utf-8");
+  const cssImports = [
+    ...cssManifest.matchAll(/@import\s+url\(["']([^"']+)["']\);/g),
+  ].map((match) => match[1]);
+
+  if (cssImports.length === 0) {
+    cpSync(cssSrc, cssDst);
+  } else {
+    const bundledCss = cssImports
+      .map((relativePath) =>
+        readFileSync(resolve(dirname(cssSrc), relativePath), "utf-8"),
+      )
+      .join("");
+    writeFileSync(cssDst, bundledCss, "utf-8");
+  }
 }
 
 // 静的ツールをコピー（convergence, simulator, machine-db等）
