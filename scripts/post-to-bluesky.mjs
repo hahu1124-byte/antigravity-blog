@@ -5,8 +5,8 @@
  * Blueskyに自動投稿する。
  *
  * ※ ブログ記事の自動投稿は2026-03-11に一度廃止されたが、2026-08にデプロイ完了検知
- *    方式（旧: 固定sleepによる推測）で再設計のうえ復活。Uber日次レポートは対象外
- *    （BLOG_EXCLUDE_TAGS）、対象は BLOG_POST_SINCE 以降 かつ 直近3日以内の記事のみ。
+ *    方式（旧: 固定sleepによる推測）で再設計のうえ復活。日次レポート・週次トレンド等を含め、
+ *    対象は BLOG_POST_SINCE 以降 かつ 直近3日以内の記事のみ。
  *
  * 投稿済み管理:
  *   posted-items.json に投稿済みURLを記録。
@@ -37,8 +37,8 @@ const SITE_URL = 'https://www.antigravity-portal.com';
 // ブログ記事投稿の対象は導入日以降のみ（旧実装は日付ガードが無く既存全記事が
 // 投稿候補になっていたため、機能復活にあたり二重ガードを追加する）
 const BLOG_POST_SINCE = '2026-08-13';
-// Uber日次レポートはタイムラインが日報で埋まるのを避けるため対象外
-const BLOG_EXCLUDE_TAGS = ['フードデリバリー'];
+// 除外タグ（現在は日次レポート・週次トレンド等を含め全新着記事を投稿対象とする）
+const BLOG_EXCLUDE_TAGS = [];
 
 // 環境変数チェック
 const IDENTIFIER = process.env.BLUESKY_IDENTIFIER;
@@ -125,7 +125,7 @@ function daysAgo(n) {
 }
 
 // --- ソース1: ブログ記事の新着を blog-data.json から取得 ---
-// 対象は週次トレンド記事等のみ（Uber日次はBLOG_EXCLUDE_TAGSで除外）。
+// 日次レポート・週次トレンド等の新着記事を対象とする。
 // 旧実装は日付ガードが無く既存全記事が投稿候補になる欠陥があったため、
 // 導入日以降 かつ 直近3日以内 の二重ガードを設ける。
 function getNewBlogPosts(postedUrls) {
