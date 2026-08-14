@@ -126,16 +126,19 @@ export function buildOgSvg({ title, date, label, palette, config }) {
   const lines = wrapTitle(title, unitsPerLine, maxLines);
   const patId = "pat";
   const gradId = "grad";
+  const cx = width / 2;
 
   const tspans = lines
     .map(
       (line, i) =>
-        `<tspan x="${padding}" dy="${i === 0 ? 0 : titleSize * titleLineHeight}">${escapeXml(line)}</tspan>`,
+        `<tspan x="${cx}" dy="${i === 0 ? 0 : titleSize * titleLineHeight}">${escapeXml(line)}</tspan>`,
     )
     .join("");
 
   const titleBlockHeight = lines.length * titleSize * titleLineHeight;
   const titleY = height / 2 - titleBlockHeight / 2 + titleSize * 0.75;
+
+  const badgeWidth = labelSize * (label.length + 2);
 
   return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -147,11 +150,10 @@ export function buildOgSvg({ title, date, label, palette, config }) {
   </defs>
   <rect width="${width}" height="${height}" fill="url(#${gradId})"/>
   <rect width="${width}" height="${height}" fill="url(#${patId})"/>
-  <rect x="${padding}" y="${padding}" width="${labelSize * (label.length + 2)}" height="${labelSize * 1.8}" rx="6" fill="${escapeXml(palette.accent)}" opacity="0.9"/>
-  <text x="${padding + labelSize * 0.9}" y="${padding + labelSize * 1.25}" font-family="${escapeXml(config.font.family)}" font-size="${labelSize}" font-weight="700" fill="${escapeXml(palette.bg1)}">${escapeXml(label)}</text>
-  <text x="${padding}" y="${titleY}" font-family="${escapeXml(config.font.family)}" font-size="${titleSize}" font-weight="700" fill="#ffffff">${tspans}</text>
-  <text x="${padding}" y="${height - padding + 8}" font-family="${escapeXml(config.font.family)}" font-size="${metaSize}" fill="${escapeXml(palette.accent)}" opacity="0.9">${escapeXml(date || "")}</text>
-  <text x="${width - padding}" y="${height - padding + 8}" font-family="${escapeXml(config.font.family)}" font-size="${metaSize}" fill="#ffffff" opacity="0.75" text-anchor="end">Gravity Portal</text>
+  <rect x="${cx - badgeWidth / 2}" y="${padding}" width="${badgeWidth}" height="${labelSize * 1.8}" rx="6" fill="${escapeXml(palette.accent)}" opacity="0.9"/>
+  <text x="${cx}" y="${padding + labelSize * 1.25}" font-family="${escapeXml(config.font.family)}" font-size="${labelSize}" font-weight="700" fill="${escapeXml(palette.bg1)}" text-anchor="middle">${escapeXml(label)}</text>
+  <text x="${cx}" y="${titleY}" font-family="${escapeXml(config.font.family)}" font-size="${titleSize}" font-weight="700" fill="#ffffff" text-anchor="middle">${tspans}</text>
+  <text x="${cx}" y="${height - padding + 8}" font-family="${escapeXml(config.font.family)}" font-size="${metaSize}" fill="#ffffff" opacity="0.75" text-anchor="middle">${escapeXml(date || "")}　·　Gravity Portal</text>
 </svg>`;
 }
 
