@@ -15,28 +15,27 @@ description: ブログ記事の新規追加手順（記事HTML作成→OGP自動
 
 ## 手順
 
-### 1. 記事コンテンツHTML作成
+### 1. 記事コンテンツHTML作成（Frontmatter付き）
 
-`src/articles/YYYYMM/記事スラッグ.html` に記事の本文HTMLフラグメントを作成する。
-`<p>`, `<h2>`, `<ul>` 等の本文タグのみを書く（`<html>`・`<head>`・`<style>`は不要。head/OGP/広告/ナビはbuild.mjs側のテンプレートが付与する）。
+`src/articles/YYYYMM/記事スラッグ.html` に記事ファイルを作成する。
+先頭にHTMLコメント形式でメタデータ（Frontmatter）を記述し、その後に本文を書く（`<html>`・`<head>`・`<style>`等は不要。テンプレートが自動付与する）。
 
-### 2. blog-data.json 更新 ⚠️重要
-
-`src/blog-data.json` の配列先頭に新しい記事のエントリを追加する。
-このファイルはブログ一覧・ポータルTOPの「最新記事」・タグページ・関連記事選定すべての元データ。
-
-エントリのフォーマット:
-```json
-{
-  "slug": "YYYYMM/記事スラッグ",
-  "title": "絵文字 タイトル",
-  "date": "YYYY-MM-DD",
-  "excerpt": "記事の概要（120文字程度）",
-  "tags": ["タグ1", "タグ2"]
-}
+```html
+<!--
+title: 🚀 絵文字 タイトル
+date: YYYY-MM-DD
+excerpt: 記事の概要（120文字程度）
+tags: [タグ1, タグ2]
+-->
+<p><img src="/blog/images/画像名.png" alt="説明"></p>
+<p>
+  本文...
+</p>
 ```
 
-### 3. ヒーロー画像（使う場合のみ）
+> **ポイント**: `blog-data.json` の手動編集は不要です！`node build.mjs` が各記事HTMLの先頭コメントからメタデータを自動収集し、`dist/blog-data.json` を生成します。
+
+### 2. ヒーロー画像（使う場合のみ）
 
 記事本文にヒーロー画像を入れる場合：
 
@@ -52,7 +51,7 @@ ffmpeg -i "元画像.png" -quality 85 "h:/gravity/projects/antigravity-blog/src/
 
 ヒーロー画像を使わない記事は、次のステップでOGP画像がタイトルから自動生成される。
 
-### 4. OGP画像の自動生成 ⚠️重要
+### 3. OGP画像の自動生成 ⚠️重要
 
 **画像生成ツールでの手動作成は不要。** sharpによる自動生成CLI（LLM/外部API不使用、CJKフォント対応）を実行する:
 
@@ -61,12 +60,12 @@ ffmpeg -i "元画像.png" -quality 85 "h:/gravity/projects/antigravity-blog/src/
 bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/generate-og-images.mjs --slug YYYYMM/記事スラッグ
 ```
 
-タイトル・タグからカード画像を動的生成して `src/images/og/YYYYMM/記事スラッグ.webp` に保存し、`src/blog-data.json`の該当エントリへ`ogImage`フィールドを自動追記する。
-ヒーロー画像がある記事（ステップ3を使った記事）は`hasHeroImage()`判定で自動スキップされるため、このコマンドを実行しても上書きされない。
+タイトル・タグからカード画像を動的生成して `src/images/og/YYYYMM/記事スラッグ.webp` に保存し、記事HTMLのFrontmatter（および `blog-data.json`）へ`ogImage`フィールドを自動追記する。
+ヒーロー画像がある記事（ステップ2を使った記事）は`hasHeroImage()`判定で自動スキップされるため、このコマンドを実行しても上書きされない。
 
 複数記事のOGP画像をまとめて生成したい場合は `--slug` の代わりに `--missing` を使う（新規かつヒーロー画像なし・OGP未生成の記事を一括処理）。
 
-### 5. ローカルビルドで確認
+### 4. ローカルビルドで確認
 
 // turbo
 ```bash
@@ -76,7 +75,7 @@ bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node
 出力の `🔗 内部リンクチェックOK` を確認する（リンク切れがあるとビルド失敗扱いになる）。
 `::warning::重複の疑いがある記事ペア` が新記事について出た場合は、タイトル・タグの重複度が高いということなので見直しを検討する（他の既存警告は無視してよい）。
 
-### 6. Git コミット＋プッシュ（hgit.sh 経由、個別実行）
+### 5. Git コミット＋プッシュ（hgit.sh 経由、個別実行）
 
 // turbo
 ```bash
@@ -95,30 +94,30 @@ bash h:/gravity/.agent/scripts/hgit.sh h:/gravity/projects/antigravity-blog push
 > **`&&` チェーンは絶対禁止。** 必ず個別の `run_command` に分割する。
 > `dist/` はコミット対象に含めない（push後にGitHub Actionsの`deploy.yml`が`node build.mjs`で本番分を再生成するため）。
 
-### 7. GitHub Pagesデプロイ確認
+### 6. GitHub Pagesデプロイ確認
 
 プッシュ後、GitHub Actions完了を待ってからSNS投稿する（デプロイ前に投稿するとOGPカードが「Page not found」になる）。
 
 確認URL: `https://www.antigravity-portal.com/blog/YYYYMM/記事スラッグ/`
 
-### 8. SNS投稿（手動）
+### 7. SNS投稿（手動）
 
 - **X**: `https://twitter.com/intent/tweet?text=...` のURLエンコードリンクを生成
 - **Bluesky**: コピペ用テキストを用意（`https://bsky.app/` から投稿）
 
-### 9. Obsidian保存（weekly_trend記事のみ・週1回手動指示）
+### 8. Obsidian保存（weekly_trend記事のみ・週1回手動指示）
 
 `週刊テックトレンド記事自動生成`ワークフロー（gravity-portal）が日曜22:00 JSTに実行されると、`scripts/generate-weekly-trend.mjs` が記事生成と同時に `antigravity-blog/src/obsidian/weekly-trends/weekly-trend-wNN.md` も自動生成してantigravity-blogにpushする（2026-07-06〜対応）。
 
 ローカルの `H:/gravity` にはGitHub Actions側の変更は自動反映されないため、ユーザーから週1回「Obsidianに保存して」等の指示があったら以下を実行する。
 
-#### 9a. antigravity-blogをpullして新規ノートを取得
+#### 8a. antigravity-blogをpullして新規ノートを取得
 
 ```bash
 bash h:/gravity/.agent/scripts/hgit.sh h:/gravity/projects/antigravity-blog pull
 ```
 
-#### 9b. 同期スクリプト実行
+#### 8b. 同期スクリプト実行
 
 ```bash
 pwsh -File h:/gravity/.agent/scripts/sync-weekly-trend-obsidian.ps1

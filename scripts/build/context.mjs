@@ -15,6 +15,9 @@ export const BUILD_STAMP = new Date()
   .split("T")[0]
   .replace(/-/g, "");
 
+import { readdirSync } from "fs";
+import { parseFrontmatter } from "../lib/frontmatter.mjs";
+
 // ソースパス
 const BLOG_DATA_PATH = join(PROJECT_DIR, "src", "blog-data.json");
 const ARTICLES_DIR = join(PROJECT_DIR, "src", "articles");
@@ -38,16 +41,48 @@ function loadBuildStats() {
 export const prevStats = loadBuildStats();
 export const curStats = {};
 
-// blog-data.json 読み込み（メタデータ）+ 個別HTMLファイルからcontent結合
-export const posts = JSON.parse(readFileSync(BLOG_DATA_PATH, "utf-8")).map(
-  (post) => {
-    const articlePath = join(ARTICLES_DIR, `${post.slug}.html`);
-    if (existsSync(articlePath)) {
-      post.content = readFileSync(articlePath, "utf-8");
+// src/articles/**/*.html から全記事を自動スキャン
+function scanArticles() {
+  const articlePosts = [];
+  if (!existsSync(ARTICLES_DIR)) return articlePosts;
+
+  const yearMonths = readdirSync(ARTICLES_DIR, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name);
+
+  for (const ym of yearMonths) {
+    const ymDir = join(ARTICLES_DIR, ym);
+    const files = readdirSync(ymDir).filter((f) => f.endsWith(".html"));
+
+    for (const file of files) {
+      const slug = `${ym}/${file.replace(/\.html$/, "")}`;
+      const filePath = join(ymDir, file);
+      const rawHtml = readFileSync(filePath, "utf-8");
+      const { metadata, content } = parseFrontmatter(rawHtml);
+
+      articlePosts.push({
+        slug,
+        title: metadata.title || slug,
+        date: metadata.date || ym.replace(/^(\d{4})(\d{2})$/, "$1-$2-01"),
+        excerpt: metadata.excerpt || "",
+        tags: metadata.tags || [],
+        ...(metadata.ogImage ? { ogImage: metadata.ogImage } : {}),
+        ...(metadata.dateModified ? { dateModified: metadata.dateModified } : {}),
+        content,
+      });
     }
-    return post;
-  },
-);
+  }
+
+  // 日付降順（最新順）、同日ならslug降順でソート
+  articlePosts.sort((a, b) => {
+    if (a.date !== b.date) return b.date.localeCompare(a.date);
+    return b.slug.localeCompare(a.slug);
+  });
+
+  return articlePosts;
+}
+
+export const posts = scanArticles();
 
 const contentCount = posts.filter((p) => p.content).length;
 curStats.articleCount = contentCount;
@@ -66,20 +101,26 @@ mkdirSync(join(OUTPUT_DIR, "blog"), { recursive: true });
 // .nojekyll — GitHub PagesのJekyll処理を無効化
 writeFileSync(join(OUTPUT_DIR, ".nojekyll"), "", "utf-8");
 
-// blog-data.json（メタデータのみ版）をdistに出力（Vercel側からfetch用）
+// blog-data.json（メタデータのみ版）をdistに出力（Vercel側からfetch用）およびsrcに同期
 export const metaOnly = posts.map(
-  ({ slug, title, date, excerpt, tags, ogImage }) => ({
+  ({ slug, title, date, excerpt, tags, ogImage, dateModified }) => ({
     slug,
     title,
     date,
     excerpt,
     tags,
     ...(ogImage ? { ogImage } : {}),
+    ...(dateModified ? { dateModified } : {}),
   }),
 );
 writeFileSync(
   join(OUTPUT_DIR, "blog-data.json"),
-  JSON.stringify(metaOnly),
+  JSON.stringify(metaOnly, null, 2) + "\n",
+  "utf-8",
+);
+writeFileSync(
+  BLOG_DATA_PATH,
+  JSON.stringify(metaOnly, null, 2) + "\n",
   "utf-8",
 );
 

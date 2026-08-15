@@ -19,6 +19,7 @@ import {
   ogImageRelPath,
   renderOgCard,
 } from "./lib/og-image.mjs";
+import { parseFrontmatter, stringifyFrontmatter } from "./lib/frontmatter.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_DIR = dirname(__dirname);
@@ -150,12 +151,21 @@ async function runMissing(args) {
     if (relPath) {
       post.ogImage = relPath;
       generated++;
+
+      // 記事HTMLのFrontmatterも更新
+      const articlePath = join(ARTICLES_DIR, `${post.slug}.html`);
+      if (existsSync(articlePath)) {
+        const raw = readFileSync(articlePath, "utf-8");
+        const { metadata, content } = parseFrontmatter(raw);
+        metadata.ogImage = relPath;
+        writeFileSync(articlePath, stringifyFrontmatter(metadata, content), "utf-8");
+      }
     }
   }
 
   writeFileSync(BLOG_DATA_PATH, JSON.stringify(blogData, null, 2), "utf-8");
   console.log(
-    `✅ ${generated}/${targets.length}件のOGP画像を生成し blog-data.json を更新しました`,
+    `✅ ${generated}/${targets.length}件のOGP画像を生成し Frontmatter / blog-data.json を更新しました`,
   );
 }
 
@@ -186,6 +196,16 @@ async function runSlug(args) {
 
   post.ogImage = relPath;
   writeFileSync(BLOG_DATA_PATH, JSON.stringify(blogData, null, 2), "utf-8");
+
+  // 記事HTMLのFrontmatterも更新
+  const articlePath = join(ARTICLES_DIR, `${post.slug}.html`);
+  if (existsSync(articlePath)) {
+    const raw = readFileSync(articlePath, "utf-8");
+    const { metadata, content } = parseFrontmatter(raw);
+    metadata.ogImage = relPath;
+    writeFileSync(articlePath, stringifyFrontmatter(metadata, content), "utf-8");
+  }
+
   console.log(`✅ 生成しました: ${relPath}`);
 }
 

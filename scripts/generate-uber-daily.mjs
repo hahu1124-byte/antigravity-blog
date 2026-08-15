@@ -14,6 +14,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { renderOgCard } from "./lib/og-image.mjs";
+import { stringifyFrontmatter } from "./lib/frontmatter.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -525,10 +526,22 @@ function buildFragment({
 // src/articles/<YYYYMM>/<DATE_STR>_uber_daily.html へ常に上書きする
 // （同日再実行時も最新データで更新される。build.mjs 側が dist へのHTML組み立てを担う）
 
-function writeFragment(html) {
+function writeFragment(html, title, ogImageRel) {
   const dir = path.join(ROOT, "src/articles", YYYYMM);
   fs.mkdirSync(dir, { recursive: true });
-  fs.writeFileSync(path.join(dir, `${DATE_STR}_uber_daily.html`), html);
+
+  const blogTag = CONFIG.blog.tag;
+  const fullTitle = `🚴 ${blogTag}情報 ${title}`;
+  const metadata = {
+    title: fullTitle,
+    date: DATE_DISPLAY,
+    excerpt: `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`,
+    tags: [blogTag],
+    ...(ogImageRel ? { ogImage: ogImageRel } : {}),
+  };
+
+  const fileContent = stringifyFrontmatter(metadata, html.trimStart());
+  fs.writeFileSync(path.join(dir, `${DATE_STR}_uber_daily.html`), fileContent);
 }
 
 // ===== blog-data.json 更新 =====
@@ -641,10 +654,10 @@ async function main() {
   );
 
   if (!DRY_RUN) {
-    writeFragment(fragment);
+    writeFragment(fragment, title, ogImageRel);
     log(`✅ 記事生成完了: ${outputFile}`);
 
-    // 6. blog-data.json 更新
+    // 6. blog-data.json 更新（互換用）
     updateBlogData(title, ogImageRel);
   } else {
     log(`📄 [dry-run] 出力先: ${outputFile}`);

@@ -27,6 +27,27 @@ import { findRelated, getRelatedPostsHtml } from "../lib/related.mjs";
 // 記事一覧ページ生成 (/blog/index.html)
 // ==========================================
 
+function getThumbnailUrl(post, activeTag) {
+  const prefix = activeTag ? "../../images/" : "./images/";
+
+  // 1. 本文からヒーロー画像（最初のimg）を抽出
+  if (post.content) {
+    const heroMatch = post.content.match(/src="(?:\/blog\/images\/|\.\.\/images\/|\.\/images\/)([^"]+)"/);
+    if (heroMatch) {
+      const imgName = heroMatch[1].replace(/\.(png|jpe?g)$/i, ".webp");
+      return `${prefix}${imgName}`;
+    }
+  }
+
+  // 2. post.ogImage
+  if (post.ogImage) {
+    return `${prefix}${post.ogImage}`;
+  }
+
+  // 3. デフォルト画像
+  return `${prefix}ai_dev_day1.webp`;
+}
+
 export function buildArticleListHtml(
   postList,
   title,
@@ -51,6 +72,9 @@ export function buildArticleListHtml(
                 </div>
             </div>
             <h2 class="card-title">${escapeHtml(post.title)}</h2>
+            <div class="card-thumbnail">
+                <img src="${getThumbnailUrl(post, activeTag)}" alt="${escapeHtml(post.title)}" loading="lazy">
+            </div>
             <p class="card-excerpt">${escapeHtml(post.excerpt)}</p>
         </a>`,
     )
@@ -95,7 +119,7 @@ export function buildArticleListHtml(
     </div>
     <script>
     (function() {
-        var PER_PAGE = 10;
+        var PER_PAGE = 12;
         var STORAGE_KEY = 'blog-page:' + location.pathname;
         var storedPage = parseInt(sessionStorage.getItem(STORAGE_KEY), 10);
         var currentPage = storedPage > 0 ? storedPage : 1;

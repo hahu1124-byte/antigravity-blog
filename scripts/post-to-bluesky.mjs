@@ -79,6 +79,9 @@ function httpsRequest(options, body = null) {
                 }
             });
         });
+        req.setTimeout(15000, () => {
+            req.destroy(new Error('HTTPS request timeout (15s)'));
+        });
         req.on('error', reject);
         if (body) req.write(body);
         req.end();
@@ -88,14 +91,18 @@ function httpsRequest(options, body = null) {
 function fetchUrl(url) {
     return new Promise((resolve, reject) => {
         const mod = url.startsWith('https') ? https : http;
-        mod.get(url, { headers: { 'User-Agent': 'AntigravityBot/1.0' } }, (res) => {
+        const req = mod.get(url, { headers: { 'User-Agent': 'AntigravityBot/1.0' } }, (res) => {
             if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
                 return fetchUrl(res.headers.location).then(resolve).catch(reject);
             }
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => resolve(data));
-        }).on('error', reject);
+        });
+        req.setTimeout(15000, () => {
+            req.destroy(new Error('fetchUrl timeout (15s)'));
+        });
+        req.on('error', reject);
     });
 }
 
@@ -103,7 +110,7 @@ function fetchUrl(url) {
 function fetchBuffer(url) {
     return new Promise((resolve, reject) => {
         const mod = url.startsWith('https') ? https : http;
-        mod.get(url, { headers: { 'User-Agent': 'AntigravityBot/1.0' } }, (res) => {
+        const req = mod.get(url, { headers: { 'User-Agent': 'AntigravityBot/1.0' } }, (res) => {
             if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
                 return fetchBuffer(res.headers.location).then(resolve).catch(reject);
             }
@@ -113,7 +120,11 @@ function fetchBuffer(url) {
                 buffer: Buffer.concat(chunks),
                 contentType: (res.headers['content-type'] || 'application/octet-stream').split(';')[0],
             }));
-        }).on('error', reject);
+        });
+        req.setTimeout(15000, () => {
+            req.destroy(new Error('fetchBuffer timeout (15s)'));
+        });
+        req.on('error', reject);
     });
 }
 
