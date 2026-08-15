@@ -143,6 +143,7 @@ function getNewBlogPosts(postedUrls) {
                 url: `${SITE_URL}/blog/${post.slug}/`,
                 tags: post.tags || [],
                 source: 'blog',
+                slug: post.slug,
                 ogImage: post.ogImage || null,
             }))
             .filter(item => !postedUrls.includes(item.url));
@@ -241,29 +242,68 @@ async function uploadBlob(session, buffer, mimeType) {
     return res.data.blob;
 }
 
-// --- リンクカード用サムネイル取得（失敗時は null を返し thumb 無しで投稿続行） ---
-// blog記事: OGP画像をローカルファイルから読む（デプロイ済みURLへのHTTP依存を1つ減らす）
+// --- リンクカード用サムネイル画像バッファ取得 ---
+// blog記事: 記事本文のヒーロー画像（タイトル下画像）を最優先、なければ汎用ogImageをローカルファイルから読む
 // note記事: og:image をHTTP取得する
-async function resolveThumb(session, item) {
-    try {
-        let buffer;
-        let mimeType;
+async function getThumbBuffer(item) {
+    if (item.source === 'blog') {
+        let thumbPath = null;
+        let sourceReason = '';
 
-        if (item.source === 'blog' && item.ogImage) {
-            const imgPath = join(ROOT, 'src', 'images', item.ogImage);
-            if (!existsSync(imgPath)) return null;
-            buffer = readFileSync(imgPath);
-            mimeType = 'image/webp';
-        } else if (item.source === 'note') {
-            const ogp = await fetchOgpMeta(item.url);
-            if (!ogp.image) return null;
-            const fetched = await fetchBuffer(ogp.image);
-            buffer = fetched.buffer;
-            mimeType = fetched.contentType || 'image/jpeg';
-        } else {
-            return null;
+        // 記事HTMLからヒーロー画像（タイトル下画像）を優先抽出
+        if (item.slug) {
+            const articlePath = join(ROOT, 'src', 'articles', `${item.slug}.html`);
+            if (existsSync(articlePath)) {
+                const articleHtml = readFileSync(articlePath, 'utf-8');
+                const heroMatch = articleHtml.match(/src="\/blog\/images\/([^"]+)"/);
+                if (heroMatch) {
+                    const heroFile = heroMatch[1]
+                        .replace(/\.png$/i, '.webp')
+                        .replace(/\.jpe?g$/i, '.webp');
+                    const heroPath = join(ROOT, 'src', 'images', heroFile);
+                    if (existsSync(heroPath)) {
+                        thumbPath = heroPath;
+                        sourceReason = `ヒーロー画像 (${heroFile})`;
+                    }
+                }
+            }
         }
 
+        // ヒーロー画像がなければ汎用ogImageを使用
+        if (!thumbPath && item.ogImage) {
+            const defaultOgPath = join(ROOT, 'src', 'images', item.ogImage);
+            if (existsSync(defaultOgPath)) {
+                thumbPath = defaultOgPath;
+                sourceReason = `汎用OGP画像 (${item.ogImage})`;
+            }
+        }
+
+        if (!thumbPath) return null;
+        return {
+            buffer: readFileSync(thumbPath),
+            mimeType: 'image/webp',
+            info: `ローカルファイル: ${sourceReason}`,
+        };
+    } else if (item.source === 'note') {
+        const ogp = await fetchOgpMeta(item.url);
+        if (!ogp.image) return null;
+        const fetched = await fetchBuffer(ogp.image);
+        return {
+            buffer: fetched.buffer,
+            mimeType: fetched.contentType || 'image/jpeg',
+            info: `リモートURL: ${ogp.image}`,
+        };
+    }
+    return null;
+}
+
+// --- リンクカード用サムネイル取得（失敗時は null を返し thumb 無しで投稿続行） ---
+async function resolveThumb(session, item) {
+    try {
+        const thumbData = await getThumbBuffer(item);
+        if (!thumbData) return null;
+
+        const { buffer, mimeType } = thumbData;
         if (buffer.length > 1_000_000) {
             console.warn(`⚠️ サムネイルが1MBを超えるためスキップ: ${item.url}`);
             return null;
@@ -381,8 +421,10 @@ async function main() {
         console.log(`🔍 [dry-run] ${allNewPosts.length} 件の投稿候補（実際の投稿・ログインは行いません）:`);
         for (const item of allNewPosts) {
             const postText = buildPostText(item);
+            const thumbData = await getThumbBuffer(item);
             console.log(`  [${item.source}] ${item.title}`);
             console.log(`    URL: ${item.url}`);
+            console.log(`    OGP画像: ${thumbData ? thumbData.info : 'なし'}`);
             console.log(`    本文(${postText.length}字): ${postText.replace(/\n/g, ' / ')}`);
         }
         return;
