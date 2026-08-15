@@ -58,7 +58,7 @@ novels/
     ├── setting-ch3.md          # 第3章「深淵の糸」詳細プロット
     ├── setting-ch4.md          # 第4章「久遠の覚醒」詳細プロット
     ├── setting-ch5.md          # 第5章「欠けた王名」詳細プロット
-    ├── setting-ch6.md          # 第6章（仮題）詳細プロット（導入部のみ確定）
+    ├── setting-ch6.md          # 第6章 詳細プロット（未定・導入部のみ策定済み）
     ├── writing_prompt.md       # AI執筆指示書
 │   └── episodes/
         ├── 1-50/               # ep01~ep50
