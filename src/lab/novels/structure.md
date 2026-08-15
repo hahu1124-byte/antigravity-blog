@@ -47,36 +47,32 @@ novels/
 │
 ├── story-03-haijo-no-ou/       # 廃城の王
     ├── appraisal-format.md     # 鑑定眼《トゥルー・サイト》の表示フォーマット
-    ├── characters-npc-crowd.md # 背景キャラ名簿（冒険者パーティー群、名前と一言特徴のみ）
     ├── characters.md           # キャラクター一覧
+    ├── characters-npc-crowd.md # 背景キャラ名簿（冒険者パーティー群、名前と一言特徴のみ）
     ├── codex.md                # 現場データ集（封石・廃城構造・執筆注意ルール）
-    ├── EP-timeline.md          # 詳細タイムライン（BG暦・日付ベースの設定専用管理表）
     ├── episodes-summary.md     # 各話あらすじ一覧
+    ├── EP-timeline.md          # 詳細タイムライン（BG暦・日付ベースの設定専用管理表）
     ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
+    ├── setting.md              # プロット・ブロック構成
     ├── setting-ch1-2.md        # 第1章・第2章 詳細プロット
     ├── setting-ch3.md          # 第3章「深淵の糸」詳細プロット
     ├── setting-ch4.md          # 第4章「久遠の覚醒」詳細プロット
     ├── setting-ch5.md          # 第5章 詳細プロット
     ├── setting-ch6.md          
-    ├── setting.md              # プロット・ブロック構成
     ├── writing_prompt.md       # AI執筆指示書
 │   └── episodes/
         ├── 1-50/               # ep01~ep50
-        ├── 101-150/            # ep101~ep106
-        └── 51-100/
-            ├── 51-60/               # ep51~ep60
-            ├── 61-70/               # ep61~ep70
-            ├── 71-80/               # ep71~ep80
-            ├── 81-90/               # ep81~ep90
-            └── 91-100/
-                ├── ... (7 older files)
-                ├── ep97T.md
-                ├── ep98T.md
-                ├── ep99T.md
+        ├── 51-100/             # ep51~ep100
+        └── 101-150/
+            └── 101-110/
+                ├── ... (3 older files)
+                ├── ep104T.md
+                ├── ep105T.md
+                ├── ep106T.md
                 └── archive/
-                    ├── ... (18 older files)
-                    ├── ep100A.md
-                    └── ep100C.md
+                    ├── ... (10 older files)
+                    ├── ep106A.md
+                    └── ep106C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
