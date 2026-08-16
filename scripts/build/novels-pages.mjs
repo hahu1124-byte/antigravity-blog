@@ -61,8 +61,7 @@ export function labWrap({
     <meta property="og:description" content="${escapeHtml(description)}">
     <meta property="og:url" content="${SITE_URL}/lab/novels/">
     <meta property="og:type" content="article">
-    <link rel="stylesheet" href="${cssPath}">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <script>
