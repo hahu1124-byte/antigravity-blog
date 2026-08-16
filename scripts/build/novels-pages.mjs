@@ -17,8 +17,7 @@ import { SITE_URL, escapeHtml } from "./html.mjs";
 // LAB novels ページ生成（Markdown → HTML）
 // ==========================================
 
-const LAB_CSS_URL =
-  "https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css";
+const LAB_CSS_URL = "/lab/styles.css";
 const NOVELS_SRC_DIR = join(PROJECT_DIR, "src", "lab", "novels");
 
 /** Markdown ファイルを読んで HTML 文字列に変換 */
@@ -43,7 +42,12 @@ export function labWrap({
   titleText,
   bodyHtml,
 }) {
-  const cssPath = cssDepth === 0 ? `./styles.css` : LAB_CSS_URL;
+  const cssPath =
+    cssDepth === 0
+      ? `./styles.css`
+      : cssDepth === 2
+        ? `../../styles.css`
+        : `/lab/styles.css`;
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -55,7 +59,7 @@ export function labWrap({
     <meta property="og:description" content="${escapeHtml(description)}">
     <meta property="og:url" content="${SITE_URL}/lab/novels/">
     <meta property="og:type" content="article">
-    <link rel="stylesheet" href="${LAB_CSS_URL}">
+    <link rel="stylesheet" href="${cssPath}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -92,7 +96,7 @@ export function labWrap({
 </html>`;
 }
 
-/** timeline.md を ## 見出しで週ごとに分割してタブUIのHTMLを生成 */
+/** timeline.md を ## 見出しで週ごとに分割して先進的タイムラインコンソールUIのHTMLを生成 */
 export async function buildTimelineTabsHtml(filePath) {
   const src = readFileSync(filePath, "utf-8");
   const { content } = matter(src);
@@ -121,64 +125,727 @@ export async function buildTimelineTabsHtml(filePath) {
       ).toString()
     : "";
 
-  // 各セクションのタイトルとHTMLを収集
-  const weekData = [];
+  // 各セクションのメタデータとHTMLをパース
+  const rawWeekData = [];
   for (const section of sections) {
     const titleMatch = section.match(/^## (.+)/m);
     const title = titleMatch ? titleMatch[1].trim() : "不明";
+
+    // 日付判定 & パース (例: "2026年 8/10〜（第9週）" / "2026年 6/15〜6/21（第1週）")
+    const dateMatch = title.match(
+      /^(\d{4})年\s*(\d{1,2})\/(\d{1,2})?(?:〜(\d{1,2})\/(\d{1,2})|〜)?/,
+    );
+    const isDate = !!dateMatch;
+
+    let year = "";
+    let month = "";
+    let weekNum = "";
+    let dateRange = "";
+    let monthKey = "notes";
+    let monthLabel = "メモ・資料";
+
+    if (dateMatch) {
+      year = dateMatch[1];
+      month = dateMatch[2];
+      monthKey = `${year}-${month.padStart(2, "0")}`;
+      monthLabel = `${year}年${month}月`;
+      const wMatch = title.match(/第(\d+)週/);
+      weekNum = wMatch ? wMatch[1] : "";
+      const rangeMatch = title.match(
+        /\d{1,2}\/\d{1,2}〜\d{1,2}\/\d{1,2}|\d{1,2}\/\d{1,2}〜/,
+      );
+      dateRange = rangeMatch ? rangeMatch[0] : "";
+    }
+
+    // セクション内のエピソード番号抽出 (epXX)
+    const epMatches = [...section.matchAll(/\bep(\d+)[A-Z]?\b/gi)];
+    let epLabel = "";
+    if (epMatches.length > 0) {
+      const epNums = [
+        ...new Set(epMatches.map((m) => parseInt(m[1], 10))),
+      ].sort((a, b) => a - b);
+      if (epNums.length === 1) {
+        epLabel = `ep${epNums[0]}`;
+      } else if (epNums.length > 1) {
+        epLabel = `ep${epNums[0]}〜${epNums[epNums.length - 1]}`;
+      }
+    }
+
     const result = await remark()
       .use(remarkGfm)
       .use(remarkHtml, { sanitize: false })
       .process(section);
-    weekData.push({ title, html: result.toString() });
+
+    rawWeekData.push({
+      title,
+      isDate,
+      year,
+      month,
+      weekNum,
+      dateRange,
+      monthKey,
+      monthLabel,
+      epLabel,
+      html: result.toString(),
+    });
   }
 
-  // 日付セクション（年で始まるもの）を逆順にし、その他（メモ等）は末尾に残す
-  const dateWeeks = weekData.filter((w) => /^\d{4}年/.test(w.title));
-  const otherWeeks = weekData.filter((w) => !/^\d{4}年/.test(w.title));
-  weekData.length = 0;
-  dateWeeks.reverse().forEach((w) => weekData.push(w));
-  otherWeeks.forEach((w) => weekData.push(w));
+  // 日付セクション（最新順）とその他セクション（末尾）に再編
+  const dateWeeks = rawWeekData.filter((w) => w.isDate);
+  const otherWeeks = rawWeekData.filter((w) => !w.isDate);
+  const weekData = [...dateWeeks.reverse(), ...otherWeeks];
 
-  const tabButtons = weekData
-    .map(
-      (w, i) =>
-        `<button class="tl-tab${i === 0 ? " tl-tab-active" : ""}" data-week="${i}">${escapeHtml(w.title)}</button>`,
-    )
+  // ユニークな月一覧の集計
+  const monthMap = new Map();
+  dateWeeks.forEach((w) => {
+    if (!monthMap.has(w.monthKey)) {
+      monthMap.set(w.monthKey, {
+        key: w.monthKey,
+        label: w.monthLabel,
+        count: 0,
+      });
+    }
+    monthMap.get(w.monthKey).count++;
+  });
+  const months = Array.from(monthMap.values());
+  if (otherWeeks.length > 0) {
+    months.push({
+      key: "notes",
+      label: "メモ・資料",
+      count: otherWeeks.length,
+    });
+  }
+
+  // 月フィルターピルHTML
+  const monthPillsHtml = `
+    <button class="tl-pill tl-pill-active" data-month="all">すべて <span class="tl-pill-count">${weekData.length}</span></button>
+    ${months
+      .map(
+        (m) =>
+          `<button class="tl-pill" data-month="${m.key}">${escapeHtml(m.label)} <span class="tl-pill-count">${m.count}</span></button>`,
+      )
+      .join("")}
+  `;
+
+  // クイックジャンプ用 option HTML
+  const jumpOptionsHtml = weekData
+    .map((w, i) => {
+      const prefix = w.weekNum ? `第${w.weekNum}週` : "NOTE";
+      const period = w.dateRange || w.title;
+      const ep = w.epLabel ? ` [${w.epLabel}]` : "";
+      const latestTag = i === 0 && w.isDate ? " ★最新" : "";
+      return `<option value="${i}">${prefix}: ${period}${ep}${latestTag}</option>`;
+    })
     .join("");
 
-  const tabContents = weekData
-    .map(
-      (w, i) =>
-        `<div class="tl-content${i === 0 ? " tl-content-active" : ""}" data-week="${i}">${w.html}</div>`,
-    )
+  // 週カードHTML
+  const weekCardsHtml = weekData
+    .map((w, i) => {
+      const isLatest = i === 0 && w.isDate;
+      return `
+      <button class="tl-card${i === 0 ? " tl-card-active" : ""}" data-index="${i}" data-month="${w.monthKey}">
+        <div class="tl-card-header">
+          <span class="tl-card-badge">${w.weekNum ? `第${w.weekNum}週` : "NOTE"}</span>
+          ${isLatest ? '<span class="tl-card-live"><span class="tl-live-dot"></span>LATEST</span>' : ""}
+        </div>
+        <div class="tl-card-period">${escapeHtml(w.dateRange || w.title)}</div>
+        <div class="tl-card-meta">
+          ${w.epLabel ? `<span class="tl-ep-chip">${escapeHtml(w.epLabel)}</span>` : ""}
+          <span class="tl-card-sub">${escapeHtml(w.monthLabel)}</span>
+        </div>
+      </button>`;
+    })
+    .join("");
+
+  // 各週コンテンツペインHTML
+  const weekPanesHtml = weekData
+    .map((w, i) => {
+      // 最初の <h2> を削除してカスタムヘッダーで統一
+      const cleanBody = w.html.replace(/<h2[\s\S]*?<\/h2>/, "").trim();
+      const prevWeek = i < weekData.length - 1 ? weekData[i + 1] : null;
+      const nextWeek = i > 0 ? weekData[i - 1] : null;
+
+      return `
+      <article class="tl-pane${i === 0 ? " tl-pane-active" : ""}" data-index="${i}" data-month="${w.monthKey}">
+        <header class="tl-pane-header">
+          <div class="tl-pane-meta-bar">
+            <span class="tl-pane-badge">${w.weekNum ? `第${w.weekNum}週` : "NOTE"}</span>
+            <span class="tl-pane-period">${escapeHtml(w.dateRange || w.title)}</span>
+            ${w.epLabel ? `<span class="tl-ep-chip tl-ep-chip-lg">${escapeHtml(w.epLabel)}</span>` : ""}
+          </div>
+          <h2 class="tl-pane-title">${escapeHtml(w.title)}</h2>
+        </header>
+        <div class="tl-pane-body">
+          ${cleanBody}
+        </div>
+        <nav class="tl-pane-footer">
+          ${
+            prevWeek
+              ? `<button class="tl-footer-nav-btn tl-footer-prev" data-target="${i + 1}">
+                  <span class="tl-nav-arrow">←</span>
+                  <div class="tl-nav-text">
+                    <span class="tl-nav-sub">過去の記録</span>
+                    <span class="tl-nav-title">${escapeHtml(prevWeek.title)}</span>
+                  </div>
+                </button>`
+              : '<div class="tl-footer-placeholder"></div>'
+          }
+          ${
+            nextWeek
+              ? `<button class="tl-footer-nav-btn tl-footer-next" data-target="${i - 1}">
+                  <div class="tl-nav-text">
+                    <span class="tl-nav-sub">新しい記録</span>
+                    <span class="tl-nav-title">${escapeHtml(nextWeek.title)}</span>
+                  </div>
+                  <span class="tl-nav-arrow">→</span>
+                </button>`
+              : '<div class="tl-footer-placeholder"></div>'
+          }
+        </nav>
+      </article>`;
+    })
     .join("");
 
   return `
 <style>
-.tl-tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1.5rem}
-.tl-tab{padding:.45rem 1rem;background:var(--lab-bg-card,rgba(30,32,48,.8));border:1px solid var(--lab-border,rgba(99,102,241,.2));border-radius:8px;color:var(--lab-text-muted,#8b8fa0);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
-.tl-tab:hover{border-color:var(--lab-accent,#58a6ff);color:var(--lab-text,#e0e0e8)}
-.tl-tab-active{background:rgba(88,166,255,.15);border-color:var(--lab-accent,#58a6ff);color:var(--lab-text,#e0e0e8)}
-.tl-content{display:none}.tl-content-active{display:block}
+.tl-console { margin: 1.5rem 0 3rem; }
+.tl-preamble { margin-bottom: 2rem; }
+.tl-deck {
+  background: var(--lab-bg-card, rgba(30, 32, 48, 0.85));
+  border: 1px solid var(--lab-border, rgba(99, 102, 241, 0.2));
+  border-radius: var(--lab-radius, 12px);
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+}
+.tl-deck::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--lab-accent, #58a6ff), var(--lab-purple, #bc8cff), transparent);
+  pointer-events: none;
+}
+.tl-deck-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.tl-month-pills { display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
+.tl-pill {
+  background: var(--lab-bg-table, rgba(20, 22, 34, 0.6));
+  border: 1px solid var(--lab-border, rgba(99, 102, 241, 0.2));
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--lab-text-muted, #8b8fa0);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.tl-pill:hover {
+  border-color: var(--lab-accent, #58a6ff);
+  color: var(--lab-text, #e0e0e8);
+  background: rgba(88, 166, 255, 0.08);
+}
+.tl-pill-active {
+  background: linear-gradient(135deg, rgba(88, 166, 255, 0.2), rgba(188, 140, 255, 0.15)) !important;
+  border-color: var(--lab-accent, #58a6ff) !important;
+  color: #fff !important;
+  box-shadow: 0 0 14px rgba(88, 166, 255, 0.3);
+}
+.tl-pill-count {
+  font-size: 0.72rem;
+  opacity: 0.75;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.05rem 0.35rem;
+  border-radius: 9999px;
+}
+.tl-nav-controls { display: flex; align-items: center; gap: 0.4rem; }
+.tl-nav-btn {
+  background: var(--lab-bg-table, rgba(20, 22, 34, 0.6));
+  border: 1px solid var(--lab-border, rgba(99, 102, 241, 0.2));
+  border-radius: 6px;
+  color: var(--lab-text-muted, #8b8fa0);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tl-nav-btn:hover:not(:disabled) {
+  border-color: var(--lab-accent, #58a6ff);
+  color: var(--lab-text, #e0e0e8);
+  background: rgba(88, 166, 255, 0.1);
+  transform: translateY(-1px);
+}
+.tl-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.tl-nav-btn-accent {
+  background: rgba(88, 166, 255, 0.12);
+  border-color: rgba(88, 166, 255, 0.4);
+  color: var(--lab-accent, #58a6ff);
+}
+.tl-nav-btn-accent:hover:not(:disabled) {
+  background: rgba(88, 166, 255, 0.25);
+  box-shadow: 0 0 12px rgba(88, 166, 255, 0.3);
+}
+.tl-deck-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.tl-jump-wrapper { display: flex; align-items: center; gap: 0.6rem; flex: 1; max-width: 500px; }
+.tl-jump-label { display: flex; align-items: center; gap: 0.3rem; font-size: 0.8rem; font-weight: 600; color: var(--lab-text-muted, #8b8fa0); white-space: nowrap; }
+.tl-select {
+  width: 100%;
+  background: var(--lab-bg-table, rgba(20, 22, 34, 0.6));
+  border: 1px solid var(--lab-border, rgba(99, 102, 241, 0.2));
+  border-radius: 6px;
+  color: var(--lab-text, #e0e0e8);
+  font-size: 0.85rem;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s;
+}
+.tl-select:hover, .tl-select:focus {
+  border-color: var(--lab-accent, #58a6ff);
+  box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
+}
+.tl-stats { font-size: 0.8rem; color: var(--lab-text-muted, #8b8fa0); display: flex; align-items: center; gap: 0.4rem; white-space: nowrap; }
+.tl-stats strong { color: var(--lab-accent, #58a6ff); }
+
+.tl-rail-section { margin: 1.75rem 0 2rem; }
+.tl-rail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; padding: 0 0.25rem; }
+.tl-rail-title { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; color: var(--lab-text-muted, #8b8fa0); text-transform: uppercase; }
+.tl-rail-hint { font-size: 0.72rem; color: var(--lab-text-muted, #8b8fa0); opacity: 0.6; }
+.tl-rail-container {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--lab-border, rgba(99, 102, 241, 0.2));
+  border-radius: var(--lab-radius, 12px);
+  padding: 0.85rem 0.75rem;
+  position: relative;
+}
+.tl-rail {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding-bottom: 0.35rem;
+}
+.tl-rail::-webkit-scrollbar { height: 5px; }
+.tl-rail::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 9999px; }
+.tl-rail::-webkit-scrollbar-thumb { background: var(--lab-border, rgba(99, 102, 241, 0.3)); border-radius: 9999px; }
+.tl-rail::-webkit-scrollbar-thumb:hover { background: var(--lab-accent, #58a6ff); }
+
+.tl-card {
+  flex: 0 0 175px;
+  min-width: 175px;
+  background: var(--lab-bg-card, rgba(30, 32, 48, 0.8));
+  border: 1px solid var(--lab-border, rgba(99, 102, 241, 0.2));
+  border-radius: var(--lab-radius-sm, 8px);
+  padding: 0.85rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.tl-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(88, 166, 255, 0.5);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+.tl-card-active {
+  background: linear-gradient(145deg, rgba(88, 166, 255, 0.12), rgba(30, 32, 48, 0.95)) !important;
+  border-color: var(--lab-accent, #58a6ff) !important;
+  box-shadow: 0 0 0 1px var(--lab-accent, #58a6ff), 0 8px 24px rgba(88, 166, 255, 0.25) !important;
+  transform: translateY(-2px);
+}
+.tl-card-active::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--lab-accent, #58a6ff), var(--lab-purple, #bc8cff));
+}
+.tl-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; }
+.tl-card-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--lab-accent, #58a6ff);
+  background: rgba(88, 166, 255, 0.12);
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+}
+.tl-card-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.15);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+.tl-live-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #4ade80; box-shadow: 0 0 6px #4ade80;
+  animation: tlPulse 1.6s infinite;
+}
+.tl-card-period {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--lab-text, #e0e0e8);
+  margin-bottom: 0.4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tl-card-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.25rem; }
+.tl-ep-chip {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--lab-purple, #bc8cff);
+  background: rgba(188, 140, 255, 0.12);
+  border: 1px solid rgba(188, 140, 255, 0.25);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-family: "SF Mono", monospace;
+}
+.tl-ep-chip-lg { font-size: 0.75rem; padding: 0.15rem 0.55rem; }
+.tl-card-sub { font-size: 0.7rem; color: var(--lab-text-muted, #8b8fa0); opacity: 0.8; }
+
+.tl-panes { position: relative; }
+.tl-pane {
+  display: none !important;
+}
+.tl-pane.tl-pane-active {
+  display: block !important;
+  animation: tlFadeIn 0.25s ease-out;
+}
+.tl-pane-header {
+  background: var(--lab-bg-card, rgba(30, 32, 48, 0.8));
+  border: 1px solid var(--lab-border, rgba(99, 102, 241, 0.2));
+  border-radius: var(--lab-radius, 12px);
+  padding: 1.75rem 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+.tl-pane-header::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; bottom: 0; width: 4px;
+  background: linear-gradient(180deg, var(--lab-accent, #58a6ff), var(--lab-purple, #bc8cff));
+}
+.tl-pane-meta-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 0.5rem; }
+.tl-pane-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--lab-accent, #58a6ff), var(--lab-purple, #bc8cff));
+  color: #fff;
+  padding: 0.2rem 0.65rem;
+  border-radius: 4px;
+}
+.tl-pane-period { font-size: 0.95rem; font-weight: 600; color: var(--lab-text-muted, #8b8fa0); }
+.tl-pane-title { font-size: 1.5rem; font-weight: 800; color: var(--lab-text, #e0e0e8); margin: 0.25rem 0 0; border-bottom: none; padding-bottom: 0; }
+.tl-pane-body h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  margin-top: 2rem;
+  padding-left: 0.5rem;
+  border-left: 3px solid var(--lab-accent, #58a6ff);
+}
+.tl-pane-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 1rem;
+  margin-top: 3.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--lab-border, rgba(99, 102, 241, 0.2));
+}
+.tl-footer-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: var(--lab-bg-card, rgba(30, 32, 48, 0.8));
+  border: 1px solid var(--lab-border, rgba(99, 102, 241, 0.2));
+  border-radius: var(--lab-radius, 12px);
+  padding: 1rem 1.25rem;
+  color: var(--lab-text, #e0e0e8);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  flex: 1;
+  max-width: 48%;
+}
+.tl-footer-next { text-align: right; justify-content: flex-end; margin-left: auto; }
+.tl-footer-nav-btn:hover {
+  border-color: var(--lab-accent, #58a6ff);
+  box-shadow: 0 6px 20px rgba(88, 166, 255, 0.15);
+  transform: translateY(-2px);
+}
+.tl-nav-arrow { font-size: 1.2rem; color: var(--lab-accent, #58a6ff); font-weight: bold; }
+.tl-nav-text { display: flex; flex-direction: column; gap: 0.15rem; overflow: hidden; }
+.tl-nav-sub { font-size: 0.72rem; color: var(--lab-text-muted, #8b8fa0); text-transform: uppercase; letter-spacing: 0.05em; }
+.tl-nav-title { font-size: 0.88rem; font-weight: 600; color: var(--lab-text, #e0e0e8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tl-footer-placeholder { flex: 1; max-width: 48%; }
+
+@keyframes tlPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+@keyframes tlFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .tl-deck-top { flex-direction: column; align-items: stretch; }
+  .tl-nav-controls { justify-content: flex-end; }
+  .tl-deck-bottom { flex-direction: column; align-items: stretch; }
+  .tl-jump-wrapper { max-width: 100%; }
+  .tl-pane-footer { flex-direction: column; }
+  .tl-footer-nav-btn, .tl-footer-placeholder { max-width: 100%; }
+  .tl-pane-header { padding: 1.25rem 1.5rem; }
+}
+@media (max-width: 600px) {
+  .tl-card { flex: 0 0 150px; min-width: 150px; padding: 0.75rem 0.85rem; }
+}
 </style>
-${preambleHtml}
-<div class="tl-tabs">${tabButtons}</div>
-<div class="tl-contents">
-${tabContents}
+<div class="tl-preamble">
+  ${preambleHtml}
 </div>
+
+<div class="tl-console" id="tlConsole">
+  <!-- コントロールデッキ -->
+  <div class="tl-deck">
+    <div class="tl-deck-top">
+      <!-- 月フィルター -->
+      <div class="tl-month-pills" id="tlMonthPills">
+        ${monthPillsHtml}
+      </div>
+
+      <!-- ステップナビゲーション -->
+      <div class="tl-nav-controls">
+        <button class="tl-nav-btn" id="tlPrevBtn" title="前の週（過去へ）">◀ 前週</button>
+        <button class="tl-nav-btn tl-nav-btn-accent" id="tlLatestBtn" title="最新週へジャンプ">⚡ 最新</button>
+        <button class="tl-nav-btn" id="tlNextBtn" title="次の週（最新へ）">次週 ▶</button>
+      </div>
+    </div>
+
+    <!-- クイックジャンプバー -->
+    <div class="tl-deck-bottom">
+      <div class="tl-jump-wrapper">
+        <label class="tl-jump-label" for="tlJumpSelect">
+          <span class="tl-jump-icon">🔍</span>
+          <span class="tl-jump-text">週ジャンプ:</span>
+        </label>
+        <select class="tl-select" id="tlJumpSelect">
+          ${jumpOptionsHtml}
+        </select>
+      </div>
+      <div class="tl-stats">
+        <span class="tl-stats-icon">📅</span>
+        <span>全 <strong>${dateWeeks.length}</strong> 週（計 ${weekData.length} エントリ）</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 週カードレール -->
+  <div class="tl-rail-section">
+    <div class="tl-rail-header">
+      <span class="tl-rail-title">TIMELINE NODES</span>
+      <span class="tl-rail-hint">クリックで選択 / 左右スクロール可能</span>
+    </div>
+    <div class="tl-rail-container">
+      <div class="tl-rail" id="tlRail">
+        ${weekCardsHtml}
+      </div>
+    </div>
+  </div>
+
+  <!-- コンテンツペイン群 -->
+  <div class="tl-panes" id="tlPanes">
+    ${weekPanesHtml}
+  </div>
+</div>
+
 <script>
-(function(){
-  var tabs=document.querySelectorAll('.tl-tab');
-  tabs.forEach(function(tab){
-    tab.addEventListener('click',function(){
-      var w=this.dataset.week;
-      tabs.forEach(function(t){t.classList.remove('tl-tab-active');});
-      document.querySelectorAll('.tl-content').forEach(function(c){c.classList.remove('tl-content-active');});
-      this.classList.add('tl-tab-active');
-      document.querySelector('.tl-content[data-week="'+w+'"]').classList.add('tl-content-active');
+(function() {
+  const consoleEl = document.getElementById('tlConsole');
+  if (!consoleEl) return;
+
+  const cards = consoleEl.querySelectorAll('.tl-card');
+  const panes = consoleEl.querySelectorAll('.tl-pane');
+  const monthPills = consoleEl.querySelectorAll('.tl-pill');
+  const jumpSelect = document.getElementById('tlJumpSelect');
+  const prevBtn = document.getElementById('tlPrevBtn');
+  const nextBtn = document.getElementById('tlNextBtn');
+  const latestBtn = document.getElementById('tlLatestBtn');
+  const rail = document.getElementById('tlRail');
+
+  let currentIndex = 0;
+
+  function updateActive(index, scrollRail = true) {
+    index = Math.max(0, Math.min(index, cards.length - 1));
+    currentIndex = index;
+
+    // カード更新
+    cards.forEach((card) => {
+      const i = parseInt(card.dataset.index, 10);
+      if (i === index) {
+        card.classList.add('tl-card-active');
+        if (scrollRail && rail) {
+          const cardLeft = card.offsetLeft - rail.offsetLeft;
+          const targetScroll = cardLeft - (rail.clientWidth / 2) + (card.clientWidth / 2);
+          rail.scrollTo({ left: targetScroll, behavior: 'smooth' });
+        }
+      } else {
+        card.classList.remove('tl-card-active');
+      }
+    });
+
+    // ペイン更新
+    panes.forEach((pane) => {
+      const i = parseInt(pane.dataset.index, 10);
+      if (i === index) {
+        pane.classList.add('tl-pane-active');
+      } else {
+        pane.classList.remove('tl-pane-active');
+      }
+    });
+
+    // セレクトボックス同期
+    if (jumpSelect && jumpSelect.value !== String(index)) {
+      jumpSelect.value = String(index);
+    }
+
+    // ナビボタン状態更新 (降順なので index=0が最新、index=cards.length-1が最古)
+    if (prevBtn) prevBtn.disabled = (index >= cards.length - 1);
+    if (nextBtn) nextBtn.disabled = (index <= 0);
+
+    // URLハッシュ更新
+    try {
+      history.replaceState(null, '', '#week-' + index);
+    } catch(e) {}
+  }
+
+  function filterMonth(monthKey) {
+    monthPills.forEach((pill) => {
+      pill.classList.toggle('tl-pill-active', pill.dataset.month === monthKey);
+    });
+
+    let firstVisibleIndex = -1;
+    cards.forEach((card) => {
+      const match = (monthKey === 'all' || card.dataset.month === monthKey);
+      card.style.display = match ? '' : 'none';
+      if (match && firstVisibleIndex === -1) {
+        firstVisibleIndex = parseInt(card.dataset.index, 10);
+      }
+    });
+
+    // 現在のカードが非表示になった場合、絞り込まれた先頭を表示
+    const currentCard = cards[currentIndex];
+    if (currentCard && currentCard.style.display === 'none' && firstVisibleIndex !== -1) {
+      updateActive(firstVisibleIndex);
+    }
+  }
+
+  // カードクリック
+  cards.forEach((card) => {
+    card.addEventListener('click', function() {
+      const idx = parseInt(this.dataset.index, 10);
+      updateActive(idx, false);
     });
   });
+
+  // 月フィルタークリック
+  monthPills.forEach((pill) => {
+    pill.addEventListener('click', function() {
+      filterMonth(this.dataset.month);
+    });
+  });
+
+  // セレクトボックス変更
+  if (jumpSelect) {
+    jumpSelect.addEventListener('change', function() {
+      updateActive(parseInt(this.value, 10));
+    });
+  }
+
+  // ステップボタン
+  if (prevBtn) {
+    prevBtn.addEventListener('click', function() {
+      if (currentIndex < cards.length - 1) {
+        updateActive(currentIndex + 1);
+      }
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function() {
+      if (currentIndex > 0) {
+        updateActive(currentIndex - 1);
+      }
+    });
+  }
+
+  if (latestBtn) {
+    latestBtn.addEventListener('click', function() {
+      filterMonth('all');
+      updateActive(0);
+    });
+  }
+
+  // フッターナビボタンクリック
+  consoleEl.querySelectorAll('.tl-footer-nav-btn').forEach((btn) => {
+    btn.addEventListener('click', function() {
+      const target = parseInt(this.dataset.target, 10);
+      if (!isNaN(target)) {
+        updateActive(target);
+        consoleEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // キーボードショートカット（左右キー）
+  window.addEventListener('keydown', function(e) {
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
+    if (e.key === 'ArrowLeft') {
+      if (currentIndex < cards.length - 1) updateActive(currentIndex + 1);
+    } else if (e.key === 'ArrowRight') {
+      if (currentIndex > 0) updateActive(currentIndex - 1);
+    }
+  });
+
+  // 初期ハッシュ解析
+  const hashMatch = window.location.hash.match(/^#week-(\\d+)$/);
+  if (hashMatch) {
+    const initialIndex = parseInt(hashMatch[1], 10);
+    if (!isNaN(initialIndex) && initialIndex >= 0 && initialIndex < cards.length) {
+      updateActive(initialIndex);
+      return;
+    }
+  }
+
+  // 初期化実行
+  updateActive(0, false);
 })();
 </script>`;
 }

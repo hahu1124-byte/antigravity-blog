@@ -229,30 +229,591 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.85rem;
-  margin: 1rem 0;
+  margin: 1.25rem 0 2rem;
   overflow-x: auto;
   display: block;
+  background: var(--lab-bg-card);
+  border: 1px solid var(--lab-border);
+  border-radius: var(--lab-radius-sm);
 }
 
 .novels-timeline-body th {
   background: var(--lab-bg-table);
   color: var(--lab-text-muted);
   font-weight: 600;
-  padding: 0.6rem 0.9rem;
+  padding: 0.75rem 1rem;
   text-align: left;
   border-bottom: 1px solid var(--lab-border);
   white-space: nowrap;
 }
 
 .novels-timeline-body td {
-  padding: 0.6rem 0.9rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   vertical-align: top;
   line-height: 1.6;
 }
 
+.novels-timeline-body tr:hover td {
+  background: rgba(88, 166, 255, 0.03);
+}
+
 .novels-timeline-body tr:last-child td {
   border-bottom: none;
+}
+
+/* ============================================================
+   先進的タイムラインコンソール（Timeline Console）スタイル
+   ============================================================ */
+
+.tl-preamble {
+  margin-bottom: 2rem;
+}
+
+.tl-console {
+  margin: 1.5rem 0 3rem;
+}
+
+/* --- コントロールデッキ --- */
+.tl-deck {
+  background: var(--lab-bg-card);
+  border: 1px solid var(--lab-border);
+  border-radius: var(--lab-radius);
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+}
+
+.tl-deck::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--lab-accent),
+    var(--lab-purple),
+    transparent
+  );
+  pointer-events: none;
+}
+
+.tl-deck-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+/* --- 月フィルターピル --- */
+.tl-month-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tl-pill {
+  background: var(--lab-bg-table);
+  border: 1px solid var(--lab-border);
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--lab-text-muted);
+  cursor: pointer;
+  transition: all var(--lab-transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tl-pill:hover {
+  border-color: var(--lab-accent);
+  color: var(--lab-text);
+  background: rgba(88, 166, 255, 0.08);
+}
+
+.tl-pill-active {
+  background: linear-gradient(
+    135deg,
+    rgba(88, 166, 255, 0.2),
+    rgba(188, 140, 255, 0.15)
+  ) !important;
+  border-color: var(--lab-accent) !important;
+  color: #fff !important;
+  box-shadow: 0 0 14px rgba(88, 166, 255, 0.3);
+}
+
+.tl-pill-count {
+  font-size: 0.72rem;
+  opacity: 0.75;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.05rem 0.35rem;
+  border-radius: 9999px;
+}
+
+/* --- ステップナビゲーション --- */
+.tl-nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.tl-nav-btn {
+  background: var(--lab-bg-table);
+  border: 1px solid var(--lab-border);
+  border-radius: 6px;
+  color: var(--lab-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+  transition: all var(--lab-transition);
+}
+
+.tl-nav-btn:hover:not(:disabled) {
+  border-color: var(--lab-accent);
+  color: var(--lab-text);
+  background: rgba(88, 166, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.tl-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.tl-nav-btn-accent {
+  background: rgba(88, 166, 255, 0.12);
+  border-color: rgba(88, 166, 255, 0.4);
+  color: var(--lab-accent);
+}
+
+.tl-nav-btn-accent:hover:not(:disabled) {
+  background: rgba(88, 166, 255, 0.25);
+  box-shadow: 0 0 12px rgba(88, 166, 255, 0.3);
+}
+
+/* --- クイックジャンプバー --- */
+.tl-deck-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tl-jump-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 1;
+  max-width: 500px;
+}
+
+.tl-jump-label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--lab-text-muted);
+  white-space: nowrap;
+}
+
+.tl-select {
+  width: 100%;
+  background: var(--lab-bg-table);
+  border: 1px solid var(--lab-border);
+  border-radius: 6px;
+  color: var(--lab-text);
+  font-size: 0.85rem;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  outline: none;
+  transition: all var(--lab-transition);
+}
+
+.tl-select:hover,
+.tl-select:focus {
+  border-color: var(--lab-accent);
+  box-shadow: 0 0 10px rgba(88, 166, 255, 0.2);
+}
+
+.tl-stats {
+  font-size: 0.8rem;
+  color: var(--lab-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.tl-stats strong {
+  color: var(--lab-accent);
+}
+
+/* --- 週カードレール --- */
+.tl-rail-section {
+  margin: 1.75rem 0 2rem;
+}
+
+.tl-rail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+  padding: 0 0.25rem;
+}
+
+.tl-rail-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--lab-text-muted);
+  text-transform: uppercase;
+}
+
+.tl-rail-hint {
+  font-size: 0.72rem;
+  color: var(--lab-text-muted);
+  opacity: 0.6;
+}
+
+.tl-rail-container {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--lab-border);
+  border-radius: var(--lab-radius);
+  padding: 0.85rem 0.75rem;
+  position: relative;
+}
+
+.tl-rail {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding-bottom: 0.35rem;
+}
+
+.tl-rail::-webkit-scrollbar {
+  height: 5px;
+}
+
+.tl-rail::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+}
+
+.tl-rail::-webkit-scrollbar-thumb {
+  background: var(--lab-border);
+  border-radius: 9999px;
+}
+
+.tl-rail::-webkit-scrollbar-thumb:hover {
+  background: var(--lab-accent);
+}
+
+/* --- 週カード本体 --- */
+.tl-card {
+  flex: 0 0 175px;
+  min-width: 175px;
+  background: var(--lab-bg-card);
+  border: 1px solid var(--lab-border);
+  border-radius: var(--lab-radius-sm);
+  padding: 0.85rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tl-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(88, 166, 255, 0.5);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.tl-card-active {
+  background: linear-gradient(
+    145deg,
+    rgba(88, 166, 255, 0.12),
+    rgba(30, 32, 48, 0.95)
+  ) !important;
+  border-color: var(--lab-accent) !important;
+  box-shadow:
+    0 0 0 1px var(--lab-accent),
+    0 8px 24px rgba(88, 166, 255, 0.25) !important;
+  transform: translateY(-2px);
+}
+
+.tl-card-active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--lab-accent), var(--lab-purple));
+}
+
+.tl-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.4rem;
+}
+
+.tl-card-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--lab-accent);
+  background: rgba(88, 166, 255, 0.12);
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  letter-spacing: 0.03em;
+}
+
+.tl-card-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.15);
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.tl-live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 6px #4ade80;
+  animation: tlPulse 1.6s infinite;
+}
+
+.tl-card-period {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--lab-text);
+  margin-bottom: 0.4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tl-card-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tl-ep-chip {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--lab-purple);
+  background: rgba(188, 140, 255, 0.12);
+  border: 1px solid rgba(188, 140, 255, 0.25);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-family: "SF Mono", monospace;
+  letter-spacing: -0.02em;
+}
+
+.tl-ep-chip-lg {
+  font-size: 0.75rem;
+  padding: 0.15rem 0.55rem;
+}
+
+.tl-card-sub {
+  font-size: 0.7rem;
+  color: var(--lab-text-muted);
+  opacity: 0.8;
+}
+
+/* --- コンテンツペイン群 --- */
+.tl-pane {
+  display: none;
+  animation: tlFadeIn 0.25s ease-out;
+}
+
+.tl-pane-active {
+  display: block;
+}
+
+.tl-pane-header {
+  background: var(--lab-bg-card);
+  border: 1px solid var(--lab-border);
+  border-radius: var(--lab-radius);
+  padding: 1.75rem 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.tl-pane-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(180deg, var(--lab-accent), var(--lab-purple));
+}
+
+.tl-pane-meta-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.tl-pane-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--lab-accent), var(--lab-purple));
+  color: #fff;
+  padding: 0.2rem 0.65rem;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+.tl-pane-period {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--lab-text-muted);
+}
+
+.tl-pane-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--lab-text);
+  margin: 0.25rem 0 0;
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tl-pane-body h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  margin-top: 2rem;
+  padding-left: 0.5rem;
+  border-left: 3px solid var(--lab-accent);
+}
+
+/* --- フッターナビゲーション --- */
+.tl-pane-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 1rem;
+  margin-top: 3.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--lab-border);
+}
+
+.tl-footer-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  background: var(--lab-bg-card);
+  border: 1px solid var(--lab-border);
+  border-radius: var(--lab-radius);
+  padding: 1rem 1.25rem;
+  color: var(--lab-text);
+  cursor: pointer;
+  transition: all var(--lab-transition);
+  text-align: left;
+  flex: 1;
+  max-width: 48%;
+}
+
+.tl-footer-next {
+  text-align: right;
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.tl-footer-nav-btn:hover {
+  border-color: var(--lab-accent);
+  box-shadow: 0 6px 20px rgba(88, 166, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.tl-nav-arrow {
+  font-size: 1.2rem;
+  color: var(--lab-accent);
+  font-weight: bold;
+}
+
+.tl-nav-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  overflow: hidden;
+}
+
+.tl-nav-sub {
+  font-size: 0.72rem;
+  color: var(--lab-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tl-nav-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--lab-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tl-footer-placeholder {
+  flex: 1;
+  max-width: 48%;
+}
+
+/* --- アニメーション --- */
+@keyframes tlPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes tlFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* --- タイムライン導線リンク --- */
@@ -341,6 +902,39 @@
 }
 
 /* --- レスポンシブ --- */
+@media (max-width: 768px) {
+  .tl-deck-top {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tl-nav-controls {
+    justify-content: flex-end;
+  }
+
+  .tl-deck-bottom {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tl-jump-wrapper {
+    max-width: 100%;
+  }
+
+  .tl-pane-footer {
+    flex-direction: column;
+  }
+
+  .tl-footer-nav-btn,
+  .tl-footer-placeholder {
+    max-width: 100%;
+  }
+
+  .tl-pane-header {
+    padding: 1.25rem 1.5rem;
+  }
+}
+
 @media (max-width: 600px) {
   .novels-hero-title {
     font-size: 1.7rem;
@@ -348,5 +942,11 @@
 
   .novels-hero {
     padding: 1.75rem;
+  }
+
+  .tl-card {
+    flex: 0 0 150px;
+    min-width: 150px;
+    padding: 0.75rem 0.85rem;
   }
 }
