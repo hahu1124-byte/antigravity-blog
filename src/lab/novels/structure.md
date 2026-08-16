@@ -62,7 +62,7 @@ novels/
 │   │   ├── setting-ch3.md      # 第3章「深淵の糸」詳細プロット
 │   │   ├── setting-ch4.md      # 第4章「久遠の覚醒」詳細プロット
 │   │   ├── setting-ch5.md      # 第5章「欠けた王名」詳細プロット
-│   │   ├── setting-ch6.md      # 第6章 詳細プロット（未定・導入部のみ策定済み）
+│   │   ├── setting-ch6.md      # 第6章「残響の王冠」詳細プロット
 │   │   └── setting.md          # プロット・ブロック構成
 │   └── episodes/
         ├── 1-50/               # ep01~ep50
