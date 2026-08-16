@@ -35,7 +35,7 @@ export async function mdToHtml(filePath) {
 export function labWrap({
   title,
   description,
-  cssDepth,
+  cssDepth = 1,
   backHref,
   backLabel,
   titleIcon,
@@ -45,9 +45,11 @@ export function labWrap({
   const cssPath =
     cssDepth === 0
       ? `./styles.css`
-      : cssDepth === 2
-        ? `../../styles.css`
-        : `/lab/styles.css`;
+      : cssDepth === 1
+        ? `../styles.css`
+        : cssDepth === 2
+          ? `../../styles.css`
+          : `../../../styles.css`;
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -62,7 +64,7 @@ export function labWrap({
     <link rel="stylesheet" href="${cssPath}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <script>
         (function(){try{var t=localStorage.getItem('gp-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})()
     </script>
@@ -157,8 +159,21 @@ export async function buildTimelineTabsHtml(filePath) {
       dateRange = rangeMatch ? rangeMatch[0] : "";
     }
 
-    // セクション内のエピソード番号抽出 (epXX)
-    const epMatches = [...section.matchAll(/\bep(\d+)[A-Z]?\b/gi)];
+    // テーブルの「対象」列（| # | 対象 | 内容 |）から、その週に執筆・制作された主対象エピソード番号のみを抽出（本文中の過去話言及を誤検知しないようにする）
+    const targetRowMatches = [
+      ...section.matchAll(/\|\s*\d+\s*\|\s*([^|]+)\s*\|/g),
+    ];
+    let epMatches = [];
+    if (targetRowMatches.length > 0) {
+      for (const row of targetRowMatches) {
+        const targetCell = row[1];
+        const matches = [...targetCell.matchAll(/\bep(\d+)[A-Z]?\b/gi)];
+        matches.forEach((m) => epMatches.push(m));
+      }
+    } else {
+      epMatches = [...section.matchAll(/\bep(\d+)[A-Z]?\b/gi)];
+    }
+
     let epLabel = "";
     if (epMatches.length > 0) {
       const epNums = [
@@ -928,6 +943,7 @@ export async function buildSettingsPages() {
       title: "設定詳細 — 廃城の王 | AI小説 | Gravity Portal",
       description:
         "「廃城の王」の世界観設定（マルチバース・エルダリア暦・神々・遺言石）を公開。",
+      cssDepth: 2,
       backHref: "/lab/novels/",
       backLabel: "AI小説に戻る",
       titleIcon: "📚",
@@ -969,6 +985,7 @@ export async function buildSettingsPages() {
       labWrap({
         title: `${s.title} — 廃城の王 | AI小説 | Gravity Portal`,
         description: `「廃城の王」の世界観設定「${s.title}」の詳細。`,
+        cssDepth: 3,
         backHref: "/lab/novels/settings/",
         backLabel: "設定詳細に戻る",
         titleIcon: s.icon,
@@ -1060,6 +1077,7 @@ export async function buildNovelsPages() {
       title: "AI小説 — 廃城の王 | LAB | Gravity Portal",
       description:
         "2つのAIが同じ話を書き、人間が統合する。カクヨム連載中「廃城の王」の制作プロセスと修正履歴を公開。",
+      cssDepth: 1,
       backHref: "/lab/",
       backLabel: "LABに戻る",
       titleIcon: "📖",
@@ -1098,6 +1116,7 @@ export async function buildNovelsPages() {
       title: "制作タイムライン — 廃城の王 | AI小説 | Gravity Portal",
       description:
         "カクヨム連載中「廃城の王」の制作タイムライン。いつ・どの話を書き・何を修正したか週ごとにまとめた制作記録。",
+      cssDepth: 2,
       backHref: "/lab/novels/",
       backLabel: "AI小説に戻る",
       titleIcon: "📅",
@@ -1135,8 +1154,6 @@ export async function buildNovelsPages() {
             <div class="wm-control-group">
                 <span class="wm-control-label">表示範囲:</span>
                 <button id="btn-view-world" class="wm-btn active" onclick="switchMapMode('world')">🗺️ エルダリア全体図</button>
-                <!-- 2026-07-26: 地理設定確定に伴いworld全体図の配置を修正。拡大図3種（arden/west/east）の背景画像は
-                     旧配置のまま未更新のため、新しい画像ができるまでボタンを非表示にする（todo.md参照） -->
                 <button id="btn-view-arden" class="wm-btn" style="display:none" onclick="switchMapMode('arden')">📍 アルデン東部・廃境拡大</button>
                 <button id="btn-view-west" class="wm-btn" style="display:none" onclick="switchMapMode('west')">🌾 西部拡大（カルン街道）</button>
                 <button id="btn-view-east" class="wm-btn" style="display:none" onclick="switchMapMode('east')">🌫️ 東部拡張（廃境最深部）</button>
