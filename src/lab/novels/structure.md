@@ -58,6 +58,7 @@ novels/
 │   │   ├── characters.md       # キャラクター一覧
 │   │   └── codex.md            # 現場データ集（封石・廃城構造・執筆注意ルール）
 │   ├── plots/                     # プロット・各章設定
+│   │   ├── guild-rank-chart.md 
 │   │   ├── setting-ch1-2.md    # 第1章・第2章 詳細プロット
 │   │   ├── setting-ch3.md      # 第3章「深淵の糸」詳細プロット
 │   │   ├── setting-ch4.md      # 第4章「久遠の覚醒」詳細プロット
@@ -68,15 +69,9 @@ novels/
         ├── 1-50/               # ep01~ep50
         ├── 51-100/             # ep51~ep100
         └── 101-150/
-            └── 101-110/
-                ├── ... (7 older files)
-                ├── ep108T.md
-                ├── ep109T.md
-                ├── ep110T.md
-                └── archive/
-                    ├── ... (18 older files)
-                    ├── ep110A.md
-                    └── ep110C.md
+            ├── 101-110/             # ep101~ep110
+            └── 111-120/
+                └── ep111A.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
