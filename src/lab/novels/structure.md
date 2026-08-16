@@ -65,14 +65,14 @@ novels/
         ├── 51-100/             # ep51~ep100
         └── 101-150/
             └── 101-110/
-                ├── ... (7 older files)
-                ├── ep108A.md
-                ├── ep108C.md
+                ├── ... (5 older files)
+                ├── ep106T.md
+                ├── ep107T.md
                 ├── ep108T.md
                 └── archive/
-                    ├── ... (12 older files)
-                    ├── ep107A.md
-                    └── ep107C.md
+                    ├── ... (14 older files)
+                    ├── ep108A.md
+                    └── ep108C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
