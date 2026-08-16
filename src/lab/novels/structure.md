@@ -30,6 +30,7 @@ novels/
 │   │   ├── nations-vern.md     # 西方大陸「ヴェルン」の国家・勢力
 │   │   └── society.md          # 社会構造・文化
 │   ├── beings/                 # 種族・生物
+│   │   ├── a-rank-adventurers.md # 有力Aランク冒険者・パーティー
 │   │   ├── demon-kings.md      # 歴代魔王（人間時代・背景詳細）
 │   │   ├── demons.md           # 魔族設定
 │   │   ├── high-rank-adventurers.md # 高ランク冒険者（S・R・Zランク）
@@ -40,26 +41,29 @@ novels/
 │       ├── items.md            # アイテム・道具
 │       ├── kingdom-law.md      # ラングリア王国法（10本50条）
 │       ├── level-system.md     # 存在格レベル体系・シーリング・突破条件
+│       ├── purification-guild-regulations.md # 浄化師協会公文書管理規程
 │       └── skills.md           # ギフト段階詳細（弱〜真）・全スキル一覧
 │
 ├── multiverse-setting/         # 自作品を全てつなげるマルチバース構想（アイデア段階）
 │   └── multiverse.md           # 確定5世界の設定
 │
 ├── story-03-haijo-no-ou/       # 廃城の王
-    ├── appraisal-format.md     # 鑑定眼《トゥルー・サイト》の表示フォーマット
-    ├── characters-npc-crowd.md # 背景キャラ名簿（冒険者パーティー群、名前と一言特徴のみ）
-    ├── characters.md           # キャラクター一覧
-    ├── codex.md                # 現場データ集（封石・廃城構造・執筆注意ルール）
-    ├── EP-timeline.md          # 詳細タイムライン（BG暦・日付ベースの設定専用管理表）
-    ├── episodes-summary.md     # 各話あらすじ一覧
-    ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
-    ├── setting-ch1-2.md        # 第1章・第2章 詳細プロット
-    ├── setting-ch3.md          # 第3章「深淵の糸」詳細プロット
-    ├── setting-ch4.md          # 第4章「久遠の覚醒」詳細プロット
-    ├── setting-ch5.md          # 第5章「欠けた王名」詳細プロット
-    ├── setting-ch6.md          # 第6章 詳細プロット（未定・導入部のみ策定済み）
-    ├── setting.md              # プロット・ブロック構成
-    ├── writing_prompt.md       # AI執筆指示書
+│   ├── EP-timeline.md          # 詳細タイムライン（BG暦・日付ベースの設定専用管理表）
+│   ├── episodes-summary.md     # 各話あらすじ一覧
+│   ├── MASTER.md               # 設定ハブ（魔王・封石・進捗）
+│   ├── writing_prompt.md       # AI執筆指示書
+│   ├── characters/                # キャラクター・現場データ
+│   │   ├── appraisal-format.md # 鑑定眼《トゥルー・サイト》の表示フォーマット
+│   │   ├── characters-npc-crowd.md # 背景キャラ名簿（冒険者パーティー群、名前と一言特徴のみ）
+│   │   ├── characters.md       # キャラクター一覧
+│   │   └── codex.md            # 現場データ集（封石・廃城構造・執筆注意ルール）
+│   ├── plots/                     # プロット・各章設定
+│   │   ├── setting-ch1-2.md    # 第1章・第2章 詳細プロット
+│   │   ├── setting-ch3.md      # 第3章「深淵の糸」詳細プロット
+│   │   ├── setting-ch4.md      # 第4章「久遠の覚醒」詳細プロット
+│   │   ├── setting-ch5.md      # 第5章「欠けた王名」詳細プロット
+│   │   ├── setting-ch6.md      # 第6章 詳細プロット（未定・導入部のみ策定済み）
+│   │   └── setting.md          # プロット・ブロック構成
 │   └── episodes/
         ├── 1-50/               # ep01~ep50
         ├── 51-100/             # ep51~ep100
