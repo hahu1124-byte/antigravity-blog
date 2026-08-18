@@ -105,7 +105,10 @@ function parseXlsx(xlsxPath) {
     const row = data[i];
     const name = String(row[1] || '').replace(/\s+/g, '');
     if (name.includes(REGION)) {
-      found = { regular: row[5], premium: row[3], diesel: row[7], kerosene: row[9] };
+      found = {
+        regular: row[5], premium: row[3], diesel: row[7], kerosene: row[9],
+        regularPrev: row[4], premiumPrev: row[2], dieselPrev: row[6], kerosenePrev: row[8],
+      };
       break;
     }
   }
@@ -122,7 +125,11 @@ function parseXlsx(xlsxPath) {
     premium: String(found.premium),
     diesel: String(found.diesel),
     kerosene: String(found.kerosene),
-    note: '灯油は18L店頭価格。毎週水曜に経産省が発表するxlsxから自動取得。',
+    regularPrev: String(found.regularPrev),
+    premiumPrev: String(found.premiumPrev),
+    dieselPrev: String(found.dieselPrev),
+    kerosenePrev: String(found.kerosenePrev),
+    note: '灯油は18L店頭価格。毎週水曜に経産省が発表するxlsxから自動取得。前週値はxlsx内の前週列を利用（追加取得不要）。',
   };
 }
 

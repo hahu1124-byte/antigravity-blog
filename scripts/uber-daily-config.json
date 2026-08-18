@@ -83,6 +83,80 @@
       "message": "イベント周辺は混雑注意"
     }
   ],
+  "comboRules": [
+    {
+      "conditions": ["rain", "friday_evening"],
+      "multiplier": 1.8,
+      "emoji": "🔥🌧️",
+      "message": "雨×金曜夜は年間最大級の稼ぎ時。ただし視界不良で事故率も上がるので、急がず件数より単価の高い案件を狙おう"
+    },
+    {
+      "conditions": ["rain", "weekend_lunch"],
+      "multiplier": 1.7,
+      "emoji": "🌧️🍽️",
+      "message": "雨の週末ランチは外出控えで注文が殺到しやすい。ただし道路が混みやすいので配達時間には余裕を持たせよう"
+    },
+    {
+      "conditions": ["hot", "weekend_lunch"],
+      "multiplier": 1.5,
+      "emoji": "🥵🍽️",
+      "message": "猛暑の週末ランチは冷たい物・デリバリー需要が跳ね上がる。水分補給と休憩を怠らずに"
+    },
+    {
+      "conditions": ["cold", "friday_evening"],
+      "multiplier": 1.6,
+      "emoji": "🥶🍻",
+      "message": "寒い金曜夜は鍋・ホットフード需要で稼ぎ時。防寒装備を万全にして臨もう"
+    },
+    {
+      "conditions": ["rain", "cold"],
+      "multiplier": 1.6,
+      "emoji": "🌧️🥶",
+      "message": "冷たい雨の日は外出せず宅配で済ませる人が増える。路面凍結・スリップに注意しながら着実に件数を積み上げよう"
+    },
+    {
+      "conditions": ["rain", "hot"],
+      "multiplier": 1.4,
+      "emoji": "🌧️🥵",
+      "message": "蒸し暑い日の夕立は、屋内退避と同時に出前需要が急増するタイミング。雨具は持ちつつ熱中症対策も忘れずに"
+    },
+    {
+      "conditions": ["cold", "weekend_lunch"],
+      "multiplier": 1.5,
+      "emoji": "🥶🍽️",
+      "message": "寒い週末のランチタイムは温かい料理の宅配需要が伸びやすい。防寒しつつ午前〜昼にかけて稼働を厚めに"
+    },
+    {
+      "conditions": ["hot", "friday_evening"],
+      "multiplier": 1.6,
+      "emoji": "🥵🍻",
+      "message": "猛暑の金曜夜は涼みたい人の宅配需要と飲み会需要が重なる稼ぎ時。夜でも気温が高いままなので水分補給を切らさずに"
+    },
+    {
+      "conditions": ["rain", "cold", "friday_evening"],
+      "multiplier": 2.0,
+      "emoji": "🌧️🥶🍻",
+      "message": "冷たい雨の金曜夜は最強クラスの需要。ただし路面凍結・視界不良・夜間の重なりで事故リスクも最大級。無理な件数稼ぎより安全運転を最優先に"
+    },
+    {
+      "conditions": ["rain", "hot", "weekend_lunch"],
+      "multiplier": 1.8,
+      "emoji": "🌧️🥵🍽️",
+      "message": "蒸し暑い雨の週末ランチは屋内退避×食事需要が重なる稼ぎどころ。湿気で体力を消耗しやすいので休憩を多めに挟もう"
+    },
+    {
+      "conditions": ["rain", "cold", "weekend_lunch"],
+      "multiplier": 1.9,
+      "emoji": "🌧️🥶🍽️",
+      "message": "冷たい雨の週末ランチは温かい料理の宅配需要が跳ね上がる絶好の稼ぎ時。防寒とスリップ対策をしっかりして臨もう"
+    },
+    {
+      "conditions": ["rain", "hot", "friday_evening"],
+      "multiplier": 1.9,
+      "emoji": "🌧️🥵🍻",
+      "message": "蒸し暑い雨の金曜夜は屋内退避×飲み会需要のダブルピーク。湿度と暑さで消耗しやすいので水分補給を切らさず走ろう"
+    }
+  ],
   "dayOfWeekTips": {
     "0": { "emoji": "🌅", "tip": "日曜夜は注文増の傾向。夕方〜夜が狙い目" },
     "1": { "emoji": "💼", "tip": "月曜ランチは企業需要多め。オフィス街を狙おう" },

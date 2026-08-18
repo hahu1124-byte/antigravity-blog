@@ -74,6 +74,81 @@ async function fetchText(url, timeout = 10000) {
   }
 }
 
+// ===== 0. 天気履歴（前日・先週比較用） =====
+// src/ 配下に置くことで uber-daily-report.yml の `git add src/` に含めてコミットさせる。
+const WEATHER_HISTORY_FILE = path.join(ROOT, "src/weather-history.json");
+const WEATHER_HISTORY_MAX_DAYS = 40;
+
+function loadWeatherHistory() {
+  try {
+    return JSON.parse(fs.readFileSync(WEATHER_HISTORY_FILE, "utf8"));
+  } catch {
+    return [];
+  }
+}
+
+function offsetDateStr(days) {
+  const d = new Date(today.getTime() - days * 24 * 60 * 60 * 1000);
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
+}
+
+// 今日の実測（予報）気温を履歴に記録し、直近 WEATHER_HISTORY_MAX_DAYS 日分のみ保持する
+function recordTodayWeather(history, todayFc) {
+  if (!todayFc) return history;
+  const entry = {
+    date: DATE_DISPLAY,
+    tempMax: todayFc.tempMax ?? null,
+    tempMin: todayFc.tempMin ?? null,
+    telop: todayFc.telop || "",
+  };
+  const idx = history.findIndex((h) => h.date === entry.date);
+  if (idx >= 0) history[idx] = entry;
+  else history.push(entry);
+
+  const trimmed = history
+    .slice()
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-WEATHER_HISTORY_MAX_DAYS);
+
+  if (!DRY_RUN) {
+    fs.writeFileSync(WEATHER_HISTORY_FILE, JSON.stringify(trimmed, null, 2));
+  }
+  return trimmed;
+}
+
+// 前日・先週同曜日との気温差から一言コメントを生成（データが無ければ空文字）
+function renderWeatherCompareText(history, todayFc) {
+  const todayMax = parseInt(todayFc?.tempMax);
+  if (isNaN(todayMax)) return "";
+
+  const yesterday = history.find((h) => h.date === offsetDateStr(1));
+  const lastWeek = history.find((h) => h.date === offsetDateStr(7));
+
+  const parts = [];
+  if (yesterday) {
+    const prevMax = parseInt(yesterday.tempMax);
+    if (!isNaN(prevMax) && prevMax !== todayMax) {
+      const diff = todayMax - prevMax;
+      parts.push(`前日より${diff > 0 ? "+" : ""}${diff}℃`);
+    }
+  }
+  if (lastWeek) {
+    const prevMax = parseInt(lastWeek.tempMax);
+    if (!isNaN(prevMax) && Math.abs(todayMax - prevMax) >= 3) {
+      const diff = todayMax - prevMax;
+      parts.push(
+        `先週の同じ曜日より${diff > 0 ? "暑い" : "涼しい"}（${diff > 0 ? "+" : ""}${diff}℃）`,
+      );
+    }
+  }
+
+  if (parts.length === 0) return "";
+  return `<p class="weather-compare">📊 ${parts.join("、")}</p>`;
+}
+
 // ===== 1. 天気予報 =====
 
 async function getWeather() {
@@ -228,14 +303,6 @@ function renderNewsSection(news) {
   return html;
 }
 
-// ===== 3. 道路交通情報 =====
-
-function renderTrafficSection() {
-  // 自動取得が不安定なため、安定するまではリンク案内のみ
-  return `<p>特に無し</p>
-<p class="section-note">名古屋市内の最新交通規制情報は <a href="https://www.jartic.or.jp/" target="_blank" rel="noopener">JARTIC</a> をご確認ください。</p>`;
-}
-
 // ===== 4. ガソリン価格 =====
 
 // ガソリン価格は独立した週次ワークフロー (update-gas-price.yml) がキャッシュを更新する。
@@ -263,6 +330,17 @@ async function getGasPrice() {
   return getGasPriceCache();
 }
 
+// 前週比の差分表示（例: "+2.0円" / "-1.5円" / 前週値が無ければ空文字）
+function gasDiffLabel(cur, prev) {
+  const c = parseFloat(cur);
+  const p = parseFloat(prev);
+  if (isNaN(c) || isNaN(p)) return "";
+  const diff = Math.round((c - p) * 10) / 10;
+  if (diff === 0) return " <span class=\"price-diff\">（前週と同額）</span>";
+  const sign = diff > 0 ? "+" : "";
+  return ` <span class="price-diff">（前週比 ${sign}${diff}円）</span>`;
+}
+
 function renderGasSection(gas) {
   if (!gas) {
     return `<p>ガソリン価格情報を取得できませんでした。</p>
@@ -271,10 +349,10 @@ function renderGasSection(gas) {
 
   return `<table class="gas-table">
   <tr><th>種別</th><th>価格（円/L）</th></tr>
-  <tr><td>⛽ レギュラー</td><td><strong>${gas.regular || "---"}</strong></td></tr>
-  <tr><td>⛽ ハイオク</td><td>${gas.premium || "---"}</td></tr>
-  <tr><td>🛢️ 軽油</td><td>${gas.diesel || "---"}</td></tr>
-  <tr><td>🔥 灯油（18L）</td><td>${gas.kerosene || "---"}</td></tr>
+  <tr><td>⛽ レギュラー</td><td><strong>${gas.regular || "---"}</strong>${gasDiffLabel(gas.regular, gas.regularPrev)}</td></tr>
+  <tr><td>⛽ ハイオク</td><td>${gas.premium || "---"}${gasDiffLabel(gas.premium, gas.premiumPrev)}</td></tr>
+  <tr><td>🛢️ 軽油</td><td>${gas.diesel || "---"}${gasDiffLabel(gas.diesel, gas.dieselPrev)}</td></tr>
+  <tr><td>🔥 灯油（18L）</td><td>${gas.kerosene || "---"}${gasDiffLabel(gas.kerosene, gas.kerosenePrev)}</td></tr>
 </table>
 <p class="section-note">出典: 経済産業省 石油製品価格調査（${gas.region}地域平均・週次更新）<br>調査日: ${gas.fetchDate}</p>`;
 }
@@ -297,39 +375,38 @@ function renderPlatformsSection() {
 // ===== 5. ピーク予測 =====
 
 function getPeakPredictions(weather) {
-  const predictions = [];
   const todayFc = weather?.forecasts?.[0];
   const telop = todayFc?.telop || "";
   const maxTemp = parseInt(todayFc?.tempMax);
 
-  // 雨チェック
-  if (telop.includes("雨")) {
-    predictions.push(CONFIG.peakRules.find((r) => r.condition === "rain"));
-  }
-
-  // 寒さ / 暑さ
+  // 成立している条件を洗い出す
+  const active = [];
+  if (telop.includes("雨")) active.push("rain");
   if (!isNaN(maxTemp)) {
-    if (maxTemp <= 8)
-      predictions.push(CONFIG.peakRules.find((r) => r.condition === "cold"));
-    if (maxTemp >= 30)
-      predictions.push(CONFIG.peakRules.find((r) => r.condition === "hot"));
+    if (maxTemp <= 8) active.push("cold");
+    if (maxTemp >= 30) active.push("hot");
+  }
+  if (DAY_OF_WEEK === 5) active.push("friday_evening");
+  if (DAY_OF_WEEK === 0 || DAY_OF_WEEK === 6) active.push("weekend_lunch");
+
+  // 複数条件が重なった組み合わせは、単独メッセージの羅列より専用の助言を優先する。
+  // 3条件コンボと2条件コンボの両方が成立しうる場合は、より具体的な（条件数が多い）方を選ぶ。
+  const matchedCombos = (CONFIG.comboRules || [])
+    .filter((c) => c.conditions.every((cond) => active.includes(cond)))
+    .sort((a, b) => b.conditions.length - a.conditions.length);
+  const combo = matchedCombos[0];
+
+  if (combo) {
+    const remaining = active
+      .filter((c) => !combo.conditions.includes(c))
+      .map((c) => CONFIG.peakRules.find((r) => r.condition === c))
+      .filter(Boolean);
+    return [combo, ...remaining];
   }
 
-  // 金曜夜
-  if (DAY_OF_WEEK === 5) {
-    predictions.push(
-      CONFIG.peakRules.find((r) => r.condition === "friday_evening"),
-    );
-  }
-
-  // 週末ランチ
-  if (DAY_OF_WEEK === 0 || DAY_OF_WEEK === 6) {
-    predictions.push(
-      CONFIG.peakRules.find((r) => r.condition === "weekend_lunch"),
-    );
-  }
-
-  return predictions.filter(Boolean);
+  return active
+    .map((c) => CONFIG.peakRules.find((r) => r.condition === c))
+    .filter(Boolean);
 }
 
 function renderPeakSection(predictions) {
@@ -348,29 +425,6 @@ function renderPeakSection(predictions) {
   let html = `<p class="peak-level"><strong>${level}</strong></p><ul class="peak-list">`;
   for (const p of predictions) {
     html += `<li>${p.emoji} ${p.message}（需要 ×${p.multiplier}）</li>`;
-  }
-  html += "</ul>";
-  return html;
-}
-
-// ===== 6. イベント情報 =====
-
-async function getEvents() {
-  log("📍 イベント情報を取得中...");
-  // Walker Plus等のスクレイピングは不安定のため、初期はリンク案内
-  return [];
-}
-
-function renderEventsSection(events) {
-  if (!events || events.length === 0) {
-    return `<p>特に無し</p>
-<p class="section-note">名古屋のイベント情報は <a href="https://www.walkerplus.com/event_list/ar0623/" target="_blank" rel="noopener">Walker Plus</a> をチェック！<br>
-バンテリンドーム・ガイシホール付近はイベント時に混雑します。</p>`;
-  }
-
-  let html = '<ul class="event-list">';
-  for (const event of events) {
-    html += `<li>${event.emoji || "📍"} ${event.name} — ${event.venue}</li>`;
   }
   html += "</ul>";
   return html;
@@ -455,7 +509,7 @@ function generateTitle(weather) {
 
 // ===== 本文フラグメント生成 =====
 // buildArticlePages()（scripts/build/blog-pages.mjs）が head/広告/関連記事/前後ナビ等を
-// 付与するため、ここでは .daily-comment + .uber-section×8 の本文だけを組み立てる。
+// 付与するため、ここでは .daily-comment + .uber-section×6 の本文だけを組み立てる。
 // 天気セクション直後の <hr> は、build.mjs 側が最初の<hr>直後に中間広告を自動挿入する
 // トリガーとして機能する（既存記事の慣行と同じ）。
 
@@ -466,9 +520,7 @@ function buildFragment({
   peakHtml,
   heatHtml,
   dayTipHtml,
-  trafficHtml,
   newsHtml,
-  eventsHtml,
   gasHtml,
 }) {
   return `<div class="daily-comment">${commentText}</div>
@@ -501,18 +553,8 @@ function buildFragment({
 </div>
 
 <div class="uber-section">
-  <h2>🚗 名古屋市 道路交通情報</h2>
-  ${trafficHtml}
-</div>
-
-<div class="uber-section">
   <h2>📰 配達に影響しそうなニュース</h2>
   ${newsHtml}
-</div>
-
-<div class="uber-section">
-  <h2>📍 名古屋イベント情報</h2>
-  ${eventsHtml}
 </div>
 
 <div class="uber-section">
@@ -592,11 +634,10 @@ async function main() {
   if (DRY_RUN) log("⚠️ ドライランモード: ファイル出力なし");
 
   // 1. データ収集（並列）
-  const [weather, news, gasPrice, events] = await Promise.all([
+  const [weather, news, gasPrice] = await Promise.all([
     getWeather(),
     getNews(),
     getGasPrice(),
-    getEvents(),
   ]);
 
   // 2. 解析
@@ -621,12 +662,18 @@ async function main() {
   }
 
   // 3. 各セクションHTML生成
-  const weatherHtml = renderWeatherSection(weather);
-  const trafficHtml = renderTrafficSection();
+  const weatherHistory = recordTodayWeather(
+    loadWeatherHistory(),
+    weather?.forecasts?.[0],
+  );
+  const weatherCompareHtml = renderWeatherCompareText(
+    weatherHistory,
+    weather?.forecasts?.[0],
+  );
+  const weatherHtml = renderWeatherSection(weather) + weatherCompareHtml;
   const newsHtml = renderNewsSection(news);
   const gasHtml = renderGasSection(gasPrice);
   const peakHtml = renderPeakSection(predictions);
-  const eventsHtml = renderEventsSection(events);
   const heatHtml = renderHeatSection(heatAdvice);
   const dayTipHtml = renderDayTipSection();
   const platformsHtml = renderPlatformsSection();
@@ -639,9 +686,7 @@ async function main() {
     peakHtml,
     heatHtml,
     dayTipHtml,
-    trafficHtml,
     newsHtml,
-    eventsHtml,
     gasHtml,
   });
 
