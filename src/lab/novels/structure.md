@@ -56,7 +56,8 @@ novels/
 │   │   ├── appraisal-format.md # 鑑定眼《トゥルー・サイト》の表示フォーマット
 │   │   ├── characters-npc-crowd.md # 背景キャラ名簿（冒険者パーティー群、名前と一言特徴のみ）
 │   │   ├── characters.md       # キャラクター一覧
-│   │   └── codex.md            # 現場データ集（封石・廃城構造・執筆注意ルール）
+│   │   ├── codex.md            # 現場データ集（封石・廃城構造・執筆注意ルール）
+│   │   └── dialogue-golden-playbook.md 
 │   ├── plots/                     # プロット・各章設定
 │   │   ├── guild-rank-chart.md 
 │   │   ├── setting-ch1-2.md    # 第1章・第2章 詳細プロット
@@ -71,9 +72,9 @@ novels/
         └── 101-150/
             ├── 101-110/             # ep101~ep110
             └── 111-120/
-                ├── ... (3 older files)
-                ├── ep114T.md
+                ├── ... (4 older files)
                 ├── ep115T.md
+                ├── ep116A.md
                 ├── setting-ch4-reveal.md
                 └── archive/
                     ├── ... (8 older files)
