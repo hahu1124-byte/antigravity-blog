@@ -35,35 +35,30 @@ tags: [タグ1, タグ2]
 
 > **ポイント**: `blog-data.json` の手動編集は不要です！`node build.mjs` が各記事HTMLの先頭コメントからメタデータを自動収集し、`dist/blog-data.json` を生成します。
 
-### 2. ヒーロー画像（使う場合のみ）
+### 2. ヒーロー画像／OGPアイキャッチ画像 ⚠️Antigravity最重要ルール
 
-記事本文にヒーロー画像を入れる場合：
+**【Antigravity（Gemini）での執筆時・絶対厳守】**
+Antigravityでブログ記事を作成する際は、必ず `generate_image` ツール（Nanobanana）を用いて記事の世界観・テーマに合わせたハイクオリティなアイキャッチ（16:9）を生成する。
 
-1. 画像をWebP形式で `src/images/` に配置する。PNG/JPEGから変換する場合:
-```bash
-ffmpeg -i "元画像.png" -quality 85 "h:/gravity/projects/antigravity-blog/src/images/画像名.webp" -y
-```
-2. 記事ソース（`src/articles/`）の先頭に画像タグを追加:
-```html
-<p><img src="/blog/images/画像名.png" alt="説明"></p>
-```
-> **注意**: 記事ソースでは`.png`のまま書いてOK。`build.mjs`がビルド時に自動で`.webp`へ変換し、相対パスにも変換する。
+1. **Nanobanana画像生成**: `generate_image` ツールで画像を生成。
+2. **WebP変換と配置**:
+   ```bash
+   ffmpeg -i "元画像.jpg" -quality 85 "h:/gravity/projects/antigravity-blog/src/images/画像名.webp" -y
+   ```
+3. **記事ソースへの連携**:
+   * 記事HTMLの先頭に画像タグを追加:
+     ```html
+     <p><img src="/blog/images/画像名.png" alt="説明"></p>
+     ```
+   * **Frontmatterにも必ず `ogImage: 画像名.webp` を明記する**（サムネイル・OGP・Twitter CardがすべてNanobanana画像に統一される）。
 
-ヒーロー画像を使わない記事は、次のステップでOGP画像がタイトルから自動生成される。
+### 3. OGP画像の自動生成（日次レポート等・画像生成不要な場合のみ）
 
-### 3. OGP画像の自動生成 ⚠️重要
+Uber日次レポートなど定型記事で画像生成を行わない場合のみ、sharpによる自動生成CLI（`scripts/generate-og-images.mjs`）を実行する:
 
-**画像生成ツールでの手動作成は不要。** sharpによる自動生成CLI（LLM/外部API不使用、CJKフォント対応）を実行する:
-
-// turbo
 ```bash
 bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/generate-og-images.mjs --slug YYYYMM/記事スラッグ
 ```
-
-タイトル・タグからカード画像を動的生成して `src/images/og/YYYYMM/記事スラッグ.webp` に保存し、記事HTMLのFrontmatter（および `blog-data.json`）へ`ogImage`フィールドを自動追記する。
-ヒーロー画像がある記事（ステップ2を使った記事）は`hasHeroImage()`判定で自動スキップされるため、このコマンドを実行しても上書きされない。
-
-複数記事のOGP画像をまとめて生成したい場合は `--slug` の代わりに `--missing` を使う（新規かつヒーロー画像なし・OGP未生成の記事を一括処理）。
 
 ### 4. ローカルビルドで確認
 
