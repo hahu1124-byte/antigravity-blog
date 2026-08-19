@@ -71,9 +71,9 @@ novels/
         └── 101-150/
             ├── 101-110/             # ep101~ep110
             └── 111-120/
-                ├── ... (2 older files)
-                ├── ep113T.md
+                ├── ... (3 older files)
                 ├── ep114T.md
+                ├── ep115A.md
                 ├── setting-ch4-reveal.md
                 └── archive/
                     ├── ... (6 older files)
