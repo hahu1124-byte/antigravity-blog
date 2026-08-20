@@ -1,5 +1,17 @@
 [
   {
+    "slug": "202608/20260821_ai_lab_update_v12",
+    "title": "🔬 LAB第12回 — 基盤モデル最終収束・エージェント消費者化・価格戦争",
+    "date": "2026-08-21 02:10",
+    "excerpt": "Claude Opus 5・GPT-5.6 Cyber・Gemini 3.7 Flash・Grok 4.6・Kimi K3完全オープン化で基盤モデルが最終収束。Claude Cowork・Gemini Sparkでエージェントが消費者化。GPT-5.6 Luna 80%値下げ、EU AI Act Article 50施行。",
+    "tags": [
+      "LAB",
+      "AI開発",
+      "Claude Code"
+    ],
+    "ogImage": "og/202608/20260821_ai_lab_update_v12.webp"
+  },
+  {
     "slug": "202608/20260821_menu_service_end_notice",
     "title": "🚨 【速報】フードデリバリー「menu」が2026年9月末でサービス終了を発表｜配達員・注文者への影響と今後の3強体制を徹底解説",
     "date": "2026-08-21 01:15",
@@ -13,18 +25,6 @@
       "ロケットナウ"
     ],
     "ogImage": "menu_service_end_hero.webp"
-  },
-  {
-    "slug": "202608/20260821_ai_lab_update_v12",
-    "title": "🔬 LAB第12回 — 基盤モデル最終収束・エージェント消費者化・価格戦争",
-    "date": "2026-08-21",
-    "excerpt": "Claude Opus 5・GPT-5.6 Cyber・Gemini 3.7 Flash・Grok 4.6・Kimi K3完全オープン化で基盤モデルが最終収束。Claude Cowork・Gemini Sparkでエージェントが消費者化。GPT-5.6 Luna 80%値下げ、EU AI Act Article 50施行。",
-    "tags": [
-      "LAB",
-      "AI開発",
-      "Claude Code"
-    ],
-    "ogImage": "og/202608/20260821_ai_lab_update_v12.webp"
   },
   {
     "slug": "202608/20260820_uber_daily",

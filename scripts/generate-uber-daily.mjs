@@ -34,8 +34,14 @@ const today = new Date(now.getTime() + 9 * 60 * 60 * 1000);
 const YYYY = today.getUTCFullYear();
 const MM = String(today.getUTCMonth() + 1).padStart(2, "0");
 const DD = String(today.getUTCDate()).padStart(2, "0");
+const HH = String(today.getUTCHours()).padStart(2, "0");
+const MI = String(today.getUTCMinutes()).padStart(2, "0");
 const DATE_STR = `${YYYY}${MM}${DD}`;
 const DATE_DISPLAY = `${YYYY}-${MM}-${DD}`;
+// Frontmatter/blog-data.json の date はソート順制御のため時刻まで含める
+// （同日中に他の記事が時刻付きで公開された場合、日付のみだと00:00扱いになり
+//   一覧の並び順が実際の公開順と食い違うため）
+const DATE_DISPLAY_WITH_TIME = `${DATE_DISPLAY} ${HH}:${MI}`;
 const YYYYMM = `${YYYY}${MM}`;
 const DAY_OF_WEEK = today.getUTCDay(); // 0=日, 1=月, ..., 6=土
 const DAY_NAMES = ["日", "月", "火", "水", "木", "金", "土"];
@@ -336,7 +342,7 @@ function gasDiffLabel(cur, prev) {
   const p = parseFloat(prev);
   if (isNaN(c) || isNaN(p)) return "";
   const diff = Math.round((c - p) * 10) / 10;
-  if (diff === 0) return " <span class=\"price-diff\">（前週と同額）</span>";
+  if (diff === 0) return ' <span class="price-diff">（前週と同額）</span>';
   const sign = diff > 0 ? "+" : "";
   return ` <span class="price-diff">（前週比 ${sign}${diff}円）</span>`;
 }
@@ -576,7 +582,7 @@ function writeFragment(html, title, ogImageRel) {
   const fullTitle = `🚴 ${blogTag}情報 ${title}`;
   const metadata = {
     title: fullTitle,
-    date: DATE_DISPLAY,
+    date: DATE_DISPLAY_WITH_TIME,
     excerpt: `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`,
     tags: [blogTag],
     ...(ogImageRel ? { ogImage: ogImageRel } : {}),
@@ -602,7 +608,7 @@ function updateBlogData(title, ogImageRel) {
   const entry = {
     slug,
     title: fullTitle,
-    date: DATE_DISPLAY,
+    date: DATE_DISPLAY_WITH_TIME,
     excerpt: `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`,
     tags: [blogTag],
     ...(ogImageRel ? { ogImage: ogImageRel } : {}),
