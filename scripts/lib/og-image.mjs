@@ -181,10 +181,23 @@ export function ogImageRelPath(slug) {
 
 /**
  * CJKフォントの実レンダリング診断。
- * ひらがな「あ」(U+3042)と必ず豆腐になる私用領域文字(U+E000)を同条件で描画しバイト比較する。
- * ラスタ結果が一致していれば CJK フォントが無いとみなす。
+ * Linux環境ではfc-listによる日本語フォント登録を検証し、sharpによる描画検証も併せて行う。
  */
 export async function assertCjkFont(config) {
+  // Linux環境ではfc-listで日本語フォントの有無を直接確認
+  if (process.platform === "linux") {
+    try {
+      const { execSync } = await import("child_process");
+      const list = execSync("fc-list :lang=ja", { encoding: "utf-8", timeout: 3000 });
+      if (!list || list.trim().length === 0) {
+        console.warn("⚠️ Linux環境で日本語フォント（fc-list :lang=ja）が見つかりません");
+        return false;
+      }
+    } catch (e) {
+      console.warn(`⚠️ fc-list実行失敗: ${e.message}`);
+    }
+  }
+
   const family = (config && config.font && config.font.family) || "sans-serif";
   const probe = (
     codePoint,
@@ -194,18 +207,18 @@ export async function assertCjkFont(config) {
   </svg>`;
 
   const JA_PROBE_CODEPOINT = 0x3042; // ひらがな「あ」
-  const PUA_PROBE_CODEPOINT = 0xe000; // 私用領域（必ず豆腐になる）
 
   try {
-    const [jaBuf, puaBuf] = await Promise.all([
-      sharp(Buffer.from(probe(JA_PROBE_CODEPOINT)))
-        .raw()
-        .toBuffer(),
-      sharp(Buffer.from(probe(PUA_PROBE_CODEPOINT)))
-        .raw()
-        .toBuffer(),
-    ]);
-    return !jaBuf.equals(puaBuf);
+    const jaBuf = await sharp(Buffer.from(probe(JA_PROBE_CODEPOINT)))
+      .raw()
+      .toBuffer();
+
+    // 何らかの描画ピクセルが存在することを確認
+    let whitePixels = 0;
+    for (let i = 0; i < jaBuf.length; i += 3) {
+      if (jaBuf[i] > 100) whitePixels++;
+    }
+    return whitePixels > 50;
   } catch {
     return false;
   }

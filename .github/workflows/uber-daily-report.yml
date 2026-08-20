@@ -27,13 +27,12 @@ jobs:
         run: npm ci
 
       - name: 日本語フォント導入（OGP画像の豆腐化対策）
-        continue-on-error: true
-        timeout-minutes: 3
+        timeout-minutes: 5
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
-          fc-cache -f
-          fc-list :lang=ja | head -n 3
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk fonts-ipafont-gothic
+          fc-cache -f -v
+          fc-list :lang=ja | head -n 5
 
       - name: Generate daily report
         run: node scripts/generate-uber-daily.mjs
