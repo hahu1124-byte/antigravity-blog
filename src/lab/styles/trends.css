@@ -128,6 +128,18 @@
   width: 75%;
 }
 
+.trend-impact-70 {
+  width: 70%;
+}
+
+.trend-impact-65 {
+  width: 65%;
+}
+
+.trend-impact-60 {
+  width: 60%;
+}
+
 .trend-impact-score {
   font-size: 0.82rem;
   color: var(--lab-orange);

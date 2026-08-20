@@ -1,5 +1,20 @@
 [
     {
+        "date": "2026-08-21",
+        "title": "v0.11.1 — LAB第12回公開（基盤モデル最終収束・エージェント消費者化・価格戦争）",
+        "sections": [
+            {
+                "version": "v0.11.1",
+                "items": [
+                    "🔬 LAB第12回公開！AI開発ツール比較・開発者ピックアップ・トレンドの第11回（v11）3ページとまとめ記事を追加",
+                    "🌐 Claude Opus 5・GPT-5.6 Cyber・Gemini 3.7 Flash・Grok 4.6・Kimi K3完全オープン化による基盤モデル最終収束を特集",
+                    "💼 Claude Cowork・Gemini Sparkによるエージェント消費者化のレポートを掲載",
+                    "⚖️ GPT-5.6 Luna 80%値下げの価格戦争、EU AI Act Article 50施行の規制実装フェーズを解説"
+                ]
+            }
+        ]
+    },
+    {
         "date": "2026-08-19",
         "title": "v0.11.0 — マルチUIアーキテクチャ ＆ Space UI（Kinetic Gravity）正式リリース",
         "sections": [

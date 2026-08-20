@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI開発者ピックアップ 2026 第11回 | LAB | Gravity Portal</title>
+    <meta
+      name="description"
+      content="AI開発者ピックアップ 第11回（2026年8月更新）。PrimeIntellect-ai/prime-agentが単日+2,293Starsの急伸。「agent-skills」パターンがGitHubトレンドを席巻。OpenClaw・mem0等のコンテキストエンジニアリング層が成熟。Kimi K3完全オープン化でOSSの選択肢がさらに拡大。"
+    />
+    <meta
+      property="og:title"
+      content="AI開発者ピックアップ 2026 第11回 — agent-skills旋風とコンテキストエンジニアリングの成熟"
+    />
+    <meta
+      property="og:description"
+      content="PrimeIntellect-ai/prime-agentが単日Stars増加数トップに。addyosmani/agent-skills・google/skills等「agent-skills」パターンがGitHubトレンドを席巻。mem0・claude-memのコンテキストエンジニアリング層が定着し始めた8月。"
+    />
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://www.antigravity-portal.com/lab/ai-developers/v11/"
+    />
+    <meta property="og:site_name" content="Gravity Portal" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link
+      rel="canonical"
+      href="https://www.antigravity-portal.com/lab/ai-developers/v11/"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css"
+    />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("gp-theme");
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
+      🌙
+    </button>
+    <header class="lab-header">
+      <a href="/lab/" class="lab-back">← LAB</a>
+      <h1 class="lab-title">👤 AI開発者ピックアップ 第11回</h1>
+    </header>
+    <main class="lab-content">
+      <section class="lab-hero">
+        <div class="lab-hero-icon">👥</div>
+        <h1>AI開発者 — agent-skills旋風とコンテキストエンジニアリングの成熟 第11回</h1>
+        <p>
+          2026年8月、OSSコーディングエージェント界隈の話題の中心はOpenCode一強から「エージェント自体をどう構成するか」へ移りました。<br />
+          PrimeIntellect-ai/prime-agentが単日+2,293
+          Starsという急伸を記録し、addyosmani/agent-skillsやgoogle/skillsのような「agent-skills」パターンがGitHubトレンドを席巻。<br />
+          mem0・claude-memのようなグラフネイティブなメモリ／コンテキスト管理ツールも定着し始め、「モデル選び」から「エージェントの構成要素選び」へ開発者の関心が広がった1ヶ月でした。
+        </p>
+        <div class="lab-hero-meta">
+          <span>📅 2026年8月21日更新</span>
+          <span>🧩 agent-skillsとコンテキストエンジニアリング</span>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>🔥 第11回の主役：PrimeIntellect-ai/prime-agent — 単日Stars増加数トップ</h2>
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🧠</div>
+            <div class="tool-card-info">
+              <h3>PrimeIntellect-ai/prime-agent</h3>
+              <div class="tool-maker">Prime Intellect</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">単日+2,293 Stars（最大増加）</span>
+            <span class="badge badge-type">自己改善型RLMエージェント</span>
+          </div>
+          <div class="tool-card-body">
+            <h3>📢 なぜ急伸したか</h3>
+            <ul>
+              <li>
+                <strong>自己改善型RLM（Recursive Language Model）エージェント</strong>:
+                長時間稼働する自律的コーディングタスク向けに設計され、実行結果を踏まえて自身の戦略を修正していく仕組みを持つ
+              </li>
+              <li>
+                <strong>8月上旬、GitHubトレンドで単日Stars増加数トップ</strong>:
+                agent-skills系プロジェクトが並ぶトレンドの中でも突出した伸び
+              </li>
+              <li>
+                <strong>基盤モデル最終収束との相性</strong>:
+                Opus 5・GPT-5.6
+                Cyber・Gemini 3.7 Flash・Kimi
+                K3と選択肢が一気に増えた8月において、「長時間タスクを自律的にやり切る」設計思想が改めて評価された
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>🔥 注目の顔ぶれ（8月最新）</h2>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🧩</div>
+            <div class="tool-card-info">
+              <h3>agent-skillsエコシステム</h3>
+              <div class="tool-maker">
+                addyosmani/agent-skills・mattpocock/skills・google/skills・obra/superpowers・cloudflare/computer
+              </div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">GitHubトレンド席巻</span>
+            <span class="badge badge-type">再利用可能なエージェントスキル</span>
+          </div>
+          <div class="tool-card-body">
+            <h3>📢 「エージェントを作る」から「スキルを配布する」へ</h3>
+            <ul>
+              <li>
+                <strong>8月上旬のGitHubトレンドはagent-skills系・computer-use系が支配的</strong>:
+                addyosmani/agent-skills、mattpocock/skills、google/skills、obra/superpowers、cloudflare/computerが同時に上位に並ぶ状況
+              </li>
+              <li>
+                <strong>「スキル」という単位の定着</strong>:
+                特定タスク向けの手順・知識をパッケージ化し、モデルやツールをまたいで再利用する設計が一気に広がった
+              </li>
+              <li>
+                <strong>企業（Google・Cloudflare）主導プロジェクトの参入</strong>:
+                個人OSSに留まらず大手プラットフォーマーも公式スキルリポジトリを公開し始めた
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🧵</div>
+            <div class="tool-card-info">
+              <h3>コンテキストエンジニアリング層（mem0 / claude-mem / semantica）</h3>
+              <div class="tool-maker">mem0ai / thedotmack / semantica-agi</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">グラフネイティブなメモリ管理</span>
+            <span class="badge badge-type">「context engineering」層の成熟</span>
+          </div>
+          <div class="tool-card-body">
+            <ul>
+              <li>
+                <strong>mem0ai/mem0</strong>:
+                エージェントの長期記憶をグラフ構造で管理するOSSとして採用が拡大
+              </li>
+              <li>
+                <strong>thedotmack/claude-mem・semantica-agi/semantica</strong>:
+                同様にエージェント向けの永続コンテキスト・記憶レイヤーとして注目度が上昇
+              </li>
+              <li>
+                <strong>「モデルAPIそのもの」から重心が移動</strong>:
+                生のモデルAPIを叩くだけでなく、再利用可能なスキル・永続メモリという「構成要素」を組み合わせる開発スタイルが主流化しつつある
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🐾</div>
+            <div class="tool-card-info">
+              <h3>OpenClaw</h3>
+              <div class="tool-maker">OSSコミュニティ</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">2026年の躍進プロジェクト</span>
+            <span class="badge badge-type">9K→382K+ Stars</span>
+          </div>
+          <div class="tool-card-body">
+            <ul>
+              <li>
+                <strong>2026年通期で9,000Starsから38万Stars超へ</strong>:
+                今年最大の躍進を遂げたOSSプロジェクトとしての地位を固めた
+              </li>
+              <li>
+                <strong>確立されたフレームワークとの併存</strong>:
+                Microsoft AutoGen（60,284★・フレームワーク別最多）、CrewAI（44K+★・月間520万DL）と並ぶ主要選択肢としての存在感を維持
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🌙</div>
+            <div class="tool-card-info">
+              <h3>Kimi K3（Moonshot AI）— 完全オープンウェイト化</h3>
+              <div class="tool-maker">中国・Moonshot AI</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">7月27日 全ウェイト公開完了</span>
+            <span class="badge badge-free">2.8兆パラメータ</span>
+          </div>
+          <div class="tool-card-body">
+            <ul>
+              <li>
+                <strong>7月27日、全モデルウェイトが正式公開</strong>:
+                政府・企業・個人を問わず自前環境で動かせる状態に。OpenCode等モデル非依存ツールへの組み込みも容易に
+              </li>
+              <li>
+                <strong>2.8兆パラメータの初のオープンソースモデル</strong>:
+                Kimi Delta Attention（KDA）・Attention
+                Residuals採用、1Mコンテキスト・ネイティブ視覚理解に対応
+              </li>
+              <li>
+                <strong>OSS開発者への意味</strong>:
+                「安価に動かせる高性能オープンウェイトモデル」の選択肢が一段と広がり、BYOK運用のコスト構造が改善
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>📊 主要フレームワーク・OSSプロジェクト比較（2026年8月）</h2>
+        <div class="table-wrapper">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>プロジェクト</th>
+                <th>GitHub Stars</th>
+                <th>License</th>
+                <th>最新動向</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>OpenCode</strong></td>
+                <td>194K+</td>
+                <td>MIT</td>
+                <td>OSSコーディングエージェント最多を維持</td>
+              </tr>
+              <tr>
+                <td><strong>OpenClaw</strong></td>
+                <td>382K+</td>
+                <td>—</td>
+                <td>2026年通期の躍進プロジェクト（9K→38万超）</td>
+              </tr>
+              <tr>
+                <td><strong>Microsoft AutoGen</strong></td>
+                <td>60,284</td>
+                <td>MIT</td>
+                <td>マルチエージェントフレームワーク別で最多★</td>
+              </tr>
+              <tr>
+                <td><strong>CrewAI</strong></td>
+                <td>44K+</td>
+                <td>MIT</td>
+                <td>月間520万DL。実運用チームでの採用継続</td>
+              </tr>
+              <tr>
+                <td><strong>PrimeIntellect-ai/prime-agent</strong></td>
+                <td>急伸中</td>
+                <td>—</td>
+                <td>8月単日Stars増加数トップ。自己改善型RLM</td>
+              </tr>
+              <tr>
+                <td><strong>mem0ai/mem0</strong></td>
+                <td>成長中</td>
+                <td>Apache 2.0</td>
+                <td>グラフネイティブなエージェント記憶レイヤー</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>🔧 2026年8月の開発者スキルトレンド</h2>
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🧩</div>
+            <div class="tool-card-info">
+              <h3>「エージェントスキル設計力」が新たな必須スキルへ</h3>
+              <div class="tool-maker">2026年8月の新常識</div>
+            </div>
+          </div>
+          <div class="tool-card-body">
+            <p>
+              基盤モデルの選択肢が一気に増えた8月、開発者に求められる能力は「どのモデルを使うか」から「モデルをまたいで再利用できるスキル・記憶をどう設計するか」へシフトしています。
+            </p>
+            <h3>新必須スキルセット（第11回版）</h3>
+            <ul>
+              <li>
+                <strong>再利用可能なagent-skillsの設計・パッケージング</strong>:
+                特定タスクの手順・知識をモデル非依存の形で記述し、複数ツールで使い回す能力
+              </li>
+              <li>
+                <strong>コンテキストエンジニアリング</strong>:
+                mem0・claude-mem等を用いた長期記憶・永続コンテキストの設計
+              </li>
+              <li>
+                <strong>マルチモデルルーティングの実務</strong>:
+                Opus 5・GPT-5.6 Cyber・Gemini 3.7
+                Flash・Grok 4.6・Kimi
+                K3を用途別に振り分ける判断力。前回に続き重要性が拡大
+              </li>
+              <li>
+                <strong>規制対応の基礎知識</strong>:
+                EU AI Act Article 50・中国のエージェント権限階層規制など、コンプライアンス要件を踏まえたツール選定・実装判断
+              </li>
+              <li>
+                <strong>オープンウェイトモデルの自前運用</strong>:
+                Kimi K3完全オープン化を受け、エアギャップ環境での大規模モデル運用スキルの需要が継続
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>📝 まとめ</h2>
+        <p>
+          2026年8月のOSS動向を一言で表すと<strong
+            >「エージェントの構成要素を選ぶ時代」</strong
+          >。PrimeIntellect-ai/prime-agentの急伸とagent-skillsパターンのトレンド席巻は、開発者の関心が「どのモデルを使うか」から「エージェントをどう組み立てるか」へ移り始めたことを示しています。mem0等のコンテキストエンジニアリング層が定着し始めたことも合わせて、次の四半期は「モデル選び」以上に「スキル・記憶・権限設計」の巧拙が開発者の差別化要因になっていくでしょう。
+        </p>
+        <p>
+          →
+          <a href="/blog/202608/20260821_ai_lab_update_v12/"
+            >📋
+            LAB第12回まとめ記事でツール比較・開発者・トレンドを一気に俯瞰する</a
+          >
+        </p>
+      </section>
+    </main>
+    <footer class="lab-footer">
+      <p>© 2026 Gravity Portal — LAB</p>
+      <nav class="lab-footer-nav">
+        <a href="/">🏠 TOP</a>
+        <a href="/lab/">🔬 LAB</a>
+        <a href="/blog/202608/20260821_ai_lab_update_v12/">📋 第12回まとめ</a>
+        <a href="/lab/ai-tools/v11/">🛠️ ツール 第11回</a>
+        <a href="/lab/ai-trends/v11/">📊 トレンド 第11回</a>
+      </nav>
+    </footer>
+    <script>
+      (function () {
+        var btn = document.getElementById("themeToggle");
+        function update() {
+          var t = document.documentElement.getAttribute("data-theme");
+          btn.textContent = t === "light" ? "🌙" : "☀️";
+        }
+        update();
+        btn.addEventListener("click", function () {
+          var cur = document.documentElement.getAttribute("data-theme");
+          var next = cur === "light" ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", next);
+          try {
+            localStorage.setItem("gp-theme", next);
+          } catch (e) {}
+          update();
+        });
+      })();
+    </script>
+  </body>
+</html>

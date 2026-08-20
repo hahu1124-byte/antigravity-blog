@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI開発ツール比較 2026 第11回 | LAB | Gravity Portal</title>
+    <meta
+      name="description"
+      content="AI開発ツール比較 第11回（2026年8月更新）。Claude Opus 5・GPT-5.6 Cyber・Gemini 3.7 Flash・Grok 4.6・Kimi K3完全オープン化で基盤モデルが最終収束。Claude Cowork・Gemini Sparkでエージェントが消費者向けに拡大。GPT-5.6 Luna 80%値下げの価格戦争、EU AI Act Article 50施行の規制実装フェーズも到来。"
+    />
+    <meta
+      property="og:title"
+      content="AI開発ツール比較 2026 第11回 — 基盤モデル最終収束・エージェント消費者化・価格戦争"
+    />
+    <meta
+      property="og:description"
+      content="Claude Opus 5・GPT-5.6 Cyber・Gemini 3.7 Flash・Grok 4.6・Kimi K3完全オープン化が同時期に出そろい基盤モデルが最終収束。Claude Cowork・Gemini Sparkでエージェントが非エンジニアへ拡大。GPT-5.6 Luna 80%値下げ、EU AI Act Article 50施行。"
+    />
+    <meta property="og:type" content="article" />
+    <meta
+      property="og:url"
+      content="https://www.antigravity-portal.com/lab/ai-tools/v11/"
+    />
+    <meta property="og:site_name" content="Gravity Portal" />
+    <meta
+      property="og:image"
+      content="https://www.antigravity-portal.com/og-lab-ai-tools.png"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link
+      rel="canonical"
+      href="https://www.antigravity-portal.com/lab/ai-tools/v11/"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css"
+    />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("gp-theme");
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">
+      🌙
+    </button>
+    <header class="lab-header">
+      <a href="/lab/" class="lab-back">← LAB</a>
+      <h1 class="lab-title">🛠️ AI開発ツール比較 第11回</h1>
+    </header>
+    <main class="lab-content">
+      <section class="lab-hero">
+        <div class="lab-hero-icon">🛠️</div>
+        <h1>
+          AI開発ツール — 基盤モデル最終収束・エージェント消費者化・価格戦争 第11回
+        </h1>
+        <p>
+          第10回（7月20日）から4週間、AI開発ツール業界は基盤モデルの世代交代が一巡し「収束」に向かう一方、新たな戦線が2つ開きました。<br />
+          Claude Opus 5・GPT-5.6
+          Cyber・Gemini
+          3.7 Flash・Grok 4.6・Kimi K3完全オープン化が出そろい、各社の布陣がほぼ固まりました。<br />
+          Claude
+          CoworkやGemini Sparkのように「開発者以外」を狙うエージェント製品が本格展開し、GPT-5.6
+          Lunaの80%値下げで価格戦争が激化。<br />
+          そしてEU AI Act Article 50が施行され、規制はいよいよ「実装フェーズ」に入りました。
+        </p>
+        <div class="lab-hero-meta">
+          <span>📅 2026年8月21日更新</span>
+          <span>🔧 7ツール比較</span>
+          <span
+            >📝
+            <a
+              href="/lab/ai-tools/v10/"
+              style="color: inherit; text-decoration: underline"
+              >前回（第10回）はこちら</a
+            ></span
+          >
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>🔥 8月の4大トピック</h2>
+        <p>
+          <strong
+            >① 基盤モデル最終収束 — Opus 5・GPT-5.6 Cyber・Gemini 3.7
+            Flash・Grok 4.6・Kimi K3完全オープン化 🌐</strong
+          >
+          —
+          7月に起きた世代交代ラッシュが一巡し、各社の布陣がほぼ固まった1ヶ月でした。7月23日に<strong
+            >Claude Opus 5</strong
+          >がロールアウト（1Mコンテキスト・xhigh推論モード。旧Opus
+          4.8は$5/$25で安全性フォールバック用途として継続）。7月27日には<strong
+            >Kimi
+            K3の完全オープンウェイト</strong
+          >が公開され、誰でも自前環境で動かせる状態に。8月6日に<strong
+            >xAIがGrok
+            4.6</strong
+          >を投入（Grok 4.5からのアップデート版）。8月10日には<strong
+            >GPT-5.6-Cyber</strong
+          >（Daybreak Blue / Red）が登場しサイバーセキュリティ問題の95%を解決。8月13日には<strong
+            >Gemini 3.7
+            Flash</strong
+          >が公開され186モデル中トップの出力速度でコーディング・エージェント向けの主力に位置付けられました。「最強モデル」を追いかける段階から、「用途別に組み合わせる」段階へフェーズが変わりつつあります。
+        </p>
+        <p>
+          <strong
+            >② エージェント消費者化 — Claude Cowork・Gemini Spark 💼</strong
+          >
+          —
+          これまで「開発者向け」だったAIエージェントが、非エンジニアの日常業務へ本格的に広がりました。<strong
+            >Claude Cowork</strong
+          >はデスクトップ常駐型のエージェントとして全有料プラン（Pro
+          $17〜20/月〜）で一般提供され、7月からはWeb・モバイル（Max向け）にも拡大。利用の大半がエンジニアリング以外（運用・マーケティング・財務・法務・リサーチ）という報告も出ています。一方Googleの<strong
+            >Gemini
+            Spark</strong
+          >はGemini 3.5
+          Flashで24時間365日稼働するバックグラウンドエージェントで、当初はAI
+          Ultra（$99.99/月）専用でしたが、8月にAI Pro（$19.99/月）へも開放され、対象ユーザー層が大幅に広がりました。
+        </p>
+        <p>
+          <strong
+            >③ 価格戦争激化 — GPT-5.6 Luna 80%値下げ・Gemini Flash
+            17%値下げ 💰</strong
+          >
+          — OpenAIは<strong>GPT-5.6 Lunaの入力価格を$0.20/M（約80%値下げ）</strong>に引き下げ、Free/Goユーザーへは無制限テキストチャットを提供開始。Googleも<strong
+            >Gemini 3.6 Flashの出力コストを17%引き下げ</strong
+          >（長時間エージェントタスクでは最大65%節約）。各社が「安価な日常用モデル」と「高価な高度推論モデル」の二階層戦略を鮮明にし始めています。
+        </p>
+        <p>
+          <strong
+            >④ 規制の実装フェーズ突入 — EU AI Act Article 50・中国エージェント規制 ⚖️</strong
+          >
+          — 8月2日、EU
+          AI Actの<strong
+            >Article 50透明性義務</strong
+          >が発効し、違反時の制裁金は最大で<strong
+            >世界売上高の3%</strong
+          >に達する規定に。中国でも7月15日付で<strong
+            >「智能体（インテリジェントエージェント）実施意見」</strong
+          >が施行され、エージェントの意思決定を権限レベル別に階層化することが義務化されました。開発ツール選定において「コンプライアンス対応」が無視できない要素になり始めています。
+        </p>
+      </section>
+
+      <section class="lab-section">
+        <h2>🔍 各ツール最新状況（2026年8月）</h2>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🤖</div>
+            <div class="tool-card-info">
+              <h3>Claude Code</h3>
+              <div class="tool-maker">Anthropic</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">Opus 5対応（7/23）</span>
+            <span class="badge badge-hot">Claude Cowork一般提供</span>
+            <span class="badge badge-free">自動セッション継続</span>
+          </div>
+          <div class="tool-card-body">
+            <h3>📢 8月の主要アップデート</h3>
+            <ul>
+              <li>
+                <strong>Claude Opus 5対応（7月23日ロールアウト）</strong>:
+                1Mコンテキスト・xhigh推論モードに対応。旧Opus
+                4.8は安全性分類器のフォールバック用として$5/$25で継続提供
+              </li>
+              <li>
+                <strong>v2.1.234：利用上限リセット時の自動継続</strong>:
+                週次/日次の利用枠がリセットされたタイミングでセッションを自動再開。資格情報漏洩への対策も強化
+              </li>
+              <li>
+                <strong>v2.1.233：GitLab MR対応・暴走ビルド対策</strong>:
+                Worktreeビューで GitLabマージリクエストに対応。ビルドコマンドの暴走を防ぐメモリ上限を追加
+              </li>
+              <li>
+                <strong>VSCode Focus View新設</strong>:
+                Ctrl+Alt+Fでツール実行の詳細を折りたたみ、ターン単位の要約とライブ実行インジケーターのみを表示するチャットメニュー
+              </li>
+              <li>
+                <strong>Claude Cowork一般提供拡大</strong>:
+                Pro以上の全有料プランで利用可能に。非エンジニア業務（運用・マーケ・財務・法務）での採用が中心という報告
+              </li>
+            </ul>
+            <h3>💰 価格（2026年8月）</h3>
+            <ul>
+              <li>Pro: $20/月 | Max 5x: $100/月 | Max 20x: $200/月</li>
+              <li>Claude Cowork: Pro以上に同梱（$17〜20/月〜）</li>
+              <li>
+                SWE-bench Verified: <strong>Opus 5搭載で引き続きカテゴリ上位</strong>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">⚡</div>
+            <div class="tool-card-info">
+              <h3>Cursor</h3>
+              <div class="tool-maker">Anysphere</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">v0.47 マルチリポ対応</span>
+            <span class="badge badge-type">ARR $3B超・評価額$60B</span>
+          </div>
+          <div class="tool-card-body">
+            <h3>📢 8月：マルチリポジトリへ拡張</h3>
+            <ul>
+              <li>
+                <strong>v0.47（8月13日）マルチリポ awareness</strong>:
+                最大10個の連結リポジトリを横断してコンテキストを保持できる新機能を投入。前回のContinue買収に続き、大規模組織向けの機能拡充が続く
+              </li>
+              <li>
+                <strong>Automations・iOS公開ベータは継続稼働</strong>:
+                7月投入の自動化機能・モバイル対応は8月も安定運用
+              </li>
+              <li>
+                <strong>Grok 4.6を含むモデル選択肢を継続提供</strong>:
+                xAIの新モデルにも追従
+              </li>
+            </ul>
+            <h3>💰 経営指標</h3>
+            <ul>
+              <li>
+                ARR: 30億ドル超 | 評価額: 293億ドル→600億ドルへ急伸（7月時点から変動なし）
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🦾</div>
+            <div class="tool-card-info">
+              <h3>Devin Desktop</h3>
+              <div class="tool-maker">Cognition</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">Security Profiles GA</span>
+            <span class="badge badge-free">Devin Coach新設</span>
+          </div>
+          <div class="tool-card-body">
+            <h3>📢 品質・アクセシビリティ強化フェーズへ</h3>
+            <ul>
+              <li>
+                <strong>Security Profiles一般提供</strong>:
+                管理者がネットワークアクセス等を定義するセキュリティプロファイルを、組織全体・自動化単位の両方で適用可能に
+              </li>
+              <li>
+                <strong>Devin Coach新設</strong>:
+                セッション入力欄でプロンプトの改善提案をリアルタイム表示
+              </li>
+              <li>
+                <strong>Slackスレッド追従・Teams UI改善</strong>:
+                投稿先Slackスレッドをセッションが購読し、返信を自動で拾う設計に
+              </li>
+              <li>
+                <strong>WCAG 2.1 AAアクセシビリティ対応</strong>:
+                ラベル・キーボード操作・スキップリンク等を全面対応
+              </li>
+            </ul>
+            <h3>💰 価格</h3>
+            <ul>
+              <li>
+                Free / Pro $20 / Max $200 / Teams $80（ベース）+ $40/シート
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">💻</div>
+            <div class="tool-card-info">
+              <h3>GitHub Copilot</h3>
+              <div class="tool-maker">Microsoft / GitHub</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">Grok 4.6追加</span>
+            <span class="badge badge-type">Copilot CLI v1.0.80</span>
+          </div>
+          <div class="tool-card-body">
+            <ul>
+              <li>
+                <strong>Grok 4.6をラインナップに追加</strong>:
+                Pro / Pro+ / Max / Business / Enterprise SKUで、エージェント型コーディング・複雑なマルチステップワークフロー向けに利用可能に
+              </li>
+              <li>
+                <strong>Copilot CLI v1.0.80（8月14日）</strong>:
+                モデル設定を更新
+              </li>
+              <li>
+                <strong>Copilot Vision GA・MCP Trust Validationは継続稼働</strong>:
+                7月導入の機能は安定運用が続く
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🟢</div>
+            <div class="tool-card-info">
+              <h3>OpenCode</h3>
+              <div class="tool-maker">OSSコミュニティ</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">194K+ Stars（OSS最多）</span>
+            <span class="badge badge-free">継続成長</span>
+          </div>
+          <div class="tool-card-body">
+            <h3>📢 成長継続 — モデル非依存の定番へ</h3>
+            <ul>
+              <li>
+                <strong>194K+ GitHub Stars（8月上旬時点）</strong>:
+                前回（182K+）からさらに増加。OSS
+                AIコーディングエージェントで引き続き最多
+              </li>
+              <li>
+                <strong>基盤モデル急増局面での強みが再確認</strong>:
+                Opus 5・GPT-5.6 Cyber・Gemini 3.7
+                Flash・Grok 4.6・Kimi
+                K3完全オープン化と、選択肢が一気に増えた8月は「単一設定ファイルで切り替え可能」という設計思想への評価がさらに高まった
+              </li>
+              <li>
+                <strong>75+ LLMプロバイダー対応・MIT
+                License・エアギャップデプロイ</strong>: 継続
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🚀</div>
+            <div class="tool-card-info">
+              <h3>Antigravity 2.0</h3>
+              <div class="tool-maker">Google DeepMind</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-hot">v2.8.0/v2.8.1</span>
+            <span class="badge badge-free">Gemini Enterprise連携</span>
+          </div>
+          <div class="tool-card-body">
+            <ul>
+              <li>
+                <strong>Business sign-in追加（8月3日）</strong>:
+                Gemini Enterpriseアカウント・Workforce Identity
+                Federationでのサインインに対応し、組織契約からのシート自動割当が可能に
+              </li>
+              <li>
+                <strong>入れ子サブエージェント表示対応</strong>:
+                孫階層以下のサブエージェントもルート会話に再帰的に反映されるように
+              </li>
+              <li>
+                <strong>v2.8.0（8/12）・v2.8.1（8/13）</strong>:
+                サイドバーのフォルダ状態を保持しプレビューを安定化。メッセージ応答性の不具合も修正
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-card-header">
+            <div class="tool-card-icon">🤖</div>
+            <div class="tool-card-info">
+              <h3>Grok Build（xAI）</h3>
+              <div class="tool-maker">xAI</div>
+            </div>
+          </div>
+          <div class="tool-card-badges">
+            <span class="badge badge-type">継続稼働（主要変更なし）</span>
+          </div>
+          <div class="tool-card-body">
+            <ul>
+              <li>
+                8並列Gitワークツリー・ローカルファースト設計は変わらず継続
+              </li>
+              <li>
+                Grok 4.6の追加以外に大きなプロダクト発表はなく、Arena
+                Mode正式公開も引き続き待機中
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>📊 全ツール総合比較（2026年8月）</h2>
+        <div class="table-wrapper">
+          <table class="compare-table">
+            <thead>
+              <tr>
+                <th>ツール</th>
+                <th>月額目安</th>
+                <th>最新動向</th>
+                <th>基盤モデル対応</th>
+                <th>特徴</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="tool-name">Claude Code</td>
+                <td>$20〜$200</td>
+                <td>Opus 5対応・自動セッション継続・Cowork一般提供</td>
+                <td>Claude Opus 5 / Sonnet 5</td>
+                <td>VSCode Focus View・GitLab MR対応</td>
+              </tr>
+              <tr>
+                <td class="tool-name">Cursor</td>
+                <td>Free〜$200</td>
+                <td>v0.47マルチリポ対応（10リポジトリ）</td>
+                <td>Grok 4.6ほか</td>
+                <td>ARR$3B超・評価額$60B</td>
+              </tr>
+              <tr>
+                <td class="tool-name">Devin Desktop</td>
+                <td>Free〜$200</td>
+                <td>Security Profiles GA・Devin Coach新設</td>
+                <td>—</td>
+                <td>WCAG 2.1 AA対応・Slackスレッド追従</td>
+              </tr>
+              <tr>
+                <td class="tool-name">GitHub Copilot</td>
+                <td>$10〜$100</td>
+                <td>Grok 4.6追加・CLI v1.0.80</td>
+                <td>Grok 4.6</td>
+                <td>Copilot Vision GA継続</td>
+              </tr>
+              <tr>
+                <td class="tool-name">Antigravity 2.0</td>
+                <td>Free〜$200</td>
+                <td>Business sign-in・入れ子サブエージェント表示</td>
+                <td>Gemini 3.7 Flashほか</td>
+                <td>Gemini Enterprise連携</td>
+              </tr>
+              <tr>
+                <td class="tool-name">OpenCode</td>
+                <td>無料（BYOK）</td>
+                <td>194K+ Stars</td>
+                <td>全対応（75+プロバイダー）</td>
+                <td>MIT・エアギャップ</td>
+              </tr>
+              <tr>
+                <td class="tool-name">Grok Build</td>
+                <td>SuperGrok込</td>
+                <td>継続（Arena Mode待ち）</td>
+                <td>Grok 4.6</td>
+                <td>8並列worktree・ローカルファースト</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>🎯 第11回時点のおすすめ（2026年8月）</h2>
+        <div class="summary-box">
+          <div class="summary-grid">
+            <div class="summary-item">
+              <div class="summary-label">🔥 最新モデル・大規模開発</div>
+              <div class="summary-value">Claude Code（Max 5x $100/月）</div>
+              <p>
+                Opus 5対応・自動セッション継続で長時間タスクの運用がさらに安定。Coworkで非エンジニア業務まで一体運用したいチームに
+              </p>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">🖥️ 大規模組織・マルチリポ</div>
+              <div class="summary-value">Cursor（$32〜$96/シート）</div>
+              <p>
+                v0.47のマルチリポawarenessで最大10リポジトリを横断管理。資本力を背景に機能投入速度は依然最速
+              </p>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">🆓 ロックインゼロ・BYOK</div>
+              <div class="summary-value">OpenCode（無料）</div>
+              <p>
+                194K+
+                Stars。基盤モデルが同時多発する8月こそ、モデル非依存設計の価値が際立つ
+              </p>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">🏢 セキュリティ・アクセシビリティ重視</div>
+              <div class="summary-value">Devin Desktop（Pro $20〜）</div>
+              <p>
+                Security Profiles GA・WCAG
+                2.1 AA対応。監査要件と利用者多様性の両方に配慮したい組織向け
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lab-section">
+        <h2>📝 調査にあたって</h2>
+        <p>
+          本記事は<strong>2026年8月21日時点</strong>の情報を基に更新しました。当サイトはClaude
+          Codeで開発中です。各社モデル・製品情報は公式ブログおよび各社報道を参照しています。<a
+            href="/lab/"
+            >アーカイブはこちら</a
+          >。
+        </p>
+        <p>
+          →
+          <a href="/blog/202608/20260821_ai_lab_update_v12/"
+            >📋
+            LAB第12回まとめ記事でツール比較・開発者・トレンドを一気に俯瞰する</a
+          >
+        </p>
+      </section>
+    </main>
+    <footer class="lab-footer">
+      <p>© 2026 Gravity Portal — LAB</p>
+      <nav class="lab-footer-nav">
+        <a href="/">🏠 TOP</a>
+        <a href="/lab/">🔬 LAB</a>
+        <a href="/blog/202608/20260821_ai_lab_update_v12/">📋 第12回まとめ</a>
+        <a href="/lab/ai-developers/v11/">👤 開発者 第11回</a>
+        <a href="/lab/ai-trends/v11/">📊 トレンド 第11回</a>
+      </nav>
+    </footer>
+    <script>
+      (function () {
+        var btn = document.getElementById("themeToggle");
+        function update() {
+          var t = document.documentElement.getAttribute("data-theme");
+          btn.textContent = t === "light" ? "🌙" : "☀️";
+        }
+        update();
+        btn.addEventListener("click", function () {
+          var cur = document.documentElement.getAttribute("data-theme");
+          var next = cur === "light" ? "dark" : "light";
+          document.documentElement.setAttribute("data-theme", next);
+          try {
+            localStorage.setItem("gp-theme", next);
+          } catch (e) {}
+          update();
+        });
+      })();
+    </script>
+  </body>
+</html>
