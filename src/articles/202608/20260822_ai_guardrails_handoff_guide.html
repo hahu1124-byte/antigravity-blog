@@ -48,36 +48,43 @@ ogImage: ai_guardrails_handoff_guide.webp
   これを防ぐため、ルールを役割に応じて次の<strong>3層構造</strong>に明確に分離して運用します。
 </p>
 
-<table style="width:100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.95rem;">
-  <thead>
-    <tr style="background: rgba(255,255,255,0.08); border-bottom: 2px solid rgba(255,255,255,0.2);">
-      <th style="padding: 10px; text-align: left;">階層</th>
-      <th style="padding: 10px; text-align: left;">役割</th>
-      <th style="padding: 10px; text-align: left;">読み込みタイミング</th>
-      <th style="padding: 10px; text-align: left;">記載内容の例</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-      <td style="padding: 10px;"><strong>第1層：憲法</strong><br><span style="font-size:0.8rem; color:#818cf8;">（最上位ルール）</span></td>
-      <td style="padding: 10px;">絶対に破ってはならない行動原則・権限境界</td>
-      <td style="padding: 10px;">セッション開始時に<strong>常時ロード</strong>（100〜200行程度にスリム化）</td>
-      <td style="padding: 10px;">不可侵ディレクトリ、破壊的操作の禁止、思考プロセスの言語指定、承認フローの必須化</td>
-    </tr>
-    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-      <td style="padding: 10px;"><strong>第2層：六法・スキル</strong><br><span style="font-size:0.8rem; color:#38bdf8;">（業務マニュアル）</span></td>
-      <td style="padding: 10px;">特定作業の詳細手順・フォーマット定義</td>
-      <td style="padding: 10px;">特定のキーワードや作業開始時に<strong>オンデマンド参照</strong></td>
-      <td style="padding: 10px;">DBマイグレーション手順、ブログ記事執筆フロー、デプロイ検証チェックリスト、ツール固有仕様</td>
-    </tr>
-    <tr>
-      <td style="padding: 10px;"><strong>第3層：引き継ぎ（Handoff）</strong><br><span style="font-size:0.8rem; color:#34d399;">（動的コンテキスト）</span></td>
-      <td style="padding: 10px;">セッション間の記憶の受け渡し</td>
-      <td style="padding: 10px;">作業開始時に最新の1件だけ読み込み、終了時に自動追記</td>
-      <td style="padding: 10px;">前回完了したこと、未着手の残タスク、直近で学んだ教訓・注意点</td>
-    </tr>
-  </tbody>
-</table>
+<div style="display: flex; flex-direction: column; gap: 1rem; margin: 1.5rem 0;">
+  <!-- 第1層 -->
+  <div style="background: rgba(99, 102, 241, 0.06); border: 1px solid rgba(99, 102, 241, 0.25); border-radius: 10px; padding: 1.2rem; border-left: 5px solid #6366f1;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.8rem;">
+      <h3 style="margin: 0; color: #818cf8; font-size: 1.15rem;">📜 第1層：憲法（最上位ルール）</h3>
+      <span style="background: rgba(99, 102, 241, 0.2); color: #c7d2fe; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-weight: bold;">常時ロード（100〜200行）</span>
+    </div>
+    <p style="margin: 0 0 0.6rem 0; font-size: 0.95rem;"><strong>【役割】</strong> 絶対に破ってはならない行動原則・権限境界の定義</p>
+    <div style="background: rgba(0, 0, 0, 0.2); padding: 0.7rem 0.9rem; border-radius: 6px; font-size: 0.88rem; color: #cbd5e1;">
+      <span style="color: #94a3b8; font-weight: bold;">記載例：</span>不可侵ディレクトリの保護、破壊的操作の禁止、思考プロセスの言語指定、承認フローの必須化
+    </div>
+  </div>
+
+  <!-- 第2層 -->
+  <div style="background: rgba(56, 189, 248, 0.06); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 1.2rem; border-left: 5px solid #38bdf8;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.8rem;">
+      <h3 style="margin: 0; color: #38bdf8; font-size: 1.15rem;">📚 第2層：六法・スキル（業務マニュアル）</h3>
+      <span style="background: rgba(56, 189, 248, 0.2); color: #bae6fd; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-weight: bold;">オンデマンド参照（必要時のみ）</span>
+    </div>
+    <p style="margin: 0 0 0.6rem 0; font-size: 0.95rem;"><strong>【役割】</strong> 特定作業の詳細手順・フォーマット定義</p>
+    <div style="background: rgba(0, 0, 0, 0.2); padding: 0.7rem 0.9rem; border-radius: 6px; font-size: 0.88rem; color: #cbd5e1;">
+      <span style="color: #94a3b8; font-weight: bold;">記載例：</span>DBマイグレーション手順、ブログ執筆フロー、デプロイ前チェックリスト、ツール固有の仕様
+    </div>
+  </div>
+
+  <!-- 第3層 -->
+  <div style="background: rgba(52, 211, 153, 0.06); border: 1px solid rgba(52, 211, 153, 0.25); border-radius: 10px; padding: 1.2rem; border-left: 5px solid #34d399;">
+    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.8rem;">
+      <h3 style="margin: 0; color: #34d399; font-size: 1.15rem;">📋 第3層：引き継ぎ・Handoff（動的コンテキスト）</h3>
+      <span style="background: rgba(52, 211, 153, 0.2); color: #a7f3d0; font-size: 0.75rem; padding: 3px 8px; border-radius: 4px; font-weight: bold;">開始時読込 ＆ 終了時追記</span>
+    </div>
+    <p style="margin: 0 0 0.6rem 0; font-size: 0.95rem;"><strong>【役割】</strong> セッション間の記憶の確実な受け渡し</p>
+    <div style="background: rgba(0, 0, 0, 0.2); padding: 0.7rem 0.9rem; border-radius: 6px; font-size: 0.88rem; color: #cbd5e1;">
+      <span style="color: #94a3b8; font-weight: bold;">記載例：</span>前回完了したこと（Done）、未着手タスク（ToDo）、学んだ教訓・注意点（Learnings）
+    </div>
+  </div>
+</div>
 
 <p>
   この3層構造にすることで、AIは普段は「最小限の憲法」だけを頭に入れて軽快に動作し、必要な時だけ「専門スキル（マニュアル）」を開いて正確に作業できるようになります。
