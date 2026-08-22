@@ -176,21 +176,38 @@
           const dx = mouseX - particle.x;
           const dy = mouseY - particle.y;
           const distance = Math.hypot(dx, dy);
-          if (distance > 0 && distance < 180) {
-            const force = (180 - distance) / 180;
-            particle.vx -= (dx / distance) * force * 0.45;
-            particle.vy -= (dy / distance) * force * 0.45;
+          if (distance > 10 && distance < 240) {
+            const force = (240 - distance) / 240;
+            particle.vx += (dx / distance) * force * 0.35;
+            particle.vy += (dy / distance) * force * 0.35;
+            particle.vx *= 0.97;
+            particle.vy *= 0.97;
           }
         }
         if (update) {
           particle.x += particle.vx;
           particle.y += particle.vy;
-          particle.vx *= 0.985;
-          particle.vy *= 0.985;
-          if (particle.x < 0) particle.x = width;
-          if (particle.x > width) particle.x = 0;
-          if (particle.y < 0) particle.y = height;
-          if (particle.y > height) particle.y = 0;
+
+          // 速度上限と過剰な加速の減衰（ベースの浮遊速度は維持）
+          const currentSpeed = Math.hypot(particle.vx, particle.vy);
+          const maxSpeed = 3.0;
+          const minSpeed = 0.35;
+
+          if (currentSpeed > maxSpeed) {
+            particle.vx = (particle.vx / currentSpeed) * maxSpeed;
+            particle.vy = (particle.vy / currentSpeed) * maxSpeed;
+          } else if (currentSpeed > 1.2) {
+            particle.vx *= 0.99;
+            particle.vy *= 0.99;
+          } else if (currentSpeed < minSpeed && currentSpeed > 0) {
+            particle.vx = (particle.vx / currentSpeed) * minSpeed;
+            particle.vy = (particle.vy / currentSpeed) * minSpeed;
+          }
+
+          if (particle.x < -10) particle.x = width + 10;
+          if (particle.x > width + 10) particle.x = -10;
+          if (particle.y < -10) particle.y = height + 10;
+          if (particle.y > height + 10) particle.y = -10;
         }
         context.beginPath();
         context.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
