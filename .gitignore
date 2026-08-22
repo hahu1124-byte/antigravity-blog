@@ -4,3 +4,4 @@ node_modules/
 remove_b_article.cjs
 scripts/gas-archive/
 dist/
+dist-preview/

@@ -95,37 +95,37 @@ a:hover {
 
 /* --- ヘッダー / ナビ --- */
 .lab-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0 1.5rem;
-  height: 52px;
-  background: var(--lab-bg-card);
-  border-bottom: 1px solid var(--lab-border);
-  position: sticky;
-  top: 0;
-  z-index: 50;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 0;
 }
 
 .lab-back {
+  display: inline-block;
   font-size: 0.85rem;
   color: var(--lab-text-muted);
-  padding: 0.3rem 0.75rem;
-  border: 1px solid var(--lab-border);
-  border-radius: 9999px;
-  transition: all var(--lab-transition);
-  white-space: nowrap;
+  text-decoration: none;
+  margin-bottom: 1rem;
+  transition: color var(--lab-transition);
 }
 
 .lab-back:hover {
   color: var(--lab-accent);
-  border-color: var(--lab-accent);
 }
 
 .lab-title {
-  font-size: 1rem;
-  font-weight: 600;
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 700;
   color: var(--lab-text);
+  margin-bottom: 0.3rem;
+}
+
+.lab-desc {
+  font-size: 0.9rem;
+  color: var(--lab-text-muted);
+  line-height: 1.6;
+  margin-bottom: 1rem;
 }
 
 /* --- メインコンテンツ --- */

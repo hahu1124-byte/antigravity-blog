@@ -8,6 +8,7 @@ import {
 import { join } from "path";
 import { BUILD_STAMP, OUTPUT_DIR, PROJECT_DIR } from "./context.mjs";
 import { SITE_URL, escapeHtml } from "./html.mjs";
+import { gpHeaderBlock } from "./gp-header.mjs";
 
 // ==========================================
 // 機種SEO個別ページ生成 (/machine-db/[slug]/index.html)
@@ -145,6 +146,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </style>
 </head>
 <body>
+${gpHeaderBlock()}
 <div class="wrap">
 <nav class="bc"><a href="/">トップ</a> &gt; <a href="/machine-db/">機種データベース</a> &gt; ${escapeHtml(m.name)}</nav>
 <header class="hdr">

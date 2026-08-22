@@ -1,4 +1,5 @@
 import { BUILD_STAMP, posts } from "./context.mjs";
+import { gpHeaderBlock } from "./gp-header.mjs";
 
 // ==========================================
 // 忍者AdMax 設定
@@ -78,22 +79,7 @@ export function htmlHead(
 </head>
 <body>
     <div id="gp-hero-bg"></div>
-    <!-- テーマ切替ボタン（Gravity Portal本体と同期） -->
-    <button class="blog-theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
-    <script>
-        (function(){
-            var btn=document.getElementById('themeToggle');
-            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
-            update();
-            btn.addEventListener('click',function(){
-                var cur=document.documentElement.getAttribute('data-theme');
-                var next=cur==='light'?'dark':'light';
-                document.documentElement.setAttribute('data-theme',next);
-                try{localStorage.setItem('gp-theme',next)}catch(e){}
-                update();
-            });
-        })()
-    </script>`;
+    ${gpHeaderBlock()}`;
 }
 
 export function escapeHtml(text) {

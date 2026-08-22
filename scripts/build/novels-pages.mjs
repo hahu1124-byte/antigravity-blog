@@ -12,6 +12,7 @@ import remarkGfm from "remark-gfm";
 import remarkHtml from "remark-html";
 import { OUTPUT_DIR, PROJECT_DIR } from "./context.mjs";
 import { SITE_URL, escapeHtml } from "./html.mjs";
+import { gpHeaderBlock } from "./gp-header.mjs";
 
 // ==========================================
 // LAB novels ページ生成（Markdown → HTML）
@@ -69,21 +70,7 @@ export function labWrap({
     </script>
 </head>
 <body>
-    <button class="theme-toggle" id="themeToggle" aria-label="テーマ切替">🌙</button>
-    <script>
-        (function(){
-            var btn=document.getElementById('themeToggle');
-            function update(){var t=document.documentElement.getAttribute('data-theme');btn.textContent=t==='light'?'🌙':'☀️'}
-            update();
-            btn.addEventListener('click',function(){
-                var cur=document.documentElement.getAttribute('data-theme');
-                var next=cur==='light'?'dark':'light';
-                document.documentElement.setAttribute('data-theme',next);
-                try{localStorage.setItem('gp-theme',next)}catch(e){}
-                update();
-            });
-        })()
-    </script>
+    ${gpHeaderBlock()}
 
     <header class="lab-header">
         <a href="${backHref}" class="lab-back">← ${backLabel}</a>
