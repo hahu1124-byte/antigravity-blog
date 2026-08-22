@@ -72,14 +72,14 @@ novels/
         └── 101-150/
             ├── 101-110/             # ep101~ep110
             └── 111-120/
-                ├── ... (10 older files)
-                ├── ep120C.md
+                ├── ... (8 older files)
+                ├── ep119T.md
                 ├── ep120T.md
                 ├── setting-ch4-reveal.md
                 └── archive/
-                    ├── ... (16 older files)
-                    ├── ep119A.md
-                    └── ep119C.md
+                    ├── ... (18 older files)
+                    ├── ep120A.md
+                    └── ep120C.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
