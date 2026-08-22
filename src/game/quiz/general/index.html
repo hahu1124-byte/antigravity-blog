@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>一般常識クイズ | Gravity Portal</title>
+    <meta
+      name="description"
+      content="時事・教養・娯楽・IT・総合の5カテゴリから出題される一般常識クイズ。各カテゴリ100問のプールからランダム10問を出題。"
+    />
+    <meta property="og:title" content="🧠 一般常識クイズ | Gravity Portal" />
+    <meta
+      property="og:description"
+      content="時事・教養・娯楽・IT・総合の5カテゴリから出題！各100問のプールからランダム出題。"
+    />
+    <meta
+      property="og:url"
+      content="https://antigravity-portal.com/game/quiz/general"
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="🧠 一般常識クイズ | Gravity Portal" />
+    <meta
+      name="twitter:description"
+      content="時事・教養・娯楽・IT・総合の5カテゴリから出題！各100問のプールからランダム出題。"
+    />
+    <link
+      rel="stylesheet"
+      href="https://hahu1124-byte.github.io/antigravity-blog/game/styles.css"
+    />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("gp-theme");
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="full-page">
+      <header class="top-bar">
+        <a href="/game/quiz/" class="top-btn">← クイズ一覧</a>
+        <h1 class="top-title">🧠 一般常識クイズ</h1>
+      </header>
+
+      <iframe
+        src="/general-quiz/index.html"
+        class="full-frame"
+        title="一般常識クイズ"
+      ></iframe>
+    </div>
+  </body>
+</html>

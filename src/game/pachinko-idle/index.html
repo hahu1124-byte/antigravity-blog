@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pachinko Idle — パチンコ放置ゲーム | Gravity Portal</title>
+    <meta
+      name="description"
+      content="確変・ST・遊タイム・プレステージを再現したパチンコ放置ゲーム。5機種を打ち分けて大当たりを引こう！αテスト公開中。"
+    />
+    <meta
+      property="og:title"
+      content="🎰 Pachinko Idle — パチンコ放置ゲーム"
+    />
+    <meta
+      property="og:description"
+      content="確変・ST・遊タイム・プレステージを再現した放置ゲーム。5機種を打ち分けよう！"
+    />
+    <meta
+      property="og:url"
+      content="https://www.antigravity-portal.com/game/pachinko-idle/"
+    />
+    <meta
+      property="og:image"
+      content="https://www.antigravity-portal.com/ogp-pachinko-idle.webp"
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="🎰 Pachinko Idle — パチンコ放置ゲーム"
+    />
+    <meta
+      name="twitter:description"
+      content="確変・ST・遊タイム・プレステージを再現。5機種を打ち分けよう！αテスト公開中。"
+    />
+    <meta
+      name="twitter:image"
+      content="https://www.antigravity-portal.com/ogp-pachinko-idle.webp"
+    />
+    <link
+      rel="stylesheet"
+      href="https://hahu1124-byte.github.io/antigravity-blog/game/styles.css"
+    />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("gp-theme");
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Pachinko Idle — パチンコ放置ゲーム",
+        "description": "確変・ST・遊タイム・プレステージを再現したパチンコ放置ゲーム。5機種を打ち分けて大当たりを引こう！",
+        "url": "https://antigravity-portal.com/game/pachinko-idle",
+        "image": "https://www.antigravity-portal.com/ogp-pachinko-idle.webp"
+      }
+    </script>
+  </head>
+  <body>
+    <div class="full-page">
+      <header class="top-bar">
+        <a href="/game/" class="top-btn">← GAME一覧に戻る</a>
+        <h1 class="top-title">🎰 Pachinko Idle</h1>
+        <div class="header-right" id="headerRight">
+          <span class="alpha-badge">α TEST</span>
+          <span
+            class="sync-badge"
+            id="syncBadge"
+            style="display: none"
+            >☁️ 同期中...</span
+          >
+          <span
+            class="premium-badge"
+            id="premiumBadge"
+            style="display: none"
+            >💎 プレミアム</span
+          >
+        </div>
+      </header>
+
+      <iframe
+        id="gameFrame"
+        src="/idle-game/index.html"
+        class="full-frame"
+        title="Pachinko Idle"
+      ></iframe>
+    </div>
+
+    <script>
+      (function () {
+        var iframe = document.getElementById("gameFrame");
+        var syncBadge = document.getElementById("syncBadge");
+        var premiumBadge = document.getElementById("premiumBadge");
+        var isPaid = false;
+        var syncing = false;
+
+        function setSyncing(v) {
+          syncing = v;
+          syncBadge.style.display = v ? "" : "none";
+        }
+        function updatePremiumBadge() {
+          premiumBadge.style.display = isPaid && !syncing ? "" : "none";
+        }
+
+        function sendPremiumStatus() {
+          if (iframe.contentWindow) {
+            iframe.contentWindow.postMessage(
+              { type: "premium-status", isPaid: isPaid },
+              "*",
+            );
+          }
+        }
+
+        function loadCloudSave() {
+          if (!isPaid) return;
+          setSyncing(true);
+          updatePremiumBadge();
+          fetch("/api/idle-game-save")
+            .then(function (res) {
+              if (!res.ok) throw new Error("load failed");
+              return res.json();
+            })
+            .then(function (json) {
+              if (json && json.data && iframe.contentWindow) {
+                iframe.contentWindow.postMessage(
+                  { type: "cloud-save-data", data: json.data },
+                  "*",
+                );
+              }
+            })
+            .catch(function (e) {
+              console.warn("クラウドセーブ読込失敗:", e);
+            })
+            .finally(function () {
+              setSyncing(false);
+              updatePremiumBadge();
+            });
+        }
+
+        function saveToCloud(saveData) {
+          if (!isPaid) return;
+          setSyncing(true);
+          updatePremiumBadge();
+          fetch("/api/idle-game-save", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: saveData }),
+          })
+            .then(function (res) {
+              return res.json();
+            })
+            .then(function (result) {
+              if (iframe.contentWindow) {
+                iframe.contentWindow.postMessage(
+                  {
+                    type: "cloud-save-result",
+                    success: !!(result && result.success),
+                  },
+                  "*",
+                );
+              }
+            })
+            .catch(function (e) {
+              console.warn("クラウドセーブ保存失敗:", e);
+              if (iframe.contentWindow) {
+                iframe.contentWindow.postMessage(
+                  { type: "cloud-save-result", success: false },
+                  "*",
+                );
+              }
+            })
+            .finally(function () {
+              setSyncing(false);
+              updatePremiumBadge();
+            });
+        }
+
+        window.addEventListener("message", function (e) {
+          if (!e.data || !e.data.type) return;
+          if (e.data.type === "get-premium-status") {
+            sendPremiumStatus();
+          }
+          if (e.data.type === "load-cloud-save") {
+            loadCloudSave();
+          }
+          if (e.data.type === "save-game") {
+            saveToCloud(e.data.data);
+          }
+        });
+
+        fetch("/api/subscription-status")
+          .then(function (res) {
+            return res.json();
+          })
+          .then(function (data) {
+            isPaid = !!(data && data.isPaid);
+            updatePremiumBadge();
+            sendPremiumStatus();
+          })
+          .catch(function () {
+            isPaid = false;
+          });
+      })();
+    </script>
+  </body>
+</html>

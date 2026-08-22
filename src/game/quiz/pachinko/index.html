@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>パチンコクイズ | Gravity Portal</title>
+    <meta
+      name="description"
+      content="パチンコの確率・ボーダー・期待値・風営法・有名演者にまつわる10問のクイズに挑戦！106問のプールからランダム出題、正解率に応じたランク判定付き。"
+    />
+    <meta property="og:title" content="🎯 パチンコクイズ | Gravity Portal" />
+    <meta
+      property="og:description"
+      content="パチンコの確率・ボーダー・期待値に関する106問からランダム10問出題！"
+    />
+    <meta
+      property="og:url"
+      content="https://antigravity-portal.com/game/quiz/pachinko"
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="🎯 パチンコクイズ | Gravity Portal" />
+    <meta
+      name="twitter:description"
+      content="パチンコの確率・ボーダー・期待値に関する106問からランダム10問出題！"
+    />
+    <link
+      rel="stylesheet"
+      href="https://hahu1124-byte.github.io/antigravity-blog/game/styles.css"
+    />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("gp-theme");
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="full-page">
+      <header class="top-bar">
+        <a href="/game/quiz/" class="top-btn">← クイズ一覧</a>
+        <h1 class="top-title">🎯 パチンコクイズ</h1>
+      </header>
+
+      <iframe
+        src="/quiz/index.html"
+        class="full-frame"
+        title="パチンコクイズ"
+      ></iframe>
+    </div>
+  </body>
+</html>

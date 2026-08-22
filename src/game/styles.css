@@ -1,0 +1,298 @@
+/* ============================================================
+   GAME セクション共通CSS
+   Gravity Portal — GAME一覧・クイズ・Pachinko Idle
+   ============================================================ */
+
+/* --- CSS変数（ダーク/ライト） --- */
+:root {
+  --game-bg: #0c0d14;
+  --game-bg-secondary: #13141f;
+  --game-border: rgba(180, 190, 220, 0.1);
+  --game-text: #e8eaf6;
+  --game-text-secondary: #9aa5be;
+  --game-text-muted: #6b7899;
+  --game-accent: #7c7ff2;
+  --game-transition: 150ms ease;
+}
+
+[data-theme="light"] {
+  --game-bg: #f5f6fa;
+  --game-bg-secondary: #edeef5;
+  --game-border: rgba(0, 0, 0, 0.08);
+  --game-text: #1a1b2e;
+  --game-text-secondary: #4a5568;
+  --game-text-muted: #8893a7;
+  --game-accent: #5b5ef0;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --game-bg: #f5f6fa;
+    --game-bg-secondary: #edeef5;
+    --game-border: rgba(0, 0, 0, 0.08);
+    --game-text: #1a1b2e;
+    --game-text-secondary: #4a5568;
+    --game-text-muted: #8893a7;
+    --game-accent: #5b5ef0;
+  }
+}
+
+body {
+  margin: 0;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  background: var(--game-bg);
+  color: var(--game-text);
+}
+
+/* --- ヘッダー（ハブページ用: TOPに戻る + タイトル + 説明） --- */
+.game-header {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 0;
+}
+
+.game-back {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: var(--game-text-muted);
+  text-decoration: none;
+  margin-bottom: 1rem;
+  transition: color var(--game-transition);
+}
+
+.game-back:hover {
+  color: var(--game-accent);
+}
+
+.game-title {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--game-accent), #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.3rem;
+}
+
+.game-title-sm {
+  display: block;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--game-text);
+  margin-bottom: 0.3rem;
+}
+
+.game-desc {
+  color: var(--game-text-secondary);
+  font-size: 0.95rem;
+}
+
+/* --- ハブレイアウト（一覧グリッド） --- */
+.hub-layout {
+  min-height: 100vh;
+  background: var(--game-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.hub-content {
+  flex: 1;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
+}
+
+.hub-heading {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--game-text);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.hub-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.hub-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  background: var(--game-bg-secondary);
+  border: 1px solid var(--game-border);
+  border-radius: 16px;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+.hub-card:hover {
+  border-color: var(--game-accent);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.hub-card-icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+}
+
+.hub-card-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--game-text);
+  margin-bottom: 0.5rem;
+}
+
+.hub-card-desc {
+  font-size: 0.85rem;
+  color: var(--game-text-muted);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.hub-card-meta {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hub-badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  background: var(--game-bg);
+  border: 1px solid var(--game-border);
+  border-radius: 9999px;
+  color: var(--game-text-muted);
+}
+
+.hub-badge-alpha {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.6rem;
+  background: rgba(255, 165, 0, 0.15);
+  border: 1px solid rgba(255, 165, 0, 0.4);
+  border-radius: 9999px;
+  color: #f5a623;
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .hub-grid {
+    grid-template-columns: 1fr;
+  }
+  .hub-content {
+    padding: 1.5rem 1rem 2rem;
+  }
+  .hub-heading {
+    font-size: 1.2rem;
+  }
+}
+
+/* --- フルページ（iframe表示用: クイズ・Pachinko Idle） --- */
+.full-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  z-index: 200;
+  background: var(--game-bg);
+}
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1rem;
+  height: 48px;
+  min-height: 48px;
+  background: var(--game-bg-secondary);
+  border-bottom: 1px solid var(--game-border);
+}
+
+.top-btn {
+  font-size: 0.85rem;
+  color: var(--game-text-muted);
+  text-decoration: none;
+  padding: 0.3rem 0.75rem;
+  border: 1px solid var(--game-border);
+  border-radius: 9999px;
+  transition: all var(--game-transition);
+  white-space: nowrap;
+}
+
+.top-btn:hover {
+  color: var(--game-accent);
+  border-color: var(--game-accent);
+}
+
+.top-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--game-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.full-frame {
+  flex: 1;
+  width: 100%;
+  border: none;
+}
+
+/* --- Pachinko Idle専用: 右側バッジ群 --- */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.alpha-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 9999px;
+  padding: 0.15rem 0.5rem;
+  white-space: nowrap;
+  letter-spacing: 0.05em;
+}
+
+.sync-badge {
+  font-size: 0.75rem;
+  color: #60a5fa;
+  background: rgba(96, 165, 250, 0.1);
+  border: 1px solid rgba(96, 165, 250, 0.25);
+  border-radius: 9999px;
+  padding: 0.15rem 0.5rem;
+  white-space: nowrap;
+}
+
+.premium-badge {
+  font-size: 0.75rem;
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.1);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 9999px;
+  padding: 0.15rem 0.5rem;
+  white-space: nowrap;
+}

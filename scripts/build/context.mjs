@@ -162,6 +162,7 @@ const staticTools = [
   "idle-game",
   "quiz",
   "general-quiz",
+  "game",
   "lab",
   "bgm-maker",
   "static-pages",
