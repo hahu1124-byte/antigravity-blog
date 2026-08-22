@@ -134,9 +134,6 @@
     const context = canvas.getContext("2d");
     if (!context) return;
 
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
     let frameId = 0;
     let width = 0;
     let height = 0;
@@ -249,19 +246,14 @@
 
     function handleResize() {
       resize();
-      if (reducedMotion) draw(false);
     }
 
     resize();
-    if (reducedMotion) {
-      draw(false);
-    } else {
-      window.addEventListener("pointermove", handlePointerMove, {
-        passive: true,
-      });
-      document.addEventListener("pointerleave", handlePointerLeave);
-      animate();
-    }
+    window.addEventListener("pointermove", handlePointerMove, {
+      passive: true,
+    });
+    document.addEventListener("pointerleave", handlePointerLeave);
+    animate();
     window.addEventListener("resize", handleResize);
     container._gpCleanup = function () {
       cancelAnimationFrame(frameId);
