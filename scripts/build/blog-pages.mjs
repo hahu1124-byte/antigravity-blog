@@ -106,9 +106,12 @@ export function buildArticleListHtml(
             <p class="page-desc">${escapeHtml(description)}</p>
         </header>
 
-        <div class="tag-filter">
-            <a href="${allHref}" class="tag${isAll ? " tag-active" : ""}">すべて (${posts.length})</a>
-            ${tagLinks}
+        <div class="tag-filter-shell">
+            <div class="tag-filter" id="blogTagFilter">
+                <a href="${allHref}" class="tag${isAll ? " tag-active" : ""}">すべて (${posts.length})</a>
+                ${tagLinks}
+            </div>
+            <button type="button" class="tag-filter-toggle" id="blogTagToggle" aria-expanded="false" aria-controls="blogTagFilter" hidden>さらに表示</button>
         </div>
 
         <section class="article-grid">
@@ -125,6 +128,23 @@ export function buildArticleListHtml(
         var currentPage = storedPage > 0 ? storedPage : 1;
         var cards = Array.from(document.querySelectorAll('.article-card'));
         var pagination = document.getElementById('pagination');
+        var tagFilter = document.getElementById('blogTagFilter');
+        var tagToggle = document.getElementById('blogTagToggle');
+
+        function updateTagToggle() {
+            if (!tagFilter || !tagToggle || tagFilter.classList.contains('tag-filter-expanded')) return;
+            tagToggle.hidden = tagFilter.scrollHeight <= tagFilter.clientHeight + 1;
+        }
+
+        if (tagFilter && tagToggle) {
+            tagToggle.addEventListener('click', function() {
+                var expanded = tagFilter.classList.toggle('tag-filter-expanded');
+                tagToggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+                tagToggle.textContent = expanded ? '閉じる' : 'さらに表示';
+            });
+            window.addEventListener('resize', updateTagToggle);
+            requestAnimationFrame(updateTagToggle);
+        }
 
         function render(scrollTop) {
             var totalPages = Math.ceil(cards.length / PER_PAGE);

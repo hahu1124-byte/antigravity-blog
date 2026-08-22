@@ -40,13 +40,44 @@
 }
 
 /* --- タグフィルター --- */
+.tag-filter-shell {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
 .tag-filter {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--border);
+  max-height: 2rem;
+  overflow: hidden;
+}
+
+.tag-filter.tag-filter-expanded {
+  max-height: none;
+}
+
+.tag-filter-toggle {
+  display: block;
+  margin: 0.75rem auto 0;
+  padding: 0.35rem 0.9rem;
+  color: var(--accent);
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: 9999px;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tag-filter-toggle:hover {
+  background: rgba(99, 102, 241, 0.18);
+}
+
+.tag-filter-toggle[hidden] {
+  display: none;
 }
 
 .tag {
@@ -189,6 +220,10 @@ html[data-theme="light"] .article-card {
 }
 
 @media (max-width: 640px) {
+  .tag-filter {
+    max-height: 7rem;
+  }
+
   .article-grid {
     grid-template-columns: 1fr;
     gap: 1.2rem;

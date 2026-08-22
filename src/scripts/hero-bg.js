@@ -264,6 +264,7 @@
     const active = resolvePreference(container, preference, renewAuto);
     container.dataset.preference = preference;
     container.dataset.gpUiActive = active;
+    document.documentElement.dataset.gpUiActive = active;
     if (active === "space") renderSpace(container, renderId);
     else renderClassic(container, renderId);
   }

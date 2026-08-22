@@ -101,11 +101,16 @@ export function gpHeaderBlock() {
 .gp-bh-theme:hover{border-color:#7c7ff2;background:rgba(124,127,242,.1)}
 body.gp-ui-shell{background:transparent!important}
 body.gp-ui-shell .hub-layout{background:transparent!important}
-body.gp-ui-shell>#gp-hero-bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;overflow:hidden}
-body.gp-ui-shell>*:not(#gp-hero-bg){position:relative;z-index:1}
-body.gp-ui-shell>.gp-blog-header{position:sticky;z-index:1000}
+body.gp-ui-shell>#gp-hero-bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;overflow:hidden;opacity:0;transition:opacity 1s ease-in-out}
+body.gp-ui-shell>#gp-hero-bg.visible{opacity:.55}
+body.gp-ui-shell>#gp-hero-bg[data-bg-dark="true"].visible{opacity:.45}
+body.gp-ui-shell>#gp-hero-bg[data-gp-ui-active="space"].visible{opacity:1;background:radial-gradient(circle at 20% 15%,rgba(124,127,242,.14),transparent 38%),radial-gradient(circle at 80% 70%,rgba(56,189,248,.1),transparent 42%),#070911}
+body.gp-ui-shell>:where(:not(#gp-hero-bg)){position:relative;z-index:1}
+body.gp-ui-shell>.gp-blog-header{position:sticky;top:0;z-index:1000}
+html[data-gp-ui-active="space"] body.gp-ui-shell{--bg-primary:#070911;--bg-secondary:#10131f;--bg-card:#181b2a;--text-primary:#f1f3fc;--text-secondary:#aab3c8;--text-muted:#7f8ba8;--border:rgba(180,190,220,.14);--lab-bg:#070911;--lab-bg-card:#181b2a;--lab-bg-table:#151827;--lab-border:#343a4d;--lab-text:#f1f3fc;--lab-text-muted:#9aa5be;--game-bg:#070911;--game-bg-secondary:#181b2a;--game-border:rgba(180,190,220,.14);--game-text:#f1f3fc;--game-text-secondary:#aab3c8;--game-text-muted:#7f8ba8;background:#070911!important;color:#f1f3fc;color-scheme:dark}
 body.gp-ui-shell .hub-card,body.gp-ui-shell .tool-card{background:rgba(24,27,40,.76)!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
 [data-theme="light"] body.gp-ui-shell .hub-card,[data-theme="light"] body.gp-ui-shell .tool-card{background:rgba(255,255,255,.76)!important}
+html[data-gp-ui-active="space"] body.gp-ui-shell .hub-card,html[data-gp-ui-active="space"] body.gp-ui-shell .tool-card,html[data-gp-ui-active="space"] body.gp-ui-shell .dev-card,html[data-gp-ui-active="space"] body.gp-ui-shell .article-card,html[data-gp-ui-active="space"] body.gp-ui-shell .article{background:rgba(24,27,40,.78)!important;color:#f1f3fc!important}
 @media(max-width:760px){.gp-bh-inner{height:56px;padding:0 .65rem;gap:.45rem}.gp-bh-logo{font-size:.92rem}.gp-bh-nav{gap:.28rem}.gp-bh-label,.gp-bh-hide-mobile{display:none}.gp-bh-link{padding:0;width:34px;height:34px;justify-content:center}.gp-bh-ui-trigger{width:38px;padding:0;justify-content:center}.gp-bh-ui-label,.gp-bh-caret{display:none}.gp-bh-ui-menu{position:fixed;top:64px;right:.65rem;width:min(270px,calc(100vw - 1.3rem))}.gp-bh-theme{width:34px;height:34px}}
 @media(max-width:430px){.gp-bh-logo{max-width:78px;overflow:hidden;text-overflow:ellipsis}.gp-bh-nav .gp-bh-link:nth-of-type(4){display:none}}
 </style>
