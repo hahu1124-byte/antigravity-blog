@@ -68,7 +68,7 @@ export function buildArticleListHtml(
                 <time class="date">${formatDateTime(post.date)}</time>
                 ${getDateModifiedBadge(post)}
                 <div class="tags">
-                    ${post.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
+                    ${post.tags.slice(0, 1).map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
                 </div>
             </div>
             <h2 class="card-title">${escapeHtml(post.title)}</h2>
