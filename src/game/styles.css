@@ -51,6 +51,7 @@ body {
 
 /* --- ヘッダー（ハブページ用: TOPに戻る + タイトル + 説明） --- */
 .game-header {
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1.5rem 0;
