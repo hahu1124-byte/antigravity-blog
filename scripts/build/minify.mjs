@@ -40,6 +40,10 @@ export function collectFiles(dir, exts) {
   return results;
 }
 
+// アクセス解析ビーコン。iframe内（/tools/*ラッパー経由）では二重カウントになるため送信しない。
+const TRACK_SNIPPET =
+  '<script>(function(){try{if(window.top!==window.self)return;var b=new Blob([JSON.stringify({path:location.pathname,referrer:document.referrer})],{type:"application/json"});navigator.sendBeacon("https://antigravity-portal.com/api/track",b)}catch(e){}})()</script>';
+
 /**
  * HTMLのインラインCSS/JSをesbuildでminify、タグ間余分空白を削除
  * <pre>タグは壊さないよう、src属性付き<script>はスキップ
@@ -73,6 +77,11 @@ export async function minifyHtmlContent(html) {
 
   // HTMLコメント削除（条件付きコメント <!--[if は除外）
   html = html.replace(/<!--(?!\[if)[\s\S]*?-->/g, "");
+
+  // アクセス解析ビーコン注入（</body>直前。無い場合は何もしない）
+  if (html.includes("</body>")) {
+    html = html.replace("</body>", `${TRACK_SNIPPET}</body>`);
+  }
 
   return html;
 }
@@ -143,7 +152,9 @@ export async function minifyAssets() {
     try {
       const minifiedHtml = await minifyHtmlContent(original);
       const newSize = Buffer.byteLength(minifiedHtml, "utf-8");
-      if (newSize < originalSize) {
+      // アクセス解析ビーコン注入でサイズが増える場合があるため、
+      // 「縮んだら書く」ではなく「内容が変わったら書く」で判定する
+      if (minifiedHtml !== original) {
         writeFileSync(file, minifiedHtml);
         totalSaved += originalSize - newSize;
         minified++;
