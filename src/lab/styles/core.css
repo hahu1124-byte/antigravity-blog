@@ -54,7 +54,7 @@ body {
     "Noto Sans JP",
     -apple-system,
     sans-serif;
-  background: var(--lab-bg);
+  background: transparent;
   color: var(--lab-text);
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
@@ -254,12 +254,18 @@ a:hover {
 
 /* --- ツールカード --- */
 .tool-card {
-  background: var(--lab-bg-card);
+  background: rgba(24, 27, 40, 0.78);
   border: 1px solid var(--lab-border);
   border-radius: var(--lab-radius);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   transition: all var(--lab-transition);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+[data-theme="light"] .tool-card {
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .tool-card:hover {
@@ -407,12 +413,18 @@ a:hover {
 
 /* --- 開発者カード --- */
 .dev-card {
-  background: var(--lab-bg-card);
+  background: rgba(24, 27, 40, 0.78);
   border: 1px solid var(--lab-border);
   border-radius: var(--lab-radius);
   padding: 1.5rem;
   margin-bottom: 1.5rem;
   transition: all var(--lab-transition);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+[data-theme="light"] .dev-card {
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .dev-card:hover {
@@ -559,6 +571,10 @@ a:hover {
 
 /* --- レスポンシブ --- */
 @media (max-width: 768px) {
+  .lab-header {
+    padding: 1.5rem 1rem 0;
+  }
+
   .lab-content {
     padding: 1.5rem 1rem 3rem;
   }
@@ -583,7 +599,7 @@ a:hover {
 
 @media (max-width: 480px) {
   .lab-header {
-    padding: 0 0.75rem;
+    padding: 1rem 1rem 0;
   }
 
   .lab-content {

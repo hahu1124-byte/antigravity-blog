@@ -37,17 +37,17 @@
       /* ハブ専用スタイル */
       .hub-layout {
         min-height: 100vh;
-        background: var(--lab-bg);
+        background: transparent;
       }
       .hub-content {
-        max-width: 800px;
+        max-width: 1200px;
         width: 100%;
         margin: 0 auto;
         padding: 2rem 1.5rem 3rem;
       }
       .hub-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 1.5rem;
       }
       .hub-card {
@@ -56,12 +56,17 @@
         align-items: center;
         text-align: center;
         padding: 2rem 1.5rem;
-        background: var(--lab-bg-card);
+        background: rgba(24, 27, 40, 0.76);
         border: 1px solid var(--lab-border);
         border-radius: 16px;
         transition: all 0.25s ease;
         text-decoration: none;
         color: inherit;
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+      }
+      [data-theme="light"] .hub-card {
+        background: rgba(255, 255, 255, 0.78);
       }
       .hub-card:hover {
         border-color: var(--lab-accent);
@@ -129,6 +134,11 @@
         gap: 0.5rem;
         flex-wrap: wrap;
         justify-content: center;
+      }
+      @media (max-width: 980px) {
+        .hub-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
       }
       @media (max-width: 600px) {
         .hub-grid {

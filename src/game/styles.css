@@ -51,7 +51,7 @@ body {
 
 /* --- ヘッダー（ハブページ用: TOPに戻る + タイトル + 説明） --- */
 .game-header {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1.5rem 0;
 }
@@ -96,14 +96,14 @@ body {
 /* --- ハブレイアウト（一覧グリッド） --- */
 .hub-layout {
   min-height: 100vh;
-  background: var(--game-bg);
+  background: transparent;
   display: flex;
   flex-direction: column;
 }
 
 .hub-content {
   flex: 1;
-  max-width: 800px;
+  max-width: 1200px;
   width: 100%;
   margin: 0 auto;
   padding: 2rem 1.5rem 3rem;
@@ -119,7 +119,7 @@ body {
 
 .hub-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.5rem;
 }
 
@@ -129,13 +129,19 @@ body {
   align-items: center;
   text-align: center;
   padding: 2rem 1.5rem;
-  background: var(--game-bg-secondary);
+  background: rgba(25, 27, 40, 0.76);
   border: 1px solid var(--game-border);
   border-radius: 16px;
   text-decoration: none;
   color: inherit;
   transition: all 0.25s ease;
   cursor: pointer;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+[data-theme="light"] .hub-card {
+  background: rgba(255, 255, 255, 0.78);
 }
 
 .hub-card:hover {
@@ -189,12 +195,21 @@ body {
   font-weight: 600;
 }
 
+@media (max-width: 980px) {
+  .hub-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 600px) {
   .hub-grid {
     grid-template-columns: 1fr;
   }
   .hub-content {
     padding: 1.5rem 1rem 2rem;
+  }
+  .game-header {
+    padding: 1.5rem 1rem 0;
   }
   .hub-heading {
     font-size: 1.2rem;

@@ -24,6 +24,7 @@ import { buildBlogNovelPages } from "./scripts/build/blog-novels.mjs";
 import { minifyAssets } from "./scripts/build/minify.mjs";
 import { checkInternalLinks } from "./scripts/build/check-links.mjs";
 import { checkDuplicateArticles } from "./scripts/build/check-duplicates.mjs";
+import { enhanceStaticShellPages } from "./scripts/build/static-shell.mjs";
 
 // ブログ・カテゴリ・記事・RSS・機種ページ
 buildIndexPage();
@@ -38,6 +39,9 @@ await buildSettingsPages();
 
 // 小説本文ページ（/blog/novels/）
 await buildBlogNovelPages();
+
+// 静的GAME/LABもビルド時に共通ヘッダー・背景へ統一
+enhanceStaticShellPages();
 
 // ビルド後処理
 await minifyAssets();

@@ -5,7 +5,7 @@
 
 /* --- カスタムプロパティ（ダークテーマ：デフォルト） --- */
 :root {
-  --bg-primary: rgba(15, 16, 23, 0.85);
+  --bg-primary: rgba(15, 16, 23, 0.72);
   --bg-secondary: rgba(22, 24, 34, 0.85);
   --bg-card: rgba(30, 32, 48, 0.75);
   --text-primary: #f0f0f8;
@@ -33,7 +33,7 @@
 
 /* --- ライトテーマ --- */
 html[data-theme="light"] {
-  --bg-primary: rgba(245, 245, 250, 0.85);
+  --bg-primary: rgba(245, 245, 250, 0.76);
   --bg-secondary: rgba(238, 238, 245, 0.85);
   --bg-card: rgba(255, 255, 255, 0.75);
   --text-primary: #1a1a2e;
@@ -104,6 +104,14 @@ a:hover {
   opacity: 0.45;
 }
 
+#gp-hero-bg[data-gp-ui-active="space"].visible {
+  opacity: 0.8;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(124, 127, 242, 0.14), transparent 38%),
+    radial-gradient(circle at 80% 70%, rgba(56, 189, 248, 0.1), transparent 42%),
+    #070911;
+}
+
 .gp-hero-media {
   position: absolute;
   top: 0;
@@ -125,6 +133,18 @@ a:hover {
   background-position: center;
   background-repeat: no-repeat;
   animation: heroBgDrift 8s ease-in-out infinite alternate;
+}
+
+.gp-space-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gp-hero-image {
+    animation: none;
+  }
 }
 
 @keyframes heroBgDrift {

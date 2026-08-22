@@ -44,13 +44,17 @@
 
 /* --- 記事カード --- */
 .article {
-  background: var(--bg-card);
+  background: rgba(24, 27, 40, 0.82);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 2.5rem 3rem;
   margin-bottom: 2rem;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+}
+
+html[data-theme="light"] .article {
+  background: rgba(255, 255, 255, 0.84);
 }
 
 .article-header {
