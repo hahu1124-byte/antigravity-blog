@@ -40,17 +40,21 @@ tags: [タグ1, タグ2]
 **【Antigravity（Gemini）での執筆時・絶対厳守】**
 Antigravityでブログ記事を作成する際は、必ず `generate_image` ツール（Nanobanana）を用いて記事の世界観・テーマに合わせたハイクオリティなアイキャッチ（16:9）を生成する。
 
-1. **Nanobanana画像生成**: `generate_image` ツールで画像を生成。
-2. **WebP変換と配置**:
+1. **プロンプト候補の取得（推奨）**:
+   記事タイトルからおすすめのプロンプト案（サイバー調・シネマティック調・イラスト調）を生成可能：
    ```bash
-   ffmpeg -i "元画像.jpg" -quality 85 "h:/gravity/projects/antigravity-blog/src/images/画像名.webp" -y
+   bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/import-article-image.mjs --suggest "記事タイトル"
    ```
-3. **記事ソースへの連携**:
-   * 記事HTMLの先頭に画像タグを追加:
-     ```html
-     <p><img src="/blog/images/画像名.png" alt="説明"></p>
-     ```
-   * **Frontmatterにも必ず `ogImage: 画像名.webp` を明記する**（サムネイル・OGP・Twitter CardがすべてNanobanana画像に統一される）。
+2. **Nanobanana画像生成**: `generate_image` ツール（16:9）で画像を生成。
+3. **画像の自動インポート＆記事反映（一括ワンコマンド）**:
+   ```bash
+   bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/import-article-image.mjs "生成画像パス" 記事スラッグ
+   ```
+   - **自動実行される処理**:
+     - `ffmpeg` による WebP 変換（quality 85）と `src/images/` への自動配置
+     - 記事 HTML の Frontmatter（`ogImage: スラッグ.webp`）自動設定
+     - 記事本文先頭への `<p><img src="/blog/images/スラッグ.webp" alt="..."></p>` の自動挿入（**※画像を変更・再生成した際も同じコマンドを実行するだけで既存タグが安全に自動差し替えされます**）
+     - `node build.mjs` による自動再ビルド
 
 ### 3. OGP画像の自動生成（日次レポート等・画像生成不要な場合のみ）
 

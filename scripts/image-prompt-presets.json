@@ -1,0 +1,50 @@
+{
+  "styles": {
+    "cyber_neon": {
+      "name": "サイバーネオン / HUD (Space UI)",
+      "description": "ダーク背景、ネオン発光、HUDインターフェース、サイバーパンク・フューチャリスティック調",
+      "keywords": "cyberpunk aesthetics, dark glowing neon elements, futuristic HUD interface, holographic data visualization, sleek dark glassmorphism, cinematic lighting, highly detailed, 8k resolution, 16:9 aspect ratio, no text, no letters",
+      "recommended_for": ["AI開発", "テック", "Claude Code", "Codex", "Gemini", "自動化", "ツール開発"]
+    },
+    "cinematic_realistic": {
+      "name": "シネマティック / ドラマチック",
+      "description": "映画のような重厚な光と影、被写界深度（ボケ感）、リアリズム、プロフェッショナルな質感",
+      "keywords": "cinematic shot, dramatic moody lighting, shallow depth of field, 35mm lens photography, photorealistic texture, atmospheric haze, volumetric light, professional composition, 16:9 aspect ratio, no text, no letters",
+      "recommended_for": ["配達員", "Uber", "都市風景", "実戦ドキュメント", "制度改正"]
+    },
+    "modern_vector_illustration": {
+      "name": "モダンベクター / アイソメトリック",
+      "description": "洗練されたカラーパレット、クリーンなベクターアート、3Dアイソメトリック、親しみやすく分かりやすい",
+      "keywords": "modern vector illustration, isometric 3D view, clean geometric shapes, soft gradient shading, minimalist tech palette, friendly professional atmosphere, high resolution, 16:9 aspect ratio, no text, no letters",
+      "recommended_for": ["確定申告", "税金", "保険", "初心者ガイド", "Q&A", "比較記事"]
+    },
+    "data_infographic": {
+      "name": "データ＆シミュレーション / テクニカル",
+      "description": "抽象的なデータフロー、粒子・パーティクル、計算・期待値・確率の可視化",
+      "keywords": "abstract data flow, particle physics visualization, glowing probability graphs, mathematical wave forms, elegant dark theme, scientific aesthetic, hyper-detailed rendering, 16:9 aspect ratio, no text, no letters",
+      "recommended_for": ["EV計算", "確率・収束", "シミュレーター", "パチンコ", "データ分析"]
+    }
+  },
+  "categories": {
+    "ai_dev": {
+      "label": "AI開発・マルチエージェント",
+      "default_style": "cyber_neon",
+      "prompt_template": "A futuristic digital command center where three distinct glowing holographic AI cores collaborate. Dark room, vibrant neon cyan, purple, and amber accents, floating data nodes and architectural blueprints in mid-air, sleek modern desk setup with multiple glowing monitors, high-tech Pair Programming atmosphere, cinematic depth of field, 16:9 aspect ratio, no text, no letters."
+    },
+    "delivery_gig": {
+      "label": "フードデリバリー・配達員",
+      "default_style": "cinematic_realistic",
+      "prompt_template": "A delivery rider bicycle equipped with smartphone navigation mount, parked at a rainy Tokyo or Nagoya street corner at dusk. Wet asphalt reflecting neon city lights and street lamps, atmospheric bokeh, professional gear, modern mobility lifestyle, cinematic mood, 16:9 aspect ratio, no text, no letters."
+    },
+    "tax_and_finance": {
+      "label": "確定申告・税金・制度・副業",
+      "default_style": "modern_vector_illustration",
+      "prompt_template": "Modern isometric illustration of personal finance and business organization. A sleek clean desk with financial documents, digital calculator, tax balance scales, shield symbol for compliance, soft warm and cool balanced tones, minimalist elegant vector art, 16:9 aspect ratio, no text, no letters."
+    },
+    "pachinko_and_stats": {
+      "label": "パチンコ・期待値・確率・ゲーム",
+      "default_style": "data_infographic",
+      "prompt_template": "High-tech probability and statistical simulation visualization. Glowing streams of golden and emerald particles flowing through an abstract mechanism, futuristic graphs and probability distribution curves floating against a deep midnight blue background, cinematic lighting, 16:9 aspect ratio, no text, no letters."
+    }
+  }
+}
