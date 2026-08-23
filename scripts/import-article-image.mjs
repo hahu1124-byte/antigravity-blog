@@ -88,32 +88,60 @@ function showPresets() {
 
 function suggestPrompts(title) {
   const presets = loadPresets();
-  console.log(`\n💡 【記事タイトルから生成されたプロンプト案】: "${title}"\n`);
+  console.log(`\n💡 【記事タイトルから生成されたプロンプト案（全7スタイル）】: "${title}"\n`);
 
   const styles = presets.styles || {};
 
-  // パターン1: サイバーネオン / HUD
+  // 1. サイバーネオン / HUD
   const cyber = styles.cyber_neon?.keywords || "cyberpunk aesthetics, dark glowing neon elements, futuristic HUD interface, 16:9 aspect ratio, no text, no letters";
   console.log("--------------------------------------------------");
-  console.log("🔵 パターン 1: サイバーネオン / テック (Space HUD調)");
+  console.log("🔵 1. サイバーネオン / HUD (Space UI 調)");
   console.log("--------------------------------------------------");
   console.log(`A striking concept visual representing "${title}". High-tech digital command center, holographic floating diagrams, glowing neon cyan and purple accents against a deep dark background, ${cyber}\n`);
 
-  // パターン2: シネマティック / ドラマチック
-  const cinema = styles.cinematic_realistic?.keywords || "cinematic shot, dramatic moody lighting, shallow depth of field, photorealistic texture, 16:9 aspect ratio, no text, no letters";
+  // 2. シネマティック / ドラマチック
+  const cinema = styles.cinematic_realistic?.keywords || "cinematic shot, dramatic moody lighting, shallow depth of field, 35mm lens photography, 16:9 aspect ratio, no text, no letters";
   console.log("--------------------------------------------------");
-  console.log("🟠 パターン 2: シネマティック / ドラマチック (リアル調)");
+  console.log("🟠 2. シネマティック / ドラマチック (リアル調)");
   console.log("--------------------------------------------------");
   console.log(`A cinematic high-detail atmospheric scene inspired by "${title}". Atmospheric lighting, rich environmental textures, dramatic composition, evocative shadows, ${cinema}\n`);
 
-  // パターン3: モダンベクター / アイソメトリック
+  // 3. モダンベクター / アイソメトリック
   const vector = styles.modern_vector_illustration?.keywords || "modern vector illustration, isometric 3D view, clean geometric shapes, soft gradient shading, 16:9 aspect ratio, no text, no letters";
   console.log("--------------------------------------------------");
-  console.log("🟢 パターン 3: モダンベクター / イラスト (親しみやすい解説調)");
+  console.log("🟢 3. モダンベクター / アイソメトリック (ビジネス・解説調)");
   console.log("--------------------------------------------------");
   console.log(`A clean modern vector conceptual illustration representing "${title}". Isometric composition, elegant modern color palette, minimalist design, visually balanced objects, ${vector}\n`);
 
-  console.log("👉 上記プロンプトを Nanobanana (generate_image ツール) に渡して画像を生成してください。\n");
+  // 4. アニメーション / 劇場版アニメ調
+  const anime = styles.anime_cinematic?.keywords || "High quality Japanese anime background art style, Makoto Shinkai aesthetic, emotional volumetric lighting, 16:9 aspect ratio, no text, no letters";
+  console.log("--------------------------------------------------");
+  console.log("🟣 4. ジャパニーズ・アニメーション (新海誠・劇場版アニメ調)");
+  console.log("--------------------------------------------------");
+  console.log(`A beautiful emotional anime scene inspired by "${title}". A character at a workspace with glowing holographic windows, dramatic dusk sky with glowing clouds and starry night outside the window, ${anime}\n`);
+
+  // 5. マンガ・コミック / 少年漫画調
+  const manga = styles.manga_comic_dynamic?.keywords || "Dynamic Japanese manga style, high contrast black and white ink drawing with fine screentone dots, dramatic action speed lines, 16:9 aspect ratio, no text, no letters";
+  console.log("--------------------------------------------------");
+  console.log("🔴 5. ダイナミック・マンガ (少年漫画・スクリーントーン調)");
+  console.log("--------------------------------------------------");
+  console.log(`Dynamic Japanese manga climactic panel representing "${title}". A hero character commanding powerful glowing data shields against chaotic glitch monsters, dramatic angles, speed lines, ${manga}\n`);
+
+  // 6. ピクセルアート / レトロゲーム調
+  const pixel = styles.pixel_art_retro?.keywords || "Gorgeous 16-bit pixel art, retro gaming aesthetic, vibrant pixelated colors, 16:9 aspect ratio, no text, no letters";
+  console.log("--------------------------------------------------");
+  console.log("🟡 6. 16-bit ピクセルアート (レトロゲーム・ドット絵調)");
+  console.log("--------------------------------------------------");
+  console.log(`A charming 16-bit pixel art scene inspired by "${title}". Nostalgic retro game interface, detailed pixel landscape, glowing 8-bit energy effects, ${pixel}\n`);
+
+  // 7. ミニマル・スケッチ / 設計図調
+  const sketch = styles.minimal_sketch_lineart?.keywords || "Elegant architectural concept sketch, delicate black ink line art with subtle pastel watercolor washes, 16:9 aspect ratio, no text, no letters";
+  console.log("--------------------------------------------------");
+  console.log("⚪ 7. ミニマル・ラインアート / スケッチ (建築パース・設計図調)");
+  console.log("--------------------------------------------------");
+  console.log(`An elegant conceptual design blueprint illustrating "${title}". Sophisticated architectural line drawing, delicate ink strokes, clean white textured background, ${sketch}\n`);
+
+  console.log("👉 お好みのプロンプトをコピーして Nanobanana (generate_image ツール) で生成してください。\n");
 }
 
 function findArticleFile(slugOrPath) {

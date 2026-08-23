@@ -1,28 +1,46 @@
 {
   "styles": {
     "cyber_neon": {
-      "name": "サイバーネオン / HUD (Space UI)",
+      "name": "1. サイバーネオン / HUD (Space UI)",
       "description": "ダーク背景、ネオン発光、HUDインターフェース、サイバーパンク・フューチャリスティック調",
       "keywords": "cyberpunk aesthetics, dark glowing neon elements, futuristic HUD interface, holographic data visualization, sleek dark glassmorphism, cinematic lighting, highly detailed, 8k resolution, 16:9 aspect ratio, no text, no letters",
       "recommended_for": ["AI開発", "テック", "Claude Code", "Codex", "Gemini", "自動化", "ツール開発"]
     },
     "cinematic_realistic": {
-      "name": "シネマティック / ドラマチック",
+      "name": "2. シネマティック / ドラマチック (リアル調)",
       "description": "映画のような重厚な光と影、被写界深度（ボケ感）、リアリズム、プロフェッショナルな質感",
       "keywords": "cinematic shot, dramatic moody lighting, shallow depth of field, 35mm lens photography, photorealistic texture, atmospheric haze, volumetric light, professional composition, 16:9 aspect ratio, no text, no letters",
       "recommended_for": ["配達員", "Uber", "都市風景", "実戦ドキュメント", "制度改正"]
     },
     "modern_vector_illustration": {
-      "name": "モダンベクター / アイソメトリック",
+      "name": "3. モダンベクター / アイソメトリック (解説・ビジネス調)",
       "description": "洗練されたカラーパレット、クリーンなベクターアート、3Dアイソメトリック、親しみやすく分かりやすい",
       "keywords": "modern vector illustration, isometric 3D view, clean geometric shapes, soft gradient shading, minimalist tech palette, friendly professional atmosphere, high resolution, 16:9 aspect ratio, no text, no letters",
       "recommended_for": ["確定申告", "税金", "保険", "初心者ガイド", "Q&A", "比較記事"]
     },
-    "data_infographic": {
-      "name": "データ＆シミュレーション / テクニカル",
-      "description": "抽象的なデータフロー、粒子・パーティクル、計算・期待値・確率の可視化",
-      "keywords": "abstract data flow, particle physics visualization, glowing probability graphs, mathematical wave forms, elegant dark theme, scientific aesthetic, hyper-detailed rendering, 16:9 aspect ratio, no text, no letters",
-      "recommended_for": ["EV計算", "確率・収束", "シミュレーター", "パチンコ", "データ分析"]
+    "anime_cinematic": {
+      "name": "4. ジャパニーズ・アニメーション (新海誠・劇場版アニメ調)",
+      "description": "エモーショナルな光と空、美しい夕景・星空、繊細な背景美術、高品質な日本のアニメ映画調",
+      "keywords": "High quality Japanese anime background art style, Makoto Shinkai aesthetic, emotional volumetric lighting, beautiful dramatic dusk sky with glowing sunset and evening stars, anime movie visual, highly detailed, 8k resolution, 16:9 aspect ratio, no text, no letters",
+      "recommended_for": ["ストーリー調記事", "開発エピソード", "個人開発の想い", "日常・コラム", "AI対話"]
+    },
+    "manga_comic_dynamic": {
+      "name": "5. ダイナミック・マンガ (少年漫画・スクリーントーン調)",
+      "description": "白黒ハイコントラスト、微細な網点（スクリーントーン）、集中線・効果線、バトル漫画のクライマックス風",
+      "keywords": "Dynamic Japanese manga style, high contrast black and white ink drawing with fine screentone dots, dramatic action speed lines, expressive ink linework, Shonen manga climactic spread panel, crisp ink hatching, 16:9 aspect ratio, no text, no letters",
+      "recommended_for": ["バグとの死闘", "トラブルシューティング", "劇的ビフォーアフター", "インパクト重視"]
+    },
+    "pixel_art_retro": {
+      "name": "6. 16-bit ピクセルアート (レトロゲーム・ドット絵調)",
+      "description": "懐かしのスーパーファミコン・アーケード調、緻密なドット絵、レトロゲームUI、温かみのある世界観",
+      "keywords": "Gorgeous 16-bit pixel art, retro gaming aesthetic, vibrant pixelated colors, detailed pixel shading, nostalgic arcade game scene, charming isometric pixel environment, 16:9 aspect ratio, no text, no letters",
+      "recommended_for": ["ゲーム開発", "パチンコ・確率シミュレーション", "レトロテック", "サイドプロジェクト"]
+    },
+    "minimal_sketch_lineart": {
+      "name": "7. ミニマル・ラインアート / スケッチ (建築パース・設計図調)",
+      "description": "繊細なインクペン画、水彩の淡い差し色、手描きの設計図やアーキテクチャスケッチ風",
+      "keywords": "Elegant architectural concept sketch, delicate black ink line art with subtle pastel watercolor washes, minimalist technical drawing, sophisticated blueprint aesthetic, clean white textured paper background, 16:9 aspect ratio, no text, no letters",
+      "recommended_for": ["アーキテクチャ設計", "設計思想・哲学", "ナレッジベース構築", "ルール設計"]
     }
   },
   "categories": {
@@ -43,7 +61,7 @@
     },
     "pachinko_and_stats": {
       "label": "パチンコ・期待値・確率・ゲーム",
-      "default_style": "data_infographic",
+      "default_style": "pixel_art_retro",
       "prompt_template": "High-tech probability and statistical simulation visualization. Glowing streams of golden and emerald particles flowing through an abstract mechanism, futuristic graphs and probability distribution curves floating against a deep midnight blue background, cinematic lighting, 16:9 aspect ratio, no text, no letters."
     }
   }
