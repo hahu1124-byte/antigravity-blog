@@ -259,7 +259,11 @@
                 case 'entry': cmp = (a.entryRate || 0) - (b.entryRate || 0); break;
                 case 'cont': cmp = (a.realContRate || 0) - (b.realContRate || 0); break;
                 case 'yutime': cmp = (a.yutimeTrigger || 0) - (b.yutimeTrigger || 0); break;
-                case 'release': cmp = (a.releaseDate || '').localeCompare(b.releaseDate || ''); break;
+                case 'release': {
+                    cmp = (a.releaseDate || '').localeCompare(b.releaseDate || '');
+                    if (cmp === 0) cmp = a.name.localeCompare(b.name, 'ja');
+                    break;
+                }
             }
             return sortDir === 'asc' ? cmp : -cmp;
         });
