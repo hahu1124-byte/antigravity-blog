@@ -12,6 +12,9 @@ description: ブログ記事の新規追加手順（記事HTML作成→OGP自動
 - 記事メタデータは `src/blog-data.json` に集約する。一覧ページ・タグページ・OGPメタタグ・関連記事・前後ナビは全てここと`src/articles/`から`node build.mjs`が自動生成する
 - **`dist/` を手動編集・手動addする必要はない。** `node build.mjs`がsrc/配下から毎回全ページを再生成し、push後はGitHub Actionsの`deploy.yml`が同じビルドを実行してデプロイする
 - `/blog/*` はGravity PortalのNext.js rewriteで `https://hahu1124-byte.github.io/antigravity-blog/blog/*` にプロキシ
+- **【重要・個人情報＆内部実務のマスキング方針】**:
+  - 記事内で扱う個人情報、プライベートなローカルパス（`G:/...`, `H:/...` 等）、特定クライアント・案件の生々しい固有名詞や内情は**必ず抽象化・マスキングして記述すること**。
+  - 「読者が自身の環境で模倣・再現できる汎用的なベストプラクティス・設計パターン」としてクリーンに昇華して記事化する。
 
 ## 手順
 
@@ -55,6 +58,11 @@ Antigravityでブログ記事を作成する際は、必ず `generate_image` ツ
      - 記事 HTML の Frontmatter（`ogImage: スラッグ.webp`）自動設定
      - 記事本文先頭への `<p><img src="/blog/images/スラッグ.webp" alt="..."></p>` の自動挿入（**※画像を変更・再生成した際も同じコマンドを実行するだけで既存タグが安全に自動差し替えされます**）
      - `node build.mjs` による自動再ビルド
+4. **【推奨】日本語タイポグラフィ・見出しの合成（文字化けゼロ＆視認性向上）**:
+   - Nanobananaで生成した文字なしアート画像の上に、SVG＋Sharpで美しい日本語グラデーション見出し・バッジを合成可能：
+   ```bash
+   bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/overlay-typography.mjs
+   ```
 
 ### 3. OGP画像の自動生成（日次レポート等・画像生成不要な場合のみ）
 
