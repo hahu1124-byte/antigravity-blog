@@ -1,5 +1,20 @@
 [
   {
+    "slug": "202608/20260826_cloud_local_ai_bridge",
+    "title": "⚡ クラウドAI×ローカルAIの黄金連携：Gemini SparkとAntigravityを直結し「24時間自走する開発エコシステム」を作った話",
+    "date": "2026-08-26 03:45",
+    "excerpt": "PCを閉じていてもクラウド側で案件検索やトレンド収集が自走し、PCを開けばローカルAIが即座に実装に繋げる。Googleドライブをブリッジにしたハイブリッド開発環境の全貌と、Codex 5時間制限復活など最新AI動向を徹底解説。",
+    "tags": [
+      "AI開発",
+      "自動化",
+      "Gemini",
+      "Antigravity",
+      "生産性",
+      "クラウドワークス"
+    ],
+    "ogImage": "20260826_cloud_local_ai_bridge.webp"
+  },
+  {
     "slug": "202608/20260825_uber_daily",
     "title": "🚴 フードデリバリー情報 🥵 20260825 暑さ対策必須",
     "date": "2026-08-25 06:18",

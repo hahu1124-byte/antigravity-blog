@@ -64,19 +64,27 @@ Uber日次レポートなど定型記事で画像生成を行わない場合の�
 bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/generate-og-images.mjs --slug YYYYMM/記事スラッグ
 ```
 
-### 4. ローカルビルドで確認
+### 4. ローカルビルドと表示確認（画像・OGP確認必須🚨）
 
-// turbo
 ```bash
 bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node build.mjs
 ```
 
-出力の `🔗 内部リンクチェックOK` を確認する（リンク切れがあるとビルド失敗扱いになる）。
-`::warning::重複の疑いがある記事ペア` が新記事について出た場合は、タイトル・タグの重複度が高いということなので見直しを検討する（他の既存警告は無視してよい）。
+- 出力の `🔗 内部リンクチェックOK` を確認する。
+- 開発サーバーを起動して、アイキャッチ画像・OGP・記事本文の見た目を確認する：
+  ```bash
+  bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog 0 npx serve dist -p 4000
+  ```
+- 確認後、必ず開発サーバーを停止（kill）する。
 
-### 5. Git コミット＋プッシュ（hgit.sh 経由、個別実行）
+### 5. ユーザーへの事前提示と確認（絶対遵守🚨）
 
-// turbo
+> [!CAUTION]
+> **記事作成・画像反映後、勝手にプッシュ（デプロイ）まで先回り実行してはならない。**
+> アイキャッチ画像（WebP）やOGPの仕上がり、記事タイトル・内容をユーザーへ提示し、**ユーザーから「これでプッシュして」「OK」等の明示的な承認を得てから**次のコミット・プッシュに進むこと。
+
+### 6. Git コミット＋プッシュ（ユーザー承認後のみ実行・hgit.sh 経由）
+
 ```bash
 bash h:/gravity/.agent/scripts/hgit.sh h:/gravity/projects/antigravity-blog add src/
 ```
