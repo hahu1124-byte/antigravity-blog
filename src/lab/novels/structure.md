@@ -73,8 +73,10 @@ novels/
             ├── 101-110/             # ep101~ep110
             ├── 111-120/             # ep111~ep120
             └── 121-130/
-                ├── ep121T.md
-                ├── ep122T.md
+                ├── ... (2 older files)
+                ├── ep123A.md
+                ├── ep123C.md
+                ├── ep123T.md
                 └── archive/
                     ├── ... (2 older files)
                     ├── ep122A.md
