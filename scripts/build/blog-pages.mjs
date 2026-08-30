@@ -289,10 +289,17 @@ export function buildArticlePages() {
         content.slice(insertPos);
     }
 
+    // Uber Daily / フードデリバリー自動生成記事はAdSense審査上の低品質判定を避けるためnoindex
+    const isUberDaily =
+      post.slug.includes("uber_daily") ||
+      (post.tags && post.tags.includes("フードデリバリー"));
+    const robotsOption = isUberDaily ? "noindex, follow" : undefined;
+
     const html = `${htmlHead(post.title, post.excerpt, cssRelPath, {
       url: ogUrl,
       image: ogImage,
       type: "article",
+      robots: robotsOption,
     })}
     <div class="article-page">
         <nav class="breadcrumb">

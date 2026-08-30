@@ -252,6 +252,33 @@
 
     <button class="gen-btn" onclick="generate()">🔄 パスワードを生成</button>
     <p class="note">ブラウザ完結・ファイルはサーバーに送信されません。暗号論的擬似乱数（crypto.getRandomValues）を使用。</p>
+
+    <!-- 詳細解説・FAQセクション -->
+    <section class="tool-guide" style="margin-top: 2rem; padding: 1.25rem 1.4rem; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); line-height: 1.6; font-size: 0.85rem; color: var(--text-muted);">
+        <h2 style="font-size: 1rem; color: var(--text); margin-bottom: 0.6rem;">💡 安全なパスワード生成ツールの特徴</h2>
+        <p style="margin-bottom: 0.8rem;">
+            Webブラウザの標準暗号化API（Web Cryptography API - <code>crypto.getRandomValues</code>）を使用し、予測不可能な安全なランダム文字列を生成します。
+        </p>
+
+        <h3 style="font-size: 0.9rem; color: var(--accent); margin: 0.8rem 0 0.4rem;">🛡️ セキュリティと設計</h3>
+        <ul style="margin-bottom: 0.8rem; padding-left: 1.2rem;">
+            <li><strong>完全端末内生成:</strong> 生成されたパスワードはネットワークを介してサーバーへ送信・記録されることは一切ありません。</li>
+            <li><strong>見間違い防止機能:</strong> 「1（数字のイチ）とl（小文字エル）」「0（数字のゼロ）とO（大文字オー）」など視認しづらい文字を自動除外できます。</li>
+            <li><strong>リアルタイム強度評価:</strong> 長さと文字種の組み合わせから、総当たり攻撃（ブルートフォース攻撃）に対する強度を即時判定します。</li>
+        </ul>
+
+        <h3 style="font-size: 0.9rem; color: var(--accent); margin: 0.8rem 0 0.4rem;">❓ よくある質問（FAQ）</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+            <div>
+                <strong style="color: var(--text);">Q. 生成されたパスワードを誰かに見られる危険はありませんか？</strong><br>
+                <span>A. ありません。すべての計算はお使いの端末のCPU/メモリ上でのみ実行され、外部通信は行われません。</span>
+            </div>
+            <div>
+                <strong style="color: var(--text);">Q. 推奨されるパスワードの長さは何文字ですか？</strong><br>
+                <span>A. 英大文字・英小文字・数字・記号を組み合わせた「16文字以上」の長さを推奨しています。</span>
+            </div>
+        </div>
+    </section>
 </div>
 
 <script>

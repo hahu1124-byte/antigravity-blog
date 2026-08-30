@@ -43,13 +43,16 @@ export function htmlHead(
   const ogUrl = ogp.url || SITE_URL;
   const ogImage = ogp.image || DEFAULT_OG_IMAGE;
   const ogType = ogp.type || "website";
+  const robotsTag = ogp.robots
+    ? `\n    <meta name="robots" content="${escapeHtml(ogp.robots)}">`
+    : "";
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${ogTitle} | Gravity Portal</title>
-    <meta name="description" content="${ogDesc}">
+    <meta name="description" content="${ogDesc}">${robotsTag}
     <!-- OGP -->
     <meta property="og:title" content="${ogTitle}">
     <meta property="og:description" content="${ogDesc}">
