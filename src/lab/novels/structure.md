@@ -65,6 +65,7 @@ novels/
 │   │   ├── setting-ch4.md      # 第4章「久遠の覚醒」詳細プロット
 │   │   ├── setting-ch5.md      # 第5章「欠けた王名」詳細プロット
 │   │   ├── setting-ch6.md      # 第6章「残響の王冠」詳細プロット
+│   │   ├── setting-ch7.md      
 │   │   └── setting.md          # プロット・ブロック構成
 │   └── episodes/
         ├── 1-50/               # ep01~ep50
@@ -73,10 +74,10 @@ novels/
             ├── 101-110/             # ep101~ep110
             ├── 111-120/             # ep111~ep120
             └── 121-130/
-                ├── ... (4 older files)
-                ├── ep125T.md
-                ├── ep126T.md
+                ├── ... (6 older files)
                 ├── ep127T.md
+                ├── ep128A.md
+                ├── ep128C.md
                 └── archive/
                     ├── ... (12 older files)
                     ├── ep127A.md
