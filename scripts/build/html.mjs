@@ -257,7 +257,7 @@ export function getAdVisibilityScript() {
 // Amazon アフィリエイト広告（記事末尾挿入）
 // ==========================================
 
-const AMAZON_TAG = "gravity063-22";
+const AMAZON_TAG = "gravityportal-22";
 
 /** Uber配達で使うもの一覧（記事1-2・週報向け） */
 const UBER_GEAR_ADS = [
