@@ -112,5 +112,11 @@
     "tempMax": "28",
     "tempMin": null,
     "telop": "雨時々止む"
+  },
+  {
+    "date": "2026-09-08",
+    "tempMax": "29",
+    "tempMin": null,
+    "telop": "雨"
   }
 ]
