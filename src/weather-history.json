@@ -118,5 +118,11 @@
     "tempMax": "29",
     "tempMin": null,
     "telop": "雨"
+  },
+  {
+    "date": "2026-09-09",
+    "tempMax": "30",
+    "tempMin": null,
+    "telop": "雨"
   }
 ]
