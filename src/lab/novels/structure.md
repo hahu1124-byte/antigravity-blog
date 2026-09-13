@@ -75,13 +75,13 @@ novels/
             ├── 111-120/             # ep111~ep120
             ├── 121-130/             # ep121~ep130
             └── 131-140/
-                ├── ... (8 older files)
-                ├── ep139A.md
+                ├── ... (7 older files)
+                ├── ep138T.md
                 ├── ep139T.md
                 ├── setting-ch5-reveal.md
                 └── archive/
-                    ├── ... (9 older files)
-                    └── ep138A.md
+                    ├── ... (10 older files)
+                    └── ep139A.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
