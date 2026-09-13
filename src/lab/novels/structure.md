@@ -75,10 +75,10 @@ novels/
             ├── 111-120/             # ep111~ep120
             ├── 121-130/             # ep121~ep130
             └── 131-140/
-                ├── ... (7 older files)
-                ├── ep138T.md
+                ├── ... (8 older files)
                 ├── ep139A.md
                 ├── ep139T.md
+                ├── setting-ch5-reveal.md
                 └── archive/
                     ├── ... (9 older files)
                     └── ep138A.md
