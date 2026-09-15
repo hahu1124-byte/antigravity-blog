@@ -68,6 +68,7 @@ function scanArticles() {
         tags: metadata.tags || [],
         ...(metadata.ogImage ? { ogImage: metadata.ogImage } : {}),
         ...(metadata.dateModified ? { dateModified: metadata.dateModified } : {}),
+        ...(metadata.related !== undefined ? { related: metadata.related !== "false" && metadata.related !== false } : {}),
         content,
       });
     }

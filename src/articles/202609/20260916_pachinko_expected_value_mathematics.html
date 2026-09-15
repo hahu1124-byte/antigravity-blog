@@ -1,0 +1,858 @@
+<!--
+title: 📊 【パチンコ数学】「期待値はポアソンかガウスか」の誤解を解く｜年間10万回転の収束率と、甘デジ〜最新LT機（実質1/2000）の分散格差
+date: 2026-09-16 00:00
+excerpt: 「パチンコはガウス分布（平均値）ではなくポアソン分布（中央値）だからボーダー理論は破綻している」というネット上の議論。本記事では感情論を排し、確率論・中心極限定理、そして保通協の型式試験（MNRS）の数式から数学的真実を客観的に検証。甘デジから実質1/2000の最新LT機まで、年間10万回転におけるブレ（分散）の構造を数理的に解き明かします。
+tags: ["パチンコ","期待値","数学","確率統計","ラッキートリガー","データ分析"]
+ogImage: 20260916_pachinko_expected_value_mathematics.webp
+related: false
+-->
+<p><img src="/blog/images/20260916_pachinko_expected_value_mathematics.webp" alt="📊 【パチンコ数学】「期待値はポアソンかガウスか」の誤解を解く｜年間10万回転の収束率と、甘デジ〜最新LT機（実質1/2000）の分散格差"></p>
+
+<p>
+  パチンコやパチスロのコミュニティにおいて、長年にわたり定期的に浮上する論争があります。
+</p>
+
+<p>
+  それは、<strong>「パチンコの大当たりや出玉はポアソン分布（または幾何分布）に従うのだから、平均値で算出したボーダーラインには意味がない。中央値でボーダーを計算すべきだ」</strong>という主張です。
+</p>
+
+<p>
+  実際にSNSや掲示板では、「ボーダー以上の優秀台を打っているのに全く勝てない。これは平均値の罠だ」「警察（保通協）の規制は中央値で作られている」といった言説がしばしば語られます。
+</p>
+
+<p>
+  なぜこのような議論が生まれるのか？ そして数学的・統計学的な観点から見たとき、何が正しく、どこに誤解が存在しているのか？
+</p>
+
+<p>
+  本記事では、感情論やネット上の煽りを完全に排し、<strong>確率統計学の基本定理（期待値の線形性・中心極限定理）</strong>および<strong>風営法に基づく型式試験（MNRS計算式）の実態</strong>をもとに、数理的見地から淡々と客観的に解説します。
+</p>
+
+<p>
+  さらに、王道ミドル機から遊タイム機、そして実質突入確率が約1/2000に達する現代の最新ラッキートリガー（LT）機まで、<strong>年間10万回転における「ブレ（分散）」のシミュレーション比較</strong>を行い、現代のパチンコが抱える「荒波化の数学的構造」を明らかにします。
+</p>
+
+<hr>
+
+<h2>第1章：期待値と中央値の数学的定義 —— なぜ「平均値」でなければならないのか？</h2>
+
+<h3>1. 期待値（Expected Value）の数学的定義</h3>
+
+<p>
+  まず大前提として、「期待値」という統計量そのものの定義を確認します。
+</p>
+
+<p>
+  確率変数 <i>X</i> が値 <i>x</i><sub>1</sub>, <i>x</i><sub>2</sub>, &hellip;, <i>x</i><sub><i>n</i></sub> をとる確率がそれぞれ <i>P</i>(<i>X</i> = <i>x</i><sub>1</sub>), <i>P</i>(<i>X</i> = <i>x</i><sub>2</sub>), &hellip;, <i>P</i>(<i>X</i> = <i>x</i><sub><i>n</i></sub>) であるとき、期待値 <i>E</i>[<i>X</i>] は以下のように定義されます。
+</p>
+
+<div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 1rem 1.2rem; margin: 1.2rem 0; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 1.2rem; color: #60a5fa;">
+  <i>E</i>[<i>X</i>] = &sum; [ <i>x</i><sub><i>i</i></sub> &times; <i>P</i>(<i>X</i> = <i>x</i><sub><i>i</i></sub>) ]
+</div>
+
+<p>
+  数学において、期待値とは<strong>「確率で重み付けされた算術平均（加重平均）」そのもの</strong>です。「ポアソン分布用の期待値」や「中央値ベースの期待値」という別の定義が存在するわけではありません。
+</p>
+
+<p>
+  パチンコにおける「ボーダーライン」とは、<strong>「投入する貸玉の期待値 ＝ 獲得する払出玉の期待値」となる損益分岐点（貸玉250玉あたりの回転数）</strong>を指します。したがって、ボーダーラインを算出する式は定義上、平均値に基づいて設計されています。
+</p>
+
+---
+
+<h3>2. 獲得出玉（差玉）は「線形加算（足し算）」できるという決定的な性質</h3>
+
+<p>
+  では、なぜ「中央値（Med: データを小さい順に並べた中央の値）」を損益分岐点にしてはいけないのでしょうか？
+</p>
+
+<p>
+  その理由は極めて単純で、パチンコが貸玉を受けて遊技球を獲得するシステムである以上、<strong>「貸玉と払出玉（差玉）はそのまま足し算ができるから」</strong>です。
+</p>
+
+<p>
+  確率論において、期待値には強力な<strong>「線形性（Additivity）」</strong>が存在します。確率変数が独立であるかどうかにかかわらず、常に以下の等式が成立します。
+</p>
+
+<div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 1rem 1.2rem; margin: 1.2rem 0; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 1.25rem; color: #34d399;">
+  <i>E</i>[ <i>X</i><sub>1</sub> + <i>X</i><sub>2</sub> + &hellip; + <i>X</i><sub><i>n</i></sub> ] = <i>E</i>[<i>X</i><sub>1</sub>] + <i>E</i>[<i>X</i><sub>2</sub>] + &hellip; + <i>E</i>[<i>X</i><sub><i>n</i></sub>]
+</div>
+
+<p style="text-align: center; font-size: 0.9rem; color: #94a3b8; margin: -0.5rem 0 1.2rem;">
+  （総和記号で表すと： <i>E</i>[ &sum; <i>X</i><sub><i>i</i></sub> ] = &sum; <i>E</i>[<i>X</i><sub><i>i</i></sub>] ）
+</p>
+
+<p>
+  一方で、<strong>中央値には加法性が一切成り立ちません</strong>。すなわち、
+  <code>Med(X + Y) &ne; Med(X) + Med(Y)</code> です。
+</p>
+
+<p>
+  わかりやすい具体例として、出玉の波が荒い遊技モデルで以下のような結果が10回続いたケースを考えてみましょう。
+</p>
+
+<ul>
+  <li><strong>9回</strong>：5,000発のマイナス（-5,000発 &times; 9 ＝ -45,000発）</li>
+  <li><strong>1回</strong>：100,000発の大連チャン（+100,000発 &times; 1 ＝ +100,000発）</li>
+</ul>
+
+<table style="width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.95rem;">
+  <thead>
+    <tr style="background: rgba(255, 255, 255, 0.08); border-bottom: 2px solid rgba(255, 255, 255, 0.2);">
+      <th style="padding: 10px; text-align: left;">統計指標</th>
+      <th style="padding: 10px; text-align: right;">計算結果</th>
+      <th style="padding: 10px; text-align: left;">現実の解釈</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      <td style="padding: 10px;"><strong>勝率</strong></td>
+      <td style="padding: 10px; text-align: right; color: #f87171;">10%（1勝9敗）</td>
+      <td style="padding: 10px;">体感としては「ほとんど負けている」</td>
+    </tr>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      <td style="padding: 10px;"><strong>1回あたりの中央値</strong></td>
+      <td style="padding: 10px; text-align: right; color: #f87171;">-5,000発</td>
+      <td style="padding: 10px;">50%境界で見れば大幅マイナス</td>
+    </tr>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(52, 211, 153, 0.08);">
+      <td style="padding: 10px;"><strong>1回あたりの平均値（期待値）</strong></td>
+      <td style="padding: 10px; text-align: right; color: #34d399; font-weight: bold;">+5,500発</td>
+      <td style="padding: 10px;">1回打つごとに平均＋5,500発のプラス</td>
+    </tr>
+    <tr style="background: rgba(59, 130, 246, 0.08);">
+      <td style="padding: 10px;"><strong>10回合計の総差玉</strong></td>
+      <td style="padding: 10px; text-align: right; color: #60a5fa; font-weight: bold;">+55,000発</td>
+      <td style="padding: 10px;"><strong>最終的に手元に残った差玉は＋55,000発の大勝利</strong></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  もし「中央値」を基準にボーダーラインを再計算した場合、それは単に<strong>「1回あたりの勝率を50%以上にするための回転数」</strong>を求めているに過ぎません。
+</p>
+
+<p>
+  パチンコのように「大半は単発や駆け抜けで小さく負け、稀に数万発の爆連で大きく勝つ」という<strong>右に大きく歪んだ分布（ポジティブ・スキュー）</strong>を持つ遊技機では、中央値は必然的に平均値を大きく下回ります。
+</p>
+
+<p>
+  しかし、遊技の真の目的は「日ごとの勝率を50%以上にすること」ではなく、<strong>「最終的に手元に残るトータル差玉を最大化すること」</strong>です。獲得出玉が足し算できる以上、長期的な累積結果を支配する指標は必然的に「平均値（期待値）」になります。
+</p>
+
+<hr>
+
+<h2>第2章：型式試験と法規の真実 —— 「MNRS」と警察庁解釈基準</h2>
+
+<p>
+  掲示板やネット上の言説において、しばしば「保通協の試験や警察の規則は中央値に基づいている」という主張が見られます。この点について、法令および保通協の試験規格を客観的に確認してみましょう。
+</p>
+
+<h3>1. 保通協の基本計算式「MNRS」の中身と算出方法</h3>
+
+<p>
+  風営法に基づく「遊技機の認定及び型式の検定等に関する規則」において、パチンコ遊技機の基本性能を規定する数式として<strong>「MNRS」</strong>が存在します。
+</p>
+
+<div style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; padding: 1.2rem; margin: 1.2rem 0;">
+  <p style="margin: 0 0 0.8rem; font-weight: bold; color: #fbbf24; font-size: 1.05rem;">
+    📜 保通協 型式試験の基本基準式
+  </p>
+  <div style="text-align: center; font-family: monospace; font-size: 1.3rem; color: #fff; margin: 0.5rem 0;">
+    M &times; N &times; R &times; S &le; 10
+  </div>
+  <p style="margin: 0.8rem 0 0; font-size: 0.9rem; color: #94a3b8; line-height: 1.6;">
+    ※2018年の規則改正前は「&le; 12」でしたが、過度な射幸性を抑えるため現行規則では「&le; 10」に引き下げられています。
+  </p>
+</div>
+
+<p>
+  この4つの変数の定義は以下の通りです。
+</p>
+
+<ul>
+  <li><strong>M（作動確率）</strong>：通常時と確変（高確率）時の滞在比率を加味した作動確率の期待値。
+    <div style="background: rgba(0, 0, 0, 0.25); border-radius: 6px; padding: 0.6rem 1rem; margin: 0.5rem 0; font-family: 'Times New Roman', Times, serif; font-size: 1.05rem; color: #93c5fd; text-align: center;">
+      <i>M</i> = (<i>P</i> + 1) &divide; [ (<i>P</i> / <i>M</i><sub><i>H</i></sub>) + (1 / <i>M</i><sub><i>L</i></sub>) ]
+    </div>
+    （<i>M</i><sub><i>L</i></sub>: 低確率, <i>M</i><sub><i>H</i></sub>: 高確率, <i>P</i>: 平均連チャン回数から初当たりを除いた期待値）</li>
+  <li><strong>N（役物連続作動回数）</strong>：大当たりの平均ラウンド数（期待値）。</li>
+  <li><strong>R（最大入賞個数）</strong>：アタッカーのカウント数（最大10個）。</li>
+  <li><strong>S（最大賞球数）</strong>：アタッカー入賞時の払出個数（最大15個）。</li>
+</ul>
+
+<p>
+  数式を見て明白な通り、<strong>MNRSは極めて厳密な「期待値（平均値）」の代数計算</strong>です。確率変数の調和平均的な重み付け期待値を用いており、「ポアソン分布で検定している」あるいは「中央値で計算している」という主張は、制度上の事実とは合致しません。
+</p>
+
+<div style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1.2rem; margin: 1.5rem 0;">
+  <p style="margin: 0 0 0.8rem; font-weight: bold; color: #60a5fa; font-size: 1.05rem;">
+    🔬 【実践計算】王道ミドル『P新世紀エヴァンゲリオン〜未来への咆哮〜』でMNRSを解く
+  </p>
+  <p style="font-size: 0.92rem; color: #cbd5e1; line-height: 1.7; margin: 0 0 1rem;">
+    では、現代ホールの絶対的覇権機であるエヴァ15のスペックを実際に保通協の計算式 <code>M &times; N &times; R &times; S &le; 10</code> に代入してみましょう。
+  </p>
+  <ul style="font-size: 0.9rem; color: #94a3b8; line-height: 1.8; margin: 0 0 1rem; padding-left: 1.2rem;">
+    <li>通常時確率 <i>M</i><sub><i>L</i></sub> ＝ 1/319.7、高確率 <i>M</i><sub><i>H</i></sub> ＝ 1/99.4（ST163回）</li>
+    <li>ヘソ大当り振り分け：10R（1500発）が <strong>3%</strong>、3R（450発）が <strong>97%</strong></li>
+    <li>電サポ中大当り振り分け：ALL 10R（100%）</li>
+    <li>アタッカー仕様：最大10カウント（<i>R</i> = 10）、賞球15個（<i>S</i> = 15）</li>
+    <li>ST継続率：約 80.75%、時短引き戻し込み実質ST突入率：約 70.0%</li>
+  </ul>
+
+  <p style="font-size: 0.92rem; color: #e2e8f0; margin: 0.5rem 0 0.3rem; font-weight: bold;">
+    ① 連チャン期待値 <i>P</i> と作動確率 <i>M</i> の算出：
+  </p>
+  <p style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.6; margin: 0 0 0.5rem;">
+    ST突入時の平均連チャン数は約 5.20回、非突入時は 1回。全体での初当り含む平均連チャン回数は約 3.94回となります。初当りを除いた連チャン期待値 <i>P</i> は <strong>約 2.94回</strong>。<br>
+    これを <i>M</i> の調和平均式に代入すると：
+  </p>
+  <div style="background: rgba(0, 0, 0, 0.3); border-radius: 6px; padding: 0.6rem; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 1.05rem; color: #93c5fd; margin: 0.5rem 0;">
+    <i>M</i> = (2.94 + 1) &divide; [ (2.94 &times; 99.4) + (1 &times; 319.7) ] = 3.94 &divide; 611.94 &approx; <strong>0.00644（約 1/155.3）</strong>
+  </div>
+
+  <p style="font-size: 0.92rem; color: #e2e8f0; margin: 0.8rem 0 0.3rem; font-weight: bold;">
+    ② 平均ラウンド数 <i>N</i> の算出：
+  </p>
+  <p style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.6; margin: 0 0 0.5rem;">
+    初回平均ラウンド数は <code>(10 &times; 0.03) + (3 &times; 0.97) = 3.21R</code>。連チャン中（2.94回）はすべて10Rのため、トータルの加重平均ラウンド数 <i>N</i> は：
+  </p>
+  <div style="background: rgba(0, 0, 0, 0.3); border-radius: 6px; padding: 0.6rem; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 1.05rem; color: #93c5fd; margin: 0.5rem 0;">
+    <i>N</i> = [ 3.21 + (2.94 &times; 10) ] &divide; 3.94 = 32.61 &divide; 3.94 &approx; <strong>8.28 ラウンド</strong>
+  </div>
+
+  <p style="font-size: 0.92rem; color: #e2e8f0; margin: 0.8rem 0 0.3rem; font-weight: bold;">
+    ③ MNRS の判定計算：
+  </p>
+  <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(52, 211, 153, 0.3); border-radius: 6px; padding: 0.8rem; text-align: center; font-family: 'Times New Roman', Times, serif; font-size: 1.2rem; color: #34d399; margin: 0.5rem 0;">
+    <i>M</i> &times; <i>N</i> &times; <i>R</i> &times; <i>S</i> = 0.00644 &times; 8.28 &times; 10 &times; 15 &approx; <strong>7.99 &le; 10</strong>
+  </div>
+  <p style="font-size: 0.9rem; color: #cbd5e1; line-height: 1.7; margin: 0.6rem 0 0;">
+    ご覧の通り、エヴァ15の極めて高い完成度を誇るスペックも、保通協の基準上限「10」に対して**約7.99**と、上限ギリギリまで性能を引き出しつつ規則内に美しく収まるよう、<strong>厳密な加重平均（期待値）の計算</strong>によって設計されていることが数学的に証明されます。
+  </p>
+</div>
+
+---
+
+<h3>2. 「警察の規則は中央値」という誤解の構造と公式法規ソース</h3>
+
+<p>
+  同様にネット上で頻繁に引用される「警察庁の技術上の規格解釈基準は中央値を採用している」「パチスロの機械割119%規制は中央値だ」「確変65%規制や7200発規制も中央値だ」という言説についても、一次情報である公式法令および通達を精査してみましょう。
+</p>
+
+<div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 1.2rem; margin: 1.2rem 0;">
+  <p style="margin: 0 0 0.8rem; font-weight: bold; color: #60a5fa; font-size: 1.05rem;">
+    🏛️ 公式法令・行政通達の一次情報ソース
+  </p>
+  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.9rem; color: #cbd5e1; line-height: 1.7;">
+    <li><strong>根拠法令</strong>：国家公安委員会規則第4号『遊技機の認定及び型式の検定等に関する規則』
+      （<a href="https://elaws.e-gov.go.jp/document?lawid=360M50400000004" target="_blank" rel="noopener noreferrer" style="color: #93c5fd; text-decoration: underline;">e-Gov法令検索 条文リンク</a>）</li>
+    <li><strong>ぱちんこ遊技機の規格</strong>：同規則 <strong>別表第4</strong>「ぱちんこ遊技機に係る技術上の規格」</li>
+    <li><strong>回胴式遊技機（スロット）の規格</strong>：同規則 <strong>別表第5</strong>「回胴式遊技機に係る技術上の規格」</li>
+    <li><strong>警察庁通達</strong>：警察庁生活安全局保安課長通達『技術上の規格解釈基準について』</li>
+  </ul>
+</div>
+
+<p>
+  上記法令の条文において、回胴式遊技機（スロット）の出玉率（機械割）試験は以下のように厳格に定められています（別表第5より引用要約）。
+</p>
+
+<table style="width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.92rem;">
+  <thead>
+    <tr style="background: rgba(255, 255, 255, 0.08); border-bottom: 2px solid rgba(255, 255, 255, 0.2);">
+      <th style="padding: 8px; text-align: left;">試験区間</th>
+      <th style="padding: 8px; text-align: center;">規定遊技回数</th>
+      <th style="padding: 8px; text-align: left;">規則上の出玉率（獲得枚数 &divide; 投入枚数）規格</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      <td style="padding: 8px;"><strong>短期試験</strong></td>
+      <td style="padding: 8px; text-align: center;">400G</td>
+      <td style="padding: 8px;">33.3%（3分の1）を超え、220%（2.2倍）に満たないこと</td>
+    </tr>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      <td style="padding: 8px;"><strong>中期試験</strong></td>
+      <td style="padding: 8px; text-align: center;">1,600G</td>
+      <td style="padding: 8px;">40%を超え、150%に満たないこと</td>
+    </tr>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      <td style="padding: 8px;"><strong>中長期試験</strong></td>
+      <td style="padding: 8px; text-align: center;">6,000G</td>
+      <td style="padding: 8px;">50%を超え、126%に満たないこと</td>
+    </tr>
+    <tr style="background: rgba(59, 130, 246, 0.05);">
+      <td style="padding: 8px;"><strong>長期試験</strong></td>
+      <td style="padding: 8px; text-align: center;">17,500G</td>
+      <td style="padding: 8px;">50%を超え、<strong>115%（現行基準・旧規則は120%未満）</strong>に満たないこと</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>
+  ご覧の通り、条文には<strong>「中央値」という文言は一言も存在しません</strong>。保通協の試験は、シミュレーションおよび実射試験において、規定区間で一度でもこの上限値・下限値の枠（足切りライン）を外れたら即刻「不適合」となる**極値（境界値）テスト**です。
+</p>
+
+<div style="background: rgba(239, 68, 68, 0.08); border-left: 4px solid #ef4444; border-radius: 4px; padding: 1rem 1.2rem; margin: 1.2rem 0; font-size: 0.93rem; color: #fca5a5; line-height: 1.7;">
+  <strong>【数理的な矛盾の指摘】</strong><br>
+  もし仮にこの「長期出玉率115%（旧119%）」が中央値であるならば、<strong>試験を受けた全シミュレーション結果のうち半数（50%）が115%を超過して即座に型式試験に落ちる</strong>ことになり、市場に1台もスロット新台を投入できなくなってしまいます。
+</div>
+
+<p>
+  さらに、「確変65%規制」や「一撃7200発規制」に関しても、これらは警察庁の法令ではなく**日工組（日本遊技機工業組合）の内規（業界自主規制）**であり、その定義も平均値（期待値）に基づいています。
+</p>
+
+<ul>
+  <li><strong>確変65%規制（2016年内規）</strong>：ST機や転落抽選機であっても、「初当たりを含む平均継続回数の期待値が、ループ機換算の65%（平均連チャン2.857回）以下でなければならない」という**厳格な平均値（期待値）規制**でした。</li>
+  <li><strong>一撃7200発規制</strong>：突入時の「平均獲得出玉の期待値」の上限（払出7200発・差玉6400発）です。もし中央値で7200発なら、平均出玉は15,000発を超えてしまい、規制どころか射幸性を著しく煽る爆裂機になってしまいます。</li>
+</ul>
+
+<p>
+  したがって、パチスロの機械割（総払出枚数 &divide; 総投入枚数）も、パチンコのボーダーラインも、行政の規則も、**すべて最初から一貫して「平均値（期待値）」という同一の数学的尺度で設計・統一されています**。「スロットは中央値でパチンコは平均値だから不公平だ」という言説は、法令・内規・数学のいずれの観点からも完全な事実誤認であることが分かります。
+</p>
+
+<hr>
+
+<h2>第3章：中心極限定理の数学 —— 年間10万回転で何が起きるか？</h2>
+
+<h3>1. 単発のミクロな分布 vs 累積のマクロな分布</h3>
+
+<p>
+  では、なぜ多くの遊技者が「平均値ボーダーは嘘ではないか」と感じてしまうのでしょうか？
+</p>
+
+<p>
+  その原因は、<strong>「ミクロ（1回ごとの大当たり）の確率分布」</strong>と<strong>「マクロ（長期間の累積収支）の確率分布」</strong>の性質の違いにあります。
+</p>
+
+<ul>
+  <li><strong>ミクロな視点（数千回転レベル）</strong>：<br>
+    初当たりまでの回転数は**幾何分布（指数分布）**に従い、一定回転数での当たり回数は**ポアソン分布**で近似されます。さらに右打ちの連チャン数も幾何分布に従うため、出玉分布は著しく右側に裾野が広い「非対称な歪んだ分布」になります。この段階では、中央値（体感）が平均値を大幅に下回ります。</li>
+  <li><strong>マクロな視点（十万回転レベル）</strong>：<br>
+    ここで統計学における最重要定理である<strong>「中心極限定理（Central Limit Theorem, CLT）」</strong>が発動します。</li>
+</ul>
+
+<div style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1.2rem; margin: 1.2rem 0;">
+  <p style="margin: 0 0 0.6rem; font-weight: bold; color: #60a5fa; font-size: 1.05rem;">
+    📐 中心極限定理（CLT）の要諦
+  </p>
+  <p style="margin: 0; font-size: 0.93rem; color: #cbd5e1; line-height: 1.7;">
+    元の確率変数の分布がどれほど非対称に歪んでいようとも、独立な同一分布に従う確率変数の総和 <i>S</i><sub><i>n</i></sub> = &sum; <i>X</i><sub><i>i</i></sub> の分布は、試行回数 <i>n</i> が十分に大きくなるにつれて、<strong>期待値 <i>n</i>&mu;、分散 <i>n</i>&sigma;<sup>2</sup> の正規分布（ガウス分布）に必ず漸近（収束）する</strong>。
+  </p>
+</div>
+
+<p>
+  ネット上で「1200万回転回さないと正規分布にならない」といった極論が語られることがありますが、統計学において分布の歪み（歪度: Skewness）は <strong>1 / &radic;<i>n</i></strong> に比例して急速に減少します。
+</p>
+
+<p>
+  出玉のボラティリティを考慮しても、初当たりが300回〜500回（通常時10万回転前後）に達すれば、<strong>総収支の確率密度関数は実用上、左右対称の美しい釣鐘型（ガウス分布）を描く</strong>ようになります。
+</p>
+
+---
+
+<h3>2. 年間10万回転における正規分布シミュレーション</h3>
+
+<div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 1.2rem; margin: 1.2rem 0;">
+  <p style="margin: 0 0 0.8rem; font-weight: bold; color: #fbbf24; font-size: 1.05rem;">
+    🎰 なぜ「カタログボーダー（約16.3回）」と「実戦ボーダー（約17.6回）」に約1.3回の差が出るのか？
+  </p>
+  <p style="margin: 0 0 1rem; font-size: 0.9rem; color: #cbd5e1; line-height: 1.7;">
+    攻略サイトや専門誌に掲載されている等価ボーダーライン（約16.3回/250玉）と、実際のホールでプロや専業が基準とする実戦ボーダーライン（約17.6回/250玉）には、<strong>約1.3回もの大きな開き</strong>が存在します。<br>
+    この乖離はなぜ生まれるのか？ 王道ミドル『エヴァ15』のスペックをベースに、理論と現実の物理的な差を比較してみましょう。
+  </p>
+
+  <table style="width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem;">
+    <thead>
+      <tr style="background: rgba(255, 255, 255, 0.08); border-bottom: 2px solid rgba(255, 255, 255, 0.2);">
+        <th style="padding: 8px; text-align: left;">比較項目</th>
+        <th style="padding: 8px; text-align: left;">カタログ公称モデル（理論払出）</th>
+        <th style="padding: 8px; text-align: left; color: #60a5fa;">ホール実戦モデル（純増差玉）</th>
+        <th style="padding: 8px; text-align: left; color: #fbbf24;">現実の差・影響</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+        <td style="padding: 8px;"><strong>10R大当り出玉</strong></td>
+        <td style="padding: 8px;">払出 1,500発</td>
+        <td style="padding: 8px; color: #60a5fa; font-weight: bold;">純増 1,400発</td>
+        <td style="padding: 8px;">アタッカー入賞で -100発/回</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+        <td style="padding: 8px;"><strong>3R大当り（ヘソ97%）</strong></td>
+        <td style="padding: 8px;">払出 450発</td>
+        <td style="padding: 8px; color: #60a5fa; font-weight: bold;">純増 420発</td>
+        <td style="padding: 8px;">アタッカー入賞で -30発/回</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+        <td style="padding: 8px;"><strong>右打ち電サポの増減</strong></td>
+        <td style="padding: 8px;">&plusmn;0発（完全無減耗）</td>
+        <td style="padding: 8px; color: #60a5fa; font-weight: bold;">約 -15発 / 初当り</td>
+        <td style="padding: 8px;">ST163回・時短で10〜15玉減</td>
+      </tr>
+      <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.02);">
+        <td style="padding: 8px;"><strong>初当り1回の期待出玉</strong></td>
+        <td style="padding: 8px;">約 4,890発</td>
+        <td style="padding: 8px; color: #60a5fa; font-weight: bold;">約 4,551発</td>
+        <td style="padding: 8px; color: #f87171;">初当りごとに約 340発 目減り</td>
+      </tr>
+      <tr style="background: rgba(59, 130, 246, 0.08);">
+        <td style="padding: 8px;"><strong>等価ボーダーライン</strong></td>
+        <td style="padding: 8px; font-weight: bold;">約 16.3回 / 250玉</td>
+        <td style="padding: 8px; color: #60a5fa; font-weight: bold; font-size: 1.05rem;">約 17.6回 / 250玉</td>
+        <td style="padding: 8px; color: #f87171; font-weight: bold;">実質ボーダーは約 1.3回 重い</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="background: rgba(239, 68, 68, 0.08); border-left: 4px solid #ef4444; border-radius: 4px; padding: 0.8rem 1rem; margin: 1rem 0 0.2rem; font-size: 0.88rem; color: #fca5a5; line-height: 1.6;">
+    <strong>⚠️ 一般プレイヤーが陥る「ボーダー詐欺」の心理的トラップ</strong><br>
+    攻略サイトに載っている「16.3回」を信じて、「この台は貸玉250玉あたり17.0回回るから勝てる台だ！」と打ってしまうと、実際の実戦ボーダー（17.6回）を下回っているため、<strong>「ボーダー以上を回しているつもりで、実際は打てば打つほどマイナス期待値を積んでいる」</strong>という致命的な錯覚が発生します。
+  </div>
+</div>
+
+<div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 1.2rem; margin: 1.2rem 0;">
+  <p style="margin: 0 0 0.8rem; font-weight: bold; color: #60a5fa; font-size: 1.05rem;">
+    🔢 年間10万回転における試行・ブレ幅（標準偏差 &sigma;）の比較
+  </p>
+  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.92rem; color: #cbd5e1; line-height: 1.8;">
+    <li><strong>年間の通常時回転数</strong>：100,000 回転（終日稼働で約40〜50日相当）</li>
+    <li><strong>初当たりの期待回数</strong>：約 313 回（100,000 &divide; 319.7）</li>
+    <li><strong>カタログ公称モデルの運のブレ幅（&sigma;<sub>total</sub>）</strong>：<strong>約 11.7万発</strong>（1回転 &sigma; &approx; 370発）</li>
+    <li><strong>ホール実戦モデルの運のブレ幅（&sigma;<sub>total</sub>）</strong>：<strong>約 11.1万発</strong>（1回転 &sigma; &approx; 350発）</li>
+  </ul>
+</div>
+
+<div style="background: rgba(59, 130, 246, 0.08); border-left: 4px solid #3b82f6; border-radius: 4px; padding: 1rem 1.2rem; margin: 1.2rem 0; font-size: 0.93rem; color: #cbd5e1; line-height: 1.7;">
+  <strong style="color: #60a5fa;">💡 そもそも「標準偏差（&sigma;：シグマ）」って何？ なぜ10万倍にならないの？</strong><br>
+  統計学の言葉で難しそうに見えますが、標準偏差とは要するに<strong>「一般的な運のブレ幅（振れ幅）」</strong>のことです。<br>
+  正規分布では、<strong>「約68%の確率で &plusmn;1&sigma; の範囲」</strong>に、そして<strong>「約95%の確率で &plusmn;2&sigma; の範囲」</strong>に結果が収まります。<br><br>
+  ここで最も重要な数学の法則があります。<br>
+  「1回転で350発ブレるなら、10万回転回したら 350発 &times; 10万 ＝ 3,500万発もブレるのでは？」と思いがちですが、そうはなりません。<br>
+  大ハマリと大連チャンは互いに打ち消し合うため、合計のブレ幅は<strong>「回転数の平方根（ルート &radic;）」でしか広がらない</strong>という強力な性質（分散の加法性）があります。<br><br>
+  ・10万回転の平方根（&radic;100,000） ＝ <strong>約 316 倍</strong><br>
+  ・年間のブレ幅 ＝ 350発 &times; 316 ＝ <strong>約 11.1万発</strong><br><br>
+  <strong>【結論】</strong><br>
+  回せば回すほど、<strong>「期待値のプラスは10万倍に積み上がる」</strong>のに対し、<strong>「運のブレ幅はたったの316倍にしか増えない」</strong>のです。これが「たくさん回せば期待値通りに勝てる（中心極限定理）」の正体です。
+</div>
+
+<h4>① カタログ公称モデル（ボーダー約16.3回）での理論シミュレーション</h4>
+<p style="font-size: 0.9rem; color: #94a3b8; margin: -0.3rem 0 0.8rem;">
+  ※入賞消費や玉減りを考慮しない、攻略サイト等に準拠した理論上の出玉シミュレーションです。
+</p>
+
+<table style="width: 100%; border-collapse: collapse; margin: 1rem 0 1.5rem; font-size: 0.92rem;">
+  <thead>
+    <tr style="background: rgba(255, 255, 255, 0.08); border-bottom: 2px solid rgba(255, 255, 255, 0.2);">
+      <th style="padding: 9px; text-align: left;">条件（ボーダー超過数）</th>
+      <th style="padding: 9px; text-align: right;">年間総期待値（差玉）</th>
+      <th style="padding: 9px; text-align: right;">運のブレ幅との比較</th>
+      <th style="padding: 9px; text-align: right; color: #f87171;">年間でマイナスになる確率</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      <td style="padding: 9px;">ボーダー ＋1.5回/250玉（約17.8回）</td>
+      <td style="padding: 9px; text-align: right;">+115,000発</td>
+      <td style="padding: 9px; text-align: right;">ブレ幅の 約 0.98倍</td>
+      <td style="padding: 9px; text-align: right; font-weight: bold; color: #fbbf24;">約 16.3%</td>
+    </tr>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(59, 130, 246, 0.05);">
+      <td style="padding: 9px;">ボーダー ＋2.5回/250玉（約18.8回）</td>
+      <td style="padding: 9px; text-align: right;">+192,000発</td>
+      <td style="padding: 9px; text-align: right;">ブレ幅の 約 1.64倍</td>
+      <td style="padding: 9px; text-align: right; font-weight: bold; color: #60a5fa;">約 5.1%</td>
+    </tr>
+    <tr style="background: rgba(52, 211, 153, 0.05);">
+      <td style="padding: 9px;">ボーダー ＋3.5回/250玉（約19.8回）</td>
+      <td style="padding: 9px; text-align: right;">+268,000発</td>
+      <td style="padding: 9px; text-align: right;">ブレ幅の 約 2.29倍</td>
+      <td style="padding: 9px; text-align: right; font-weight: bold; color: #34d399;">約 1.1%</td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>② ホール実戦モデル（ボーダー約17.6回）での現実シミュレーション</h4>
+<p style="font-size: 0.9rem; color: #94a3b8; margin: -0.3rem 0 0.8rem;">
+  ※入賞消費玉（-100発/-30発）および右打ち電サポ減り（ST163回で10〜15玉減）を正確に差し引いた実戦シミュレーションです。
+</p>
+
+<table style="width: 100%; border-collapse: collapse; margin: 1rem 0 1.2rem; font-size: 0.92rem;">
+  <thead>
+    <tr style="background: rgba(255, 255, 255, 0.08); border-bottom: 2px solid rgba(255, 255, 255, 0.2);">
+      <th style="padding: 9px; text-align: left;">条件（ボーダー超過数）</th>
+      <th style="padding: 9px; text-align: right;">年間総期待値（差玉）</th>
+      <th style="padding: 9px; text-align: right;">運のブレ幅との比較</th>
+      <th style="padding: 9px; text-align: right; color: #f87171;">年間でマイナスになる確率</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      <td style="padding: 9px;">ボーダー ＋1.5回/250玉（約19.1回）</td>
+      <td style="padding: 9px; text-align: right;">+108,000発</td>
+      <td style="padding: 9px; text-align: right;">ブレ幅の 約 0.97倍</td>
+      <td style="padding: 9px; text-align: right; font-weight: bold; color: #fbbf24;">約 16.6%</td>
+    </tr>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(59, 130, 246, 0.05);">
+      <td style="padding: 9px;">ボーダー ＋2.5回/250玉（約20.1回）</td>
+      <td style="padding: 9px; text-align: right;">+175,000発</td>
+      <td style="padding: 9px; text-align: right;">ブレ幅の 約 1.58倍</td>
+      <td style="padding: 9px; text-align: right; font-weight: bold; color: #60a5fa;">約 5.7%</td>
+    </tr>
+    <tr style="background: rgba(52, 211, 153, 0.05);">
+      <td style="padding: 9px;">ボーダー ＋3.5回/250玉（約21.1回）</td>
+      <td style="padding: 9px; text-align: right;">+236,000発</td>
+      <td style="padding: 9px; text-align: right;">ブレ幅の 約 2.13倍</td>
+      <td style="padding: 9px; text-align: right; font-weight: bold; color: #34d399;">約 1.7%</td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 1rem; margin: 1.2rem 0; font-size: 0.9rem; color: #cbd5e1; line-height: 1.7;">
+  <strong style="color: #fbbf24;">🔍 【具体例】貸玉250玉あたり19.0回回る台を年間10万回転打ったときの認識ギャップ</strong><br>
+  ・<strong>カタログ基準での思い込み</strong>：ボーダー16.3回に対して「＋2.7回のお宝台！」と認識し、年間期待値は <strong>約 ＋20.7万発</strong> だと錯覚する。<br>
+  ・<strong>ホール実戦での現実</strong>：実戦ボーダー17.6回に対して「＋1.4回の並プラス台」に過ぎず、実際の年間期待値は <strong>約 ＋10.1万発</strong> に留まる。<br>
+  &rarr; 理論と現実を混同するだけで、<strong>年間で実に「10.6万発」もの期待値のズレ</strong>が手元に生じることになります。実戦においてアタッカー入賞や電サポ減りを正確に加味することがいかに致命的に重要かが分かります。
+</div>
+
+<p>
+  良質な台（ボーダー＋2.5回以上）を年間10万回転回した場合、たとえ実収支が期待値に対して大きく下振れ（欠損）し続けたとしても、<strong>年間トータルでマイナスに沈む確率は統計学的にわずか数％程度</strong>に封じ込められます。
+</p>
+
+<p>
+  「年間10万回転回せばガウス分布に近くなり、マイナスになる確率は限りなく小さくなる」というプレイヤーの実感は、数学的にも極めて厳密な事実です。
+</p>
+
+---
+
+<h3>3. プロ・専業が実践する「技術介入の数学」と交換率ギャップ</h3>
+
+<p>
+  ここまでは一般打ちを前提とした「実戦値（ボーダー約17.6回）」を見てきましたが、実際のホールで勝ち続けるプロや専業は、<strong>技術介入によってこのボーダーラインをさらに数段階引き下げています</strong>。
+</p>
+
+<div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 1.2rem; margin: 1.2rem 0;">
+  <p style="margin: 0 0 0.8rem; font-weight: bold; color: #34d399; font-size: 1.05rem;">
+    🛠️ 技術介入による出玉底上げのメカニズム
+  </p>
+  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.92rem; color: #cbd5e1; line-height: 1.8;">
+    <li><strong>オーバー入賞（ひねり打ち等）</strong>：<br>
+      アタッカーが10カウントで閉じる瞬間に、減速させた10玉目と強めの11玉目を同時に重複入賞させる技術です。<br>
+      規定カウントを超えて入賞した玉は、消費1発に対して払出15発が得られるため、<strong>1回成功するごとに「＋14発」の純増</strong>を生み出します。<br>
+      台のバネムラや釘の個体差があるため毎回3回決めるのは困難ですが、10R大当り中に<strong>平均1.6回成功</strong>させたと仮定すると、1大当りあたり <code>1.6 &times; 14発 ＝ <strong>約 ＋22.4発</strong></code> の出玉上乗せとなります。<br>
+      連チャン（初当り＋右打ち約2.94回）全体では、初当り1回につき <strong>約 ＋75〜80発</strong> の純増底上げに繋がります。</li>
+    <li><strong>電サポ中の止め打ち（無駄玉排除）</strong>：<br>
+      電チューの開放パターンに合わせて単発打ちやインターバル止めを行うことで、通常打ちでは1初当りあたり約15発失われていた電サポ玉減りを <strong>&plusmn;0発（ほぼ現状維持）</strong> に抑え込みます。</li>
+  </ul>
+</div>
+
+<p>
+  この技術介入を積み重ねると、初当り1回あたりの期待純出玉は <code>4,551発 &rarr; <strong>約 4,640発</strong></code> まで跳ね上がり、等価ボーダーラインは <strong>約 17.2回 / 250玉</strong> まで有利に押し下がります。
+</p>
+
+<div style="background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 8px; padding: 1.2rem; margin: 1.2rem 0;">
+  <p style="margin: 0 0 0.8rem; font-weight: bold; color: #fbbf24; font-size: 1.05rem;">
+    ⚖️ 見落とせない「交換率（非等価ギャップ）」と「持ち玉比率」の壁
+  </p>
+  <p style="font-size: 0.92rem; color: #cbd5e1; line-height: 1.7; margin: 0 0 0.8rem;">
+    さらに実戦で極めて重要な要素が<strong>「交換率（貸出レートと景品交換レートの差）」</strong>です。
+  </p>
+  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.9rem; color: #cbd5e1; line-height: 1.8;">
+    <li><strong>非等価店でのボーダー上昇</strong>：<br>
+      貸出250玉に対して交換が27.5玉や28玉といった非等価環境では、手元に持玉ができるまでの「貸玉追加投資区間」において、実質ボーダーラインは <strong>約 18.5〜19.5回 / 250玉 以上に急上昇</strong> します。</li>
+    <li><strong>持ち玉比率の重要性</strong>：<br>
+      非等価店で勝つためには、いかに早い段階で初当りを引いて持ち玉遊技へ移行し、終日稼働における「持ち玉比率（全体の何％を持ち玉で回せたか）」を80%〜90%以上に高められるかが、年間収支を左右する決定的な変数となります。</li>
+  </ul>
+</div>
+
+<table style="width: 100%; border-collapse: collapse; margin: 1.2rem 0; font-size: 0.92rem;">
+  <thead>
+    <tr style="background: rgba(255, 255, 255, 0.08); border-bottom: 2px solid rgba(255, 255, 255, 0.2);">
+      <th style="padding: 9px; text-align: left;">ボーダー基準</th>
+      <th style="padding: 9px; text-align: center;">等価ボーダー（250玉あたり）</th>
+      <th style="padding: 9px; text-align: right;">初当り期待純出玉</th>
+      <th style="padding: 9px; text-align: left;">算出条件・プレイヤー層</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      <td style="padding: 9px;"><strong>① カタログ公称値</strong></td>
+      <td style="padding: 9px; text-align: center; color: #94a3b8;">約 16.3回</td>
+      <td style="padding: 9px; text-align: right;">約 4,890発</td>
+      <td style="padding: 9px;">入賞消費・玉減りを無視した理論値（雑誌・サイト掲載）</td>
+    </tr>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      <td style="padding: 9px;"><strong>② ホール実戦値（一般）</strong></td>
+      <td style="padding: 9px; text-align: center; color: #60a5fa; font-weight: bold;">約 17.6回</td>
+      <td style="padding: 9px; text-align: right;">約 4,551発</td>
+      <td style="padding: 9px;">入賞消費（-100発/-30発）＋電サポ微減の現実値</td>
+    </tr>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(52, 211, 153, 0.05);">
+      <td style="padding: 9px;"><strong>③ 技術介入値（プロ基準）</strong></td>
+      <td style="padding: 9px; text-align: center; color: #34d399; font-weight: bold;">約 17.2回</td>
+      <td style="padding: 9px; text-align: right;">約 4,640発</td>
+      <td style="padding: 9px;">オーバー入賞（平均1.6回/R）＋止め打ちによる底上げ値</td>
+    </tr>
+    <tr style="background: rgba(245, 158, 11, 0.05);">
+      <td style="padding: 9px;"><em>※非等価・貸玉投資時</em></td>
+      <td style="padding: 9px; text-align: center; color: #fbbf24; font-weight: bold;"><em>約 18.5〜19.5回</em></td>
+      <td style="padding: 9px; text-align: right;">—</td>
+      <td style="padding: 9px;"><em>交換率ギャップにより初期投資ボーダーが大幅上昇</em></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr>
+
+<h2>第4章：【実機スペック比較】最新LT機6機種の「実質突入確率」と分散格差</h2>
+
+<p>
+  王道ミドル機では、<strong>ボーダーライン＋3回転以上の台を10万回転回せばほぼ負けない（マイナス転落確率がわずか数％程度に抑え込まれる）</strong>ことが分かりました。しかし、ここで現代のパチンコにおいて極めて深刻な問題が発生しています。
+</p>
+
+<p>
+  それは、**「ラッキートリガー（LT）機の普及により、機種ごとの分散（ボラティリティ）が歴史上類を見ないレベルにまで拡大している」**という点です。
+</p>
+
+<p>
+  一口に「LT機」と言っても、通常時からラッキートリガーに突入するまでの実質的なハードルは機種によって天と地ほどの差があります。主要なLT機6機種について、「実質LT突入確率」と「年間10万回転での突入期待回数」を比較してみましょう。
+</p>
+
+<table style="width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.92rem;">
+  <thead>
+    <tr style="background: rgba(255, 255, 255, 0.08); border-bottom: 2px solid rgba(255, 255, 255, 0.2);">
+      <th style="padding: 8px; text-align: left;">機種名</th>
+      <th style="padding: 8px; text-align: center;">初当たり確率</th>
+      <th style="padding: 8px; text-align: left;">LT突入ルート・契機</th>
+      <th style="padding: 8px; text-align: right; color: #fbbf24;">実質LT突入確率</th>
+      <th style="padding: 8px; text-align: right; color: #60a5fa;">10万回転での期待回数</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      <td style="padding: 8px;"><strong>eリコリス・リコイル</strong></td>
+      <td style="padding: 8px; text-align: center;">合算 1/259.7<br><span style="font-size: 0.78rem; color: #94a3b8;">（図柄約1/347＋チャージ約1/1038.8）</span></td>
+      <td style="padding: 8px;">図柄揃い時 約60% ＋ チンアナゴ時 20%<br><span style="font-size: 0.78rem; color: #94a3b8;">（初当り全体の約50%で直LT）</span></td>
+      <td style="padding: 8px; text-align: right; font-weight: bold;">約 1/519</td>
+      <td style="padding: 8px; text-align: right; font-weight: bold;">約 192 回</td>
+    </tr>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(239, 68, 68, 0.05);">
+      <td style="padding: 8px;"><strong>eアサルトリリィ（超偏り型）</strong></td>
+      <td style="padding: 8px; text-align: center;">約 1/164.4</td>
+      <td style="padding: 8px;">初当たり時の約25.3%でLT</td>
+      <td style="padding: 8px; text-align: right; font-weight: bold; color: #f87171;">約 1/650</td>
+      <td style="padding: 8px; text-align: right; font-weight: bold; color: #f87171;">約 153 回</td>
+    </tr>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      <td style="padding: 8px;"><strong>e東京喰種W</strong></td>
+      <td style="padding: 8px; text-align: center;">図柄 1/399.9</td>
+      <td style="padding: 8px;">図柄揃い時の約51%で直LT</td>
+      <td style="padding: 8px; text-align: right; font-weight: bold;">約 1/784</td>
+      <td style="padding: 8px; text-align: right; font-weight: bold;">約 127 回</td>
+    </tr>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
+      <td style="padding: 8px;"><strong>P緋弾のアリア 緋緋神降臨（初期LT）</strong></td>
+      <td style="padding: 8px; text-align: center;">図柄 1/399.9</td>
+      <td style="padding: 8px;">下位RUSH突破・引き戻し等合算</td>
+      <td style="padding: 8px; text-align: right; font-weight: bold;">約 1/1,200〜</td>
+      <td style="padding: 8px; text-align: right; font-weight: bold;">約 80 回</td>
+    </tr>
+    <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); background: rgba(239, 68, 68, 0.08);">
+      <td style="padding: 8px;"><strong>e牙狼12黄金騎士極限（牙狼7500）</strong></td>
+      <td style="padding: 8px; text-align: center;">図柄 1/437.5</td>
+      <td style="padding: 8px;">極限7500(50%) &times; 勝利(50%)</td>
+      <td style="padding: 8px; text-align: right; font-weight: bold; color: #ef4444;">約 1/1,750</td>
+      <td style="padding: 8px; text-align: right; font-weight: bold; color: #ef4444;">わずか 約 57 回</td>
+    </tr>
+    <tr style="background: rgba(239, 68, 68, 0.12);">
+      <td style="padding: 8px;"><strong>e東京喰種 超デカ超一撃（グール999）</strong></td>
+      <td style="padding: 8px; text-align: center;">図柄 約 1/999</td>
+      <td style="padding: 8px;">図柄揃い時の約50%でLT突入</td>
+      <td style="padding: 8px; text-align: right; font-weight: bold; color: #dc2626;">約 1/1,998</td>
+      <td style="padding: 8px; text-align: right; font-weight: bold; color: #dc2626;">わずか 約 50 回</td>
+    </tr>
+  </tbody>
+</table>
+
+---
+
+<h3>各機種の数理的特性と「収束の壁」</h3>
+
+<h4>1. 牙狼7500（実質1/1750）やグール999（実質1/2000）の衝撃</h4>
+<p>
+  表を見ると一目瞭然ですが、初期LT機である『アリア（実質約1/1200）』から、近年の『牙狼12極限（実質1/1750）』、そして『グール999（実質約1/2000）』へと、<strong>LT突入のハードルは恐ろしい勢いで重くなっています</strong>。
+</p>
+<p>
+  実質1/2000クラスの機種では、<strong>年間10万回転という膨大な試行を重ねても、LT突入回数は平均して「たった50回〜57回程度」</strong>しかありません。
+</p>
+<p>
+  年間の母数が50回程度しかない場合、ポアソン分布における下振れ（年間50回の期待値に対して35回しか引けない等）が容易に発生します。1回あたりの出玉トリガーが超巨大化しているため、数回の下振れだけで十万〜数十万発規模の出玉欠損となり、**「ボーダー＋3回のお宝台を年間10万回転回したのに、年間収支（総差玉）がマイナスで終わる」という事象が数学的に現実の確率として起こり得ます**。
+</p>
+
+<h4>2. eアサルトリリィ（突入率25%）が引き起こす「中央値の精神的トラップ」</h4>
+<p>
+  『eアサルトリリィ』は通常時の大当り確率が約1/164.4と軽快ですが、LT突入率は約25.3%に留まります。
+</p>
+<p>
+  これは、<strong>「初当たりの4回中3回（約75%）は出玉がほぼ取れずに終わる」</strong>ことを意味します。初当たり自体はよく引けるため遊技頻度は高くなりますが、中央値（体感勝率）は壊滅的に低くなります。「こんなに初当たりを引いているのに毎回負ける」という体感の歪みを最も生み出しやすいスペック構造と言えます。
+</p>
+
+<div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 1rem 1.2rem; margin: 1.2rem 0; font-size: 0.92rem; color: #cbd5e1; line-height: 1.7;">
+  <strong style="color: #60a5fa;">📌 【比較参考】そもそもLTのない「甘デジ」や「遊タイム機」はどうなのか？</strong><br>
+  ・<strong>甘デジ（1/99など）</strong>：年間10万回転回せば、初当たりそのものが約1,000回も取れます。トリガーへの依存度が低く母数が極めて大きいため、わずか数万回転でもあっという間に期待値通りに収束します。<br>
+  ・<strong>遊タイム機（P大海物語5SPなど）</strong>：通常時950回転で天井時短（350回）に突入するため、幾何分布特有の「1500ハマリ、2000ハマリ」という大ハマリの裾野が物理的に切除されます。これにより、同じ1/319のミドル機であっても、年間のブレ幅（標準偏差）そのものが圧縮され、大負けリスクが抑制されるという数学的恩恵があります。
+</div>
+
+<hr>
+
+<h2>第5章：まとめ —— 現代のパチンコで「勝つための数学的リテラシー」</h2>
+
+<p>
+  本記事で検証した数理的結論をまとめます。
+</p>
+
+<ol>
+  <li><strong>期待値は平均値である</strong>：<br>
+    獲得した遊技球（差玉）はそのまま線形加算（足し算）できるため、長期的な累積結果を支配するのは平均値のみです。「中央値ボーダー」は1日ごとの勝率を50%にするための指標に過ぎず、トータル出玉を最大化する役には立ちません。</li>
+  <li><strong>保通協の試験（MNRS）も期待値である</strong>：<br>
+    国の型式試験や出玉率規制は、純粋な平均値の代数計算や上限足切り試験で構成されており、ポアソン分布や中央値で検定されているという事実はありません。</li>
+  <li><strong>年間10万回転回せば中心極限定理によりガウス分布へ収束する</strong>：<br>
+    十分な試行回数を確保し、ボーダー＋2回以上の台を打ち続ければ、年間でマイナスになる確率は数％程度に抑え込まれます。</li>
+  <li><strong>ただし、最新LT機は「中心極限定理に必要な試行回数」が桁違いに多い</strong>：<br>
+    実質突入確率が1/1500〜1/2000に達する現代の荒波LT機では、年間10万回転回してもトリガー試行が50回程度しか得られません。そのため、**「ボーダーを超えていても1年単位で下振れ（マイナス）で終わる」という現象が統計学的に現実の確率として発生します**。</li>
+</ol>
+
+<p>
+  荒波機を打つ際は、「期待値がプラスだから絶対に今年勝てる」と過信するのではなく、<strong>「この機種の分散に自分の総持玉・遊技体力（パンクリスク）と年間の遊技回転数が耐えられるか」</strong>というボラティリティの視点を持つことが、現代のパチンコにおいて最も重要な数学的リテラシーと言えます。
+</p>
+
+<div style="background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 1.2rem; margin: 1.5rem 0;">
+  <p style="margin: 0 0 0.8rem; font-weight: bold; color: #60a5fa; font-size: 1.05rem;">
+    💡 【現実の処方箋】一般ファンはどう向き合うべきか？ 〜無理のない範囲で楽しむ大衆娯楽の選択肢〜
+  </p>
+  <p style="font-size: 0.92rem; color: #cbd5e1; line-height: 1.7; margin: 0 0 0.8rem;">
+    大前提として、パチンコは日常生活や家計を圧迫してまで勝敗に執着するものではなく、<strong>「余暇の時間を無理のない範囲で楽しむ大衆娯楽（遊技）」</strong>です。ギャンブルとして無理な勝負にのめり込むのではなく、自分の目的や遊技体力に合わせた付き合い方を選ぶことが何よりも大切です。
+  </p>
+  <p style="font-size: 0.92rem; color: #cbd5e1; line-height: 1.7; margin: 0 0 0.8rem;">
+    現代のホールにおいて「通常営業でボーダー＋3回転以上のお宝台」に出会えることは現実的にほぼ皆無であり、年間10万回転を回せない兼業・一般ファンが平打ちで勝ち続けるのは極めて困難です。そのため、ご自身のスタンスに応じて以下の2つのアプローチをおすすめします。
+  </p>
+
+  <div style="background: rgba(255, 255, 255, 0.03); border-radius: 6px; padding: 0.9rem 1rem; margin: 0.8rem 0;">
+    <p style="margin: 0 0 0.4rem; font-weight: bold; color: #34d399; font-size: 0.95rem;">
+      🎯 ① どうしても数学的に「勝ち（プラス収支）」にこだわりたい場合
+    </p>
+    <p style="margin: 0; font-size: 0.88rem; color: #cbd5e1; line-height: 1.7;">
+      <strong>&rarr; 「遊タイム搭載機のハマり台狙い（天井時短狙い）」に徹する</strong><br>
+      遊タイム機（大海5SPなど）は規定回転数で天井時短へ突入するため、幾何分布特有の「1500ハマリ、2000ハマリ」という無限のマイナス振れ幅が物理的にカットされます。少ない試行回数でも運のブレ幅（分散）を大幅に圧縮しつつ、高期待値区間だけを効率よく選んで打つことができます。
+    </p>
+  </div>
+
+  <div style="background: rgba(255, 255, 255, 0.03); border-radius: 6px; padding: 0.9rem 1rem; margin: 0.8rem 0;">
+    <p style="margin: 0 0 0.4rem; font-weight: bold; color: #fbbf24; font-size: 0.95rem;">
+      🎮 ② 好きなアニメの演出や新台の世界観を楽しみたい場合
+    </p>
+    <p style="margin: 0; font-size: 0.88rem; color: #cbd5e1; line-height: 1.7;">
+      <strong>&rarr; 「1円パチンコ等の低貸（低貸玉）コーナー」でボーダーを気にせず遊ぶ</strong><br>
+      手持ちの玉数に余裕がない方や、特定のコンテンツ（アニメや演出）を満喫したい方は、過度な負担がかかる4円の荒波機でボーダーや収支に神経をすり減らす必要は全くありません。低貸コーナーであれば、過度なリスクを負わずに「純粋な遊びのライン」として大好きな作品の世界観や大当り演出を心ゆくまで満喫できます。
+    </p>
+  </div>
+
+  <p style="font-size: 0.88rem; color: #94a3b8; line-height: 1.6; margin: 0.8rem 0 0;">
+    期待値やボーダーをストイックに追求することだけがパチンコではありません。「身の丈に合った無理のないレートで、健全に楽しむこと」こそが、現代の遊技において最も大切なリテラシーと言えます。
+  </p>
+</div>
+
+<hr>
+
+<h2>第6章：数学的思考の総括と学術的出典・参考文献</h2>
+
+<p>
+  本記事で解説した数理的論拠は、ネット上の独自解釈やオカルトではなく、近代確率論および風営法規格に厳密に基づいています。読者の皆様の学習および検証のため、使用した数学定理と公式法規の出典・参考文献を体系的に整理します。
+</p>
+
+<div style="display: grid; grid-template-columns: 1fr; gap: 1rem; margin: 1.5rem 0;">
+  <!-- カード1: 期待値の線形性 -->
+  <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #3b82f6; border-radius: 8px; padding: 1.2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.6rem;">
+      <h3 style="margin: 0; font-size: 1.05rem; color: #60a5fa;">① 期待値の線形性（加法性）</h3>
+      <span style="background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 4px; padding: 0.2rem 0.6rem; font-family: 'Times New Roman', Times, serif; font-size: 1.05rem; color: #93c5fd;">
+        <i>E</i>[&sum;<i>X</i><sub><i>i</i></sub>] = &sum;<i>E</i>[<i>X</i><sub><i>i</i></sub>]
+      </span>
+    </div>
+    <p style="margin: 0; font-size: 0.92rem; color: #cbd5e1; line-height: 1.7;">
+      <strong>【パチンコ数理への帰結】</strong><br>
+      出玉（差玉）が足し算できるシステムである以上、確率変数の独立性や分布の歪み（ポジティブ・スキュー）に一切関係なく、<strong>長期的な累積結果を支配する指標は必然的に「平均値」のみ</strong>になります（※中央値には加法性が成立しません）。
+    </p>
+  </div>
+
+  <!-- カード2: 大数の法則 -->
+  <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #10b981; border-radius: 8px; padding: 1.2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.6rem;">
+      <h3 style="margin: 0; font-size: 1.05rem; color: #34d399;">② 大数の法則（LLN: Law of Large Numbers）</h3>
+      <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 4px; padding: 0.2rem 0.6rem; font-family: 'Times New Roman', Times, serif; font-size: 1.05rem; color: #6ee7b7;">
+        lim<sub><i>n</i>&rarr;&infin;</sub> <i>P</i>(|<i>X̄</i><sub><i>n</i></sub> - &mu;| &ge; &epsilon;) = 0
+      </span>
+    </div>
+    <p style="margin: 0; font-size: 0.92rem; color: #cbd5e1; line-height: 1.7;">
+      <strong>【パチンコ数理への帰結】</strong><br>
+      試行回数（通常時回転数 <i>n</i>）を増やすことで、1回転あたりの平均差玉は真の期待値 &mu; に限りなく近づきます。「試行を重ねれば期待値通りになる」というボーダー理論の根本原理です。
+    </p>
+  </div>
+
+  <!-- カード3: 中心極限定理 -->
+  <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #8b5cf6; border-radius: 8px; padding: 1.2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.6rem;">
+      <h3 style="margin: 0; font-size: 1.05rem; color: #a78bfa;">③ 中心極限定理（CLT: Central Limit Theorem）</h3>
+      <span style="background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 4px; padding: 0.2rem 0.6rem; font-family: 'Times New Roman', Times, serif; font-size: 1.05rem; color: #c4b5fd;">
+        &sum;<i>X</i><sub><i>i</i></sub> &sim; <i>N</i>(<i>n</i>&mu;, <i>n</i>&sigma;<sup>2</sup>)
+      </span>
+    </div>
+    <p style="margin: 0; font-size: 0.92rem; color: #cbd5e1; line-height: 1.7;">
+      <strong>【パチンコ数理への帰結】</strong><br>
+      元の出玉分布がどれほど非対称に歪んでいても、総収支は試行回数に応じて正規分布（ガウス分布）へと漸近します。累積の運のブレ幅は回転数の平方根 <strong>&radic;<i>n</i> でしか広がらない</strong>ため、回転数を増やすほど期待値のプラスがブレを圧倒します。
+    </p>
+  </div>
+
+  <!-- カード4: 幾何分布と無記憶性 -->
+  <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #f59e0b; border-radius: 8px; padding: 1.2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.6rem;">
+      <h3 style="margin: 0; font-size: 1.05rem; color: #fbbf24;">④ 幾何分布と無記憶性（Memoryless Property）</h3>
+      <span style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 4px; padding: 0.2rem 0.6rem; font-family: 'Times New Roman', Times, serif; font-size: 0.95rem; color: #fcd34d;">
+        <i>P</i>(<i>X</i> > <i>s</i>+<i>t</i> | <i>X</i> > <i>s</i>) = <i>P</i>(<i>X</i> > <i>t</i>)
+      </span>
+    </div>
+    <p style="margin: 0; font-size: 0.92rem; color: #cbd5e1; line-height: 1.7;">
+      <strong>【パチンコ数理への帰結】</strong><br>
+      「ハマっているからそろそろ当たる」「連チャン直後だから当たりにくい」というオカルト波理論を否定する数学的根拠。過去の抽選結果は未来の初当り確率に一切干渉しません。
+    </p>
+  </div>
+
+  <!-- カード5: ポアソン分布 -->
+  <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); border-left: 4px solid #ef4444; border-radius: 8px; padding: 1.2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.6rem;">
+      <h3 style="margin: 0; font-size: 1.05rem; color: #f87171;">⑤ ポアソン分布（Poisson Distribution）</h3>
+      <span style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 4px; padding: 0.2rem 0.6rem; font-family: 'Times New Roman', Times, serif; font-size: 0.95rem; color: #fca5a5;">
+        <i>P</i>(<i>X</i> = <i>k</i>) = (&lambda;<sup><i>k</i></sup><i>e</i><sup>-&lambda;</sup>) / <i>k</i>!
+      </span>
+    </div>
+    <p style="margin: 0; font-size: 0.92rem; color: #cbd5e1; line-height: 1.7;">
+      <strong>【パチンコ数理への帰結】</strong><br>
+      実質1/2000クラスのLT突入など、低確率・大試行における生起回数を表す分布。年間の母数が50回程度しかない場合、ポアソン分布の下振れがそのまま十万発単位の欠損に直結し、年間でのマイナス転落要因となります。
+    </p>
+  </div>
+</div>
+
+<div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; padding: 1.2rem; margin: 1.5rem 0;">
+  <p style="margin: 0 0 0.8rem; font-weight: bold; color: #fbbf24; font-size: 1.05rem;">
+    📖 公式法規および学術参考文献
+  </p>
+  <ul style="margin: 0; padding-left: 1.2rem; font-size: 0.9rem; color: #cbd5e1; line-height: 1.8;">
+    <li><strong>国家公安委員会規則第4号</strong>『遊技機の認定及び型式の検定等に関する規則』（別表第4：ぱちんこ遊技機、別表第5：回胴式遊技機）<br>
+      <a href="https://elaws.e-gov.go.jp/document?lawid=360M50400000004" target="_blank" rel="noopener noreferrer" style="color: #93c5fd; text-decoration: underline;">e-Gov法令検索：条文リンク</a></li>
+    <li><strong>警察庁生活安全局保安課長通達</strong>『技術上の規格解釈基準について』</li>
+    <li><strong>一般財団法人 保安通信協会（保通協）</strong>『型式試験の概要及び実施細則』</li>
+    <li><strong>ウィリアム・フェラー（William Feller）</strong>『確率論とその応用 (An Introduction to Probability Theory and Its Applications, Vol. 1 & 2)』Wiley</li>
+    <li><strong>アンドレイ・コルモゴロフ（A. N. Kolmogorov）</strong>『確率論の基礎概念 (Grundbegriffe der Wahrscheinlichkeitsrechnung)』Springer</li>
+    <li><strong>伊藤清</strong>『確率論』岩波書店</li>
+  </ul>
+</div>

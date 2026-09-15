@@ -325,7 +325,7 @@ export function buildArticlePages() {
             ${getNinjaAdHtml()}
             ${getAmazonAdsHtml(post)}
         </article>
-        ${getRelatedPostsHtml(related, toRoot)}
+        ${post.related === false ? "" : getRelatedPostsHtml(related, toRoot)}
 
         <nav class="post-nav">
             <div class="post-nav-prev">${prevNav}</div>
