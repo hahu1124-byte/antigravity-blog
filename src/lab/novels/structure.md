@@ -76,13 +76,13 @@ novels/
             ├── 121-130/             # ep121~ep130
             ├── 131-140/             # ep131~ep140
             └── 141-150/
-                ├── ... (4 older files)
+                ├── ... (3 older files)
+                ├── ep144T.md
                 ├── ep145T.md
-                ├── ep146A.md
                 ├── ep146T.md
                 └── archive/
-                    ├── ... (4 older files)
-                    └── ep145A.md
+                    ├── ... (5 older files)
+                    └── ep146A.md
 ```
 
 **T版**（`ep◯◯T.md`）がカクヨムに掲載している正式版。A版・C版はT版完成後に `archive/` へ退避。
