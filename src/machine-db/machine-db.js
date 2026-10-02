@@ -13,6 +13,14 @@
         return (NOW_MS - new Date(createdAt).getTime()) < NEW_DAYS * 86400000;
     }
 
+    // 検索用の正規化: 全角/半角の揺れを NFKC でそろえ、ひらがなをカタカナに変換して大文字小文字も無視する
+    function normalizeSearch(s) {
+        return String(s || '')
+            .normalize('NFKC')
+            .replace(/[ぁ-ゖ]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60))
+            .toLowerCase();
+    }
+
     let allMachines = [];
     let filteredMachines = [];
     let currentPage = 1;
@@ -180,6 +188,8 @@
                 maker: row.maker || '',
                 sourceUrl: row.source_url || '',
                 createdAt: row.created_at || null,
+                // 機種名と別名を正規化して 1 本につないだ検索キー（入力のたびに作り直さない）
+                searchKey: [row.name, ...(Array.isArray(row.aliases) ? row.aliases : [])].map(normalizeSearch).join('\n'),
             }));
             // 最終更新日時（updated_atの最大値）
             const maxUpdated = allRows.reduce((max, r) => (!r.updated_at ? max : (!max || r.updated_at > max ? r.updated_at : max)), null);
@@ -211,15 +221,11 @@
     }
 
     function applyFilters() {
-        const search = searchInput.value.trim().toLowerCase();
+        const search = normalizeSearch(searchInput.value.trim());
         const type = typeFilter.value;
         const yutime = yutimeFilter.value;
         filteredMachines = allMachines.filter(m => {
-            if (search) {
-                const nameMatch = m.name.toLowerCase().includes(search);
-                const aliasMatch = Array.isArray(m.aliases) && m.aliases.some(a => a.toLowerCase().includes(search));
-                if (!nameMatch && !aliasMatch) return false;
-            }
+            if (search && !m.searchKey.includes(search)) return false;
             if (type !== 'all') {
                 if (type === 'その他') {
                     if (['ハイミドル', 'ミドル', 'ライトミドル', 'ライト(甘デジ)'].includes(m.type)) return false;
