@@ -4,12 +4,13 @@
 
     const SUPABASE_URL = '__SUPABASE_URL__';
     const SUPABASE_KEY = '__SUPABASE_ANON_KEY__';
-    const NEW_DAYS = 15;
+    // NEWバッジは導入日ではなく、DBに機種が登録された日時（created_at）から数える
+    const NEW_DAYS = 7;
     const NOW_MS = Date.now();
 
-    function isNewMachine(releaseDate) {
-        if (!releaseDate) return false;
-        return (NOW_MS - new Date(releaseDate).getTime()) < NEW_DAYS * 86400000;
+    function isNewMachine(createdAt) {
+        if (!createdAt) return false;
+        return (NOW_MS - new Date(createdAt).getTime()) < NEW_DAYS * 86400000;
     }
 
     let allMachines = [];
@@ -148,7 +149,7 @@
     async function loadData() {
         try {
             const PAGE = 1000;
-            const SELECT = 'name,type,prob,base_probability,border_equiv,rb,yutime_trigger,yutime_spins,avg_chain,avg_acquired,entry_rate,real_cont_rate,rush_rate,aliases,release_date,maker,source_url,updated_at';
+            const SELECT = 'name,type,prob,base_probability,border_equiv,rb,yutime_trigger,yutime_spins,avg_chain,avg_acquired,entry_rate,real_cont_rate,rush_rate,aliases,release_date,maker,source_url,updated_at,created_at';
             const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` };
             const allRows = [];
             for (let offset = 0; ; offset += PAGE) {
@@ -178,6 +179,7 @@
                 releaseDate: row.release_date || null,
                 maker: row.maker || '',
                 sourceUrl: row.source_url || '',
+                createdAt: row.created_at || null,
             }));
             // 最終更新日時（updated_atの最大値）
             const maxUpdated = allRows.reduce((max, r) => (!r.updated_at ? max : (!max || r.updated_at > max ? r.updated_at : max)), null);
@@ -395,7 +397,7 @@
             const favClass = isFavorite(m.name) ? 'fav-active' : '';
             const favStar = isFavorite(m.name) ? '★' : '☆';
             let cells = `<td class="fav-cell"><button class="fav-btn ${favClass}" data-name="${esc(m.name)}" title="お気に入り">${favStar}</button></td>`;
-            const newBadge = isNewMachine(m.releaseDate) ? '<span class="new-badge">NEW</span>' : '';
+            const newBadge = isNewMachine(m.createdAt) ? '<span class="new-badge">NEW</span>' : '';
             cells += `<td class="machine-name" title="${esc(m.name)}">${newBadge}${esc(m.name)}</td>`;
             for (const col of columnOrder) {
                 if (!v[col]) continue;
