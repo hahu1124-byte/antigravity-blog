@@ -68,10 +68,10 @@
           data-machine="rezero"
           onclick="selectMachine('rezero')"
         >
-            <span class="machine-name">🔵 Re:ゼロ season2 風</span>
-            <span class="machine-spec"
-              >通常 1/349.9 ｜ RUSH145回 ｜ 継続率約77%</span
-            >
+          <span class="machine-name">🔵 Re:ゼロ season2 風</span>
+          <span class="machine-spec"
+            >通常 1/349.9 ｜ RUSH145回 ｜ 継続率約77%</span
+          >
         </button>
         <button class="machine-modal-close" onclick="closeMachineModal()">
           閉じる
@@ -182,7 +182,9 @@
 
     <!-- Chart.js ライブラリ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- 分割したJSを読み込み -->
-    <script src="js/script.js?v=20260701-history"></script>
+    <!-- 分割したJSを読み込み（EVA の演出データ → 抽選エンジン → 本体の順） -->
+    <script src="js/eva-effects.js?v=20261003-eva15"></script>
+    <script src="js/eva-engine.js?v=20261003-eva15"></script>
+    <script src="js/script.js?v=20261003-eva15"></script>
   </body>
 </html>

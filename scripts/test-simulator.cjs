@@ -58,8 +58,11 @@ const context = vm.createContext({
   makeRandom,
 });
 
-const source = fs.readFileSync("src/simulator/js/script.js", "utf8");
-vm.runInContext(source, context);
+// index.html と同じ順（EVA の演出データ → 抽選エンジン → 本体）で読み込む
+for (const file of ["eva-effects.js", "eva-engine.js", "script.js"]) {
+  const source = fs.readFileSync(`src/simulator/js/${file}`, "utf8");
+  vm.runInContext(source, context, { filename: file });
+}
 
 async function run(code) {
   return vm.runInContext(`(async () => { ${code} })()`, context);
@@ -89,17 +92,6 @@ function assertClose(label, actual, expected, tolerance) {
     }
     checkBands("Rezero 通常", REZERO_BANDS_N, 1048576, 2997);
     checkBands("Rezero ST", REZERO_BANDS_S, 1048576, 10496);
-    checkBands("EVA 通常/時短 保留色軸", EVA_AXIS_HOLD_N, 65536, 205);
-    checkBands("EVA 通常/時短 背景予告軸", EVA_AXIS_BG_N, 65536, 205);
-    checkBands("EVA 通常/時短 先読み軸(<=400回転)", EVA_AXIS_PRECURSOR_N_LOW, 65536, 205);
-    checkBands("EVA 通常/時短 先読み軸(>400回転)", EVA_AXIS_PRECURSOR_N_HIGH, 65536, 205);
-    checkBands("EVA 通常/時短 レバブル軸", EVA_AXIS_LEVER_N, 65536, 205);
-    checkBands("EVA 通常/時短 リーチ軸", EVA_AXIS_REACH_N, 65536, 205);
-    checkBands("EVA ST 保留色軸", EVA_AXIS_HOLD_S, 65536, 659);
-    checkBands("EVA ST 背景予告軸", EVA_AXIS_BG_S, 65536, 659);
-    checkBands("EVA ST 先読み軸", EVA_AXIS_PRECURSOR_S, 65536, 659);
-    checkBands("EVA ST レバブル軸", EVA_AXIS_LEVER_S, 65536, 659);
-    checkBands("EVA ST リーチ軸", EVA_AXIS_REACH_S, 65536, 659);
     return "ok";
   `);
   if (bandIntegrity !== "ok") throw new Error("band integrity check failed");
@@ -135,7 +127,9 @@ function assertClose(label, actual, expected, tolerance) {
     9,
   );
   if (simulation.coloredHolds !== 0) {
-    throw new Error(`ReZero colored holds remained: ${simulation.coloredHolds}`);
+    throw new Error(
+      `ReZero colored holds remained: ${simulation.coloredHolds}`,
+    );
   }
 
   // 帯テーブル(REZERO_BANDS_N)の hit/(hit+miss) から導出される厳密値
@@ -172,212 +166,297 @@ function assertClose(label, actual, expected, tolerance) {
   const saibareTrust = saibare.hitsSeen / saibare.totalSeen;
   assertClose("先バレ trust", saibareTrust, 0.4, 0.025);
 
-  // EVA機 通常時：軸独立抽選(5軸)のモンテカルロ検証（currentRot<=400固定＝群予告は出現しない領域）
-  const evaSimulation = await run(`
-    currentMachine = "eva";
-    M = MACHINES.eva;
-    SPECS = M.specs;
-    mode = "通常";
-    currentRot = 0;
-    Math.random = makeRandom(20260704);
-    let hitsSeen = 0;
-    let leverHits = 0;
-    const axisCounts = {};
-    const spins = 6000000;
-    for (let i = 0; i < spins; i++) {
-      const job = createJob(false);
-      if (job.isHit) hitsSeen++;
-      const hasLever = job.name.includes("白レバブル") || job.name.includes("赤レバブル") || job.name.includes("虹レバブル");
-      if (hasLever && job.isHit) leverHits++;
-      for (const label of job.name) {
-        const row = axisCounts[label] || (axisCounts[label] = { hits: 0, total: 0 });
-        row.total++;
-        if (job.isHit) row.hits++;
+  // ============================================================
+  // EVA機：当否と当り種別 → リーチ → 予告の層（層内排他）の抽選と、事後確率による信頼度表示
+  // ============================================================
+  const evaStartedAt = Date.now();
+  console.log(`[EVA] 開始 ${new Date(evaStartedAt).toISOString()}`);
+
+  // 決定論の検算：本数の合計が 2^20・当り本数と厳密に一致すること
+  const evaIntegrity = await run(`
+    const problems = [];
+    function checkTables(label, T, expectHit) {
+      const bit = T.classTotals.reduce((s, x) => s + x, 0);
+      if (bit !== 1048576) problems.push(label + ": Σ本数 " + bit);
+      const hit = T.classes.filter((c) => c.hit).reduce((s, c) => s + c.n, 0);
+      if (hit !== expectHit) problems.push(label + ": 当り本数 " + hit);
+      for (const L of T.free) {
+        for (const c of T.classes) {
+          const row = L.counts[c.id];
+          const sum = row.reduce((a, b) => a + b, 0);
+          if (sum !== c.n) problems.push(label + " " + L.label + " " + c.id + ": " + sum + " !== " + c.n);
+          if (row.some((x) => x < 0)) problems.push(label + " " + L.label + " " + c.id + ": 負の本数");
+        }
+      }
+      const reach = T.free.find((l) => l.key === T.reachKey);
+      for (const L of T.linked) {
+        for (const c of T.classes) {
+          L.counts[c.id].forEach((row, r) => {
+            const sum = row.reduce((a, b) => a + b, 0);
+            if (sum !== reach.counts[c.id][r]) problems.push(label + " " + L.label + " " + c.id + " " + reach.states[r].name + ": " + sum);
+            if (row.some((x) => x < 0)) problems.push(label + " " + L.label + ": 負の本数");
+          });
+        }
       }
     }
-    return { spins, hitsSeen, axisCounts, leverHits };
+    checkTables("通常(400以下)", EVA_T_N_LOW, 3280);
+    checkTables("通常(401以上)", EVA_T_N_HIGH, 3280);
+    checkTables("ST", EVA_T_S, 10544);
+    return problems;
   `);
-  assertClose(
-    "EVA 通常時 base odds",
-    evaSimulation.spins / evaSimulation.hitsSeen,
-    65536 / 205,
-    5,
+  if (evaIntegrity.length)
+    throw new Error("EVA テーブル: " + evaIntegrity.join(" / "));
+
+  // 決定論の検算：整数テーブルから出る各演出の信頼度が宣言値（実機値）どおりか。
+  // あわせて「ハズレで何回転に1回出るか」の一覧を出す（出現頻度の推定値を調整するときの目安）
+  const evaDeclared = await run(`
+    const rows = [];
+    function walk(label, T) {
+      const missId = T.classes.find((c) => !c.hit).id;
+      const hitIds = T.classes.filter((c) => c.hit).map((c) => c.id);
+      const layers = [...T.free.map((L) => ({ L, linked: false })), ...T.linked.map((L) => ({ L, linked: true }))];
+      for (const { L, linked } of layers) {
+        L.states.forEach((s, i) => {
+          if (s.id === "none") return;
+          const sumOf = (cid) => linked ? L.counts[cid].reduce((a, row) => a + row[i], 0) : L.counts[cid][i];
+          const hit = hitIds.reduce((a, cid) => a + sumOf(cid), 0);
+          const miss = sumOf(missId);
+          rows.push({
+            table: label, layer: L.label, name: s.name,
+            declaredTrust: s.trust, declaredHit: s.hit, declaredMiss: s.miss,
+            hit, miss, trust: hit + miss ? (hit / (hit + miss)) * 100 : 0,
+            missEvery: miss ? Math.round(1048576 / miss) : null,
+            hitShare: (hit / T.classes.filter((c) => c.hit).reduce((a, c) => a + c.n, 0)) * 100,
+          });
+        });
+      }
+    }
+    walk("通常(401以上)", EVA_T_N_HIGH);
+    walk("ST", EVA_T_S);
+    return rows;
+  `);
+  for (const row of evaDeclared) {
+    const label = `EVA ${row.table} ${row.name}`;
+    if (row.hit === 0) throw new Error(`${label}: 当り本数が 0`);
+    if (row.declaredTrust !== undefined) {
+      if (row.declaredTrust >= 100) {
+        if (row.miss !== 0)
+          throw new Error(`${label}: 濃厚なのにハズレが ${row.miss} 本`);
+      } else {
+        const tolerance = Math.max(0.2, row.declaredTrust * 0.02);
+        assertClose(
+          `${label} 信頼度(テーブル)`,
+          row.trust,
+          row.declaredTrust,
+          tolerance,
+        );
+      }
+    } else if (row.hit !== row.declaredHit || row.miss !== row.declaredMiss) {
+      throw new Error(
+        `${label}: 本数 ${row.hit}/${row.miss} が宣言 ${row.declaredHit}/${row.declaredMiss} と違う`,
+      );
+    }
+  }
+  console.log(
+    "[EVA] 演出ごとの信頼度と出現頻度（通常は 401 回転以上のテーブル）",
   );
-  if (evaSimulation.axisCounts["群予告"]) {
+  for (const row of evaDeclared) {
+    console.log(
+      `  ${row.table} ${row.layer} ${row.name}: 信頼度 ${row.trust.toFixed(1)}%` +
+        `（宣言 ${row.declaredTrust !== undefined ? row.declaredTrust + "%" : "本数指定"}）` +
+        ` 当りの ${row.hitShare.toFixed(1)}% / ハズレ ${row.missEvery ? "1/" + row.missEvery + " 回転" : "なし"}`,
+    );
+  }
+
+  // 決定論の検算：当り種別の比率と、全回転リーチ＝10R確変
+  const evaKinds = await run(`
+    const T = EVA_T_N_LOW;
+    const n = Object.fromEntries(T.classes.map((c) => [c.id, c.n]));
+    const reach = T.free.find((l) => l.key === T.reachKey);
+    const zi = reach.states.findIndex((s) => s.id === "zenkaiten");
+    return {
+      r10: n.r10 / 3280, k3: n.k3 / 3280, t3: n.t3 / 3280,
+      zenkaitenR10: reach.counts.r10[zi], zenkaitenOther: reach.counts.k3[zi] + reach.counts.t3[zi] + reach.counts.miss[zi],
+      r10Other: reach.counts.r10.reduce((a, b) => a + b, 0) - reach.counts.r10[zi],
+    };
+  `);
+  assertClose("EVA 10R確変 比率", evaKinds.r10, 0.03, 0.001);
+  assertClose("EVA 3R確変 比率", evaKinds.k3, 0.56, 0.001);
+  assertClose("EVA 3R通常 比率", evaKinds.t3, 0.41, 0.001);
+  if (
+    evaKinds.zenkaitenR10 !== 98 ||
+    evaKinds.zenkaitenOther !== 0 ||
+    evaKinds.r10Other !== 0
+  ) {
+    throw new Error(
+      `EVA 全回転リーチと 10R確変が一致しない: ${JSON.stringify(evaKinds)}`,
+    );
+  }
+
+  // モンテカルロ：通常時（400 回転以下・401 回転以上）
+  const evaMc = await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常";
+    const out = {};
+    for (const [label, rot, spins, seed] of [["low", 0, 6000000, 20261003], ["high", 500, 3000000, 20261004]]) {
+      currentRot = rot;
+      Math.random = makeRandom(seed);
+      const r = { spins, hits: 0, kinds: { r10: 0, k3: 0, t3: 0 }, bands: {}, alone: {}, names: {},
+        leverHits: 0, leverMismatch: 0, vibeMismatch: 0, zenkaitenNotR10: 0 };
+      for (let i = 0; i < spins; i++) {
+        const job = createJob(false);
+        if (job.isHit) { r.hits++; r.kinds[job.kind]++; }
+        const hasLever = job.name.includes("白レバブル") || job.name.includes("赤レバブル") || job.name.includes("虹レバブル");
+        if (hasLever && job.isHit) r.leverHits++;
+        if (job.vibe !== hasLever) r.vibeMismatch++;
+        const leverHold = job.name.includes("レバブル保留");
+        const colorHold = ["red", "green", "blue"].includes(job.holdType);
+        if (leverHold !== (hasLever && !colorHold)) r.leverMismatch++;
+        if (job.reachId === "zenkaiten" && job.kind !== "r10") r.zenkaitenNotR10++;
+        for (const nm of job.name) {
+          const row = r.names[nm] || (r.names[nm] = { n: 0, hit: 0 });
+          row.n++; if (job.isHit) row.hit++;
+        }
+        if (job.name.length) {
+          const b = Math.min(Math.floor(job.trust / 10) * 10, 100);
+          const row = r.bands[b] || (r.bands[b] = { n: 0, hit: 0, sum: 0 });
+          row.n++; row.sum += job.trust; if (job.isHit) row.hit++;
+        }
+        // 当該レバブル以外の予告が何も付かない SP リーチ（レバブルは問わない）
+        const others = job.name.filter((nm) => !/レバブル/.test(nm));
+        if (others.length === 1 && job.tenpai && job.reachId !== "normal") {
+          const row = r.alone[job.reachId] || (r.alone[job.reachId] = { n: 0, hit: 0, noLeverN: 0, noLeverHit: 0 });
+          row.n++; if (job.isHit) row.hit++;
+          if (!hasLever) { row.noLeverN++; if (job.isHit) row.noLeverHit++; }
+        }
+      }
+      out[label] = r;
+    }
+    return out;
+  `);
+  const reachTrust = {
+    final: 70.5,
+    sahaquiel: 65.2,
+    armisael: 56.8,
+    sho: 34.8,
+    zero: 10.2,
+    ni: 7.2,
+    synchro: 3.1,
+  };
+  for (const [label, r] of Object.entries(evaMc)) {
+    assertClose(`EVA ${label} base odds`, r.spins / r.hits, 1048576 / 3280, 6);
+    if (r.vibeMismatch)
+      throw new Error(
+        `EVA ${label}: 揺れとレバブルが食い違う ${r.vibeMismatch} 件`,
+      );
+    if (r.leverMismatch)
+      throw new Error(
+        `EVA ${label}: レバブル保留の表示が食い違う ${r.leverMismatch} 件`,
+      );
+    if (r.zenkaitenNotR10)
+      throw new Error(
+        `EVA ${label}: 10R でない全回転リーチ ${r.zenkaitenNotR10} 件`,
+      );
+    assertClose(
+      `EVA ${label} 3R確変 比率(実測)`,
+      r.kinds.k3 / r.hits,
+      0.56,
+      0.02,
+    );
+    assertClose(
+      `EVA ${label} 3R通常 比率(実測)`,
+      r.kinds.t3 / r.hits,
+      0.41,
+      0.02,
+    );
+    // 当該レバブル（シミュ専用）は旧来どおり：全大当りの約66.7%に絡み、出現数は白＞赤＞虹
+    assertClose(
+      `EVA ${label} レバブル 大当り絡み率`,
+      r.leverHits / r.hits,
+      0.667,
+      0.02,
+    );
+    const order = ["白レバブル", "赤レバブル", "虹レバブル"].map(
+      (nm) => r.names[nm].n,
+    );
+    if (!(order[0] > order[1] && order[1] > order[2])) {
+      throw new Error(
+        `EVA ${label} レバブル出現順が白>赤>虹になっていない: ${order}`,
+      );
+    }
+    // 表示信頼度（事後確率）と実測当選率が帯ごとに一致する
+    console.log(`[EVA] ${label}: 表示の帯ごとの実測`);
+    for (const [band, row] of Object.entries(r.bands).sort(
+      (a, b) => a[0] - b[0],
+    )) {
+      const shown = row.sum / row.n;
+      const actual = (row.hit / row.n) * 100;
+      console.log(
+        `  帯 ${band}% n=${row.n} 表示平均 ${shown.toFixed(2)}% → 実測 ${actual.toFixed(2)}%`,
+      );
+      if (row.n >= 3000)
+        assertClose(`EVA ${label} 帯${band}% 表示と実測`, actual, shown, 2);
+    }
+    // 単独 SP リーチが公表値の 6 割以上（旧方式は アルミサエル 9% / 56.8% だった）。
+    // 「予告が付かない」こと自体の倍率はどのリーチでも同じ（約0.55）なので、
+    // 体感に効く公表 30% 以上のリーチだけを基準にし、低いリーチは値を出すだけにする
+    console.log(
+      `[EVA] ${label}: 他の予告が付かない SP リーチ（レバブルは問わない／レバブルも無し）`,
+    );
+    for (const [id, row] of Object.entries(r.alone)) {
+      const actual = (row.hit / row.n) * 100;
+      const noLever = row.noLeverN
+        ? (row.noLeverHit / row.noLeverN) * 100
+        : NaN;
+      console.log(
+        `  ${id} n=${row.n} 実測 ${actual.toFixed(1)}%（公表 ${reachTrust[id] ?? "-"}%）／レバブル無し ${noLever.toFixed(1)}%`,
+      );
+      if (
+        reachTrust[id] >= 30 &&
+        row.n >= 500 &&
+        actual < reachTrust[id] * 0.6
+      ) {
+        throw new Error(
+          `EVA ${label} ${id} 単独の実測 ${actual.toFixed(1)}% が公表値 ${reachTrust[id]}% の 6 割未満`,
+        );
+      }
+    }
+  }
+  if (evaMc.low.names["群予告(レイ)"] || evaMc.low.names["群予告(シンジ)"]) {
     throw new Error("群予告 appeared while currentRot<=400 (gating broken)");
   }
-  const evaExpectedTrust = {
-    赤保留: 0.9,
-    緑保留: 0.2,
-    青保留: 0.05,
-    レイ背景: 0.85,
-    プレミア背景: 1.0,
-    渚カヲル: 1.0,
-    カウントダウン: 0.65,
-    白レバブル: 0.9,
-    赤レバブル: 0.98,
-    虹レバブル: 1.0,
-    全回転リーチ: 1.0,
-    vsアルミサエル: 0.568,
-    vsサハクィエル: 0.652,
-    最終号機リーチ: 0.705,
-  };
-  // 「レバブル保留」は独立軸を持たず表示上の格上げのみのため、赤/緑/青保留・白/赤/虹レバブルは
-  // 一切歪まず単独抽選時の理論値と厳密に一致するはず（許容誤差は他と同じ0.03のまま）
-  for (const [name, expected] of Object.entries(evaExpectedTrust)) {
-    const row = evaSimulation.axisCounts[name];
-    if (!row) throw new Error(`EVA ${name}: no samples`);
-    const measured = row.hits / row.total;
-    assertClose(`EVA ${name} trust`, measured, expected, 0.03);
-  }
-  // レバブルは全大当りの約66.7%に絡む
-  assertClose(
-    "EVA レバブル 大当り絡み率",
-    evaSimulation.leverHits / evaSimulation.hitsSeen,
-    0.667,
-    0.02,
-  );
-  // 出現数は白＞赤＞虹の順
-  const leverOrder = [
-    evaSimulation.axisCounts["白レバブル"].total,
-    evaSimulation.axisCounts["赤レバブル"].total,
-    evaSimulation.axisCounts["虹レバブル"].total,
-  ];
-  if (!(leverOrder[0] > leverOrder[1] && leverOrder[1] > leverOrder[2])) {
-    throw new Error(`EVA レバブル出現順が白>赤>虹になっていない: ${leverOrder}`);
-  }
+  if (!evaMc.high.names["群予告(シンジ)"])
+    throw new Error("群予告 did not appear when currentRot>400");
 
-  // 群予告はcurrentRot>400でのみ出現し、信頼度は約75%
-  const evaGroupSimulation = await run(`
-    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常";
-    currentRot = 500;
-    Math.random = makeRandom(20260705);
-    let hits = 0, total = 0, hitsSeen = 0;
-    const spins = 1000000;
-    for (let i = 0; i < spins; i++) {
-      const job = createJob(false);
-      if (job.isHit) hitsSeen++;
-      if (job.name.includes("群予告")) {
-        total++;
-        if (job.isHit) hits++;
-      }
-    }
-    return { hits, total, hitsSeen };
-  `);
-  if (evaGroupSimulation.total === 0) throw new Error("群予告 did not appear when currentRot>400");
-  assertClose(
-    "EVA 群予告 trust",
-    evaGroupSimulation.hits / evaGroupSimulation.total,
-    0.75,
-    0.03,
-  );
-
-  // holdType/currentViewが保留色軸の結果とそのまま一致することを確認
+  // holdType/currentView が保留の層の結果とそのまま一致すること
   await run(`
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常"; currentRot = 0;
-    Math.random = () => 0.0001; // 保留色軸の先頭(赤保留)を確実に引く
-    for (let i = 0; i < 50; i++) {
-      const job = createJob(false);
-      if (job.name.includes("赤保留")) {
-        if (job.holdType !== "red" || job.currentView !== "red") throw new Error("EVA hold currentView mismatch");
-        break;
-      }
+    Math.random = () => 0.0001;
+    const job = createJob(false);
+    if (!job.name.includes("赤保留") || job.holdType !== "red" || job.currentView !== "red") {
+      throw new Error("EVA hold currentView mismatch: " + job.name.join("+"));
     }
   `);
 
-  // 「レバブル保留」が出た場合はレバブルが確定発生する
+  // ST 中に入賞した保留を通常時に消化するときは通常の確率で抽選し直す（残保留の引き戻し 約1.25%）
   await run(`
-    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常"; currentRot = 0;
-    Math.random = makeRandom(20260706);
-    let checked = 0;
-    for (let i = 0; i < 200000 && checked < 100; i++) {
-      const job = createJob(false);
-      if (job.name.includes("レバブル保留")) {
-        const hasLever = job.name.includes("白レバブル") || job.name.includes("赤レバブル") || job.name.includes("虹レバブル");
-        if (!hasLever) throw new Error("レバブル保留なのにレバブルが発生していない: " + job.name.join("+"));
-        checked++;
-      }
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; currentRot = 0;
+    Math.random = makeRandom(20261005);
+    mode = "ST";
+    const stJob = createJob(true);
+    if (stJob.regime !== "s") throw new Error("ST 中の保留の確率状態が s でない");
+    mode = "通常";
+    const refreshed = refreshStaleJob(stJob);
+    if (refreshed === stJob || refreshed.regime !== "n" || !refreshed.isRight) {
+      throw new Error("ST 後の残保留が通常の確率で抽選し直されていない");
     }
-    if (checked === 0) throw new Error("レバブル保留のサンプルが得られなかった");
+    mode = "時短";
+    const jitanJob = createJob(true);
+    mode = "通常";
+    if (refreshStaleJob(jitanJob) !== jitanJob) throw new Error("時短の保留を不要に作り直した");
   `);
 
-  // 「レバブル保留」表示時の信頼度は常にレバブル自身の信頼度と一致する（独自の信頼度は持たない）
-  await run(`
-    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常"; currentRot = 0;
-    Math.random = makeRandom(20260708);
-    const leverTrust = { 白レバブル: 90 / (90 + 10) * 100, 赤レバブル: 40 / (40 + 1) * 100, 虹レバブル: 100 };
-    let checked = 0;
-    for (let i = 0; i < 400000 && checked < 100; i++) {
-      const job = createJob(false);
-      if (!job.name.includes("レバブル保留")) continue;
-      // 他の軸(背景/先読み/リーチ)が同時発火していない、レバブル保留+レバブル色のみの純粋なケースだけを比較する
-      if (job.name.length !== 2) continue;
-      const leverName = Object.keys(leverTrust).find((n) => job.name.includes(n));
-      if (!leverName) throw new Error("レバブル保留なのに対応するレバブル色が見つからない: " + job.name.join("+"));
-      if (Math.abs(job.trust - leverTrust[leverName]) > 0.01) {
-        throw new Error(\`レバブル保留の表示信頼度(\${job.trust})がレバブル自身の信頼度(\${leverTrust[leverName]})と不一致\`);
-      }
-      checked++;
-    }
-    if (checked === 0) throw new Error("レバブル保留のサンプルが得られなかった");
-  `);
-
-  // 液晶の揺れ(vibe)はレバブル発生時のみ
-  await run(`
-    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常"; currentRot = 0;
-    Math.random = makeRandom(20260707);
-    for (let i = 0; i < 200000; i++) {
-      const job = createJob(false);
-      const hasLever = job.name.includes("白レバブル") || job.name.includes("赤レバブル") || job.name.includes("虹レバブル");
-      if (job.vibe && !hasLever) throw new Error("レバブル以外でvibeが発生: " + job.name.join("+"));
-      if (!job.vibe && hasLever) throw new Error("レバブル発生時にvibeが立っていない: " + job.name.join("+"));
-    }
-    currentMachine = "rezero";
-    M = MACHINES.rezero;
-    SPECS = M.specs;
-  `);
-
-  // EVA通常時：プレミア演出(isRushSure、常にST420)も含めた全hitで
-  // 全回転3%・ST突入56%・時短41%になっていることを検証する
-  const evaOutcome = await run(`
-    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常"; currentRot = 0;
-    Math.random = makeRandom(20260709);
-    const outcome = { zenkaiten: 0, st420: 0, jitan420: 0 };
-    let hits = 0;
-    for (let i = 0; i < 4000000; i++) {
-      const job = createJob(false);
-      if (!job.isHit) continue;
-      hits++;
-      if (job.isRushSure) { outcome.st420++; continue; }
-      let rand = Math.random() * 100;
-      let hitDigit;
-      if (rand < 3.332) hitDigit = 7;
-      else if (rand < 60.248) hitDigit = [2, 4, 6, 8][Math.floor(Math.random() * 4)];
-      else hitDigit = [1, 3, 5, 9][Math.floor(Math.random() * 4)];
-      if (hitDigit === 7) { outcome.zenkaiten++; continue; }
-      if (hitDigit % 2 !== 0) { outcome.st420++; continue; }
-      if (Math.random() < 0.2) outcome.st420++;
-      else outcome.jitan420++;
-    }
-    return { hits, outcome };
-  `);
-  assertClose(
-    "EVA 全回転 比率(プレミア込み全hit)",
-    evaOutcome.outcome.zenkaiten / evaOutcome.hits,
-    0.03,
-    0.005,
-  );
-  assertClose(
-    "EVA ST突入(420) 比率(プレミア込み全hit)",
-    evaOutcome.outcome.st420 / evaOutcome.hits,
-    0.56,
-    0.01,
-  );
-  assertClose(
-    "EVA 時短 比率(プレミア込み全hit)",
-    evaOutcome.outcome.jitan420 / evaOutcome.hits,
-    0.41,
-    0.01,
+  console.log(
+    `[EVA] 終了 ${new Date().toISOString()}（${((Date.now() - evaStartedAt) / 1000).toFixed(1)} 秒）`,
   );
 
   const rushDistribution = await run(`
@@ -442,8 +521,16 @@ function assertClose(label, actual, expected, tolerance) {
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs;
     mode = "通常"; lcdCount = 25; totalBall = 0; currentRot = 25;
     Math.random = () => 0.9;
-    await M.resolveHit({ eff: { isRight: false, isRushSure: false }, hitDigit: 2 });
-    if (currentRot !== 0 || totalBall !== 420) throw new Error("Eva normal hit failed");
+    await M.resolveHit({ eff: { isRight: false, kind: "t3", upgrade: false }, hitDigit: 2 });
+    if (currentRot !== 0 || totalBall !== 420 || mode !== "時短" || rRem !== 100) throw new Error("Eva normal hit failed");
+
+    mode = "通常"; lcdCount = 30; totalBall = 0; currentRot = 30;
+    await M.resolveHit({ eff: { isRight: false, kind: "k3", upgrade: true, reachId: "synchro" }, hitDigit: 4 });
+    if (totalBall !== 420 || mode !== "ST" || rRem !== 163) throw new Error("Eva 3R kakuhen hit failed");
+
+    mode = "通常"; lcdCount = 40; totalBall = 0; currentRot = 40;
+    await M.resolveHit({ eff: { isRight: false, kind: "r10", upgrade: false, reachId: "zenkaiten" }, hitDigit: 7 });
+    if (totalBall !== 1400 || mode !== "ST" || rRem !== 163) throw new Error("Eva 10R hit failed");
 
     mode = "ST"; lcdCount = 12; totalBall = 0; currentRot = 12;
     await M.resolveHit({ eff: { isRight: true, isRushSure: false }, hitDigit: 3 });

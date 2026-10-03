@@ -14,9 +14,7 @@ const POST_BONUS_HOLD_MS = 500;
 function missRateForTrust(hitRate, trust, odds) {
   const hitProbability = 1 / odds;
   const missProbability = 1 - hitProbability;
-  return (
-    (hitProbability * hitRate * (1 - trust)) / (trust * missProbability)
-  );
+  return (hitProbability * hitRate * (1 - trust)) / (trust * missProbability);
 }
 
 async function showFreezeBonus() {
@@ -69,219 +67,6 @@ function drawBand(bands) {
   // 丸め誤差対策のフォールバック（理論上到達しない）
   const last = bands[bands.length - 1];
   return { band: last, isHit: false };
-}
-
-// --- EVA機 通常/時短 演出軸（2^16=65536, 当り205本 → 1/319.688） ---
-// 「保留色・背景予告・カウントダウン・群予告・レバブル・リーチ」は互いに独立した軸として
-// それぞれ個別にBayes整合の整数カウントを持つ。1回転につき各軸を独立抽選するため、
-// 複数の軸が同時に発火すれば自然に複合演出（例：レイ背景＋赤保留＋赤レバブル）になる。
-// リーチ演出のみ軸内が排他（1回転で1種類のみ）。各軸の信頼度は他の軸の結果に一切依存しないため、
-// 何個重なっても軸ごとのΣhit=205・Σ(hit+miss)=65536は不変＝当り確率と信頼度表示の矛盾が起きない。
-const EVA_BIT_N = 65536;
-const EVA_HIT_N = 205; // 通常/時短 1/319.688
-const EVA_HIT_S = 659; // ST 1/99.448（ビット幅はEVA_BIT_Nと共通）
-function finalizeAxis(hitBudget, bitTotal, states) {
-  const hitUsed = states.reduce((s, x) => s + x.hit, 0);
-  const missUsed = states.reduce((s, x) => s + x.miss, 0);
-  const none = {
-    name: "なし",
-    hit: hitBudget - hitUsed,
-    miss: bitTotal - hitBudget - missUsed,
-  };
-  return [...states, none].map((s) => ({
-    ...s,
-    trust: (s.hit / (s.hit + s.miss)) * 100,
-  }));
-}
-function drawAxisComposite(axes, hitTotal, grandTotal) {
-  const missTotal = grandTotal - hitTotal;
-  const isHit = Math.floor(Math.random() * grandTotal) < hitTotal;
-  const picks = {};
-  for (const key of Object.keys(axes)) {
-    const states = axes[key];
-    let r = Math.floor(Math.random() * (isHit ? hitTotal : missTotal));
-    let chosen = states[states.length - 1];
-    for (const s of states) {
-      const span = isHit ? s.hit : s.miss;
-      if (r < span) {
-        chosen = s;
-        break;
-      }
-      r -= span;
-    }
-    picks[key] = chosen;
-  }
-  return { isHit, picks };
-}
-// --- 通常/時短（EVA_HIT_N=205） ---
-// 保留色：赤90%・緑20%・青5%（「レバブル保留」は独立状態を持たず、
-// 保留なし×レバブル独立発生の組み合わせ時にcreateEvaJob側で表示のみ格上げする。
-// これにより赤/緑/青の信頼度は一切歪まず、レバブル保留の表示信頼度は
-// 常にレバブル自身の信頼度と一致する＝逆算不要で確実に一致する）
-const EVA_AXIS_HOLD_N = finalizeAxis(EVA_HIT_N, EVA_BIT_N, [
-  { name: "赤保留", hit: 90, miss: 10, holdType: "red" },
-  { name: "緑保留", hit: 40, miss: 160, holdType: "green" },
-  { name: "青保留", hit: 10, miss: 190, holdType: "blue" },
-]);
-// レバブル：全大当りの約66.7%に絡む。出現数は白＞赤＞虹の順（液晶が揺れるのはレバブル発生時のみ）
-const EVA_AXIS_LEVER_N = finalizeAxis(EVA_HIT_N, EVA_BIT_N, [
-  { name: "白レバブル", hit: 90, miss: 10, vibe: true, vibeColor: "white" },
-  { name: "赤レバブル", hit: 40, miss: 1, vibe: true, vibeColor: "red" },
-  {
-    name: "虹レバブル",
-    hit: 7,
-    miss: 0,
-    vibe: true,
-    vibeColor: "rainbow",
-    isRushSure: true,
-  },
-]);
-// 背景予告：レイ背景85%・プレミア背景/渚カヲルは100%＆ST確定
-const EVA_AXIS_BG_N = finalizeAxis(EVA_HIT_N, EVA_BIT_N, [
-  { name: "レイ背景", hit: 34, miss: 6, text: "レイ背景" },
-  {
-    name: "プレミア背景",
-    hit: 6,
-    miss: 0,
-    text: "警報プレミア",
-    isRushSure: true,
-  },
-  {
-    name: "渚カヲル",
-    hit: 6,
-    miss: 0,
-    text: "来なさい",
-    isRushSure: true,
-  },
-]);
-// 先読み予告（カウントダウンを内包）：通常回転数400以下では群予告は出現しない
-const EVA_AXIS_PRECURSOR_N_LOW = finalizeAxis(EVA_HIT_N, EVA_BIT_N, [
-  { name: "カウントダウン", hit: 26, miss: 14, text: "３２１０" },
-]);
-const EVA_AXIS_PRECURSOR_N_HIGH = finalizeAxis(EVA_HIT_N, EVA_BIT_N, [
-  { name: "カウントダウン", hit: 26, miss: 14, text: "３２１０" },
-  { name: "群予告", hit: 15, miss: 5, text: "群予告" },
-]);
-// リーチ演出（排他）：全回転100%＆ST確定／vsアルミサエル56.8%／vsサハクィエル65.2%／最終号機リーチ70.5%
-const EVA_AXIS_REACH_N = finalizeAxis(EVA_HIT_N, EVA_BIT_N, [
-  { name: "全回転リーチ", hit: 2, miss: 0, isRushSure: true, text: "祝" },
-  { name: "vsアルミサエル", hit: 21, miss: 16 },
-  { name: "vsサハクィエル", hit: 15, miss: 8 },
-  { name: "最終号機リーチ", hit: 31, miss: 13, text: "最終号機\n画ブレ金" },
-]);
-
-// --- ST（EVA_HIT_S=659）：通常時の各信頼度に+25pt（上限100%） ---
-// ST中は「なし」の割合をできる限り減らす（各軸を大幅増量。信頼度100%の状態はmiss不要なので
-// 制約なく増量できる分、他の状態より優先的に厚くしている）
-const EVA_AXIS_HOLD_S = finalizeAxis(EVA_HIT_S, EVA_BIT_N, [
-  { name: "赤保留", hit: 300, miss: 0, holdType: "red" }, // 100%
-  { name: "緑保留", hit: 200, miss: 244, holdType: "green" }, // 45.0%
-  { name: "青保留", hit: 100, miss: 233, holdType: "blue" }, // 30.0%
-]);
-const EVA_AXIS_LEVER_S = finalizeAxis(EVA_HIT_S, EVA_BIT_N, [
-  { name: "白レバブル", hit: 420, miss: 0, vibe: true, vibeColor: "white" },
-  { name: "赤レバブル", hit: 180, miss: 0, vibe: true, vibeColor: "red" },
-  {
-    name: "虹レバブル",
-    hit: 50,
-    miss: 0,
-    vibe: true,
-    vibeColor: "rainbow",
-    isRushSure: true,
-  },
-]);
-const EVA_AXIS_BG_S = finalizeAxis(EVA_HIT_S, EVA_BIT_N, [
-  { name: "レイ背景", hit: 420, miss: 0, text: "レイ背景" },
-  { name: "プレミア背景", hit: 120, miss: 0, text: "警報プレミア", isRushSure: true },
-  { name: "渚カヲル", hit: 100, miss: 0, text: "来なさい", isRushSure: true },
-]);
-// STでは400回転ゲートは適用しない（RUSH中は経過回転の意味合いが通常時と異なるため）
-const EVA_AXIS_PRECURSOR_S = finalizeAxis(EVA_HIT_S, EVA_BIT_N, [
-  { name: "カウントダウン", hit: 420, miss: 47, text: "３２１０" }, // 89.9%
-  { name: "群予告", hit: 180, miss: 0, text: "群予告" }, // 100%
-]);
-const EVA_AXIS_REACH_S = finalizeAxis(EVA_HIT_S, EVA_BIT_N, [
-  { name: "全回転リーチ", hit: 32, miss: 0, isRushSure: true, text: "祝" },
-  { name: "vsアルミサエル", hit: 180, miss: 40 }, // 81.8%
-  { name: "vsサハクィエル", hit: 184, miss: 20 }, // 90.2%
-  { name: "最終号機リーチ", hit: 252, miss: 12, text: "最終号機\n画ブレ金" }, // 95.5%
-]);
-
-const EVA_AXIS_ORDER = ["hold", "background", "precursor", "lever", "reach"];
-
-function createEvaJob(isRight, regime) {
-  const hitBudget = regime === "n" ? EVA_HIT_N : EVA_HIT_S;
-  const axes =
-    regime === "n"
-      ? {
-          hold: EVA_AXIS_HOLD_N,
-          background: EVA_AXIS_BG_N,
-          precursor:
-            currentRot > 400
-              ? EVA_AXIS_PRECURSOR_N_HIGH
-              : EVA_AXIS_PRECURSOR_N_LOW,
-          lever: EVA_AXIS_LEVER_N,
-          reach: EVA_AXIS_REACH_N,
-        }
-      : {
-          hold: EVA_AXIS_HOLD_S,
-          background: EVA_AXIS_BG_S,
-          precursor: EVA_AXIS_PRECURSOR_S,
-          lever: EVA_AXIS_LEVER_S,
-          reach: EVA_AXIS_REACH_S,
-        };
-  const { isHit, picks } = drawAxisComposite(axes, hitBudget, EVA_BIT_N);
-
-  // 保留が無地(なし)で、なおかつレバブルが独立して発生した場合のみ「レバブル保留」に表示格上げする。
-  // 赤/緑/青保留は一切書き換えないため信頼度は歪まず、レバブル保留の信頼度は
-  // 下のmax()計算でlever軸の値がそのまま採用される（＝レバブルの信頼度と常に一致）
-  if (picks.hold.name === "なし" && picks.lever.name !== "なし") {
-    picks.hold = { ...picks.hold, name: "レバブル保留", holdType: "vibe" };
-  }
-
-  let name = [];
-  let trust = 0,
-    holdType = "none",
-    vibe = false,
-    vibeColor = "none",
-    text = "",
-    isRushSure = false,
-    flash = false;
-  let bestVibeTrust = -1;
-  for (const key of EVA_AXIS_ORDER) {
-    const p = picks[key];
-    if (p.name === "なし") continue;
-    name.push(p.name);
-    trust = Math.max(trust, p.trust);
-    if (p.holdType) holdType = p.holdType;
-    if (p.isRushSure) isRushSure = true;
-    if (p.flash) flash = true;
-    if (p.text) text = text ? text + "\n" + p.text : p.text;
-    // 液晶の揺れ（vibe）はレバブル軸由来の場合のみ発生させる
-    if (key === "lever" && p.vibe && p.trust > bestVibeTrust) {
-      vibe = true;
-      vibeColor = p.vibeColor;
-      bestVibeTrust = p.trust;
-    }
-  }
-  return {
-    isHit,
-    isRight,
-    heavy: false,
-    name,
-    trust,
-    vibe,
-    vibeColor,
-    flash,
-    text,
-    holdType,
-    // 保留色軸そのものが既にBayes整合の信頼度を持つため、見た目をそのまま採用する
-    currentView: holdType,
-    isRushSure,
-    bonusType: null,
-    deferHitLog: false,
-    saibare: false,
-  };
 }
 
 // --- リゼロ機 通常 帯テーブル（2^20=1048576, 当り2997本 → 1/349.875） ---
@@ -353,8 +138,8 @@ const MACHINES = {
     title: "EVANGELION Sim -2025 Final-",
     theme: "theme-eva",
     specs: {
-      n: EVA_BIT_N / EVA_HIT_N,
-      s: EVA_BIT_N / EVA_HIT_S,
+      n: EVA_BIT / EVA_N_HIT,
+      s: EVA_BIT / EVA_S_HIT,
       st: 163,
       jt: 100,
     },
@@ -370,27 +155,20 @@ const MACHINES = {
       let isRightUpgrade = false;
       const originalHit = hitDigit;
       if (!eff.isRight) {
+        // ヘソ当りの中身は抽選時の当り種別（eff.kind）で決まっている
         rushCount = 1;
-        if (eff.isRushSure) {
-          isST = true;
-          bonusBall = 420;
-          addLog(">> プレミアム演出！！");
-        } else if (originalHit === 7) {
+        if (eff.kind === "r10") {
           isST = true;
           bonusBall = 1400;
           addLog(">> 全回転！！");
-        } else if (originalHit % 2 !== 0) {
+        } else if (eff.kind === "k3") {
           isST = true;
           bonusBall = 420;
+          needsUpgrade = eff.upgrade;
+          if (eff.reachId === "synchro") addLog(">> 暴走ボーナス！！");
         } else {
-          if (Math.random() < 0.2) {
-            isST = true;
-            needsUpgrade = true;
-            bonusBall = 420;
-          } else {
-            isST = false;
-            bonusBall = 420;
-          }
+          isST = false;
+          bonusBall = 420;
         }
       } else {
         isST = true;
@@ -719,10 +497,23 @@ function createJob(isRight = false) {
     }
   }
 
-  res.heavy = res.trust >= 50 || res.saibare;
+  res.heavy = res.trust >= 50 || res.saibare || !!res.sure;
   res.displayName =
     Array.from(new Set(res.name)).join("+").replace(/ST/g, "") || "通常";
   return res;
+}
+
+// 保留は入賞時に抽選しているため、消化するときに確率状態（通常/ST）が変わっていたら
+// その時点の確率で抽選し直す（実機も当否は変動開始時の確率で決まる）。
+// ST 終了後の残保留の引き戻しが ST 確率のまま（約3.96%）になるのを防ぐ（実機 約1.2%）
+function refreshStaleJob(job) {
+  if (!job || currentMachine !== "eva") return job;
+  const regimeNow = mode === "通常" || mode === "時短" ? "n" : "s";
+  return job.regime === regimeNow ? job : createJob(job.isRight);
+}
+
+function trustLabel(eff) {
+  return eff.sure ? eff.sure : `信頼度:${eff.trust.toFixed(1)}%`;
 }
 
 // ============================================================
@@ -754,6 +545,7 @@ async function startProcess() {
     activeJob = mode === "通常" ? leftStock.shift() : rightStock.shift();
   }
 
+  activeJob = refreshStaleJob(activeJob);
   if (activeJob) activeJob.currentView = activeJob.holdType;
   refillStock();
   updateUI();
@@ -777,7 +569,7 @@ async function startProcess() {
   if ((eff.trust >= 50.0 || eff.isHit) && !eff.deferHitLog) {
     const modeLabel = M.modeLabel(mode);
     addLog(
-      `${modeLabel} ${lcdCount}回転【${eff.displayName}】信頼度:${eff.trust.toFixed(1)}%`,
+      `${modeLabel} ${lcdCount}回転【${eff.displayName}】${trustLabel(eff)}`,
     );
   }
   const machineEl = document.getElementById("machine"),
@@ -805,7 +597,7 @@ async function startProcess() {
         ? leftStock[0]
         : null;
   for (let j of [eff, nextJob]) {
-    if (j && (j.trust >= 50.0 || j.saibare)) {
+    if (j && (j.trust >= 50.0 || j.saibare || j.sure)) {
       hasSakiyomiOrIkiatsu = true;
       break;
     }
@@ -830,7 +622,11 @@ async function startProcess() {
   await new Promise((r) => setTimeout(r, spinTime));
   clearInterval(spin);
   let finalNums, hitDigit;
-  if (eff.isHit) {
+  if (eff.isHit && currentMachine === "eva") {
+    // EVA は当り種別から図柄を抽選時に決めている（10R=7・3R確変=奇数/昇格用の偶数・3R通常=偶数）
+    hitDigit = eff.hitDigit;
+    finalNums = [hitDigit, hitDigit, hitDigit];
+  } else if (eff.isHit) {
     if (eff.isRushSure && (mode === "通常" || mode === "時短")) {
       hitDigit = [1, 3, 5, 9][Math.floor(Math.random() * 4)];
     } else {
@@ -850,6 +646,8 @@ async function startProcess() {
       }
     }
     finalNums = [hitDigit, hitDigit, hitDigit];
+  } else if (currentMachine === "eva") {
+    finalNums = evaMissDigits(eff.tenpai);
   } else {
     finalNums = generateFinalDigits();
   }
