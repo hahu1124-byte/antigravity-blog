@@ -8,7 +8,7 @@
     />
     <title>EVANGELION Sim -2025 Final-</title>
     <!-- 分割したCSSを読み込み -->
-    <link rel="stylesheet" href="css/style.css?v=20261003-lead9" />
+    <link rel="stylesheet" href="css/style.css?v=20261003-cube11" />
   </head>
 
   <body class="theme-eva">
@@ -173,7 +173,7 @@
               class="side-btn active"
               onclick="evaToggleVoice()"
             >
-              ボイス ON
+              サウンド ON
             </button>
           </div>
           <button class="btn-auto" id="btn-slow" onclick="toggleAuto('slow')">
@@ -185,17 +185,32 @@
         </div>
       </div>
       <div class="log" id="log">> システム起動完了</div>
-      <!-- EVA の演出ボイスのクレジット（各キャラの利用規約で表記が必要。中身は eva-voice.js が入れる） -->
-      <p class="voice-credit" id="voice-credit"></p>
     </div>
+
+    <!-- フッター：EVA のサウンドのクレジットと出典（.main-content の段組みの外に置く） -->
+    <footer class="sim-footer">
+      <!-- 演出ボイス（各キャラの利用規約で表記が必要。中身は eva-voice.js が入れる） -->
+      <p class="voice-credit" id="voice-credit"></p>
+      <!-- 一発告知音の出典（公式サイトのダウンロードコンテンツ） -->
+      <p class="voice-credit">
+        一発告知音：パチンコ・パチスロ
+        エヴァンゲリオン公式サイトのダウンロードコンテンツ「一発告知音」を使用しています。音源は公式サイト（<a
+          href="https://eva-project.jp/download/#sound"
+          target="_blank"
+          rel="noopener"
+          >eva-project.jp/download</a
+        >）から入手できます。本シミュレーターは個人で楽しむための非公式のもので、権利者・メーカーとは関係ありません。©カラー
+        ©カラー／Project Eva. ©SANKYO
+      </p>
+    </footer>
 
     <!-- Chart.js ライブラリ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- 分割したJSを読み込み（EVA の演出データ → 抽選エンジン → 本体の順） -->
-    <script src="js/eva-effects.js?v=20261003-lead9"></script>
-    <script src="js/eva-voice.js?v=20261003-lead9"></script>
-    <script src="js/eva-engine.js?v=20261003-lead9"></script>
-    <script src="js/eva-reel.js?v=20261003-lead9"></script>
-    <script src="js/script.js?v=20261003-lead9"></script>
+    <script src="js/eva-effects.js?v=20261003-cube11"></script>
+    <script src="js/eva-voice.js?v=20261003-cube11"></script>
+    <script src="js/eva-engine.js?v=20261003-cube11"></script>
+    <script src="js/eva-reel.js?v=20261003-cube11"></script>
+    <script src="js/script.js?v=20261003-cube11"></script>
   </body>
 </html>

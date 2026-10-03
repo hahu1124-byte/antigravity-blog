@@ -482,6 +482,26 @@ function assertClose(label, actual, expected, tolerance) {
     if (L.currentView !== "blue") throw new Error("横回転の段で色が変わらない");
     stepHold(L, true);
     if (L.currentView !== "red") throw new Error("槍の段で赤にならない");
+    // ST 中の横回転は「変化」の立方体の後に変わり、当該で続けるときは前の演出の長さだけ空ける
+    mode = "ST";
+    const C = { holdSeq: [{ view: "green", fx: "spin" }, { view: "red", fx: "lance" }], holdStep: 0, currentView: "none" };
+    if (holdStepMs(C.holdSeq[0]) !== HOLD_CHANGE_STAGE_MS || holdStepMs(C.holdSeq[1]) !== HOLD_LANCE_STAGE_MS) throw new Error("ST の段の長さが違う");
+    timeoutCalls.length = 0;
+    finishHold(C, false);
+    if (C.currentView !== "red" || !timeoutCalls.includes(HOLD_CHANGE_STAGE_MS)) throw new Error("ST の当該変化（立方体→槍）が違う: " + timeoutCalls);
+    mode = "通常";
+    if (holdStepMs({ fx: "spin" }) !== HOLD_ANIM_MS) throw new Error("通常時の横回転に立方体が出る");
+    // 高速オートは当りの保留が入ったときだけ低速オートに切り替わる（先読みや色保留だけでは切り替えない）
+    currentMachine = "eva"; isAuto = true; autoSpeed = "fast";
+    slowDownForSakiyomi({ isHit: false, holdType: "red", trust: 91, leads: [{}], holdSeq: [{}] });
+    if (autoSpeed !== "fast") throw new Error("ハズレの保留で低速オートに切り替わった");
+    slowDownForSakiyomi({ isHit: true, holdType: "none", trust: 0, leads: [], holdSeq: [] });
+    if (autoSpeed !== "slow") throw new Error("当りの保留で低速オートに切り替わらない");
+    isAuto = false;
+    // ログは下に足していく
+    document.getElementById("log").innerHTML = "> a";
+    addLog("b");
+    if (!document.getElementById("log").innerHTML.endsWith("> b")) throw new Error("ログが下に足されない");
   `);
 
   // 保留はオートを押すまで溜めない（起動・リセット直後は空）
@@ -733,6 +753,11 @@ function assertClose(label, actual, expected, tolerance) {
       for (const t of v.texts) if (!allTexts.has(t)) throw new Error("ボイスの文字に対応する演出が無い: " + JSON.stringify(t));
     }
     if (evaVoiceOf("ちょっち期待して") !== "chotto" || evaVoiceOf("ドデカ図柄") !== null) throw new Error("ボイスの引き当てが違う");
+    // 一発告知音：インパクトフラッシュを優先、福音エアーは諸人こぞりて、他の 100% の一発告知はインパクトフラッシュの音
+    const one = (id, trust = 100, key = "oneshot") => ({ layer: { key }, state: { id, trust } });
+    if (evaNoticeOf([one("fukuin-air"), one("impact-flash")]) !== "impact") throw new Error("インパクトフラッシュの音が優先されない");
+    if (evaNoticeOf([one("fukuin-air")]) !== "gospel" || evaNoticeOf([one("kaworu-digit")]) !== "ninth" || evaNoticeOf([one("roar")]) !== "impact") throw new Error("一発告知音の割り当てが違う");
+    if (evaNoticeOf([one("frame-weak", 48.4, "flash")]) !== null || evaNoticeOf([one("x", 100, "precursor")]) !== null) throw new Error("告知でない演出で告知音が鳴る");
     // 文字の色：演出名の色（強い色を優先）
     if (evaColorOf({ name: "エヴァチャンス文字(CHANCE緑)" }) !== "green") throw new Error("CHANCE緑の色が違う");
     if (evaColorOf({ name: "パネル予告(左選択・左赤右金)" }) !== "gold") throw new Error("金と赤の優先が違う");

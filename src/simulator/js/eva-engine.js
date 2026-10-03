@@ -549,6 +549,7 @@ function createEvaJob(isRight, regime) {
     holdStep: 0,
     leads,
     leadPlan: null,
+    notice: evaNoticeOf(shown), // 一発告知音（eva-voice.js）。保留を消化した瞬間に鳴らす
     // SP リーチ（全回転を含む）：SP に発展したら当該保留を消す
     sp: reach.id === "zenkaiten" || T.spec.spReaches.includes(reach.id),
     isRushSure: false,

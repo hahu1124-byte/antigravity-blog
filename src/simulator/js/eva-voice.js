@@ -267,12 +267,84 @@ function evaRenderVoiceCredit() {
 }
 evaRenderVoiceCredit();
 
+// ============================================================
+// 一発告知音（パチンコ エヴァンゲリオン公式サイトのダウンロードコンテンツ
+// https://eva-project.jp/download/#sound 。ユーザー方針 2026-10-03。出典はページ下の注意書き）。
+// 原音は大きいので音量を下げ（平均 -9〜-11dB → ボイスと同じくらいに）、着メロの 2 曲は 5 秒でフェードアウト。
+// 保留を消化した瞬間（変動開始）に鳴らす
+// ============================================================
+const EVA_NOTICE_SOUNDS = {
+  impact: { file: "se/sound_01.mp3", volume: 0.3, maxMs: 0 }, // インパクトフラッシュ
+  ninth: { file: "se/sound_02.mp3", volume: 0.25, maxMs: 5000 }, // 着メロ 交響曲第九番
+  gospel: { file: "se/sound_03.mp3", volume: 0.25, maxMs: 5000 }, // 着メロ 諸人こぞりて
+};
+// 演出（state.id）→ 告知音。ここに無い一発告知（100% の演出）はインパクトフラッシュの音
+const EVA_NOTICE_BY_STATE = {
+  "impact-flash": "impact",
+  "fukuin-air": "gospel",
+  "kaworu-digit": "ninth",
+  "kaworu-button": "ninth",
+};
+// 告知音を鳴らす層（通常時の一発告知・ST の一発告知/枠フラッシュ）
+const EVA_NOTICE_LAYERS = ["oneshot", "flash"];
+const EVA_NOTICE_FADE_MS = 800;
+
+// その回転の告知音（eva-engine.js が job.notice に入れる）。インパクトフラッシュを優先
+function evaNoticeOf(shown) {
+  let notice = null;
+  for (const { layer, state } of shown) {
+    if (!EVA_NOTICE_LAYERS.includes(layer.key) || state.trust < 100) continue;
+    const id = EVA_NOTICE_BY_STATE[state.id] || "impact";
+    if (id === "impact" && state.id === "impact-flash") return "impact";
+    if (!notice) notice = id;
+  }
+  return notice;
+}
+
+const evaNoticeCache = {};
+let evaNoticeTimer = null;
+function evaPlayNotice(id) {
+  const snd = EVA_NOTICE_SOUNDS[id];
+  if (!evaVoiceOn || !snd || typeof Audio === "undefined") return;
+  let a = evaNoticeCache[id];
+  if (!a) {
+    a = new Audio(snd.file);
+    a.preload = "auto";
+    evaNoticeCache[id] = a;
+  }
+  clearInterval(evaNoticeTimer);
+  try {
+    a.volume = snd.volume;
+    a.currentTime = 0;
+    const p = a.play();
+    if (p && p.catch) p.catch(() => {});
+  } catch (e) {
+    return;
+  }
+  if (!snd.maxMs) return;
+  // 着メロは maxMs で少しずつ小さくして止める
+  setTimeout(() => {
+    const step = snd.volume / (EVA_NOTICE_FADE_MS / 50);
+    evaNoticeTimer = setInterval(() => {
+      a.volume = Math.max(0, a.volume - step);
+      if (a.volume <= 0) {
+        clearInterval(evaNoticeTimer);
+        a.pause();
+      }
+    }, 50);
+  }, snd.maxMs);
+}
+
+// ボイスと告知音をまとめて ON/OFF
 function evaToggleVoice() {
   evaVoiceOn = !evaVoiceOn;
-  if (!evaVoiceOn && evaVoicePlaying) evaVoicePlaying.pause();
+  if (!evaVoiceOn) {
+    if (evaVoicePlaying) evaVoicePlaying.pause();
+    for (const a of Object.values(evaNoticeCache)) a.pause();
+  }
   const btn = document.getElementById("btn-voice");
   if (btn) {
     btn.classList.toggle("active", evaVoiceOn);
-    btn.innerText = evaVoiceOn ? "ボイス ON" : "ボイス OFF";
+    btn.innerText = evaVoiceOn ? "サウンド ON" : "サウンド OFF";
   }
 }

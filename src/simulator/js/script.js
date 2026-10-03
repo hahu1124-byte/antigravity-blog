@@ -568,14 +568,60 @@ function stepHold(job, anim) {
     }
     updateHesoUI();
   };
-  // 槍の変化は液晶全体の槍演出を出し、槍が刺さった瞬間に色を変える（実機の録画と同じ流れ）
+  // 槍の変化は液晶全体の槍演出を出し、槍が刺さった瞬間に色を変える（実機の録画と同じ流れ）。
+  // ST 中の横回転の変化は、液晶いっぱいに「変化」の立方体が回ってから色を変える
   if (anim && st.fx === "lance") {
     playLanceStage();
     setTimeout(apply, HOLD_LANCE_HIT_MS);
+  } else if (anim && st.fx === "spin" && useChangeStage()) {
+    playChangeStage();
+    setTimeout(apply, HOLD_CHANGE_HIT_MS);
   } else {
     apply();
   }
   return true;
+}
+
+// 段 1 つにかかる時間（当該で続けて変えるとき、前の演出が終わってから次を出す）
+function holdStepMs(st) {
+  if (st.fx === "lance") return HOLD_LANCE_STAGE_MS;
+  if (st.fx === "spin" && useChangeStage()) return HOLD_CHANGE_STAGE_MS;
+  return HOLD_ANIM_MS;
+}
+
+// 液晶全体の「変化」立方体：ST 中の保留変化（実機の録画どおり）
+const HOLD_CHANGE_STAGE_MS = 1000; // 演出全体の長さ（style.css の .change-stage と合わせる）
+const HOLD_CHANGE_HIT_MS = 800; // 立方体が回りきって保留の色が変わるまで
+function useChangeStage() {
+  return currentMachine === "eva" && mode === "ST";
+}
+function playChangeStage() {
+  const screen = document.getElementById("screen");
+  if (!screen) return;
+  let stage = document.getElementById("change-stage");
+  if (!stage) {
+    stage = document.createElement("div");
+    stage.id = "change-stage";
+    stage.className = "change-stage";
+    const face = (cls, t) => `<div class="cs-face ${cls}">${t}</div>`;
+    stage.innerHTML =
+      '<div class="cs-cube">' +
+      face("cs-front", "変化") +
+      face("cs-back", "変化") +
+      face("cs-right", "変化") +
+      face("cs-left", "変化") +
+      face("cs-top", "") +
+      face("cs-bottom", "") +
+      "</div>";
+    screen.appendChild(stage);
+  }
+  stage.classList.remove("on");
+  void stage.offsetWidth;
+  stage.classList.add("on");
+  const token = (playChangeStage.token = (playChangeStage.token || 0) + 1);
+  setTimeout(() => {
+    if (playChangeStage.token === token) stage.classList.remove("on");
+  }, HOLD_CHANGE_STAGE_MS);
 }
 
 // 液晶全体のロンギヌスの槍演出：炎の中を大きな槍が落ちてきて保留に刺さり、閃光が走る
@@ -616,8 +662,11 @@ function finishHold(job, instant) {
     updateHesoUI();
     return;
   }
-  for (let i = 0; i < rest; i++) {
-    setTimeout(() => stepHold(job, true), i * HOLD_ANIM_MS);
+  // 前の段の演出（横回転・変化の立方体・槍）が終わってから次の段を出す
+  let at = 0;
+  for (let i = job.holdStep; i < job.holdSeq.length; i++) {
+    setTimeout(() => stepHold(job, true), at);
+    at += holdStepMs(job.holdSeq[i]);
   }
 }
 
@@ -791,6 +840,8 @@ async function startProcess() {
     finishHold(eff, instant);
     // 保留に居る先読み（カウントダウンの 3→2→1 など）はこの変動のリーチ前に出す
     const leadSteps = takeLeadSteps(eff);
+    // 一発告知音：保留を消化した瞬間に鳴らす（インパクトフラッシュ・福音エアーなど）
+    if (eff.notice && !instant) evaPlayNotice(eff.notice);
     await evaRunDisplay(eff, {
       instant,
       heavy: eff.heavy,
@@ -998,20 +1049,14 @@ function takeLeadSteps(current) {
   return out;
 }
 
-// 高速オート中に先読み・色の付く保留・激アツの保留が溜まったら低速オートに切り替える
-// （保留と連動する先読みを見せるため。ユーザー方針 2026-10-03）
+// 高速オート中に当りの保留が入ったら低速オートに切り替える
+// （当りまでの保留の先読み・保留変化を見せるため。ユーザー方針 2026-10-03「当たりの保留が入ったら低速オートに」）
 function slowDownForSakiyomi(job) {
   if (currentMachine !== "eva" || !isAuto || autoSpeed !== "fast") return;
-  const signal =
-    (job.leads && job.leads.length) ||
-    (job.holdSeq && job.holdSeq.length) ||
-    (job.holdType && job.holdType !== "none") ||
-    job.trust >= 50 ||
-    job.sure;
-  if (!signal) return;
+  if (!job.isHit) return;
   autoSpeed = "slow";
   updateAutoBtns();
-  addLog("先読みの保留が入ったので低速オートに切り替えました");
+  addLog("低速オートに切り替えました");
 }
 
 function updateHesoUI() {
@@ -1108,9 +1153,11 @@ function updateUI() {
   updateHesoUI();
 }
 
+// ログは下に足していき、いちばん下（新しい行）が見えるようにする
 function addLog(m) {
   const l = document.getElementById("log");
-  l.innerHTML = `> ${m}<br>${l.innerHTML}`;
+  l.innerHTML = `${l.innerHTML}<br>> ${m}`;
+  l.scrollTop = l.scrollHeight;
 }
 
 // ============================================================

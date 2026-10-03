@@ -966,6 +966,90 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   }
 }
 
+/* ST 中の保留変化：液晶いっぱいに「変化」の立方体が回る（script.js の playChangeStage。
+   1.0 秒、0.8 秒で回りきって保留の色が変わる。実機の録画どおり黒い箱に白い文字） */
+.change-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  perspective: 600px;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.6));
+}
+
+.change-stage.on {
+  display: flex;
+}
+
+.change-stage .cs-cube {
+  --cs-half: 55px;
+  position: relative;
+  width: 110px;
+  height: 110px;
+  transform-style: preserve-3d;
+  animation: cs-spin 1s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+
+.change-stage .cs-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-family: "Shippori Mincho B1", serif;
+  font-size: 34px;
+  font-weight: 900;
+  color: #f4f7ff;
+  background: linear-gradient(160deg, #262b35, #07090d);
+  border: 2px solid #8a93a3;
+  box-shadow: inset 0 0 16px rgba(255, 60, 60, 0.35);
+  text-shadow:
+    0 0 6px #fff,
+    0 0 12px #ff3b3b;
+}
+
+.change-stage .cs-front {
+  transform: translateZ(var(--cs-half));
+}
+.change-stage .cs-back {
+  transform: rotateY(180deg) translateZ(var(--cs-half));
+}
+.change-stage .cs-right {
+  transform: rotateY(90deg) translateZ(var(--cs-half));
+}
+.change-stage .cs-left {
+  transform: rotateY(-90deg) translateZ(var(--cs-half));
+}
+.change-stage .cs-top {
+  transform: rotateX(90deg) translateZ(var(--cs-half));
+}
+.change-stage .cs-bottom {
+  transform: rotateX(-90deg) translateZ(var(--cs-half));
+}
+
+@keyframes cs-spin {
+  0% {
+    transform: scale(0.3) rotateX(-14deg) rotateY(0deg);
+    opacity: 0;
+  }
+  20% {
+    transform: scale(1) rotateX(-14deg) rotateY(120deg);
+    opacity: 1;
+  }
+  80% {
+    transform: scale(1) rotateX(-14deg) rotateY(720deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5) rotateX(-14deg) rotateY(720deg);
+    opacity: 0;
+  }
+}
+
 @keyframes rainbow-border {
   0% {
     border-color: #f00;
@@ -1420,12 +1504,24 @@ body.light-mode .log {
   text-align: center;
 }
 
+/* ページ下のフッター（クレジット・出典）。.main-content（PC では横並び）の外に置く */
+.sim-footer {
+  width: 100%;
+  max-width: 900px;
+  padding: 4px 16px 24px;
+  box-sizing: border-box;
+}
+
 /* EVA の演出ボイス：クレジット表記と ON/OFF ボタン（EVA 以外の機種では出さない） */
 .voice-credit {
   margin: 8px 0 0;
   font-size: 0.72rem;
   line-height: 1.5;
   color: #999;
+}
+
+.voice-credit a {
+  color: #8ab4ff;
 }
 
 body:not(.theme-eva) #btn-voice,
