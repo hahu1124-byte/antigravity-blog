@@ -4,9 +4,9 @@
 // 1回転を「当否と当り種別 → リーチ → 予告の層」の順に整数テーブルで引く。
 // 予告の層は層の中で排他（1層から出る演出は1つまで）。層どうしは当り種別を条件に独立で、
 // リーチに紐づく層（EVA_LINKED_*）だけは当り種別とリーチの両方を条件にする。
-// 表示の信頼度は、その回転で出た全演出（何も出なかった層の「なし」も含む）から
-// 事後確率を閉形式で出す。各軸の max() を出す旧方式は、重なったときの表示が実際と
-// 大きくずれた（単独アルミサエル 表示56.8% → 実測 約9%）ため廃止した。
+// 各演出を単体で数えた信頼度は宣言値（記事の値）どおりになり、重なれば実際の当りやすさも上がる。
+// 表示の信頼度は、出た演出のうち宣言値（記事の値）が一番高いもの（ユーザー方針 2026-10-03）。
+// その回転の本当の当りやすさ（事後確率）は evaPosterior で出し、job.posterior に持たせて試験で使う。
 // ============================================================
 
 // total を weights の比で整数に分ける（最大剰余法）
@@ -261,6 +261,21 @@ function evaTablesFor(regime) {
   return currentRot > 400 ? EVA_T_N_HIGH : EVA_T_N_LOW;
 }
 
+// 演出ひとつの宣言上の信頼度（記事の値。本数指定の演出は本数から）
+function evaStateTrust(s) {
+  if (s.trust !== undefined) return s.trust;
+  return s.hit + s.miss ? (s.hit / (s.hit + s.miss)) * 100 : 0;
+}
+
+// 濃厚の演出の中で一番強い言い方を選ぶ（10R確変 ＞ 確変 ＞ 大当り）
+function evaSureLabel(states) {
+  if (!states.length) return null;
+  const onlyIn = (s, ids) => s.only && s.only.every((id) => ids.includes(id));
+  if (states.some((s) => onlyIn(s, ["r10"]))) return "10R確変濃厚";
+  if (states.some((s) => onlyIn(s, EVA_KAKUHEN))) return "確変濃厚";
+  return "大当り濃厚";
+}
+
 function createEvaJob(isRight, regime) {
   const T = evaTablesFor(regime);
   const { cls, picks } = evaDraw(T);
@@ -275,10 +290,15 @@ function createEvaJob(isRight, regime) {
   let holdType = "none";
   let vibe = false;
   let vibeColor = "none";
+  let trust = 0;
+  const sureStates = [];
   for (const L of [...T.free, ...T.linked]) {
     const s = L.states[picks[L.key]];
     if (s.id === "none") continue;
     name.push(s.name);
+    const t = evaStateTrust(s);
+    trust = Math.max(trust, t);
+    if (t >= 100) sureStates.push(s);
     if (s.holdType) holdType = s.holdType;
     if (s.text) text = text ? text + "\n" + s.text : s.text;
     // 液晶の揺れ（vibe）は当該レバブルのときだけ
@@ -312,8 +332,9 @@ function createEvaJob(isRight, regime) {
     isRight,
     heavy: false,
     name,
-    trust: post.trust,
-    sure: post.sure,
+    trust,
+    sure: evaSureLabel(sureStates),
+    posterior: post.trust,
     vibe,
     vibeColor,
     flash: false,

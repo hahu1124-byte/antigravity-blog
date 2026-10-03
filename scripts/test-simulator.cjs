@@ -301,7 +301,7 @@ function assertClose(label, actual, expected, tolerance) {
       currentRot = rot;
       Math.random = makeRandom(seed);
       const r = { spins, hits: 0, kinds: { r10: 0, k3: 0, t3: 0 }, bands: {}, alone: {}, names: {},
-        leverHits: 0, leverMismatch: 0, vibeMismatch: 0, zenkaitenNotR10: 0 };
+        leverHits: 0, leverMismatch: 0, vibeMismatch: 0, zenkaitenNotR10: 0, shownMismatch: 0 };
       for (let i = 0; i < spins; i++) {
         const job = createJob(false);
         if (job.isHit) { r.hits++; r.kinds[job.kind]++; }
@@ -316,11 +316,15 @@ function assertClose(label, actual, expected, tolerance) {
           const row = r.names[nm] || (r.names[nm] = { n: 0, hit: 0 });
           row.n++; if (job.isHit) row.hit++;
         }
+        // 抽選の中身の整合：その回転の本当の当りやすさ（事後確率）が実測と一致する
         if (job.name.length) {
-          const b = Math.min(Math.floor(job.trust / 10) * 10, 100);
+          const b = Math.min(Math.floor(job.posterior / 10) * 10, 100);
           const row = r.bands[b] || (r.bands[b] = { n: 0, hit: 0, sum: 0 });
-          row.n++; row.sum += job.trust; if (job.isHit) row.hit++;
+          row.n++; row.sum += job.posterior; if (job.isHit) row.hit++;
         }
+        // 表示は出た演出の宣言値の最大（最終号機リーチだけなら 70.5%）
+        if (job.name.length === 1 && job.name[0] === "最終号機リーチ" && job.trust !== 70.5) r.shownMismatch++;
+        if (job.name.length && job.sure && job.trust !== 100) r.shownMismatch++;
         // 当該レバブル以外の予告が何も付かない SP リーチ（レバブルは問わない）
         const others = job.name.filter((nm) => !/レバブル/.test(nm));
         if (others.length === 1 && job.tenpai && job.reachId !== "normal") {
@@ -439,6 +443,30 @@ function assertClose(label, actual, expected, tolerance) {
       }
     }
   }
+  for (const [label, r] of Object.entries(evaMc)) {
+    if (r.shownMismatch)
+      throw new Error(
+        `EVA ${label}: 表示の信頼度が宣言値の最大と違う ${r.shownMismatch} 件`,
+      );
+  }
+
+  // ST（IMPACT MODE シンジモード）：当り確率
+  const evaSt = await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "ST"; currentRot = 0;
+    Math.random = makeRandom(20261006);
+    const spins = 3000000;
+    let hits = 0, sure = 0, sureMiss = 0;
+    for (let i = 0; i < spins; i++) {
+      const job = createJob(true);
+      if (job.isHit) hits++;
+      if (job.sure) { sure++; if (!job.isHit) sureMiss++; }
+    }
+    return { spins, hits, sure, sureMiss };
+  `);
+  assertClose("EVA ST odds", evaSt.spins / evaSt.hits, 1048576 / 10544, 2);
+  if (evaSt.sureMiss)
+    throw new Error(`EVA ST: 濃厚なのにハズレ ${evaSt.sureMiss} 件`);
+
   if (evaMc.low.names["群予告(レイ)"] || evaMc.low.names["群予告(シンジ)"]) {
     throw new Error("群予告 appeared while currentRot<=400 (gating broken)");
   }
