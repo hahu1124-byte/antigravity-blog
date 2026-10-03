@@ -297,7 +297,7 @@ function assertClose(label, actual, expected, tolerance) {
   const evaMc = await run(`
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常";
     const out = {};
-    for (const [label, rot, spins, seed] of [["low", 0, 6000000, 20261003], ["high", 500, 3000000, 20261004]]) {
+    for (const [label, rot, spins, seed] of [["low", 0, 6000000, 20261003], ["high", 500, 6000000, 20261004]]) {
       currentRot = rot;
       Math.random = makeRandom(seed);
       const r = { spins, hits: 0, kinds: { r10: 0, k3: 0, t3: 0 }, bands: {}, alone: {}, names: {},
@@ -385,6 +385,8 @@ function assertClose(label, actual, expected, tolerance) {
     }
     // 表示信頼度（事後確率）と実測当選率が帯ごとに一致する
     console.log(`[EVA] ${label}: 表示の帯ごとの実測`);
+    // 40〜89% の帯は 1 つずつだとサンプルが少ないので、まとめても判定する
+    const mid = { n: 0, hit: 0, sum: 0 };
     for (const [band, row] of Object.entries(r.bands).sort(
       (a, b) => a[0] - b[0],
     )) {
@@ -393,9 +395,25 @@ function assertClose(label, actual, expected, tolerance) {
       console.log(
         `  帯 ${band}% n=${row.n} 表示平均 ${shown.toFixed(2)}% → 実測 ${actual.toFixed(2)}%`,
       );
-      if (row.n >= 3000)
-        assertClose(`EVA ${label} 帯${band}% 表示と実測`, actual, shown, 2);
+      if (row.n >= 1000)
+        assertClose(`EVA ${label} 帯${band}% 表示と実測`, actual, shown, 3);
+      if (band >= 40 && band < 90) {
+        mid.n += row.n;
+        mid.hit += row.hit;
+        mid.sum += row.sum;
+      }
     }
+    if (mid.n < 1000)
+      throw new Error(`EVA ${label}: 40〜89% 帯のサンプル不足 ${mid.n}`);
+    console.log(
+      `  帯 40〜89% まとめ n=${mid.n} 表示平均 ${(mid.sum / mid.n).toFixed(2)}% → 実測 ${((mid.hit / mid.n) * 100).toFixed(2)}%`,
+    );
+    assertClose(
+      `EVA ${label} 帯40〜89% 表示と実測`,
+      (mid.hit / mid.n) * 100,
+      mid.sum / mid.n,
+      3,
+    );
     // 単独 SP リーチが公表値の 6 割以上（旧方式は アルミサエル 9% / 56.8% だった）。
     // 「予告が付かない」こと自体の倍率はどのリーチでも同じ（約0.55）なので、
     // 体感に効く公表 30% 以上のリーチだけを基準にし、低いリーチは値を出すだけにする

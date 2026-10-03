@@ -513,6 +513,8 @@ function refreshStaleJob(job) {
 }
 
 function trustLabel(eff) {
+  // 右打ち（ST・時短・残保留）の当りはすべて 10R 確変なので、種別まで書かずに「当り濃厚」とする
+  if (eff.sure && eff.isRight) return "当り濃厚";
   return eff.sure ? eff.sure : `信頼度:${eff.trust.toFixed(1)}%`;
 }
 
