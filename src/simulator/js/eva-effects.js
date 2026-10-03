@@ -2353,6 +2353,21 @@ const EVA_LINKED_N = [
         only: EVA_KAKUHEN,
         text: "次回予告\nランプ 最後のシ者",
       },
+      // 次回予告のボイス（1geki・パチ7）：「この次も期待してね～」58.6%、「この次もサービス、サービス」大当り濃厚
+      {
+        id: "next-voice-kitai",
+        name: "次回予告(ボイス この次も期待してね～)",
+        trust: 58.6,
+        share: 0.3,
+        text: "次回予告\nこの次も期待してね",
+      },
+      {
+        id: "next-voice-service",
+        name: "次回予告(ボイス この次もサービス、サービス)",
+        trust: 100,
+        share: 0.1,
+        text: "次回予告\nこの次もサービス、サービス",
+      },
       {
         id: "lamp-zero",
         name: "暗転タイトルランプ(零号機・赤)",
@@ -2710,11 +2725,12 @@ const EVA_LINKED_N = [
   },
   {
     // SP 発展演出（SP リーチに付く部品：信頼度の最大には使うが「2 つ以上」には数えない）。
-    // 最終号機リーチは専用の発展演出なので含めない
+    // 3 機発進・単機発進はエヴァが出撃する演出なので、エヴァ系リーチ（零号機・弐号機・初号機）だけに付ける。
+    // 最終号機リーチは専用の発展演出、ストーリーリーチは名シーン・槍通過などで発展する
     key: "launch",
     label: "SP発展演出",
     component: true,
-    reaches: ["zero", "ni", "sho", "armisael", "sahaquiel"],
+    reaches: ["zero", "ni", "sho"],
     states: [
       { id: "three", name: "SP発展(3機発進)", trust: 5.7, rate: 0.7 },
       {

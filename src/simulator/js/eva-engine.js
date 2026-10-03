@@ -634,6 +634,8 @@ const EVA_NEXT_MOVIE_IDS = [
   "next-contra",
   "next-lamp-contra",
   "next-lamp-last",
+  "next-voice-kitai",
+  "next-voice-service",
 ];
 
 // 当否が決まった後に演出を選ぶときの引き直しの上限（当りでも平均 320 回ほどで決まる）
