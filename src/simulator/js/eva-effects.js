@@ -19,6 +19,7 @@ const EVA_LEVER_SP_BOOST = 300; // 当該レバブル
 const EVA_BIT = 1048576; // 2^20
 const EVA_N_HIT = 3280; // 通常/時短 1/319.688
 const EVA_S_HIT = 10544; // ST 1/99.448
+const EVA_JT_HIGHBASE = 500; // 電サポ中（ST・時短）のヘソ通常当りの時短回数（実機どおり）
 
 // 当り種別：ヘソ当りの振り分け（実機 10R確変 3.0%・3R確変 56%・3R通常 41%）。n は比だけに使う
 const EVA_CLASSES_N = [
@@ -1532,21 +1533,21 @@ const EVA_LAYERS_S = [
         name: "違和感保留(文字が逆に流れる)",
         trust: 69.8,
         share: 1,
-        holdType: "vibe",
+        holdType: "odd",
       },
       {
         id: "odd-noise",
         name: "違和感保留(全体にノイズ)",
         trust: 28.0,
         share: 0.3,
-        holdType: "vibe",
+        holdType: "odd",
       },
       {
         id: "odd-blank",
         name: "違和感保留(中の文字なし)",
         trust: 13.9,
         share: 0.2,
-        holdType: "vibe",
+        holdType: "odd",
       },
     ],
   },

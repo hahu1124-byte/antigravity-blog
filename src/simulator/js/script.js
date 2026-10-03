@@ -154,9 +154,15 @@ const MACHINES = {
       let needsUpgrade = false;
       let isRightUpgrade = false;
       const originalHit = hitDigit;
+      // 電サポ中（ST・時短）の当りか。ヘソの通常当りは時短 500 回（実機の「高ベース中の特図1通常当り」）
+      const prevMode = mode;
+      const highBase = prevMode !== "通常";
+      let jitanCount = SPECS.jt;
+      // R数：右打ち（特図2）はすべて 10R、ヘソ（特図1）は 10R確変だけ 10R で他は 3R
+      const rounds = eff.isRight || eff.kind === "r10" ? 10 : 3;
       if (!eff.isRight) {
-        // ヘソ当りの中身は抽選時の当り種別（eff.kind）で決まっている
-        rushCount = 1;
+        // ヘソ当りの中身は抽選時の当り種別（eff.kind）で決まっている。連チャン中なら数え続ける
+        rushCount = highBase ? rushCount + 1 : 1;
         if (eff.kind === "r10") {
           isST = true;
           bonusBall = 1400;
@@ -170,6 +176,14 @@ const MACHINES = {
         } else {
           isST = false;
           bonusBall = 420;
+          if (highBase) jitanCount = EVA_JT_HIGHBASE;
+        }
+        // ヘソ当りは R 数を液晶とログに出す（確変か通常かは昇格演出で見せる）
+        addLog(`>> ヘソ当り ${rounds}R`);
+        const ov = document.getElementById("effect-overlay");
+        if (ov) {
+          ov.innerText = `${rounds} ROUND`;
+          ov.style.display = "block";
         }
       } else {
         isST = true;
@@ -188,16 +202,20 @@ const MACHINES = {
       addLog(`>> 当たり！ 【${originalHit}】${lcdCount}回転`);
       totalBall += bonusBall;
       currentRot = 0;
+      // 次のモードの確率で残保留を判定し直し、当りがあれば V ストック（保留連確定）を示唆する
+      rejudgeStocks(isST ? "s" : "n");
       const vStockEl = document.getElementById("v-stock");
-      if (mode !== "通常") {
-        const hasStockHit = rightStock.some((job) => job.isHit);
-        if (hasStockHit && vStockEl) {
-          vStockEl.style.display = "block";
-          addLog(">> Vストック獲得！！（保留連確定）");
-        }
+      const hasStockHit = [...rightStock, ...leftStock].some(
+        (job) => job.isHit,
+      );
+      if (hasStockHit) {
+        if (vStockEl) vStockEl.style.display = "block";
+        addLog(">> Vストック獲得！！（保留連確定）");
       }
       await new Promise((r) => setTimeout(r, 1000));
-      if (mode === "通常" && needsUpgrade) {
+      const hitOv = document.getElementById("effect-overlay");
+      if (hitOv) hitOv.style.display = "none";
+      if (prevMode === "通常" && needsUpgrade) {
         let nextOdd = [1, 3, 5, 9][Math.floor(Math.random() * 4)];
         addLog(`>> ${nextOdd}図柄へ昇格！！`);
         document.getElementById("lamp").classList.add("lamp-active");
@@ -219,7 +237,10 @@ const MACHINES = {
         rRem = SPECS.st;
       } else {
         mode = "時短";
-        rRem = SPECS.jt;
+        rRem = jitanCount;
+        if (jitanCount !== SPECS.jt) {
+          addLog(`>> 電サポ中のヘソ通常当り：時短${jitanCount}回＋残保留`);
+        }
       }
       currentRushHits++;
       lcdCount = 0;
@@ -452,8 +473,10 @@ function buildResFromBand(band, isHit, isRight) {
   };
 }
 
-function createJob(isRight = false) {
-  const regime = mode === "通常" || mode === "時短" ? "n" : "s";
+// regimeOverride：確率の状態を指定して抽選する（大当り中に、次のモードの確率で残保留を判定し直すとき）
+function createJob(isRight = false, regimeOverride) {
+  const regime =
+    regimeOverride || (mode === "通常" || mode === "時短" ? "n" : "s");
   let res;
   if (currentMachine === "eva") {
     res = createEvaJob(isRight, regime);
@@ -506,6 +529,16 @@ function refreshStaleJob(job) {
   return job.regime === regimeNow ? job : createJob(job.isRight);
 }
 
+// 確率の状態が変わる瞬間（大当りで ST へ・ST/時短の終了で通常へ）に、残保留をその確率で判定し直す。
+// 大当り中に残保留の当否が決まるので、V ストック・保留連の示唆が出せる
+function rejudgeStocks(regime) {
+  if (currentMachine !== "eva") return;
+  const fix = (job) =>
+    job.regime === regime ? job : createJob(job.isRight, regime);
+  leftStock = leftStock.map(fix);
+  rightStock = rightStock.map(fix);
+}
+
 function trustLabel(eff) {
   // 右打ち（ST・時短・残保留）の当りはすべて 10R 確変なので、種別まで書かずに「当り濃厚」とする
   if (eff.sure && eff.isRight) return "当り濃厚";
@@ -526,6 +559,8 @@ async function startProcess() {
     );
     recordInitialHitHistory(`${currentRushHits}連`);
     mode = "通常";
+    // 残保留は通常の確率で判定し直す（ST 確率のまま消化しない）
+    rejudgeStocks("n");
     lcdCount = normalRotationAfterModeEnd(endedMode);
     currentRushHits = 0;
     firstHitRot = 0;

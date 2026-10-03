@@ -439,6 +439,58 @@ function assertClose(label, actual, expected, tolerance) {
     if (refreshStaleJob(jitanJob) !== jitanJob) throw new Error("時短の保留を不要に作り直した");
   `);
 
+  // ST 中のヘソ保留（特図1）の当りはヘソの振り分け、残保留は次のモードの確率で判定し直す、
+  // 電サポ中のヘソ通常当りは時短 500 回で連チャンは続く
+  const hesoSt = await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; currentRot = 0;
+    Math.random = makeRandomStrong(20261008);
+    mode = "ST";
+    const kinds = { r10: 0, k3: 0, t3: 0 };
+    let hits = 0;
+    for (let i = 0; i < 1500000; i++) {
+      const job = createJob(false);
+      if (!job.isHit) continue;
+      hits++;
+      kinds[job.kind]++;
+      if (job.upgrade) throw new Error("ST 中のヘソ当りで昇格演出");
+    }
+    // 判定し直し
+    mode = "通常";
+    leftStock = [createJob(false), createJob(false)];
+    rightStock = [createJob(true)];
+    rejudgeStocks("s");
+    if (![...leftStock, ...rightStock].every((j) => j.regime === "s")) throw new Error("残保留が ST の確率で判定し直されていない");
+    return { hits, kinds };
+  `);
+  assertClose(
+    "EVA ST中ヘソ 10R 比率",
+    hesoSt.kinds.r10 / hesoSt.hits,
+    0.03,
+    0.01,
+  );
+  assertClose(
+    "EVA ST中ヘソ 3R確変 比率",
+    hesoSt.kinds.k3 / hesoSt.hits,
+    0.56,
+    0.03,
+  );
+  assertClose(
+    "EVA ST中ヘソ 3R通常 比率",
+    hesoSt.kinds.t3 / hesoSt.hits,
+    0.41,
+    0.03,
+  );
+  await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs;
+    leftStock = []; rightStock = [];
+    mode = "ST"; rushCount = 3; currentRushHits = 3; lcdCount = 20; totalBall = 0; currentRot = 20;
+    await M.resolveHit({ eff: { isRight: false, kind: "t3", upgrade: false }, hitDigit: 4 });
+    if (mode !== "時短" || rRem !== 500 || rushCount !== 4 || totalBall !== 420) throw new Error("電サポ中のヘソ通常当りが時短500回になっていない: " + mode + " " + rRem + " " + rushCount);
+    mode = "時短"; rushCount = 4; totalBall = 0;
+    await M.resolveHit({ eff: { isRight: false, kind: "k3", upgrade: false }, hitDigit: 3 });
+    if (mode !== "ST" || rRem !== 163 || rushCount !== 5) throw new Error("電サポ中のヘソ確変当りが ST になっていない");
+  `);
+
   // ハズレ図柄：リーチは左右が揃い中は 1 コマ先（ズレ目）、リーチなしは左右が揃わない
   await run(`
     Math.random = makeRandomStrong(20261007);

@@ -306,6 +306,16 @@ function evaTablesFor(regime) {
   return currentRot > 400 ? EVA_T_N_HIGH : EVA_T_N_LOW;
 }
 
+// ヘソ（特図1）の当りの振り分け。確変を強制する演出（確変濃厚・シンクロ）なら 10R か 3R確変
+function evaPickHesoKind(forced) {
+  const n = Object.fromEntries(EVA_CLASSES_N.map((c) => [c.id, c.n]));
+  const total = forced ? n.r10 + n.k3 : n.r10 + n.k3 + n.t3;
+  const r = Math.random() * total;
+  if (r < n.r10) return "r10";
+  if (r < n.r10 + n.k3) return "k3";
+  return "t3";
+}
+
 // 演出を液晶に出す段階：リーチ前（pre）・リーチ成立（reach）・リーチ後（post）
 const EVA_POST_LAYERS = ["after", "launch", "chanceup", "device", "shutter"];
 function evaPhaseOf(layer) {
@@ -335,7 +345,10 @@ function createEvaJob(isRight, regime) {
   let kind = null;
   if (isHit) {
     const hitClasses = T.spec.classes.filter((c) => c.hit);
-    if (hitClasses.length === 1) kind = hitClasses[0].id;
+    if (!isRight && regime !== "n") {
+      // ST 中のヘソ保留（特図1）の当りはヘソの振り分け（10R確変 3%・3R確変 56%・3R通常 41%）
+      kind = evaPickHesoKind(acc.forced);
+    } else if (hitClasses.length === 1) kind = hitClasses[0].id;
     else if (reach.id === "zenkaiten") kind = "r10";
     else if (acc.forced) kind = "k3";
     else kind = Math.random() < T.k3Rate ? "k3" : "t3";
@@ -388,10 +401,11 @@ function createEvaJob(isRight, regime) {
   let hitDigit = null;
   let upgrade = false;
   if (isHit) {
-    if (regime !== "n") hitDigit = Math.random() < 0.5 ? 3 : 1;
+    if (isRight && regime !== "n") hitDigit = Math.random() < 0.5 ? 3 : 1;
     else if (kind === "r10") hitDigit = 7;
     else if (kind === "k3") {
-      upgrade = Math.random() < EVA_UPGRADE_RATE;
+      // 偶数図柄からの昇格演出は通常時のヘソ当りだけ（電サポ中の当りは確変図柄で見せる）
+      upgrade = regime === "n" && Math.random() < EVA_UPGRADE_RATE;
       hitDigit = upgrade
         ? [2, 4, 6, 8][Math.floor(Math.random() * 4)]
         : [1, 3, 5, 9][Math.floor(Math.random() * 4)];
