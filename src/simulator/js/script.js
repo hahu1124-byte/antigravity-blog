@@ -206,9 +206,9 @@ const MACHINES = {
       // 当りがあれば V ストック（保留連確定）を示唆する
       rejudgeStocks(isST ? "ST" : "時短", isST ? SPECS.st : jitanCount);
       const vStockEl = document.getElementById("v-stock");
-      const hasStockHit = [...rightStock, ...leftStock].some(
-        (job) => job.isHit,
-      );
+      // 保留連の示唆は右（電チュー）の保留に当りがあるときだけ。ヘソの保留は右が優先して消化される間は
+      // 消化されないので、次の当りにならない（ユーザー指摘 2026-10-03）
+      const hasStockHit = rightStock.some((job) => job.isHit);
       if (hasStockHit) {
         if (vStockEl) vStockEl.style.display = "block";
         addLog(">> Vストック獲得！！（保留連確定）");
@@ -775,7 +775,9 @@ function finishHold(job, instant) {
 
 // 先読み：保留にいる間、変動が始まるたびに確率で 1 段ずつ変わる
 function advanceStockHolds(anim) {
-  for (const job of [...leftStock, ...rightStock]) {
+  // ST・時短中のヘソの保留は画面に出ていないので進めない（モードが終わってから続ける）
+  const left = mode === "通常" ? leftStock : [];
+  for (const job of [...left, ...rightStock]) {
     if (job.holdWhen !== "stock" || !job.holdSeq) continue;
     if (job.holdStep >= job.holdSeq.length) continue;
     if (Math.random() < HOLD_STOCK_STEP_RATE) stepHold(job, anim);
@@ -840,10 +842,12 @@ function rejudgeStocks(newMode, remain) {
   rightStock = rightStock.map((job, i) =>
     rejudgeHold(job, regimeAt(i + 1), "右 大当りで判定し直し"),
   );
+  // ST・時短中は右（電チュー）を優先して消化し、右は毎回補充されるので、ヘソの保留はモードが
+  // 終わってから消化される＝通常時の表のまま（ST の範囲で当りにしない。ユーザー指摘 2026-10-03）
   leftStock = leftStock.map((job, j) =>
     rejudgeHold(
       job,
-      regimeAt(rightStock.length + j + 1),
+      newMode === "通常" ? regimeAt(rightStock.length + j + 1) : "n",
       "ヘソ 大当りで判定し直し",
     ),
   );
@@ -1211,7 +1215,9 @@ function takeLeadSteps(current) {
     for (const s of current.leadPlan) out.push(...s);
     current.leadPlan = null;
   }
-  for (const job of [...rightStock, ...leftStock]) {
+  // ST・時短中のヘソの保留の先読みは出さない（消化はモードが終わってから。そこで続きを出す）
+  const left = mode === "通常" ? leftStock : [];
+  for (const job of [...rightStock, ...left]) {
     if (job.leadPlan && job.leadPlan.length) out.push(...job.leadPlan.shift());
   }
   return out;
@@ -1392,10 +1398,71 @@ function toggleDebug(kind) {
 }
 
 function updateDebugBtns() {
-  for (const k of Object.keys(DEBUG_PICKS)) {
-    const b = document.getElementById("dbg-" + k);
+  for (const k of [...Object.keys(DEBUG_PICKS), "effect"]) {
+    const b = document.getElementById(
+      k === "effect" ? "dbg-effect-btn" : "dbg-" + k,
+    );
     if (b) b.classList.toggle("armed", debugFlag === k);
   }
+}
+
+// 演出を選んで出す（デバッグ）：選択欄に全部の演出を並べる。値は "n|層の key|state.id"（n＝通常時・時短、s＝ST）
+const DEBUG_EFFECT_GROUPS = [
+  ["n", "通常・時短", () => [...EVA_LAYERS_N, ...EVA_LINKED_N]],
+  ["s", "ST", () => [...EVA_LAYERS_S, ...EVA_LINKED_S]],
+];
+function buildDebugEffectList() {
+  const sel = document.getElementById("dbg-effect");
+  if (!sel || typeof EVA_LAYERS_N === "undefined") return;
+  let html = '<option value="">演出を選ぶ</option>';
+  const esc = (t) =>
+    String(t).replace(
+      /[&<>"]/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+    );
+  for (const [g, label, layersOf] of DEBUG_EFFECT_GROUPS) {
+    for (const layer of layersOf()) {
+      html += `<optgroup label="${esc(label + "：" + layer.label)}">`;
+      for (const s of layer.states) {
+        const t = s.trust >= 100 ? "濃厚" : `${s.trust}%`;
+        html += `<option value="${esc(g + "|" + layer.key + "|" + s.id)}">${esc(s.name)}（${t}）</option>`;
+      }
+      html += "</optgroup>";
+    }
+  }
+  sel.innerHTML = html;
+}
+
+// 選んだ演出で次の変動を作る。当否は選択欄（抽選どおり・当り・ハズレ）。今の状態で出せない演出はログで知らせる
+function debugEffectJob(job) {
+  const sel = document.getElementById("dbg-effect");
+  const hitSel = document.getElementById("dbg-effect-hit");
+  const v = sel && sel.value;
+  if (!v) {
+    addLog("[デバッグ] 演出が選ばれていません");
+    return job;
+  }
+  const [g, key, id] = v.split("|");
+  const inST = mode === "ST";
+  if ((g === "s") !== inST) {
+    addLog(
+      `[デバッグ] ${g === "s" ? "ST の演出は ST 中" : "通常・時短の演出は ST 以外"}で選んでください`,
+    );
+    return job;
+  }
+  const h = hitSel ? hitSel.value : "";
+  const forceHit = h === "hit" ? true : h === "miss" ? false : undefined;
+  const forced = createJob(job.isRight, undefined, {
+    force: { key, id },
+    forceHit,
+  });
+  if (!forced.forced) {
+    addLog("[デバッグ] この演出は今の状態では出せません");
+    return job;
+  }
+  addLog(`[デバッグ] 演出を指定：${forced.forced}`);
+  logLottery(forced, "強制した変動");
+  return forced;
 }
 
 // 消化する保留を、押してあるデバッグの条件に合う回転に差し替える（1 回きり）
@@ -1404,6 +1471,7 @@ function applyDebugFlag(job) {
   const kind = debugFlag;
   debugFlag = null;
   updateDebugBtns();
+  if (kind === "effect") return debugEffectJob(job);
   const forced = debugDraw(job.isRight, DEBUG_PICKS[kind]);
   if (!forced) return job;
   addLog(`[デバッグ] ${DEBUG_LABELS[kind]}`);
@@ -1637,3 +1705,4 @@ window.onload = () => {
 // 起動直後から通常時の図柄を出す（グラフのライブラリの読み込みを待つ window.onload より前。
 // script.js は body の最後で読むので液晶の要素はもうある）
 if (document.getElementById("d1")) renderIdleDigits();
+buildDebugEffectList();

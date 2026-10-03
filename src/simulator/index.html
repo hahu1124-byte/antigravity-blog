@@ -8,7 +8,7 @@
     />
     <title>EVANGELION Sim -2025 Final-</title>
     <!-- 分割したCSSを読み込み -->
-    <link rel="stylesheet" href="css/style.css?v=20261003-bg1" />
+    <link rel="stylesheet" href="css/style.css?v=20261003-dbg2" />
   </head>
 
   <body class="theme-eva">
@@ -207,6 +207,22 @@
               抽選ログ OFF
             </button>
           </div>
+          <!-- 演出を選んで次の変動に出す（script.js の buildDebugEffectList / debugEffectJob） -->
+          <div class="debug-effect">
+            <select id="dbg-effect" class="debug-select"></select>
+            <select id="dbg-effect-hit" class="debug-select debug-select-hit">
+              <option value="">抽選どおり</option>
+              <option value="hit">当り</option>
+              <option value="miss">ハズレ</option>
+            </select>
+            <button
+              class="debug-btn"
+              id="dbg-effect-btn"
+              onclick="toggleDebug('effect')"
+            >
+              この演出を出す
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -232,15 +248,20 @@
         新世紀エヴァンゲリオン〜未来への咆哮〜）の液晶を撮影したものです。©カラー
         ©カラー／Project Eva. ©SANKYO
       </p>
+      <!-- 次回予告の曲の出典 -->
+      <p class="voice-credit">
+        次回予告の曲：鷺巣詩郎「次回予告 (F-2 30秒バージョン)」の冒頭 28
+        秒を使用しています。
+      </p>
     </footer>
 
     <!-- Chart.js ライブラリ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- 分割したJSを読み込み（EVA の演出データ → 抽選エンジン → 本体の順） -->
-    <script src="js/eva-effects.js?v=20261003-bg1"></script>
-    <script src="js/eva-voice.js?v=20261003-bg1"></script>
-    <script src="js/eva-engine.js?v=20261003-bg1"></script>
-    <script src="js/eva-reel.js?v=20261003-bg1"></script>
-    <script src="js/script.js?v=20261003-bg1"></script>
+    <script src="js/eva-effects.js?v=20261003-dbg2"></script>
+    <script src="js/eva-voice.js?v=20261003-dbg2"></script>
+    <script src="js/eva-engine.js?v=20261003-dbg2"></script>
+    <script src="js/eva-reel.js?v=20261003-dbg2"></script>
+    <script src="js/script.js?v=20261003-dbg2"></script>
   </body>
 </html>

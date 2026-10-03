@@ -160,6 +160,8 @@ const EVA_NOTICE_SOUNDS = {
   impact: { file: "se/sound_01.mp3", volume: 0.3, maxMs: 0, times: 2 },
   ninth: { file: "se/sound_02.mp3", volume: 0.25, maxMs: 5000 }, // 着メロ 交響曲第九番
   gospel: { file: "se/sound_03.mp3", volume: 0.25, maxMs: 5000 }, // 着メロ 諸人こぞりて
+  // 次回予告の曲（鷺巣詩郎「次回予告 (F-2 30秒バージョン)」の 0〜28 秒。音量はそろえて切り出し済み）
+  next: { file: "se/next-yokoku.mp3", volume: 0.45, maxMs: 0 },
 };
 // 演出（state.id）→ 告知音。ここに無い一発告知（100% の演出）はインパクトフラッシュの音
 const EVA_NOTICE_BY_STATE = {

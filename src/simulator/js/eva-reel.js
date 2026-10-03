@@ -368,6 +368,41 @@ function evaSetBg(name) {
   if (name) screen.classList.add("bg-" + name);
 }
 
+// 次回予告：図柄をいきなり消して黒地に「予告」の画面（img/yokoku.jpg）と曲（se/next-yokoku.mp3・26.9 秒）。
+// 残り 6 秒でその次回予告のタイトル（「奇跡の価値は」など）に切り替え、ミサトのボイスを鳴らす。
+// 曲が終わったら図柄の画面に戻る（ユーザー方針 2026-10-03）。サウンド OFF でも同じ長さで画面だけ流す
+// 曲は頭の無音（1.1 秒）を削って 26.9 秒（画面の切り替えと音がずれないように。ユーザー指摘 2026-10-03）
+const EVA_NEXT_MOVIE_MS = 26900;
+const EVA_NEXT_TITLE_AT_MS = 20900; // 残り 6 秒でタイトルへ
+async function evaPlayNextMovie(item) {
+  const screen = document.getElementById("screen");
+  if (!screen || !screen.appendChild) return;
+  let el = document.getElementById("next-movie");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "next-movie";
+    el.className = "next-movie";
+    el.innerHTML = '<div class="nm-title"></div>';
+    screen.appendChild(el);
+  }
+  // タイトルは文字の 2 行目（「次回予告\n奇跡の価値は」なら「奇跡の価値は」）。無ければ「予告」のまま
+  const lines = String(item.text || "").split("\n");
+  const title = lines.length > 1 ? lines.slice(1).join("\n") : "";
+  const titleEl = el.firstChild;
+  if (titleEl) titleEl.textContent = title;
+  el.className = "next-movie on";
+  screen.classList.add("movie-next");
+  evaPlayNotice("next", 1);
+  await evaSleep(title ? EVA_NEXT_TITLE_AT_MS : EVA_NEXT_MOVIE_MS);
+  if (title) {
+    el.className = "next-movie on titled";
+    if (item.voice) evaPlayVoice(item.voice);
+    await evaSleep(EVA_NEXT_MOVIE_MS - EVA_NEXT_TITLE_AT_MS);
+  }
+  el.className = "next-movie";
+  screen.classList.remove("movie-next");
+}
+
 // 復活当りの「復活！！」（style.css の .revive-banner）
 function evaReviveBanner(on) {
   const screen = document.getElementById("screen");
@@ -573,7 +608,18 @@ async function evaRunDisplayMain(eff, opts) {
   let preUsed = 0;
   for (const t of pre) {
     const take = Array.isArray(t) && t.some((s) => s.takeover);
-    if (take) {
+    const movie = Array.isArray(t) && t.find((s) => s.movie === "next");
+    if (movie) {
+      // 次回予告：図柄を消して「予告」の画面と曲。同じ段の他の文字はその後に出す
+      show("");
+      await evaPlayNextMovie(movie);
+      const rest = t.filter((s) => s !== movie);
+      if (rest.length) {
+        show(rest);
+        await evaSleep(EVA_STEP_MS);
+      }
+      preUsed += EVA_NEXT_MOVIE_MS;
+    } else if (take) {
       const undo = evaTakeover(t);
       show(t);
       await evaSleep(EVA_TAKEOVER_MS);

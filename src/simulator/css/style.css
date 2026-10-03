@@ -1382,6 +1382,60 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   }
 }
 
+/* 次回予告（eva-reel.js の evaPlayNextMovie）：図柄を消して黒地に「予告」の画面、
+   残り 6 秒で各予告のタイトルを白い明朝の大きな文字で出す */
+.screen.movie-next .digit-container,
+.screen.movie-next .effect-text {
+  visibility: hidden;
+}
+
+.next-movie {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: #000 url("../img/yokoku.jpg") center / contain no-repeat;
+  pointer-events: none;
+}
+
+.next-movie.on {
+  display: flex;
+}
+
+.next-movie.titled {
+  background-image: none;
+}
+
+.next-movie .nm-title {
+  display: none;
+  padding: 0 6%;
+  white-space: pre-line;
+  text-align: center;
+  color: #fff;
+  font-family: "Shippori Mincho B1", serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 10vw, 4.2rem);
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+}
+
+.next-movie.titled .nm-title {
+  display: block;
+  animation: nm-title-in 0.2s steps(2);
+}
+
+@keyframes nm-title-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
 /* 前兆（先読み系）の専用画面：図柄を隠して暗い画面に演出の文字を大きく出す（ドックンなら炎だけ）。
    eva-reel.js の evaTakeover が .lead-takeover と演出の効果のクラスを付ける */
 .screen.lead-takeover {
@@ -2159,6 +2213,29 @@ body.light-mode .side-col {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+/* 演出を選んで出す：選択欄 2 つとボタン */
+.debug-effect {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.debug-select {
+  flex: 1 1 100%;
+  min-width: 0;
+  min-height: 30px;
+  background: #1a1a1a;
+  color: #ddd;
+  border: 1px solid #555;
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+
+.debug-select-hit {
+  flex: 1 1 40%;
 }
 
 .debug-btn {

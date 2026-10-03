@@ -630,6 +630,9 @@ function assertClose(label, actual, expected, tolerance) {
       if (job.zoom !== (red ? "red" : on ? "on" : null)) throw new Error("図柄拡大の印が違う: " + job.name.join("+") + " → " + job.zoom);
       if (on) zooms++;
       if (red) reds++;
+      // 次回予告は当該で「予告」の画面と曲（steps の movie）
+      const next = job.name.find((n) => n.startsWith("次回予告("));
+      if (next && !job.steps.some((s) => s.movie === "next")) throw new Error("次回予告に演出の印が無い: " + next);
       // 格納庫背景は液晶の背景に画像（steps の bg）を出す
       const hangar = job.name.find((n) => n.startsWith("格納庫背景("));
       if (hangar && !job.steps.some((s) => s.bg && s.bg.startsWith("hangar-"))) throw new Error("格納庫背景に背景画像が無い: " + hangar);
@@ -639,6 +642,49 @@ function assertClose(label, actual, expected, tolerance) {
     if (evaUseGrid()) throw new Error("図柄拡大中なのに 3×3");
     evaDisplayIdle();
     if (!evaUseGrid()) throw new Error("待機に戻っても 1×1 のまま");
+  `);
+
+  // 保留連（V ストック）の示唆は右の保留に当りがあるときだけ。ヘソの当りでは出さない
+  await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs;
+    Math.random = makeRandomStrong(20261011);
+    const vs = document.getElementById("v-stock");
+    mode = "通常"; currentRot = 30; lcdCount = 30;
+    vs.style.display = "none";
+    leftStock = [createJob(false, "n", { lotNo: 0 })]; rightStock = [];
+    await M.resolveHit({ eff: { isRight: false, kind: "k3", upgrade: false }, hitDigit: 3 });
+    if (vs.style.display === "block") throw new Error("ヘソの保留の当りで保留連の示唆が出た");
+    if (!leftStock[0].isHit || leftStock[0].regime !== "n") throw new Error("ヘソの当り保留が通常の表のままでない");
+    mode = "通常"; currentRot = 30; lcdCount = 30;
+    vs.style.display = "none";
+    leftStock = []; rightStock = [createJob(true, "n", { lotNo: 0 })];
+    await M.resolveHit({ eff: { isRight: false, kind: "k3", upgrade: false }, hitDigit: 3 });
+    if (vs.style.display !== "block") throw new Error("右の保留の当りで保留連の示唆が出ない");
+    leftStock = []; rightStock = []; vs.style.display = "none";
+  `);
+
+  // デバッグ：演出を選んで出す。全部の演出が指定どおりに出て、当否の指定も効く（濃厚の演出は必ず当り）
+  await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs;
+    Math.random = makeRandomStrong(20261010);
+    const groups = [["n", "通常", [...EVA_LAYERS_N, ...EVA_LINKED_N]], ["s", "ST", [...EVA_LAYERS_S, ...EVA_LINKED_S]]];
+    let n = 0;
+    for (const [g, m, layers] of groups) {
+      mode = m; currentRot = 0;
+      for (const layer of layers) {
+        for (const s of layer.states) {
+          for (const forceHit of [true, false]) {
+            const job = createEvaJob(g === "s", g, { force: { key: layer.key, id: s.id }, forceHit });
+            if (job.forced !== s.name) throw new Error("指定した演出が出ない: " + layer.label + " " + s.name + " → " + job.forced);
+            if (!job.name.includes(s.name)) throw new Error("指定した演出が名前に無い: " + s.name + " / " + job.name.join("+"));
+            const wantHit = s.trust >= 100 ? true : forceHit;
+            if (job.isHit !== wantHit) throw new Error("当否の指定が効かない: " + s.name + " hit=" + job.isHit);
+            n++;
+          }
+        }
+      }
+    }
+    if (n < 200) throw new Error("演出の数が少なすぎる: " + n);
   `);
 
   // 窓の上下に少し見える段は、リールの並びの続き（上下が数字ならブランク、上下がブランクなら隣の数字）
@@ -665,6 +711,7 @@ function assertClose(label, actual, expected, tolerance) {
       for (const s of job.steps) if (s.stage) stages.add(s.stage);
       const shutter = job.name.find((n) => n.startsWith("シャッター("));
       if (shutter && !job.steps.some((s) => s.stage && s.stage.startsWith("shutter-"))) throw new Error("シャッターに stage が無い: " + shutter);
+      if (job.name.includes("新次回予告") && !job.steps.some((s) => s.movie === "next")) throw new Error("ST の新次回予告に演出の印が無い");
       // ドックンの先読みは炎の効果を持ち、当該の段は専用画面（takeover）になる
       const dokkun = job.name.find((n) => n.startsWith("ドックン"));
       if (dokkun) {
@@ -788,7 +835,10 @@ function assertClose(label, actual, expected, tolerance) {
     leftStock = [createJob(false), createJob(false)];
     rightStock = [createJob(true)];
     rejudgeStocks("ST", 163);
-    if (![...leftStock, ...rightStock].every((j) => j.regime === "s")) throw new Error("残保留が ST の確率で判定し直されていない");
+    // 右（電チュー）は ST の表で判定し直す。ヘソは右が優先して消化される間は消化されない（ST が終わってから）
+    // ので通常時の表のまま（ユーザー指摘 2026-10-03：ヘソで保留連の示唆が出ていた）
+    if (!rightStock.every((j) => j.regime === "s")) throw new Error("右の残保留が ST の確率で判定し直されていない");
+    if (!leftStock.every((j) => j.regime === "n")) throw new Error("ヘソの残保留が ST の確率で判定し直された");
     leftStock = []; rightStock = [];
     return { hits, kinds };
   `);

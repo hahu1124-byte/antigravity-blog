@@ -453,19 +453,59 @@ function evaHoldPlan(holdType, holdId, shift) {
   return { seq, when, view: "none" };
 }
 
-// 演出の組合せを 1 つ引く（層ごとに 1 つ。リーチに紐づく層はリーチで出方が変わる）
-function evaDrawEffects(T) {
-  const rp = evaPickNo(T.reach.probs);
+// デバッグ：演出を 1 つ指定して必ず出す（force = { key：層の key, id：state.id }）。
+// 返り値 { L：その層, si：層の中の番号, reaches：出られるリーチの番号（null はどのリーチでも） }。
+// 今の表に無い演出（回転数の条件で外れているなど）は null
+function evaForcePlan(T, force) {
+  if (!force) return null;
+  const L = [...T.free, ...T.linked].find(
+    (l) => l.key === force.key && l.states.some((s) => s.id === force.id),
+  );
+  if (!L) return null;
+  const si = L.states.findIndex((s) => s.id === force.id);
+  let reaches = null;
+  if (L.isReach) reaches = [si];
+  else if (L.probsByReach) {
+    reaches = T.reach.states
+      .map((_, r) => r)
+      .filter((r) => L.probsByReach[r][si] > 0);
+    if (!reaches.length) return null;
+  }
+  return { L, si, reaches };
+}
+
+// 指定したリーチの番号の中から、ふだんの出現率の比で 1 つ引く（デバッグ用）
+function evaPickReachIn(T, reaches) {
+  const w = reaches.map((r) => T.reach.probs[r]);
+  const sum = w.reduce((a, b) => a + b, 0);
+  let x = Math.random() * (sum > 0 ? sum : reaches.length);
+  for (let k = 0; k < reaches.length; k++) {
+    const wk = sum > 0 ? w[k] : 1;
+    if (x < wk) return reaches[k];
+    x -= wk;
+  }
+  return reaches[reaches.length - 1];
+}
+
+// 演出の組合せを 1 つ引く（層ごとに 1 つ。リーチに紐づく層はリーチで出方が変わる）。
+// plan（evaForcePlan）があれば、その層はその演出に決め、リーチはその演出が出られるものから引く
+function evaDrawEffects(T, plan) {
+  const rp =
+    plan && plan.reaches
+      ? { i: evaPickReachIn(T, plan.reaches), no: -1 }
+      : evaPickNo(T.reach.probs);
   const r = rp.i;
   const reach = T.reach.states[r];
-  const shown = []; // [{ layer, state, no：その層で引いた番号 }]
+  const shown = []; // [{ layer, state, no：その層で引いた番号（指定した演出は -1） }]
+  const pickIn = (L, probs) =>
+    plan && plan.L === L ? { i: plan.si, no: -1 } : evaPickNo(probs);
   for (const L of T.free) {
-    const p = L.isReach ? rp : evaPickNo(L.probs);
+    const p = L.isReach ? rp : pickIn(L, L.probs);
     const s = L.states[p.i];
     if (s.id !== "none") shown.push({ layer: L, state: s, no: p.no });
   }
   for (const L of T.linked) {
-    const p = evaPickNo(L.probsByReach[r]);
+    const p = pickIn(L, L.probsByReach[r]);
     const s = L.states[p.i];
     if (s.id !== "none") shown.push({ layer: L, state: s, no: p.no });
   }
@@ -474,6 +514,20 @@ function evaDrawEffects(T) {
   const f = acc.any ? evaF(acc.k, acc.maxT, acc.sure) : T.base0;
   return { reach, shown, acc, f };
 }
+
+// 次回予告の演出（通常時・時短の 8 種と ST の新次回予告）。当該で出たら「予告」の画面と曲を流す
+// （ユーザー方針 2026-10-03。出現率はそれぞれの表のまま）
+const EVA_NEXT_MOVIE_IDS = [
+  "next-rei",
+  "next-asuka",
+  "next-otoko",
+  "next-namida",
+  "next-kiseki",
+  "next-air",
+  "next-service",
+  "next-kuroji",
+  "next-preview",
+];
 
 // 当否が決まった後に演出を選ぶときの引き直しの上限（当りでも平均 320 回ほどで決まる）
 const EVA_DRAW_MAX = 200000;
@@ -485,15 +539,34 @@ function evaIsLeadEffect(layer, state) {
 
 // opts.lotNo：入賞時に引いた当否の番号（判定し直すときは同じ番号を新しい範囲に当てる）
 // opts.after：ST・時短が終わった後に消化される残保留（先読みを出さず、当りは必ずプレミア）
+// opts.force：デバッグで演出を 1 つ指定して必ず出す（{ key, id }。evaForcePlan）。
+// opts.forceHit：デバッグで当否を決める（true＝当り・false＝ハズレ・省く＝ふだんどおり。
+// 信頼度 100% の演出を指定したときは当り）
 function createEvaJob(isRight, regime, opts = {}) {
-  const T = evaTablesFor(regime);
+  let T = evaTablesFor(regime);
+  let plan = evaForcePlan(T, opts.force);
+  // 通常時の表は回転数で 2 組（群予告・レイ背景の条件）。今の表に無ければもう一方で引く
+  if (opts.force && !plan && regime === "n") {
+    const other = T === EVA_T_N_LOW ? EVA_T_N_HIGH : EVA_T_N_LOW;
+    const p2 = evaForcePlan(other, opts.force);
+    if (p2) {
+      T = other;
+      plan = p2;
+    }
+  }
   // 実機と同じく、先に当否を引く：65536 個の番号から 1 つ。当り範囲は毎回同じ
   // （通常・時短 0〜204 の 205 個＝1/319.7、ST 0〜658 の 659 個＝1/99.4）
   const hitRange = Math.round(T.pHit * EVA_LOTTERY);
+  const forceHit =
+    plan && plan.L.states[plan.si].trust >= 100 ? true : opts.forceHit;
   const lotNo =
     opts.lotNo !== undefined
       ? opts.lotNo
-      : Math.floor(Math.random() * EVA_LOTTERY);
+      : forceHit === true
+        ? Math.floor(Math.random() * hitRange)
+        : forceHit === false
+          ? hitRange + Math.floor(Math.random() * (EVA_LOTTERY - hitRange))
+          : Math.floor(Math.random() * EVA_LOTTERY);
   const isHit = lotNo < hitRange;
   const after = !!opts.after;
   // 当否が決まってから演出を選ぶ：演出の組合せを引き、その組合せの信頼度で当るかを試し、
@@ -502,7 +575,7 @@ function createEvaJob(isRight, regime, opts = {}) {
   // 抜けの残保留は、先読みの付かない組合せだけを使い、当りなら信頼度 100% の演出を含むものだけにする
   let draw;
   for (let tries = 0; tries < EVA_DRAW_MAX; tries++) {
-    draw = evaDrawEffects(T);
+    draw = evaDrawEffects(T, plan);
     if (Math.random() < draw.f !== isHit) continue;
     if (after) {
       if (draw.shown.some(({ layer, state }) => evaIsLeadEffect(layer, state)))
@@ -575,6 +648,8 @@ function createEvaJob(isRight, regime, opts = {}) {
         stage: state.stage || null, // eva-reel.js の evaPlayShutter
         spark: state.spark || null,
         bg: state.bg || null, // 液晶の背景の画像（格納庫など。eva-reel.js の evaSetBg）
+        // 次回予告：図柄を消して「予告」の画面と曲（28 秒）→ 各予告のタイトル（eva-reel.js の evaPlayNextMovie）
+        movie: EVA_NEXT_MOVIE_IDS.includes(state.id) ? "next" : null,
         // 前兆（先読み系）の段は、図柄を隠してその演出の専用画面に切り替える（eva-reel.js）
         takeover: layer.lead === "pre",
         fx: layer.lead === "pre" ? state.fx || null : null,
@@ -688,6 +763,7 @@ function createEvaJob(isRight, regime, opts = {}) {
     deferHitLog: false,
     saibare: false,
     regime,
+    forced: plan ? plan.L.states[plan.si].name : null, // デバッグで指定して出した演出
     kind,
     hitDigit,
     upgrade,
