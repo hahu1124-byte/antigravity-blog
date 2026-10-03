@@ -1642,11 +1642,15 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
 
 /* 液晶の左下の回転数（実機の液晶の左下の表示。通常時は現在回転、時短・ST は残り回転。script.js の updateUI）。
    ST の残り回数の違和感（eva-reel.js の evaMarkRemain）で赤文字・ノイズ大／小・ガタガタ・虹文字になる */
+/* 幅は 4 桁が入る大きさで固定（桁数で箱の大きさが変わらないように。ユーザー方針 2026-10-04）。
+   「残り／回転」は上に小さく、数字は下（保留を真ん中に置いても重ならない幅に収める） */
 .st-remain {
   display: flex;
-  align-items: baseline;
-  gap: 4px;
-  padding: 2px 8px 0;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  width: 72px;
+  padding: 1px 4px 0;
   border: 2px solid #8a8fa8;
   border-radius: 4px;
   background: linear-gradient(#2a2440, #0b0a14);
@@ -1657,7 +1661,8 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
 .st-remain .sr-label {
   color: #b9c3e8;
   font-weight: 900;
-  font-size: 0.7rem;
+  font-size: 0.6rem;
+  line-height: 1.1;
   letter-spacing: 0.1em;
 }
 
@@ -1665,8 +1670,9 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   color: #eef2ff;
   font-family: "Shippori Mincho B1", serif;
   font-weight: 900;
-  font-size: 1.9rem;
-  line-height: 1.1;
+  font-size: 1.45rem;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
   text-shadow:
     0 0 6px #7a8cff,
     2px 2px 0 #000;
@@ -1719,26 +1725,34 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   animation-duration: 0.07s;
 }
 
-/* 液晶の左下：EVA は回転数とその右に保留を 1 列に並べる（script.js の updateUI が .eva-lcd を付ける）。
-   リゼロは枠ごと無いものとして、保留は今までどおりの位置 */
+/* 液晶の下（EVA。script.js の updateUI が .eva-lcd を付ける）：回転数は左下、保留は残りの保留 4 つの真ん中が
+   液晶の真ん中に来る位置で固定し、消化中の保留はその左（ユーザー方針 2026-10-04）。
+   保留の左端＝真ん中 −（消化中の幅＋間隔＋残り 4 つの幅の半分）。リゼロは今までどおりの位置 */
 .lcd-bottom {
   display: contents;
 }
 
-.screen.eva-lcd .lcd-bottom {
+.screen.eva-lcd .st-remain {
   position: absolute;
   left: 8px;
-  bottom: 8px;
+  bottom: 6px;
   z-index: 6;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  pointer-events: none;
 }
 
-.screen.eva-lcd .lcd-bottom .st-remain,
-.screen.eva-lcd .lcd-bottom .heso-overlay {
-  position: static;
+/* 通常時・時短：六角形 30px・消化中 39px・間隔 8px → 39 + 8 + (30×4 + 8×3) / 2 = 119px */
+body.theme-eva .screen.eva-lcd .heso-overlay:not(.right-mode) {
+  left: calc(50% - 119px);
+  right: auto;
+  bottom: 10px;
+  gap: 8px;
+  --hx-step: 38px; /* 六角形の幅 30px＋間隔 8px */
+}
+
+/* ST：箱 26px・消化中 34px・間隔 5px → 34 + 5 + (26×4 + 5×3) / 2 = 98.5px */
+body.theme-eva .screen.eva-lcd .heso-overlay.right-mode {
+  left: calc(50% - 98.5px);
+  right: auto;
+  bottom: 10px;
 }
 
 /* 保留の数（左下）は EVA では左上へ逃がす（回転数の表示と重ならないよう） */
