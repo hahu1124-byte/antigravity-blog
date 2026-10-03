@@ -6,12 +6,12 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Re:ゼロ Sim -season2-</title>
+    <title>EVANGELION Sim -2025 Final-</title>
     <!-- 分割したCSSを読み込み -->
-    <link rel="stylesheet" href="css/style.css?v=20260701-history" />
+    <link rel="stylesheet" href="css/style.css?v=20261004-core" />
   </head>
 
-  <body class="theme-rezero">
+  <body class="theme-eva">
     <header>
       <button class="header-btn" onclick="openMachineModal()">機種選択</button>
       <button class="header-btn btn-graph" onclick="openModal()">
@@ -68,10 +68,10 @@
           data-machine="rezero"
           onclick="selectMachine('rezero')"
         >
-            <span class="machine-name">🔵 Re:ゼロ season2 風</span>
-            <span class="machine-spec"
-              >通常 1/349.9 ｜ RUSH145回 ｜ 継続率約77%</span
-            >
+          <span class="machine-name">🔵 Re:ゼロ season2 風</span>
+          <span class="machine-spec"
+            >通常 1/349.9 ｜ RUSH145回 ｜ 継続率約77%</span
+          >
         </button>
         <button class="machine-modal-close" onclick="closeMachineModal()">
           閉じる
@@ -92,9 +92,9 @@
             +1500！！
           </div>
           <div class="digit-container">
-            <div id="d1" class="digit odd">3</div>
-            <div id="d2" class="digit odd">5</div>
-            <div id="d3" class="digit odd">7</div>
+            <div id="d1" class="digit"></div>
+            <div id="d2" class="digit"></div>
+            <div id="d3" class="digit"></div>
           </div>
           <div id="v-stock" class="v-stock-anim" style="display: none">V</div>
           <div id="sub-display" class="mode-display">通常:0</div>
@@ -115,23 +115,32 @@
           >
             0 / 0
           </div>
-          <div id="heso-area" class="heso-overlay">
-            <div id="h0" class="heso-ball heso-current"></div>
-            <div id="h1" class="heso-ball"></div>
-            <div id="h2" class="heso-ball"></div>
-            <div id="h3" class="heso-ball"></div>
-            <div id="h4" class="heso-ball"></div>
-          </div>
-          <div
-            id="denchu-area"
-            class="heso-overlay right-mode"
-            style="display: none"
-          >
-            <div id="d_h0" class="heso-ball heso-current"></div>
-            <div id="d_h1" class="heso-ball"></div>
-            <div id="d_h2" class="heso-ball"></div>
-            <div id="d_h3" class="heso-ball"></div>
-            <div id="d_h4" class="heso-ball"></div>
+          <!-- 液晶の左下：EVA は回転数（通常時は現在回転、時短・ST は残り回転）とその右に保留を並べる。
+               リゼロはこの枠を使わず、保留は今までどおりの位置（style.css の .lcd-bottom） -->
+          <div class="lcd-bottom">
+            <!-- 回転数（ST の残り回数の違和感で赤くなる・震えるなど。script.js の updateUI と eva-reel.js） -->
+            <div id="st-remain" class="st-remain" style="display: none">
+              <span class="sr-label" id="st-remain-label">残り</span>
+              <span class="sr-num" id="st-remain-num">163</span>
+            </div>
+            <div id="heso-area" class="heso-overlay">
+              <div id="h0" class="heso-ball heso-current"></div>
+              <div id="h1" class="heso-ball"></div>
+              <div id="h2" class="heso-ball"></div>
+              <div id="h3" class="heso-ball"></div>
+              <div id="h4" class="heso-ball"></div>
+            </div>
+            <div
+              id="denchu-area"
+              class="heso-overlay right-mode"
+              style="display: none"
+            >
+              <div id="d_h0" class="heso-ball heso-current"></div>
+              <div id="d_h1" class="heso-ball"></div>
+              <div id="d_h2" class="heso-ball"></div>
+              <div id="d_h3" class="heso-ball"></div>
+              <div id="d_h4" class="heso-ball"></div>
+            </div>
           </div>
         </div>
         <div class="stat-grid">
@@ -168,6 +177,13 @@
             >
               先バレ
             </button>
+            <button
+              id="btn-voice"
+              class="side-btn active"
+              onclick="evaToggleVoice()"
+            >
+              サウンド ON
+            </button>
           </div>
           <button class="btn-auto" id="btn-slow" onclick="toggleAuto('slow')">
             低速オート
@@ -177,12 +193,91 @@
           </button>
         </div>
       </div>
-      <div class="log" id="log">> システム起動完了</div>
+      <!-- ログとその下のデバッグメニュー（PC では液晶の横に縦に並べる） -->
+      <div class="side-col">
+        <div class="log" id="log">> システム起動完了</div>
+        <div class="debug-panel" id="debug-panel">
+          <div class="debug-title">デバッグ（押すと次の変動に効く）</div>
+          <div class="debug-btns">
+            <button class="debug-btn" id="dbg-hit" onclick="toggleDebug('hit')">
+              強制大当り
+            </button>
+            <button
+              class="debug-btn"
+              id="dbg-zenkaiten"
+              onclick="toggleDebug('zenkaiten')"
+            >
+              強制全回転
+            </button>
+            <button class="debug-btn" id="dbg-sp" onclick="toggleDebug('sp')">
+              強制SPハズレ
+            </button>
+            <button
+              class="debug-btn"
+              id="dbg-instant"
+              onclick="toggleDebug('instant')"
+            >
+              強制即当り(777)
+            </button>
+            <button class="debug-btn" id="dbg-lot" onclick="toggleDebugLot()">
+              抽選ログ OFF
+            </button>
+          </div>
+          <!-- 演出を選んで次の変動に出す（script.js の buildDebugEffectList / debugEffectJob） -->
+          <div class="debug-effect">
+            <select id="dbg-effect" class="debug-select"></select>
+            <select id="dbg-effect-hit" class="debug-select debug-select-hit">
+              <option value="">抽選どおり</option>
+              <option value="hit">当り</option>
+              <option value="miss">ハズレ</option>
+            </select>
+            <button
+              class="debug-btn"
+              id="dbg-effect-btn"
+              onclick="toggleDebug('effect')"
+            >
+              この演出を出す
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <!-- フッター：EVA のサウンドのクレジットと出典（.main-content の段組みの外に置く） -->
+    <footer class="sim-footer">
+      <!-- 演出ボイス（各キャラの利用規約で表記が必要。中身は eva-voice.js が入れる） -->
+      <p class="voice-credit" id="voice-credit"></p>
+      <!-- 一発告知音の出典（公式サイトのダウンロードコンテンツ） -->
+      <p class="voice-credit">
+        一発告知音：パチンコ・パチスロ
+        エヴァンゲリオン公式サイトのダウンロードコンテンツ「一発告知音」を使用しています。音源は公式サイト（<a
+          href="https://eva-project.jp/download/#sound"
+          target="_blank"
+          rel="noopener"
+          >eva-project.jp/download</a
+        >）から入手できます。本シミュレーターは個人で楽しむための非公式のもので、権利者・メーカーとは関係ありません。©カラー
+        ©カラー／Project Eva. ©SANKYO
+      </p>
+      <!-- 液晶の背景画像（格納庫背景）の出典 -->
+      <p class="voice-credit">
+        格納庫背景の画像：実機（P
+        新世紀エヴァンゲリオン〜未来への咆哮〜）の液晶を撮影したものです。©カラー
+        ©カラー／Project Eva. ©SANKYO
+      </p>
+      <!-- 次回予告の曲の出典 -->
+      <p class="voice-credit">
+        次回予告の曲：鷺巣詩郎「次回予告 (F-2 30秒バージョン)」の冒頭 28
+        秒を使用しています。
+      </p>
+    </footer>
 
     <!-- Chart.js ライブラリ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- 分割したJSを読み込み -->
-    <script src="js/script.js?v=20260701-history"></script>
+    <!-- 分割したJSを読み込み（EVA の演出データ → 抽選エンジン → 本体の順） -->
+    <script src="js/eva-effects.js?v=20261004-core"></script>
+    <script src="js/eva-voice.js?v=20261004-core"></script>
+    <script src="js/eva-engine.js?v=20261004-core"></script>
+    <script src="js/eva-reel.js?v=20261004-core"></script>
+    <script src="js/script.js?v=20261004-core"></script>
   </body>
 </html>
