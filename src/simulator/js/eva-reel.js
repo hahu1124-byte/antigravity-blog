@@ -68,9 +68,20 @@ function evaSleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
-// 通常時・時短中は 3×3、ST 中は数字 3 つ
+// 図柄拡大の回転中（通常時・時短中）："on" / "red" / null。次の回転まで 1×1 のまま
+let evaZoomNow = null;
+function evaSetZoom(z) {
+  evaZoomNow = z && mode !== "ST" ? z : null;
+  const d1 = document.getElementById("d1");
+  const box = d1 && d1.parentElement;
+  if (!box || !box.classList) return;
+  box.classList.toggle("zoom", !!evaZoomNow);
+  box.classList.toggle("zoom-red", evaZoomNow === "red");
+}
+
+// 通常時・時短中は 3×3、ST 中と図柄拡大の回転は数字 3 つ（図柄拡大は縦長の 1×1）
 function evaUseGrid() {
-  return mode !== "ST";
+  return mode !== "ST" && !evaZoomNow;
 }
 
 // --- リール（数字の間にブランク：null） ---
@@ -244,11 +255,14 @@ function evaPlainSet(i, n, cls) {
   const el = document.getElementById("d" + i);
   if (!el) return;
   el.className = cls || getDigitClass(n, mode);
-  el.innerText = n;
+  // 図柄拡大中は数字を縦に伸ばす（style.css の .zoom-glyph）
+  if (evaZoomNow) el.innerHTML = `<span class="zoom-glyph">${n}</span>`;
+  else el.innerText = n;
 }
 
 // 待機中の図柄（起動・機種選択・リセット時）：中段に 3・5・7（上段・下段はブランク）
 function evaDisplayIdle() {
+  evaSetZoom(null);
   if (evaUseGrid()) {
     [3, 5, 7].forEach((n, col) => evaGridSetCol(col, [null, n, null]));
   } else {
@@ -299,6 +313,8 @@ function evaShowText(ov, lines) {
 // リーチ前の予告は回っている間に、リーチ名は左右が揃ったときに、
 // リーチ後の予告とチャンスアップは中が回っている間に順番に出す
 async function evaRunDisplay(eff, opts) {
+  // 図柄拡大は 3×3 をやめ、1 列 1 つの縦長の図柄で回す（瞬時表示では拡大しない）
+  evaSetZoom(opts.instant ? null : eff.zoom);
   const grid = evaUseGrid();
   const tenpai = eff.isHit || eff.tenpai;
   // 止まる図柄と表示の部品（3×3 と数字 3 つで同じ流れにする）。回っている間はリールの位置で持つ

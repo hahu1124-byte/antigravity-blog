@@ -239,6 +239,45 @@ body.light-mode .machine {
     inset 0 0 12px rgba(255, 213, 79, 0.4);
 }
 
+/* 図柄拡大（通常時・時短中）：3×3 をやめ、列ごとに 3 段ぶんの高さの縦長の図柄 1 つ */
+.digit-container.zoom .digit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 31%;
+  height: 252px; /* 3×3 と同じ高さ（80px×3＋間 6px×2）で液晶がずれないように */
+  overflow: hidden;
+  font-size: clamp(5rem, 24vw, 8.4rem);
+  line-height: 1;
+  border: 2px solid #3a3a5a;
+  border-radius: 10px;
+  background: linear-gradient(160deg, #1d1d3d, #0a0a18);
+  box-sizing: border-box;
+}
+
+.digit-container.zoom .digit .zoom-glyph {
+  display: inline-block;
+  transform: scaleY(1.7);
+}
+
+.digit-container.zoom .digit.hot {
+  border-color: #fff;
+}
+
+.digit-container.zoom .digit.win {
+  border-color: #ffd54f;
+  box-shadow:
+    0 0 16px #ffd54f,
+    inset 0 0 12px rgba(255, 213, 79, 0.4);
+}
+
+/* 図柄拡大(赤)：枠と背景を赤く */
+.digit-container.zoom-red .digit {
+  border-color: #ff3b3b;
+  background: linear-gradient(160deg, #4a0d0d, #160404);
+  box-shadow: 0 0 14px rgba(255, 40, 40, 0.6);
+}
+
 @keyframes reach-glow {
   from {
     filter: brightness(1);

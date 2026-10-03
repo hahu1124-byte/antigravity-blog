@@ -202,8 +202,9 @@ const MACHINES = {
       addLog(`>> 当たり！ 【${originalHit}】${lcdCount}回転`);
       totalBall += bonusBall;
       currentRot = 0;
-      // 次のモードの確率で残保留を判定し直し、当りがあれば V ストック（保留連確定）を示唆する
-      rejudgeStocks(isST ? "s" : "n");
+      // 次のモードで残保留の消化時の状態を予測し直し、同じ番号で判定し直す。
+      // 当りがあれば V ストック（保留連確定）を示唆する
+      rejudgeStocks(isST ? "ST" : "時短", isST ? SPECS.st : jitanCount);
       const vStockEl = document.getElementById("v-stock");
       const hasStockHit = [...rightStock, ...leftStock].some(
         (job) => job.isHit,
@@ -473,13 +474,20 @@ function buildResFromBand(band, isHit, isRight) {
   };
 }
 
-// regimeOverride：確率の状態を指定して抽選する（大当り中に、次のモードの確率で残保留を判定し直すとき）
-function createJob(isRight = false, regimeOverride) {
-  const regime =
-    regimeOverride || (mode === "通常" || mode === "時短" ? "n" : "s");
+// モード → 確率の状態（EVA は時短に専用の表がある。リゼロは時短も通常の帯）
+function regimeOfMode(m) {
+  if (m === "通常") return "n";
+  if (m === "時短") return currentMachine === "eva" ? "j" : "n";
+  return "s";
+}
+
+// regimeOverride：確率の状態を指定して抽選する（保留の消化時の状態を予測して判定するとき）
+// opts：EVA の { lotNo（同じ番号で判定し直す）, after（抜けの残保留） }
+function createJob(isRight = false, regimeOverride, opts) {
+  const regime = regimeOverride || regimeOfMode(mode);
   let res;
   if (currentMachine === "eva") {
-    res = createEvaJob(isRight, regime);
+    res = createEvaJob(isRight, regime, opts);
   } else {
     const bands = M.bands[regime];
     const { band, isHit } = drawBand(bands);
@@ -520,27 +528,62 @@ function createJob(isRight = false, regimeOverride) {
   return res;
 }
 
-// 保留は入賞時に抽選しているため、消化するときに確率状態（通常/ST）が変わっていたら
-// その時点の確率で抽選し直す（実機も当否は変動開始時の確率で決まる）。
-// ST 終了後の残保留の引き戻しが ST 確率のまま（約3.96%）になるのを防ぐ（実機 約1.2%）
-function refreshStaleJob(job) {
-  if (!job || currentMachine !== "eva") return job;
-  const regimeNow = mode === "通常" || mode === "時短" ? "n" : "s";
-  if (job.regime === regimeNow) return job;
-  const next = carryHold(job, createJob(job.isRight));
-  logLottery(next, `${next.isRight ? "右" : "ヘソ"} 消化時に判定し直し`);
+// ============================================================
+// 保留は実機と同じく、入賞時に引いた当否の番号（0〜65535）を持つ。入賞時に「消化されるのは
+// ST・時短の中か、終わった後か」を残り回転数と消化順の位置から予測し、その状態の表で当否と
+// 先読みを決める。予定外に状態が変わったとき（ヘソで当って ST へ、など）だけ、同じ番号を新しい
+// 状態の範囲で判定し直す（通常・時短 0〜204 は ST 0〜658 の中なので、当りが増える向きだけ）
+// ============================================================
+
+// k 回転先に消化される保留の状態：今のモードの残りが remain 回転なら、その中か後か
+function predictRegime(k, remain) {
+  if (mode === "通常" || k <= remain) return { regime: regimeOfMode(mode) };
+  return { regime: "n", after: true }; // ST・時短が終わった後に消化（抜けの残保留）
+}
+
+// 同じ番号のまま、状態 regime の表で判定し直す
+function rejudgeHold(job, regime, where) {
+  if (!job || job.regime === regime) return job;
+  const next = carryHold(
+    job,
+    createJob(job.isRight, regime, { lotNo: job.lotNo }),
+  );
+  logLottery(next, where, job);
   return next;
 }
 
-// 作り直した保留の見た目：保留の種類が同じなら、変化の途中経過をそのまま引き継ぐ
-// （赤だった保留が一度無地に戻ってまた赤になるのを防ぐ）
+// 消化するときに状態が予測と違っていたら、同じ番号で判定し直す（保険）
+function refreshStaleJob(job) {
+  if (!job || currentMachine !== "eva") return job;
+  return rejudgeHold(
+    job,
+    regimeOfMode(mode),
+    `${job.isRight ? "右" : "ヘソ"} 消化時に判定し直し`,
+  );
+}
+
+const HOLD_VIEW_RANK = { none: 0, blue: 1, green: 2, red: 3, rainbow: 4 };
+
+// 判定し直した保留の見た目：見えていた先読み（保留の色・変化の途中・前兆の段・震え）はそのまま続ける。
+// 保留の種類が同じなら変化の途中経過も引き継ぐ。違うときは、見えている色から新しい流れへ進む
+// （見えている色より弱い色へは戻さない）
 function carryHold(oldJob, newJob) {
-  // 入賞時に見えていたレバブル先読みの震えは、作り直しても続ける
   if (oldJob.holdShake) newJob.holdShake = true;
+  if (oldJob.leadPlan) newJob.leadPlan = oldJob.leadPlan;
   if (oldJob.holdType === newJob.holdType && oldJob.holdSeq) {
     newJob.holdSeq = oldJob.holdSeq;
     newJob.holdWhen = oldJob.holdWhen;
     newJob.holdStep = oldJob.holdStep;
+    newJob.currentView = oldJob.currentView;
+  } else if (oldJob.currentView && oldJob.currentView !== "none") {
+    const seen = HOLD_VIEW_RANK[oldJob.currentView];
+    const last = newJob.holdSeq && newJob.holdSeq[newJob.holdSeq.length - 1];
+    if (
+      seen !== undefined &&
+      (!last || (HOLD_VIEW_RANK[last.view] || 0) <= seen)
+    ) {
+      newJob.holdSeq = [];
+    }
     newJob.currentView = oldJob.currentView;
   }
   return newJob;
@@ -735,20 +778,25 @@ function vanishCurrentHold(job) {
   updateHesoUI();
 }
 
-// 確率の状態が変わる瞬間（大当りで ST へ・ST/時短の終了で通常へ）に、残保留をその確率で判定し直す。
-// 大当り中に残保留の当否が決まるので、V ストック・保留連の示唆が出せる
-function rejudgeStocks(regime) {
+// 大当りで次のモード（newMode・remain 回転）が決まった瞬間に、残保留の消化時の状態を予測し直し、
+// 予測が変わった保留だけ同じ番号で判定し直す。大当り中に残保留の当否が決まるので、
+// V ストック・保留連の示唆が出せる。消化順は右（特図2）が先、ヘソが後
+function rejudgeStocks(newMode, remain) {
   if (currentMachine !== "eva") return;
-  const fix = (job) => {
-    if (job.regime === regime) return job;
-    const next = carryHold(job, createJob(job.isRight, regime));
-    logLottery(next, `${next.isRight ? "右" : "ヘソ"} 判定し直し`);
-    // 判定し直して当り・強い先読みになった保留も、高速オートなら低速に落とす
-    slowDownForSakiyomi(next);
-    return next;
-  };
-  leftStock = leftStock.map(fix);
-  rightStock = rightStock.map(fix);
+  const newRegime = newMode === "時短" ? "j" : newMode === "ST" ? "s" : "n";
+  const regimeAt = (k) => (k <= remain ? newRegime : "n");
+  rightStock = rightStock.map((job, i) =>
+    rejudgeHold(job, regimeAt(i + 1), "右 大当りで判定し直し"),
+  );
+  leftStock = leftStock.map((job, j) =>
+    rejudgeHold(
+      job,
+      regimeAt(rightStock.length + j + 1),
+      "ヘソ 大当りで判定し直し",
+    ),
+  );
+  // 判定し直して強い先読みになった保留も、高速オートなら低速に落とす
+  [...rightStock, ...leftStock].forEach(slowDownForSakiyomi);
 }
 
 function trustLabel(eff) {
@@ -775,8 +823,7 @@ async function startProcess() {
     );
     recordInitialHitHistory(`${currentRushHits}連`);
     mode = "通常";
-    // 残保留は通常の確率で判定し直す（ST 確率のまま消化しない）
-    rejudgeStocks("n");
+    // 残保留は入賞時に「終わった後に消化」と予測して通常の表で判定済み（ずれていれば消化時に判定し直す）
     lcdCount = normalRotationAfterModeEnd(endedMode);
     currentRushHits = 0;
     firstHitRot = 0;
@@ -997,6 +1044,7 @@ function renderIdleDigits() {
     evaDisplayIdle();
     return;
   }
+  evaSetZoom(null); // EVA の図柄拡大の縦長表示を残さない
   [1, 2, 3].forEach((i) => {
     const el = document.getElementById("d" + i);
     el.innerText = nums[i - 1];
@@ -1047,8 +1095,15 @@ function refillStock(from) {
             : 1
           : 0;
   if (!add && !rightStock.length && !leftStock.length) add = 1;
+  // ST・時短の残り回転（消化中の変動から呼ばれたときは、その変動の分を引く）
+  const remain = from ? rRem - 1 : rRem;
   while (add-- > 0 && stock.length < 4) {
-    const job = createJob(!isLeft);
+    // 消化時の状態を予測し、その表で判定する（ST・時短の後に消化されるなら抜けの残保留）
+    const pred =
+      currentMachine === "eva"
+        ? predictRegime(stock.length + 1, remain)
+        : { regime: undefined };
+    const job = createJob(!isLeft, pred.regime, { after: pred.after });
     // 入賞したこの変動から、消化されるまでの変動に先読みの段を割り振る
     scheduleLeads(job, stock.length + 1);
     stock.push(job);
@@ -1316,19 +1371,24 @@ function describeHoldPlan(job) {
 }
 
 // where：何の保留か（例「ヘソ 3個目」「右 判定し直し」）
-function logLottery(job, where) {
+const REGIME_LABELS = { n: "通常", j: "時短", s: "ST" };
+// prev：判定し直す前の保留（あれば「通常でハズレ → ST で当り」のように並べる）
+function logLottery(job, where, prev) {
   if (!debugLotOn || currentMachine !== "eva" || !job) return;
-  const range =
-    job.hitRange <= 0
-      ? "当り無し"
-      : job.hitRange >= EVA_LOTTERY
-        ? "全部当り"
-        : `0〜${job.hitRange - 1}`;
-  const effects = job.name.filter((n) => n !== "レバブル保留");
+  const range = `0〜${job.hitRange - 1}`;
+  const result = `${REGIME_LABELS[job.regime]}（当り ${range}）→ ${job.isHit ? "当り" : "ハズレ"}`;
+  const before = prev
+    ? `${REGIME_LABELS[prev.regime]}で${prev.isHit ? "当り" : "ハズレ"} → `
+    : "";
+  // 演出は層ごとに引いた番号（0〜1048575）付きで
+  const effects = (job.effects || []).map(
+    (e) => `${e.name}#${e.no}/${EVA_EFFECT_LOTTERY}`,
+  );
   const plan = describeHoldPlan(job);
   if (plan) effects.push(plan);
+  const after = job.after ? "【抜けの残保留・先読みなし】" : "";
   addLog(
-    `[抽選] ${where} #${job.lotNo}/${EVA_LOTTERY}（当り ${range}）→ ${job.isHit ? "当り" : "ハズレ"}` +
+    `[抽選] ${where}${after} #${job.lotNo}/${EVA_LOTTERY} ${before}${result}` +
       ` ｜ ${effects.join("・") || "演出なし"} ｜ 信頼度 ${job.trust.toFixed(1)}%`,
   );
 }

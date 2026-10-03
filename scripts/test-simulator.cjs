@@ -586,7 +586,7 @@ function assertClose(label, actual, expected, tolerance) {
     leftStock = [];
     refillStock("left");
     const lotLog = document.getElementById("log").innerHTML;
-    if (!/\\[抽選\\] ヘソ 1個目 #\\d+\\/65536（当り (0〜\\d+|当り無し|全部当り)）→ (当り|ハズレ)/.test(lotLog)) throw new Error("抽選ログの形が違う: " + lotLog);
+    if (!/\\[抽選\\] ヘソ 1個目 #\\d+\\/65536 通常（当り 0〜204）→ (当り|ハズレ)/.test(lotLog)) throw new Error("抽選ログの形が違う: " + lotLog);
     toggleDebugLot();
     leftStock = [];
     // ログは下に足していく
@@ -618,7 +618,27 @@ function assertClose(label, actual, expected, tolerance) {
     if (shifts === 0) throw new Error("EVA shift hold never appeared in ST");
   `);
 
-  // ST 中に入賞した保留を通常時に消化するときは通常の確率で抽選し直す（残保留の引き戻し 約1.25%）
+  // 図柄拡大の回転は 3×3 をやめて 1×1（eff.zoom）。赤は "red"、他の回転は null
+  await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常"; currentRot = 0;
+    Math.random = makeRandomStrong(20261007);
+    let zooms = 0, reds = 0;
+    for (let i = 0; i < 100000; i++) {
+      const job = createJob(false);
+      const red = job.name.includes("図柄拡大(赤)");
+      const on = red || job.name.includes("図柄拡大");
+      if (job.zoom !== (red ? "red" : on ? "on" : null)) throw new Error("図柄拡大の印が違う: " + job.name.join("+") + " → " + job.zoom);
+      if (on) zooms++;
+      if (red) reds++;
+    }
+    if (!zooms || !reds) throw new Error("図柄拡大が出ない: " + zooms + "/" + reds);
+    evaSetZoom("on");
+    if (evaUseGrid()) throw new Error("図柄拡大中なのに 3×3");
+    evaDisplayIdle();
+    if (!evaUseGrid()) throw new Error("待機に戻っても 1×1 のまま");
+  `);
+
+  // 保留は番号で持つ：消化時に状態が予測と違えば、同じ番号を新しい状態の範囲で判定し直す
   await run(`
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; currentRot = 0;
     Math.random = makeRandomStrong(20261005);
@@ -627,13 +647,65 @@ function assertClose(label, actual, expected, tolerance) {
     if (stJob.regime !== "s") throw new Error("ST 中の保留の確率状態が s でない");
     mode = "通常";
     const refreshed = refreshStaleJob(stJob);
-    if (refreshed === stJob || refreshed.regime !== "n" || !refreshed.isRight) {
-      throw new Error("ST 後の残保留が通常の確率で抽選し直されていない");
+    if (refreshed.regime !== "n" || !refreshed.isRight || refreshed.lotNo !== stJob.lotNo || refreshed.isHit !== refreshed.lotNo < 205) {
+      throw new Error("ST 後の残保留が同じ番号で通常の範囲に判定し直されていない");
     }
+    // 同じ番号：通常の範囲（0〜204）の外で ST の範囲（0〜658）の中なら、ST へ移ると当りになる
+    const miss = createJob(false, "n", { lotNo: 400 });
+    if (miss.isHit) throw new Error("通常の範囲外の番号が当り");
+    const hit = rejudgeHold(miss, "s", "test");
+    if (!hit.isHit || hit.lotNo !== 400 || hit.regime !== "s") throw new Error("ST へ移った保留が同じ番号で当りにならない");
+    // 時短は専用の表（ストーリーリーチは大当り濃厚）
     mode = "時短";
-    const jitanJob = createJob(true);
-    mode = "通常";
-    if (refreshStaleJob(jitanJob) !== jitanJob) throw new Error("時短の保留を不要に作り直した");
+    if (createJob(true).regime !== "j") throw new Error("時短の保留が時短の表で判定されない");
+    for (let i = 0; i < 300000; i++) {
+      const j = createJob(false);
+      if (!j.isHit && (j.reachId === "armisael" || j.reachId === "sahaquiel")) throw new Error("時短中のストーリーリーチがハズレた");
+    }
+    // 入賞時の予測：ST の残りが 2 回転（消化中の変動を除く）なら、3 個目の保留は終わった後に消化＝抜けの残保留
+    mode = "ST"; rRem = 3; leftStock = [];
+    rightStock = [createJob(true), createJob(true)];
+    refillStock("right");
+    const late = rightStock[2];
+    if (!late || late.regime !== "n" || !late.after || late.leads.length || late.holdSeq.length || late.holdType !== "none") throw new Error("抜けの残保留の予測・先読みなしが違う: " + JSON.stringify(late && { r: late.regime, a: late.after }));
+    // 抜けの残保留の当りは必ず信頼度 100% の演出で当る
+    let afterHits = 0;
+    for (let i = 0; i < 400000 && afterHits < 200; i++) {
+      const j = createJob(i % 2 === 0, "n", { after: true });
+      if (j.leads.length || j.holdType !== "none") throw new Error("抜けの残保留に先読みが付いた: " + j.name.join("+"));
+      if (!j.isHit) continue;
+      afterHits++;
+      if (!j.sure) throw new Error("抜けの残保留がプレミア以外で当った: " + j.name.join("+"));
+    }
+    if (afterHits < 200) throw new Error("抜けの残保留の当りが少なすぎる: " + afterHits);
+    rightStock = []; leftStock = []; rRem = 0; mode = "通常";
+  `);
+
+  // 予告→発展先：対応するリーチ以外へはハズレで行かない（矛盾は大当り濃厚の別の演出）
+  await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs;
+    Math.random = makeRandomStrong(20261013);
+    const rules = [
+      ["群予告(レイ)", ["zero"]], ["群予告(アスカ)", ["ni"]], ["群予告(シンジ)", ["sho"]],
+      ["キャラ連続(レイ×3)", ["zero"]], ["キャラ連続(アスカ×3)", ["ni"]], ["キャラ連続(シンジ×3)", ["sho"]],
+      ["違和感保留(文字が逆に流れる)", ["st-sho", "st-ni", "st-zero", "dummy", "mission"]],
+      ["違和感保留(中の文字なし)", ["mission"]], ["背景ノイズ違和感(大)", ["dummy"]],
+      ["使徒襲来(サキエル)", ["sakiel"]], ["使徒襲来(ゼルエル)", ["zeruel"]], ["ミッションモード前兆", ["mission"]],
+    ];
+    const seen = {};
+    for (const [md, right, rot] of [["通常", false, 500], ["ST", true, 0]]) {
+      mode = md; currentRot = rot;
+      for (let i = 0; i < 1500000; i++) {
+        const j = createJob(right);
+        for (const [nm, ok] of rules) {
+          if (!j.name.includes(nm)) continue;
+          seen[nm] = (seen[nm] || 0) + 1;
+          if (!ok.includes(j.reachId)) throw new Error(nm + " が対応外のリーチ " + j.reachId + " へ発展した");
+        }
+      }
+    }
+    for (const [nm] of rules) if (!seen[nm]) throw new Error(nm + " が一度も出ない");
+    mode = "通常"; currentRot = 0;
   `);
 
   // ST 中のヘソ保留（特図1）の当りはヘソの振り分け、残保留は次のモードの確率で判定し直す、
@@ -655,8 +727,9 @@ function assertClose(label, actual, expected, tolerance) {
     mode = "通常";
     leftStock = [createJob(false), createJob(false)];
     rightStock = [createJob(true)];
-    rejudgeStocks("s");
+    rejudgeStocks("ST", 163);
     if (![...leftStock, ...rightStock].every((j) => j.regime === "s")) throw new Error("残保留が ST の確率で判定し直されていない");
+    leftStock = []; rightStock = [];
     return { hits, kinds };
   `);
   assertClose(

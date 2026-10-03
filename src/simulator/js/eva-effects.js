@@ -346,8 +346,22 @@ const EVA_LAYERS_N = [
       },
       { id: "board-in", name: "盤面ランプ(集光)", trust: 5.4, share: 0.3 },
       { id: "board-out", name: "盤面ランプ(散光)", trust: 0.1, share: 0.05 },
-      { id: "zoom", name: "図柄拡大", trust: 0.4, share: 0.2 },
-      { id: "zoom-red", name: "図柄拡大(赤)", trust: 12.0, share: 0.5 },
+      // 図柄拡大：この回転は 3×3 を縦長の 1×1（大きな図柄 1 つずつ）にして回す（eva-reel.js）
+      {
+        id: "zoom",
+        name: "図柄拡大",
+        trust: 0.4,
+        share: 0.2,
+        zoom: true,
+      },
+      {
+        id: "zoom-red",
+        name: "図柄拡大(赤)",
+        trust: 12.0,
+        share: 0.5,
+        zoom: true,
+        zoomRed: true,
+      },
     ],
   },
   {
@@ -507,11 +521,14 @@ const EVA_LAYERS_N = [
         share: 0.1,
         text: "セクシー",
       },
+      // キャラ連続はキャラのリーチへ発展する（レイ→零号機・アスカ→弐号機・シンジ→初号機）。
+      // 違うリーチへ発展したら大当り濃厚（なな徹 7334。下の chara-contra）
       {
         id: "chara-rei1",
         name: "キャラ連続(レイ×1)",
         trust: 25.4,
         share: 0.4,
+        reaches: ["zero"],
         text: "レイ",
       },
       {
@@ -519,6 +536,7 @@ const EVA_LAYERS_N = [
         name: "キャラ連続(レイ×3)",
         trust: 53.3,
         share: 0.5,
+        reaches: ["zero"],
         text: "レイ×3",
       },
       {
@@ -526,6 +544,7 @@ const EVA_LAYERS_N = [
         name: "キャラ連続(アスカ×1)",
         trust: 24.3,
         share: 0.4,
+        reaches: ["ni"],
         text: "アスカ",
       },
       {
@@ -533,6 +552,7 @@ const EVA_LAYERS_N = [
         name: "キャラ連続(アスカ×3)",
         trust: 52.9,
         share: 0.5,
+        reaches: ["ni"],
         text: "アスカ×3",
       },
       {
@@ -540,6 +560,7 @@ const EVA_LAYERS_N = [
         name: "キャラ連続(シンジ×1)",
         trust: 38.4,
         share: 0.5,
+        reaches: ["sho"],
         text: "シンジ",
       },
       {
@@ -547,7 +568,16 @@ const EVA_LAYERS_N = [
         name: "キャラ連続(シンジ×3)",
         trust: 83.1,
         share: 1,
+        reaches: ["sho"],
         text: "シンジ×3",
+      },
+      {
+        id: "chara-contra",
+        name: "キャラ連続(発展先と矛盾)",
+        trust: 100,
+        share: 0.1,
+        reaches: ["synchro", "armisael", "sahaquiel", "final"],
+        text: "キャラ連続",
       },
       {
         id: "chara-4",
@@ -841,14 +871,15 @@ const EVA_LINKED_N = [
         only: EVA_KAKUHEN,
         text: "カヲル背景",
       },
-      // 群予告は実戦上 400 回転以降のみ
+      // 群予告は実戦上 400 回転以降のみ。キャラのリーチへ発展し、違うリーチなら大当り濃厚（なな徹 7334）
       {
         id: "gun-rei",
         name: "群予告(レイ)",
         trust: 81.8,
         share: 1.5,
         minRot: 401,
-        text: "群予告",
+        reaches: ["zero"],
+        text: "群予告\nレイ",
       },
       {
         id: "gun-asuka",
@@ -856,7 +887,8 @@ const EVA_LINKED_N = [
         trust: 80.4,
         share: 1.5,
         minRot: 401,
-        text: "群予告",
+        reaches: ["ni"],
+        text: "群予告\nアスカ",
       },
       {
         id: "gun-shinji",
@@ -864,6 +896,16 @@ const EVA_LINKED_N = [
         trust: 87.3,
         share: 1.5,
         minRot: 401,
+        reaches: ["sho"],
+        text: "群予告\nシンジ",
+      },
+      {
+        id: "gun-contra",
+        name: "群予告(発展先と矛盾)",
+        trust: 100,
+        share: 0.2,
+        minRot: 401,
+        reaches: ["synchro", "armisael", "sahaquiel", "final"],
         text: "群予告",
       },
       {
@@ -1730,12 +1772,23 @@ const EVA_LAYERS_S = [
         share: 0.5,
         holdType: "rainbow",
       },
+      // 文字が逆に流れる保留は、即 SP へ発展すれば大当り濃厚（なな徹 7335）。
+      // 69.8% のほうは即 SP 以外へ、即 SP へ行くのは濃厚の別状態
       {
         id: "odd-reverse",
         name: "違和感保留(文字が逆に流れる)",
         trust: 69.8,
         share: 1,
+        reaches: [...EVA_ST_EVA_SP, "dummy", "mission"],
         // ST の箱は中の文字が流れるので、違和感は 3 種を見た目で分ける（style.css の heso-odd-*）
+        holdType: "odd-reverse",
+      },
+      {
+        id: "odd-reverse-soku",
+        name: "違和感保留(文字が逆に流れる・即SP)",
+        trust: 100,
+        share: 0.2,
+        reaches: EVA_ST_SOKU_SP,
         holdType: "odd-reverse",
       },
       {
@@ -1745,11 +1798,13 @@ const EVA_LAYERS_S = [
         share: 0.3,
         holdType: "odd-noise",
       },
+      // 中の文字が無い保留から発展すればミッションモード（なな徹 7335）
       {
         id: "odd-blank",
         name: "違和感保留(中の文字なし)",
         trust: 13.9,
         share: 0.2,
+        reaches: ["mission"],
         holdType: "odd-blank",
       },
       {
@@ -1876,19 +1931,22 @@ const EVA_LAYERS_S = [
         share: 1,
         text: "ドックン",
       },
+      // 使徒襲来前兆は、出た使徒の即 SP へ発展する
       {
         id: "sakiel-pre",
         name: "使徒襲来(サキエル)",
         trust: 73.1,
         share: 1,
-        text: "使徒襲来",
+        reaches: ["sakiel"],
+        text: "使徒襲来\nサキエル",
       },
       {
         id: "zeruel-pre",
         name: "使徒襲来(ゼルエル)",
         trust: 17.3,
         share: 0.3,
-        text: "使徒襲来",
+        reaches: ["zeruel"],
+        text: "使徒襲来\nゼルエル",
       },
       {
         id: "accel",
@@ -1897,11 +1955,13 @@ const EVA_LAYERS_S = [
         share: 0.5,
         text: "初号機加速",
       },
+      // ミッションモード前兆は成功すればミッションモードへ発展する
       {
         id: "mission-pre",
         name: "ミッションモード前兆",
         trust: 45.2,
         share: 1,
+        reaches: ["mission"],
         text: "CAUTION",
       },
       {
@@ -1984,7 +2044,14 @@ const EVA_LAYERS_S = [
         share: 1.5,
         text: "チャンス背景",
       },
-      { id: "bg-noise", name: "背景ノイズ違和感(大)", trust: 80.0, share: 0.7 },
+      // 背景ノイズ違和感はダミー初号機リーチへの発展を示す（1geki）。値は 1geki の前兆「大→大」
+      {
+        id: "bg-noise",
+        name: "背景ノイズ違和感(大)",
+        trust: 82.5,
+        share: 0.7,
+        reaches: ["dummy"],
+      },
     ],
   },
   {
@@ -2083,6 +2150,7 @@ const EVA_LAYERS_S = [
         name: "新使徒予告(シャムシエル)",
         trust: 82.7,
         share: 0.7,
+        reaches: ["st-sho"], // 予告した使徒のリーチ（初号機vsシャムシエル）へ発展する
         text: "シャムシエル",
       },
       {
@@ -2130,6 +2198,7 @@ const EVA_LAYERS_S = [
         name: "敵探索(イスラフェル白文字)",
         trust: 46.9,
         share: 0.4,
+        reaches: ["st-zero"], // 出た使徒のリーチ（零号機vsイスラフェル）へ発展する
         text: "イスラフェル",
       },
       {
@@ -2137,6 +2206,7 @@ const EVA_LAYERS_S = [
         name: "敵探索(イスラフェル赤文字)",
         trust: 65.0,
         share: 0.4,
+        reaches: ["st-zero"],
         text: "イスラフェル",
       },
       {
@@ -2144,6 +2214,7 @@ const EVA_LAYERS_S = [
         name: "敵探索(シャムシエル白文字)",
         trust: 66.7,
         share: 0.4,
+        reaches: ["st-sho"], // 初号機vsシャムシエル
         text: "シャムシエル",
       },
       {
@@ -2151,6 +2222,7 @@ const EVA_LAYERS_S = [
         name: "敵探索(シャムシエル赤文字)",
         trust: 78.9,
         share: 0.4,
+        reaches: ["st-sho"],
         text: "シャムシエル",
       },
       {

@@ -70,17 +70,39 @@ function evaBoostedLayer(layer, states, reach, spReaches, pHit, alpha) {
   const ks = states.map((s) =>
     s.trust >= EVA_BOOST_MIN_TRUST ? layer.spBoost : 1,
   );
+  // reaches を持つ状態は、そのリーチの回転だけに全部を乗せる（予告→発展先の対応。
+  // 群予告レイなら零号機リーチだけ、など）。全体の出現率は share から決まる値のまま
+  const pOf = (ids) =>
+    reach.probs.reduce(
+      (sum, p, i) => (ids.includes(reach.states[i].id) ? sum + p : sum),
+      0,
+    );
+  const pSet = states.map((s) => (s.reaches ? pOf(s.reaches) : 0));
   // SP 限定の状態は SP の回転だけに全部を乗せる（全体の出現率は share から決まる値のまま）
   const base = states.map((s, i) =>
-    spOnly[i]
-      ? pSp > 0
-        ? evaFreq(s, pHit, alpha) / pSp
+    s.reaches
+      ? pSet[i] > 0
+        ? evaFreq(s, pHit, alpha) / pSet[i]
         : 0
-      : evaFreq(s, pHit, alpha) / (1 - pSp + ks[i] * pSp),
+      : spOnly[i]
+        ? pSp > 0
+          ? evaFreq(s, pHit, alpha) / pSp
+          : 0
+        : evaFreq(s, pHit, alpha) / (1 - pSp + ks[i] * pSp),
   );
   const probsByReach = reach.states.map((rs, r) => {
     const probs = base.map((b, i) =>
-      spOnly[i] ? (isSp[r] ? b : 0) : isSp[r] ? b * ks[i] : b,
+      states[i].reaches
+        ? states[i].reaches.includes(rs.id)
+          ? b
+          : 0
+        : spOnly[i]
+          ? isSp[r]
+            ? b
+            : 0
+          : isSp[r]
+            ? b * ks[i]
+            : b,
     );
     const none = 1 - probs.reduce((a, b) => a + b, 0);
     if (none < -1e-12) {
@@ -295,12 +317,20 @@ function evaCalibrate(spec, rot) {
 }
 
 function evaPick(probs) {
-  let r = Math.random();
+  return evaPickNo(probs).i;
+}
+
+// 演出の番号：層ごとに 2^20（1,048,576）個の番号から 1 つ引き、出現率の表のどこに入ったかで演出を決める
+// （抽選ログに「演出 #番号/1048576」と出す）
+const EVA_EFFECT_LOTTERY = 1048576;
+function evaPickNo(probs) {
+  const no = Math.floor(Math.random() * EVA_EFFECT_LOTTERY);
+  let r = (no + 0.5) / EVA_EFFECT_LOTTERY;
   for (let i = 0; i < probs.length - 1; i++) {
-    if (r < probs[i]) return i;
+    if (r < probs[i]) return { i, no };
     r -= probs[i];
   }
-  return probs.length - 1;
+  return { i: probs.length - 1, no };
 }
 
 const EVA_SPEC_N = {
@@ -317,13 +347,32 @@ const EVA_SPEC_S = {
   linked: EVA_LINKED_S,
   spReaches: EVA_ST_SP,
 };
+// 時短（チャンスタイム）中はストーリーリーチ（vsアルミサエル・vsサハクィエル）が大当り濃厚
+// （なな徹 7335）。通常時の表をもとに、その 2 本の信頼度だけ 100% にした表を使う
+const EVA_JITAN_SURE_REACHES = ["armisael", "sahaquiel"];
+const EVA_SPEC_J = {
+  ...EVA_SPEC_N,
+  layers: EVA_LAYERS_N.map((L) =>
+    L.isReach
+      ? {
+          ...L,
+          states: L.states.map((s) =>
+            EVA_JITAN_SURE_REACHES.includes(s.id) ? { ...s, trust: 100 } : s,
+          ),
+        }
+      : L,
+  ),
+};
 // 群予告の 400 回転ゲートがあるので通常時は 2 組
 const EVA_T_N_LOW = evaCalibrate(EVA_SPEC_N, 0);
 const EVA_T_N_HIGH = evaCalibrate(EVA_SPEC_N, 401);
+const EVA_T_J = evaCalibrate(EVA_SPEC_J, 0);
 const EVA_T_S = evaCalibrate(EVA_SPEC_S, 0);
 
+// regime：確率の状態。"n"＝通常、"j"＝時短、"s"＝ST
 function evaTablesFor(regime) {
-  if (regime !== "n") return EVA_T_S;
+  if (regime === "s") return EVA_T_S;
+  if (regime === "j") return EVA_T_J;
   return currentRot > 400 ? EVA_T_N_HIGH : EVA_T_N_LOW;
 }
 
@@ -406,16 +455,19 @@ function evaHoldPlan(holdType, holdId, shift) {
 
 // 演出の組合せを 1 つ引く（層ごとに 1 つ。リーチに紐づく層はリーチで出方が変わる）
 function evaDrawEffects(T) {
-  const r = evaPick(T.reach.probs);
+  const rp = evaPickNo(T.reach.probs);
+  const r = rp.i;
   const reach = T.reach.states[r];
-  const shown = []; // [{ layer, state }]
+  const shown = []; // [{ layer, state, no：その層で引いた番号 }]
   for (const L of T.free) {
-    const s = L.isReach ? reach : L.states[evaPick(L.probs)];
-    if (s.id !== "none") shown.push({ layer: L, state: s });
+    const p = L.isReach ? rp : evaPickNo(L.probs);
+    const s = L.states[p.i];
+    if (s.id !== "none") shown.push({ layer: L, state: s, no: p.no });
   }
   for (const L of T.linked) {
-    const s = L.states[evaPick(L.probsByReach[r])];
-    if (s.id !== "none") shown.push({ layer: L, state: s });
+    const p = evaPickNo(L.probsByReach[r]);
+    const s = L.states[p.i];
+    if (s.id !== "none") shown.push({ layer: L, state: s, no: p.no });
   }
   let acc = EVA_EMPTY;
   for (const { layer, state } of shown) acc = evaStep(acc, layer, state);
@@ -426,20 +478,38 @@ function evaDrawEffects(T) {
 // 当否が決まった後に演出を選ぶときの引き直しの上限（当りでも平均 320 回ほどで決まる）
 const EVA_DRAW_MAX = 200000;
 
-function createEvaJob(isRight, regime) {
+// 保留に居る間に見える演出（前兆・入賞時・保留の見た目・レバブル先読みの震え）
+function evaIsLeadEffect(layer, state) {
+  return !!layer.lead || layer.key === "hold" || !!state.holdShake;
+}
+
+// opts.lotNo：入賞時に引いた当否の番号（判定し直すときは同じ番号を新しい範囲に当てる）
+// opts.after：ST・時短が終わった後に消化される残保留（先読みを出さず、当りは必ずプレミア）
+function createEvaJob(isRight, regime, opts = {}) {
   const T = evaTablesFor(regime);
   // 実機と同じく、先に当否を引く：65536 個の番号から 1 つ。当り範囲は毎回同じ
-  // （通常 0〜204 の 205 個＝1/319.7、ST 0〜658 の 659 個＝1/99.4）
+  // （通常・時短 0〜204 の 205 個＝1/319.7、ST 0〜658 の 659 個＝1/99.4）
   const hitRange = Math.round(T.pHit * EVA_LOTTERY);
-  const lotNo = Math.floor(Math.random() * EVA_LOTTERY);
+  const lotNo =
+    opts.lotNo !== undefined
+      ? opts.lotNo
+      : Math.floor(Math.random() * EVA_LOTTERY);
   const isHit = lotNo < hitRange;
+  const after = !!opts.after;
   // 当否が決まってから演出を選ぶ：演出の組合せを引き、その組合せの信頼度で当るかを試し、
   // 決まった当否と同じ結果になった組合せを使う。演出ごとの「出たら何%当るか」（信頼度）は
-  // そのまま保たれる（当りなら当りのときの出方、ハズレならハズレのときの出方から選ぶのと同じ）
+  // そのまま保たれる（当りなら当りのときの出方、ハズレならハズレのときの出方から選ぶのと同じ）。
+  // 抜けの残保留は、先読みの付かない組合せだけを使い、当りなら信頼度 100% の演出を含むものだけにする
   let draw;
   for (let tries = 0; tries < EVA_DRAW_MAX; tries++) {
     draw = evaDrawEffects(T);
-    if (Math.random() < draw.f === isHit) break;
+    if (Math.random() < draw.f !== isHit) continue;
+    if (after) {
+      if (draw.shown.some(({ layer, state }) => evaIsLeadEffect(layer, state)))
+        continue;
+      if (isHit && !draw.acc.sure) continue;
+    }
+    break;
   }
   const { reach, shown, acc, f } = draw;
 
@@ -508,8 +578,9 @@ function createEvaJob(isRight, regime) {
       vibeColor = state.vibeColor;
     }
   }
-  // 保留が無地で当該レバブルが出たときだけ「レバブル保留」に表示を格上げする（抽選には影響しない）
-  if (holdType === "none" && vibe) {
+  // 保留が無地で当該レバブルが出たときだけ「レバブル保留」に表示を格上げする（抽選には影響しない）。
+  // 抜けの残保留は保留の見た目を変えない（先読みなし）
+  if (holdType === "none" && vibe && !after) {
     holdType = "vibe";
     name.unshift("レバブル保留");
   }
@@ -570,10 +641,11 @@ function createEvaJob(isRight, regime) {
     name,
     trust: acc.any ? f * 100 : 0,
     sure,
-    effects: shown.map(({ layer, state }) => ({
+    effects: shown.map(({ layer, state, no }) => ({
       name: state.name,
       trust: state.trust,
       counted: evaCounted(layer, state),
+      no, // その層で引いた演出の番号（0〜1048575）
     })),
     vibe,
     vibeColor,
@@ -590,8 +662,15 @@ function createEvaJob(isRight, regime) {
     leadPlan: null,
     preTrust,
     holdShake,
+    // 図柄拡大：3×3 をやめて縦長の 1×1 で回す（"red" は赤の図柄拡大）
+    zoom: shown.some(({ state }) => state.zoomRed)
+      ? "red"
+      : shown.some(({ state }) => state.zoom)
+        ? "on"
+        : null,
     lotNo, // 当否で引いた番号（0〜65535）
     hitRange, // 当り範囲の数（0〜hitRange-1 が当り）
+    after, // ST・時短が終わった後に消化される残保留（先読みなし）
     notice: evaNoticeOf(shown), // 一発告知音（eva-voice.js）。保留を消化した瞬間に鳴らす
     // SP リーチ（全回転を含む）：SP に発展したら当該保留を消す
     sp: reach.id === "zenkaiten" || T.spec.spReaches.includes(reach.id),
