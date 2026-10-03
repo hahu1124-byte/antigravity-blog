@@ -1383,14 +1383,20 @@ function updateUI() {
   const modeLabel = M.modeLabel(mode);
   document.getElementById("sub-display").innerText =
     mode === "通常" ? `通常:${lcdCount}` : `${modeLabel}:${rRem}`;
-  // EVA の ST 中は左下に残り回転を出し、保留はその上に小さく出す（style.css の .screen.st-mode）
-  const stOn = currentMachine === "eva" && mode === "ST";
+  // EVA は液晶の左下に回転数（通常時は現在回転、時短・ST は残り回転）を出し、その右に保留を並べる
+  // （style.css の .screen.eva-lcd .lcd-bottom）。ST 中は保留の箱を小さく（.screen.st-mode）
+  const isEva = currentMachine === "eva";
   const stBox = document.getElementById("st-remain");
-  if (stBox) stBox.style.display = stOn ? "flex" : "none";
+  if (stBox) stBox.style.display = isEva ? "flex" : "none";
+  const stLabel = document.getElementById("st-remain-label");
+  if (stLabel) stLabel.innerText = mode === "通常" ? "回転" : "残り";
   const stNum = document.getElementById("st-remain-num");
-  if (stNum) stNum.innerText = rRem;
+  if (stNum) stNum.innerText = mode === "通常" ? currentRot : rRem;
   const scr = document.getElementById("screen");
-  if (scr && scr.classList) scr.classList.toggle("st-mode", stOn);
+  if (scr && scr.classList) {
+    scr.classList.toggle("eva-lcd", isEva);
+    scr.classList.toggle("st-mode", isEva && mode === "ST");
+  }
   updateHesoUI();
 }
 

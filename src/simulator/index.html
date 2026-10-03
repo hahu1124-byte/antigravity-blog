@@ -8,7 +8,7 @@
     />
     <title>EVANGELION Sim -2025 Final-</title>
     <!-- 分割したCSSを読み込み -->
-    <link rel="stylesheet" href="css/style.css?v=20261004-stleft" />
+    <link rel="stylesheet" href="css/style.css?v=20261004-lcdrow" />
   </head>
 
   <body class="theme-eva">
@@ -115,28 +115,32 @@
           >
             0 / 0
           </div>
-          <div id="heso-area" class="heso-overlay">
-            <div id="h0" class="heso-ball heso-current"></div>
-            <div id="h1" class="heso-ball"></div>
-            <div id="h2" class="heso-ball"></div>
-            <div id="h3" class="heso-ball"></div>
-            <div id="h4" class="heso-ball"></div>
-          </div>
-          <!-- ST 中の残り回転（左下。残り回数の違和感で赤くなる・震えるなど。script.js の updateUI と eva-reel.js） -->
-          <div id="st-remain" class="st-remain" style="display: none">
-            <span class="sr-label">残り</span>
-            <span class="sr-num" id="st-remain-num">163</span>
-          </div>
-          <div
-            id="denchu-area"
-            class="heso-overlay right-mode"
-            style="display: none"
-          >
-            <div id="d_h0" class="heso-ball heso-current"></div>
-            <div id="d_h1" class="heso-ball"></div>
-            <div id="d_h2" class="heso-ball"></div>
-            <div id="d_h3" class="heso-ball"></div>
-            <div id="d_h4" class="heso-ball"></div>
+          <!-- 液晶の左下：EVA は回転数（通常時は現在回転、時短・ST は残り回転）とその右に保留を並べる。
+               リゼロはこの枠を使わず、保留は今までどおりの位置（style.css の .lcd-bottom） -->
+          <div class="lcd-bottom">
+            <!-- 回転数（ST の残り回数の違和感で赤くなる・震えるなど。script.js の updateUI と eva-reel.js） -->
+            <div id="st-remain" class="st-remain" style="display: none">
+              <span class="sr-label" id="st-remain-label">残り</span>
+              <span class="sr-num" id="st-remain-num">163</span>
+            </div>
+            <div id="heso-area" class="heso-overlay">
+              <div id="h0" class="heso-ball heso-current"></div>
+              <div id="h1" class="heso-ball"></div>
+              <div id="h2" class="heso-ball"></div>
+              <div id="h3" class="heso-ball"></div>
+              <div id="h4" class="heso-ball"></div>
+            </div>
+            <div
+              id="denchu-area"
+              class="heso-overlay right-mode"
+              style="display: none"
+            >
+              <div id="d_h0" class="heso-ball heso-current"></div>
+              <div id="d_h1" class="heso-ball"></div>
+              <div id="d_h2" class="heso-ball"></div>
+              <div id="d_h3" class="heso-ball"></div>
+              <div id="d_h4" class="heso-ball"></div>
+            </div>
           </div>
         </div>
         <div class="stat-grid">
@@ -270,10 +274,10 @@
     <!-- Chart.js ライブラリ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- 分割したJSを読み込み（EVA の演出データ → 抽選エンジン → 本体の順） -->
-    <script src="js/eva-effects.js?v=20261004-stleft"></script>
-    <script src="js/eva-voice.js?v=20261004-stleft"></script>
-    <script src="js/eva-engine.js?v=20261004-stleft"></script>
-    <script src="js/eva-reel.js?v=20261004-stleft"></script>
-    <script src="js/script.js?v=20261004-stleft"></script>
+    <script src="js/eva-effects.js?v=20261004-lcdrow"></script>
+    <script src="js/eva-voice.js?v=20261004-lcdrow"></script>
+    <script src="js/eva-engine.js?v=20261004-lcdrow"></script>
+    <script src="js/eva-reel.js?v=20261004-lcdrow"></script>
+    <script src="js/script.js?v=20261004-lcdrow"></script>
   </body>
 </html>

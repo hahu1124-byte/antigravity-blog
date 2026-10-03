@@ -771,8 +771,12 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-in {
 }
 
 /* 消化中の保留（左端）は白く縁取って（.hx-ring）少し大きく */
-body.theme-eva .heso-ball.heso-current {
-  scale: 1.12;
+/* 消化中の保留は 1.3 倍の大きさ（他の保留と見分けやすく。ユーザー方針 2026-10-04）。
+   保留の位置を測る演出があるので scale ではなく大きさで */
+body.theme-eva .heso-overlay:not(.right-mode) .heso-ball.heso-current {
+  --hx-size: 6.5px;
+  width: 39px;
+  height: 34px;
 }
 
 /* デフォルト（無地）の保留：銀 */
@@ -1636,13 +1640,9 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
     4px 4px 0 #000;
 }
 
-/* ST 中の左下の残り回転（実機の液晶の左下の表示。script.js の updateUI）。
-   残り回数の違和感（eva-reel.js の evaMarkRemain）で赤文字・ノイズ大／小・ガタガタ・虹文字になる */
+/* 液晶の左下の回転数（実機の液晶の左下の表示。通常時は現在回転、時短・ST は残り回転。script.js の updateUI）。
+   ST の残り回数の違和感（eva-reel.js の evaMarkRemain）で赤文字・ノイズ大／小・ガタガタ・虹文字になる */
 .st-remain {
-  position: absolute;
-  left: 8px;
-  bottom: 8px;
-  z-index: 6;
   display: flex;
   align-items: baseline;
   gap: 4px;
@@ -1719,26 +1719,54 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   animation-duration: 0.07s;
 }
 
-/* ST 中の保留は左下の残り回転の上に小さく並べる（液晶の図柄に重ねない）。
-   保留変化の立方体などは保留の位置を測って出すので、拡大縮小ではなく箱の大きさで小さくする */
-body.theme-eva .screen.st-mode .heso-overlay.right-mode {
-  left: 8px;
-  right: auto;
-  bottom: 50px;
-  gap: 5px;
-  --hx-step: 31px; /* 箱の幅 26px＋間隔 5px */
+/* 液晶の左下：EVA は回転数とその右に保留を 1 列に並べる（script.js の updateUI が .eva-lcd を付ける）。
+   リゼロは枠ごと無いものとして、保留は今までどおりの位置 */
+.lcd-bottom {
+  display: contents;
 }
 
-/* 保留の数（左下）は ST 中だけ左上へ逃がす（残り回転の表示と重ならないよう） */
-.screen.st-mode #stock-count-display {
+.screen.eva-lcd .lcd-bottom {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.screen.eva-lcd .lcd-bottom .st-remain,
+.screen.eva-lcd .lcd-bottom .heso-overlay {
+  position: static;
+}
+
+/* 保留の数（左下）は EVA では左上へ逃がす（回転数の表示と重ならないよう） */
+.screen.eva-lcd #stock-count-display {
   bottom: auto !important;
   top: 5px;
+}
+
+/* ST 中の保留の箱は小さく（液晶の図柄に重ねない）。保留変化の立方体などは保留の位置を測って出すので、
+   拡大縮小ではなく箱の大きさで小さくする。消化中の保留は 1.3 倍 */
+body.theme-eva .screen.st-mode .heso-overlay.right-mode {
+  gap: 5px;
+  --hx-step: 31px; /* 箱の幅 26px＋間隔 5px */
 }
 
 body.theme-eva .screen.st-mode .heso-overlay.right-mode .heso-ball {
   --hx-size: 5px;
   width: 26px;
   height: 17px;
+}
+
+body.theme-eva
+  .screen.st-mode
+  .heso-overlay.right-mode
+  .heso-ball.heso-current {
+  --hx-size: 6.5px;
+  width: 34px;
+  height: 22px;
 }
 
 @keyframes remain-in {
