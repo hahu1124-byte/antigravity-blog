@@ -20,7 +20,7 @@
 
 const EVA_COMBO_MIN_TRUST = 50; // 「2 つ以上」で数える高信頼度の演出の下限（%）
 const EVA_COMBO2_FLOOR = 80; // 2 つ重なったときの最低信頼度（%）
-const EVA_SUDDEN_SHARE = 0.03; // 無演出当り（突発当り）に回す当りの割合の目安
+const EVA_SUDDEN_SHARE = 0.01; // 無演出当り（突発当り）に回す当りの割合（1%＝1/31,969 回転。ユーザー方針 2026-10-04）
 const EVA_ALPHA_MAX = 4; // 出現率の係数の上限（広げすぎて出現率の合計が 1 を超えないように）
 
 const EVA_NONE = { id: "none", name: "なし" };
@@ -481,8 +481,15 @@ function evaPickHesoKind(forced) {
 // リーチ後予告の層は key が "after" で始まる（after・after-voice など）
 const EVA_POST_LAYERS = [
   "mission-kind",
+  // リーチ成立時の図柄送り・槍役物（SP リーチの回転だけ）
+  "order",
+  "lance",
+  "cutin",
+  "n-telop",
+  "premovie",
   "gabure",
   "synchro-meter",
+  "st-telop",
   "launch",
   "chanceup",
   "device",

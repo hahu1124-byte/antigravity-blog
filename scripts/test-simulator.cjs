@@ -795,20 +795,26 @@ function assertClose(label, actual, expected, tolerance) {
   await run(`
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs;
     Math.random = makeRandomStrong(20261013);
+    // 名前の最後が * なら前方一致（段数別の演出をまとめて見る）
     const rules = [
       ["群予告(レイ)", ["zero"]], ["群予告(アスカ)", ["ni"]], ["群予告(シンジ)", ["sho"]],
       ["キャラ連続(レイ×3)", ["zero"]], ["キャラ連続(アスカ×3)", ["ni"]], ["キャラ連続(シンジ×3)", ["sho"]],
       ["違和感保留(文字が逆に流れる)", ["st-sho", "st-ni", "st-zero", "dummy", "mission"]],
-      ["違和感保留(中の文字なし)", ["mission"]], ["背景ノイズ違和感(大)", ["dummy"]],
-      ["使徒襲来(サキエル)", ["sakiel"]], ["使徒襲来(ゼルエル)", ["zeruel"]], ["ミッションモード前兆", ["mission"]],
+      ["違和感保留(中の文字なし)", ["mission"]], ["背景ノイズ違和感(*", ["dummy"]],
+      ["使徒襲来(サキエル×2)", ["sakiel"]], ["使徒襲来(サキエル×3)", ["sakiel"]], ["使徒襲来(サキエル×4)", ["sakiel"]],
+      ["使徒襲来(ゼルエル*", ["zeruel"]], ["使徒襲来(サキエル×3→ゼルエル)", ["zeruel"]],
+      ["ミッションモード前兆*", ["mission"]],
+      ["敵探索(量産機*", ["st-ni"]], ["敵探索(イスラフェル*", ["st-zero"]], ["敵探索(シャムシエル*", ["st-sho"]],
     ];
+    const hasName = (names, nm) =>
+      nm.endsWith("*") ? names.some((n) => n.startsWith(nm.slice(0, -1))) : names.includes(nm);
     const seen = {};
     for (const [md, right, rot] of [["通常", false, 500], ["ST", true, 0]]) {
       mode = md; currentRot = rot;
       for (let i = 0; i < 1500000; i++) {
         const j = createJob(right);
         for (const [nm, ok] of rules) {
-          if (!j.name.includes(nm)) continue;
+          if (!hasName(j.name, nm)) continue;
           seen[nm] = (seen[nm] || 0) + 1;
           if (!ok.includes(j.reachId)) throw new Error(nm + " が対応外のリーチ " + j.reachId + " へ発展した");
         }

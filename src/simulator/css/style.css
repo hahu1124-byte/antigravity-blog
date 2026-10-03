@@ -2449,6 +2449,11 @@ body:not(.theme-eva) .voice-credit {
   animation-delay: -0.4s;
 }
 
+.digit-container.spark-white .digit {
+  --sp: #ffffff;
+  filter: drop-shadow(0 0 6px #e0e8ff) drop-shadow(0 0 12px #c0d0ff);
+}
+
 .digit-container.spark-green .digit {
   --sp: #5dff7a;
   filter: drop-shadow(0 0 6px #18e04a) drop-shadow(0 0 14px #18e04a);
