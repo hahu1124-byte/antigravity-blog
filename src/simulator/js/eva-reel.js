@@ -374,6 +374,7 @@ function evaSetBg(name) {
 // 曲は頭の無音（1.1 秒）を削って 26.9 秒（画面の切り替えと音がずれないように。ユーザー指摘 2026-10-03）
 const EVA_NEXT_MOVIE_MS = 26900;
 const EVA_NEXT_TITLE_AT_MS = 20900; // 残り 6 秒でタイトルへ
+const EVA_NEXT_TITLE_MAX_PX = 67; // タイトルの字の大きさの上限（短いタイトル）
 async function evaPlayNextMovie(item) {
   const screen = document.getElementById("screen");
   if (!screen || !screen.appendChild) return;
@@ -389,7 +390,15 @@ async function evaPlayNextMovie(item) {
   const lines = String(item.text || "").split("\n");
   const title = lines.length > 1 ? lines.slice(1).join("\n") : "";
   const titleEl = el.firstChild;
-  if (titleEl) titleEl.textContent = title;
+  if (titleEl) {
+    titleEl.textContent = title;
+    // 1 行に収める（「サービス、サービス」が折り返さないよう、画面の幅と文字数から字の大きさを決める）
+    const longest = Math.max(1, ...title.split("\n").map((s) => s.length));
+    const w = screen.clientWidth || 0;
+    titleEl.style.fontSize = w
+      ? `${Math.min(EVA_NEXT_TITLE_MAX_PX, (w * 0.86) / longest)}px`
+      : "";
+  }
   el.className = "next-movie on";
   screen.classList.add("movie-next");
   evaPlayNotice("next", 1);

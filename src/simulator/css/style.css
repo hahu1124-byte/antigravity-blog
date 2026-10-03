@@ -1410,8 +1410,8 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
 
 .next-movie .nm-title {
   display: none;
-  padding: 0 6%;
-  white-space: pre-line;
+  padding: 0 4%;
+  white-space: pre; /* 折り返さない（字の大きさは eva-reel.js が画面の幅に合わせる） */
   text-align: center;
   color: #fff;
   font-family: "Shippori Mincho B1", serif;
