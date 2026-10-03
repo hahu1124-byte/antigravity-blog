@@ -727,8 +727,10 @@ async function evaRunDisplayMain(eff, opts) {
     });
   }, EVA_REEL_TICK_MS);
 
-  // キャラ連続の仮停止：左・中が同じ数字 a（7 は 10R 濃厚の見た目なので使わない）、右だけ隣の数字で止める。
-  // 3×3 は中段に並べる（上下の段はブランクなので斜めのラインも揃わない）
+  // キャラ連続の仮停止（擬似連のズレ目。7 は 10R 濃厚の見た目なので使わない。ユーザー指摘 2026-10-04）：
+  // 3×3 は、左が数字 a を上段か下段に止め、中は左と同じ段か中段に a、右は必ず中段に a で止める
+  // （左・中が横か斜めに並び、右だけ 1 段ずれる。右の a は中段だけで上下はブランクなので、どのラインも揃わない）。
+  // 数字 3 つ（ST・図柄拡大）は左・中が a、右だけ隣の数字
   const charaCtl = {
     pause() {
       spinning.fill(false);
@@ -739,10 +741,19 @@ async function evaRunDisplayMain(eff, opts) {
     fakeStop() {
       spinning.fill(false);
       const a = evaRandDigit([7]);
+      if (grid) {
+        const leftRow = Math.random() < 0.5 ? 0 : 2;
+        const rows = [leftRow, Math.random() < 0.5 ? leftRow : 1, 1];
+        rows.forEach((row, col) => {
+          frames[col] = evaPosOf(col, a, row);
+          setCol(col, frameOf(col, frames[col]));
+        });
+        return;
+      }
       const right = evaWrap(a + (Math.random() < 0.5 ? 1 : -1));
       const nums = [a, a, right === 7 ? evaWrap(a - 1) : right];
       nums.forEach((n, col) => {
-        frames[col] = grid ? evaPosOf(col, n, 1) : n;
+        frames[col] = n;
         setCol(col, frameOf(col, frames[col]));
       });
     },
@@ -1034,7 +1045,7 @@ function evaUpgradeFinish() {
 }
 
 // digit：止まっている偶数図柄。up：昇格するか。fast：高速オート（演出を省いて結果だけ）。
-// jitan：昇格しなかったときの時短回数。返り値：{ digit：最後の図柄, allRed, finish }
+// jitan：昇格しなかったときの時短回数（今は表示に使っていない）。返り値：{ digit：最後の図柄, allRed, finish }
 async function evaPlayUpgrade(digit, up, fast, jitan) {
   const allRed =
     Math.random() <
@@ -1135,7 +1146,7 @@ async function evaPlayUpgrade(digit, up, fast, jitan) {
     await evaSleep(EVA_UPGRADE_RESULT_MS);
     if (lamp) lamp.classList.remove("lamp-active");
   } else {
-    evaShowText(ov, `時短 ${jitan}回`);
+    // 昇格しなかったときは文字を出さずにそのまま時短へ（「時短 100回」の表示は要らない。ユーザー方針 2026-10-04）
     await evaSleep(EVA_UPGRADE_RESULT_MS);
   }
   evaShowText(ov, "");

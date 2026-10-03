@@ -950,8 +950,17 @@ async function startProcess() {
   const machineEl = document.getElementById("machine"),
     screenEl = document.getElementById("screen");
   if (eff.vibe) {
-    machineEl.classList.add("vibrate", "vibe-" + eff.vibeColor);
-    screenEl.classList.add("vibrate", "vibe-" + eff.vibeColor);
+    const vibeClasses = ["vibrate", "vibe-" + eff.vibeColor];
+    machineEl.classList.add(...vibeClasses);
+    screenEl.classList.add(...vibeClasses);
+    // 枠が震える時間：ショート（白）0.3 秒、ロング（赤）と虹 0.8 秒（ずっと震え続けないように。ユーザー方針 2026-10-04）
+    setTimeout(
+      () => {
+        machineEl.classList.remove(...vibeClasses);
+        screenEl.classList.remove(...vibeClasses);
+      },
+      eff.vibeColor === "white" ? 300 : 800,
+    );
   }
   const vStockEl = document.getElementById("v-stock");
   if (vStockEl) vStockEl.style.display = "none";

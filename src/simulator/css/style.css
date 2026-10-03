@@ -209,7 +209,8 @@ body.light-mode .machine {
   flex-direction: column;
   justify-content: center;
   gap: var(--cell-gap);
-  width: 31%;
+  /* 列の幅は ST の数字（.digit の 112px）と同じに（間があきすぎてスカスカに見えた。ユーザー方針 2026-10-04） */
+  width: min(112px, 31%);
   height: var(--grid-h);
   overflow: hidden;
   font-size: clamp(2.4rem, 10vw, 3.8rem);
@@ -539,10 +540,11 @@ body.theme-eva .heso-ball {
   --hx-size: 5px;
   --hx-glow: transparent;
   --hx-inset: 2px;
-  --hx-depth: 1.4px; /* 厚みの板 1 枚ごとの奥行き（8 枚で約 11px） */
+  --hx-depth: 1.1px; /* 厚みの板 1 枚ごとの奥行き（8 枚で約 9px） */
   position: relative;
-  width: 30px;
-  height: 26px;
+  /* ST の箱（26×17）と同じくらいの大きさに見えるように（ユーザー方針 2026-10-04） */
+  width: 26px;
+  height: 22px;
   background: none !important;
   border: none !important;
   border-radius: 0 !important;
@@ -775,8 +777,8 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-in {
    保留の位置を測る演出があるので scale ではなく大きさで */
 body.theme-eva .heso-overlay:not(.right-mode) .heso-ball.heso-current {
   --hx-size: 6.5px;
-  width: 39px;
-  height: 34px;
+  width: 34px;
+  height: 29px;
 }
 
 /* デフォルト（無地）の保留：銀 */
@@ -1739,13 +1741,13 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   z-index: 6;
 }
 
-/* 通常時・時短：六角形 30px・消化中 39px・間隔 8px → 39 + 8 + 30 + 8 = 85px */
+/* 通常時・時短：六角形 26px・消化中 34px・間隔 5px → 34 + 5 + 26 + 5 = 70px（ST と同じ） */
 body.theme-eva .screen.eva-lcd .heso-overlay:not(.right-mode) {
-  left: calc(50% - 85px);
+  left: calc(50% - 70px);
   right: auto;
   bottom: 10px;
-  gap: 8px;
-  --hx-step: 38px; /* 六角形の幅 30px＋間隔 8px */
+  gap: 5px;
+  --hx-step: 31px; /* 六角形の幅 26px＋間隔 5px */
 }
 
 /* ST：箱 26px・消化中 34px・間隔 5px → 34 + 5 + 26 + 5 = 70px */
