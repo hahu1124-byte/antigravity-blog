@@ -700,6 +700,14 @@ async function evaRunDisplayMain(eff, opts) {
       // 次回予告：図柄を消して「予告」の画面と曲。同じ段の他の文字はその後に出す
       show("");
       await evaPlayNextMovie(movie);
+      // ST の新次回予告（濃厚）：タイトルの後、リーチを経ずにいきなり図柄が揃う
+      if (movie.nextHit && eff.isHit) {
+        clearInterval(timer);
+        spinning.fill(false);
+        evaPlayNotice("impact", 1);
+        [0, 1, 2].forEach((col) => setCol(col, finals[col], null, winKeys));
+        return;
+      }
       const rest = t.filter((s) => s !== movie);
       if (rest.length) {
         show(rest);
