@@ -734,6 +734,29 @@ body.theme-eva .heso-overlay.right-mode {
   gap: 8px;
 }
 
+/* 保留を消化したとき、残りの保留が 1 つ右から当該の位置へ詰まる（script.js の animateHoldShift）。
+   1 つ分＝保留の幅＋間隔。transform（拡大・回転）とぶつからないよう translate で動かす */
+body.theme-eva .heso-overlay {
+  --hx-step: 40px;
+}
+
+body.theme-eva .heso-overlay.right-mode {
+  --hx-step: 36px;
+}
+
+body.theme-eva .heso-overlay.hold-shift .heso-ball {
+  animation: hx-slide 0.3s ease-out;
+}
+
+@keyframes hx-slide {
+  from {
+    translate: var(--hx-step) 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
 /* SP リーチに発展して消えた当該保留 */
 body.theme-eva .heso-ball.heso-gone {
   opacity: 0;
@@ -1395,6 +1418,19 @@ body.light-mode .log {
   border-radius: 5px;
   display: none;
   text-align: center;
+}
+
+/* EVA の演出ボイス：クレジット表記と ON/OFF ボタン（EVA 以外の機種では出さない） */
+.voice-credit {
+  margin: 8px 0 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: #999;
+}
+
+body:not(.theme-eva) #btn-voice,
+body:not(.theme-eva) .voice-credit {
+  display: none;
 }
 
 /* EVA：液晶の文字色（演出名の色。eva-reel.js の evaShowText が行ごとに付ける） */

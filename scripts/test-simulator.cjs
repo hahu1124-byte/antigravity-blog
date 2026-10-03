@@ -82,6 +82,7 @@ const context = vm.createContext({
 // index.html と同じ順（EVA の演出データ → 抽選エンジン → 本体）で読み込む
 for (const file of [
   "eva-effects.js",
+  "eva-voice.js",
   "eva-engine.js",
   "eva-reel.js",
   "script.js",
@@ -599,6 +600,61 @@ function assertClose(label, actual, expected, tolerance) {
     leftStock = []; rightStock = [];
     refillStock();
     if (rightStock.length !== 1) throw new Error("保留が空のとき右保留が 1 個入らない");
+
+    // 通常時のヘソ保留も 1 回転の消化で平均 1.5 個（空なら 1 個、上限 4）
+    mode = "通常"; isAuto = false;
+    leftStock = []; rightStock = [];
+    refillStock();
+    if (leftStock.length !== 1) throw new Error("保留が空のときヘソ保留が 1 個入らない: " + leftStock.length);
+    let addedL = 0;
+    for (let i = 0; i < n; i++) {
+      leftStock = [];
+      refillStock("left");
+      addedL += leftStock.length;
+    }
+    if (Math.abs(addedL / n - 1.5) > 0.02) throw new Error("ヘソ 1 回転の消化で溜まる数が平均 1.5 個でない: " + addedL / n);
+    leftStock = [];
+  `);
+
+  // 先読みの段：カウントダウンは当該の手前へ 3→2→1 を詰め、入賞時の演出は入賞した変動に出す
+  await run(`
+    const job = { leads: [
+      { kind: "pre", seq: ["３", "２", "１"], text: "０" },
+      { kind: "entry", seq: null, text: "レバー振動" },
+      { kind: "pre", seq: null, text: "ドックン…" },
+    ] };
+    scheduleLeads(job, 4);
+    const texts = job.leadPlan.map((s) => s.map((x) => x.text).join("/"));
+    if (texts.join("|") !== "レバー振動|３|２/ドックン…|１/ドックン…") throw new Error("先読みの割り振りが違う: " + texts.join("|"));
+    const short = { leads: [{ kind: "pre", seq: ["３", "２", "１"], text: "０" }] };
+    scheduleLeads(short, 2);
+    if (short.leadPlan.map((s) => s.map((x) => x.text).join()).join("|") !== "２|１") throw new Error("保留が少ないときのカウントダウンが違う");
+    // 保留の順に 1 段ずつ取り出し、当該に残った段はまとめて出す
+    currentMachine = "eva";
+    leftStock = [short]; rightStock = [];
+    const cur = { leadPlan: [[{ text: "x" }]] };
+    const got = takeLeadSteps(cur).map((s) => s.text).join();
+    if (got !== "x,２" || cur.leadPlan !== null) throw new Error("先読みの取り出しが違う: " + got);
+    leftStock = [];
+  `);
+
+  // 信頼度 50% 以上の保留・前兆は SP リーチの回転にしか出ない（赤保留がリーチ無しで終わらない）
+  await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; currentRot = 0;
+    Math.random = makeRandomStrong(20261010);
+    for (const [md, right] of [["通常", false], ["ST", true]]) {
+      mode = md;
+      let reds = 0;
+      for (let i = 0; i < 300000; i++) {
+        const j = createJob(right);
+        const strong = j.holdType === "red" || j.name.some((nm) => nm.startsWith("カウントダウン(0:シンジ)") || nm === "カウントダウン");
+        if (!strong) continue;
+        reds++;
+        if (!j.sp) throw new Error(md + ": 信頼度の高い保留・前兆が SP リーチ以外で出た: " + j.name.join("+") + " / " + j.reachId);
+      }
+      if (!reds) throw new Error(md + ": 赤保留・カウントダウンが出ない");
+    }
+    mode = "通常";
   `);
 
   // ハズレ図柄：リーチは左右が揃い中は 1 コマ先（ズレ目）、リーチなしは左右が揃わない
@@ -626,11 +682,13 @@ function assertClose(label, actual, expected, tolerance) {
       lines[miss.reach[0]]++;
       const rows = evaRowsOf(miss.grid);
       if ((miss.reach[0] === "top" && rows.top[0] === 4) || (miss.reach[0] === "bot" && rows.bot[0] === 2)) throw new Error("大当り濃厚のリーチがハズレで出た: " + JSON.stringify(miss));
+      if (rows[miss.reach[0]][0] === 7) throw new Error("7 のリーチ（10R 濃厚）がハズレで出た: " + JSON.stringify(miss));
       const dbl = evaBuildGrid({ tenpai: true, isHit: false, double: true });
       if (evaReachLines(dbl.grid).join() !== "x1,x2" || evaWinRows(dbl.grid).length) throw new Error("ダブルラインのハズレが違う: " + JSON.stringify(dbl));
       // ダブルラインは上下のクロス：左が上 a・下 a+1 なら逆回転の右は上 a+1・下 a（右列も実際の並び）
       const [lc, , rc] = dbl.grid;
       if (rc[0] !== evaWrap(lc[0] + 1) || rc[2] !== lc[0] || lc[2] !== evaWrap(lc[0] + 1)) throw new Error("ダブルラインの右列が並びどおりでない: " + JSON.stringify(dbl));
+      if (lc[0] === 7 || lc[2] === 7) throw new Error("ダブルラインのハズレに 7 のリーチ: " + JSON.stringify(dbl));
       const d = 1 + (i % 9);
       for (const double of [false, true]) {
         const hit = evaBuildGrid({ tenpai: true, isHit: true, hitDigit: d, double });
@@ -665,6 +723,16 @@ function assertClose(label, actual, expected, tolerance) {
     const chunked = evaChunkSteps(["a", "b", "c", "d", "e", "f"], 4);
     if (chunked.length > 4 || chunked.flat().join("") !== "abcdef") throw new Error("段のまとめ方が違う");
     if (evaChunkSteps(["a", "b"], 4).length !== 2) throw new Error("少ない段をまとめてしまう");
+    // ボイス：対応表の文字はどれも実在する演出の文字で、役の声が決まっている
+    const allTexts = new Set();
+    for (const L of [...EVA_LAYERS_N, ...EVA_LINKED_N, ...EVA_LAYERS_S, ...EVA_LINKED_S]) {
+      for (const s of L.states) if (s.text) allTexts.add(s.text);
+    }
+    for (const v of EVA_VOICES) {
+      if (!EVA_VOICE_ROLES[v.role]) throw new Error("ボイスの役が無い: " + v.id);
+      for (const t of v.texts) if (!allTexts.has(t)) throw new Error("ボイスの文字に対応する演出が無い: " + JSON.stringify(t));
+    }
+    if (evaVoiceOf("ちょっち期待して") !== "chotto" || evaVoiceOf("ドデカ図柄") !== null) throw new Error("ボイスの引き当てが違う");
     // 文字の色：演出名の色（強い色を優先）
     if (evaColorOf({ name: "エヴァチャンス文字(CHANCE緑)" }) !== "green") throw new Error("CHANCE緑の色が違う");
     if (evaColorOf({ name: "パネル予告(左選択・左赤右金)" }) !== "gold") throw new Error("金と赤の優先が違う");

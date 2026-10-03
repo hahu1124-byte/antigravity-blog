@@ -55,18 +55,33 @@ function evaFreq(s, pHit, alpha) {
 // 全体の出現率は share から決まる値のまま。リーチが決まった後に引くので linked と同じ形にする
 // 弱い演出（信頼度 EVA_BOOST_MIN_TRUST 未満：点滅・青保留など）はどの回転でも出るので寄せない
 const EVA_BOOST_MIN_TRUST = 20;
+// 信頼度がこれ以上（100% 未満）の予告・保留は SP リーチの回転にしか出さない。
+// 赤保留やカウントダウンがリーチ無しのハズレで終わる（何も起きない）のを防ぐ（ユーザー指摘 2026-10-03）。
+// 100% の演出（一発告知など）はリーチ無しの突発当りでも出るので対象外。
+// 当該レバブル（fixed：当りの約 3 割に出す）も、SP だけに寄せると枠が足りないので対象外
+const EVA_SP_ONLY_TRUST = 50;
 
 function evaBoostedLayer(layer, states, reach, spReaches, pHit, alpha) {
   const isSp = reach.states.map((rs) => spReaches.includes(rs.id));
   const pSp = reach.probs.reduce((sum, p, i) => (isSp[i] ? sum + p : sum), 0);
+  const spOnly = states.map(
+    (s) => s.trust >= EVA_SP_ONLY_TRUST && s.trust < 100 && !s.fixed,
+  );
   const ks = states.map((s) =>
     s.trust >= EVA_BOOST_MIN_TRUST ? layer.spBoost : 1,
   );
-  const base = states.map(
-    (s, i) => evaFreq(s, pHit, alpha) / (1 - pSp + ks[i] * pSp),
+  // SP 限定の状態は SP の回転だけに全部を乗せる（全体の出現率は share から決まる値のまま）
+  const base = states.map((s, i) =>
+    spOnly[i]
+      ? pSp > 0
+        ? evaFreq(s, pHit, alpha) / pSp
+        : 0
+      : evaFreq(s, pHit, alpha) / (1 - pSp + ks[i] * pSp),
   );
   const probsByReach = reach.states.map((rs, r) => {
-    const probs = base.map((b, i) => (isSp[r] ? b * ks[i] : b));
+    const probs = base.map((b, i) =>
+      spOnly[i] ? (isSp[r] ? b : 0) : isSp[r] ? b * ks[i] : b,
+    );
     const none = 1 - probs.reduce((a, b) => a + b, 0);
     if (none < -1e-12) {
       throw new Error(
@@ -79,6 +94,7 @@ function evaBoostedLayer(layer, states, reach, spReaches, pHit, alpha) {
     key: layer.key,
     label: layer.label,
     component: !!layer.component,
+    lead: layer.lead || null,
     states: [...states, EVA_NONE],
     probsByReach,
   };
@@ -101,6 +117,7 @@ function evaBuildTables(spec, rot, alpha) {
         label: layer.label,
         isReach: !!layer.isReach,
         component: !!layer.component,
+        lead: layer.lead || null,
         states: [...states, EVA_NONE],
         probs: [...probs, none],
       };
@@ -247,6 +264,7 @@ function evaCalibrate(spec, rot) {
   let alpha = 1;
   let T = evaBuildTables(spec, rot, alpha);
   let E = evaExpect(T);
+  // alpha で縮まない分（100%・fixed の演出）。SP 限定の演出は alpha=0 で SP の回転ごと消える（出現率 0 で正しい）
   const fixed = evaExpect(evaBuildTables(spec, rot, 0)).effect;
   for (let i = 0; i < 12 && Math.abs(E.effect - target) > target * 1e-4; i++) {
     const next = Math.min(
@@ -420,6 +438,8 @@ function createEvaJob(isRight, regime) {
   const fx = []; // 液晶に付ける効果のクラス（style.css の fx-*）
   const steps = []; // 液晶に順番に出す文字（eva-reel.js が回転中に出す）
   let holdId = "";
+  // 先読みの演出（保留に居る間の変動に出す段。script.js の scheduleLeads が変動に割り振る）
+  const leads = [];
   for (const { layer, state } of shown) {
     name.push(state.name);
     if (state.holdType) {
@@ -427,12 +447,23 @@ function createEvaJob(isRight, regime) {
       holdId = state.id;
     }
     if (state.shift) shift = true;
-    if (state.text) {
+    if (layer.lead) {
+      leads.push({
+        kind: layer.lead,
+        seq: state.lead || null,
+        text: state.text || state.name,
+        color: evaColorOf(state),
+        voice: evaVoiceOf(state.text),
+      });
+    }
+    // 入賞時の演出は入賞した変動で出すので、当該の段には入れない
+    if (state.text && layer.lead !== "entry") {
       text = text ? text + "\n" + state.text : state.text;
       steps.push({
         phase: evaPhaseOf(layer),
         text: state.text,
         color: evaColorOf(state),
+        voice: evaVoiceOf(state.text), // eva-voice.js
       });
     }
     if (state.fx) fx.push(state.fx);
@@ -516,6 +547,8 @@ function createEvaJob(isRight, regime) {
     holdSeq: hold.seq,
     holdWhen: hold.when,
     holdStep: 0,
+    leads,
+    leadPlan: null,
     // SP リーチ（全回転を含む）：SP に発展したら当該保留を消す
     sp: reach.id === "zenkaiten" || T.spec.spReaches.includes(reach.id),
     isRushSure: false,

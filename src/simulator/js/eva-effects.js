@@ -153,9 +153,10 @@ const EVA_LAYERS_N = [
     ],
   },
   {
-    // 保留入賞時の演出
+    // 保留入賞時の演出（lead: "entry"＝入賞した変動で出す。当該では出さない）
     key: "entry",
     spBoost: EVA_SP_BOOST,
+    lead: "entry",
     label: "入賞時",
     states: [
       {
@@ -204,8 +205,11 @@ const EVA_LAYERS_N = [
     ],
   },
   {
+    // 前兆（先読み）：lead: "pre"＝保留に居る間の変動から出して当該へつなぐ。
+    // state.lead は当該より前の変動に順に出す段（カウントダウンの 3→2→1 など）。無ければ text を繰り返す
     key: "precursor",
     spBoost: EVA_SP_BOOST,
+    lead: "pre",
     label: "前兆",
     states: [
       {
@@ -213,7 +217,8 @@ const EVA_LAYERS_N = [
         name: "カウントダウン(0:シンジ)",
         trust: 75.4,
         share: 3,
-        text: "３２１０",
+        lead: ["３", "２", "１"],
+        text: "０",
       },
       {
         id: "countdown-kaworu",
@@ -221,7 +226,8 @@ const EVA_LAYERS_N = [
         trust: 100,
         share: 0.2,
         only: EVA_KAKUHEN,
-        text: "３２１\nカヲル",
+        lead: ["３", "２", "１"],
+        text: "カヲル",
       },
       {
         id: "sound-1",
@@ -272,6 +278,7 @@ const EVA_LAYERS_N = [
         name: "ALERT前兆(LV.MAX)",
         trust: 4.0,
         share: 0.3,
+        lead: ["ALERT\nLV.1", "ALERT\nLV.2"],
         text: "ALERT\nLV.MAX",
       },
       // 暴走入賞は暴走ボーナス（ST 確定の 3R）濃厚
@@ -1783,8 +1790,10 @@ const EVA_LAYERS_S = [
     ],
   },
   {
+    // レバブル先読みは入賞した変動で震える（当該では出さない）
     key: "lever-pre",
     spBoost: EVA_SP_BOOST,
+    lead: "entry",
     label: "レバブル先読み",
     states: [
       {
@@ -1804,8 +1813,10 @@ const EVA_LAYERS_S = [
     ],
   },
   {
+    // 前兆（先読み）：保留に居る間の変動から出して当該へつなぐ（通常時の precursor と同じ）
     key: "precursor",
     spBoost: EVA_SP_BOOST,
+    lead: "pre",
     label: "前兆",
     states: [
       {
@@ -1813,14 +1824,16 @@ const EVA_LAYERS_S = [
         name: "カウントダウン",
         trust: 85.2,
         share: 2,
-        text: "３２１０",
+        lead: ["３", "２", "１"],
+        text: "０",
       },
       {
         id: "countdown-kaworu",
         name: "カウントダウン(0:カヲル)",
         trust: 100,
         share: 0.3,
-        text: "３２１カヲル",
+        lead: ["３", "２", "１"],
+        text: "カヲル",
       },
       {
         id: "eyecatch-red",
@@ -1890,6 +1903,7 @@ const EVA_LAYERS_S = [
   {
     key: "screen",
     spBoost: EVA_SP_BOOST,
+    lead: "pre",
     label: "画面系の前兆",
     states: [
       {

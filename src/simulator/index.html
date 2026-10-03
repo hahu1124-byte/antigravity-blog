@@ -8,7 +8,7 @@
     />
     <title>EVANGELION Sim -2025 Final-</title>
     <!-- 分割したCSSを読み込み -->
-    <link rel="stylesheet" href="css/style.css?v=20261003-lance7" />
+    <link rel="stylesheet" href="css/style.css?v=20261003-lead9" />
   </head>
 
   <body class="theme-eva">
@@ -168,6 +168,13 @@
             >
               先バレ
             </button>
+            <button
+              id="btn-voice"
+              class="side-btn active"
+              onclick="evaToggleVoice()"
+            >
+              ボイス ON
+            </button>
           </div>
           <button class="btn-auto" id="btn-slow" onclick="toggleAuto('slow')">
             低速オート
@@ -178,14 +185,17 @@
         </div>
       </div>
       <div class="log" id="log">> システム起動完了</div>
+      <!-- EVA の演出ボイスのクレジット（各キャラの利用規約で表記が必要。中身は eva-voice.js が入れる） -->
+      <p class="voice-credit" id="voice-credit"></p>
     </div>
 
     <!-- Chart.js ライブラリ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- 分割したJSを読み込み（EVA の演出データ → 抽選エンジン → 本体の順） -->
-    <script src="js/eva-effects.js?v=20261003-lance7"></script>
-    <script src="js/eva-engine.js?v=20261003-lance7"></script>
-    <script src="js/eva-reel.js?v=20261003-lance7"></script>
-    <script src="js/script.js?v=20261003-lance7"></script>
+    <script src="js/eva-effects.js?v=20261003-lead9"></script>
+    <script src="js/eva-voice.js?v=20261003-lead9"></script>
+    <script src="js/eva-engine.js?v=20261003-lead9"></script>
+    <script src="js/eva-reel.js?v=20261003-lead9"></script>
+    <script src="js/script.js?v=20261003-lead9"></script>
   </body>
 </html>

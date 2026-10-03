@@ -630,6 +630,22 @@ function advanceStockHolds(anim) {
   }
 }
 
+// 保留を消化したとき、残りの保留が 1 つずつ左（当該の位置）へ詰まるアニメ（style.css の .hold-shift）
+const HOLD_SHIFT_MS = 320;
+function animateHoldShift(from) {
+  const area = document.getElementById(
+    from === "right" ? "denchu-area" : "heso-area",
+  );
+  if (!area) return;
+  area.classList.remove("hold-shift");
+  void area.offsetWidth; // 続けて消化したときもアニメを最初からにする
+  area.classList.add("hold-shift");
+  const token = (animateHoldShift.token = (animateHoldShift.token || 0) + 1);
+  setTimeout(() => {
+    if (animateHoldShift.token === token) area.classList.remove("hold-shift");
+  }, HOLD_SHIFT_MS);
+}
+
 // SP リーチに発展したら当該保留を消す（次の保留を消化する流れを見せる）
 function vanishCurrentHold(job) {
   if (!job || activeJob !== job) return;
@@ -693,6 +709,8 @@ async function startProcess() {
   }
 
   activeJob = refreshStaleJob(activeJob);
+  // 残りの保留が当該の位置へ詰まる（高速オートは毎回動くと見づらいので省く）
+  if (currentMachine === "eva" && autoSpeed !== "fast") animateHoldShift(from);
   // EVA は当該の色を finishHold で変える（変化保留）。他の機種は入賞時の色のまま
   if (activeJob && currentMachine !== "eva")
     activeJob.currentView = activeJob.holdType;
@@ -771,10 +789,12 @@ async function startProcess() {
     const instant = currentSpeed === "fast" && !eff.heavy;
     // 当該で変わる保留（シフト変化・当該変化）と、先読みで変わりきらなかった残り
     finishHold(eff, instant);
+    // 保留に居る先読み（カウントダウンの 3→2→1 など）はこの変動のリーチ前に出す
+    const leadSteps = takeLeadSteps(eff);
     await evaRunDisplay(eff, {
       instant,
       heavy: eff.heavy,
-      steps: eff.steps,
+      steps: [...leadSteps, ...(eff.steps || [])],
       onSp: () => vanishCurrentHold(eff),
     });
     if (eff.isHit) hitDigit = eff.bosoShown ? "1・3・5" : eff.hitDigit;
@@ -905,17 +925,22 @@ function generateFinalDigits() {
   return [d1, d2, d3];
 }
 
-// 右打ち中の保留は少しずつ溜まる（ST・時短に入った瞬間に 4 個そろうのは不自然なため）：
-// ヘソ保留を 1 個消化する間に右は 2 個、右を 1 個消化すると平均 1.2 個（2 割で 2 個）
+// 保留は少しずつ溜まる（いきなり 4 個そろうのは不自然なため）：
+//   通常時：1 回転消化するたびに平均 1.5 個（5 割で 2 個）
+//   右打ち中：ヘソ保留を 1 個消化する間に右は 2 個、右を 1 個消化すると平均 1.2 個（2 割で 2 個）
+// どちらも上限 4 個。保留が 1 つも無いときは回せるように 1 個入れる
+const LEFT_REFILL_EXTRA_RATE = 0.5;
 const RIGHT_REFILL_FROM_LEFT = 2;
 const RIGHT_REFILL_EXTRA_RATE = 0.2;
 
 // from：直前に消化した保留（"left" / "right"。消化していないときは省く）
 function refillStock(from) {
-  if (mode === "通常") {
-    while (leftStock.length < 4) leftStock.push(createJob(false));
-  } else {
-    let add =
+  const isLeft = mode === "通常";
+  const stock = isLeft ? leftStock : rightStock;
+  let add;
+  if (isLeft) add = from ? (Math.random() < LEFT_REFILL_EXTRA_RATE ? 2 : 1) : 0;
+  else
+    add =
       from === "left"
         ? RIGHT_REFILL_FROM_LEFT
         : from === "right"
@@ -923,11 +948,70 @@ function refillStock(from) {
             ? 2
             : 1
           : 0;
-    // 保留が 1 つも無ければ回せないので 1 個は入れる
-    if (!add && !rightStock.length && !leftStock.length) add = 1;
-    while (add-- > 0 && rightStock.length < 4) rightStock.push(createJob(true));
+  if (!add && !rightStock.length && !leftStock.length) add = 1;
+  while (add-- > 0 && stock.length < 4) {
+    const job = createJob(!isLeft);
+    // 入賞したこの変動から、消化されるまでの変動に先読みの段を割り振る
+    scheduleLeads(job, stock.length + 1);
+    stock.push(job);
+    slowDownForSakiyomi(job);
   }
   updateHesoUI();
+}
+
+// 先読みの段（eva-engine.js の leads）を、入賞した変動から当該の手前までの count 変動に割り振る。
+//   入賞時の演出（kind "entry"）：入賞した変動だけ
+//   前兆（kind "pre"）：当該の手前へ詰めて並べる（カウントダウンは 3→2→1 の後ろから、他は最大 2 変動繰り返す）
+// 当該では前兆の最後の段（カウントダウンの 0 など）を当該の演出として出す
+const LEAD_REPEAT_MAX = 2;
+function scheduleLeads(job, count) {
+  if (!job.leads || !job.leads.length || count <= 0) return;
+  const plan = Array.from({ length: count }, () => []);
+  for (const l of job.leads) {
+    const step = (text) => ({
+      phase: "pre",
+      text,
+      color: l.color,
+      voice: l.kind === "entry" ? l.voice : null,
+    });
+    if (l.kind === "entry") {
+      plan[0].push(step(l.text));
+      continue;
+    }
+    const seq = l.seq || Array(Math.min(count, LEAD_REPEAT_MAX)).fill(l.text);
+    const use = seq.slice(-count);
+    use.forEach((t, i) => plan[count - use.length + i].push(step(t)));
+  }
+  job.leadPlan = plan;
+}
+
+// この変動に出す先読みの段：当該に残った分（入賞してすぐ消化した保留など）と、保留の順に 1 段ずつ
+function takeLeadSteps(current) {
+  const out = [];
+  if (current && current.leadPlan) {
+    for (const s of current.leadPlan) out.push(...s);
+    current.leadPlan = null;
+  }
+  for (const job of [...rightStock, ...leftStock]) {
+    if (job.leadPlan && job.leadPlan.length) out.push(...job.leadPlan.shift());
+  }
+  return out;
+}
+
+// 高速オート中に先読み・色の付く保留・激アツの保留が溜まったら低速オートに切り替える
+// （保留と連動する先読みを見せるため。ユーザー方針 2026-10-03）
+function slowDownForSakiyomi(job) {
+  if (currentMachine !== "eva" || !isAuto || autoSpeed !== "fast") return;
+  const signal =
+    (job.leads && job.leads.length) ||
+    (job.holdSeq && job.holdSeq.length) ||
+    (job.holdType && job.holdType !== "none") ||
+    job.trust >= 50 ||
+    job.sure;
+  if (!signal) return;
+  autoSpeed = "slow";
+  updateAutoBtns();
+  addLog("先読みの保留が入ったので低速オートに切り替えました");
 }
 
 function updateHesoUI() {

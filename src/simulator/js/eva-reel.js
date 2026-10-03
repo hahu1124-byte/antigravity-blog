@@ -6,7 +6,8 @@
 //   列は「数字・ブランク・数字」か「ブランク・数字・ブランク」で止まる。ラインは上段・中段・下段。
 //   左 → 右 → 中の順に止め、左右がそろえばリーチ。中が止まって揃えば当り。ハズレは中が当り図柄の
 //   すぐ外（1 コマずれた所）で止まる（ズレ目）。
-//   上段 4・下段 2 のリーチは特別な大当り濃厚リーチ（ハズレでは出さない）。当りは 4・4・4／2・2・2 か、
+//   上段 4・下段 2 のリーチは特別な大当り濃厚リーチ（ハズレでは出さない）。7 のリーチは 10R 濃厚
+//   （ヘソの 10R はすべて 7 で揃う）なので、3×3 のハズレでは 7 のリーチも出さない（ユーザー方針 2026-10-03）。当りは 4・4・4／2・2・2 か、
 //   ズレて暴走図柄の 1・3・5 が揃う（暴走ボーナス・確変濃厚）。
 //   ダブルラインは上下のクロス（左上→中段→右下・左下→中段→右上）。左が上 a・下 a+1 なら、
 //   逆回転の右は上 a+1・下 a で止まるので、2 本の斜めが同時にリーチになる（中段で交わる）。
@@ -151,11 +152,12 @@ function evaBuildGrid(spec) {
       // 上下のクロス：左は上 a・下 a+1、逆回転の右は上 a+1・下 a。
       // x1（左上→右下）が a、x2（左下→右上）が a+1 のリーチ。中が中段に a か a+1 で止まれば当り
       const dline = Math.random() < 0.5 ? "x1" : "x2";
+      // ハズレは 7 のリーチを作らない（a と a+1 のどちらも 7 にしない。7 テンパイは 10R 濃厚）
       const a = isHit
         ? dline === "x1"
           ? hitDigit
           : evaWrap(hitDigit - 1)
-        : evaRandDigit();
+        : evaRandDigit([6, 7]);
       const target = dline === "x1" ? a : evaWrap(a + 1);
       const hitPos = evaPosOf(1, target, 1);
       // ハズレは中段が揃う数字のすぐ外（中は 9→1 の並び：x1 なら a の 2 セル下の a-1、
@@ -172,7 +174,9 @@ function evaBuildGrid(spec) {
       let n;
       if (isHit) n = hitDigit;
       else {
-        const except = line === "top" ? [4] : line === "bot" ? [2] : [];
+        // 7 のリーチは 10R 濃厚（ヘソの 10R はすべて 7 で揃う）なのでハズレでは出さない。
+        // 上段 4・下段 2 も大当り濃厚のリーチ
+        const except = line === "top" ? [4, 7] : line === "bot" ? [2, 7] : [7];
         n = evaRandDigit(except);
       }
       const hitPos = evaPosOf(1, n, row);
@@ -387,7 +391,12 @@ async function evaRunDisplay(eff, opts) {
   }
 
   const ov = document.getElementById("effect-overlay");
-  const show = (t) => evaShowText(ov, t);
+  // 文字を出し、その段にボイスがあれば最初の 1 つを鳴らす（eva-voice.js）
+  const show = (t) => {
+    evaShowText(ov, t);
+    const v = Array.isArray(t) && t.find((s) => s.voice);
+    if (v) evaPlayVoice(v.voice);
+  };
   const steps = opts.steps || [];
   const pre = evaChunkSteps(
     steps.filter((s) => s.phase === "pre"),
