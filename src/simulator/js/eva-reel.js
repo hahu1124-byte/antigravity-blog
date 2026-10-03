@@ -1,12 +1,15 @@
 /* --- EVA15風 液晶の図柄 --- */
 
 // ============================================================
-// 通常時・時短中：3×3 の図柄。上段と下段に数字、中段はブランクの図柄。ラインは上段と下段の 2 本。
-//   各列の下段は上段から決まる：左 +1・中 −2・右 −3（左右は逆回転）。
-//   左 → 右 → 中の順に止め、左右がそろえばリーチ。中が止まって揃えば当り。
-//   ハズレのズレ目は、上段 a のリーチなら中が上段 a+1／下段 a−1、下段 b のリーチなら中が上段 b+1／下段 b−1。
-//   このときもう一方の段に暴走図柄の 1・3・5（順不同）が揃うのは「上段 4」「下段 2」のリーチだけ
-//   （上段 4：下段 5・3・1、下段 2：上段 1・3・5）なので、この 2 つはハズレでは出さない＝大当り濃厚。
+// 通常時・時短中：3×3 の図柄。各列のリールは数字の間にブランクが入り、
+//   左は上から 1→9、中と右はその逆で上から 9→1（逆回転。ユーザー方針 2026-10-03）。
+//   列は「数字・ブランク・数字」か「ブランク・数字・ブランク」で止まる。ラインは上段・中段・下段。
+//   左 → 右 → 中の順に止め、左右がそろえばリーチ。中が止まって揃えば当り。ハズレは中が当り図柄の
+//   すぐ外（1 コマずれた所）で止まる（ズレ目）。
+//   上段 4・下段 2 のリーチは特別な大当り濃厚リーチ（ハズレでは出さない）。当りは 4・4・4／2・2・2 か、
+//   ズレて暴走図柄の 1・3・5 が揃う（暴走ボーナス・確変濃厚）。
+//   ダブルライン（上段と下段が同時にリーチ）は並びでは止まらない形なので、見た目の演出として右列だけ
+//   並びから外して出す。
 // ST 中：数字 3 つだけ（止める順番と演出の文字の出し方は同じ）。
 // ============================================================
 
@@ -24,11 +27,9 @@ const EVA_BOSO_SHOW_RATE = 0.12;
 const EVA_SURE_REACH_RATE = 0.15;
 // リーチのうちダブルライン（上段と下段が同時にリーチ）にする割合
 const EVA_DOUBLE_REACH_RATE = 0.15;
-
-// 各列の下段＝上段＋この値（左・中・右）
-const EVA_COL_STEP = [1, -2, -3];
-// 大当り濃厚のリーチ（ズレ目で暴走図柄が揃う）
+// 大当り濃厚のリーチ（段 → 数字）
 const EVA_SURE_REACH = { top: 4, bot: 2 };
+const EVA_ROWS = ["top", "mid", "bot"];
 
 function evaWrap(n) {
   return ((((n - 1) % 9) + 9) % 9) + 1;
@@ -54,114 +55,139 @@ function evaUseGrid() {
   return mode !== "ST";
 }
 
-// --- 3×3 の盤面：grid[列] = [上段, 下段]（列 0=左 1=中 2=右） ---
-function evaBottomOf(col, t) {
-  return evaWrap(t + EVA_COL_STEP[col]);
+// --- リール（数字の間にブランク：null） ---
+const EVA_STRIP_UP = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const EVA_STRIP_DOWN = [9, 8, 7, 6, 5, 4, 3, 2, 1];
+// 列 0=左・1=中・2=右
+const EVA_REEL_CELLS = [EVA_STRIP_UP, EVA_STRIP_DOWN, EVA_STRIP_DOWN].map(
+  (strip) => strip.flatMap((n) => [n, null]),
+);
+const EVA_REEL_LEN = 18;
+
+// 列 col のリールの位置 p（上段に来るセル）から 3 段の図柄
+function evaWindow(col, p) {
+  const cs = EVA_REEL_CELLS[col];
+  const q = ((p % EVA_REEL_LEN) + EVA_REEL_LEN) % EVA_REEL_LEN;
+  return [0, 1, 2].map((k) => cs[(q + k) % EVA_REEL_LEN]);
 }
-// 逆回転の並びどおりの列（上段 t から下段が決まる）
-function evaNatural(col, t) {
-  return [t, evaBottomOf(col, t)];
+// 列 col で、段 row（0=上段 1=中段 2=下段）に数字 n が来る位置
+function evaPosOf(col, n, row) {
+  return EVA_REEL_CELLS[col].indexOf(n) - row;
 }
+
 function evaRowsOf(grid) {
-  return { top: grid.map((c) => c[0]), bot: grid.map((c) => c[1]) };
+  return {
+    top: grid.map((w) => w[0]),
+    mid: grid.map((w) => w[1]),
+    bot: grid.map((w) => w[2]),
+  };
 }
 function evaIsBoso(row) {
-  return [...row].sort((a, b) => a - b).join(",") === "1,3,5";
+  return (
+    !row.includes(null) && [...row].sort((a, b) => a - b).join(",") === "1,3,5"
+  );
 }
 function evaRowHit(row) {
-  return row[0] === row[1] && row[1] === row[2];
+  return row[0] !== null && row[0] === row[1] && row[1] === row[2];
 }
-// 左右がそろっているライン
+// 左右がそろっている段（リーチ）
 function evaReachLines(grid) {
-  const { top, bot } = evaRowsOf(grid);
-  const out = [];
-  if (top[0] === top[2]) out.push("top");
-  if (bot[0] === bot[2]) out.push("bot");
-  return out;
+  const rows = evaRowsOf(grid);
+  return EVA_ROWS.filter(
+    (k) => rows[k][0] !== null && rows[k][0] === rows[k][2],
+  );
 }
 // 当りになっている段（図柄揃い・暴走図柄）
 function evaWinRows(grid) {
   const rows = evaRowsOf(grid);
-  return ["top", "bot"].filter((k) => evaRowHit(rows[k]) || evaIsBoso(rows[k]));
+  return EVA_ROWS.filter((k) => evaRowHit(rows[k]) || evaIsBoso(rows[k]));
+}
+
+function evaPickLine() {
+  const r = Math.random();
+  return r < 0.35 ? "top" : r < 0.65 ? "mid" : "bot";
 }
 
 // 止まる盤面を決める。spec：{ tenpai, isHit, hitDigit, boso, line, double }
-//   boso：上段 4 のリーチから下段 5・3・1、または下段 2 のリーチから上段 1・3・5（暴走図柄の当り）
-//   double：上段と下段のダブルライン（逆回転の並びでは止まらない形。見た目の演出として右列だけ並びから外す）
-// 返り値：{ grid, reach（リーチの段の配列）, win（当りの段）, boso }
+// 返り値：{ grid（列ごとの 3 段）, pos（中列の位置。回転の止め方に使う）, reach, win, boso }
 function evaBuildGrid(spec) {
   const { tenpai, isHit, hitDigit } = spec;
+  const W = evaWindow;
   for (let tries = 0; tries < 500; tries++) {
-    const line = spec.line || (Math.random() < 0.5 ? "top" : "bot");
+    const line = spec.line || evaPickLine();
+    const row = EVA_ROWS.indexOf(line);
     let grid;
+    let cpos = null;
     let reach = [];
-    let win = null;
+    let win = [];
     if (isHit && spec.boso) {
-      reach = [line];
-      if (line === "top") {
-        grid = [evaNatural(0, 4), evaNatural(1, 5), evaNatural(2, 4)];
-        win = "bot";
+      // 上段 4 のリーチがズレて下段 5・1・3、または下段 2 のリーチがズレて上段 1・5・3
+      if (line === "bot") {
+        cpos = evaPosOf(1, 5, 0);
+        grid = [W(0, evaPosOf(0, 2, 2)), W(1, cpos), W(2, evaPosOf(2, 2, 2))];
+        reach = ["bot"];
+        win = ["top"];
       } else {
-        grid = [evaNatural(0, 1), evaNatural(1, 3), evaNatural(2, 5)];
-        win = "top";
+        cpos = evaPosOf(1, 1, 2);
+        grid = [W(0, evaPosOf(0, 4, 0)), W(1, cpos), W(2, evaPosOf(2, 4, 0))];
+        reach = ["top"];
+        win = ["bot"];
       }
     } else if ((isHit || tenpai) && spec.double) {
-      // 上段 a・下段 a+1 のダブルライン（左は並びどおり、右を合わせる）
+      // 上段 a・下段 a+1。左は並びどおり、右は見た目の演出として左と同じ形に。
+      // 当りは中が上段か下段の一方に止まって揃う（濃厚の上段 4・下段 2 はハズレでは出さない）
+      const dline =
+        line === "mid" ? (Math.random() < 0.5 ? "top" : "bot") : line;
+      const a = isHit
+        ? dline === "top"
+          ? hitDigit
+          : evaWrap(hitDigit - 1)
+        : evaRandDigit([4, 1]);
+      const left = W(0, evaPosOf(0, a, 0));
+      const target = dline === "top" ? a : evaWrap(a + 1);
+      const hitPos = evaPosOf(1, target, EVA_ROWS.indexOf(dline));
+      cpos = isHit ? hitPos : hitPos + (Math.random() < 0.5 ? 2 : -2);
+      grid = [left, W(1, cpos), left.slice()];
       reach = ["top", "bot"];
-      let a;
-      if (isHit) {
-        win = line;
-        a = line === "top" ? hitDigit : evaWrap(hitDigit - 1);
-      } else a = evaRandDigit();
-      const b = evaWrap(a + 1);
-      const center = isHit
-        ? line === "top"
-          ? evaNatural(1, a)
-          : evaNatural(1, evaWrap(b + 2))
-        : evaNatural(1, evaWrap(a + 1)); // ハズレ：上段も下段もズレる
-      grid = [evaNatural(0, a), center, [a, b]];
-    } else if (isHit) {
-      const a = hitDigit;
-      reach = [line];
-      win = line;
-      grid =
-        line === "top"
-          ? [evaNatural(0, a), evaNatural(1, a), evaNatural(2, a)]
-          : [
-              evaNatural(0, evaWrap(a - 1)),
-              evaNatural(1, evaWrap(a + 2)),
-              evaNatural(2, evaWrap(a + 3)),
-            ];
-    } else if (tenpai) {
-      reach = [line];
-      if (line === "top") {
-        const a = evaRandDigit([EVA_SURE_REACH.top]);
-        grid = [
-          evaNatural(0, a),
-          evaNatural(1, evaWrap(a + 1)),
-          evaNatural(2, a),
-        ];
-      } else {
-        const b = evaRandDigit([EVA_SURE_REACH.bot]);
-        grid = [
-          evaNatural(0, evaWrap(b - 1)),
-          evaNatural(1, evaWrap(b + 1)),
-          evaNatural(2, evaWrap(b + 3)),
-        ];
+      win = isHit ? [dline] : [];
+    } else if (isHit || tenpai) {
+      let n;
+      if (isHit) n = hitDigit;
+      else {
+        const except = line === "top" ? [4] : line === "bot" ? [2] : [];
+        n = evaRandDigit(except);
       }
+      const hitPos = evaPosOf(1, n, row);
+      // ハズレのズレ目：上段・下段のリーチは隣の数字（2 セル）、中段のリーチは 1 セルずらす
+      const off = line === "mid" ? 1 : 2;
+      cpos = isHit ? hitPos : hitPos + (Math.random() < 0.5 ? off : -off);
+      grid = [W(0, evaPosOf(0, n, row)), W(1, cpos), W(2, evaPosOf(2, n, row))];
+      reach = [line];
+      win = isHit ? [line] : [];
     } else {
-      grid = [0, 1, 2].map((col) => evaNatural(col, evaRandDigit()));
+      cpos = Math.floor(Math.random() * EVA_REEL_LEN);
+      grid = [
+        W(0, Math.floor(Math.random() * EVA_REEL_LEN)),
+        W(1, cpos),
+        W(2, Math.floor(Math.random() * EVA_REEL_LEN)),
+      ];
     }
     const reachOk = evaReachLines(grid).join() === reach.join();
-    const winOk = evaWinRows(grid).join() === (win ? win : "");
-    if (reachOk && winOk)
-      return { grid, reach, win, boso: !!(isHit && spec.boso) };
+    const winOk = evaWinRows(grid).join() === win.join();
+    if (reachOk && winOk) {
+      return { grid, cpos, reach, win, boso: !!(isHit && spec.boso) };
+    }
   }
-  // 理論上ここには来ない（念のためのリーチなし）
+  // 理論上ここには来ない（念のための中段 3・5・7）
   return {
-    grid: [evaNatural(0, 9), evaNatural(1, 4), evaNatural(2, 6)],
+    grid: [
+      W(0, evaPosOf(0, 3, 1)),
+      W(1, evaPosOf(1, 5, 1)),
+      W(2, evaPosOf(2, 7, 1)),
+    ],
+    cpos: evaPosOf(1, 5, 1),
     reach: [],
-    win: null,
+    win: [],
     boso: false,
   };
 }
@@ -170,24 +196,15 @@ function evaCellClass(n) {
   return n % 2 !== 0 ? "odd" : "even";
 }
 
-// 列 col（0〜2）を出す。v は [上段, 下段] か上段の数字（下段は並びどおり）。
-// hot の段は光らせる（リーチ）、win の段は当りの光
-function evaGridSetCol(col, v, hot, win) {
+// 列 col（0〜2）に 3 段（null はブランク）を出す。hot の段は光らせる（リーチ）、win の段は当りの光
+function evaGridSetCol(col, cells, hot, win) {
   const el = document.getElementById("d" + (col + 1));
   if (!el) return;
-  // 3 要素の配列は [上段, 中段, 下段] をそのまま出す（null はブランク）
-  const cells =
-    Array.isArray(v) && v.length === 3
-      ? v
-      : (() => {
-          const pair = Array.isArray(v) ? v : evaNatural(col, v);
-          return [pair[0], null, pair[1]];
-        })();
   el.className = "digit grid-col";
   el.innerHTML = cells
     .map((n, row) => {
       if (n === null) return `<span class="cell blank">◆</span>`;
-      const key = ["top", "mid", "bot"][row];
+      const key = EVA_ROWS[row];
       const cls = ["cell", evaCellClass(n)];
       if (hot && hot.includes(key)) cls.push("hot");
       if (win && win.includes(key)) cls.push("win");
@@ -213,10 +230,12 @@ function evaDisplayIdle() {
   }
 }
 
-// 当り後の昇格・右打ち当りの演出：上段（数字 3 つなら全部）を図柄 n にそろえる
+// 当り後の昇格・右打ち当りの演出：中段（数字 3 つなら全部）を図柄 n にそろえる
 function evaShowTriple(n, cls) {
   if (evaUseGrid()) {
-    [0, 1, 2].forEach((col) => evaGridSetCol(col, n, null, ["top"]));
+    [0, 1, 2].forEach((col) =>
+      evaGridSetCol(col, [null, n, null], null, ["mid"]),
+    );
   } else {
     [1, 2, 3].forEach((i) => evaPlainSet(i, n, cls));
   }
@@ -239,8 +258,8 @@ function evaChunkSteps(texts, max) {
 async function evaRunDisplay(eff, opts) {
   const grid = evaUseGrid();
   const tenpai = eff.isHit || eff.tenpai;
-  // 止まる図柄と表示の部品（3×3 と数字 3 つで同じ流れにする）
-  let finals, reachKeys, winKeys, setCol, step, centerSeq;
+  // 止まる図柄と表示の部品（3×3 と数字 3 つで同じ流れにする）。回っている間はリールの位置で持つ
+  let finals, reachKeys, winKeys, setCol, frameOf, step, centerSeq;
   let label = "";
   if (grid) {
     // 暴走図柄の当りは確変濃厚（見せ方だけ。通常当りでは出さない）：
@@ -264,6 +283,7 @@ async function evaRunDisplay(eff, opts) {
       line = Math.random() < 0.5 ? "top" : "bot";
       eff.hitDigit = EVA_SURE_REACH[line];
     }
+    if (boso) line = Math.random() < 0.5 ? "top" : "bot";
     const double =
       tenpai && !boso && !line && Math.random() < EVA_DOUBLE_REACH_RATE;
     const g = evaBuildGrid({
@@ -282,21 +302,20 @@ async function evaRunDisplay(eff, opts) {
     if (double) label = "ダブルリーチ！";
     finals = g.grid;
     reachKeys = g.reach;
-    winKeys = g.win ? [g.win] : [];
-    setCol = (col, v, hot, win) => evaGridSetCol(col, v, hot, win);
-    // 左右は逆回転：左は数字が増える向き、中と右は減る向きに流れる（回っている間は上段の数字で持つ）
-    step = (col, t) => (col === 0 ? evaReelNext(t) : evaReelPrev(t));
-    // 中は数字が減る向きに 4 コマかけて止まる（下段リーチのズレ目は当り図柄を通り過ぎる）
-    centerSeq = (v) => {
-      const t = v[0];
-      return [evaWrap(t + 3), evaWrap(t + 2), evaWrap(t + 1), v];
-    };
+    winKeys = g.win;
+    setCol = (col, cells, hot, win) => evaGridSetCol(col, cells, hot, win);
+    frameOf = (col, p) => evaWindow(col, p);
+    // 左と、中・右は逆回転
+    step = (col, p) => (col === 0 ? p - 1 : p + 1);
+    // 中は 4 セルかけて止まる（中の回る向きのまま止まる位置に近づく）
+    centerSeq = () => [g.cpos - 4, g.cpos - 3, g.cpos - 2, g.cpos - 1];
   } else {
-    finals = eff.isHit
+    const nums = eff.isHit
       ? [eff.hitDigit, eff.hitDigit, eff.hitDigit]
       : evaMissDigits(eff.tenpai);
-    reachKeys = finals[0] === finals[2] ? ["top"] : [];
-    winKeys = eff.isHit ? ["top"] : [];
+    finals = nums;
+    reachKeys = nums[0] === nums[2] ? ["mid"] : [];
+    winKeys = eff.isHit ? ["mid"] : [];
     setCol = (col, n, hot, win) =>
       evaPlainSet(
         col + 1,
@@ -305,13 +324,17 @@ async function evaRunDisplay(eff, opts) {
           (hot && hot.length ? " hot" : "") +
           (win && win.length ? " win" : ""),
       );
+    frameOf = (col, n) => n;
     step = (col, n) => evaReelNext(n);
-    centerSeq = (n) => [
-      evaReelPrev(evaReelPrev(evaReelPrev(n))),
-      evaReelPrev(evaReelPrev(n)),
-      evaReelPrev(n),
-      n,
-    ];
+    centerSeq = () => {
+      let n = nums[1];
+      const seq = [];
+      for (let s = 0; s < 4; s++) {
+        n = evaReelPrev(n);
+        seq.unshift(n);
+      }
+      return seq;
+    };
   }
   const hotOf = (col) => (col === 1 ? [] : reachKeys);
 
@@ -343,13 +366,15 @@ async function evaRunDisplay(eff, opts) {
     EVA_STEP_MAX,
   );
 
-  const frames = [0, 1, 2].map(() => evaRandDigit());
+  const frames = [0, 1, 2].map(() =>
+    grid ? Math.floor(Math.random() * EVA_REEL_LEN) : evaRandDigit(),
+  );
   const spinning = [true, true, true];
   const timer = setInterval(() => {
     [0, 1, 2].forEach((col) => {
       if (!spinning[col]) return;
       frames[col] = step(col, frames[col]);
-      setCol(col, frames[col]);
+      setCol(col, frameOf(col, frames[col]));
     });
   }, EVA_REEL_TICK_MS);
 
@@ -390,10 +415,10 @@ async function evaRunDisplay(eff, opts) {
   spinning[1] = false;
 
   if (reach) {
-    // 中は最後の 4 コマをだんだん遅くして止める
-    const seq = centerSeq(finals[1]);
+    // 中は最後の数コマをだんだん遅くして止める
+    const seq = centerSeq();
     for (let s = 0; s < seq.length; s++) {
-      setCol(1, seq[s]);
+      setCol(1, frameOf(1, seq[s]));
       await evaSleep(120 + s * 90);
     }
   }
