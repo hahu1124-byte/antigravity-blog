@@ -774,47 +774,171 @@ body.theme-eva .heso-ball.heso-anim-lance {
   }
 }
 
-/* 槍：赤い柄に二又の穂先。上から落ちてきて保留に刺さる */
-body.theme-eva .hx-lance {
+/* 横回転で変わる間は保留に「変化」と出す（ST の変化保留の箱と同じ） */
+body.theme-eva .heso-ball.heso-anim-spin,
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
+  --hx-text: "変化";
+  --hx-size: 8px;
+}
+
+/* 液晶全体のロンギヌスの槍演出（script.js の playLanceStage。1.5 秒、1.0 秒で刺さる）。
+   保留（z-index 6）は炎の上に見えたまま、槍がその位置に落ちてくる */
+.lance-stage {
   position: absolute;
-  left: 50%;
-  top: -30px;
-  z-index: 2;
-  width: 3px;
-  height: 30px;
-  margin-left: -1.5px;
-  background: linear-gradient(#ff8a8a, #b00000);
-  box-shadow: 0 0 4px #ff2020;
-  animation: hx-lance-drop 0.65s ease-in forwards;
+  inset: 0;
+  z-index: 5;
+  display: none;
+  overflow: hidden;
   pointer-events: none;
 }
 
-body.theme-eva .hx-lance::before {
-  content: "";
-  position: absolute;
-  left: -4px;
-  bottom: -6px;
-  width: 7px;
-  height: 8px;
-  border: 2px solid #d00000;
-  border-top: none;
-  border-radius: 0 0 5px 5px;
+.lance-stage.on {
+  display: block;
 }
 
-@keyframes hx-lance-drop {
+.lance-stage .ls-fire {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse at 50% 115%,
+      #fff3b0 0%,
+      #ffb02e 22%,
+      #f04a12 48%,
+      rgba(110, 0, 0, 0.9) 100%
+    ),
+    #400000;
+  animation:
+    ls-fire 1.5s ease forwards,
+    ls-flicker 0.12s steps(2) infinite;
+}
+
+@keyframes ls-fire {
   0% {
-    transform: translateY(-24px);
     opacity: 0;
   }
-  30% {
+  15%,
+  80% {
+    opacity: 0.92;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes ls-flicker {
+  50% {
+    filter: brightness(1.18) hue-rotate(-8deg);
+  }
+}
+
+/* 大きな槍：赤い柄に二又の穂先。上から斜めに落ちて保留の列に刺さる */
+.lance-stage .ls-spear {
+  position: absolute;
+  left: 50%;
+  bottom: 22px;
+  width: 6px;
+  height: 62%;
+  margin-left: -3px;
+  background: linear-gradient(#ffb0b0, #c00000 40%, #6a0000);
+  box-shadow: 0 0 10px #ff2a2a;
+  transform-origin: 50% 100%;
+  animation: ls-spear 1.5s cubic-bezier(0.5, 0, 0.9, 0.4) forwards;
+}
+
+.lance-stage .ls-spear::before {
+  content: "";
+  position: absolute;
+  left: -7px;
+  bottom: -10px;
+  width: 14px;
+  height: 16px;
+  border: 4px solid #e00000;
+  border-top: none;
+  border-radius: 0 0 9px 9px;
+  box-shadow: 0 0 8px #ff2a2a;
+}
+
+@keyframes ls-spear {
+  0%,
+  35% {
+    transform: translate(60%, -140%) rotate(-18deg);
+    opacity: 0;
+  }
+  45% {
     opacity: 1;
   }
-  60% {
-    transform: translateY(14px);
+  66% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  90% {
+    transform: translate(0, 0) rotate(0deg);
     opacity: 1;
   }
   100% {
-    transform: translateY(14px);
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0;
+  }
+}
+
+/* 刺さった瞬間の閃光 */
+.lance-stage .ls-flash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 90%,
+    #fff 0%,
+    #ffe36b 30%,
+    rgba(255, 120, 0, 0) 70%
+  );
+  opacity: 0;
+  animation: ls-flash 1.5s linear forwards;
+}
+
+@keyframes ls-flash {
+  0%,
+  64% {
+    opacity: 0;
+  }
+  68% {
+    opacity: 1;
+  }
+  85%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.lance-stage .ls-text {
+  position: absolute;
+  top: 14%;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: "Shippori Mincho B1", serif;
+  font-size: clamp(1.4rem, 6vw, 2.2rem);
+  font-weight: 900;
+  color: #fff;
+  text-shadow:
+    0 0 6px #ff2020,
+    0 0 14px #ff2020,
+    2px 2px 0 #600;
+  opacity: 0;
+  animation: ls-text 1.5s ease forwards;
+}
+
+@keyframes ls-text {
+  0% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+  20%,
+  70% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
     opacity: 0;
   }
 }

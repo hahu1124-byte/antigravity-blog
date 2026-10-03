@@ -552,20 +552,56 @@ function stepHold(job, anim) {
   const st = job.holdSeq && job.holdSeq[job.holdStep];
   if (!st) return false;
   job.holdStep++;
-  job.currentView = st.view;
-  if (anim) {
-    job.holdAnim = st.fx;
-    const token = (job.holdAnimToken = (job.holdAnimToken || 0) + 1);
-    setTimeout(() => {
-      if (job.holdAnimToken !== token) return;
+  const apply = () => {
+    if (job.currentView === "gone") return; // SP 発展で消えた後は変えない
+    job.currentView = st.view;
+    if (anim) {
+      job.holdAnim = st.fx;
+      const token = (job.holdAnimToken = (job.holdAnimToken || 0) + 1);
+      setTimeout(() => {
+        if (job.holdAnimToken !== token) return;
+        job.holdAnim = null;
+        updateHesoUI();
+      }, HOLD_ANIM_MS);
+    } else {
       job.holdAnim = null;
-      updateHesoUI();
-    }, HOLD_ANIM_MS);
+    }
+    updateHesoUI();
+  };
+  // 槍の変化は液晶全体の槍演出を出し、槍が刺さった瞬間に色を変える（実機の録画と同じ流れ）
+  if (anim && st.fx === "lance") {
+    playLanceStage();
+    setTimeout(apply, HOLD_LANCE_HIT_MS);
   } else {
-    job.holdAnim = null;
+    apply();
   }
-  updateHesoUI();
   return true;
+}
+
+// 液晶全体のロンギヌスの槍演出：炎の中を大きな槍が落ちてきて保留に刺さり、閃光が走る
+const HOLD_LANCE_STAGE_MS = 1500; // 演出全体の長さ（style.css の .lance-stage と合わせる）
+const HOLD_LANCE_HIT_MS = 1000; // 槍が刺さって保留の色が変わるまで
+function playLanceStage() {
+  const screen = document.getElementById("screen");
+  if (!screen) return;
+  let stage = document.getElementById("lance-stage");
+  if (!stage) {
+    stage = document.createElement("div");
+    stage.id = "lance-stage";
+    stage.className = "lance-stage";
+    stage.innerHTML =
+      '<div class="ls-fire"></div><div class="ls-spear"></div>' +
+      '<div class="ls-flash"></div><div class="ls-text">ロンギヌスの槍</div>';
+    screen.appendChild(stage);
+  }
+  // 続けて出たときもアニメを最初からにする
+  stage.classList.remove("on");
+  void stage.offsetWidth;
+  stage.classList.add("on");
+  const token = (playLanceStage.token = (playLanceStage.token || 0) + 1);
+  setTimeout(() => {
+    if (playLanceStage.token === token) stage.classList.remove("on");
+  }, HOLD_LANCE_STAGE_MS);
 }
 
 // 当該になった保留の残りの段。高速オートは最後の色をすぐ出す（タイマーを残さない）
@@ -940,18 +976,13 @@ function updateHesoUI() {
   }
 }
 
-// 保留 1 つの見た目。変化中は横回転・槍のアニメのクラスを付け、槍のときだけ槍の要素を入れる
-// （槍の要素は付け外しするときだけ作り直す。毎回作るとアニメが最初からになるため）
+// 保留 1 つの見た目。変化中は横回転（「変化」の文字）・槍が刺さった閃光のクラスを付ける
+// （槍そのものは液晶全体の playLanceStage で出す）
 function paintHold(el, job, isCurrent) {
   el.className = `heso-ball ${isCurrent ? "heso-current" : ""}`;
   if (job) {
     el.classList.add("heso-" + job.currentView);
     if (job.holdAnim) el.classList.add("heso-anim-" + job.holdAnim);
-  }
-  const lance = !!(job && job.holdAnim === "lance");
-  if ((el._lance || false) !== lance) {
-    el.innerHTML = lance ? '<i class="hx-lance"></i>' : "";
-    el._lance = lance;
   }
 }
 

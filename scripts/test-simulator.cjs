@@ -475,6 +475,12 @@ function assertClose(label, actual, expected, tolerance) {
     vanishCurrentHold(g);
     if (g.currentView !== "gone" || stepHold(g, true)) throw new Error("SP 発展で当該保留が消えない");
     activeJob = null;
+    // 槍の段は液晶全体の槍演出のあと（刺さった瞬間）に色が変わる
+    const L = { holdSeq: [{ view: "blue", fx: "spin" }, { view: "red", fx: "lance" }], holdStep: 0, currentView: "none" };
+    stepHold(L, true);
+    if (L.currentView !== "blue") throw new Error("横回転の段で色が変わらない");
+    stepHold(L, true);
+    if (L.currentView !== "red") throw new Error("槍の段で赤にならない");
   `);
 
   // 保留はオートを押すまで溜めない（起動・リセット直後は空）
