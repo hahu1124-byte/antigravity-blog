@@ -688,8 +688,8 @@ async function startProcess() {
   isAnim = false;
   updateUI();
   updateAutoBtns();
-  // 次回転への待機時間も調整（高速時は5ms、低速時は150ms）
-  let nextDelay = currentSpeed === "fast" ? 5 : 150;
+  // 次回転への待機時間（高速時は5ms、低速時は図柄が止まってから0.5秒）
+  let nextDelay = currentSpeed === "fast" ? 5 : 500;
   if (isAuto) setTimeout(startProcess, nextDelay);
 }
 
@@ -1002,3 +1002,7 @@ window.onload = () => {
   refillStock();
   updateUI();
 };
+
+// 起動直後から通常時の図柄を出す（グラフのライブラリの読み込みを待つ window.onload より前。
+// script.js は body の最後で読むので液晶の要素はもうある）
+if (document.getElementById("d1")) renderIdleDigits();

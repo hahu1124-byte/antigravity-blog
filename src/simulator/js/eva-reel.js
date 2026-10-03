@@ -175,13 +175,19 @@ function evaCellClass(n) {
 function evaGridSetCol(col, v, hot, win) {
   const el = document.getElementById("d" + (col + 1));
   if (!el) return;
-  const pair = Array.isArray(v) ? v : evaNatural(col, v);
-  const cells = [pair[0], null, pair[1]];
+  // 3 要素の配列は [上段, 中段, 下段] をそのまま出す（null はブランク）
+  const cells =
+    Array.isArray(v) && v.length === 3
+      ? v
+      : (() => {
+          const pair = Array.isArray(v) ? v : evaNatural(col, v);
+          return [pair[0], null, pair[1]];
+        })();
   el.className = "digit grid-col";
   el.innerHTML = cells
     .map((n, row) => {
       if (n === null) return `<span class="cell blank">◆</span>`;
-      const key = row === 0 ? "top" : "bot";
+      const key = ["top", "mid", "bot"][row];
       const cls = ["cell", evaCellClass(n)];
       if (hot && hot.includes(key)) cls.push("hot");
       if (win && win.includes(key)) cls.push("win");
@@ -198,10 +204,10 @@ function evaPlainSet(i, n, cls) {
   el.innerText = n;
 }
 
-// 待機中の図柄（機種選択・リセット時）
+// 待機中の図柄（起動・機種選択・リセット時）：中段に 3・5・7（上段・下段はブランク）
 function evaDisplayIdle() {
   if (evaUseGrid()) {
-    [9, 4, 6].forEach((t, col) => evaGridSetCol(col, t));
+    [3, 5, 7].forEach((n, col) => evaGridSetCol(col, [null, n, null]));
   } else {
     [3, 5, 7].forEach((n, k) => evaPlainSet(k + 1, n));
   }

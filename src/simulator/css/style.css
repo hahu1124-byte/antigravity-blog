@@ -162,8 +162,9 @@ body.light-mode .machine {
 
 .mode-display {
   position: absolute;
-  bottom: 35px;
-  right: 15px;
+  bottom: 6px; /* 液晶の図柄（3×3 の下段）と重ならないよう右下の端に */
+  right: 10px;
+  z-index: 6;
   color: var(--accent);
   font-weight: bold;
   font-size: 0.9rem;
