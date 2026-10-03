@@ -803,7 +803,10 @@ body.theme-eva .heso-ball.heso-odd {
 }
 
 /* 通常時・時短の六角形の文字：5px の 3 行では潰れて読めなかったので（ユーザー指摘 2026-10-04）、
-   1 行の「EMERGENCY」を 7px（消化中 9px）で右から左へ流す（ST の箱と同じ見せ方）。警報保留の「警戒」は流さない */
+   1 行の「EMERGENCY」を 7px（消化中 9px）で出す。六角形に収まらない分は、保留の揺れ（hx-sway：
+   y 軸に −32°〜+32°、2.6 秒で往復）と同じ周期・同じ緩急で左右に動かし、筒の表面の文字が回り込むように見せる
+   （一定の速さで流すと揺れとちぐはぐで気持ち悪かった。ユーザー指摘 2026-10-04）。
+   違和感保留は逆向きに動く。警報保留の「警戒」は動かさない */
 body.theme-eva .heso-overlay:not(.right-mode) .heso-ball {
   --hx-size: 7px;
 }
@@ -816,7 +819,6 @@ body.theme-eva
   .heso-overlay:not(.right-mode)
   .heso-ball:not(.heso-alert-red, .heso-alert-purple)
   > .hx-text {
-  justify-content: flex-start;
   letter-spacing: 0;
 }
 
@@ -824,15 +826,25 @@ body.theme-eva
   .heso-overlay:not(.right-mode)
   .heso-ball:not(.heso-alert-red, .heso-alert-purple)
   > .hx-text::before {
-  padding-left: 100%;
-  animation: hx-marquee 2.4s linear infinite;
+  flex: none;
+  animation: hx-text-sway 2.6s ease-in-out infinite alternate;
 }
 
 body.theme-eva
   .heso-overlay:not(.right-mode)
   .heso-ball.heso-odd
   > .hx-text::before {
-  animation-direction: reverse;
+  animation-direction: alternate-reverse;
+}
+
+/* 箱が −32° → +32° に回る（右の端が奥へ）のに合わせて、文字は右 → 左へ */
+@keyframes hx-text-sway {
+  from {
+    translate: 28% 0;
+  }
+  to {
+    translate: -28% 0;
+  }
 }
 
 /* 点滅：オレンジの枠だけ光る */
@@ -1852,15 +1864,18 @@ body.theme-eva .screen.eva-lcd .heso-overlay.right-mode {
 
 /* ST 中の保留の箱は小さく（液晶の図柄に重ねない）。保留変化の立方体などは保留の位置を測って出すので、
    拡大縮小ではなく箱の大きさで小さくする。消化中の保留は 1.3 倍 */
+/* 箱の下端をそろえ、高くした分は上へ伸ばす */
 body.theme-eva .screen.st-mode .heso-overlay.right-mode {
   gap: 5px;
+  align-items: flex-end;
   --hx-step: 31px; /* 箱の幅 26px＋間隔 5px */
 }
 
+/* 箱の高さ：上の帯が短く文字に重なって見えたので上へ伸ばす（17→21px、消化中 22→27px。ユーザー指摘 2026-10-04） */
 body.theme-eva .screen.st-mode .heso-overlay.right-mode .heso-ball {
   --hx-size: 8px; /* 5px では潰れて読めなかった（ユーザー指摘 2026-10-04） */
   width: 26px;
-  height: 17px;
+  height: 21px;
 }
 
 body.theme-eva
@@ -1869,7 +1884,7 @@ body.theme-eva
   .heso-ball.heso-current {
   --hx-size: 10px;
   width: 34px;
-  height: 22px;
+  height: 27px;
 }
 
 /* 保留が詰まるとき：消化中の保留は残り保留の 1 つ目の位置から動いてくる。消化中は大きい（34px）ので、
