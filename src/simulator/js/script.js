@@ -526,7 +526,81 @@ function createJob(isRight = false, regimeOverride) {
 function refreshStaleJob(job) {
   if (!job || currentMachine !== "eva") return job;
   const regimeNow = mode === "通常" || mode === "時短" ? "n" : "s";
-  return job.regime === regimeNow ? job : createJob(job.isRight);
+  return job.regime === regimeNow
+    ? job
+    : carryHold(job, createJob(job.isRight));
+}
+
+// 作り直した保留の見た目：保留の種類が同じなら、変化の途中経過をそのまま引き継ぐ
+// （赤だった保留が一度無地に戻ってまた赤になるのを防ぐ）
+function carryHold(oldJob, newJob) {
+  if (oldJob.holdType === newJob.holdType && oldJob.holdSeq) {
+    newJob.holdSeq = oldJob.holdSeq;
+    newJob.holdWhen = oldJob.holdWhen;
+    newJob.holdStep = oldJob.holdStep;
+    newJob.currentView = oldJob.currentView;
+  }
+  return newJob;
+}
+
+// --- EVA の変化保留（eva-engine.js の evaHoldPlan で決めた流れを見せる） ---
+const HOLD_ANIM_MS = 650; // 横回転・槍のアニメの長さ
+const HOLD_STOCK_STEP_RATE = 0.5; // 先読み：変動が始まるたびに 1 段進む確率
+
+// 保留の色を 1 段進める。anim：横回転か槍のアニメを付ける
+function stepHold(job, anim) {
+  const st = job.holdSeq && job.holdSeq[job.holdStep];
+  if (!st) return false;
+  job.holdStep++;
+  job.currentView = st.view;
+  if (anim) {
+    job.holdAnim = st.fx;
+    const token = (job.holdAnimToken = (job.holdAnimToken || 0) + 1);
+    setTimeout(() => {
+      if (job.holdAnimToken !== token) return;
+      job.holdAnim = null;
+      updateHesoUI();
+    }, HOLD_ANIM_MS);
+  } else {
+    job.holdAnim = null;
+  }
+  updateHesoUI();
+  return true;
+}
+
+// 当該になった保留の残りの段。高速オートは最後の色をすぐ出す（タイマーを残さない）
+function finishHold(job, instant) {
+  if (!job || !job.holdSeq) return;
+  const rest = job.holdSeq.length - job.holdStep;
+  if (rest <= 0) return;
+  if (instant) {
+    job.holdStep = job.holdSeq.length;
+    job.currentView = job.holdSeq[job.holdSeq.length - 1].view;
+    job.holdAnim = null;
+    updateHesoUI();
+    return;
+  }
+  for (let i = 0; i < rest; i++) {
+    setTimeout(() => stepHold(job, true), i * HOLD_ANIM_MS);
+  }
+}
+
+// 先読み：保留にいる間、変動が始まるたびに確率で 1 段ずつ変わる
+function advanceStockHolds(anim) {
+  for (const job of [...leftStock, ...rightStock]) {
+    if (job.holdWhen !== "stock" || !job.holdSeq) continue;
+    if (job.holdStep >= job.holdSeq.length) continue;
+    if (Math.random() < HOLD_STOCK_STEP_RATE) stepHold(job, anim);
+  }
+}
+
+// SP リーチに発展したら当該保留を消す（次の保留を消化する流れを見せる）
+function vanishCurrentHold(job) {
+  if (!job || activeJob !== job) return;
+  if (job.holdSeq) job.holdStep = job.holdSeq.length; // 残りの変化は打ち切る
+  job.holdAnim = null;
+  job.currentView = "gone";
+  updateHesoUI();
 }
 
 // 確率の状態が変わる瞬間（大当りで ST へ・ST/時短の終了で通常へ）に、残保留をその確率で判定し直す。
@@ -534,7 +608,9 @@ function refreshStaleJob(job) {
 function rejudgeStocks(regime) {
   if (currentMachine !== "eva") return;
   const fix = (job) =>
-    job.regime === regime ? job : createJob(job.isRight, regime);
+    job.regime === regime
+      ? job
+      : carryHold(job, createJob(job.isRight, regime));
   leftStock = leftStock.map(fix);
   rightStock = rightStock.map(fix);
 }
@@ -581,7 +657,11 @@ async function startProcess() {
   }
 
   activeJob = refreshStaleJob(activeJob);
-  if (activeJob) activeJob.currentView = activeJob.holdType;
+  // EVA は当該の色を finishHold で変える（変化保留）。他の機種は入賞時の色のまま
+  if (activeJob && currentMachine !== "eva")
+    activeJob.currentView = activeJob.holdType;
+  // 先読みの変化は前から居た保留だけ（入賞した瞬間には変わらない）
+  if (currentMachine === "eva") advanceStockHolds(autoSpeed !== "fast");
   refillStock(from);
   updateUI();
   let eff = activeJob;
@@ -652,10 +732,14 @@ async function startProcess() {
   if (currentMachine === "eva") {
     // EVA は当り種別から図柄を抽選時に決めている（10R=7・3R確変=奇数/昇格用の偶数・3R通常=偶数）。
     // 液晶は通常時・時短中が 3×3（5 ライン）、ST 中が数字 3 つ。左→右→中の順に止める（eva-reel.js）
+    const instant = currentSpeed === "fast" && !eff.heavy;
+    // 当該で変わる保留（シフト変化・当該変化）と、先読みで変わりきらなかった残り
+    finishHold(eff, instant);
     await evaRunDisplay(eff, {
-      instant: currentSpeed === "fast" && !eff.heavy,
+      instant,
       heavy: eff.heavy,
       steps: eff.steps,
+      onSp: () => vanishCurrentHold(eff),
     });
     if (eff.isHit) hitDigit = eff.bosoShown ? "1・3・5" : eff.hitDigit;
   } else {
@@ -841,8 +925,7 @@ function updateHesoUI() {
           ? activeJob
           : null
         : leftStock[i - 1] || null;
-    el.className = `heso-ball ${i === 0 ? "heso-current" : ""}`;
-    if (s) el.classList.add("heso-" + s.currentView);
+    paintHold(el, s, i === 0);
   }
   for (let i = 0; i <= 4; i++) {
     const el = document.getElementById("d_h" + i);
@@ -853,8 +936,22 @@ function updateHesoUI() {
           ? activeJob
           : null
         : rightStock[i - 1] || null;
-    el.className = `heso-ball ${i === 0 ? "heso-current" : ""}`;
-    if (s) el.classList.add("heso-" + s.currentView);
+    paintHold(el, s, i === 0);
+  }
+}
+
+// 保留 1 つの見た目。変化中は横回転・槍のアニメのクラスを付け、槍のときだけ槍の要素を入れる
+// （槍の要素は付け外しするときだけ作り直す。毎回作るとアニメが最初からになるため）
+function paintHold(el, job, isCurrent) {
+  el.className = `heso-ball ${isCurrent ? "heso-current" : ""}`;
+  if (job) {
+    el.classList.add("heso-" + job.currentView);
+    if (job.holdAnim) el.classList.add("heso-anim-" + job.holdAnim);
+  }
+  const lance = !!(job && job.holdAnim === "lance");
+  if ((el._lance || false) !== lance) {
+    el.innerHTML = lance ? '<i class="hx-lance"></i>' : "";
+    el._lance = lance;
   }
 }
 
@@ -1036,7 +1133,8 @@ function resetState() {
   if (hChart) hChart.destroy();
   initCharts();
   updateAutoBtns();
-  refillStock();
+  // 保留はオートを押してから溜める（起動・リセット直後は空）
+  updateHesoUI();
   updateUI();
 }
 
@@ -1061,7 +1159,8 @@ window.onload = () => {
   document.title = M.title;
   initCharts();
   renderIdleDigits();
-  refillStock();
+  // 保留はオートを押してから溜める（起動直後は空）
+  updateHesoUI();
   updateUI();
 };
 

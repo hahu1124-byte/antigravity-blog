@@ -433,6 +433,8 @@ async function evaRunDisplay(eff, opts) {
     // リーチ名 → リーチ後の予告・チャンスアップ。中の回転は SP・激アツなら長く
     const total = opts.heavy ? EVA_REEL_SP_MS : EVA_REEL_REACH_MS;
     let used = 0;
+    // SP リーチに発展したら当該保留を消す（script.js の vanishCurrentHold）
+    if (eff.sp && opts.onSp) opts.onSp();
     if (reachText.length) {
       show(reachText);
       await evaSleep(EVA_STEP_MS);

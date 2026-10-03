@@ -431,14 +431,57 @@ function assertClose(label, actual, expected, tolerance) {
   if (!evaMc.high.names["群予告(シンジ)"])
     throw new Error("群予告 did not appear when currentRot>400");
 
-  // holdType/currentView が保留の層の結果とそのまま一致すること
+  // 変化保留：青・緑・赤・虹は入賞時は無地で、変化の流れの最後が保留の層の結果と一致する。
+  // それ以外の保留（点滅・警報など）は入賞時からその見た目
   await run(`
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常"; currentRot = 0;
     Math.random = () => 0.0001;
     const job = createJob(false);
-    if (!job.name.includes("赤保留") || job.holdType !== "red" || job.currentView !== "red") {
+    if (!job.name.includes("赤保留") || job.holdType !== "red" || job.currentView !== "none" || job.holdSeq.at(-1).view !== "red" || job.holdSeq.at(-1).fx !== "lance") {
       throw new Error("EVA hold currentView mismatch: " + job.name.join("+"));
     }
+    Math.random = makeRandomStrong(20261009);
+    let lanceOne = 0, twoStep = 0, spin = 0, fixed = 0, stock = 0, current = 0;
+    for (let i = 0; i < 300000; i++) {
+      const j = createJob(false);
+      if (j.holdType === "none" || j.holdType === "vibe") continue;
+      const seq = j.holdSeq;
+      if (!seq.length) {
+        if (j.currentView !== j.holdType) throw new Error("変化しない保留が入賞時から出ていない: " + j.holdType);
+        fixed++;
+        continue;
+      }
+      if (j.currentView !== "none" || seq.at(-1).view !== j.holdType) throw new Error("変化保留の流れが違う: " + JSON.stringify(seq));
+      if (j.holdWhen === "stock") stock++; else current++;
+      const isLanceState = j.name.some((n) => n.startsWith("ロンギヌスの槍保留変化"));
+      if (j.holdType === "red" || j.holdType === "rainbow") {
+        if (seq.at(-1).fx !== "lance") throw new Error("赤・虹が槍で変わらない");
+        if (isLanceState && seq.length !== 1) throw new Error("槍保留変化が無地から一気に変わらない");
+        if (seq.length === 2) { if (seq[0].fx !== "spin" || !["blue", "green"].includes(seq[0].view)) throw new Error("二段構えの一段目が違う"); twoStep++; }
+        if (isLanceState) lanceOne++;
+      } else {
+        if (seq.length !== 1 || seq[0].fx !== "spin") throw new Error("青・緑が横回転で変わらない");
+        spin++;
+      }
+    }
+    if (!lanceOne || !twoStep || !spin || !fixed || !stock || !current) throw new Error("変化保留の種類が出そろわない: " + [lanceOne, twoStep, spin, fixed, stock, current]);
+
+    // 当該の残りの段：高速オートは最後の色をすぐ、SP に発展したら当該保留は消えて残りの変化は打ち切る
+    const k = { holdSeq: [{ view: "blue", fx: "spin" }, { view: "red", fx: "lance" }], holdStep: 0, currentView: "none" };
+    finishHold(k, true);
+    if (k.currentView !== "red" || k.holdStep !== 2) throw new Error("高速オートで当該保留が最後の色にならない");
+    const g = { holdSeq: [{ view: "green", fx: "spin" }], holdStep: 0, currentView: "none" };
+    activeJob = g;
+    vanishCurrentHold(g);
+    if (g.currentView !== "gone" || stepHold(g, true)) throw new Error("SP 発展で当該保留が消えない");
+    activeJob = null;
+  `);
+
+  // 保留はオートを押すまで溜めない（起動・リセット直後は空）
+  await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs;
+    resetState();
+    if (leftStock.length || rightStock.length) throw new Error("リセット直後に保留が溜まっている: " + leftStock.length + "/" + rightStock.length);
   `);
 
   // ST 中のシフト変化：保留にいる間は無地、当該になってから色が付く

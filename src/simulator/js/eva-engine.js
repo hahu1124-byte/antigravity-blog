@@ -352,6 +352,34 @@ function evaColorOf(state) {
 // 全回転リーチのうち格納庫背景(四号機)を前段に見せる割合（見せ方だけ）
 const EVA_HANGAR4_RATE = 0.2;
 
+// 変化保留：青・緑・赤・虹の保留は入賞時は無地で、保留にいる間（先読み）か
+// 消化を始めたとき（当該）に変わる。青・緑は横回転、赤・虹はロンギヌスの槍で切り替える。
+// 通常の赤・虹は横回転で青か緑を挟む二段構えにもなり、ロンギヌスの槍保留変化は無地から槍で一気に変わる
+// （見た目で区別できるように）。シフト変化は当該だけ。
+const EVA_HOLD_CHANGE = ["blue", "green", "red", "rainbow"];
+const EVA_HOLD_STOCK_RATE = 0.65; // 先読みで変わる割合（残りは当該で変わる）
+const EVA_HOLD_TWO_STEP_RATE = 0.6; // 通常の赤・虹のうち青か緑を挟む割合
+
+// 返り値：{ seq：[{ view, fx: "spin"|"lance" }]（順に適用）, when："stock"|"current"|null, view：入賞時の見た目 }
+function evaHoldPlan(holdType, holdId, shift) {
+  if (!EVA_HOLD_CHANGE.includes(holdType)) {
+    return { seq: [], when: null, view: holdType };
+  }
+  const lance = holdType === "red" || holdType === "rainbow";
+  const seq = [];
+  if (
+    lance &&
+    !holdId.startsWith("lance") &&
+    Math.random() < EVA_HOLD_TWO_STEP_RATE
+  ) {
+    seq.push({ view: Math.random() < 0.5 ? "blue" : "green", fx: "spin" });
+  }
+  seq.push({ view: holdType, fx: lance ? "lance" : "spin" });
+  const when =
+    shift || Math.random() >= EVA_HOLD_STOCK_RATE ? "current" : "stock";
+  return { seq, when, view: "none" };
+}
+
 function createEvaJob(isRight, regime) {
   const T = evaTablesFor(regime);
   const r = evaPick(T.reach.probs);
@@ -391,9 +419,13 @@ function createEvaJob(isRight, regime) {
   let vibeColor = "none";
   const fx = []; // 液晶に付ける効果のクラス（style.css の fx-*）
   const steps = []; // 液晶に順番に出す文字（eva-reel.js が回転中に出す）
+  let holdId = "";
   for (const { layer, state } of shown) {
     name.push(state.name);
-    if (state.holdType) holdType = state.holdType;
+    if (state.holdType) {
+      holdType = state.holdType;
+      holdId = state.id;
+    }
     if (state.shift) shift = true;
     if (state.text) {
       text = text ? text + "\n" + state.text : state.text;
@@ -433,6 +465,9 @@ function createEvaJob(isRight, regime) {
     steps.push({ phase: "post", text: "突発当り" });
     fx.push("fx-tear");
   }
+
+  // 保留の色が変わる流れ（見せ方だけ。当否と holdType はもう決まっている）
+  const hold = evaHoldPlan(holdType, holdId, shift);
 
   let sure = null;
   if (acc.any && f >= 1) {
@@ -477,7 +512,12 @@ function createEvaJob(isRight, regime) {
     flash: false,
     text,
     holdType,
-    currentView: shift ? "none" : holdType,
+    currentView: hold.view,
+    holdSeq: hold.seq,
+    holdWhen: hold.when,
+    holdStep: 0,
+    // SP リーチ（全回転を含む）：SP に発展したら当該保留を消す
+    sp: reach.id === "zenkaiten" || T.spec.spReaches.includes(reach.id),
     isRushSure: false,
     bonusType: null,
     deferHitLog: false,
