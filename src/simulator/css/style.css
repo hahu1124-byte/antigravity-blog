@@ -632,6 +632,121 @@ body.theme-eva .heso-ball > .hx-side8 {
   transform: translateZ(calc(var(--hx-depth) * -8));
 }
 
+/* 裏と左右の面（.hx-f3）：前面と同じ縁・面・文字を持つ面（回転して裏や横を向いても文字が鏡文字にならず、
+   同じ表示が見える。ユーザー指摘 2026-10-04）。前面の縁・面・文字・白縁は裏から見えないようにする（backface）。
+   通常時の六角形は ±32° しか揺れないので裏の面だけ（いちばん奥の板の後ろ）。
+   ST の箱は前面・左右・裏の 4 面とも同じ見た目の四角い箱（奥行き＝箱の幅 --hx-w）で、真ん中を軸に回る */
+body.theme-eva .heso-ball > .hx-f3 {
+  position: absolute;
+  clip-path: var(--hx-shape);
+  background: var(--hx-edge);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+body.theme-eva .heso-ball > .hx-f3::after {
+  content: "";
+  position: absolute;
+  inset: var(--hx-inset);
+  clip-path: var(--hx-shape);
+  background: var(--hx-face);
+}
+
+body.theme-eva .heso-ball > .hx-f3 > .hx-f3-text {
+  position: absolute;
+  inset: var(--hx-inset);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--hx-ink);
+  font: 700 var(--hx-size) / 1.15 sans-serif;
+  letter-spacing: 0;
+}
+
+body.theme-eva .heso-ball > .hx-f3 > .hx-f3-text::before {
+  content: var(--hx-text);
+  display: block;
+  white-space: pre;
+}
+
+/* 通常時：裏の面だけ */
+body.theme-eva .heso-ball > .hx-f3-back {
+  inset: 0;
+  transform: translateZ(calc(var(--hx-depth) * -8.5)) rotateY(180deg);
+}
+
+body.theme-eva .heso-ball > .hx-f3-left,
+body.theme-eva .heso-ball > .hx-f3-right {
+  display: none;
+}
+
+body.theme-eva .heso-ball::before,
+body.theme-eva .heso-ball::after,
+body.theme-eva .heso-ball > .hx-ring,
+body.theme-eva .heso-ball > .hx-text {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ST の箱：4 面の箱。左右の面は前面と同じ大きさで、前面の左右の端から奥へ立てる。
+   裏の面は箱の幅だけ奥。重ねた板（厚み）は箱の中に隠れるので出さない。回転の軸は箱の真ん中（奥行きの半分） */
+body.theme-eva .heso-overlay.right-mode .heso-ball {
+  --hx-w: 34px;
+  transform-origin: 50% 50% calc(var(--hx-w) / -2);
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-side {
+  display: none;
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-f3-back {
+  transform: translateZ(calc(var(--hx-w) * -1)) rotateY(180deg);
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-f3-left,
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-f3-right {
+  display: block;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-f3-left {
+  right: 100%;
+  transform-origin: right center;
+  transform: rotateY(-90deg);
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-f3-right {
+  left: 100%;
+  transform-origin: left center;
+  transform: rotateY(90deg);
+}
+
+/* ST の箱の文字は 4 面とも同じように右から左へ流す（違和感保留は逆向き） */
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-f3 > .hx-f3-text {
+  justify-content: flex-start;
+}
+
+body.theme-eva
+  .heso-overlay.right-mode
+  .heso-ball
+  > .hx-f3
+  > .hx-f3-text::before {
+  padding-left: 100%;
+  animation: hx-marquee 2.4s linear infinite;
+}
+
+body.theme-eva
+  .heso-overlay.right-mode
+  .heso-ball.heso-odd-reverse
+  > .hx-f3
+  > .hx-f3-text::before {
+  animation-direction: reverse;
+}
+
 /* 光：いちばん奥にぼかした色 */
 body.theme-eva .heso-ball > .hx-glow {
   position: absolute;
@@ -824,7 +939,12 @@ body.theme-eva
 body.theme-eva
   .heso-overlay:not(.right-mode)
   .heso-ball:not(.heso-alert-red, .heso-alert-purple)
-  > .hx-text::before {
+  > .hx-text::before,
+body.theme-eva
+  .heso-overlay:not(.right-mode)
+  .heso-ball:not(.heso-alert-red, .heso-alert-purple)
+  > .hx-f3-back
+  > .hx-f3-text::before {
   flex: none;
   transform: scaleX(0.5);
 }
@@ -1152,29 +1272,14 @@ body.theme-eva .heso-ball.heso-anim-spin {
   animation: hx-spin 0.6s ease-out;
 }
 
-/* 保留変化の横回転：3D で回すが裏側は見せない（そのまま 360° 回すと裏返った間の文字が鏡文字になっていた。
-   ユーザー指摘 2026-10-04）。真横（90°）まで回ったら反対の真横（−90°）から戻る「めくり」を 2 回 */
+/* 保留変化の横回転：厚みのある箱として 3D で 1 回転する。裏を向いた間は裏の面（.hx-back）が見えるので
+   文字は鏡文字にならない（ユーザー指摘 2026-10-04：めくりにするとペラペラに見えた） */
 @keyframes hx-spin {
-  0% {
-    transform: perspective(80px) rotateY(0deg);
+  from {
+    transform: perspective(120px) rotateY(0deg);
   }
-  25% {
-    transform: perspective(80px) rotateY(90deg);
-  }
-  25.01% {
-    transform: perspective(80px) rotateY(-90deg);
-  }
-  50% {
-    transform: perspective(80px) rotateY(0deg);
-  }
-  75% {
-    transform: perspective(80px) rotateY(90deg);
-  }
-  75.01% {
-    transform: perspective(80px) rotateY(-90deg);
-  }
-  100% {
-    transform: perspective(80px) rotateY(0deg);
+  to {
+    transform: perspective(120px) rotateY(360deg);
   }
 }
 
@@ -1873,6 +1978,7 @@ body.theme-eva .screen.st-mode .heso-overlay.right-mode {
 /* 箱の高さ：上の帯が短く文字に重なって見えたので上へ伸ばす（17→21px、消化中 22→27px。ユーザー指摘 2026-10-04） */
 body.theme-eva .screen.st-mode .heso-overlay.right-mode .heso-ball {
   --hx-size: 8px; /* 5px では潰れて読めなかった（ユーザー指摘 2026-10-04） */
+  --hx-w: 26px; /* 4 面の箱の奥行き（＝幅） */
   width: 26px;
   height: 21px;
 }
@@ -1882,6 +1988,7 @@ body.theme-eva
   .heso-overlay.right-mode
   .heso-ball.heso-current {
   --hx-size: 10px;
+  --hx-w: 34px;
   width: 34px;
   height: 27px;
 }
