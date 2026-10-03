@@ -568,10 +568,16 @@ function assertClose(label, actual, expected, tolerance) {
     if (s.isHit || !s.sp) throw new Error("強制SPハズレが違う");
     leftStock = [];
     // 当否は 65536 個の番号から 1 つ：当りは番号が当り範囲（0〜hitRange-1）に入ったときだけ
-    for (let i = 0; i < 20000; i++) {
-      const j = createJob(false);
-      if (j.lotNo < 0 || j.lotNo >= EVA_LOTTERY || j.isHit !== j.lotNo < j.hitRange) throw new Error("当否の番号と当り範囲が合わない");
+    // 実機と同じく当り範囲は毎回同じ（通常 0〜204、ST 0〜658）で、演出は当否が決まってから選ぶ
+    for (const [md, right, range] of [["通常", false, 205], ["ST", true, 659]]) {
+      mode = md;
+      for (let i = 0; i < 20000; i++) {
+        const j = createJob(right);
+        if (j.hitRange !== range) throw new Error(md + ": 当り範囲が固定でない: " + j.hitRange);
+        if (j.lotNo < 0 || j.lotNo >= EVA_LOTTERY || j.isHit !== j.lotNo < j.hitRange) throw new Error("当否の番号と当り範囲が合わない");
+      }
     }
+    mode = "通常";
     // 抽選ログ：ON のときだけ、番号・当り範囲・演出をログに出す
     document.getElementById("log").innerHTML = "";
     refillStock("left");

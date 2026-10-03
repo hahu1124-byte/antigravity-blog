@@ -404,8 +404,8 @@ function evaHoldPlan(holdType, holdId, shift) {
   return { seq, when, view: "none" };
 }
 
-function createEvaJob(isRight, regime) {
-  const T = evaTablesFor(regime);
+// 演出の組合せを 1 つ引く（層ごとに 1 つ。リーチに紐づく層はリーチで出方が変わる）
+function evaDrawEffects(T) {
   const r = evaPick(T.reach.probs);
   const reach = T.reach.states[r];
   const shown = []; // [{ layer, state }]
@@ -420,16 +420,28 @@ function createEvaJob(isRight, regime) {
   let acc = EVA_EMPTY;
   for (const { layer, state } of shown) acc = evaStep(acc, layer, state);
   const f = acc.any ? evaF(acc.k, acc.maxT, acc.sure) : T.base0;
-  // 当否は 65536 個の番号（0〜65535）から 1 つ引き、当り範囲（0〜hitRange-1）に入れば当り。
-  // 当り範囲の数は f×65536。端数は確率で 1 つ足すので、当り確率は f のまま変わらない
-  const exact = f * EVA_LOTTERY;
-  const floorRange = Math.floor(exact);
-  const hitRange = Math.min(
-    EVA_LOTTERY,
-    floorRange + (Math.random() < exact - floorRange ? 1 : 0),
-  );
+  return { reach, shown, acc, f };
+}
+
+// 当否が決まった後に演出を選ぶときの引き直しの上限（当りでも平均 320 回ほどで決まる）
+const EVA_DRAW_MAX = 200000;
+
+function createEvaJob(isRight, regime) {
+  const T = evaTablesFor(regime);
+  // 実機と同じく、先に当否を引く：65536 個の番号から 1 つ。当り範囲は毎回同じ
+  // （通常 0〜204 の 205 個＝1/319.7、ST 0〜658 の 659 個＝1/99.4）
+  const hitRange = Math.round(T.pHit * EVA_LOTTERY);
   const lotNo = Math.floor(Math.random() * EVA_LOTTERY);
   const isHit = lotNo < hitRange;
+  // 当否が決まってから演出を選ぶ：演出の組合せを引き、その組合せの信頼度で当るかを試し、
+  // 決まった当否と同じ結果になった組合せを使う。演出ごとの「出たら何%当るか」（信頼度）は
+  // そのまま保たれる（当りなら当りのときの出方、ハズレならハズレのときの出方から選ぶのと同じ）
+  let draw;
+  for (let tries = 0; tries < EVA_DRAW_MAX; tries++) {
+    draw = evaDrawEffects(T);
+    if (Math.random() < draw.f === isHit) break;
+  }
+  const { reach, shown, acc, f } = draw;
 
   // 当り種別：全回転は 10R、確変濃厚の演出かシンクロ当りは 3R確変、他は逆算した比で
   let kind = null;
