@@ -206,6 +206,7 @@ function evaBuildTables(spec, rot) {
   const P = spec.pHit;
   const plan = spec.plan;
   const warn = [];
+  const info = []; // 縮めたが信頼度は保った所（rate の層の出る割合など）
   const active = (layer) =>
     layer.states.filter(
       (s) => (!s.minRot || rot >= s.minRot) && (!s.maxRot || rot <= s.maxRot),
@@ -264,8 +265,9 @@ function evaBuildTables(spec, rot) {
     const hit = Array.from({ length: nR }, () => new Array(n + 1).fill(0));
     const miss = Array.from({ length: nR }, () => new Array(n + 1).fill(0));
     const isLinked = linkedSet.has(def);
+    // rate の層：目安（plan.budget）を持たない層だけ（通常時のテロップなどは目安で配る）
     const rateMode =
-      !plan &&
+      (!plan || plan.budget[def.key] === undefined) &&
       n > 0 &&
       states.every((s) => s.share === undefined && s.rate !== undefined);
     if (plan && plan.always.includes(def.key)) {
@@ -311,7 +313,7 @@ function evaBuildTables(spec, rot) {
         }
       }
     } else if (rateMode) {
-      // ST の部品（rate：そのリーチになったときに出る割合。値は未決なので暫定）。
+      // ST の部品（rate：資料の「そのリーチになったときに出る割合」）。
       // 出る割合を当り・ハズレに分けて、出た回の当りやすさを信頼度にする
       states.forEach((s, i) => {
         const t = s.trust / 100;
@@ -320,10 +322,25 @@ function evaBuildTables(spec, rot) {
             typeof s.rate === "number" ? s.rate : s.rate[rStates[r].id] || 0;
           const T = TR[r];
           if (!(T > 0)) continue;
-          hit[r][i] = Math.min(1, (q * t) / T);
+          hit[r][i] = (q * t) / T;
           miss[r][i] = T >= 1 ? 0 : (q * (1 - t)) / (1 - T);
         }
       });
+      // 資料の出る割合と信頼度がそのリーチの信頼度と合わず、当り用かハズレ用の合計が 1 を超えるリーチでは、
+      // 当り・ハズレを同じ比で縮める（信頼度はそのまま、そのリーチで出る割合だけ下がる）。warn ではなく info に残す
+      for (let r = 0; r < nR; r++) {
+        const H = hit[r].slice(0, n).reduce((a, b) => a + b, 0);
+        const M = miss[r].slice(0, n).reduce((a, b) => a + b, 0);
+        const over = Math.max(H, bR[r] > 0 ? M : 0);
+        if (over <= 1 + 1e-9) continue;
+        info.push(
+          `${def.label}：${rStates[r].name} で出る割合を ${((1 / over) * 100).toFixed(0)}% に縮めた`,
+        );
+        for (let i = 0; i < n; i++) {
+          hit[r][i] /= over;
+          miss[r][i] /= over;
+        }
+      }
     } else {
       const hs = evaResolveHits(spec, def, states, hitByReach, trustByReach);
       // リーチ前の予告は、付くリーチが決まっている演出を先に置き、決まっていない演出は
@@ -371,11 +388,21 @@ function evaBuildTables(spec, rot) {
           if (ids) {
             const rows = idsToRows(ids);
             const cap = sumOver(aR, rows);
-            const mcap = sumOver(bR, rows);
-            for (const r of rows) {
-              hit[r][i] = cap > 0 ? a / cap : 0;
-              miss[r][i] = mcap > 0 ? b / mcap : 0;
-            }
+            for (const r of rows) hit[r][i] = cap > 0 ? a / cap : 0;
+            // 付くリーチより信頼度が低い演出（ST の背景ノイズ違和感 9〜33% → ダミー 80.5% など）は、
+            // ハズレのときそのリーチに行かせると枠が足りない。ハズレは付くリーチの決まっていない演出と同じ所へ
+            // （10%未満はどの回転にも、10%以上は SP リーチのハズレ）
+            const tMin = Math.min(
+              ...rows.map((r) => (r === noneR ? 0 : TR[r])),
+            );
+            const mRows =
+              t < tMin
+                ? s.trust < EVA_LOW_TRUST
+                  ? allRows
+                  : spMissRows
+                : rows;
+            const mcap = sumOver(bR, mRows);
+            for (const r of mRows) miss[r][i] = mcap > 0 ? b / mcap : 0;
             return;
           }
           // 付くリーチが決まっていない演出：残りの空き（w）に比例して配る
@@ -477,6 +504,7 @@ function evaBuildTables(spec, rot) {
     k3Rate,
     forcedShare: forced,
     warn,
+    info,
   };
 }
 
@@ -544,14 +572,14 @@ const EVA_SPEC_N = {
   spReaches: EVA_SP_REACHES,
   plan: EVA_PLAN_N,
 };
-// ST は出る割合が未決なので plan を持たず、share を「当りのうち何%」として暫定で読む
+// ST も通常時と同じ決まり（EVA_PLAN_S。値は暫定）
 const EVA_SPEC_S = {
   pHit: EVA_S_HIT / EVA_BIT,
   classes: EVA_CLASSES_S,
   layers: EVA_LAYERS_S,
   linked: EVA_LINKED_S,
   spReaches: EVA_ST_SP,
-  plan: null,
+  plan: EVA_PLAN_S,
 };
 // 時短（チャンスタイム）中はストーリーリーチ（vsアルミサエル・vsサハクィエル）が大当り濃厚
 // （なな徹 7335）。通常時の表をもとに、その 2 本の信頼度だけ 100% にした表を使う（ハズレ用の表に出ない）

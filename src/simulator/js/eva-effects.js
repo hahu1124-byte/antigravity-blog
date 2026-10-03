@@ -3517,6 +3517,11 @@ const EVA_LAYERS_S = [
   {
     key: "hold",
     label: "保留",
+    groups: {
+      color: ["red", "green", "blue", "rainbow"],
+      odd: ["odd-", "caution"],
+      shift: ["shift-"],
+    },
     states: [
       { id: "red", name: "赤保留", trust: 95.1, share: 4, holdType: "red" },
       {
@@ -3645,6 +3650,16 @@ const EVA_LAYERS_S = [
     key: "precursor",
     lead: "pre",
     label: "前兆",
+    // 出る割合のまとまり（EVA_PLAN_S の budget）
+    groups: {
+      countdown: ["countdown"],
+      eyecatch: ["eyecatch-"],
+      dokkun: ["dokkun"],
+      shito: ["sakiel-", "zeruel-"],
+      accel: ["accel-"],
+      mission: ["mission-pre"],
+      search: ["search-pre"],
+    },
     states: [
       // カウントダウンは段数とノイズで値が違う（1geki・でちゃう！）。lead は当該より前の段、当該で 0
       {
@@ -4002,6 +4017,14 @@ const EVA_LAYERS_S = [
     key: "screen",
     lead: "pre",
     label: "画面系の前兆",
+    groups: {
+      logo: ["logo-"],
+      stop: ["stop-"],
+      mute: ["mute-"],
+      remain: ["remain-"],
+      chancebg: ["chance-bg"],
+      noise: ["bg-noise"],
+    },
     states: [
       // ロゴフラッシュは開始の色→当該の色で値が違う（パチ7・なな徹 7173）
       ...evaStepStates(
@@ -4157,6 +4180,17 @@ const EVA_LAYERS_S = [
     // 名前を「ドックン」で始めない（前兆のドックンと見分けるため）
     key: "pseudo",
     label: "擬似連",
+    groups: {
+      dokkun: ["pseudo-dokkun"],
+      cd: ["pseudo-cd"],
+      eye: ["pseudo-eye"],
+      accel: ["pseudo-accel"],
+      caution: ["pseudo-caution"],
+      logo: ["pseudo-logo"],
+      stop: ["pseudo-stop"],
+      remain: ["pseudo-remain"],
+      noise: ["pseudo-noise"],
+    },
     states: [
       {
         id: "pseudo-dokkun",
@@ -4302,6 +4336,15 @@ const EVA_LAYERS_S = [
   {
     key: "midway",
     label: "変動中予告",
+    groups: {
+      su: ["su-", "cut-"],
+      chance: ["chance-"],
+      shito: ["shito-", "search-"],
+      serif: ["serif-"],
+      panel: ["panel-"],
+      push: ["push"],
+      next: ["next-"],
+    },
     states: [
       {
         id: "su-white3",
@@ -5254,3 +5297,68 @@ const EVA_LINKED_S = [
     ],
   },
 ];
+
+// ST 中の出る割合（通常時の EVA_PLAN_N と同じ決まり。2026-10-04 暫定：今までの share の合計をまとまりの目安に
+// そのまま移したもの。数字はユーザーと決め直す）。
+// 決まり：10%未満は当りのうち＝信頼度×信頼度、濃厚は share か 0.1% の大きいほう、10%以上はまとまりの目安を
+// 同じ割合ずつ。リーチに付く部品（入力デバイス・テロップ・SP発展・シャッターなど、rate を持つ層）は、
+// 資料の「そのリーチで出る割合」と信頼度をそのまま使い、そのリーチの枠に収まらないときは出る割合だけ縮める
+const EVA_PLAN_S = {
+  budget: {
+    hold: { color: 6.5, odd: 1.5, shift: 3.2 },
+    "lever-pre": 1.5,
+    precursor: {
+      countdown: 1.9,
+      eyecatch: 1.6,
+      dokkun: 2,
+      shito: 1.3,
+      accel: 0.5,
+      mission: 0.8,
+      search: 0.3,
+    },
+    screen: {
+      logo: 1.9,
+      stop: 1.4,
+      mute: 1.7,
+      remain: 1.9,
+      chancebg: 1.5,
+      noise: 0.7,
+    },
+    pseudo: {
+      dokkun: 0.5,
+      cd: 1,
+      eye: 0.25,
+      accel: 0.15,
+      caution: 0.3,
+      logo: 0.3,
+      stop: 0.3,
+      remain: 0.25,
+      noise: 0.1,
+    },
+    midway: {
+      su: 4.9,
+      chance: 2,
+      shito: 3.8,
+      serif: 1.55,
+      panel: 1.85,
+      push: 2.6,
+    },
+    flash: 2,
+  },
+  spread: [],
+  always: [],
+  hit: {
+    // リーチの当りのうち（%）。残り 1% は突発当り
+    reach: {
+      sakiel: 24.75,
+      zeruel: 8.25,
+      "st-sho": 16.5,
+      "st-ni": 10.3,
+      "st-zero": 6.2,
+      dummy: 16.5,
+      mission: 6.2,
+      zenkaiten: 4.1,
+      tenpai: 6.2,
+    },
+  },
+};
