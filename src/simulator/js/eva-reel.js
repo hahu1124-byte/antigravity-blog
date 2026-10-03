@@ -328,21 +328,79 @@ function evaChunkSteps(items, max) {
   return out;
 }
 
-// 液晶の文字を出す。lines は文字列か [{ text, color }] の配列。色は style.css の .tc-*
+// 段の文字の「ノイズ」を見せ方に直す（「ノイズ」という文字は出さない。ユーザー方針 2026-10-04）：
+//   「ノイズ\n小／中／大」で始まる段は背景ノイズ違和感 → bg に強さ（液晶全体にノイズ。evaBgNoise）
+//   それ以外で「ノイズ」の行がある段、または noise の付いた段 → 残りの文字にノイズを掛ける（noise に強さ）
+const EVA_NOISE_LEVEL = { 小: "s", 中: "m", 大: "l" };
+function evaParseNoise(it) {
+  const lines = String((it && it.text) || "").split("\n");
+  if (lines[0] === "ノイズ" && EVA_NOISE_LEVEL[lines[1]]) {
+    return {
+      bg: EVA_NOISE_LEVEL[lines[1]],
+      lines: lines.slice(2),
+      noise: null,
+    };
+  }
+  const noisy = lines.some((l) => l.includes("ノイズ"));
+  return {
+    bg: null,
+    lines: lines.filter((l) => !l.includes("ノイズ")),
+    noise: (it && it.noise) || (noisy ? "m" : null),
+  };
+}
+
+// 液晶の文字を出す。lines は文字列か [{ text, color, noise }] の配列。色は style.css の .tc-*、
+// ノイズは .tx-noise（文字にモザイクのノイズとちらつき。色はその文字の色）
 function evaShowText(ov, lines) {
   if (!ov) return;
   const items = typeof lines === "string" ? [{ text: lines }] : lines || [];
   ov.textContent = "";
   for (const it of items) {
-    for (const row of String(it.text || "").split("\n")) {
+    const p = evaParseNoise(it);
+    for (const row of p.lines) {
       if (!row) continue;
       const div = document.createElement("div");
-      if (it.color) div.className = "tc-" + it.color;
+      const cls = [];
+      if (it.color) cls.push("tc-" + it.color);
+      if (p.noise) cls.push("tx-noise", "tx-noise-" + p.noise);
+      if (cls.length) div.className = cls.join(" ");
       div.textContent = row;
       ov.appendChild(div);
     }
   }
   ov.style.display = ov.childNodes.length ? "block" : "none";
+}
+
+// 背景ノイズ違和感：液晶全体にモザイクと走査線のノイズ（level：s・m・l で濃さ、color：段の色）
+const EVA_BG_NOISE_MS = 900;
+function evaBgNoise(level, color) {
+  const screen = document.getElementById("screen");
+  if (!screen || !screen.appendChild) return;
+  let el = document.getElementById("bg-noise");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "bg-noise";
+    screen.appendChild(el);
+  }
+  el.className = `bg-noise on bn-${level}${color ? " bn-" + color : ""}`;
+  const token = (evaBgNoise.token = (evaBgNoise.token || 0) + 1);
+  setTimeout(() => {
+    if (evaBgNoise.token === token) el.className = "bg-noise";
+  }, EVA_BG_NOISE_MS);
+}
+
+// 変動音オフ：画面全体が白黒になり、戻るときに白か赤に光る（color）
+const EVA_MONO_MS = 1600;
+function evaMono(color) {
+  const screen = document.getElementById("screen");
+  if (!screen || !screen.classList) return;
+  screen.classList.add("fx-mono");
+  const token = (evaMono.token = (evaMono.token || 0) + 1);
+  setTimeout(() => {
+    if (evaMono.token !== token) return;
+    screen.classList.remove("fx-mono");
+    evaWhiteout(color === "red" ? "red" : null);
+  }, EVA_MONO_MS);
 }
 
 // 1 回転の液晶。opts.steps：[{ phase: "pre"|"reach"|"post", text }]。
@@ -480,9 +538,9 @@ function evaShowRemain(kind) {
   }, EVA_REMAIN_MS);
 }
 
-// 画面が白く光る（無演出即当りで 7 が止まる前）
+// 画面が白く光る（無演出即当りで 7 が止まる前）。color "red" なら赤く光る（変動音オフの赤）
 const EVA_WHITEOUT_MS = 450;
-function evaWhiteout() {
+function evaWhiteout(color) {
   const screen = document.getElementById("screen");
   if (!screen || !screen.appendChild) return;
   let el = document.getElementById("whiteout");
@@ -493,7 +551,7 @@ function evaWhiteout() {
   }
   el.className = "whiteout";
   void el.offsetWidth; // 続けて出たときもアニメを最初からにする
-  el.className = "whiteout on";
+  el.className = "whiteout on" + (color === "red" ? " wo-red" : "");
   setTimeout(() => (el.className = "whiteout"), EVA_WHITEOUT_MS);
 }
 
@@ -700,6 +758,12 @@ async function evaRunDisplayMain(eff, opts) {
     if (bg) evaSetBg(bg.bg);
     const rm = t.find((s) => s.remain);
     if (rm) evaMarkRemain(rm.remain);
+    const mono = t.find((s) => s.mono);
+    if (mono) evaMono(mono.mono);
+    for (const s of t) {
+      const p = evaParseNoise(s);
+      if (p.bg) evaBgNoise(p.bg, s.color);
+    }
   };
   const steps = opts.steps || [];
   const pre = evaChunkSteps(

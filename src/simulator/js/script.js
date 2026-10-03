@@ -1218,9 +1218,11 @@ function scheduleLeads(job, count) {
         color: o.color !== undefined ? o.color : l.color,
         voice: l.kind === "entry" ? l.voice : null,
         spark: l.spark || null, // 図柄停止時発光：その変動の図柄が止まったらキラキラ
-        remain: l.remain || null, // ST の残り回数の違和感：液晶の真ん中に「残り N」
+        remain: l.remain || null, // ST の残り回数の違和感：左下の残り回転に掛ける
+        // 先読みの段の文字のノイズは段ごとの文字の「ノイズ」で決める（2→1ノイズ→0ノイズ など。eva-reel.js）
+        mono: l.mono || null, // 画面のモノクロ（変動音オフ）
         // 前兆（先読み）の段は図柄を隠して専用画面に切り替え、当該と同じ効果（ドックンの炎など）を出す
-        takeover: l.kind === "pre" && !l.remain,
+        takeover: l.kind === "pre" && !l.remain && !l.mono,
         fx:
           l.kind === "pre" ? (o.fx !== undefined ? o.fx : l.fx || null) : null,
       };

@@ -4092,8 +4092,22 @@ const EVA_LAYERS_S = [
         share: 0.2,
         spark: "rainbow",
       },
-      { id: "mute-white", name: "変動音オフ(白)", trust: 81.7, share: 1 },
-      { id: "mute-red", name: "変動音オフ(赤)", trust: 90.7, share: 0.7 },
+      // 変動音オフ：音が消えて画面がモノクロになり、戻るときのエフェクトが白か赤（でちゃう！の「画面モノクロ→白／赤」）。
+      // mono：戻るときの色（eva-reel.js の evaMono）
+      {
+        id: "mute-white",
+        name: "変動音オフ(白)",
+        trust: 81.7,
+        share: 1,
+        mono: "white",
+      },
+      {
+        id: "mute-red",
+        name: "変動音オフ(赤)",
+        trust: 90.7,
+        share: 0.7,
+        mono: "red",
+      },
       // 残り回数表示の違和感：液晶の左下の残り回転が赤くなる・ノイズが掛かる・震える・虹色になる
       // （remain：見た目の種類。eva-reel.js の evaMarkRemain。ユーザー方針 2026-10-04）。
       // 真ん中に大きく「残り N」が出るのはふだん残り 100・50・10 だけで、それ以外は無演出即当りの前の違和感

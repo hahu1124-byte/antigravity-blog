@@ -62,6 +62,18 @@ function evaAttachOf(plan, layer, s) {
   return band ? band.reaches.filter((id) => !ids || ids.includes(id)) : ids;
 }
 
+// 演出の文字に掛けるノイズの強さ（名前に「ノイズ」が付く演出。eva-reel.js が文字にモザイクのノイズを掛ける）。
+// 残り回数・背景ノイズ違和感・保留は別の見せ方なので null
+function evaNoiseOf(state) {
+  if (state.remain || state.holdType || /^bg-noise/.test(state.id)) return null;
+  if (!/ノイズ/.test(state.name)) return null;
+  return /ノイズ大/.test(state.name)
+    ? "l"
+    : /ノイズ小/.test(state.name)
+      ? "s"
+      : "m";
+}
+
 // ハズレ用の出現率の倍率：当り用の出現率 a に掛けるとハズレ用の b（t：演出の信頼度、T：基準の当りやすさ）
 function evaMissFactor(t, T) {
   if (t >= 1 || T >= 1 || t <= 0) return 0;
@@ -923,18 +935,24 @@ function createEvaJob(isRight, regime, opts = {}) {
         kind: layer.lead,
         seq: state.lead || null,
         // 残り回数の違和感は文字を出さず「残り N」の表示だけ
-        text: state.remain ? "" : state.text || state.name,
+        text: state.remain || state.mono ? "" : state.text || state.name,
         color: evaColorOf(state),
         voice: evaVoiceOf(state.text),
         spark: state.spark || null,
-        remain: state.remain || null, // ST の残り回数の違和感（eva-reel.js の evaShowRemain）
+        remain: state.remain || null, // ST の残り回数の違和感（eva-reel.js の evaMarkRemain）
+        noise: evaNoiseOf(state), // 文字に掛けるノイズ
+        mono: state.mono || null, // 画面のモノクロ（変動音オフ。eva-reel.js の evaMono）
         fx: state.fx || null, // 先読みの段でも当該と同じ液晶の効果（ドックンの炎など）を出す
       });
     }
     // 入賞時の演出は入賞した変動で出すので、当該の段には入れない。
     // 文字の無い演出でも、液晶の見た目（stage：シャッター、spark：図柄のキラキラ）があれば段にする
     if (
-      (state.text || state.stage || state.spark || state.remain) &&
+      (state.text ||
+        state.stage ||
+        state.spark ||
+        state.remain ||
+        state.mono) &&
       layer.lead !== "entry"
     ) {
       if (state.text) text = text ? text + "\n" + state.text : state.text;
@@ -946,6 +964,8 @@ function createEvaJob(isRight, regime, opts = {}) {
         stage: state.stage || null, // eva-reel.js の evaPlayShutter
         spark: state.spark || null,
         remain: state.remain || null,
+        noise: evaNoiseOf(state),
+        mono: state.mono || null,
         bg: state.bg || null, // 液晶の背景の画像（格納庫など。eva-reel.js の evaSetBg）
         // 次回予告：図柄を消して「予告」の画面と曲（28 秒）→ 各予告のタイトル（eva-reel.js の evaPlayNextMovie）
         movie: EVA_NEXT_MOVIE_IDS.includes(state.id) ? "next" : null,
@@ -958,7 +978,8 @@ function createEvaJob(isRight, regime, opts = {}) {
         chara: state.chara || null,
         // 前兆（先読み系）の段は、図柄を隠してその演出の専用画面に切り替える（eva-reel.js）
         // 残り回数の違和感は左下の数字が変わるだけなので図柄は隠さない
-        takeover: layer.lead === "pre" && !state.remain,
+        // モノクロも図柄を白黒にするだけなので隠さない
+        takeover: layer.lead === "pre" && !state.remain && !state.mono,
         fx: layer.lead === "pre" ? state.fx || null : null,
       });
     }

@@ -1044,9 +1044,24 @@ body.theme-eva
   animation-direction: reverse;
 }
 
-/* 全体がノイズっぽい：走査線とちらつき */
+/* 全体がノイズっぽい：箱にモザイクのノイズ（白と黒の細かいます目）と走査線、ちらつき
+   （ユーザー方針 2026-10-04：保留のノイズは保留そのものにモザイクで） */
 body.theme-eva .heso-overlay.right-mode .heso-ball.heso-odd-noise {
-  --hx-base: repeating-linear-gradient(0deg, #3a3a3a 0 1px, #0b0b0b 1px 2px);
+  --hx-base:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.5) 0 1px,
+      transparent 1px 2px
+    ),
+    repeating-conic-gradient(#8a8a8a 0 25%, #151515 0 50%) 0 0 / 3px 3px;
+  animation: hx-mosaic 0.2s steps(2) infinite;
+}
+
+@keyframes hx-mosaic {
+  50% {
+    filter: contrast(1.6) brightness(1.25);
+    translate: 1px 0;
+  }
 }
 body.theme-eva .heso-overlay.right-mode .heso-ball.heso-odd-noise > .hx-text {
   animation: hx-noise 0.3s steps(2) infinite;
@@ -1727,6 +1742,30 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   animation-duration: 0.07s;
 }
 
+/* 回転数の数字の上にモザイクのノイズ（文字のノイズと同じ。ユーザー方針 2026-10-04） */
+.st-remain.sr-noise-s .sr-num,
+.st-remain.sr-noise-l .sr-num {
+  position: relative;
+}
+
+.st-remain.sr-noise-s .sr-num::after,
+.st-remain.sr-noise-l .sr-num::after {
+  content: "";
+  position: absolute;
+  inset: 0 -2px;
+  pointer-events: none;
+  background: repeating-conic-gradient(currentColor 0 25%, transparent 0 50%) 0
+    0 / 4px 4px;
+  opacity: 0.25;
+  mix-blend-mode: screen;
+  animation: tx-mosaic 0.12s steps(2) infinite;
+}
+
+.st-remain.sr-noise-l .sr-num::after {
+  opacity: 0.5;
+  background-size: 6px 6px;
+}
+
 /* 液晶の下（EVA。script.js の updateUI が .eva-lcd を付ける）：回転数は左下、保留は残りの保留の 2 つ目の
    左端が液晶の真ん中に来る位置で固定する（4 つの真ん中に合わせると左に寄って見えた。ユーザー方針 2026-10-04）。
    保留の左端＝真ん中 −（消化中の幅＋間隔＋1 つ目の幅＋間隔）。リゼロは今までどおりの位置 */
@@ -1838,6 +1877,121 @@ body.theme-eva
 .whiteout.on {
   display: block;
   animation: whiteout-fade 0.45s ease-out forwards;
+}
+
+.whiteout.wo-red {
+  background: #ff2020;
+}
+
+/* 演出の文字に掛けるノイズ（「ノイズ」という文字の代わり。eva-reel.js の evaShowText）。
+   文字がずれてちらつき、上にモザイクが乗る。モザイクの色はその文字の色（currentColor） */
+.effect-text .tx-noise {
+  position: relative;
+  animation: tx-glitch 0.18s steps(2) infinite;
+}
+
+.effect-text .tx-noise::after {
+  content: "";
+  position: absolute;
+  inset: -2px -6px;
+  pointer-events: none;
+  background: repeating-conic-gradient(currentColor 0 25%, transparent 0 50%) 0
+    0 / 6px 6px;
+  opacity: 0.35;
+  mix-blend-mode: screen;
+  animation: tx-mosaic 0.12s steps(2) infinite;
+}
+
+.effect-text .tx-noise-s::after {
+  opacity: 0.2;
+}
+
+.effect-text .tx-noise-l {
+  animation-duration: 0.1s;
+}
+
+.effect-text .tx-noise-l::after {
+  opacity: 0.55;
+  background-size: 9px 9px;
+}
+
+@keyframes tx-glitch {
+  0% {
+    translate: 3px 0;
+    clip-path: inset(0 0 38% 0);
+  }
+
+  50% {
+    translate: -3px 0;
+    clip-path: inset(42% 0 0 0);
+  }
+
+  100% {
+    translate: 1px 0;
+    clip-path: inset(0);
+  }
+}
+
+@keyframes tx-mosaic {
+  to {
+    background-position: 3px 3px;
+  }
+}
+
+/* 背景ノイズ違和感：液晶全体にモザイクと走査線のノイズ（eva-reel.js の evaBgNoise）。
+   小・中・大で濃さ、段の色（紫・赤）でノイズの色 */
+.bg-noise {
+  --bn: rgba(255, 255, 255, 0.8);
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: none;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.18) 0 1px,
+      transparent 1px 3px
+    ),
+    repeating-conic-gradient(var(--bn) 0 25%, transparent 0 50%) 0 0 / 8px 8px;
+  animation: bg-noise-move 0.1s steps(2) infinite;
+}
+
+.bg-noise.on {
+  display: block;
+}
+
+.bg-noise.bn-s {
+  opacity: 0.25;
+}
+
+.bg-noise.bn-m {
+  opacity: 0.45;
+}
+
+.bg-noise.bn-l {
+  opacity: 0.7;
+}
+
+.bg-noise.bn-purple {
+  --bn: rgba(190, 90, 255, 0.85);
+}
+
+.bg-noise.bn-red {
+  --bn: rgba(255, 50, 50, 0.85);
+}
+
+@keyframes bg-noise-move {
+  to {
+    background-position:
+      0 2px,
+      4px 4px;
+  }
+}
+
+/* 変動音オフ：画面全体を白黒に（eva-reel.js の evaMono。戻るときに白か赤に光る） */
+.screen.fx-mono {
+  filter: grayscale(1) contrast(1.15);
 }
 
 @keyframes whiteout-fade {
