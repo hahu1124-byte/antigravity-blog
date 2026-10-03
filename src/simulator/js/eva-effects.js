@@ -193,6 +193,7 @@ const EVA_LAYERS_N = [
         name: "デバイス振動先読み(ショート)",
         trust: 71.3,
         share: 1.5,
+        holdShake: true, // 入賞から消化まで、その保留をレバブルと同じように震わせる
         text: "レバー振動",
       },
       {
@@ -200,6 +201,7 @@ const EVA_LAYERS_N = [
         name: "デバイス振動先読み(ロング)",
         trust: 87.6,
         share: 1,
+        holdShake: true,
         text: "レバー振動\nロング",
       },
     ],
@@ -830,7 +832,7 @@ const EVA_LINKED_N = [
         trust: 100,
         share: 1,
         only: EVA_KAKUHEN,
-        text: "来なさい",
+        text: "カヲル背景",
       },
       // 群予告は実戦上 400 回転以降のみ
       {
@@ -1801,6 +1803,7 @@ const EVA_LAYERS_S = [
         name: "レバブル先読み(ショート)",
         trust: 95.6,
         share: 1.5,
+        holdShake: true,
         text: "レバブル先読み",
       },
       {
@@ -1808,6 +1811,7 @@ const EVA_LAYERS_S = [
         name: "レバブル先読み(ロング)",
         trust: 100,
         share: 0.5,
+        holdShake: true,
         text: "レバブル先読み\nロング",
       },
     ],

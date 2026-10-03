@@ -494,21 +494,39 @@ function assertClose(label, actual, expected, tolerance) {
     if (C.currentView !== "red" || !timeoutCalls.includes(HOLD_CHANGE_STAGE_MS)) throw new Error("ST の当該変化（立方体→槍）が違う: " + timeoutCalls);
     mode = "通常";
     if (holdStepMs({ fx: "spin" }) !== HOLD_ANIM_MS) throw new Error("通常時の横回転に立方体が出る");
-    // 高速オートは「当りの保留」か「信頼度 50% 以上の先読みの保留」が入ったら低速に。
-    // その保留がハズレたら高速に戻す（他にまだ低速に落とす保留が残っていれば戻さない）
+    // 高速オートは「信頼度 50% 以上の先読みの保留」が入ったら低速に。
+    // 消化し終えて残りの保留に強い先読みが無ければ、当り・ハズレどちらでも高速に戻す
     currentMachine = "eva"; isAuto = true; autoSpeed = "fast"; autoBackToFast = false;
     leftStock = []; rightStock = [];
     slowDownForSakiyomi({ isHit: false, preTrust: 20 });
     if (autoSpeed !== "fast") throw new Error("弱い先読みのハズレで低速オートに切り替わった");
-    const strong = { isHit: false, preTrust: 91 };
-    slowDownForSakiyomi(strong);
-    if (autoSpeed !== "slow" || !strong.autoSlow) throw new Error("信頼度 50% 以上の先読みで低速オートに切り替わらない");
-    leftStock = [{ autoSlow: true }];
-    backToFastAfterMiss(strong);
-    if (autoSpeed !== "slow") throw new Error("低速に落とす保留が残っているのに高速に戻った");
+    slowDownForSakiyomi({ isHit: false, preTrust: 91 });
+    if (autoSpeed !== "slow") throw new Error("信頼度 50% 以上の先読みで低速オートに切り替わらない");
+    leftStock = [{ preTrust: 91 }];
+    backToFastAfterSlow();
+    if (autoSpeed !== "slow") throw new Error("強い先読みの保留が残っているのに高速に戻った");
     leftStock = [];
-    backToFastAfterMiss(strong);
-    if (autoSpeed !== "fast") throw new Error("先読みの保留がハズレても高速に戻らない");
+    backToFastAfterSlow();
+    if (autoSpeed !== "fast") throw new Error("先読みの保留を消化しても高速に戻らない");
+    // 当りの保留でも、消化し終えたら戻す
+    slowDownForSakiyomi({ isHit: true, preTrust: 95 });
+    backToFastAfterSlow();
+    if (autoSpeed !== "fast") throw new Error("当りの先読み保留の後で高速に戻らない");
+    // レバブル先読み（デバイス振動先読み）の保留は震える印を持ち、作り直しても続く
+    Math.random = makeRandomStrong(20261012);
+    let shook = null;
+    for (let i = 0; i < 400000 && !shook; i++) {
+      const j = createJob(false);
+      if (j.name.some((nm) => nm.startsWith("デバイス振動先読み"))) shook = j;
+    }
+    if (!shook || !shook.holdShake) throw new Error("デバイス振動先読みの保留に震える印が付かない");
+    if (!carryHold(shook, createJob(false)).holdShake) throw new Error("作り直した保留で震えが消えた");
+    // 残保留を判定し直して保留が作り直されても戻る（以前は保留の印が消えて戻らなかった）
+    slowDownForSakiyomi({ isHit: false, preTrust: 80 });
+    leftStock = [{ preTrust: 0 }];
+    backToFastAfterSlow();
+    if (autoSpeed !== "fast") throw new Error("作り直した保留のあとで高速に戻らない");
+    leftStock = [];
     // 先読みの無い保留は当りでも入った時点では切り替えない（当該の変動だけ低速）
     slowDownForSakiyomi({ isHit: true, preTrust: 0 });
     if (autoSpeed !== "fast") throw new Error("先読みの無い当り保留で低速オートに切り替わった");
@@ -717,6 +735,7 @@ function assertClose(label, actual, expected, tolerance) {
     for (let i = 0; i < 2000; i++) {
       const [a, b, c] = evaMissDigits(true);
       if (a !== c || b !== evaReelNext(a)) throw new Error("リーチのズレ目が違う: " + [a, b, c]);
+      if (a === 7) throw new Error("ST 中のハズレで 7 のリーチ（10R 濃厚）が出た");
       const [x, , z] = evaMissDigits(false);
       if (x === z) throw new Error("リーチなしで左右が揃った: " + [x, z]);
     }
@@ -786,7 +805,9 @@ function assertClose(label, actual, expected, tolerance) {
       if (!EVA_VOICE_ROLES[v.role]) throw new Error("ボイスの役が無い: " + v.id);
       for (const t of v.texts) if (!allTexts.has(t)) throw new Error("ボイスの文字に対応する演出が無い: " + JSON.stringify(t));
     }
-    if (evaVoiceOf("次回予告\\nレイ、心のむこうに") !== "next-rei" || evaVoiceOf("ドデカ図柄") !== null) throw new Error("ボイスの引き当てが違う");
+    // 次回予告・タイトル予告はミサトの固定セリフ（通常「この次も期待してね～」、濃厚は「この次もサービス、サービス」）
+    if (evaVoiceOf("次回予告\\nレイ、心のむこうに") !== "next-kitai" || evaVoiceOf("涙") !== "next-kitai" || evaVoiceOf("次回予告\\nサービス、サービス") !== "next-service" || evaVoiceOf("ドデカ図柄") !== null) throw new Error("ボイスの引き当てが違う");
+    if (evaVoiceOf("カヲル背景") !== null) throw new Error("カヲル背景にボイスが付いている");
     // リーチの演出（リーチ名・リーチボイス・カットイン）にはボイスを付けない
     for (const t of ["最終号機リーチ", "全回転リーチ\\n祝", "リーチ！", "ちょっち期待して", "サービス、サービス", "必ず殲滅する", "あなた達に未来を託すわ"]) {
       if (evaVoiceOf(t) !== null) throw new Error("リーチの演出にボイスが付いている: " + t);

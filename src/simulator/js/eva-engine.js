@@ -444,8 +444,10 @@ function createEvaJob(isRight, regime) {
   // 高速オートを保留が入った時点で低速に落とす判断に使う（当該で変わる保留は下で除く）
   let leadTrust = 0;
   let holdTrust = 0;
+  let holdShake = false; // レバブル先読み：入賞から消化まで保留を震わせる
   for (const { layer, state } of shown) {
     name.push(state.name);
+    if (state.holdShake) holdShake = true;
     if (layer.lead) leadTrust = Math.max(leadTrust, state.trust);
     if (layer.key === "hold") holdTrust = state.trust;
     if (state.holdType) {
@@ -560,6 +562,7 @@ function createEvaJob(isRight, regime) {
     leads,
     leadPlan: null,
     preTrust,
+    holdShake,
     notice: evaNoticeOf(shown), // 一発告知音（eva-voice.js）。保留を消化した瞬間に鳴らす
     // SP リーチ（全回転を含む）：SP に発展したら当該保留を消す
     sp: reach.id === "zenkaiten" || T.spec.spReaches.includes(reach.id),

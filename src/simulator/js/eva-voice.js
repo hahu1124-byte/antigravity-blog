@@ -19,55 +19,42 @@ const EVA_VOICE_ROLES = {
 
 // 音声の一覧：id（voice/<id>.mp3）・役・読み上げる文（読みを直すためにかなや数字に置き換える）・
 // 対応する演出の文字（eva-effects.js の state.text と同じもの）。
-// リーチの演出（リーチ名・リーチボイス・カットイン・SP 発展）には付けない。付けるのは次回予告の
-// ミサトのナレーション・ゲンドウ発言・背景予告・タイトルや警報の読み上げだけ（ユーザー方針 2026-10-03）
+// リーチの演出（リーチ名・リーチボイス・カットイン・SP 発展）には付けない（ユーザー方針 2026-10-03）。
+// 次回予告とタイトル予告はミサトの次回予告の固定セリフ（1geki の次回予告「ボイス」）：
+//   通常「この次も期待してね～」（58.6%）、大当り濃厚は「この次もサービス、サービス」（プレミア）
 const EVA_VOICES = [
-  // ミサト（次回予告）
+  // ミサト：次回予告・タイトル予告（通常）
   {
-    id: "service",
+    id: "next-kitai",
     role: "misato",
-    line: "サービス、サービス！",
-    texts: ["次回予告\nサービス、サービス"],
+    line: "この次も、期待してね〜",
+    texts: [
+      "次回予告\nレイ、心のむこうに",
+      "次回予告\nアスカ、来日",
+      "次回予告\n男の戰い",
+      "次回予告\n涙",
+      "次回予告\n奇跡の価値は",
+      "次回予告\nAir",
+      "レイ、心のむこうに",
+      "アスカ、来日",
+      "男の戰い",
+      "Air",
+      "涙",
+      "奇跡の価値は",
+    ],
   },
-  { id: "next", role: "misato", line: "次回予告", texts: ["次回予告"] },
+  // ミサト：大当り濃厚（サービス、サービス・黒地の次回予告・最後のシ者・発展先と矛盾のタイトル）
   {
-    id: "next-rei",
+    id: "next-service",
     role: "misato",
-    line: "次回、レイ、心のむこうに。",
-    texts: ["次回予告\nレイ、心のむこうに"],
+    line: "この次も、サービス、サービス！",
+    texts: [
+      "次回予告\nサービス、サービス",
+      "次回予告",
+      "最後のシ者",
+      "タイトル予告",
+    ],
   },
-  {
-    id: "next-asuka",
-    role: "misato",
-    line: "次回、アスカ、来日。",
-    texts: ["次回予告\nアスカ、来日"],
-  },
-  {
-    id: "next-otoko",
-    role: "misato",
-    line: "次回、男の戦い。",
-    texts: ["次回予告\n男の戰い"],
-  },
-  {
-    id: "next-namida",
-    role: "misato",
-    line: "次回、涙。",
-    texts: ["次回予告\n涙"],
-  },
-  {
-    id: "next-kiseki",
-    role: "misato",
-    line: "次回、奇跡の価値は。",
-    texts: ["次回予告\n奇跡の価値は"],
-  },
-  {
-    id: "next-air",
-    role: "misato",
-    line: "次回、エアー。",
-    texts: ["次回予告\nAir"],
-  },
-  // カヲル（背景予告）
-  { id: "kaworu-come", role: "kaworu", line: "来なさい", texts: ["来なさい"] },
   // ゲンドウ
   {
     id: "gendo-seele",
@@ -87,7 +74,7 @@ const EVA_VOICES = [
     line: "時計の針は、元には戻らない",
     texts: ["時計の針は元に戻らない"],
   },
-  // アナウンス（警報・タイトルの読み上げ。指定の無い役のセリフもここ）
+  // アナウンス（警報の読み上げ。指定の無い役のセリフもここ）
   {
     id: "alert",
     role: "announce",
@@ -106,38 +93,6 @@ const EVA_VOICES = [
     ],
   },
   { id: "caution", role: "announce", line: "コーション", texts: ["CAUTION"] },
-  {
-    id: "title-rei",
-    role: "announce",
-    line: "レイ、心のむこうに",
-    texts: ["レイ、心のむこうに"],
-  },
-  {
-    id: "title-asuka",
-    role: "announce",
-    line: "アスカ、来日",
-    texts: ["アスカ、来日"],
-  },
-  {
-    id: "title-otoko",
-    role: "announce",
-    line: "男の戦い",
-    texts: ["男の戰い"],
-  },
-  { id: "title-air", role: "announce", line: "エアー", texts: ["Air"] },
-  { id: "title-namida", role: "announce", line: "涙", texts: ["涙"] },
-  {
-    id: "title-kiseki",
-    role: "announce",
-    line: "奇跡の価値は",
-    texts: ["奇跡の価値は"],
-  },
-  {
-    id: "title-last",
-    role: "announce",
-    line: "最後のシシャ",
-    texts: ["最後のシ者", "タイトルランプ\n最後のシ者"],
-  },
 ];
 
 // 演出の文字 → 音声の id
@@ -201,7 +156,8 @@ evaRenderVoiceCredit();
 // 保留を消化した瞬間（変動開始）に鳴らす
 // ============================================================
 const EVA_NOTICE_SOUNDS = {
-  impact: { file: "se/sound_01.mp3", volume: 0.3, maxMs: 0 }, // インパクトフラッシュ
+  // インパクトフラッシュは一発告知のとき 2 回続けて鳴らす（ユーザー方針 2026-10-03）
+  impact: { file: "se/sound_01.mp3", volume: 0.3, maxMs: 0, times: 2 },
   ninth: { file: "se/sound_02.mp3", volume: 0.25, maxMs: 5000 }, // 着メロ 交響曲第九番
   gospel: { file: "se/sound_03.mp3", volume: 0.25, maxMs: 5000 }, // 着メロ 諸人こぞりて
 };
@@ -230,7 +186,8 @@ function evaNoticeOf(shown) {
 
 const evaNoticeCache = {};
 let evaNoticeTimer = null;
-function evaPlayNotice(id) {
+// times：続けて鳴らす回数（省くと音ごとの既定。復活当りの合図などは 1 回）
+function evaPlayNotice(id, times) {
   const snd = EVA_NOTICE_SOUNDS[id];
   if (!evaVoiceOn || !snd || typeof Audio === "undefined") return;
   let a = evaNoticeCache[id];
@@ -240,6 +197,14 @@ function evaPlayNotice(id) {
     evaNoticeCache[id] = a;
   }
   clearInterval(evaNoticeTimer);
+  // 鳴り終わったら残りの回数だけ頭からもう一度
+  let rest = (times || snd.times || 1) - 1;
+  a.onended = () => {
+    if (rest-- <= 0 || !evaVoiceOn) return;
+    a.currentTime = 0;
+    const p = a.play();
+    if (p && p.catch) p.catch(() => {});
+  };
   try {
     a.volume = snd.volume;
     a.currentTime = 0;

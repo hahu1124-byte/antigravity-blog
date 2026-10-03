@@ -493,7 +493,7 @@ async function evaRunDisplay(eff, opts) {
     eff.revived = true;
     if (screenEl) screenEl.classList.add("fx-revive");
     show([{ text: "復活！！", color: "gold" }]);
-    evaPlayNotice("impact");
+    evaPlayNotice("impact", 1); // 復活の合図は 1 回
     await evaSleep(150);
   }
   // 止まったらリーチの光を消し、当りならその段を光らせる
@@ -541,9 +541,13 @@ async function evaZenkaitenLap(eff, show, reachText, grid) {
   show("");
 }
 
-// ハズレ図柄（数字 3 つ）：リーチは左右を揃え、中は当り図柄の 1 コマ先（ズレ目）
+// ハズレ図柄（数字 3 つ・ST 中）：リーチは左右を揃え、中は当り図柄の 1 コマ先（ズレ目）。
+// 7 のリーチは 10R 濃厚なのでハズレでは作らない（3×3 と同じ。ユーザー指摘 2026-10-03）
 function evaMissDigits(tenpai) {
+  if (tenpai) {
+    const r = evaRandDigit([7]);
+    return [r, evaReelNext(r), r];
+  }
   const d1 = evaRandDigit();
-  if (tenpai) return [d1, evaReelNext(d1), d1];
   return [d1, evaRandDigit(), evaRandDigit([d1])];
 }

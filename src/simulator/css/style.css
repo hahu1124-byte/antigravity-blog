@@ -517,74 +517,69 @@ body.theme-eva .heso-ball::after {
 }
 
 /* 通常時・時短中の保留は 3D で左右にゆらゆら揺れる（ST の箱は揺らさない）。
-   違和感保留は揺れの周期が違うので見分けられる。横回転・槍・詰めるアニメの間は止める。
-   transform（拡大など）とぶつからないよう rotate で回す */
+   全部の保留の枠が同じ揺れをずっと続ける（枠ごとにずらさず、途中で止めない）ので、
+   消化して保留が詰まっても・色が変わっても、前の揺れとそろったまま動く。
+   点滅・振動・横回転・槍・詰めるアニメは揺れに重ねて足す（揺れを置き換えると最初からになるため）。
+   違和感保留だけ揺れの周期が違う（速い）。transform（拡大など）とぶつからないよう rotate で回す */
 body.theme-eva .heso-overlay:not(.right-mode) {
+  --hx-sway: hx-sway 2.6s ease-in-out infinite alternate;
   perspective: 160px;
 }
 
-body.theme-eva
-  .heso-overlay:not(.right-mode):not(.hold-shift)
-  .heso-ball:is(
-    .heso-none,
-    .heso-blue,
-    .heso-green,
-    .heso-red,
-    .heso-rainbow,
-    .heso-shogoki,
-    .heso-alert-red,
-    .heso-alert-purple,
-    .heso-odd,
-    .heso-blink,
-    .heso-blink-strong
-  ):not(.heso-anim-spin, .heso-anim-lance) {
-  animation: hx-sway 2.6s ease-in-out infinite alternate;
+body.theme-eva .heso-overlay:not(.right-mode) .heso-ball {
+  animation: var(--hx-sway);
 }
 
-/* 点滅保留は揺れと点滅を両方 */
-body.theme-eva
-  .heso-overlay:not(.right-mode):not(.hold-shift)
-  .heso-ball.heso-blink:not(.heso-anim-spin, .heso-anim-lance) {
+body.theme-eva .heso-overlay:not(.right-mode) .heso-ball.heso-blink {
   animation:
-    hx-sway 2.6s ease-in-out infinite alternate,
+    var(--hx-sway),
     heso-blink 0.6s steps(2) infinite;
 }
 
-body.theme-eva
-  .heso-overlay:not(.right-mode):not(.hold-shift)
-  .heso-ball.heso-blink-strong:not(.heso-anim-spin, .heso-anim-lance) {
+body.theme-eva .heso-overlay:not(.right-mode) .heso-ball.heso-blink-strong {
   animation:
-    hx-sway 2.6s ease-in-out infinite alternate,
+    var(--hx-sway),
     heso-blink 0.25s steps(2) infinite;
 }
 
-/* 違和感保留：揺れの周期が違う（速い） */
-body.theme-eva
-  .heso-overlay:not(.right-mode):not(.hold-shift)
-  .heso-ball.heso-odd:not(.heso-anim-spin, .heso-anim-lance) {
-  animation-duration: 1.1s;
+body.theme-eva .heso-overlay:not(.right-mode) .heso-ball.heso-odd {
+  animation: hx-sway 1.1s ease-in-out infinite alternate;
 }
 
-/* 並びごとに揺れをずらす（揺れているときだけ。横回転・槍のアニメはずらさない） */
-body.theme-eva
-  .heso-overlay:not(.right-mode):not(.hold-shift)
-  .heso-ball:nth-child(2):not(.heso-anim-spin, .heso-anim-lance) {
-  animation-delay: -0.5s;
+body.theme-eva .heso-overlay:not(.right-mode) .heso-ball.heso-vibe {
+  animation:
+    var(--hx-sway),
+    vibration 0.1s infinite !important;
 }
-body.theme-eva
-  .heso-overlay:not(.right-mode):not(.hold-shift)
-  .heso-ball:nth-child(3):not(.heso-anim-spin, .heso-anim-lance) {
-  animation-delay: -1s;
+
+/* レバブル先読みの保留：入賞から消化まで、色はそのままでレバブル保留と同じように震える
+   （script.js の paintHold が heso-shake を付ける。ST の箱も同じ） */
+body.theme-eva .heso-overlay:not(.right-mode) .heso-ball.heso-shake {
+  animation:
+    var(--hx-sway),
+    vibration 0.1s infinite;
 }
-body.theme-eva
-  .heso-overlay:not(.right-mode):not(.hold-shift)
-  .heso-ball:nth-child(4):not(.heso-anim-spin, .heso-anim-lance) {
-  animation-delay: -1.5s;
+
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-shake {
+  animation: vibration 0.1s infinite;
 }
-body.theme-eva
-  .heso-overlay:not(.right-mode):not(.hold-shift)
-  .heso-ball:nth-child(5):not(.heso-anim-spin, .heso-anim-lance) {
-  animation-delay: -2s;
+
+body.theme-eva .heso-overlay:not(.right-mode) .heso-ball.heso-anim-spin {
+  animation:
+    var(--hx-sway),
+    hx-spin 0.6s ease-out;
+}
+
+body.theme-eva .heso-overlay:not(.right-mode) .heso-ball.heso-anim-lance {
+  animation:
+    var(--hx-sway),
+    hx-lance-hit 0.65s ease-out;
+}
+
+body.theme-eva .heso-overlay.hold-shift:not(.right-mode) .heso-ball {
+  animation:
+    var(--hx-sway),
+    hx-slide 0.3s ease-out;
 }
 
 @keyframes hx-sway {
@@ -1586,6 +1581,32 @@ body.light-mode .log {
   border-color: #ccc;
 }
 
+/* ログとデバッグメニューは 1 つの枠（.side-col）にまとめ、デバッグはログの枠の下の部分に入れる。
+   枠の線はまとめた側が持ち、ログ自身の線と上の余白は消す */
+.side-col {
+  margin-top: 10px;
+  border: 1px solid #333;
+  background: #000;
+  box-sizing: border-box;
+}
+
+.side-col .log {
+  margin-top: 0;
+  border: none;
+}
+
+.side-col .debug-panel {
+  margin: 0;
+  border: none;
+  border-top: 1px dashed #444;
+  border-radius: 0;
+}
+
+body.light-mode .side-col {
+  border-color: #ccc;
+  background: #fff;
+}
+
 /* ============================================================
    グラフモーダル
    ============================================================ */
@@ -1990,8 +2011,18 @@ body.light-mode .machine-select-btn .machine-spec {
     flex: 2;
   }
 
-  .log {
+  /* PC：ログとデバッグを合わせた枠を液晶の台と同じ高さにし、ログがデバッグの分だけ縮む。
+     高さを固定すると台（中身で高さが変わる）とずれるので、横並びの行いっぱいに伸ばす。
+     contain: size でログの中身が行の高さを押し広げないようにする（行の高さ＝台の高さ） */
+  .side-col {
     margin-top: 0;
-    height: 515px;
+    align-self: stretch;
+    contain: size;
+  }
+
+  .side-col .log {
+    flex: 1;
+    min-height: 0;
+    height: auto;
   }
 }

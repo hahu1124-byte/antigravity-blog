@@ -534,6 +534,8 @@ function refreshStaleJob(job) {
 // 作り直した保留の見た目：保留の種類が同じなら、変化の途中経過をそのまま引き継ぐ
 // （赤だった保留が一度無地に戻ってまた赤になるのを防ぐ）
 function carryHold(oldJob, newJob) {
+  // 入賞時に見えていたレバブル先読みの震えは、作り直しても続ける
+  if (oldJob.holdShake) newJob.holdShake = true;
   if (oldJob.holdType === newJob.holdType && oldJob.holdSeq) {
     newJob.holdSeq = oldJob.holdSeq;
     newJob.holdWhen = oldJob.holdWhen;
@@ -950,7 +952,7 @@ async function startProcess() {
   }
   isAnim = false;
   // 先読みで低速にした保留がハズレたら、この 0.5 秒の待ちの後から高速オートに戻す
-  if (currentMachine === "eva") backToFastAfterMiss(eff);
+  if (currentMachine === "eva") backToFastAfterSlow();
   updateUI();
   updateAutoBtns();
   // 次回転への待機時間（高速時は5ms、低速時は図柄が止まってから0.5秒）
@@ -1086,24 +1088,27 @@ function takeLeadSteps(current) {
 
 // 高速オート中に、保留に居る間に見える先読み（前兆・入賞時・保留の見た目）で信頼度 50% 以上の
 // 保留が入ったら、その時点で低速オートに切り替える（先読みと保留変化を見せるため）。
-// その保留がハズレたら、図柄が止まって 0.5 秒後（低速の待ち時間）から高速オートに戻す。
+// その保留を消化し終えたら、図柄が止まって 0.5 秒後（低速の待ち時間）から高速オートに戻す。
 // 先読みの無い保留は当りでも切り替えない（当該の変動だけ startProcess で低速にする）。ユーザー方針 2026-10-03
 let autoBackToFast = false; // 自動で低速にしたか（ボタンを押したら解除）
+function hasStrongLead(job) {
+  return !!job && job.preTrust >= 50;
+}
 function slowDownForSakiyomi(job) {
   if (currentMachine !== "eva" || !isAuto) return;
-  if (!(job.preTrust >= 50)) return;
-  job.autoSlow = true;
+  if (!hasStrongLead(job)) return;
   if (autoSpeed !== "fast") return;
   autoSpeed = "slow";
   autoBackToFast = true;
   updateAutoBtns();
 }
 
-// 低速に落とした保留がハズレたら高速に戻す（まだ低速に落とす保留が残っていれば戻さない）
-function backToFastAfterMiss(eff) {
-  if (!eff.autoSlow || eff.isHit || !autoBackToFast) return;
-  if (!isAuto || autoSpeed !== "slow") return;
-  if ([...leftStock, ...rightStock].some((j) => j.autoSlow)) return;
+// 自動で低速にした後、残りの保留に信頼度 50% 以上の先読みが無くなったら高速に戻す。
+// 当り・ハズレどちらでも戻す（当りは当りの処理が終わってから。以前は当りだと戻さず、
+// 残保留を判定し直すと保留の印が消えて戻らなくなっていた。ユーザー指摘 2026-10-03）
+function backToFastAfterSlow() {
+  if (!autoBackToFast || !isAuto || autoSpeed !== "slow") return;
+  if ([...leftStock, ...rightStock].some(hasStrongLead)) return;
   autoSpeed = "fast";
   autoBackToFast = false;
   updateAutoBtns();
@@ -1162,6 +1167,9 @@ function paintHold(el, job, isCurrent) {
   if (job) {
     el.classList.add("heso-" + job.currentView);
     if (job.holdAnim) el.classList.add("heso-anim-" + job.holdAnim);
+    // レバブル先読みの保留は入賞から消化まで震える（変化のアニメ中・消えた後は除く）
+    else if (job.holdShake && job.currentView !== "gone")
+      el.classList.add("heso-shake");
   }
 }
 
