@@ -484,7 +484,7 @@ body.theme-eva .heso-ball {
   --hx-size: 5px;
   --hx-glow: transparent;
   --hx-inset: 2px;
-  --hx-depth: 1.3px; /* 厚みの板 1 枚ごとの奥行き */
+  --hx-depth: 1.4px; /* 厚みの板 1 枚ごとの奥行き（8 枚で約 11px） */
   position: relative;
   width: 30px;
   height: 26px;
@@ -530,23 +530,43 @@ body.theme-eva .heso-ball::after {
   transform: translateZ(0.4px);
 }
 
-/* 厚み：縁の色を暗くした板を奥へ 4 枚重ねる（揺れて横を向いたときに側面に見える） */
+/* 厚み：縁の色を暗くした板を奥へ 8 枚重ねる（約 11px。揺れて横を向いたときに側面に見える）。
+   手前ほど明るく、奥ほど暗くして立体に見せる */
 body.theme-eva .heso-ball > .hx-side {
   inset: 0;
-  background: color-mix(in srgb, var(--hx-edge) 45%, #000);
+  background: color-mix(in srgb, var(--hx-edge) var(--hx-lit), #000);
 }
 body.theme-eva .heso-ball > .hx-side1 {
+  --hx-lit: 62%;
   transform: translateZ(calc(var(--hx-depth) * -1));
 }
 body.theme-eva .heso-ball > .hx-side2 {
+  --hx-lit: 56%;
   transform: translateZ(calc(var(--hx-depth) * -2));
 }
 body.theme-eva .heso-ball > .hx-side3 {
+  --hx-lit: 50%;
   transform: translateZ(calc(var(--hx-depth) * -3));
 }
 body.theme-eva .heso-ball > .hx-side4 {
+  --hx-lit: 45%;
   transform: translateZ(calc(var(--hx-depth) * -4));
-  background: color-mix(in srgb, var(--hx-edge) 25%, #000);
+}
+body.theme-eva .heso-ball > .hx-side5 {
+  --hx-lit: 40%;
+  transform: translateZ(calc(var(--hx-depth) * -5));
+}
+body.theme-eva .heso-ball > .hx-side6 {
+  --hx-lit: 35%;
+  transform: translateZ(calc(var(--hx-depth) * -6));
+}
+body.theme-eva .heso-ball > .hx-side7 {
+  --hx-lit: 30%;
+  transform: translateZ(calc(var(--hx-depth) * -7));
+}
+body.theme-eva .heso-ball > .hx-side8 {
+  --hx-lit: 22%;
+  transform: translateZ(calc(var(--hx-depth) * -8));
 }
 
 /* 光：いちばん奥にぼかした色 */
@@ -555,7 +575,7 @@ body.theme-eva .heso-ball > .hx-glow {
   inset: -6px;
   border-radius: 50%;
   background: radial-gradient(closest-side, var(--hx-glow), transparent);
-  transform: translateZ(calc(var(--hx-depth) * -5));
+  transform: translateZ(calc(var(--hx-depth) * -9));
 }
 
 /* 消化中の白縁（縁より少し大きい白い板を縁のすぐ奥に置く） */
@@ -600,7 +620,7 @@ body:not(.theme-eva) .heso-ball > i {
    違和感保留だけ揺れの周期が違う（速い）。transform（拡大など）とぶつからないよう rotate で回す */
 body.theme-eva .heso-overlay:not(.right-mode) {
   --hx-sway: hx-sway 2.6s ease-in-out infinite alternate;
-  perspective: 160px;
+  perspective: 220px; /* 厚みを増やしたので遠近を少し弱めて歪みを抑える */
 }
 
 body.theme-eva .heso-overlay:not(.right-mode) .heso-ball {
@@ -661,10 +681,10 @@ body.theme-eva .heso-overlay.hold-shift:not(.right-mode) .heso-ball {
 
 @keyframes hx-sway {
   from {
-    rotate: y -24deg;
+    rotate: y -32deg;
   }
   to {
-    rotate: y 24deg;
+    rotate: y 32deg;
   }
 }
 
