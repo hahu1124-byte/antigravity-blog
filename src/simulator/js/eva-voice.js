@@ -133,7 +133,6 @@ const EVA_VOICES = [
     role: "announce",
     line: "警報、警報",
     texts: [
-      "警報",
       "警報\nイスラフェル",
       "警報\nレリエル",
       "警報\nゼルエル",
@@ -149,12 +148,12 @@ const EVA_VOICES = [
       "警報\nLv.4",
     ],
   },
-  // ミッションモード前兆の当該（4/4 で成功・継続・擬似連）
+  // ミッションモード前兆の当該（4/4 で成功・継続。ST の擬似連の層は 2026-10-04 に削除）
   {
     id: "caution",
     role: "announce",
     line: "コーション",
-    texts: ["CAUTION\n4/4", "CAUTION\n継続", "擬似連\nCAUTION"],
+    texts: ["CAUTION\n4/4", "CAUTION\n継続"],
   },
 ];
 

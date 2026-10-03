@@ -209,11 +209,12 @@ function assertClose(label, actual, expected, tolerance) {
   console.log(`[EVA] 開始 ${new Date(evaStartedAt).toISOString()}`);
 
   // 表から数え上げで確かめる（乱数なし）：表が作れる・同じ層の合計が 100% 以内（warn が無い）・
-  // リーチと演出の出た回の当りやすさ＝資料の信頼度。ST・時短の割合は未決（暫定。時短は強いリーチが
-  // ストーリーリーチ（濃厚）に替わるので、そこに付く演出は資料より高くなる）なので表示だけ
+  // リーチと演出の出た回の当りやすさ＝資料の信頼度。ST（高速区間を含む）の割合は 2026-10-04 に決定。
+  // 時短は強いリーチがストーリーリーチ（濃厚）に替わるので、そこに付く演出は資料より高くなる（それが正しい）ので表示だけ。
+  // ST の rate の層（入力デバイスなど）は枠に収まらないリーチで出る割合だけ縮める（info。信頼度は保つ）
   const evaCal = await run(`
     const out = [];
-    for (const [label, T, strict] of [["通常(400以下)", EVA_T_N_LOW, true], ["通常(401以上)", EVA_T_N_HIGH, true], ["時短", EVA_T_J, false], ["ST", EVA_T_S, false]]) {
+    for (const [label, T, strict] of [["通常(400以下)", EVA_T_N_LOW, true], ["通常(401以上)", EVA_T_N_HIGH, true], ["時短", EVA_T_J, false], ["ST", EVA_T_S, true], ["ST高速区間", EVA_T_S_FAST, true]]) {
       const P = T.pHit;
       const off = [];
       for (const r of evaStateFreqs(T)) {
@@ -373,7 +374,7 @@ function assertClose(label, actual, expected, tolerance) {
         statTol(shown, mid.n),
       );
     }
-    // 演出・リーチの出た回の当りやすさ＝信頼度（ST は割合が暫定なので表示だけ）。濃厚は 1 回でもハズレたら失敗
+    // 演出・リーチの出た回の当りやすさ＝信頼度（通常時・ST とも）。濃厚は 1 回でもハズレたら失敗
     console.log(
       `[EVA] ${label}: 演出・リーチの出た回の実測（n≥2000 は標準誤差の3.5倍で判定）`,
     );
@@ -396,7 +397,7 @@ function assertClose(label, actual, expected, tolerance) {
         throw new Error(
           `EVA ${label}: ${nm} は濃厚なのにハズレ ${row.n - row.hit} 件`,
         );
-      if (label !== "st" && row.n >= 2000)
+      if (row.n >= 2000)
         assertClose(
           `EVA ${label} ${nm} 出た回`,
           actual,
@@ -769,6 +770,10 @@ function assertClose(label, actual, expected, tolerance) {
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; currentRot = 0;
     Math.random = makeRandomStrong(20261005);
     mode = "ST";
+    // ST は消化する前の残り回転が 101 以上なら高速区間（sf）、100 以下なら s
+    rRem = 150;
+    if (createJob(true).regime !== "sf") throw new Error("ST の残り 150 回転の保留が高速区間（sf）でない");
+    rRem = 50;
     const stJob = createJob(true);
     if (stJob.regime !== "s") throw new Error("ST 中の保留の確率状態が s でない");
     mode = "通常";
@@ -807,7 +812,9 @@ function assertClose(label, actual, expected, tolerance) {
     rightStock = []; leftStock = []; rRem = 0; mode = "通常";
   `);
 
-  // 予告→発展先：対応するリーチ以外へはハズレで行かない（矛盾は大当り濃厚の別の演出）
+  // 予告→発展先：当りは必ず対応するリーチへ（矛盾は大当り濃厚の別の演出）。ハズレも対応するリーチへ行くが、
+  // 演出の信頼度が対応するリーチより低いもの（背景ノイズ違和感 9〜33% → ダミー 80.5% など）は、ハズレのとき
+  // 他の SP リーチのハズレ（10% 未満はリーチなし）へ行ってよい（案 B。そうしないとリーチのハズレの枠が足りない）
   await run(`
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs;
     Math.random = makeRandomStrong(20261013);
@@ -826,13 +833,19 @@ function assertClose(label, actual, expected, tolerance) {
       nm.endsWith("*") ? names.some((n) => n.startsWith(nm.slice(0, -1))) : names.includes(nm);
     const seen = {};
     for (const [md, right, rot] of [["通常", false, 500], ["ST", true, 0]]) {
-      mode = md; currentRot = rot;
+      mode = md; currentRot = rot; rRem = 0;
+      const T = md === "通常" ? EVA_T_N_HIGH : EVA_T_S;
+      const reachTrust = Object.fromEntries(T.reach.states.map((s, i) => [s.id, T.reach.trust[i] * 100]));
       for (let i = 0; i < 1500000; i++) {
         const j = createJob(right);
         for (const [nm, ok] of rules) {
           if (!hasName(j.name, nm)) continue;
           seen[nm] = (seen[nm] || 0) + 1;
-          if (!ok.includes(j.reachId)) throw new Error(nm + " が対応外のリーチ " + j.reachId + " へ発展した");
+          if (ok.includes(j.reachId)) continue;
+          const e = j.effects.find((x) => hasName([x.name], nm));
+          const lowest = Math.min(...ok.map((id) => reachTrust[id] ?? 100));
+          if (j.isHit || !e || e.trust >= lowest)
+            throw new Error(nm + " が対応外のリーチ " + j.reachId + " へ発展した（" + (j.isHit ? "当り" : "ハズレ") + "）");
         }
       }
     }
@@ -862,7 +875,8 @@ function assertClose(label, actual, expected, tolerance) {
     rejudgeStocks("ST", 163);
     // 右（電チュー）は ST の表で判定し直す。ヘソは右が優先して消化される間は消化されない（ST が終わってから）
     // ので通常時の表のまま（ユーザー指摘 2026-10-03：ヘソで保留連の示唆が出ていた）
-    if (!rightStock.every((j) => j.regime === "s")) throw new Error("右の残保留が ST の確率で判定し直されていない");
+    // ST に入った直後（残り 163 回転）の右の保留は高速区間（sf）の表
+    if (!rightStock.every((j) => j.regime === "sf")) throw new Error("右の残保留が ST（高速区間）の確率で判定し直されていない");
     if (!leftStock.every((j) => j.regime === "n")) throw new Error("ヘソの残保留が ST の確率で判定し直された");
     leftStock = []; rightStock = [];
     return { hits, kinds };
@@ -957,7 +971,8 @@ function assertClose(label, actual, expected, tolerance) {
     leftStock = [];
   `);
 
-  // 信頼度 50% 以上の保留・前兆は SP リーチの回転にしか出ない（赤保留がリーチ無しで終わらない）
+  // 信頼度 50% 以上の保留・前兆は SP リーチの回転にしか出ない（赤保留がリーチ無しで終わらない）。
+  // ST は図柄テンパイ（リーチはかかる）のハズレにも乗る（保留 35% などが SP リーチのハズレだけでは収まらない。2026-10-04）
   await run(`
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; currentRot = 0;
     Math.random = makeRandomStrong(20261010);
@@ -969,7 +984,7 @@ function assertClose(label, actual, expected, tolerance) {
         const strong = j.holdType === "red" || j.name.some((nm) => nm.startsWith("カウントダウン(0:シンジ)") || nm === "カウントダウン");
         if (!strong) continue;
         reds++;
-        if (!j.sp) throw new Error(md + ": 信頼度の高い保留・前兆が SP リーチ以外で出た: " + j.name.join("+") + " / " + j.reachId);
+        if (!j.sp && !(md === "ST" && j.reachId === "tenpai")) throw new Error(md + ": 信頼度の高い保留・前兆が SP リーチ以外で出た: " + j.name.join("+") + " / " + j.reachId);
       }
       if (!reds) throw new Error(md + ": 赤保留・カウントダウンが出ない");
     }
