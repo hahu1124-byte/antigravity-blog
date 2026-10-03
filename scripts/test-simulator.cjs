@@ -432,6 +432,22 @@ function assertClose(label, actual, expected, tolerance) {
   }
   if (!evaMc.high.names["群予告(シンジ)"])
     throw new Error("群予告 did not appear when currentRot>400");
+  // レイ背景は 400 回転まで、401 回転からは群予告に替わる
+  if (!evaMc.low.names["レイ背景"])
+    throw new Error("レイ背景が 400 回転以内で出ない");
+  if (evaMc.high.names["レイ背景"])
+    throw new Error("レイ背景が 401 回転以上で出た");
+  // カウントダウンの 0 はシンジかカヲルかが分かる
+  await run(`
+    for (const L of [...EVA_LAYERS_N, ...EVA_LAYERS_S]) {
+      for (const s of L.states) {
+        if (!s.id.startsWith("countdown")) continue;
+        const who = s.id === "countdown-kaworu" ? "カヲル" : "シンジ";
+        if (!s.text.includes(who) || s.lead.length !== 3)
+          throw new Error("カウントダウンの 0 のキャラが分からない: " + s.name);
+      }
+    }
+  `);
 
   // 変化保留：青・緑・赤・虹は入賞時は無地で、変化の流れの最後が保留の層の結果と一致する。
   // それ以外の保留（点滅・警報など）は入賞時からその見た目

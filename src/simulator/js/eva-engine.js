@@ -102,8 +102,11 @@ function evaBoostedLayer(layer, states, reach, spReaches, pHit, alpha) {
 
 function evaBuildTables(spec, rot, alpha) {
   const pHit = spec.pHit;
+  // minRot / maxRot：出せる回転数の範囲（群予告は 401 回転から、レイ背景は 400 回転まで）
   const active = (layer) =>
-    layer.states.filter((s) => !s.minRot || rot >= s.minRot);
+    layer.states.filter(
+      (s) => (!s.minRot || rot >= s.minRot) && (!s.maxRot || rot <= s.maxRot),
+    );
   const free = spec.layers
     .filter((layer) => !layer.spBoost)
     .map((layer) => {

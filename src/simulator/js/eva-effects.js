@@ -35,6 +35,9 @@ const EVA_KAKUHEN = ["r10", "k3"];
 // 3R確変のうち偶数図柄で揃えて昇格で見せる割合（見た目だけ。確率には関係しない）
 const EVA_UPGRADE_RATE = 0.183;
 
+// カウントダウン先読みの 3→2→1（保留に居る間の変動に出す。0 は当該でシンジかカヲル）
+const EVA_COUNTDOWN_LEAD = ["３\nミサト", "２\nアスカ", "１\nレイ"];
+
 const EVA_SP_REACHES = [
   "synchro",
   "zero",
@@ -219,8 +222,9 @@ const EVA_LAYERS_N = [
         name: "カウントダウン(0:シンジ)",
         trust: 75.4,
         share: 3,
-        lead: ["３", "２", "１"],
-        text: "０",
+        // 3:ミサト→2:アスカ→1:レイ→0:シンジ（カヲルなら確変濃厚）。0 のキャラで分かるように出す
+        lead: EVA_COUNTDOWN_LEAD,
+        text: "０\nシンジ",
       },
       {
         id: "countdown-kaworu",
@@ -228,8 +232,9 @@ const EVA_LAYERS_N = [
         trust: 100,
         share: 0.2,
         only: EVA_KAKUHEN,
-        lead: ["３", "２", "１"],
-        text: "カヲル",
+        lead: EVA_COUNTDOWN_LEAD,
+        text: "０\nカヲル",
+        color: "rainbow",
       },
       {
         id: "sound-1",
@@ -811,11 +816,13 @@ const EVA_LINKED_N = [
     label: "リーチ後予告",
     reaches: EVA_SP_REACHES,
     states: [
+      // レイ背景は 400 回転まで。401 回転からは代わりに群予告（下の minRot: 401）が出る（ユーザー方針 2026-10-03）
       {
         id: "rei-bg",
         name: "レイ背景",
         trust: 85.4,
         share: 4,
+        maxRot: 400,
         text: "レイ背景",
       },
       // 旧レイ・アスカ・ユイ・加持・キール・零号機の背景は大当り濃厚（確変までは決まらない）
@@ -1829,16 +1836,17 @@ const EVA_LAYERS_S = [
         name: "カウントダウン",
         trust: 85.2,
         share: 2,
-        lead: ["３", "２", "１"],
-        text: "０",
+        lead: EVA_COUNTDOWN_LEAD,
+        text: "０\nシンジ",
       },
       {
         id: "countdown-kaworu",
         name: "カウントダウン(0:カヲル)",
         trust: 100,
         share: 0.3,
-        lead: ["３", "２", "１"],
-        text: "カヲル",
+        lead: EVA_COUNTDOWN_LEAD,
+        text: "０\nカヲル",
+        color: "rainbow",
       },
       {
         id: "eyecatch-red",
