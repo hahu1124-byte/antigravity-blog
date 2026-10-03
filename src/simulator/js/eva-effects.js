@@ -466,6 +466,8 @@ const EVA_LAYERS_N = [
     key: "pre-step",
     spBoost: EVA_SP_BOOST,
     label: "リーチ前予告",
+    // 層の中は排他のまま、出現率の倍率（eva-tune.js）だけ id の頭で分けたまとまりごとに持つ
+    groups: { stepup: ["su-"], chara: ["chara-"], serif: ["serif-"] },
     states: [
       {
         id: "su-silver5",
@@ -1126,6 +1128,16 @@ const EVA_LINKED_N = [
     key: "trigger",
     label: "発展契機",
     reaches: EVA_SP_REACHES,
+    // 発展契機は 1 つのリーチに 1 つ（排他）。出現率の倍率だけ種類ごとに持つ
+    groups: {
+      title: ["title-"],
+      shito: ["shito-"],
+      scene: ["scene-"],
+      next: ["next-"],
+      tlamp: ["lamp-"],
+      meeting: ["meeting-"],
+      barake: ["barake-"],
+    },
     states: [
       {
         id: "title-rei",
@@ -1823,6 +1835,28 @@ const EVA_LINKED_N = [
     ],
   },
 ];
+
+// 頻度の目標：通常時の大当りのうち何%に出るか（p-town の実戦 52 回の分析を丸めた値。誤差 ±10pt）。
+// キーは層の key（groups のある層は "key/group"）。scripts/eva-tools/tune-freq.cjs がこれに合わせて
+// まとまりごとの出現率の倍率を解き、eva-tune.js に書き出す。
+// SP 発展（75%）はリーチの配分で決まる部品なので倍率では合わせない
+const EVA_FREQ_TARGETS_N = {
+  hold: 30, // 保留変化
+  bg: 25, // 背景変化
+  zoom: 20, // 図柄拡大
+  start: 45, // 変動開始時ランプ
+  "pre-step/stepup": 35, // ステップアップ
+  "trigger/title": 30, // タイトル予告
+  order: 20, // 図柄送り
+  "pre-step/serif": 15, // セリフ
+  "trigger/shito": 10, // 使徒予告
+  lance: 35, // 槍役物連続
+  "after-voice": 35, // テンパイボイス
+  "after-lance": 30, // 槍通過
+  "after-lamp": 20, // 使徒襲来ランプ
+  "after-toka": 15, // 初号機透過
+  "trigger/next": 5, // 次回予告
+};
 
 // ============================================================
 // ST「IMPACT MODE」シンジモード（違和感保留の 3 種はでちゃう！の同じ表の値）

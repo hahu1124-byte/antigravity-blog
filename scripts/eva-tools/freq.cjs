@@ -6,7 +6,12 @@ const vm = require("vm");
 
 const [jsDir, outFile] = process.argv.slice(2);
 const ctx = vm.createContext({ console, Math });
-for (const f of ["eva-effects.js", "eva-voice.js", "eva-engine.js"]) {
+for (const f of [
+  "eva-effects.js",
+  "eva-tune.js",
+  "eva-voice.js",
+  "eva-engine.js",
+]) {
   vm.runInContext(fs.readFileSync(path.join(jsDir, f), "utf8"), ctx, {
     filename: f,
   });
@@ -26,14 +31,19 @@ const rows = vm.runInContext(
   ctx,
 );
 
-const every = (p) => (p > 0 ? `1/${Math.round(1 / p).toLocaleString()}` : "出ない");
+const every = (p) =>
+  p > 0 ? `1/${Math.round(1 / p).toLocaleString()}` : "出ない";
 const trust = (t) => (t >= 100 ? "濃厚" : `${t}%`);
 
 // 通常時：400 回転以下と 401 回転以上を横に並べる（同じ層・同じ名前で突き合わせ）
 const normal = new Map();
 for (const r of rows.filter((r) => r.table !== "st")) {
   const key = r.layer + "\u0000" + r.name;
-  const row = normal.get(key) || { layer: r.layer, name: r.name, trust: r.trust };
+  const row = normal.get(key) || {
+    layer: r.layer,
+    name: r.name,
+    trust: r.trust,
+  };
   row[r.table] = r;
   normal.set(key, row);
 }
@@ -48,7 +58,9 @@ lines.push("- 信頼度は資料の値（その演出が出たときの当りや
 lines.push("");
 lines.push("## 通常時（ヘソ）");
 lines.push("");
-lines.push("| 層 | 演出 | 信頼度 | 400回転以下 | 401回転以上 | 単独なら当りの |");
+lines.push(
+  "| 層 | 演出 | 信頼度 | 400回転以下 | 401回転以上 | 単独なら当りの |",
+);
 lines.push("| --- | --- | --- | --- | --- | --- |");
 for (const r of normal.values()) {
   const solo = (r.high || r.low).solo;

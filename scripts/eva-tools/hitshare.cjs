@@ -8,7 +8,12 @@ const vm = require("vm");
 const [jsDir, nArg] = process.argv.slice(2);
 const N = Number(nArg || 2000000);
 const ctx = vm.createContext({ console, Math, currentRot: 0 });
-for (const f of ["eva-effects.js", "eva-voice.js", "eva-engine.js"]) {
+for (const f of [
+  "eva-effects.js",
+  "eva-tune.js",
+  "eva-voice.js",
+  "eva-engine.js",
+]) {
   vm.runInContext(fs.readFileSync(path.join(jsDir, f), "utf8"), ctx, {
     filename: f,
   });

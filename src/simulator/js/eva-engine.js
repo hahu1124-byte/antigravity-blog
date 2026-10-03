@@ -50,6 +50,23 @@ function evaFreq(s, pHit, alpha) {
   return s.trust >= 100 || s.fixed ? base : base * alpha;
 }
 
+// 出現率の倍率のまとまり：層の key。層に groups があれば id の頭で分けて "key/group"
+// （層の中の排他はそのまま、倍率だけ別に持つ。発展契機のタイトル予告・次回予告など）
+function evaScaleKey(layer, s) {
+  if (layer.groups) {
+    for (const [g, heads] of Object.entries(layer.groups)) {
+      if (heads.some((h) => s.id.startsWith(h))) return layer.key + "/" + g;
+    }
+  }
+  return layer.key;
+}
+
+// まとまりの出現率の倍率（eva-tune.js の EVA_FREQ_SCALE。頻度の目標に合わせて解いた値）。
+// alpha と掛けて evaFreq に渡すので、信頼度 100% と fixed の演出には効かない
+function evaScaleOf(spec, layer, s) {
+  return (spec.scale && spec.scale[evaScaleKey(layer, s)]) || 1;
+}
+
 // spBoost の層：SP リーチの回転では spBoost 倍出やすくする（実機の予告は SP リーチに乗って来ることが多い）。
 // 予告とリーチが同じ回転に重なるので当りの枠を共有でき、リーチも予告もそれなりの頻度で出せる。
 // 全体の出現率は share から決まる値のまま。リーチが決まった後に引くので linked と同じ形にする
@@ -61,7 +78,9 @@ const EVA_BOOST_MIN_TRUST = 20;
 // 当該レバブル（fixed：当りの約 3 割に出す）も、SP だけに寄せると枠が足りないので対象外
 const EVA_SP_ONLY_TRUST = 50;
 
-function evaBoostedLayer(layer, states, reach, spReaches, pHit, alpha) {
+// alphaOf(s)：その演出に掛ける係数（alpha × まとまりの倍率）
+function evaBoostedLayer(layer, states, reach, spReaches, pHit, alphaOf) {
+  const fr = states.map((s) => evaFreq(s, pHit, alphaOf(s)));
   const isSp = reach.states.map((rs) => spReaches.includes(rs.id));
   const pSp = reach.probs.reduce((sum, p, i) => (isSp[i] ? sum + p : sum), 0);
   const spOnly = states.map(
@@ -82,13 +101,13 @@ function evaBoostedLayer(layer, states, reach, spReaches, pHit, alpha) {
   const base = states.map((s, i) =>
     s.reaches
       ? pSet[i] > 0
-        ? evaFreq(s, pHit, alpha) / pSet[i]
+        ? fr[i] / pSet[i]
         : 0
       : spOnly[i]
         ? pSp > 0
-          ? evaFreq(s, pHit, alpha) / pSp
+          ? fr[i] / pSp
           : 0
-        : evaFreq(s, pHit, alpha) / (1 - pSp + ks[i] * pSp),
+        : fr[i] / (1 - pSp + ks[i] * pSp),
   );
   const probsByReach = reach.states.map((rs, r) => {
     const probs = base.map((b, i) =>
@@ -105,7 +124,8 @@ function evaBoostedLayer(layer, states, reach, spReaches, pHit, alpha) {
             : b,
     );
     const none = 1 - probs.reduce((a, b) => a + b, 0);
-    if (none < -1e-12) {
+    // 出ないリーチ（alpha=0 で固定分だけ数えるときなど）の行は使われないので確かめない
+    if (none < -1e-12 && reach.probs[r] > 0) {
       throw new Error(
         `${layer.label}: ${rs.name} の出現率の合計が 1 を超えています`,
       );
@@ -115,6 +135,7 @@ function evaBoostedLayer(layer, states, reach, spReaches, pHit, alpha) {
   return {
     key: layer.key,
     label: layer.label,
+    groups: layer.groups || null,
     component: !!layer.component,
     lead: layer.lead || null,
     states: [...states, EVA_NONE],
@@ -133,13 +154,16 @@ function evaBuildTables(spec, rot, alpha) {
     .filter((layer) => !layer.spBoost)
     .map((layer) => {
       const states = active(layer);
-      const probs = states.map((s) => evaFreq(s, pHit, alpha));
+      const probs = states.map((s) =>
+        evaFreq(s, pHit, alpha * evaScaleOf(spec, layer, s)),
+      );
       const none = 1 - probs.reduce((a, b) => a + b, 0);
       if (none < 0)
         throw new Error(`${layer.label}: 出現率の合計が 1 を超えています`);
       return {
         key: layer.key,
         label: layer.label,
+        groups: layer.groups || null,
         isReach: !!layer.isReach,
         component: !!layer.component,
         lead: layer.lead || null,
@@ -151,7 +175,14 @@ function evaBuildTables(spec, rot, alpha) {
   const boosted = spec.layers
     .filter((layer) => layer.spBoost)
     .map((layer) =>
-      evaBoostedLayer(layer, active(layer), reach, spec.spReaches, pHit, alpha),
+      evaBoostedLayer(
+        layer,
+        active(layer),
+        reach,
+        spec.spReaches,
+        pHit,
+        (s) => alpha * evaScaleOf(spec, layer, s),
+      ),
     );
   const linkedOwn = spec.linked.map((layer) => {
     const states = active(layer);
@@ -167,10 +198,12 @@ function evaBuildTables(spec, rot, alpha) {
           (sum, x, i) => (reaches.includes(x.id) ? sum + reach.probs[i] : sum),
           0,
         );
-        return pSet > 0 ? evaFreq(s, pHit, alpha) / pSet : 0;
+        return pSet > 0
+          ? evaFreq(s, pHit, alpha * evaScaleOf(spec, layer, s)) / pSet
+          : 0;
       });
       const none = 1 - probs.reduce((a, b) => a + b, 0);
-      if (none < -1e-12) {
+      if (none < -1e-12 && reach.probs[r] > 0) {
         throw new Error(
           `${layer.label}: ${rs.name} の出現率の合計が 1 を超えています`,
         );
@@ -180,6 +213,7 @@ function evaBuildTables(spec, rot, alpha) {
     return {
       key: layer.key,
       label: layer.label,
+      groups: layer.groups || null,
       component: !!layer.component,
       states: [...states, EVA_NONE],
       probsByReach,
@@ -282,23 +316,78 @@ function evaExpect(T) {
   return out;
 }
 
+// まとまり（evaScaleKey）ごとに「当りのうち何%に出るか」を厳密に数え上げる（頻度の調整と試験用）。
+// そのまとまりの演出の出現率だけ 0 にした表（「なし」は元のまま）で当りの期待値を出し直すと、
+// 元との差が E[f × そのまとまりが出た] になる（層の中は排他なのでまとまりの中も排他）
+function evaGroupShares(T, keys) {
+  const full = evaExpect(T).effect;
+  const out = {};
+  for (const key of keys) {
+    const off = (L, probs) =>
+      probs.map((p, i) =>
+        L.states[i].id !== "none" && evaScaleKey(L, L.states[i]) === key
+          ? 0
+          : p,
+      );
+    const free = T.free.map((L) =>
+      L.isReach ? L : { ...L, probs: off(L, L.probs) },
+    );
+    const linked = T.linked.map((L) => ({
+      ...L,
+      probsByReach: L.probsByReach.map((probs) => off(L, probs)),
+    }));
+    const e = evaExpect({ ...T, free, linked }).effect;
+    out[key] = (full - e) / T.pHit;
+  }
+  return out;
+}
+
 // 当り確率が仕様どおりになるよう alpha を決め、無演出当りの確率と 3R確変の比を出す
 function evaCalibrate(spec, rot) {
   const target = spec.pHit * (1 - EVA_SUDDEN_SHARE);
-  // alpha は縮めるだけでなく広げもする（余った枠を突発当りに回しすぎないため。上限 EVA_ALPHA_MAX）
+  // alpha は縮めるだけでなく広げもする（余った枠を突発当りに回しすぎないため。上限 EVA_ALPHA_MAX）。
+  // 広げて出現率の合計が 1 を超える（SP リーチの回転に乗せきれない）ときは、作れるところで止める。
+  // 縮める方向で作れないのは、リーチ（alpha に比例）が減って信頼度 100% の演出（alpha が効かない）が
+  // SP リーチの回転に収まらないとき。倍率（eva-tune.js）の上げすぎなので、そのまま投げる
+  const tryBuild = (a) => {
+    try {
+      return evaBuildTables(spec, rot, a);
+    } catch (e) {
+      return null;
+    }
+  };
+  // 始めの alpha=1 は最終の値（0.3 前後）より大きいので、倍率を上げた層が 1 を超えることがある。
+  // そのときは 0.01 まで縮めて始める。それでも作れなければ alpha=1 のときの理由を投げる
   let alpha = 1;
-  let T = evaBuildTables(spec, rot, alpha);
+  let T = tryBuild(alpha);
+  while (!T && alpha > 0.01) {
+    alpha /= 2;
+    T = tryBuild(alpha);
+  }
+  if (!T) evaBuildTables(spec, rot, 1);
   let E = evaExpect(T);
   // alpha で縮まない分（100%・fixed の演出）。SP 限定の演出は alpha=0 で SP の回転ごと消える（出現率 0 で正しい）
   const fixed = evaExpect(evaBuildTables(spec, rot, 0)).effect;
-  for (let i = 0; i < 12 && Math.abs(E.effect - target) > target * 1e-4; i++) {
-    const next = Math.min(
-      EVA_ALPHA_MAX,
-      alpha * ((target - fixed) / (E.effect - fixed)),
-    );
+  let ceil = EVA_ALPHA_MAX;
+  for (let i = 0; i < 30 && Math.abs(E.effect - target) > target * 1e-4; i++) {
+    let next = Math.min(ceil, alpha * ((target - fixed) / (E.effect - fixed)));
     if (next === alpha) break;
+    if (next < alpha) {
+      alpha = next;
+      T = evaBuildTables(spec, rot, alpha);
+      E = evaExpect(T);
+      continue;
+    }
+    let Tn = tryBuild(next);
+    // 広げて作れなければ今の alpha との間まで戻す（そこが広げられる上限）
+    while (!Tn && next / alpha > 1.0001) {
+      ceil = next;
+      next = Math.sqrt(next * alpha);
+      Tn = tryBuild(next);
+    }
+    if (!Tn) break;
     alpha = next;
-    T = evaBuildTables(spec, rot, alpha);
+    T = Tn;
     E = evaExpect(T);
   }
   const base0 = (spec.pHit - E.effect) / E.none;
@@ -339,6 +428,7 @@ const EVA_SPEC_N = {
   layers: EVA_LAYERS_N,
   linked: EVA_LINKED_N,
   spReaches: EVA_SP_REACHES,
+  scale: EVA_FREQ_SCALE.n,
 };
 const EVA_SPEC_S = {
   pHit: EVA_S_HIT / EVA_BIT,
@@ -346,6 +436,7 @@ const EVA_SPEC_S = {
   layers: EVA_LAYERS_S,
   linked: EVA_LINKED_S,
   spReaches: EVA_ST_SP,
+  scale: EVA_FREQ_SCALE.s,
 };
 // 時短（チャンスタイム）中はストーリーリーチ（vsアルミサエル・vsサハクィエル）が大当り濃厚
 // （なな徹 7335）。通常時の表をもとに、その 2 本の信頼度だけ 100% にした表を使う
