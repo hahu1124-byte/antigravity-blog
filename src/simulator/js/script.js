@@ -1211,7 +1211,7 @@ function scheduleLeads(job, count) {
         spark: l.spark || null, // 図柄停止時発光：その変動の図柄が止まったらキラキラ
         remain: l.remain || null, // ST の残り回数の違和感：液晶の真ん中に「残り N」
         // 前兆（先読み）の段は図柄を隠して専用画面に切り替え、当該と同じ効果（ドックンの炎など）を出す
-        takeover: l.kind === "pre",
+        takeover: l.kind === "pre" && !l.remain,
         fx:
           l.kind === "pre" ? (o.fx !== undefined ? o.fx : l.fx || null) : null,
       };
@@ -1383,6 +1383,14 @@ function updateUI() {
   const modeLabel = M.modeLabel(mode);
   document.getElementById("sub-display").innerText =
     mode === "通常" ? `通常:${lcdCount}` : `${modeLabel}:${rRem}`;
+  // EVA の ST 中は左下に残り回転を出し、保留はその上に小さく出す（style.css の .screen.st-mode）
+  const stOn = currentMachine === "eva" && mode === "ST";
+  const stBox = document.getElementById("st-remain");
+  if (stBox) stBox.style.display = stOn ? "flex" : "none";
+  const stNum = document.getElementById("st-remain-num");
+  if (stNum) stNum.innerText = rRem;
+  const scr = document.getElementById("screen");
+  if (scr && scr.classList) scr.classList.toggle("st-mode", stOn);
   updateHesoUI();
 }
 

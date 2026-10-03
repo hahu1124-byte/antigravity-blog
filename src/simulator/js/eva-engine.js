@@ -957,7 +957,8 @@ function createEvaJob(isRight, regime, opts = {}) {
         // キャラ連続：キャラが出るたびに図柄が仮停止して擬似連のように続く（eva-reel.js の evaPlayChara）
         chara: state.chara || null,
         // 前兆（先読み系）の段は、図柄を隠してその演出の専用画面に切り替える（eva-reel.js）
-        takeover: layer.lead === "pre",
+        // 残り回数の違和感は左下の数字が変わるだけなので図柄は隠さない
+        takeover: layer.lead === "pre" && !state.remain,
         fx: layer.lead === "pre" ? state.fx || null : null,
       });
     }

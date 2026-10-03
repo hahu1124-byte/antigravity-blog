@@ -8,7 +8,7 @@
     />
     <title>EVANGELION Sim -2025 Final-</title>
     <!-- 分割したCSSを読み込み -->
-    <link rel="stylesheet" href="css/style.css?v=20261004-remain" />
+    <link rel="stylesheet" href="css/style.css?v=20261004-stleft" />
   </head>
 
   <body class="theme-eva">
@@ -121,6 +121,11 @@
             <div id="h2" class="heso-ball"></div>
             <div id="h3" class="heso-ball"></div>
             <div id="h4" class="heso-ball"></div>
+          </div>
+          <!-- ST 中の残り回転（左下。残り回数の違和感で赤くなる・震えるなど。script.js の updateUI と eva-reel.js） -->
+          <div id="st-remain" class="st-remain" style="display: none">
+            <span class="sr-label">残り</span>
+            <span class="sr-num" id="st-remain-num">163</span>
           </div>
           <div
             id="denchu-area"
@@ -265,10 +270,10 @@
     <!-- Chart.js ライブラリ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- 分割したJSを読み込み（EVA の演出データ → 抽選エンジン → 本体の順） -->
-    <script src="js/eva-effects.js?v=20261004-remain"></script>
-    <script src="js/eva-voice.js?v=20261004-remain"></script>
-    <script src="js/eva-engine.js?v=20261004-remain"></script>
-    <script src="js/eva-reel.js?v=20261004-remain"></script>
-    <script src="js/script.js?v=20261004-remain"></script>
+    <script src="js/eva-effects.js?v=20261004-stleft"></script>
+    <script src="js/eva-voice.js?v=20261004-stleft"></script>
+    <script src="js/eva-engine.js?v=20261004-stleft"></script>
+    <script src="js/eva-reel.js?v=20261004-stleft"></script>
+    <script src="js/script.js?v=20261004-stleft"></script>
   </body>
 </html>

@@ -1592,8 +1592,8 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   }
 }
 
-/* ST の残り回数の違和感：液晶の真ん中に大きく「残り N」（eva-reel.js の evaShowRemain）。
-   白は無演出即当りの前。赤文字・ノイズ大／小・ガタガタ・虹文字で見分ける */
+/* ST の残り回転の告知：液晶の真ん中に大きく「残り N」（eva-reel.js の evaShowRemain）。
+   ふだんは残り 100・50・10 のときだけ。それ以外で出るのは無演出即当りの前の違和感 */
 .remain-panel {
   position: absolute;
   inset: 0;
@@ -1636,15 +1636,50 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
     4px 4px 0 #000;
 }
 
-.remain-panel.rp-red .rp-num {
-  color: #ff3b3b;
-  -webkit-text-stroke-color: #5a0000;
-  text-shadow:
-    0 0 14px #ff1a1a,
-    4px 4px 0 #000;
+/* ST 中の左下の残り回転（実機の液晶の左下の表示。script.js の updateUI）。
+   残り回数の違和感（eva-reel.js の evaMarkRemain）で赤文字・ノイズ大／小・ガタガタ・虹文字になる */
+.st-remain {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  z-index: 6;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 2px 8px 0;
+  border: 2px solid #8a8fa8;
+  border-radius: 4px;
+  background: linear-gradient(#2a2440, #0b0a14);
+  box-shadow: 0 0 6px rgba(160, 120, 255, 0.5);
+  pointer-events: none;
 }
 
-.remain-panel.rp-rainbow .rp-num {
+.st-remain .sr-label {
+  color: #b9c3e8;
+  font-weight: 900;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+}
+
+.st-remain .sr-num {
+  color: #eef2ff;
+  font-family: "Shippori Mincho B1", serif;
+  font-weight: 900;
+  font-size: 1.9rem;
+  line-height: 1.1;
+  text-shadow:
+    0 0 6px #7a8cff,
+    2px 2px 0 #000;
+}
+
+.st-remain.sr-red .sr-num {
+  color: #ff3b3b;
+  text-shadow:
+    0 0 8px #ff1a1a,
+    2px 2px 0 #000;
+}
+
+.st-remain.sr-rainbow .sr-num {
   background: linear-gradient(
     90deg,
     #ff3b3b,
@@ -1657,36 +1692,53 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  -webkit-text-stroke: 0;
   text-shadow: none;
-  filter: drop-shadow(3px 3px 0 #000);
+  filter: drop-shadow(2px 2px 0 #000);
 }
 
-.remain-panel.rp-shake .rp-num {
+.st-remain.sr-shake {
   animation: remain-shake 0.08s linear infinite;
 }
 
-.remain-panel.rp-noise-s .rp-num,
-.remain-panel.rp-noise-l .rp-num {
+.st-remain.sr-noise-s .sr-num,
+.st-remain.sr-noise-l .sr-num {
   animation: remain-noise 0.12s steps(2) infinite;
 }
 
-.remain-panel.rp-noise-l {
+.st-remain.sr-noise-l {
   background:
     repeating-linear-gradient(
       0deg,
-      rgba(255, 255, 255, 0.12) 0 2px,
-      transparent 2px 5px
+      rgba(255, 255, 255, 0.18) 0 1px,
+      transparent 1px 3px
     ),
-    radial-gradient(
-      ellipse at 50% 55%,
-      rgba(60, 10, 70, 0.85),
-      rgba(0, 0, 0, 0.6) 75%
-    );
+    linear-gradient(#3a1440, #0b0a14);
 }
 
-.remain-panel.rp-noise-l .rp-num {
+.st-remain.sr-noise-l .sr-num {
   animation-duration: 0.07s;
+}
+
+/* ST 中の保留は左下の残り回転の上に小さく並べる（液晶の図柄に重ねない）。
+   保留変化の立方体などは保留の位置を測って出すので、拡大縮小ではなく箱の大きさで小さくする */
+body.theme-eva .screen.st-mode .heso-overlay.right-mode {
+  left: 8px;
+  right: auto;
+  bottom: 50px;
+  gap: 5px;
+  --hx-step: 31px; /* 箱の幅 26px＋間隔 5px */
+}
+
+/* 保留の数（左下）は ST 中だけ左上へ逃がす（残り回転の表示と重ならないよう） */
+.screen.st-mode #stock-count-display {
+  bottom: auto !important;
+  top: 5px;
+}
+
+body.theme-eva .screen.st-mode .heso-overlay.right-mode .heso-ball {
+  --hx-size: 5px;
+  width: 26px;
+  height: 17px;
 }
 
 @keyframes remain-in {

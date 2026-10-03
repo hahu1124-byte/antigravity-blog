@@ -447,9 +447,21 @@ function evaSpark(color) {
   }
 }
 
-// ST の残り回数の違和感：液晶の真ん中に大きく「残り N」（N は今の残り回転）を出す（実機の動画 2026-10-04）。
-// kind：white（無演出即当りの前）・red（赤文字）・noise-l／noise-s（ノイズ大／小）・shake（ガタガタ）・rainbow（虹文字）
+// ST の残り回転の告知：液晶の真ん中に大きく「残り N」（N は今の残り回転。実機の動画 2026-10-04）。
+// ふだんは残り 100・50・10 のときだけ出る（EVA_REMAIN_ANNOUNCE）。それ以外の回転で出るのは違和感で、
+// 高速区間の無演出即当りの前に出る（kind "white"）
 const EVA_REMAIN_MS = 1000;
+const EVA_REMAIN_ANNOUNCE = [100, 50, 10];
+
+// ST の残り回数の違和感（残り回数表示の赤文字・ノイズ大／小・ガタガタ・虹文字）：左下の残り回転の表示に掛ける。
+// その変動の間だけ（次の変動の始めに evaRunDisplay が消す）。kind：red・noise-l・noise-s・shake・rainbow
+function evaMarkRemain(kind) {
+  const el = document.getElementById("st-remain");
+  if (!el || !el.classList) return;
+  for (const k of ["red", "noise-l", "noise-s", "shake", "rainbow"]) {
+    el.classList.toggle("sr-" + k, k === kind);
+  }
+}
 function evaShowRemain(kind) {
   const screen = document.getElementById("screen");
   if (!screen || !screen.appendChild) return;
@@ -558,6 +570,16 @@ async function evaPlayChara(item, ctl) {
 async function evaRunDisplay(eff, opts) {
   evaSpark(null);
   evaSetBg(null);
+  evaMarkRemain(null);
+  // 残り 100・50・10 は毎回、変動の始めに真ん中で告知する
+  if (
+    !opts.instant &&
+    typeof mode !== "undefined" &&
+    mode === "ST" &&
+    EVA_REMAIN_ANNOUNCE.includes(rRem)
+  ) {
+    evaShowRemain("white");
+  }
   evaSparkPending = null;
   await evaRunDisplayMain(eff, opts);
   if (evaSparkPending && !opts.instant) evaSpark(evaSparkPending);
@@ -677,7 +699,7 @@ async function evaRunDisplayMain(eff, opts) {
     const bg = t.find((s) => s.bg);
     if (bg) evaSetBg(bg.bg);
     const rm = t.find((s) => s.remain);
-    if (rm) evaShowRemain(rm.remain);
+    if (rm) evaMarkRemain(rm.remain);
   };
   const steps = opts.steps || [];
   const pre = evaChunkSteps(
