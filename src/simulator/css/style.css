@@ -1211,12 +1211,20 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   --ls-y: calc(100% - 22px);
 }
 
+/* 槍は図柄の真ん中の高さ（液晶の上下の真ん中）より下にだけ見せ、そこから出てくるようにする
+   （ユーザー方針：保留変化の槍は図柄の半分下から出る） */
+.lance-stage .ls-spear-clip {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(50% 0 0 0);
+}
+
 .lance-stage .ls-spear {
   position: absolute;
   left: calc(var(--ls-x) - 3px);
   bottom: calc(100% - var(--ls-y));
   width: 6px;
-  height: 62%;
+  height: 45%;
   background: linear-gradient(#ffb0b0, #c00000 40%, #6a0000);
   box-shadow: 0 0 10px #ff2a2a;
   transform-origin: 50% 100%;

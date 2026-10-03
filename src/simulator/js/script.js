@@ -737,7 +737,9 @@ function playLanceStage(holdEl) {
     stage.id = "lance-stage";
     stage.className = "lance-stage";
     stage.innerHTML =
-      '<div class="ls-fire"></div><div class="ls-spear"></div>' +
+      // 槍は図柄の真ん中の高さより下にだけ見える（そこから出てくる。style.css の .ls-spear-clip）
+      '<div class="ls-fire"></div>' +
+      '<div class="ls-spear-clip"><div class="ls-spear"></div></div>' +
       '<div class="ls-flash"></div><div class="ls-text">ロンギヌスの槍</div>';
     screen.appendChild(stage);
   }
