@@ -573,7 +573,7 @@ function stepHold(job, anim) {
   // 槍の変化は液晶全体の槍演出を出し、槍が刺さった瞬間に色を変える（実機の録画と同じ流れ）。
   // ST 中の横回転の変化は、液晶いっぱいに「変化」の立方体が回ってから色を変える
   if (anim && st.fx === "lance") {
-    playLanceStage();
+    playLanceStage(holdElementOf(job));
     setTimeout(apply, HOLD_LANCE_HIT_MS);
   } else if (anim && st.fx === "spin" && useChangeStage()) {
     playChangeStage(holdElementOf(job));
@@ -649,7 +649,8 @@ function playChangeStage(holdEl) {
 // 液晶全体のロンギヌスの槍演出：炎の中を大きな槍が落ちてきて保留に刺さり、閃光が走る
 const HOLD_LANCE_STAGE_MS = 1500; // 演出全体の長さ（style.css の .lance-stage と合わせる）
 const HOLD_LANCE_HIT_MS = 1000; // 槍が刺さって保留の色が変わるまで
-function playLanceStage() {
+// holdEl：変わる保留。槍はその保留へ右斜め上から落ちて刺さる（無ければ保留の並びの真ん中あたり）
+function playLanceStage(holdEl) {
   const screen = document.getElementById("screen");
   if (!screen) return;
   let stage = document.getElementById("lance-stage");
@@ -661,6 +662,13 @@ function playLanceStage() {
       '<div class="ls-fire"></div><div class="ls-spear"></div>' +
       '<div class="ls-flash"></div><div class="ls-text">ロンギヌスの槍</div>';
     screen.appendChild(stage);
+  }
+  // 刺さる位置（液晶の中での保留の中心）を style.css の --ls-x / --ls-y に渡す
+  if (holdEl && holdEl.getBoundingClientRect && screen.getBoundingClientRect) {
+    const h = holdEl.getBoundingClientRect();
+    const s = screen.getBoundingClientRect();
+    stage.style.setProperty("--ls-x", `${h.left - s.left + h.width / 2}px`);
+    stage.style.setProperty("--ls-y", `${h.top - s.top + h.height / 2}px`);
   }
   // 続けて出たときもアニメを最初からにする
   stage.classList.remove("on");

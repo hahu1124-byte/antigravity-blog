@@ -1080,14 +1080,20 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   }
 }
 
-/* 大きな槍：赤い柄に二又の穂先。上から斜めに落ちて保留の列に刺さる */
+/* 大きな槍：赤い柄に二又の穂先。変わる保留へ右斜め上から落ちて刺さる。
+   穂先（下端）を保留の中心（--ls-x / --ls-y。script.js の playLanceStage が入れる）に置き、
+   穂先を軸に 28 度傾けて右上から来る向きにする。落ちる動きは柄の向きに沿ってずらす */
+.lance-stage {
+  --ls-x: 50%;
+  --ls-y: calc(100% - 22px);
+}
+
 .lance-stage .ls-spear {
   position: absolute;
-  left: 50%;
-  bottom: 22px;
+  left: calc(var(--ls-x) - 3px);
+  bottom: calc(100% - var(--ls-y));
   width: 6px;
   height: 62%;
-  margin-left: -3px;
   background: linear-gradient(#ffb0b0, #c00000 40%, #6a0000);
   box-shadow: 0 0 10px #ff2a2a;
   transform-origin: 50% 100%;
@@ -1110,32 +1116,32 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
 @keyframes ls-spear {
   0%,
   35% {
-    transform: translate(60%, -140%) rotate(-18deg);
+    transform: rotate(28deg) translateY(-130%);
     opacity: 0;
   }
   45% {
     opacity: 1;
   }
   66% {
-    transform: translate(0, 0) rotate(0deg);
+    transform: rotate(28deg) translateY(0);
     opacity: 1;
   }
   90% {
-    transform: translate(0, 0) rotate(0deg);
+    transform: rotate(28deg) translateY(0);
     opacity: 1;
   }
   100% {
-    transform: translate(0, 0) rotate(0deg);
+    transform: rotate(28deg) translateY(0);
     opacity: 0;
   }
 }
 
-/* 刺さった瞬間の閃光 */
+/* 刺さった瞬間の閃光（刺さった保留を中心に） */
 .lance-stage .ls-flash {
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    circle at 50% 90%,
+    circle at var(--ls-x) var(--ls-y),
     #fff 0%,
     #ffe36b 30%,
     rgba(255, 120, 0, 0) 70%
