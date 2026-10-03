@@ -455,17 +455,27 @@ function assertClose(label, actual, expected, tolerance) {
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "ST"; currentRot = 0;
     Math.random = makeRandom(20261006);
     const spins = 3000000;
-    let hits = 0, sure = 0, sureMiss = 0;
+    let hits = 0, sure = 0, sureMiss = 0, leverHits = 0, leverMiss = 0;
     for (let i = 0; i < spins; i++) {
       const job = createJob(true);
       if (job.isHit) hits++;
       if (job.sure) { sure++; if (!job.isHit) sureMiss++; }
+      if (job.vibe) { if (job.isHit) leverHits++; else leverMiss++; }
     }
-    return { spins, hits, sure, sureMiss };
+    return { spins, hits, sure, sureMiss, leverHits, leverMiss };
   `);
   assertClose("EVA ST odds", evaSt.spins / evaSt.hits, 1048576 / 10544, 2);
   if (evaSt.sureMiss)
     throw new Error(`EVA ST: 濃厚なのにハズレ ${evaSt.sureMiss} 件`);
+  // ST 中の当該レバブルはどれも当り確定で、出るのは当りの約2割
+  if (evaSt.leverMiss)
+    throw new Error(`EVA ST: 当該レバブルでハズレ ${evaSt.leverMiss} 件`);
+  assertClose(
+    "EVA ST レバブル 当り絡み率",
+    evaSt.leverHits / evaSt.hits,
+    0.2,
+    0.01,
+  );
 
   if (evaMc.low.names["群予告(レイ)"] || evaMc.low.names["群予告(シンジ)"]) {
     throw new Error("群予告 appeared while currentRot<=400 (gating broken)");

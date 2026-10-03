@@ -661,22 +661,24 @@ const EVA_LAYERS_S = [
     ],
   },
   {
-    // シミュ専用の当該レバブル（旧来の値のまま）
+    // シミュ専用の当該レバブル。ST 中はどれも当り確定のまま、出るのは当りの約2割
+    // （ユーザー方針 2026-10-03。旧来は当りの 98.6% に出て他の演出の意味が無くなっていた）。
+    // 白:赤:虹 の比は旧来（6720:2880:800）のまま
     key: "lever",
     label: "当該レバブル",
     states: [
       {
         id: "white",
         name: "白レバブル",
-        hit: 6720,
+        hit: 1363,
         miss: 0,
         vibeColor: "white",
       },
-      { id: "red", name: "赤レバブル", hit: 2880, miss: 0, vibeColor: "red" },
+      { id: "red", name: "赤レバブル", hit: 584, miss: 0, vibeColor: "red" },
       {
         id: "rainbow",
         name: "虹レバブル",
-        hit: 800,
+        hit: 162,
         miss: 0,
         vibeColor: "rainbow",
       },
