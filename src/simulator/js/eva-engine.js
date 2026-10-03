@@ -1,39 +1,25 @@
 /* --- EVA15風 抽選エンジン --- */
 
 // ============================================================
-// 1回転を「リーチ → 予告の層（層の中は排他）」の順に引いて、出た演出を先に決め、
-// その組合せの信頼度 f で当否を引く（ユーザー方針 2026-10-03）。
-//   f = 出た演出の信頼度（記事の値）の最大
-//       ただし「数える演出」が 2 つ重なれば最低 80%、3 つ以上なら 100%（大当り濃厚）
-//       信頼度 100% の演出が出れば 100%
-// 表示の信頼度は f そのもの＝その回転の本当の当りやすさ。
-// 数える演出は信頼度 EVA_COMBO_MIN_TRUST 以上の高信頼度の予告とリーチだけ（ユーザー方針：
-// 60% の演出 2 つなら 80%、レバブルと 30% の演出ならレバブルの信頼度のまま）。リーチに必ず付く部品
-// （ST の入力デバイス・SP 発展・シャッター：層の component）は max には使うが数えない。
-//
-// 当り確率（通常 1/319.688・ST 1/99.448）を固定するため、読み込み時に出現率を校正する：
-// 信頼度 100% 未満の演出の出現率を係数 alpha で縮め、残りを無演出当り（突発当り）に回す。
-// 信頼度 100% の演出（全回転・一発告知）と fixed の演出（当該レバブル）は縮めない。
-// 期待値は層の独立性を使って厳密に数え上げる（乱数で回さない）。
-// 旧方式（2^20 の整数テーブル＋事後確率表示）は、この規則と両立しないため廃止した。
+// 当否を先に決め、当り用・ハズレ用の表から演出を引く（案 B。ユーザー決定 2026-10-04）。
+//   当否：65536 個の番号から 1 つ（当り範囲：通常・時短 205 個＝1/319.7、ST 659 個＝1/99.4）
+//   当りなら当り用の表、ハズレならハズレ用の表で、リーチ → 各層（層の中は 1 回転に 1 つ）の順に引く
+// 演出ごとの出現率（eva-effects.js の決めた割合 EVA_PLAN_N から読み込み時に作る）：
+//   当り用の表 a ＝ その演出が「当りのうち何%に付くか」
+//   ハズレ用の表 b ＝ a × T(1−t) ÷ (t(1−T))（t：演出の信頼度、T：基準の当りやすさ。
+//   リーチ前の予告は当り確率、リーチに付く演出はそのリーチの信頼度）。
+//   これで「出た回の当りやすさ＝資料の信頼度」がどの演出・どのリーチでも成り立つ。濃厚は b＝0
+// 液晶に出す信頼度は、出た組合せの事後確率 P·Πa ÷ (P·Πa ＋ (1−P)·Πb)（層は当否ごとに独立なので積）。
+// 旧方式（組合せのいちばん高い信頼度で当否・alpha の校正・2 つで 80%）は、予告が SP リーチに寄って
+// シンクロが 31%（資料 3.1%）、リーチなしの当りが当りの 2 割になったため 2026-10-04 に廃止した。
 // ============================================================
 
-const EVA_COMBO_MIN_TRUST = 50; // 「2 つ以上」で数える高信頼度の演出の下限（%）
-const EVA_COMBO2_FLOOR = 80; // 2 つ重なったときの最低信頼度（%）
-const EVA_SUDDEN_SHARE = 0.01; // 無演出当り（突発当り）に回す当りの割合（1%＝1/31,969 回転。ユーザー方針 2026-10-04）
-const EVA_ALPHA_MAX = 4; // 出現率の係数の上限（広げすぎて出現率の合計が 1 を超えないように）
+const EVA_SUDDEN_SHARE = 0.01; // 突発当り（リーチなしの当り）＝当りの 1%（1/31,969 回転。ユーザー方針 2026-10-04）
+const EVA_LOW_TRUST = 10; // 信頼度がこれ未満の予告：当りのうち＝信頼度×信頼度、ハズレはリーチなしの回転にも出る
+const EVA_SURE_MIN_HIT = 0.1; // 濃厚の演出の当りのうち（%）の下限
+const EVA_ALWAYS_SURE_RATE = 0.005; // 必ず出る部品の濃厚：そのリーチの当りのときに出る割合
 
 const EVA_NONE = { id: "none", name: "なし" };
-
-function evaF(k, maxT, sure) {
-  if (sure || k >= 3) return 1;
-  if (k === 2) return Math.max(maxT, EVA_COMBO2_FLOOR) / 100;
-  return maxT / 100;
-}
-
-function evaCounted(layer, s) {
-  return !layer.component && s.trust >= EVA_COMBO_MIN_TRUST;
-}
 
 // 「確変濃厚」「10R確変濃厚」の判定（only で当り種別を絞った 100% の演出）
 function evaSureKind(s) {
@@ -43,16 +29,9 @@ function evaSureKind(s) {
   return null;
 }
 
-// 層の各状態の出現率。share は「単独で出たとき当りの何%を占めるか」の重み、
-// rate はリーチが決まった後の出現率（部品の層）
-function evaFreq(s, pHit, alpha) {
-  const base = ((s.share / 100) * pHit) / (s.trust / 100);
-  return s.trust >= 100 || s.fixed ? base : base * alpha;
-}
-
-// 出現率の倍率のまとまり：層の key。層に groups があれば id の頭で分けて "key/group"
-// （層の中の排他はそのまま、倍率だけ別に持つ。発展契機のタイトル予告・次回予告など）
-function evaScaleKey(layer, s) {
+// 層の中のまとまり：層の key。層に groups があれば id の頭で分けて "key/group"
+// （発展契機のタイトル予告・次回予告、リーチ前予告のステップアップ・セリフなど）
+function evaGroupKey(layer, s) {
   if (layer.groups) {
     for (const [g, heads] of Object.entries(layer.groups)) {
       if (heads.some((h) => s.id.startsWith(h))) return layer.key + "/" + g;
@@ -61,352 +40,487 @@ function evaScaleKey(layer, s) {
   return layer.key;
 }
 
-// まとまりの出現率の倍率（eva-tune.js の EVA_FREQ_SCALE。頻度の目標に合わせて解いた値）。
-// alpha と掛けて evaFreq に渡すので、信頼度 100% と fixed の演出には効かない
-function evaScaleOf(spec, layer, s) {
-  return (spec.scale && spec.scale[evaScaleKey(layer, s)]) || 1;
+// まとまりの目安：数（当りのうち何%）か { each：10%以上の演出 1 つあたりの% }。無ければ undefined
+function evaBudgetOf(plan, layer, s) {
+  const b = plan && plan.budget[layer.key];
+  if (b === undefined || typeof b === "number" || b.each !== undefined)
+    return b;
+  return b[evaGroupKey(layer, s).slice(layer.key.length + 1)];
 }
 
-// spBoost の層：SP リーチの回転では spBoost 倍出やすくする（実機の予告は SP リーチに乗って来ることが多い）。
-// 予告とリーチが同じ回転に重なるので当りの枠を共有でき、リーチも予告もそれなりの頻度で出せる。
-// 全体の出現率は share から決まる値のまま。リーチが決まった後に引くので linked と同じ形にする
-// 弱い演出（信頼度 EVA_BOOST_MIN_TRUST 未満：点滅・青保留など）はどの回転でも出るので寄せない
-const EVA_BOOST_MIN_TRUST = 20;
-// 信頼度がこれ以上（100% 未満）の予告・保留は SP リーチの回転にしか出さない。
-// 赤保留やカウントダウンがリーチ無しのハズレで終わる（何も起きない）のを防ぐ（ユーザー指摘 2026-10-03）。
-// 100% の演出（一発告知など）はリーチ無しの突発当りでも出るので対象外。
-// 当該レバブル（fixed：当りの約 3 割に出す）も、SP だけに寄せると枠が足りないので対象外
-const EVA_SP_ONLY_TRUST = 50;
+// その演出が出られるリーチ（id の配列。null はどのリーチでも）
+function evaReachesOf(layer, s) {
+  return s.reaches || layer.reaches || null;
+}
 
-// alphaOf(s)：その演出に掛ける係数（alpha × まとまりの倍率）
-function evaBoostedLayer(layer, states, reach, spReaches, pHit, alphaOf) {
-  const fr = states.map((s) => evaFreq(s, pHit, alphaOf(s)));
-  const isSp = reach.states.map((rs) => spReaches.includes(rs.id));
-  const pSp = reach.probs.reduce((sum, p, i) => (isSp[i] ? sum + p : sum), 0);
-  const spOnly = states.map(
-    (s) => s.trust >= EVA_SP_ONLY_TRUST && s.trust < 100 && !s.fixed,
-  );
-  const ks = states.map((s) =>
-    s.trust >= EVA_BOOST_MIN_TRUST ? layer.spBoost : 1,
-  );
-  // reaches を持つ状態は、そのリーチの回転だけに全部を乗せる（予告→発展先の対応。
-  // 群予告レイなら零号機リーチだけ、など）。全体の出現率は share から決まる値のまま
-  const pOf = (ids) =>
-    reach.probs.reduce(
-      (sum, p, i) => (ids.includes(reach.states[i].id) ? sum + p : sum),
-      0,
-    );
-  const pSet = states.map((s) => (s.reaches ? pOf(s.reaches) : 0));
-  // SP 限定の状態は SP の回転だけに全部を乗せる（全体の出現率は share から決まる値のまま）
-  const base = states.map((s, i) =>
-    s.reaches
-      ? pSet[i] > 0
-        ? fr[i] / pSet[i]
-        : 0
-      : spOnly[i]
-        ? pSp > 0
-          ? fr[i] / pSp
-          : 0
-        : fr[i] / (1 - pSp + ks[i] * pSp),
-  );
-  const probsByReach = reach.states.map((rs, r) => {
-    const probs = base.map((b, i) =>
-      states[i].reaches
-        ? states[i].reaches.includes(rs.id)
-          ? b
-          : 0
-        : spOnly[i]
-          ? isSp[r]
-            ? b
-            : 0
-          : isSp[r]
-            ? b * ks[i]
-            : b,
-    );
-    const none = 1 - probs.reduce((a, b) => a + b, 0);
-    // 出ないリーチ（alpha=0 で固定分だけ数えるときなど）の行は使われないので確かめない
-    if (none < -1e-12 && reach.probs[r] > 0) {
-      throw new Error(
-        `${layer.label}: ${rs.name} の出現率の合計が 1 を超えています`,
-      );
+// リーチに付く演出の乗せ先。演出に付くリーチの指定が無ければ、信頼度で分けた帯（plan.bands）のリーチに乗せる
+// （弱い演出を強いリーチに乗せると、そのリーチのハズレが足りなくなる）。濃厚は層の指定どおり全部
+function evaAttachOf(plan, layer, s) {
+  const ids = evaReachesOf(layer, s);
+  if (s.reaches || !plan || !plan.bands || s.trust >= 100) return ids;
+  const band = plan.bands.find((b) => s.trust < b.below);
+  return band ? band.reaches.filter((id) => !ids || ids.includes(id)) : ids;
+}
+
+// ハズレ用の出現率の倍率：当り用の出現率 a に掛けるとハズレ用の b（t：演出の信頼度、T：基準の当りやすさ）
+function evaMissFactor(t, T) {
+  if (t >= 1 || T >= 1 || t <= 0) return 0;
+  return (T * (1 - t)) / (t * (1 - T));
+}
+
+// 演出ごとの「当りのうち何%に付くか」を決める（必ず出る部品・rate の層は別に解く）：
+//   個別に決めた値（plan.hit）→ 濃厚は share か 0.1% の大きいほう → 10%未満は 信頼度×信頼度
+//   → 10%以上はまとまりの目安から上の分を引いた残りを配る（plan.spread の層は付くリーチの当りに比例、
+//     ほかは同じ割合ずつ）。目安が { each } なら 1 つあたりその値
+// ST（plan が無い）は値が未決なので share をそのまま使う
+function evaResolveHits(spec, layer, states, hitByReach, trustByReach) {
+  const h = new Map();
+  // 目安の残りを配った演出（表づくりで、リーチの枠が溢れたらまとまりの中で配り直してよいもの）
+  h.mid = new Set();
+  const plan = spec.plan;
+  if (!plan) {
+    for (const s of states) h.set(s, s.share || 0);
+    return h;
+  }
+  const own = plan.hit[layer.key] || {};
+  const groups = new Map();
+  for (const s of states) {
+    const g = evaGroupKey(layer, s);
+    if (!groups.has(g)) groups.set(g, []);
+    groups.get(g).push(s);
+  }
+  for (const list of groups.values()) {
+    const budget = evaBudgetOf(plan, layer, list[0]);
+    const mid = [];
+    for (const s of list) {
+      if (own[s.id] !== undefined) h.set(s, own[s.id]);
+      else if (s.trust >= 100)
+        h.set(s, Math.max(s.share || 0, EVA_SURE_MIN_HIT));
+      else if (s.trust < EVA_LOW_TRUST) h.set(s, (s.trust * s.trust) / 100);
+      else mid.push(s);
     }
-    return [...probs, Math.max(0, none)];
-  });
-  return {
-    key: layer.key,
-    label: layer.label,
-    groups: layer.groups || null,
-    component: !!layer.component,
-    lead: layer.lead || null,
-    states: [...states, EVA_NONE],
-    probsByReach,
-  };
+    if (!mid.length) continue;
+    if (typeof budget === "number") {
+      const fixed = list.reduce((sum, s) => sum + (h.get(s) || 0), 0);
+      const rest = Math.max(0, budget - fixed);
+      // 付くリーチの当りに比例。信頼度がそのリーチより低い演出はハズレを多く使うので、その倍率で割って小さくする
+      // （同じまとまりの中で高い演出に回す。まとまりの目安は変えない）
+      const weight = (s) => {
+        if (!plan.spread.includes(layer.key)) return 1;
+        const ids = evaAttachOf(plan, layer, s);
+        if (!ids) return 1;
+        return ids.reduce((sum, id) => {
+          const T = (trustByReach[id] || 0) / 100;
+          const k = evaMissFactor(s.trust / 100, T);
+          return sum + (hitByReach[id] || 0) / Math.max(1, k);
+        }, 0);
+      };
+      const wSum = mid.reduce((sum, s) => sum + weight(s), 0);
+      for (const s of mid) {
+        h.set(s, wSum > 0 ? (rest * weight(s)) / wSum : 0);
+        h.mid.add(s);
+      }
+    } else if (budget && budget.each !== undefined) {
+      for (const s of mid) h.set(s, budget.each);
+    } else {
+      for (const s of mid) h.set(s, s.share || 0);
+    }
+  }
+  return h;
 }
 
-function evaBuildTables(spec, rot, alpha) {
-  const pHit = spec.pHit;
-  // minRot / maxRot：出せる回転数の範囲（群予告は 401 回転から、レイ背景は 400 回転まで）
+// リーチに付く層で、あるリーチの当り用・ハズレ用の合計が 1 を超えたら、そのリーチの「目安の残りを配った演出」を
+// 枠に収まるまで縮め、縮めた分を同じまとまりの演出の、まだ空きのあるリーチ側へ移す（発展契機のように
+// まとまりの目安が大きい層で、強いリーチの枠が足りなくなるため）。リーチごとにハズレ＝当り×倍率を保つので、
+// 演出の出た回の当りやすさは信頼度のまま。まとまりの目安も変わらない（移す先が無いときだけ減る）
+function evaRebalanceLinked(def, states, hs, hit, miss, aR, bR, TR, noneR) {
+  const n = states.length;
+  const isMid = states.map((s) => hs.mid.has(s));
+  const group = states.map((s) => evaGroupKey(def, s));
+  const k = (r, i) => evaMissFactor(states[i].trust / 100, TR[r]);
+  const target = {};
+  states.forEach((s, i) => {
+    if (isMid[i]) target[group[i]] = (target[group[i]] || 0) + hs.get(s) / 100;
+  });
+  const full = new Set();
+  for (let it = 0; it < 100; it++) {
+    let clipped = false;
+    for (let r = 0; r < noneR; r++) {
+      if (!(aR[r] > 0)) continue;
+      let fh = 0;
+      let mh = 0;
+      let fm = 0;
+      let mm = 0;
+      for (let i = 0; i < n; i++) {
+        const x = hit[r][i];
+        if (!x) continue;
+        if (isMid[i]) {
+          mh += x;
+          mm += x * k(r, i);
+        } else {
+          fh += x;
+          fm += x * k(r, i);
+        }
+      }
+      let s = 1;
+      if (fh + mh > 1 + 1e-9 && mh > 0) s = Math.min(s, (1 - fh) / mh);
+      if (bR[r] > 0 && fm + mm > 1 + 1e-9 && mm > 0)
+        s = Math.min(s, (1 - fm) / mm);
+      if (s < 1) {
+        s = Math.max(0, s);
+        for (let i = 0; i < n; i++) if (isMid[i]) hit[r][i] *= s;
+        full.add(r);
+        clipped = true;
+      }
+    }
+    if (!clipped) break;
+    for (const g of Object.keys(target)) {
+      let cur = 0;
+      let room = 0;
+      for (let i = 0; i < n; i++) {
+        if (!isMid[i] || group[i] !== g) continue;
+        for (let r = 0; r < noneR; r++) {
+          cur += aR[r] * hit[r][i];
+          if (!full.has(r)) room += aR[r] * hit[r][i];
+        }
+      }
+      const lack = target[g] - cur;
+      if (lack <= 1e-12 || room <= 0) continue;
+      const f = 1 + lack / room;
+      for (let i = 0; i < n; i++) {
+        if (!isMid[i] || group[i] !== g) continue;
+        for (let r = 0; r < noneR; r++) if (!full.has(r)) hit[r][i] *= f;
+      }
+    }
+  }
+  for (let i = 0; i < n; i++) {
+    if (!isMid[i]) continue;
+    for (let r = 0; r < noneR; r++) miss[r][i] = hit[r][i] * k(r, i);
+  }
+}
+
+// 当り用・ハズレ用の表を作る。rot：今の回転数（群予告は 401 回転から、レイ背景は 400 回転まで）。
+// 返り値の reach.hit / reach.miss はリーチの出現率、layers[].hit[r] / miss[r] はリーチ r のときの層の出現率
+// （最後が「なし」）。同じ層の合計が 1 を超えたら比を保って縮め、warn に残す（確かめは試験と確認スクリプト）
+function evaBuildTables(spec, rot) {
+  const P = spec.pHit;
+  const plan = spec.plan;
+  const warn = [];
   const active = (layer) =>
     layer.states.filter(
       (s) => (!s.minRot || rot >= s.minRot) && (!s.maxRot || rot <= s.maxRot),
     );
-  const free = spec.layers
-    .filter((layer) => !layer.spBoost)
-    .map((layer) => {
-      const states = active(layer);
-      const probs = states.map((s) =>
-        evaFreq(s, pHit, alpha * evaScaleOf(spec, layer, s)),
-      );
-      const none = 1 - probs.reduce((a, b) => a + b, 0);
-      if (none < 0)
-        throw new Error(`${layer.label}: 出現率の合計が 1 を超えています`);
-      return {
-        key: layer.key,
-        label: layer.label,
-        groups: layer.groups || null,
-        isReach: !!layer.isReach,
-        component: !!layer.component,
-        lead: layer.lead || null,
-        states: [...states, EVA_NONE],
-        probs: [...probs, none],
-      };
-    });
-  const reach = free.find((l) => l.isReach);
-  const boosted = spec.layers
-    .filter((layer) => layer.spBoost)
-    .map((layer) =>
-      evaBoostedLayer(
-        layer,
-        active(layer),
-        reach,
-        spec.spReaches,
-        pHit,
-        (s) => alpha * evaScaleOf(spec, layer, s),
-      ),
+
+  // リーチ：当り用 aR ＝ 当りのうち、ハズレ用 bR。リーチなしの当りは突発当り
+  const reachDef = spec.layers.find((l) => l.isReach);
+  const rStates = [...active(reachDef), EVA_NONE];
+  const nR = rStates.length;
+  const noneR = nR - 1;
+  const ownReach = (plan && plan.hit.reach) || {};
+  const raw = rStates.map((s) =>
+    s === EVA_NONE
+      ? 0
+      : (plan && ownReach[s.id] !== undefined ? ownReach[s.id] : s.share || 0) /
+        100,
+  );
+  const rawSum = raw.reduce((a, b) => a + b, 0);
+  // ST（share を暫定で読む）はリーチの合計を当りの 99% にそろえる
+  const scaleR = !plan && rawSum > 0 ? (1 - EVA_SUDDEN_SHARE) / rawSum : 1;
+  const aR = raw.map((x) => x * scaleR);
+  aR[noneR] = Math.max(0, 1 - aR.reduce((a, b) => a + b, 0));
+  const TR = rStates.map((s) => (s === EVA_NONE ? 0 : s.trust / 100));
+  const bR = rStates.map((s, i) =>
+    s === EVA_NONE ? 0 : aR[i] * evaMissFactor(TR[i], P),
+  );
+  const bSum = bR.reduce((a, b) => a + b, 0);
+  if (bSum > 1)
+    warn.push(
+      `リーチ：ハズレ用の合計が 1 を超えています（${bSum.toFixed(3)}）`,
     );
-  const linkedOwn = spec.linked.map((layer) => {
-    const states = active(layer);
-    const probsByReach = reach.states.map((rs, r) => {
-      const probs = states.map((s) => {
-        const reaches = s.reaches || layer.reaches;
-        if (!reaches.includes(rs.id)) return 0;
-        if (s.rate !== undefined) {
-          return typeof s.rate === "number" ? s.rate : s.rate[rs.id] || 0;
-        }
-        // share 指定：対象リーチ全体に同じ率で乗せ、単独での当り寄与が share になるようにする
-        const pSet = reach.states.reduce(
-          (sum, x, i) => (reaches.includes(x.id) ? sum + reach.probs[i] : sum),
-          0,
-        );
-        return pSet > 0
-          ? evaFreq(s, pHit, alpha * evaScaleOf(spec, layer, s)) / pSet
-          : 0;
-      });
-      const none = 1 - probs.reduce((a, b) => a + b, 0);
-      if (none < -1e-12 && reach.probs[r] > 0) {
-        throw new Error(
-          `${layer.label}: ${rs.name} の出現率の合計が 1 を超えています`,
-        );
-      }
-      return [...probs, Math.max(0, none)];
-    });
-    return {
-      key: layer.key,
-      label: layer.label,
-      groups: layer.groups || null,
-      component: !!layer.component,
-      states: [...states, EVA_NONE],
-      probsByReach,
-    };
-  });
-  const linked = [...boosted, ...linkedOwn];
-  return { pHit, spec, free, reach, linked, alpha };
-}
+  bR[noneR] = Math.max(0, 1 - bSum);
+  const ri = Object.fromEntries(rStates.map((s, i) => [s.id, i]));
+  const hitByReach = Object.fromEntries(
+    rStates.map((s, i) => [s.id, aR[i] * 100]),
+  );
+  const trustByReach = Object.fromEntries(
+    rStates.map((s, i) => [s.id, TR[i] * 100]),
+  );
+  const isSp = rStates.map((s) => spec.spReaches.includes(s.id));
+  const idsToRows = (ids) =>
+    ids.map((id) => ri[id]).filter((r) => r !== undefined);
+  const sumOver = (probs, rows) => rows.reduce((a, r) => a + probs[r], 0);
+  const allRows = rStates.map((_, r) => r);
+  const hitRowsAll = allRows.filter((r) => r !== noneR);
+  const spMissRows = allRows.filter((r) => isSp[r]);
 
-// 各演出の 1 回転あたりの出現率（試験と調整用の一覧）
-function evaStateFreqs(T) {
-  const rows = [];
-  for (const L of T.free) {
-    L.states.forEach((s, i) => {
-      if (s.id !== "none") rows.push({ layer: L, state: s, freq: L.probs[i] });
-    });
-  }
-  for (const L of T.linked) {
-    L.states.forEach((s, i) => {
-      if (s.id === "none") return;
-      const freq = T.reach.probs.reduce(
-        (sum, p, r) => sum + p * L.probsByReach[r][i],
-        0,
-      );
-      rows.push({ layer: L, state: s, freq });
-    });
-  }
-  return rows;
-}
-
-// 出た演出の組合せを要約する（引くときも数え上げるときも同じ規則を使う）
-function evaStep(acc, layer, s) {
-  if (s.id === "none") return acc;
-  const sureKind = evaSureKind(s);
-  return {
-    any: true,
-    k: Math.min(3, acc.k + (evaCounted(layer, s) ? 1 : 0)),
-    maxT: Math.max(acc.maxT, s.trust),
-    sure: acc.sure || s.trust >= 100,
-    sureKind:
-      acc.sureKind === "r10" || sureKind === "r10"
-        ? "r10"
-        : acc.sureKind || sureKind,
-    forced: acc.forced || !!sureKind || !!s.forceKakuhen,
-  };
-}
-const EVA_EMPTY = {
-  any: false,
-  k: 0,
-  maxT: 0,
-  sure: false,
-  sureKind: null,
-  forced: false,
-};
-
-// 全回転の当り・確変を強制する当り・演出ありの当りの期待値を厳密に数え上げる
-function evaExpect(T) {
-  const out = { effect: 0, none: 0, forced: 0, r10: 0 };
-  const others = T.free.filter((l) => !l.isReach);
-  T.reach.states.forEach((rs, r) => {
-    const pr = T.reach.probs[r];
-    if (pr <= 0) return;
-    // 状態を数値のキーにまとめる（f に効く情報だけ残す）
-    let dist = new Map();
-    const put = (m, acc, p) => {
-      const sure = acc.sure || acc.k >= 3;
-      const t = sure ? 1000 : Math.round(acc.maxT * 10);
-      const key = [acc.any, sure ? 3 : acc.k, t, acc.sureKind, acc.forced].join(
-        "|",
-      );
-      const cur = m.get(key);
-      if (cur) cur.p += p;
-      else m.set(key, { acc: { ...acc, sure }, p });
-    };
-    put(dist, evaStep(EVA_EMPTY, T.reach, rs), pr);
-    const layers = [
-      ...others.map((L) => ({ L, probs: L.probs })),
-      ...T.linked.map((L) => ({ L, probs: L.probsByReach[r] })),
-    ];
-    for (const { L, probs } of layers) {
-      const next = new Map();
-      for (const { acc, p } of dist.values()) {
-        L.states.forEach((s, i) => {
-          if (probs[i] > 0) put(next, evaStep(acc, L, s), p * probs[i]);
+  const linkedSet = new Set(spec.linked);
+  const layers = [];
+  for (const def of [
+    ...spec.layers.filter((l) => !l.isReach),
+    ...spec.linked,
+  ]) {
+    const states = active(def);
+    const n = states.length;
+    const hit = Array.from({ length: nR }, () => new Array(n + 1).fill(0));
+    const miss = Array.from({ length: nR }, () => new Array(n + 1).fill(0));
+    const isLinked = linkedSet.has(def);
+    const rateMode =
+      !plan &&
+      n > 0 &&
+      states.every((s) => s.share === undefined && s.rate !== undefined);
+    if (plan && plan.always.includes(def.key)) {
+      // 必ずどれか 1 つ出る部品（SP 発展・カットイン・シンクロメーター）：リーチごとに当り・ハズレの割合を解く。
+      // 信頼度がリーチより高い組と低い組に分け、組の中は同じ割合、当りでもハズレでも合計 100% になる比にする
+      for (let r = 0; r < noneR; r++) {
+        const on = [];
+        states.forEach((s, i) => {
+          const ids = evaReachesOf(def, s);
+          if (ids && ids.includes(rStates[r].id)) on.push(i);
         });
+        if (!on.length) continue;
+        const T = TR[r];
+        const k = (i) => evaMissFactor(states[i].trust / 100, T);
+        const sure = on.filter((i) => states[i].trust >= 100);
+        const hi = on.filter(
+          (i) => states[i].trust < 100 && states[i].trust / 100 > T,
+        );
+        const lo = on.filter(
+          (i) => states[i].trust < 100 && states[i].trust / 100 <= T,
+        );
+        const free = 1 - EVA_ALWAYS_SURE_RATE * sure.length;
+        const avg = (list) =>
+          list.length ? list.reduce((x, i) => x + k(i), 0) / list.length : 0;
+        const Khi = avg(hi);
+        const Klo = avg(lo);
+        let aHi =
+          hi.length && lo.length
+            ? (Klo * free - 1) / (Klo - Khi)
+            : hi.length
+              ? free
+              : 0;
+        aHi = Math.min(free, Math.max(0, aHi));
+        const aLo = free - aHi;
+        for (const i of sure) hit[r][i] = EVA_ALWAYS_SURE_RATE;
+        for (const i of hi) {
+          hit[r][i] = aHi / hi.length;
+          miss[r][i] = hit[r][i] * k(i);
+        }
+        for (const i of lo) {
+          hit[r][i] = aLo / lo.length;
+          miss[r][i] = hit[r][i] * k(i);
+        }
       }
-      dist = next;
-    }
-    for (const { acc, p } of dist.values()) {
-      if (!acc.any) {
-        out.none += p;
-        continue;
+    } else if (rateMode) {
+      // ST の部品（rate：そのリーチになったときに出る割合。値は未決なので暫定）。
+      // 出る割合を当り・ハズレに分けて、出た回の当りやすさを信頼度にする
+      states.forEach((s, i) => {
+        const t = s.trust / 100;
+        for (const r of idsToRows(evaReachesOf(def, s) || spec.spReaches)) {
+          const q =
+            typeof s.rate === "number" ? s.rate : s.rate[rStates[r].id] || 0;
+          const T = TR[r];
+          if (!(T > 0)) continue;
+          hit[r][i] = Math.min(1, (q * t) / T);
+          miss[r][i] = T >= 1 ? 0 : (q * (1 - t)) / (1 - T);
+        }
+      });
+    } else {
+      const hs = evaResolveHits(spec, def, states, hitByReach, trustByReach);
+      // リーチ前の予告は、付くリーチが決まっている演出を先に置き、決まっていない演出は
+      // リーチごとの残りの空きに比例して配る（キャラ連続が零号機・弐号機の当りに寄る分を他の予告で埋めない）
+      const order = states.map((_, i) => i);
+      if (!isLinked) {
+        order.sort(
+          (x, y) =>
+            (evaReachesOf(def, states[y]) ? 1 : 0) -
+            (evaReachesOf(def, states[x]) ? 1 : 0),
+        );
       }
-      const f = evaF(acc.k, acc.maxT, acc.sure);
-      out.effect += p * f;
-      if (rs.id === "zenkaiten") out.r10 += p * f;
-      else if (acc.forced) out.forced += p * f;
+      const free = (probs, rows) => {
+        const f = new Array(nR).fill(0);
+        for (const r of rows) {
+          let used = 0;
+          for (let j = 0; j < n; j++) {
+            if (evaReachesOf(def, states[j]) && probs === aR) used += hit[r][j];
+            else if (evaReachesOf(def, states[j])) used += miss[r][j];
+          }
+          f[r] = Math.max(0, 1 - used);
+        }
+        return f;
+      };
+      let hitFree = null;
+      let missFree = null;
+      order.forEach((i) => {
+        const s = states[i];
+        const a = (hs.get(s) || 0) / 100;
+        const t = s.trust / 100;
+        const ids = isLinked ? evaAttachOf(plan, def, s) : evaReachesOf(def, s);
+        if (isLinked) {
+          // リーチに付く演出：付くリーチの当りに同じ割合で乗せ、ハズレはリーチごとに信頼度を守る
+          const rows = idsToRows(ids || spec.spReaches);
+          const cap = sumOver(aR, rows);
+          for (const r of rows) {
+            hit[r][i] = cap > 0 ? a / cap : 0;
+            miss[r][i] = hit[r][i] * evaMissFactor(t, TR[r]);
+          }
+        } else {
+          // リーチ前の予告：当りはリーチのある当りに一様（突発当りには付けない）。
+          // ハズレは、信頼度 10%未満ならどの回転にも（リーチなしでハズレ、次の回転へ）、
+          // 10%以上は SP リーチのハズレだけ（強い予告がリーチなしで終わらない。2026-10-03 方針）
+          const b = a * evaMissFactor(t, P);
+          if (ids) {
+            const rows = idsToRows(ids);
+            const cap = sumOver(aR, rows);
+            const mcap = sumOver(bR, rows);
+            for (const r of rows) {
+              hit[r][i] = cap > 0 ? a / cap : 0;
+              miss[r][i] = mcap > 0 ? b / mcap : 0;
+            }
+            return;
+          }
+          // 付くリーチが決まっていない演出：残りの空き（w）に比例して配る
+          if (!hitFree) {
+            hitFree = free(aR, hitRowsAll);
+            missFree = free(bR, allRows);
+          }
+          const spread = (probs, rows, w, total, out) => {
+            const cap = rows.reduce((x, r) => x + probs[r] * w[r], 0);
+            for (const r of rows)
+              out[r][i] = cap > 0 ? (total * w[r]) / cap : 0;
+          };
+          spread(aR, hitRowsAll, hitFree, a, hit);
+          spread(
+            bR,
+            s.trust < EVA_LOW_TRUST ? allRows : spMissRows,
+            missFree,
+            b,
+            miss,
+          );
+        }
+      });
+      if (isLinked && hs.mid.size) {
+        evaRebalanceLinked(def, states, hs, hit, miss, aR, bR, TR, noneR);
+      }
     }
-  });
-  return out;
-}
+    // 同じ層の合計（そのリーチが出る表だけ確かめる）と「なし」
+    for (const [rows, probs, kind] of [
+      [hit, aR, "当り用"],
+      [miss, bR, "ハズレ用"],
+    ]) {
+      rows.forEach((row, r) => {
+        const sum = row.slice(0, n).reduce((a, b) => a + b, 0);
+        if (sum > 1 + 1e-9) {
+          if (probs[r] > 0) {
+            warn.push(
+              `${def.label}：${rStates[r].name} の${kind}の合計が 1 を超えています（${sum.toFixed(3)}）`,
+            );
+          }
+          for (let i = 0; i < n; i++) row[i] /= sum;
+        }
+        row[n] = Math.max(0, 1 - Math.min(1, sum));
+      });
+    }
+    layers.push({
+      key: def.key,
+      label: def.label,
+      lead: def.lead || null,
+      component: !!def.component,
+      groups: def.groups || null,
+      isLinked,
+      states: [...states, EVA_NONE],
+      hit,
+      miss,
+    });
+  }
 
-// まとまり（evaScaleKey）ごとに「当りのうち何%に出るか」を厳密に数え上げる（頻度の調整と試験用）。
-// そのまとまりの演出の出現率だけ 0 にした表（「なし」は元のまま）で当りの期待値を出し直すと、
-// 元との差が E[f × そのまとまりが出た] になる（層の中は排他なのでまとまりの中も排他）
-function evaGroupShares(T, keys) {
-  const full = evaExpect(T).effect;
-  const out = {};
-  for (const key of keys) {
-    const off = (L, probs) =>
-      probs.map((p, i) =>
-        L.states[i].id !== "none" && evaScaleKey(L, L.states[i]) === key
-          ? 0
-          : p,
-      );
-    const free = T.free.map((L) =>
-      L.isReach ? L : { ...L, probs: off(L, L.probs) },
-    );
-    const linked = T.linked.map((L) => ({
-      ...L,
-      probsByReach: L.probsByReach.map((probs) => off(L, probs)),
-    }));
-    const e = evaExpect({ ...T, free, linked }).effect;
-    out[key] = (full - e) / T.pHit;
-  }
-  return out;
-}
-
-// 当り確率が仕様どおりになるよう alpha を決め、無演出当りの確率と 3R確変の比を出す
-function evaCalibrate(spec, rot) {
-  const target = spec.pHit * (1 - EVA_SUDDEN_SHARE);
-  // alpha は縮めるだけでなく広げもする（余った枠を突発当りに回しすぎないため。上限 EVA_ALPHA_MAX）。
-  // 広げて出現率の合計が 1 を超える（SP リーチの回転に乗せきれない）ときは、作れるところで止める。
-  // 縮める方向で作れないのは、リーチ（alpha に比例）が減って信頼度 100% の演出（alpha が効かない）が
-  // SP リーチの回転に収まらないとき。倍率（eva-tune.js）の上げすぎなので、そのまま投げる
-  const tryBuild = (a) => {
-    try {
-      return evaBuildTables(spec, rot, a);
-    } catch (e) {
-      return null;
+  // 当り種別：全回転は 10R、確変濃厚の演出かシンクロ当りは 3R確変。残りの 3R確変の比を逆算する
+  const isForced = (s) => !!evaSureKind(s) || !!s.forceKakuhen;
+  const zen = ri.zenkaiten;
+  let forced = 0;
+  for (let r = 0; r < nR; r++) {
+    if (r === zen || !(aR[r] > 0)) continue;
+    let pNo = rStates[r].forceKakuhen ? 0 : 1;
+    for (const L of layers) {
+      let pf = 0;
+      L.states.forEach((s, i) => {
+        if (s !== EVA_NONE && isForced(s)) pf += L.hit[r][i];
+      });
+      pNo *= 1 - Math.min(1, pf);
     }
-  };
-  // 始めの alpha=1 は最終の値（0.3 前後）より大きいので、倍率を上げた層が 1 を超えることがある。
-  // そのときは 0.01 まで縮めて始める。それでも作れなければ alpha=1 のときの理由を投げる
-  let alpha = 1;
-  let T = tryBuild(alpha);
-  while (!T && alpha > 0.01) {
-    alpha /= 2;
-    T = tryBuild(alpha);
+    forced += aR[r] * (1 - pNo);
   }
-  if (!T) evaBuildTables(spec, rot, 1);
-  let E = evaExpect(T);
-  // alpha で縮まない分（100%・fixed の演出）。SP 限定の演出は alpha=0 で SP の回転ごと消える（出現率 0 で正しい）
-  const fixed = evaExpect(evaBuildTables(spec, rot, 0)).effect;
-  let ceil = EVA_ALPHA_MAX;
-  for (let i = 0; i < 30 && Math.abs(E.effect - target) > target * 1e-4; i++) {
-    let next = Math.min(ceil, alpha * ((target - fixed) / (E.effect - fixed)));
-    if (next === alpha) break;
-    if (next < alpha) {
-      alpha = next;
-      T = evaBuildTables(spec, rot, alpha);
-      E = evaExpect(T);
-      continue;
-    }
-    let Tn = tryBuild(next);
-    // 広げて作れなければ今の alpha との間まで戻す（そこが広げられる上限）
-    while (!Tn && next / alpha > 1.0001) {
-      ceil = next;
-      next = Math.sqrt(next * alpha);
-      Tn = tryBuild(next);
-    }
-    if (!Tn) break;
-    alpha = next;
-    T = Tn;
-    E = evaExpect(T);
-  }
-  const base0 = (spec.pHit - E.effect) / E.none;
-  if (base0 < 0) throw new Error("無演出当りの確率が負になりました");
-  // 3R確変の比：全回転（10R）と確変を強制した当りを差し引いた残りで逆算する
+  const r10 = zen !== undefined ? aR[zen] : 0;
   const hitN = spec.classes.filter((c) => c.hit);
   const nHit = hitN.reduce((s, c) => s + c.n, 0);
   const k3 = hitN.find((c) => c.id === "k3");
   let k3Rate = 0;
   if (k3) {
-    const k3Target = (spec.pHit * k3.n) / nHit;
-    k3Rate = (k3Target - E.forced) / (spec.pHit - E.r10 - E.forced);
-    if (k3Rate < 0 || k3Rate > 1) throw new Error("3R確変の比が範囲外です");
+    k3Rate = (k3.n / nHit - forced) / (1 - r10 - forced);
+    if (!(k3Rate >= 0 && k3Rate <= 1)) {
+      warn.push(`3R確変の比が範囲外です（${k3Rate.toFixed(3)}）`);
+      k3Rate = Math.min(1, Math.max(0, k3Rate));
+    }
   }
-  return { ...T, base0, k3Rate, expect: E };
+  return {
+    pHit: P,
+    spec,
+    reach: {
+      key: "reach",
+      label: reachDef.label,
+      isReach: true,
+      states: rStates,
+      hit: aR,
+      miss: bR,
+      trust: TR,
+    },
+    layers,
+    k3Rate,
+    forcedShare: forced,
+    warn,
+  };
 }
 
-function evaPick(probs) {
-  return evaPickNo(probs).i;
+// 演出ごとの 1 回転あたりの出現率（freq）と「当りのうち何%に付くか」（hit：0〜1）。試験と確認用
+function evaStateFreqs(T) {
+  const P = T.pHit;
+  const R = T.reach;
+  const rows = [];
+  R.states.forEach((s, i) => {
+    if (s.id === "none") return;
+    rows.push({
+      layer: R,
+      state: s,
+      freq: P * R.hit[i] + (1 - P) * R.miss[i],
+      hit: R.hit[i],
+    });
+  });
+  for (const L of T.layers) {
+    L.states.forEach((s, i) => {
+      if (s.id === "none") return;
+      let h = 0;
+      let m = 0;
+      R.states.forEach((_, r) => {
+        h += R.hit[r] * L.hit[r][i];
+        m += R.miss[r] * L.miss[r][i];
+      });
+      rows.push({ layer: L, state: s, freq: P * h + (1 - P) * m, hit: h });
+    });
+  }
+  return rows;
+}
+
+// 出た演出の要約：何か出たか・濃厚か・確変濃厚の種類・確変を強制するか
+function evaSummarize(shown) {
+  const acc = { any: false, sure: false, sureKind: null, forced: false };
+  for (const { state: s } of shown) {
+    acc.any = true;
+    if (s.trust >= 100) acc.sure = true;
+    const k = evaSureKind(s);
+    if (k === "r10") acc.sureKind = "r10";
+    else if (k && !acc.sureKind) acc.sureKind = k;
+    if (k || s.forceKakuhen) acc.forced = true;
+  }
+  return acc;
 }
 
 // 演出の番号：層ごとに 2^20（1,048,576）個の番号から 1 つ引き、出現率の表のどこに入ったかで演出を決める
@@ -428,18 +542,19 @@ const EVA_SPEC_N = {
   layers: EVA_LAYERS_N,
   linked: EVA_LINKED_N,
   spReaches: EVA_SP_REACHES,
-  scale: EVA_FREQ_SCALE.n,
+  plan: EVA_PLAN_N,
 };
+// ST は出る割合が未決なので plan を持たず、share を「当りのうち何%」として暫定で読む
 const EVA_SPEC_S = {
   pHit: EVA_S_HIT / EVA_BIT,
   classes: EVA_CLASSES_S,
   layers: EVA_LAYERS_S,
   linked: EVA_LINKED_S,
   spReaches: EVA_ST_SP,
-  scale: EVA_FREQ_SCALE.s,
+  plan: null,
 };
 // 時短（チャンスタイム）中はストーリーリーチ（vsアルミサエル・vsサハクィエル）が大当り濃厚
-// （なな徹 7335）。通常時の表をもとに、その 2 本の信頼度だけ 100% にした表を使う
+// （なな徹 7335）。通常時の表をもとに、その 2 本の信頼度だけ 100% にした表を使う（ハズレ用の表に出ない）
 const EVA_JITAN_SURE_REACHES = ["armisael", "sahaquiel"];
 const EVA_SPEC_J = {
   ...EVA_SPEC_N,
@@ -455,10 +570,10 @@ const EVA_SPEC_J = {
   ),
 };
 // 群予告の 400 回転ゲートがあるので通常時は 2 組
-const EVA_T_N_LOW = evaCalibrate(EVA_SPEC_N, 0);
-const EVA_T_N_HIGH = evaCalibrate(EVA_SPEC_N, 401);
-const EVA_T_J = evaCalibrate(EVA_SPEC_J, 0);
-const EVA_T_S = evaCalibrate(EVA_SPEC_S, 0);
+const EVA_T_N_LOW = evaBuildTables(EVA_SPEC_N, 0);
+const EVA_T_N_HIGH = evaBuildTables(EVA_SPEC_N, 401);
+const EVA_T_J = evaBuildTables(EVA_SPEC_J, 0);
+const EVA_T_S = evaBuildTables(EVA_SPEC_S, 0);
 
 // regime：確率の状態。"n"＝通常、"j"＝時短、"s"＝ST
 function evaTablesFor(regime) {
@@ -556,30 +671,42 @@ function evaHoldPlan(holdType, holdId, shift) {
   return { seq, when, view: "none" };
 }
 
-// デバッグ：演出を 1 つ指定して必ず出す（force = { key：層の key, id：state.id }）。
-// 返り値 { L：その層, si：層の中の番号, reaches：出られるリーチの番号（null はどのリーチでも） }。
+// デバッグ：指定した演出（force = { key：層の key, id：state.id }）を今の表から探す。
+// 返り値 { L：層（リーチは reach）, si：層の中の番号, canHit / canMiss：当り用・ハズレ用の表に出られるか }。
 // 今の表に無い演出（回転数の条件で外れているなど）は null
-function evaForcePlan(T, force) {
+function evaFindForced(T, force) {
   if (!force) return null;
-  const L = [...T.free, ...T.linked].find(
+  const R = T.reach;
+  if (force.key === "reach") {
+    const si = R.states.findIndex((s) => s.id === force.id);
+    if (si < 0) return null;
+    return { L: R, si, canHit: R.hit[si] > 0, canMiss: R.miss[si] > 0 };
+  }
+  const L = T.layers.find(
     (l) => l.key === force.key && l.states.some((s) => s.id === force.id),
   );
   if (!L) return null;
   const si = L.states.findIndex((s) => s.id === force.id);
-  let reaches = null;
-  if (L.isReach) reaches = [si];
-  else if (L.probsByReach) {
-    reaches = T.reach.states
-      .map((_, r) => r)
-      .filter((r) => L.probsByReach[r][si] > 0);
-    if (!reaches.length) return null;
-  }
-  return { L, si, reaches };
+  const can = (probs, rows) =>
+    R.states.some((_, r) => probs[r] > 0 && rows[r][si] > 0);
+  return { L, si, canHit: can(R.hit, L.hit), canMiss: can(R.miss, L.miss) };
 }
 
-// 指定したリーチの番号の中から、ふだんの出現率の比で 1 つ引く（デバッグ用）
-function evaPickReachIn(T, reaches) {
-  const w = reaches.map((r) => T.reach.probs[r]);
+// 指定した演出が、決まった当否の表で出られるリーチの番号（evaDrawEffects の plan）
+function evaForcePlan(T, found, isHit) {
+  const R = T.reach;
+  if (found.L === R) return { L: R, si: found.si, reaches: [found.si] };
+  const probs = isHit ? R.hit : R.miss;
+  const rows = isHit ? found.L.hit : found.L.miss;
+  const reaches = R.states
+    .map((_, r) => r)
+    .filter((r) => probs[r] > 0 && rows[r][found.si] > 0);
+  return reaches.length ? { L: found.L, si: found.si, reaches } : null;
+}
+
+// 指定したリーチの番号の中から、その表の出現率の比で 1 つ引く（デバッグ用）
+function evaPickReachIn(probs, reaches) {
+  const w = reaches.map((r) => probs[r]);
   const sum = w.reduce((a, b) => a + b, 0);
   let x = Math.random() * (sum > 0 ? sum : reaches.length);
   for (let k = 0; k < reaches.length; k++) {
@@ -590,31 +717,49 @@ function evaPickReachIn(T, reaches) {
   return reaches[reaches.length - 1];
 }
 
-// 演出の組合せを 1 つ引く（層ごとに 1 つ。リーチに紐づく層はリーチで出方が変わる）。
-// plan（evaForcePlan）があれば、その層はその演出に決め、リーチはその演出が出られるものから引く
-function evaDrawEffects(T, plan) {
+// 保留に居る間に見える演出の層（前兆・入賞時・保留の見た目・レバブル先読み）
+function evaIsLeadLayer(L) {
+  return !!L.lead || L.key === "hold";
+}
+
+// 当否の決まった表から演出の組合せを 1 つ引く（リーチ → 各層。層の中は 1 つ）。
+// plan（evaForcePlan）があれば、その層はその演出に決め、リーチはその演出が出られるものから引く。
+// noLead：保留に居る間に見える層を「なし」にする（抜けの残保留）。
+// f：その組合せの事後確率（液晶に出す信頼度）
+function evaDrawEffects(T, isHit, plan, noLead) {
+  const R = T.reach;
+  const P = T.pHit;
   const rp =
     plan && plan.reaches
-      ? { i: evaPickReachIn(T, plan.reaches), no: -1 }
-      : evaPickNo(T.reach.probs);
+      ? { i: evaPickReachIn(isHit ? R.hit : R.miss, plan.reaches), no: -1 }
+      : evaPickNo(isHit ? R.hit : R.miss);
   const r = rp.i;
-  const reach = T.reach.states[r];
+  const reach = R.states[r];
   const shown = []; // [{ layer, state, no：その層で引いた番号（指定した演出は -1） }]
-  const pickIn = (L, probs) =>
-    plan && plan.L === L ? { i: plan.si, no: -1 } : evaPickNo(probs);
-  for (const L of T.free) {
-    const p = L.isReach ? rp : pickIn(L, L.probs);
+  let H = P * R.hit[r];
+  let M = (1 - P) * R.miss[r];
+  let reachPushed = false;
+  const pushReach = () => {
+    if (!reachPushed && reach.id !== "none")
+      shown.push({ layer: R, state: reach, no: rp.no });
+    reachPushed = true;
+  };
+  for (const L of T.layers) {
+    // リーチ前の層 → リーチ → リーチに付く層の順に並べる（液晶の段の順）
+    if (L.isLinked) pushReach();
+    const none = L.states.length - 1;
+    let p;
+    if (plan && plan.L === L) p = { i: plan.si, no: -1 };
+    else if (noLead && evaIsLeadLayer(L)) p = { i: none, no: -1 };
+    else p = evaPickNo((isHit ? L.hit : L.miss)[r]);
+    H *= L.hit[r][p.i];
+    M *= L.miss[r][p.i];
     const s = L.states[p.i];
     if (s.id !== "none") shown.push({ layer: L, state: s, no: p.no });
   }
-  for (const L of T.linked) {
-    const p = pickIn(L, L.probsByReach[r]);
-    const s = L.states[p.i];
-    if (s.id !== "none") shown.push({ layer: L, state: s, no: p.no });
-  }
-  let acc = EVA_EMPTY;
-  for (const { layer, state } of shown) acc = evaStep(acc, layer, state);
-  const f = acc.any ? evaF(acc.k, acc.maxT, acc.sure) : T.base0;
+  pushReach();
+  const acc = evaSummarize(shown);
+  const f = acc.sure ? 1 : H + M > 0 ? H / (H + M) : isHit ? 1 : 0;
   return { reach, shown, acc, f };
 }
 
@@ -638,36 +783,32 @@ const EVA_NEXT_MOVIE_IDS = [
   "next-voice-service",
 ];
 
-// 当否が決まった後に演出を選ぶときの引き直しの上限（当りでも平均 320 回ほどで決まる）
+// 抜けの残保留の当りで、濃厚が入るまで引き直す上限
 const EVA_DRAW_MAX = 200000;
-
-// 保留に居る間に見える演出（前兆・入賞時・保留の見た目・レバブル先読みの震え）
-function evaIsLeadEffect(layer, state) {
-  return !!layer.lead || layer.key === "hold" || !!state.holdShake;
-}
 
 // opts.lotNo：入賞時に引いた当否の番号（判定し直すときは同じ番号を新しい範囲に当てる）
 // opts.after：ST・時短が終わった後に消化される残保留（先読みを出さず、当りは必ずプレミア）
-// opts.force：デバッグで演出を 1 つ指定して必ず出す（{ key, id }。evaForcePlan）。
+// opts.force：デバッグで演出を 1 つ指定して必ず出す（{ key, id }。evaFindForced）。
 // opts.forceHit：デバッグで当否を決める（true＝当り・false＝ハズレ・省く＝ふだんどおり。
-// 信頼度 100% の演出を指定したときは当り）
+// 指定した演出が当り用・ハズレ用のどちらかにしか無ければ、それに合わせる）
 function createEvaJob(isRight, regime, opts = {}) {
   let T = evaTablesFor(regime);
-  let plan = evaForcePlan(T, opts.force);
+  let found = evaFindForced(T, opts.force);
   // 通常時の表は回転数で 2 組（群予告・レイ背景の条件）。今の表に無ければもう一方で引く
-  if (opts.force && !plan && regime === "n") {
+  if (opts.force && !found && regime === "n") {
     const other = T === EVA_T_N_LOW ? EVA_T_N_HIGH : EVA_T_N_LOW;
-    const p2 = evaForcePlan(other, opts.force);
-    if (p2) {
+    const f2 = evaFindForced(other, opts.force);
+    if (f2) {
       T = other;
-      plan = p2;
+      found = f2;
     }
   }
   // 実機と同じく、先に当否を引く：65536 個の番号から 1 つ。当り範囲は毎回同じ
   // （通常・時短 0〜204 の 205 個＝1/319.7、ST 0〜658 の 659 個＝1/99.4）
   const hitRange = Math.round(T.pHit * EVA_LOTTERY);
-  const forceHit =
-    plan && plan.L.states[plan.si].trust >= 100 ? true : opts.forceHit;
+  let forceHit = opts.forceHit;
+  if (found && !found.canMiss) forceHit = true;
+  else if (found && !found.canHit) forceHit = false;
   const lotNo =
     opts.lotNo !== undefined
       ? opts.lotNo
@@ -677,21 +818,16 @@ function createEvaJob(isRight, regime, opts = {}) {
           ? hitRange + Math.floor(Math.random() * (EVA_LOTTERY - hitRange))
           : Math.floor(Math.random() * EVA_LOTTERY);
   const isHit = lotNo < hitRange;
+  const plan = found ? evaForcePlan(T, found, isHit) : null;
   const after = !!opts.after;
-  // 当否が決まってから演出を選ぶ：演出の組合せを引き、その組合せの信頼度で当るかを試し、
-  // 決まった当否と同じ結果になった組合せを使う。演出ごとの「出たら何%当るか」（信頼度）は
-  // そのまま保たれる（当りなら当りのときの出方、ハズレならハズレのときの出方から選ぶのと同じ）。
-  // 抜けの残保留は、先読みの付かない組合せだけを使い、当りなら信頼度 100% の演出を含むものだけにする
-  let draw;
-  for (let tries = 0; tries < EVA_DRAW_MAX; tries++) {
-    draw = evaDrawEffects(T, plan);
-    if (Math.random() < draw.f !== isHit) continue;
-    if (after) {
-      if (draw.shown.some(({ layer, state }) => evaIsLeadEffect(layer, state)))
-        continue;
-      if (isHit && !draw.acc.sure) continue;
-    }
-    break;
+  // 当否の表から演出を引く。抜けの残保留は先読みの層を出さず、当りは濃厚が入るまで引き直す
+  let draw = evaDrawEffects(T, isHit, plan, after);
+  for (
+    let tries = 0;
+    after && isHit && !draw.acc.sure && tries < EVA_DRAW_MAX;
+    tries++
+  ) {
+    draw = evaDrawEffects(T, isHit, plan, after);
   }
   const { reach, shown, acc, f } = draw;
 
@@ -802,7 +938,7 @@ function createEvaJob(isRight, regime, opts = {}) {
   const preTrust = Math.max(leadTrust, hold.when === "current" ? 0 : holdTrust);
 
   let sure = null;
-  if (acc.any && f >= 1) {
+  if (acc.sure) {
     sure =
       acc.sureKind === "r10"
         ? "10R確変濃厚"
@@ -832,12 +968,12 @@ function createEvaJob(isRight, regime, opts = {}) {
     isRight,
     heavy: false,
     name,
+    // 液晶に出す信頼度：出た組合せの事後確率（表示と実際の当りやすさが一致する）
     trust: acc.any ? f * 100 : 0,
     sure,
-    effects: shown.map(({ layer, state, no }) => ({
+    effects: shown.map(({ state, no }) => ({
       name: state.name,
       trust: state.trust,
-      counted: evaCounted(layer, state),
       no, // その層で引いた演出の番号（0〜1048575）
     })),
     vibe,

@@ -83,7 +83,6 @@ const context = vm.createContext({
 // index.html と同じ順（EVA の演出データ → 抽選エンジン → 本体）で読み込む
 for (const file of [
   "eva-effects.js",
-  "eva-tune.js",
   "eva-voice.js",
   "eva-engine.js",
   "eva-reel.js",

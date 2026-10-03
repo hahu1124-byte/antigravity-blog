@@ -29,8 +29,9 @@ const EVA_BOSO_SHOW_RATE = 0.12;
 const EVA_SURE_REACH_RATE = 0.05;
 // リーチのうちダブルライン（上段と下段が同時にリーチ）にする割合
 const EVA_DOUBLE_REACH_RATE = 0.15;
-// リーチの当りのうち、いったんハズレ目で止まってから復活する割合と、その間（ミリ秒）
-const EVA_REVIVE_RATE = 0.15;
+// リーチの当りのうち、いったんハズレ目で止まってから復活する割合と、その間（ミリ秒）。
+// 当りのうち 3%（どのリーチでも。ユーザー方針 2026-10-04）
+const EVA_REVIVE_RATE = 0.03;
 const EVA_REVIVE_WAIT_MS = 900;
 const EVA_REVIVE_SHOW_MS = 1100; // 「復活！！」と当り図柄を見せる時間
 // 大当り濃厚のリーチ（段 → 数字）

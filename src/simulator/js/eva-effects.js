@@ -6,16 +6,14 @@
 //        IMPACT MODE（レイモード以外＝シンジモード）の値。100 は濃厚
 //        （only で確変種別に絞れば確変濃厚、r10 だけなら 10R確変濃厚）。
 //        当該レバブルはシミュ専用の値。
-// share: 「単独で出たとき当りの何%を占めるか」の重み（実機非公開の推定値。ここだけ触れば調整できる）。
-//        当り確率を固定するため、信頼度 100% 未満の演出は読み込み時に一律で縮められる
-//        （eva-engine.js の alpha）。信頼度 100% の演出と fixed: true の演出は縮めない
-//        ＝ほぼそのまま当りの share% になる。
-// rate: リーチが決まった後の出現率（SP リーチに必ず付く部品の層だけ）。数値かリーチ id ごとの表。
+// 出る割合：通常時は下の EVA_PLAN_N（演出が「当りのうち何%に付くか」。2026-10-04 ユーザーと決定）。
+//        ST は未決なので share を「当りのうち何%」として暫定で読み、部品は rate（そのリーチで出る割合）。
+//        eva-engine.js が当り用・ハズレ用の表を作り、どの演出も「出た回の当りやすさ＝trust」になる。
+// share: 濃厚の演出の当りのうち（%。0.1% より小さければ 0.1%）と、ST の暫定の値。
+// rate: ST の部品の層の、そのリーチになったときに出る割合。数値かリーチ id ごとの表。
+// reaches: その演出が出られるリーチ（予告→発展先の対応）。minRot / maxRot：出せる回転数の範囲。
 // forceKakuhen: この演出で当ったら 3R確変（シンクロ経由の暴走ボーナス）。
-// spBoost: その層の演出が SP リーチの回転で何倍出やすいか（予告が SP リーチに乗って来る度合い）。
 // ============================================================
-const EVA_SP_BOOST = 1000; // 予告の層
-const EVA_LEVER_SP_BOOST = 300; // 当該レバブル
 const EVA_BIT = 1048576; // 2^20
 const EVA_N_HIT = 3280; // 通常/時短 1/319.688
 const EVA_S_HIT = 10544; // ST 1/99.448
@@ -95,7 +93,6 @@ const EVA_SP_REACHES = [
 const EVA_LAYERS_N = [
   {
     key: "hold",
-    spBoost: EVA_SP_BOOST,
     label: "保留",
     states: [
       { id: "red", name: "赤保留", trust: 91.0, share: 7, holdType: "red" },
@@ -201,7 +198,6 @@ const EVA_LAYERS_N = [
   {
     // 保留入賞時の演出（lead: "entry"＝入賞した変動で出す。当該では出さない）
     key: "entry",
-    spBoost: EVA_SP_BOOST,
     lead: "entry",
     label: "入賞時",
     states: [
@@ -256,7 +252,6 @@ const EVA_LAYERS_N = [
     // 前兆（先読み）：lead: "pre"＝保留に居る間の変動から出して当該へつなぐ。
     // state.lead は当該より前の変動に順に出す段（カウントダウンの 3→2→1 など）。無ければ text を繰り返す
     key: "precursor",
-    spBoost: EVA_SP_BOOST,
     lead: "pre",
     label: "前兆",
     states: [
@@ -366,7 +361,6 @@ const EVA_LAYERS_N = [
   {
     // 変動開始時の演出
     key: "start",
-    spBoost: EVA_SP_BOOST,
     label: "変動開始時",
     states: [
       {
@@ -407,7 +401,6 @@ const EVA_LAYERS_N = [
     // 図柄拡大：この回転は 3×3 を縦長の 1×1（大きな図柄 1 つずつ）にして回す（eva-reel.js）。
     // 変動開始時のランプとは別の層（同じ回転に重なって出られる）
     key: "zoom",
-    spBoost: EVA_SP_BOOST,
     label: "図柄拡大",
     states: [
       {
@@ -517,10 +510,14 @@ const EVA_LAYERS_N = [
   {
     // リーチ前予告（ステップアップ・キャラ連続・セリフ）
     key: "pre-step",
-    spBoost: EVA_SP_BOOST,
     label: "リーチ前予告",
-    // 層の中は排他のまま、出現率の倍率（eva-tune.js）だけ id の頭で分けたまとまりごとに持つ
-    groups: { stepup: ["su-"], chara: ["chara-"], serif: ["serif-"] },
+    // 層の中は排他のまま、出る割合の目安（EVA_PLAN_N）だけ id の頭で分けたまとまりごとに持つ
+    groups: {
+      monitor: ["su-monitor-"],
+      stepup: ["su-"],
+      chara: ["chara-"],
+      serif: ["serif-"],
+    },
     states: [
       // 銀枠の SU1〜4・ガセ・ジャンプ、金SU2、名シーンへつなぐ金枠（1geki・でちゃう！）
       ...evaRowStates("su-silver", "ステップアップ", [
@@ -1136,7 +1133,6 @@ const EVA_LAYERS_N = [
     // リーチ前予告（ゲンドウ発言・変動中フラッシュ・ドデカ図柄）。
     // 槍役物・図柄送り・背景変化は別の層（同じ回転に重なって出られる）
     key: "pre-misc",
-    spBoost: EVA_SP_BOOST,
     label: "リーチ前予告(その他)",
     states: [
       {
@@ -1248,7 +1244,6 @@ const EVA_LAYERS_N = [
   {
     // 背景変化（1geki）
     key: "bg",
-    spBoost: EVA_SP_BOOST,
     label: "背景変化",
     states: [
       {
@@ -1324,7 +1319,6 @@ const EVA_LAYERS_N = [
   {
     // 背景小物：濃厚になる小物だけ（濃厚でない小物は資料に種類・値が無い。パチ7・なな徹 7138・でちゃう！）
     key: "bgitem",
-    spBoost: EVA_SP_BOOST,
     label: "背景小物",
     states: [
       {
@@ -1382,7 +1376,6 @@ const EVA_LAYERS_N = [
     // 通常時のミッションモード：出た時点で大当り濃厚のミッションだけ（1geki・パチ7・なな徹 7153）。
     // ミッションモード全体は期待薄だが、出る割合と値が資料に無いので入れていない
     key: "n-mission",
-    spBoost: EVA_SP_BOOST,
     label: "ミッションモード",
     states: [
       {
@@ -1439,9 +1432,8 @@ const EVA_LAYERS_N = [
   {
     // 実機は「デバイス振動先読み」のショート/ロングだけ。当該変動の白/赤/虹はシミュ専用
     // （信頼度は旧来の 90 / 97.6 / 100%。出るのは当りの約3割で、他の演出とも重なる。
-    //   fixed＝全体を縮める対象から外して 3 割を保つ。ユーザー方針 2026-10-03）
+    //   割合は EVA_PLAN_N の lever。ユーザー方針 2026-10-03）
     key: "lever",
-    spBoost: EVA_LEVER_SP_BOOST,
     label: "当該レバブル",
     states: [
       {
@@ -1449,7 +1441,6 @@ const EVA_LAYERS_N = [
         name: "白レバブル",
         trust: 90,
         share: 18,
-        fixed: true,
         vibeColor: "white",
       },
       {
@@ -1457,7 +1448,6 @@ const EVA_LAYERS_N = [
         name: "赤レバブル",
         trust: 97.6,
         share: 9,
-        fixed: true,
         vibeColor: "red",
       },
       {
@@ -1926,7 +1916,7 @@ const EVA_LINKED_N = [
     key: "trigger",
     label: "発展契機",
     reaches: EVA_SP_REACHES,
-    // 発展契機は 1 つのリーチに 1 つ（排他）。出現率の倍率だけ種類ごとに持つ
+    // 発展契機は 1 つのリーチに 1 つ（排他）。出る割合の目安（EVA_PLAN_N）だけ種類ごとに持つ
     groups: {
       title: ["title-"],
       shito: ["shito-"],
@@ -3368,26 +3358,132 @@ const EVA_LINKED_N = [
   },
 ];
 
-// 頻度の目標：通常時の大当りのうち何%に出るか（p-town の実戦 52 回の分析を丸めた値。誤差 ±10pt）。
-// キーは層の key（groups のある層は "key/group"）。scripts/eva-tools/tune-freq.cjs がこれに合わせて
-// まとまりごとの出現率の倍率を解き、eva-tune.js に書き出す。
-// SP 発展（75%）はリーチの配分で決まる部品なので倍率では合わせない
-const EVA_FREQ_TARGETS_N = {
-  hold: 30, // 保留変化
-  bg: 25, // 背景変化
-  zoom: 20, // 図柄拡大
-  start: 45, // 変動開始時ランプ
-  "pre-step/stepup": 35, // ステップアップ
-  "trigger/title": 30, // タイトル予告
-  order: 20, // 図柄送り
-  "pre-step/serif": 15, // セリフ
-  "trigger/shito": 10, // 使徒予告
-  lance: 35, // 槍役物連続
-  "after-voice": 35, // テンパイボイス
-  "after-lance": 30, // 槍通過
-  "after-lamp": 20, // 使徒襲来ランプ
-  "after-toka": 15, // 初号機透過
-  "trigger/next": 5, // 次回予告
+// 通常時（と時短）の出る割合：演出が「当りのうち何%に付くか」（2026-10-04 ユーザーと決定。
+// 経緯と表は archive/scratch/eva-freq/決定した割合.md）。eva-engine.js の evaBuildTables がここから
+// 当り用・ハズレ用の表を作る（出る頻度 ＝ 319.7 × 信頼度 ÷ 当りのうち何%）。
+// ここに無い演出は決まりで決まる：濃厚は share か 0.1% の大きいほう、信頼度 10%未満は 信頼度×信頼度、
+// 10%以上はまとまりの目安から上の分を引いた残りを配る
+const EVA_PLAN_N = {
+  // まとまりの目安（当りのうち何%）。層の key か、groups のある層は { group: 目安 }。
+  // { each: x } は 10%以上の演出 1 つあたり x%
+  budget: {
+    start: 45, // 変動開始時（52回分析）
+    zoom: 15, // 図柄拡大（52回分析は 20%。図柄拡大(赤)が多すぎるので 15%）
+    "pre-step": {
+      monitor: { each: 0.5 }, // モニターSU
+      stepup: 35, // ステップアップ（52回分析）
+      chara: { each: 2 }, // キャラ連続
+      serif: 15, // セリフ予告（52回分析）
+    },
+    "pre-misc": { each: 1 }, // ゲンドウ発言・変動中フラッシュ・ドデカ図柄・サイレント擬似連
+    bg: 25, // 背景変化（52回分析）
+    // ③ リーチ成立時（同じ割合ずつ）
+    lance: 20,
+    order: 20,
+    "after-voice": 20,
+    "after-lamp": 20,
+    // ④ リーチ後〜発展（付くリーチの当りに比例）
+    after: 5,
+    "after-title": 3,
+    "after-kidou": 5,
+    "after-lance": 30,
+    "after-toka": 1.5,
+    trigger: {
+      title: 35,
+      shito: 10,
+      next: 15,
+      scene: 5,
+      tlamp: 5,
+      meeting: 2,
+      barake: 1,
+    },
+    // ⑤ SP リーチ中（付くリーチの当りに比例）
+    "n-telop": 15,
+    premovie: 10,
+    gabure: 30,
+    chanceup: 10,
+  },
+  // 目安の残りを「付くリーチの当りの大きさ」に比例して配る層（ほかは同じ割合ずつ）
+  spread: [
+    "after",
+    "after-title",
+    "after-kidou",
+    "after-lance",
+    "after-toka",
+    "trigger",
+    "n-telop",
+    "premovie",
+    "gabure",
+    "chanceup",
+  ],
+  // SP リーチになれば必ずどれか 1 つ出る部品（リーチごとに当り・ハズレの割合を解く）
+  always: ["launch", "cutin", "synchro-meter"],
+  // リーチに付く演出で、付くリーチを決めていないもの（③ のリーチボイス・図柄送りなど）は、信頼度で乗せる先を分ける
+  // （信頼度の低い演出は弱い SP リーチに、高い演出は強い SP リーチに。2026-10-04 ③ の案 b）。
+  // 弱い演出を強いリーチに乗せると、そのリーチのハズレが足りなくなる
+  bands: [
+    { below: 10, reaches: ["synchro", "ni", "zero"] },
+    { below: 35, reaches: ["zero", "sho"] },
+    { below: 100, reaches: ["sho", "armisael", "sahaquiel", "final"] },
+  ],
+  // 個別に決めた演出（当りのうち何%）
+  hit: {
+    // リーチ（合計 99%。残りの 1% が突発当り）
+    reach: {
+      sho: 30,
+      final: 20,
+      armisael: 12,
+      sahaquiel: 12,
+      zero: 9.75,
+      ni: 8.75,
+      synchro: 3,
+      zenkaiten: 3,
+      normal: 0.5,
+    },
+    // 保留（合計 約35%。点滅＞青＞緑の頻度、警報(紫)は 1/600 回転）
+    hold: {
+      red: 5,
+      shogoki: 4,
+      vibe: 4,
+      "odd-size": 3,
+      "odd-shape": 3,
+      "odd-cycle": 3,
+      "alert-red": 2,
+      "alert-purple": 1.12,
+      "lance-red": 3,
+      blink: 1.6,
+      blue: 2.0,
+      green: 1.3,
+      rainbow: 1,
+      "blink-strong": 0.3,
+      "lance-rainbow": 0.5,
+    },
+    // 入賞時（デバイス振動先読みは なな徹の「当りに占める割合」約8%・約0.8%）
+    entry: {
+      "device-short": 8,
+      "device-long": 0.8,
+      "lamp-white": 3,
+      "lamp-red": 2,
+      "lamp-rainbow": 0.3,
+      "lamp-awake": 0.3,
+    },
+    // 前兆（信頼度の高いものは 3%、濃厚は 0.2〜0.3%。10%未満は決まりの式）
+    precursor: {
+      countdown: 3,
+      dokkun: 3,
+      "dokkun-red": 3,
+      moon: 3,
+      "sound-3": 3,
+      "countdown-kaworu": 0.3,
+      "sound-4": 0.3,
+      boso: 0.3,
+      "sound-5": 0.2,
+    },
+    // 当該レバブル（シミュ専用。当りの約 3 割）
+    lever: { white: 18, red: 9, rainbow: 3 },
+    // サイレント擬似連(ノーマルリーチ後) はノーマルリーチの当り（当りの 0.5%）にしか付けられない
+    "pre-misc": { "silent-normal": 0.2 },
+  },
 };
 
 // ============================================================
@@ -3401,7 +3497,6 @@ const EVA_ST_SP = [...EVA_ST_SOKU_SP, ...EVA_ST_EVA_SP, "dummy", "mission"];
 const EVA_LAYERS_S = [
   {
     key: "hold",
-    spBoost: EVA_SP_BOOST,
     label: "保留",
     states: [
       { id: "red", name: "赤保留", trust: 95.1, share: 4, holdType: "red" },
@@ -3505,7 +3600,6 @@ const EVA_LAYERS_S = [
   {
     // レバブル先読みは入賞した変動で震える（当該では出さない）
     key: "lever-pre",
-    spBoost: EVA_SP_BOOST,
     lead: "entry",
     label: "レバブル先読み",
     states: [
@@ -3530,7 +3624,6 @@ const EVA_LAYERS_S = [
   {
     // 前兆（先読み）：保留に居る間の変動から出して当該へつなぐ（通常時の precursor と同じ）
     key: "precursor",
-    spBoost: EVA_SP_BOOST,
     lead: "pre",
     label: "前兆",
     states: [
@@ -3888,7 +3981,6 @@ const EVA_LAYERS_S = [
   },
   {
     key: "screen",
-    spBoost: EVA_SP_BOOST,
     lead: "pre",
     label: "画面系の前兆",
     states: [
@@ -4045,7 +4137,6 @@ const EVA_LAYERS_S = [
     // 擬似連：当該の変動の中で段が進む出方（前兆とは値が違う。1geki・でちゃう！）。
     // 名前を「ドックン」で始めない（前兆のドックンと見分けるため）
     key: "pseudo",
-    spBoost: EVA_SP_BOOST,
     label: "擬似連",
     states: [
       {
@@ -4191,7 +4282,6 @@ const EVA_LAYERS_S = [
   },
   {
     key: "midway",
-    spBoost: EVA_SP_BOOST,
     label: "変動中予告",
     states: [
       {
@@ -4663,7 +4753,6 @@ const EVA_LAYERS_S = [
   },
   {
     key: "flash",
-    spBoost: EVA_SP_BOOST,
     label: "一発告知・枠フラッシュ",
     states: [
       {
@@ -4710,7 +4799,6 @@ const EVA_LAYERS_S = [
     // シミュ専用の当該レバブル。ST 中はどれも当り確定、出るのは当りの約2割
     // （ユーザー方針 2026-10-03）。白:赤:虹 の比は旧来（6720:2880:800）のまま
     key: "lever",
-    spBoost: EVA_LEVER_SP_BOOST,
     label: "当該レバブル",
     states: [
       {
