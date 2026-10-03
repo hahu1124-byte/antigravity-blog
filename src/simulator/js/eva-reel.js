@@ -290,6 +290,7 @@ function evaPlainSet(i, n, cls) {
 function evaDisplayIdle() {
   evaSetZoom(null);
   evaSpark(null);
+  evaSetBg(null);
   if (evaUseGrid()) {
     [3, 5, 7].forEach((n, col) => evaGridSetCol(col, [null, n, null]));
   } else {
@@ -357,6 +358,16 @@ function evaTakeover(items) {
   return () => screen.classList.remove(...added);
 }
 
+// 液晶の背景の画像（格納庫背景など。style.css の .screen.bg-*、画像は img/）。
+// 段で出たら、その変動が終わって次の変動が始まるまで出しておく
+const EVA_BG_IMAGES = ["hangar-zero", "hangar-ni", "hangar-sho", "hangar-4"];
+function evaSetBg(name) {
+  const screen = document.getElementById("screen");
+  if (!screen || !screen.classList) return;
+  for (const b of EVA_BG_IMAGES) screen.classList.remove("bg-" + b);
+  if (name) screen.classList.add("bg-" + name);
+}
+
 // 復活当りの「復活！！」（style.css の .revive-banner）
 function evaReviveBanner(on) {
   const screen = document.getElementById("screen");
@@ -411,6 +422,7 @@ function evaPlayShutter(kind) {
 
 async function evaRunDisplay(eff, opts) {
   evaSpark(null);
+  evaSetBg(null);
   evaSparkPending = null;
   await evaRunDisplayMain(eff, opts);
   if (evaSparkPending && !opts.instant) evaSpark(evaSparkPending);
@@ -527,6 +539,8 @@ async function evaRunDisplayMain(eff, opts) {
     if (sh) evaPlayShutter(sh.stage);
     const sp = t.find((s) => s.spark);
     if (sp) evaSparkPending = sp.spark;
+    const bg = t.find((s) => s.bg);
+    if (bg) evaSetBg(bg.bg);
   };
   const steps = opts.steps || [];
   const pre = evaChunkSteps(
@@ -804,6 +818,7 @@ async function evaPlayUpgrade(digit, up, fast, jitan) {
   };
   evaSetZoom(null);
   evaSpark(null);
+  evaSetBg(null);
   evaShowText(ov, "");
   // 白く光ってから炎の背景へ
   setFx(true, "fx-upg-white");

@@ -574,6 +574,7 @@ function createEvaJob(isRight, regime, opts = {}) {
         voice: evaVoiceOf(state.text), // eva-voice.js
         stage: state.stage || null, // eva-reel.js の evaPlayShutter
         spark: state.spark || null,
+        bg: state.bg || null, // 液晶の背景の画像（格納庫など。eva-reel.js の evaSetBg）
         // 前兆（先読み系）の段は、図柄を隠してその演出の専用画面に切り替える（eva-reel.js）
         takeover: layer.lead === "pre",
         fx: layer.lead === "pre" ? state.fx || null : null,
@@ -601,7 +602,7 @@ function createEvaJob(isRight, regime, opts = {}) {
   ) {
     name.unshift("格納庫背景(四号機)");
     text = text ? "格納庫\n四号機\n" + text : "格納庫\n四号機";
-    steps.unshift({ phase: "pre", text: "格納庫\n四号機" });
+    steps.unshift({ phase: "pre", text: "格納庫\n四号機", bg: "hangar-4" });
   }
   // 演出なしの当りは突発当り（初号機が画面を引き裂いて告知）
   if (isHit && !acc.any) {

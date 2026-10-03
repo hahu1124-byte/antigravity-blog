@@ -1335,6 +1335,53 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   }
 }
 
+/* 液晶の背景の画像（格納庫背景など。eva-reel.js の evaSetBg）。図柄が読めるよう少し暗くして敷く */
+/* url() は CSS 変数に入れると相対パスの基準がずれることがあるので、クラスごとに直接書く */
+.screen.bg-hangar-zero,
+.screen.bg-hangar-ni,
+.screen.bg-hangar-sho,
+.screen.bg-hangar-4 {
+  background-color: #000;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  animation: bg-in 0.4s ease-out;
+}
+
+.screen.bg-hangar-zero {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.32)),
+    url("../img/hangar-zero.jpg");
+}
+
+.screen.bg-hangar-ni {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.32)),
+    url("../img/hangar-ni.jpg");
+}
+
+.screen.bg-hangar-sho {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.32)),
+    url("../img/hangar-sho.jpg");
+}
+
+.screen.bg-hangar-4 {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0.32)),
+    url("../img/hangar-4.jpg");
+}
+
+@keyframes bg-in {
+  from {
+    filter: brightness(2.2);
+  }
+
+  to {
+    filter: none;
+  }
+}
+
 /* 前兆（先読み系）の専用画面：図柄を隠して暗い画面に演出の文字を大きく出す（ドックンなら炎だけ）。
    eva-reel.js の evaTakeover が .lead-takeover と演出の効果のクラスを付ける */
 .screen.lead-takeover {

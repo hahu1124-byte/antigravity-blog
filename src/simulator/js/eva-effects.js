@@ -423,6 +423,7 @@ const EVA_LAYERS_N = [
         share: 0.1,
         only: EVA_KAKUHEN,
         text: "格納庫\n零号機",
+        bg: "hangar-zero", // 液晶の背景に格納庫の画像（img/hangar-zero.jpg）
       },
       {
         id: "hangar-ni",
@@ -431,6 +432,7 @@ const EVA_LAYERS_N = [
         share: 0.1,
         only: EVA_KAKUHEN,
         text: "格納庫\n弐号機",
+        bg: "hangar-ni",
       },
       {
         id: "hangar-sho",
@@ -439,6 +441,7 @@ const EVA_LAYERS_N = [
         share: 0.1,
         only: EVA_KAKUHEN,
         text: "格納庫\n初号機",
+        bg: "hangar-sho",
       },
       {
         id: "silent",

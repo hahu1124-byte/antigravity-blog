@@ -630,6 +630,9 @@ function assertClose(label, actual, expected, tolerance) {
       if (job.zoom !== (red ? "red" : on ? "on" : null)) throw new Error("図柄拡大の印が違う: " + job.name.join("+") + " → " + job.zoom);
       if (on) zooms++;
       if (red) reds++;
+      // 格納庫背景は液晶の背景に画像（steps の bg）を出す
+      const hangar = job.name.find((n) => n.startsWith("格納庫背景("));
+      if (hangar && !job.steps.some((s) => s.bg && s.bg.startsWith("hangar-"))) throw new Error("格納庫背景に背景画像が無い: " + hangar);
     }
     if (!zooms || !reds) throw new Error("図柄拡大が出ない: " + zooms + "/" + reds);
     evaSetZoom("on");
