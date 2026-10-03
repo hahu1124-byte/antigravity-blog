@@ -1725,9 +1725,9 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   animation-duration: 0.07s;
 }
 
-/* 液晶の下（EVA。script.js の updateUI が .eva-lcd を付ける）：回転数は左下、保留は残りの保留 4 つの真ん中が
-   液晶の真ん中に来る位置で固定し、消化中の保留はその左（ユーザー方針 2026-10-04）。
-   保留の左端＝真ん中 −（消化中の幅＋間隔＋残り 4 つの幅の半分）。リゼロは今までどおりの位置 */
+/* 液晶の下（EVA。script.js の updateUI が .eva-lcd を付ける）：回転数は左下、保留は残りの保留の 2 つ目の
+   左端が液晶の真ん中に来る位置で固定する（4 つの真ん中に合わせると左に寄って見えた。ユーザー方針 2026-10-04）。
+   保留の左端＝真ん中 −（消化中の幅＋間隔＋1 つ目の幅＋間隔）。リゼロは今までどおりの位置 */
 .lcd-bottom {
   display: contents;
 }
@@ -1739,18 +1739,18 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   z-index: 6;
 }
 
-/* 通常時・時短：六角形 30px・消化中 39px・間隔 8px → 39 + 8 + (30×4 + 8×3) / 2 = 119px */
+/* 通常時・時短：六角形 30px・消化中 39px・間隔 8px → 39 + 8 + 30 + 8 = 85px */
 body.theme-eva .screen.eva-lcd .heso-overlay:not(.right-mode) {
-  left: calc(50% - 119px);
+  left: calc(50% - 85px);
   right: auto;
   bottom: 10px;
   gap: 8px;
   --hx-step: 38px; /* 六角形の幅 30px＋間隔 8px */
 }
 
-/* ST：箱 26px・消化中 34px・間隔 5px → 34 + 5 + (26×4 + 5×3) / 2 = 98.5px */
+/* ST：箱 26px・消化中 34px・間隔 5px → 34 + 5 + 26 + 5 = 70px */
 body.theme-eva .screen.eva-lcd .heso-overlay.right-mode {
-  left: calc(50% - 98.5px);
+  left: calc(50% - 70px);
   right: auto;
   bottom: 10px;
 }
