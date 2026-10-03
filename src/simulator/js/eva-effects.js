@@ -5148,35 +5148,37 @@ const EVA_LINKED_S = [
 // 資料の「そのリーチで出る割合」と信頼度をそのまま使い、そのリーチの枠に収まらないときは出る割合だけ縮める
 const EVA_PLAN_S = {
   // まとまりの目安は濃厚・10%未満の分も含めた合計（10%以上の演出は、そこから濃厚・10%未満の分を引いた残りを分ける）
+  // 2026-10-04 ユーザーと決定：保留は色 12.5・違和感 10・シフト変化 12.5、レバブル先読み 7、
+  // 前兆は全体 20%（カウントダウンは据え置き、残りを今の比で底上げ）、画面系・変動中は 2〜3% ずつ上げ、
+  // CHANCE 文字は 8%、一発告知は全体 8%（下の hit.flash）
   budget: {
-    hold: { color: 7, odd: 1.7, shift: 3.5 },
-    "lever-pre": 2,
+    hold: { color: 12.5, odd: 10, shift: 12.5 },
+    "lever-pre": 7,
     precursor: {
       countdown: 2.3,
-      eyecatch: 1.65,
-      dokkun: 1.95,
-      shito: 1.3,
-      accel: 0.5,
-      mission: 0.8,
-      search: 0.3,
+      eyecatch: 4.5,
+      dokkun: 5,
+      shito: 3.5,
+      accel: 1.5,
+      mission: 2.2,
+      search: 1,
     },
     screen: {
-      logo: 2.8,
-      stop: 1.6,
-      mute: 1.7,
-      remain: 2,
-      chancebg: 1.5,
-      noise: 1.6,
+      logo: 5.5,
+      stop: 4,
+      mute: 4,
+      remain: 4.5,
+      chancebg: 4,
+      noise: 4,
     },
     midway: {
-      su: 5.4,
-      chance: 2.3,
-      shito: 4.1,
-      serif: 2.15,
-      panel: 3.4,
-      push: 2.9,
+      su: 8.5,
+      chance: 8,
+      shito: 7,
+      serif: 5,
+      panel: 6.5,
+      push: 6,
     },
-    flash: 4.1,
   },
   spread: [],
   always: [],
@@ -5196,5 +5198,16 @@ const EVA_PLAN_S = {
     // 新次回予告（どちらも濃厚）は 2 種で当りの 20%（通常時の次回予告と同じくらい。ユーザー方針 2026-10-04）。
     // 2 種の比は前の暫定値（0.15：0.1）のまま
     midway: { "next-preview": 12, "next-last": 8 },
+    // 一発告知・枠フラッシュは全体で当りの 8%（前の暫定値の比のまま各演出に配る）
+    flash: {
+      "impact-flash": 2,
+      "fukuin-air": 1,
+      "kaworu-button": 0.4,
+      "frame-eye-red": 0.2,
+      "frame-eye-purple": 0.2,
+      "frame-weak": 2,
+      "frame-strong": 2,
+      "frame-late": 0.2,
+    },
   },
 };

@@ -252,7 +252,11 @@ function evaBuildTables(spec, rot) {
   const sumOver = (probs, rows) => rows.reduce((a, r) => a + probs[r], 0);
   const allRows = rStates.map((_, r) => r);
   const hitRowsAll = allRows.filter((r) => r !== noneR);
-  const spMissRows = allRows.filter((r) => isSp[r]);
+  // 信頼度 10%以上のリーチ前の予告のハズレの乗せ先（リーチなしで終わらせない）。
+  // ST は図柄テンパイ（リーチはかかる）も含める（SP のハズレだけでは保留 35% などが収まらない。2026-10-04）
+  const spMissRows = allRows.filter(
+    (r) => isSp[r] || (spec.preMissReaches || []).includes(rStates[r].id),
+  );
 
   const linkedSet = new Set(spec.linked);
   const layers = [];
@@ -579,6 +583,7 @@ const EVA_SPEC_S = {
   layers: EVA_LAYERS_S,
   linked: EVA_LINKED_S,
   spReaches: EVA_ST_SP,
+  preMissReaches: ["tenpai"],
   plan: EVA_PLAN_S,
 };
 // 時短（チャンスタイム）中はストーリーリーチ（vsアルミサエル・vsサハクィエル）が大当り濃厚
