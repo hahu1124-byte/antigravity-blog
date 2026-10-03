@@ -490,9 +490,11 @@ function buildResFromBand(band, isHit, isRight) {
 }
 
 // モード → 確率の状態（EVA は時短に専用の表がある。リゼロは時短も通常の帯）
-function regimeOfMode(m) {
+// remBefore：その変動を消化する前の残り回転（EVA の ST は残り 163〜101 が高速区間 "sf"。eva-engine.js）
+function regimeOfMode(m, remBefore = rRem) {
   if (m === "通常") return "n";
   if (m === "時短") return currentMachine === "eva" ? "j" : "n";
+  if (currentMachine === "eva" && remBefore >= EVA_ST_FAST_FROM) return "sf";
   return "s";
 }
 
@@ -552,7 +554,9 @@ function createJob(isRight = false, regimeOverride, opts) {
 
 // k 回転先に消化される保留の状態：今のモードの残りが remain 回転なら、その中か後か
 function predictRegime(k, remain) {
-  if (mode === "通常" || k <= remain) return { regime: regimeOfMode(mode) };
+  // k 個目の保留を消化する前の残り回転は remain − (k − 1)
+  if (mode === "通常" || k <= remain)
+    return { regime: regimeOfMode(mode, remain - (k - 1)) };
   return { regime: "n", after: true }; // ST・時短が終わった後に消化（抜けの残保留）
 }
 
@@ -837,8 +841,8 @@ function vanishCurrentHold(job) {
 // V ストック・保留連の示唆が出せる。消化順は右（特図2）が先、ヘソが後
 function rejudgeStocks(newMode, remain) {
   if (currentMachine !== "eva") return;
-  const newRegime = newMode === "時短" ? "j" : newMode === "ST" ? "s" : "n";
-  const regimeAt = (k) => (k <= remain ? newRegime : "n");
+  const regimeAt = (k) =>
+    k <= remain ? regimeOfMode(newMode, remain - (k - 1)) : "n";
   rightStock = rightStock.map((job, i) =>
     rejudgeHold(job, regimeAt(i + 1), "右 大当りで判定し直し"),
   );
@@ -962,6 +966,7 @@ async function startProcess() {
     ov.style.display = "block";
   }
   let currentSpeed = autoSpeed;
+  let quickSpin = false; // ST の高速区間の演出の無いハズレ（下で決める）
 
   // 消化中(eff) または その次 の変動が信頼度50%以上かチェック。
   // EVA は当該（消化中の変動）だけを見る：先読みの無い保留で手前の変動まで低速にしない
@@ -997,10 +1002,18 @@ async function startProcess() {
     finishHold(eff, instant);
     // 保留に居る先読み（カウントダウンの 3→2→1 など）はこの変動のリーチ前に出す
     const leadSteps = takeLeadSteps(eff);
+    // ST の高速区間（残り 163〜101）で演出の無いハズレは 1 回転 0.8 秒・待機 0.2 秒（ユーザー方針 2026-10-04）
+    quickSpin =
+      eff.regime === "sf" &&
+      !eff.isHit &&
+      !eff.tenpai &&
+      !leadSteps.length &&
+      !(eff.steps || []).length;
     // 一発告知音：保留を消化した瞬間に鳴らす（インパクトフラッシュ・福音エアーなど）
     if (eff.notice && !instant) evaPlayNotice(eff.notice);
     await evaRunDisplay(eff, {
       instant,
+      quick: quickSpin,
       heavy: eff.heavy,
       steps: [...leadSteps, ...(eff.steps || [])],
       onSp: () => vanishCurrentHold(eff),
@@ -1078,7 +1091,7 @@ async function startProcess() {
   updateUI();
   updateAutoBtns();
   // 次回転への待機時間（高速時は5ms、低速時は図柄が止まってから0.5秒）
-  let nextDelay = currentSpeed === "fast" ? 5 : 500;
+  let nextDelay = currentSpeed === "fast" ? 5 : quickSpin ? 200 : 500;
   if (isAuto) setTimeout(startProcess, nextDelay);
 }
 
@@ -1381,11 +1394,13 @@ const DEBUG_PICKS = {
   hit: (j) => j.isHit,
   zenkaiten: (j) => j.isHit && j.reachId === "zenkaiten",
   sp: (j) => !j.isHit && j.sp,
+  instant: (j) => !!j.instant777,
 };
 const DEBUG_LABELS = {
   hit: "強制大当り",
   zenkaiten: "強制全回転",
   sp: "強制SPハズレ",
+  instant: "強制即当り(777)",
 };
 const DEBUG_MAX_DRAWS = 3000000;
 
@@ -1477,6 +1492,11 @@ function applyDebugFlag(job) {
   debugFlag = null;
   updateDebugBtns();
   if (kind === "effect") return debugEffectJob(job);
+  // 無演出即当りは ST の高速区間（残り 163〜101）だけ
+  if (kind === "instant" && regimeOfMode(mode) !== "sf") {
+    addLog("[デバッグ] 即当り(777)は ST の残り 163〜101 回転で押してください");
+    return job;
+  }
   const forced = debugDraw(job.isRight, DEBUG_PICKS[kind]);
   if (!forced) return job;
   addLog(`[デバッグ] ${DEBUG_LABELS[kind]}`);

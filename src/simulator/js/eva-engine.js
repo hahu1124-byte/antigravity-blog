@@ -225,8 +225,14 @@ function evaBuildTables(spec, rot) {
         100,
   );
   const rawSum = raw.reduce((a, b) => a + b, 0);
-  // ST（share を暫定で読む）はリーチの合計を当りの 99% にそろえる
-  const scaleR = !plan && rawSum > 0 ? (1 - EVA_SUDDEN_SHARE) / rawSum : 1;
+  // plan が無い表はリーチの合計を当りの 99% にそろえる。spec.suddenShare があれば、リーチの合計を
+  // 1 − suddenShare に縮めて、リーチなしの当りをその割合にする（ST の高速区間）
+  const scaleR =
+    rawSum > 0 && spec.suddenShare !== undefined
+      ? (1 - spec.suddenShare) / rawSum
+      : !plan && rawSum > 0
+        ? (1 - EVA_SUDDEN_SHARE) / rawSum
+        : 1;
   const aR = raw.map((x) => x * scaleR);
   aR[noneR] = Math.max(0, 1 - aR.reduce((a, b) => a + b, 0));
   const TR = rStates.map((s) => (s === EVA_NONE ? 0 : s.trust / 100));
@@ -607,10 +613,19 @@ const EVA_T_N_LOW = evaBuildTables(EVA_SPEC_N, 0);
 const EVA_T_N_HIGH = evaBuildTables(EVA_SPEC_N, 401);
 const EVA_T_J = evaBuildTables(EVA_SPEC_J, 0);
 const EVA_T_S = evaBuildTables(EVA_SPEC_S, 0);
+// ST の高速区間（残り 163〜101 回転。ユーザー方針 2026-10-04）：リーチなしの当りを当りの 6% にした表。
+// うち 1% は通常の突発当り、5% は無演出で 7・7・7 が左から順に止まる即当り（createEvaJob の instant777）
+const EVA_ST_FAST_FROM = 101; // 消化する前の残り回転がこれ以上なら高速区間
+const EVA_ST_INSTANT_SHARE = 0.05; // 無演出即当り（当りのうち）
+const EVA_T_S_FAST = evaBuildTables(
+  { ...EVA_SPEC_S, suddenShare: EVA_SUDDEN_SHARE + EVA_ST_INSTANT_SHARE },
+  0,
+);
 
-// regime：確率の状態。"n"＝通常、"j"＝時短、"s"＝ST
+// regime：確率の状態。"n"＝通常、"j"＝時短、"s"＝ST、"sf"＝ST の高速区間
 function evaTablesFor(regime) {
   if (regime === "s") return EVA_T_S;
+  if (regime === "sf") return EVA_T_S_FAST;
   if (regime === "j") return EVA_T_J;
   return currentRot > 400 ? EVA_T_N_HIGH : EVA_T_N_LOW;
 }
@@ -930,7 +945,7 @@ function createEvaJob(isRight, regime, opts = {}) {
         movie: EVA_NEXT_MOVIE_IDS.includes(state.id) ? "next" : null,
         // ST の新次回予告（濃厚）は、最後のタイトルの後いきなり図柄が揃う（リーチを経ない。ユーザー方針 2026-10-04）
         nextHit:
-          regime === "s" &&
+          (regime === "s" || regime === "sf") &&
           EVA_NEXT_MOVIE_IDS.includes(state.id) &&
           state.trust >= 100,
         // キャラ連続：キャラが出るたびに図柄が仮停止して擬似連のように続く（eva-reel.js の evaPlayChara）
@@ -964,8 +979,21 @@ function createEvaJob(isRight, regime, opts = {}) {
     text = text ? "格納庫\n四号機\n" + text : "格納庫\n四号機";
     steps.unshift({ phase: "pre", text: "格納庫\n四号機", bg: "hangar-4" });
   }
-  // 演出なしの当りは突発当り（初号機が画面を引き裂いて告知）
-  if (isHit && !acc.any) {
+  // ST の高速区間のリーチなしの当り（当りの 6%）のうち 5% 分は、無演出で 7・7・7 が左から順に止まる即当り
+  // （eva-reel.js。告知も文字もなし。ユーザー方針 2026-10-04）
+  let instant777 = false;
+  if (
+    isHit &&
+    !acc.any &&
+    reach.id === "none" &&
+    regime === "sf" &&
+    Math.random() <
+      EVA_ST_INSTANT_SHARE / (EVA_ST_INSTANT_SHARE + EVA_SUDDEN_SHARE)
+  ) {
+    instant777 = true;
+    name.push("無演出即当り(777)");
+  } else if (isHit && !acc.any) {
+    // 演出なしの当りは突発当り（初号機が画面を引き裂いて告知）
     name.push("突発当り");
     text = "突発当り";
     steps.push({ phase: "post", text: "突発当り" });
@@ -991,7 +1019,7 @@ function createEvaJob(isRight, regime, opts = {}) {
   let upgrade = false;
   if (isHit) {
     // 全回転リーチは ST 中でも 7 で止める（液晶で 1 周して 7 で止まる演出。eva-reel.js）
-    if (reach.id === "zenkaiten") hitDigit = 7;
+    if (reach.id === "zenkaiten" || instant777) hitDigit = 7;
     else if (isRight && regime !== "n") hitDigit = Math.random() < 0.5 ? 3 : 1;
     else if (kind === "r10") hitDigit = 7;
     else if (kind === "k3") {
@@ -1011,6 +1039,7 @@ function createEvaJob(isRight, regime, opts = {}) {
     // 液晶に出す信頼度：出た組合せの事後確率（表示と実際の当りやすさが一致する）
     trust: acc.any ? f * 100 : 0,
     sure,
+    instant777, // ST の高速区間の無演出即当り（eva-reel.js で 7 を左から順に止める）
     effects: shown.map(({ state, no }) => ({
       name: state.name,
       trust: state.trust,

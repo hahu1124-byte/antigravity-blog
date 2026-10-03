@@ -20,6 +20,13 @@ const EVA_REEL_RIGHT_MS = 520; // 右が止まるまで
 const EVA_REEL_CENTER_MS = 640; // リーチでないとき中が止まるまで
 const EVA_REEL_REACH_MS = 900; // ノーマルリーチの中の回転時間（右が止まってから）
 const EVA_REEL_SP_MS = 1900; // SP リーチ・激アツの中の回転時間（右が止まってから）
+// ST の高速区間（残り 163〜101）で演出の無いハズレの回転：1 回転 0.8 秒（左→右→中）。待機は script.js で 0.2 秒
+const EVA_QUICK_LEFT_MS = 450;
+const EVA_QUICK_RIGHT_MS = 650;
+const EVA_QUICK_CENTER_MS = 800;
+// 高速区間の無演出即当り：回っているところから、7 が左・中・右の順に止まる
+const EVA_INSTANT_FIRST_MS = 450; // 左が止まるまで
+const EVA_INSTANT_STEP_MS = 280; // 次の列が止まるまで
 const EVA_STEP_MS = 450; // 液晶に出す演出の文字 1 段の時間
 const EVA_STEP_MAX = 4; // リーチ前・リーチ後それぞれの最大段数（多いときはまとめる）
 // 確変の当りのうち暴走図柄（1・3・5）で見せる割合（シンクロ経由の当りは必ず暴走）
@@ -726,6 +733,18 @@ async function evaRunDisplayMain(eff, opts) {
       preUsed += EVA_STEP_MS;
     }
   }
+  // ST の高速区間の無演出即当り：告知も文字もなく、7 が左・中・右の順に止まって揃う
+  if (eff.instant777) {
+    await evaSleep(EVA_INSTANT_FIRST_MS);
+    for (const col of [0, 1, 2]) {
+      spinning[col] = false;
+      setCol(col, finals[col], null, col === 2 ? winKeys : null);
+      if (col < 2) await evaSleep(EVA_INSTANT_STEP_MS);
+    }
+    clearInterval(timer);
+    [0, 1, 2].forEach((col) => setCol(col, finals[col], null, winKeys));
+    return;
+  }
   // 全回転リーチ：3 列とも同じ図柄を並べてゆっくり 1 周させ、7 で止まって震える
   if (eff.reachId === "zenkaiten" && eff.isHit) {
     clearInterval(timer);
@@ -733,15 +752,26 @@ async function evaRunDisplayMain(eff, opts) {
     await evaZenkaitenLap(eff, show, reachText, grid);
     return;
   }
-  await evaSleep(Math.max(0, EVA_REEL_LEFT_MS - preUsed));
+  // ST の高速区間の演出の無いハズレは 1 回転 0.8 秒（opts.quick。script.js が決める）
+  const leftMs = opts.quick ? EVA_QUICK_LEFT_MS : EVA_REEL_LEFT_MS;
+  const rightMs = opts.quick ? EVA_QUICK_RIGHT_MS : EVA_REEL_RIGHT_MS;
+  const centerMs = opts.quick ? EVA_QUICK_CENTER_MS : EVA_REEL_CENTER_MS;
+  const reach = reachKeys.length > 0;
+  // ST（数字 3 つ）はリーチ以外のとき左→中→右の順に止まる。リーチのときだけ左→右→中（実機。ユーザー指摘 2026-10-04）
+  const lcr = !grid && !reach;
+  await evaSleep(Math.max(0, leftMs - preUsed));
   show("");
   spinning[0] = false;
   setCol(0, finals[0]);
-  await evaSleep(EVA_REEL_RIGHT_MS - EVA_REEL_LEFT_MS);
-  spinning[2] = false;
-  const reach = reachKeys.length > 0;
-  setCol(0, finals[0], hotOf(0));
-  setCol(2, finals[2], hotOf(2));
+  await evaSleep(rightMs - leftMs);
+  if (lcr) {
+    spinning[1] = false;
+    setCol(1, finals[1]);
+  } else {
+    spinning[2] = false;
+    setCol(0, finals[0], hotOf(0));
+    setCol(2, finals[2], hotOf(2));
+  }
 
   if (reach) {
     // リーチ名 → リーチ後の予告・チャンスアップ。中の回転は SP・激アツなら長く
@@ -761,10 +791,11 @@ async function evaRunDisplayMain(eff, opts) {
     }
     await evaSleep(Math.max(0, total - used));
   } else {
-    await evaSleep(EVA_REEL_CENTER_MS - EVA_REEL_RIGHT_MS);
+    await evaSleep(centerMs - rightMs);
   }
   clearInterval(timer);
   spinning[1] = false;
+  spinning[2] = false;
 
   if (reach) {
     // 中は最後の数コマをだんだん遅くして止める
