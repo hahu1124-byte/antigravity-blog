@@ -367,6 +367,13 @@ function assertClose(label, actual, expected, tolerance) {
     console.log(
       `[EVA] ${label}: 当該レバブルは当りの ${((r.leverHits / r.hits) * 100).toFixed(1)}%`,
     );
+    // 通常時の当該レバブルは当りの約3割（他の演出と重なってよい）
+    assertClose(
+      `EVA ${label} レバブル 当り絡み率`,
+      r.leverHits / r.hits,
+      0.3,
+      0.02,
+    );
   }
   // ST 中の当該レバブルはどれも当り確定で、出るのは当りの約2割
   if (evaMc.st.leverMiss)
