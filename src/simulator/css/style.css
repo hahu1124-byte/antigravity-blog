@@ -803,10 +803,7 @@ body.theme-eva .heso-ball.heso-odd {
 }
 
 /* 通常時・時短の六角形の文字：5px の 3 行では潰れて読めなかったので（ユーザー指摘 2026-10-04）、
-   1 行の「EMERGENCY」を 7px（消化中 9px）で出す。六角形に収まらない分は、保留の揺れ（hx-sway：
-   y 軸に −32°〜+32°、2.6 秒で往復）と同じ周期・同じ緩急で左右に動かし、筒の表面の文字が回り込むように見せる
-   （一定の速さで流すと揺れとちぐはぐで気持ち悪かった。ユーザー指摘 2026-10-04）。
-   違和感保留は逆向きに動く。警報保留の「警戒」は動かさない */
+   1 行の「EMERGENCY」を 7px（消化中 9px）で出す（流したり揺れに合わせて動かしたりはしない） */
 body.theme-eva .heso-overlay:not(.right-mode) .heso-ball {
   --hx-size: 7px;
 }
@@ -822,29 +819,14 @@ body.theme-eva
   letter-spacing: 0;
 }
 
+/* 文字は動かさない（実機の通常時の保留の文字は動かない。ユーザー指摘 2026-10-04）。
+   7px（消化中 9px）の高さのまま横幅だけ縮めて六角形に収める */
 body.theme-eva
   .heso-overlay:not(.right-mode)
   .heso-ball:not(.heso-alert-red, .heso-alert-purple)
   > .hx-text::before {
   flex: none;
-  animation: hx-text-sway 2.6s ease-in-out infinite alternate;
-}
-
-body.theme-eva
-  .heso-overlay:not(.right-mode)
-  .heso-ball.heso-odd
-  > .hx-text::before {
-  animation-direction: alternate-reverse;
-}
-
-/* 箱が −32° → +32° に回る（右の端が奥へ）のに合わせて、文字は右 → 左へ */
-@keyframes hx-text-sway {
-  from {
-    translate: 28% 0;
-  }
-  to {
-    translate: -28% 0;
-  }
+  transform: scaleX(0.5);
 }
 
 /* 点滅：オレンジの枠だけ光る */
