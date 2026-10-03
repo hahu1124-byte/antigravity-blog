@@ -567,8 +567,21 @@ function assertClose(label, actual, expected, tolerance) {
     const s = applyDebugFlag(createJob(false));
     if (s.isHit || !s.sp) throw new Error("強制SPハズレが違う");
     leftStock = [];
-    debugAddRedHold();
-    if (leftStock.length !== 1 || !leftStock[0].isHit || leftStock[0].holdType !== "red") throw new Error("赤保留の当りが保留に入らない");
+    // 当否は 65536 個の番号から 1 つ：当りは番号が当り範囲（0〜hitRange-1）に入ったときだけ
+    for (let i = 0; i < 20000; i++) {
+      const j = createJob(false);
+      if (j.lotNo < 0 || j.lotNo >= EVA_LOTTERY || j.isHit !== j.lotNo < j.hitRange) throw new Error("当否の番号と当り範囲が合わない");
+    }
+    // 抽選ログ：ON のときだけ、番号・当り範囲・演出をログに出す
+    document.getElementById("log").innerHTML = "";
+    refillStock("left");
+    if (document.getElementById("log").innerHTML.includes("[抽選]")) throw new Error("抽選ログが OFF なのに出た");
+    toggleDebugLot();
+    leftStock = [];
+    refillStock("left");
+    const lotLog = document.getElementById("log").innerHTML;
+    if (!/\\[抽選\\] ヘソ 1個目 #\\d+\\/65536（当り (0〜\\d+|当り無し|全部当り)）→ (当り|ハズレ)/.test(lotLog)) throw new Error("抽選ログの形が違う: " + lotLog);
+    toggleDebugLot();
     leftStock = [];
     // ログは下に足していく
     document.getElementById("log").innerHTML = "> a";

@@ -526,9 +526,10 @@ function createJob(isRight = false, regimeOverride) {
 function refreshStaleJob(job) {
   if (!job || currentMachine !== "eva") return job;
   const regimeNow = mode === "通常" || mode === "時短" ? "n" : "s";
-  return job.regime === regimeNow
-    ? job
-    : carryHold(job, createJob(job.isRight));
+  if (job.regime === regimeNow) return job;
+  const next = carryHold(job, createJob(job.isRight));
+  logLottery(next, `${next.isRight ? "右" : "ヘソ"} 消化時に判定し直し`);
+  return next;
 }
 
 // 作り直した保留の見た目：保留の種類が同じなら、変化の途中経過をそのまま引き継ぐ
@@ -741,6 +742,7 @@ function rejudgeStocks(regime) {
   const fix = (job) => {
     if (job.regime === regime) return job;
     const next = carryHold(job, createJob(job.isRight, regime));
+    logLottery(next, `${next.isRight ? "右" : "ヘソ"} 判定し直し`);
     // 判定し直して当り・強い先読みになった保留も、高速オートなら低速に落とす
     slowDownForSakiyomi(next);
     return next;
@@ -1050,6 +1052,7 @@ function refillStock(from) {
     // 入賞したこの変動から、消化されるまでの変動に先読みの段を割り振る
     scheduleLeads(job, stock.length + 1);
     stock.push(job);
+    logLottery(job, `${isLeft ? "ヘソ" : "右"} ${stock.length}個目`);
     slowDownForSakiyomi(job);
   }
   updateHesoUI();
@@ -1281,22 +1284,53 @@ function applyDebugFlag(job) {
   const forced = debugDraw(job.isRight, DEBUG_PICKS[kind]);
   if (!forced) return job;
   addLog(`[デバッグ] ${DEBUG_LABELS[kind]}`);
+  logLottery(forced, "強制した変動");
   return forced;
 }
 
-// 赤保留の当りを保留の最後に足す（先読み・槍の保留変化・低速オートの確認用）
-function debugAddRedHold() {
-  if (currentMachine !== "eva") return;
-  const isRight = mode !== "通常";
-  const job = debugDraw(isRight, (j) => j.isHit && j.holdType === "red");
-  if (!job) return;
-  const stock = isRight ? rightStock : leftStock;
-  if (stock.length >= 4) stock.pop();
-  scheduleLeads(job, stock.length + 1);
-  stock.push(job);
-  slowDownForSakiyomi(job);
-  updateHesoUI();
-  addLog("[デバッグ] 赤保留の当りを保留に追加");
+// 抽選ログ（トグル）：ON のとき、保留が入るたびに当否の番号（65536 個のうち何番か）・当り範囲・
+// 選ばれた演出（保留変化・先読みを含む）をログに出す
+let debugLotOn = false;
+function toggleDebugLot() {
+  debugLotOn = !debugLotOn;
+  const b = document.getElementById("dbg-lot");
+  if (b) {
+    b.classList.toggle("armed", debugLotOn);
+    b.innerText = debugLotOn ? "抽選ログ ON" : "抽選ログ OFF";
+  }
+}
+
+const HOLD_VIEW_NAMES = {
+  blue: "青",
+  green: "緑",
+  red: "赤",
+  rainbow: "虹",
+};
+// 保留変化の流れ（例：先読みで 青→槍で赤）
+function describeHoldPlan(job) {
+  if (!job.holdSeq || !job.holdSeq.length) return "";
+  const steps = job.holdSeq
+    .map((s) => (s.fx === "lance" ? "槍で" : "") + HOLD_VIEW_NAMES[s.view])
+    .join("→");
+  return `保留変化(${job.holdWhen === "stock" ? "先読み" : "当該"}:${steps})`;
+}
+
+// where：何の保留か（例「ヘソ 3個目」「右 判定し直し」）
+function logLottery(job, where) {
+  if (!debugLotOn || currentMachine !== "eva" || !job) return;
+  const range =
+    job.hitRange <= 0
+      ? "当り無し"
+      : job.hitRange >= EVA_LOTTERY
+        ? "全部当り"
+        : `0〜${job.hitRange - 1}`;
+  const effects = job.name.filter((n) => n !== "レバブル保留");
+  const plan = describeHoldPlan(job);
+  if (plan) effects.push(plan);
+  addLog(
+    `[抽選] ${where} #${job.lotNo}/${EVA_LOTTERY}（当り ${range}）→ ${job.isHit ? "当り" : "ハズレ"}` +
+      ` ｜ ${effects.join("・") || "演出なし"} ｜ 信頼度 ${job.trust.toFixed(1)}%`,
+  );
 }
 
 // ログは下に足していき、いちばん下（新しい行）が見えるようにする

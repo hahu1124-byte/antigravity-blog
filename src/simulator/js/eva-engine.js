@@ -370,6 +370,9 @@ function evaColorOf(state) {
   return hit ? hit[1] : null;
 }
 
+// 当否の乱数の数（実機の大当り乱数と同じ 65536 個）
+const EVA_LOTTERY = 65536;
+
 // 全回転リーチのうち格納庫背景(四号機)を前段に見せる割合（見せ方だけ）
 const EVA_HANGAR4_RATE = 0.2;
 
@@ -417,7 +420,16 @@ function createEvaJob(isRight, regime) {
   let acc = EVA_EMPTY;
   for (const { layer, state } of shown) acc = evaStep(acc, layer, state);
   const f = acc.any ? evaF(acc.k, acc.maxT, acc.sure) : T.base0;
-  const isHit = Math.random() < f;
+  // 当否は 65536 個の番号（0〜65535）から 1 つ引き、当り範囲（0〜hitRange-1）に入れば当り。
+  // 当り範囲の数は f×65536。端数は確率で 1 つ足すので、当り確率は f のまま変わらない
+  const exact = f * EVA_LOTTERY;
+  const floorRange = Math.floor(exact);
+  const hitRange = Math.min(
+    EVA_LOTTERY,
+    floorRange + (Math.random() < exact - floorRange ? 1 : 0),
+  );
+  const lotNo = Math.floor(Math.random() * EVA_LOTTERY);
+  const isHit = lotNo < hitRange;
 
   // 当り種別：全回転は 10R、確変濃厚の演出かシンクロ当りは 3R確変、他は逆算した比で
   let kind = null;
@@ -566,6 +578,8 @@ function createEvaJob(isRight, regime) {
     leadPlan: null,
     preTrust,
     holdShake,
+    lotNo, // 当否で引いた番号（0〜65535）
+    hitRange, // 当り範囲の数（0〜hitRange-1 が当り）
     notice: evaNoticeOf(shown), // 一発告知音（eva-voice.js）。保留を消化した瞬間に鳴らす
     // SP リーチ（全回転を含む）：SP に発展したら当該保留を消す
     sp: reach.id === "zenkaiten" || T.spec.spReaches.includes(reach.id),
