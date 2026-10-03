@@ -1187,16 +1187,21 @@ function scheduleLeads(job, count) {
   if (!job.leads || !job.leads.length || count <= 0) return;
   const plan = Array.from({ length: count }, () => []);
   for (const l of job.leads) {
-    const step = (text) => ({
-      phase: "pre",
-      text,
-      color: l.color,
-      voice: l.kind === "entry" ? l.voice : null,
-      spark: l.spark || null, // 図柄停止時発光：その変動の図柄が止まったらキラキラ
-      // 前兆（先読み）の段は図柄を隠して専用画面に切り替え、当該と同じ効果（ドックンの炎など）を出す
-      takeover: l.kind === "pre",
-      fx: l.kind === "pre" ? l.fx || null : null,
-    });
+    // 段は文字だけか、段ごとの色・効果を持つ { text, color, fx }（ドックンの 青→赤 など。eva-effects.js）
+    const step = (t) => {
+      const o = typeof t === "string" ? { text: t } : t;
+      return {
+        phase: "pre",
+        text: o.text,
+        color: o.color !== undefined ? o.color : l.color,
+        voice: l.kind === "entry" ? l.voice : null,
+        spark: l.spark || null, // 図柄停止時発光：その変動の図柄が止まったらキラキラ
+        // 前兆（先読み）の段は図柄を隠して専用画面に切り替え、当該と同じ効果（ドックンの炎など）を出す
+        takeover: l.kind === "pre",
+        fx:
+          l.kind === "pre" ? (o.fx !== undefined ? o.fx : l.fx || null) : null,
+      };
+    };
     if (l.kind === "entry") {
       plan[0].push(step(l.text));
       continue;

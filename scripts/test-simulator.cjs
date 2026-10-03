@@ -444,7 +444,9 @@ function assertClose(label, actual, expected, tolerance) {
       for (const s of L.states) {
         if (!s.id.startsWith("countdown")) continue;
         const who = s.id === "countdown-kaworu" ? "カヲル" : "シンジ";
-        if (!s.text.includes(who) || s.lead.length !== 3)
+        // 前の段は 3→2→1 の後ろの方（段数で値が違う。ノイズの段は文字に印が付く）
+        const heads = s.lead.map((x) => (typeof x === "string" ? x : x.text).slice(0, 1));
+        if (!s.text.includes(who) || !s.lead.length || heads.join("") !== ["３", "２", "１"].slice(3 - heads.length).join(""))
           throw new Error("カウントダウンの 0 のキャラが分からない: " + s.name);
       }
     }

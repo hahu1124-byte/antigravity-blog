@@ -480,6 +480,9 @@ function evaPickHesoKind(forced) {
 // 演出を液晶に出す段階：リーチ前（pre）・リーチ成立（reach）・リーチ後（post）。
 // リーチ後予告の層は key が "after" で始まる（after・after-voice など）
 const EVA_POST_LAYERS = [
+  "mission-kind",
+  "gabure",
+  "synchro-meter",
   "launch",
   "chanceup",
   "device",
@@ -620,6 +623,10 @@ const EVA_NEXT_MOVIE_IDS = [
   "next-service",
   "next-kuroji",
   "next-preview",
+  "next-last",
+  "next-contra",
+  "next-lamp-contra",
+  "next-lamp-last",
 ];
 
 // 当否が決まった後に演出を選ぶときの引き直しの上限（当りでも平均 320 回ほどで決まる）
