@@ -787,13 +787,46 @@ body.theme-eva .heso-ball.heso-odd {
   --hx-edge: #f5f7fb;
   --hx-face: linear-gradient(160deg, #eef1f6, #a9b2bf);
   --hx-ink: #2b2f36;
-  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-text: "EMERGENCY";
   --hx-glow: rgba(150, 180, 255, 0.5);
 }
 
-/* 違和感保留：三角形が逆向き（サイズは .heso-odd の拡大のまま） */
+/* 違和感保留：文字が逆向きに流れる（下の通常時の流れる文字を参照） */
 body.theme-eva .heso-ball.heso-odd {
-  --hx-text: "▼\A EMERGENCY\A ▲";
+  --hx-text: "EMERGENCY";
+}
+
+/* 通常時・時短の六角形の文字：5px の 3 行では潰れて読めなかったので（ユーザー指摘 2026-10-04）、
+   1 行の「EMERGENCY」を 7px（消化中 9px）で右から左へ流す（ST の箱と同じ見せ方）。警報保留の「警戒」は流さない */
+body.theme-eva .heso-overlay:not(.right-mode) .heso-ball {
+  --hx-size: 7px;
+}
+
+body.theme-eva .heso-overlay:not(.right-mode) .heso-ball.heso-current {
+  --hx-size: 9px;
+}
+
+body.theme-eva
+  .heso-overlay:not(.right-mode)
+  .heso-ball:not(.heso-alert-red, .heso-alert-purple)
+  > .hx-text {
+  justify-content: flex-start;
+  letter-spacing: 0;
+}
+
+body.theme-eva
+  .heso-overlay:not(.right-mode)
+  .heso-ball:not(.heso-alert-red, .heso-alert-purple)
+  > .hx-text::before {
+  padding-left: 100%;
+  animation: hx-marquee 2.4s linear infinite;
+}
+
+body.theme-eva
+  .heso-overlay:not(.right-mode)
+  .heso-ball.heso-odd
+  > .hx-text::before {
+  animation-direction: reverse;
 }
 
 /* 点滅：オレンジの枠だけ光る */
@@ -801,7 +834,7 @@ body.theme-eva .heso-ball.heso-blink {
   --hx-edge: #ff9a3c;
   --hx-face: rgba(255, 140, 40, 0.18);
   --hx-ink: #ffd2a0;
-  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-text: "EMERGENCY";
   --hx-glow: #ff8c00;
 }
 
@@ -809,15 +842,15 @@ body.theme-eva .heso-ball.heso-blink-strong {
   --hx-edge: #ffd54f;
   --hx-face: rgba(255, 213, 79, 0.3);
   --hx-ink: #fff;
-  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-text: "EMERGENCY";
   --hx-glow: #ffd54f;
 }
 
 body.theme-eva .heso-ball.heso-blue {
   --hx-edge: #9cc4ff;
   --hx-face: linear-gradient(160deg, #4d8cff, #0a2a8a);
-  --hx-ink: #001a55;
-  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-ink: #f0f6ff; /* 紺の文字は青地に沈んで読めなかった */
+  --hx-text: "EMERGENCY";
   --hx-glow: #2f6bff;
 }
 
@@ -825,15 +858,15 @@ body.theme-eva .heso-ball.heso-green {
   --hx-edge: #a8ffa8;
   --hx-face: linear-gradient(160deg, #46e046, #0b6b0b);
   --hx-ink: #022a02;
-  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-text: "EMERGENCY";
   --hx-glow: #00ff00;
 }
 
 body.theme-eva .heso-ball.heso-red {
   --hx-edge: #ffb3b3;
   --hx-face: linear-gradient(160deg, #ff4242, #9a0000);
-  --hx-ink: #3a0000;
-  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-ink: #fff4f4; /* 暗い赤の文字は赤地に沈んで読めなかった */
+  --hx-text: "EMERGENCY";
   --hx-glow: #ff0000;
 }
 
@@ -850,7 +883,7 @@ body.theme-eva .heso-ball.heso-rainbow {
     #ff1744
   );
   --hx-ink: #fff;
-  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-text: "EMERGENCY";
   --hx-glow: #fff;
 }
 
@@ -874,7 +907,7 @@ body.theme-eva .heso-ball.heso-shogoki {
   --hx-edge: #7cff4f;
   --hx-face: linear-gradient(160deg, #7a3fc4, #2b0f50);
   --hx-ink: #7cff4f;
-  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-text: "EMERGENCY";
   --hx-glow: #7cff4f;
 }
 
@@ -883,7 +916,7 @@ body.theme-eva .heso-ball.heso-vibe {
   --hx-edge: #fff;
   --hx-face: radial-gradient(circle, #fff, #ff8c00);
   --hx-ink: #5a1a00;
-  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-text: "EMERGENCY";
   --hx-glow: #ff8c00;
 }
 
@@ -1750,28 +1783,29 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   animation-duration: 0.07s;
 }
 
-/* 回転数の数字の上にモザイクのノイズ（文字のノイズと同じ。ユーザー方針 2026-10-04） */
+/* 回転数の数字のノイズ：数字の形の中だけをモザイク模様で塗る（文字のノイズと同じ。上に重ねると潰れる） */
 .st-remain.sr-noise-s .sr-num,
 .st-remain.sr-noise-l .sr-num {
-  position: relative;
+  color: transparent;
+  text-shadow: none;
+  background-image:
+    repeating-conic-gradient(rgba(0, 0, 0, 0.4) 0 25%, transparent 0 50%),
+    linear-gradient(#eef2ff, #eef2ff);
+  background-size:
+    3px 3px,
+    100% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  filter: drop-shadow(0 0 3px #7a8cff);
 }
 
-.st-remain.sr-noise-s .sr-num::after,
-.st-remain.sr-noise-l .sr-num::after {
-  content: "";
-  position: absolute;
-  inset: 0 -2px;
-  pointer-events: none;
-  background: repeating-conic-gradient(currentColor 0 25%, transparent 0 50%) 0
-    0 / 4px 4px;
-  opacity: 0.25;
-  mix-blend-mode: screen;
-  animation: tx-mosaic 0.12s steps(2) infinite;
-}
-
-.st-remain.sr-noise-l .sr-num::after {
-  opacity: 0.5;
-  background-size: 6px 6px;
+.st-remain.sr-noise-l .sr-num {
+  background-image:
+    repeating-conic-gradient(rgba(0, 0, 0, 0.7) 0 25%, transparent 0 50%),
+    linear-gradient(#eef2ff, #eef2ff);
+  background-size:
+    5px 5px,
+    100% 100%;
 }
 
 /* 液晶の下（EVA。script.js の updateUI が .eva-lcd を付ける）：回転数は左下、保留は残りの保留の 2 つ目の
@@ -1818,7 +1852,7 @@ body.theme-eva .screen.st-mode .heso-overlay.right-mode {
 }
 
 body.theme-eva .screen.st-mode .heso-overlay.right-mode .heso-ball {
-  --hx-size: 5px;
+  --hx-size: 8px; /* 5px では潰れて読めなかった（ユーザー指摘 2026-10-04） */
   width: 26px;
   height: 17px;
 }
@@ -1827,9 +1861,20 @@ body.theme-eva
   .screen.st-mode
   .heso-overlay.right-mode
   .heso-ball.heso-current {
-  --hx-size: 6.5px;
+  --hx-size: 10px;
   width: 34px;
   height: 22px;
+}
+
+/* 保留が詰まるとき：消化中の保留は残り保留の 1 つ目の位置から動いてくる。消化中は大きい（34px）ので、
+   動く距離は中心どうしの距離（34/2 ＋ 間隔 5 ＋ 26/2 ＝ 35px。他の保留は 31px）。
+   白い縁（消化中の印）は動いている間は出さず、消化中の位置に着いてから出す（ユーザー指摘 2026-10-04） */
+body.theme-eva .screen.eva-lcd .heso-ball.heso-current {
+  --hx-step: 35px;
+}
+
+body.theme-eva .heso-overlay.hold-shift .heso-ball.heso-current > .hx-ring {
+  display: none;
 }
 
 @keyframes remain-in {
@@ -1858,17 +1903,16 @@ body.theme-eva
   }
 }
 
+/* ずれは小さく（大きく欠けると数字が読めない） */
 @keyframes remain-noise {
   0% {
-    translate: 3px 0;
-    filter: hue-rotate(0deg);
-    clip-path: inset(0 0 40% 0);
+    translate: 2px 0;
+    clip-path: inset(0 0 8% 0);
   }
 
   100% {
-    translate: -3px 0;
-    filter: hue-rotate(90deg);
-    clip-path: inset(30% 0 0 0);
+    translate: -2px 0;
+    clip-path: inset(10% 0 0 0);
   }
 }
 
@@ -1892,57 +1936,100 @@ body.theme-eva
 }
 
 /* 演出の文字に掛けるノイズ（「ノイズ」という文字の代わり。eva-reel.js の evaShowText）。
-   文字がずれてちらつき、上にモザイクが乗る。モザイクの色はその文字の色（currentColor） */
-.effect-text .tx-noise {
-  position: relative;
-  animation: tx-glitch 0.18s steps(2) infinite;
+   文字の上にモザイクを重ねると文字が潰れて読めなかった（ユーザー指摘 2026-10-04）ので、
+   文字の形の中だけをモザイク模様（その文字の色＋暗います目）で塗り、少しだけずらしてちらつかせる。
+   --tc は文字の色（.tc-* と組み合わせて決める）。div を付けて .tc-* より強くする */
+.effect-text div.tx-noise {
+  --tc: #fff;
+  --tn: rgba(0, 0, 0, 0.55); /* ます目の暗さ */
+  color: transparent;
+  text-shadow: none;
+  background-image:
+    repeating-conic-gradient(var(--tn) 0 25%, transparent 0 50%),
+    linear-gradient(var(--tc), var(--tc));
+  background-size:
+    4px 4px,
+    100% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 4px var(--tc));
+  animation:
+    tx-glitch 0.2s steps(2) infinite,
+    tx-mosaic 0.12s steps(2) infinite;
 }
 
-.effect-text .tx-noise::after {
-  content: "";
-  position: absolute;
-  inset: -2px -6px;
-  pointer-events: none;
-  background: repeating-conic-gradient(currentColor 0 25%, transparent 0 50%) 0
-    0 / 6px 6px;
-  opacity: 0.35;
-  mix-blend-mode: screen;
-  animation: tx-mosaic 0.12s steps(2) infinite;
+.effect-text div.tx-noise.tx-noise-s {
+  --tn: rgba(0, 0, 0, 0.35);
+  background-size:
+    3px 3px,
+    100% 100%;
 }
 
-.effect-text .tx-noise-s::after {
-  opacity: 0.2;
+.effect-text div.tx-noise.tx-noise-l {
+  --tn: rgba(0, 0, 0, 0.7);
+  background-size:
+    6px 6px,
+    100% 100%;
+  animation-duration: 0.12s, 0.1s;
 }
 
-.effect-text .tx-noise-l {
-  animation-duration: 0.1s;
+.effect-text div.tx-noise.tc-silver {
+  --tc: #d9dde3;
+}
+.effect-text div.tx-noise.tc-blue {
+  --tc: #4aa8ff;
+}
+.effect-text div.tx-noise.tc-green {
+  --tc: #3dff6e;
+}
+.effect-text div.tx-noise.tc-purple {
+  --tc: #c77dff;
+}
+.effect-text div.tx-noise.tc-red {
+  --tc: #ff2b2b;
+}
+.effect-text div.tx-noise.tc-vermilion {
+  --tc: #ff5a1f;
 }
 
-.effect-text .tx-noise-l::after {
-  opacity: 0.55;
-  background-size: 9px 9px;
+/* 金・虹のノイズはグラデーションの上にます目 */
+.effect-text div.tx-noise.tc-gold {
+  --tc: #ffd84a;
+  background-image:
+    repeating-conic-gradient(var(--tn) 0 25%, transparent 0 50%),
+    linear-gradient(100deg, #ffe9a0, #ffd84a 40%, #fffdf0 50%, #f0b400);
+  -webkit-text-stroke: 0.6px #5c3b00;
+}
+.effect-text div.tx-noise.tc-rainbow {
+  --tc: #ffea00;
+  background-image:
+    repeating-conic-gradient(var(--tn) 0 25%, transparent 0 50%),
+    linear-gradient(90deg, #ff1744, #ff9100, #ffea00, #00e676, #2979ff, #d500f9);
 }
 
+/* ずれは小さく（読めなくならない程度に、少しだけ上下が欠ける） */
 @keyframes tx-glitch {
   0% {
-    translate: 3px 0;
-    clip-path: inset(0 0 38% 0);
+    translate: 2px 0;
+    clip-path: inset(0 0 8% 0);
   }
 
   50% {
-    translate: -3px 0;
-    clip-path: inset(42% 0 0 0);
+    translate: -2px 0;
+    clip-path: inset(10% 0 0 0);
   }
 
   100% {
-    translate: 1px 0;
-    clip-path: inset(0);
+    translate: 0 0;
+    clip-path: none;
   }
 }
 
 @keyframes tx-mosaic {
   to {
-    background-position: 3px 3px;
+    background-position:
+      2px 2px,
+      0 0;
   }
 }
 
@@ -2830,16 +2917,21 @@ body:not(.theme-eva) .voice-credit {
   color: transparent;
   background: linear-gradient(
     100deg,
-    #b8860b 0%,
-    #ffd700 30%,
-    #fffbe0 45%,
-    #ffd700 60%,
-    #b8860b 100%
+    #ffe9a0 0%,
+    #ffd84a 30%,
+    #fffdf0 45%,
+    #ffd84a 60%,
+    #f0b400 100%
   );
   background-size: 250% 100%;
   background-clip: text;
   -webkit-background-clip: text;
-  filter: drop-shadow(0 0 4px #ffb300) drop-shadow(0 0 2px #000);
+  /* 親（.effect-text）の黒い影が透明な文字の中に透けて金が濁り、文字が潰れて見えていた
+     （ユーザー指摘 2026-10-04）。影は消し、細い濃い縁取りと控えめな光で輪郭を出す */
+  text-shadow: none;
+  -webkit-text-stroke: 0.6px #5c3b00;
+  filter: drop-shadow(0 1px 0 #1e1200)
+    drop-shadow(0 0 3px rgba(255, 190, 0, 0.5));
   animation: gold-sheen 1.6s linear infinite;
 }
 

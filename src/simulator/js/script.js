@@ -588,6 +588,13 @@ const HOLD_VIEW_RANK = { none: 0, blue: 1, green: 2, red: 3, rainbow: 4 };
 // （見えている色より弱い色へは戻さない）
 function carryHold(oldJob, newJob) {
   if (oldJob.holdShake) newJob.holdShake = true;
+  // 保留連の一発告知（rejudgeStocks）は判定し直しても引き継ぐ（同じ番号なので当りのまま）
+  if (oldJob.holdChain && newJob.isHit) {
+    newJob.holdChain = true;
+    newJob.notice = oldJob.notice;
+    if (!newJob.name.includes("保留連の一発告知"))
+      newJob.name.push("保留連の一発告知");
+  }
   if (oldJob.leadPlan) newJob.leadPlan = oldJob.leadPlan;
   if (oldJob.holdType === newJob.holdType && oldJob.holdSeq) {
     newJob.holdSeq = oldJob.holdSeq;
@@ -857,6 +864,14 @@ function rejudgeStocks(newMode, remain) {
       "ヘソ 大当りで判定し直し",
     ),
   );
+  // 保留連（大当りした時点で保留に居る当り）は、消化した瞬間に必ず一発告知音を鳴らして当てる。
+  // 音はインパクトフラッシュ以外の 2 曲（交響曲第九番・諸人こぞりて）のどちらか（ユーザー方針 2026-10-04）
+  for (const job of [...rightStock, ...leftStock]) {
+    if (!job.isHit || job.holdChain) continue;
+    job.holdChain = true;
+    job.notice = Math.random() < 0.5 ? "ninth" : "gospel";
+    job.name.push("保留連の一発告知");
+  }
   // 判定し直して強い先読みになった保留も、高速オートなら低速に落とす
   [...rightStock, ...leftStock].forEach(slowDownForSakiyomi);
 }
@@ -1020,8 +1035,9 @@ async function startProcess() {
       !eff.tenpai &&
       !leadSteps.length &&
       !(eff.steps || []).length;
-    // 一発告知音：保留を消化した瞬間に鳴らす（インパクトフラッシュ・福音エアーなど）
-    if (eff.notice && !instant) evaPlayNotice(eff.notice);
+    // 一発告知音：保留を消化した瞬間に鳴らす（インパクトフラッシュ・福音エアーなど）。
+    // 保留連の告知は高速オートでも必ず鳴らす
+    if (eff.notice && (!instant || eff.holdChain)) evaPlayNotice(eff.notice);
     await evaRunDisplay(eff, {
       instant,
       quick: quickSpin,
