@@ -512,6 +512,10 @@ function assertClose(label, actual, expected, tolerance) {
     slowDownForSakiyomi({ isHit: true, preTrust: 95 });
     backToFastAfterSlow();
     if (autoSpeed !== "fast") throw new Error("当りの先読み保留の後で高速に戻らない");
+    // 保留が無い枠は出さない（中身は一度だけ作る）
+    const slot = { classList: { list: [], add(c) { this.list.push(c); } }, innerHTML: "" };
+    paintHold(slot, null, false);
+    if (!slot.classList.list.includes("heso-empty") || !slot.innerHTML.includes("hx-text")) throw new Error("空の枠が隠れない");
     // レバブル先読み（デバイス振動先読み）の保留は震える印を持ち、作り直しても続く
     Math.random = makeRandomStrong(20261012);
     let shook = null;

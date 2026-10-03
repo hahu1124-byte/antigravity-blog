@@ -470,7 +470,10 @@ body.light-mode .machine {
    EVA の保留（なな徹の画像を参考）
    通常時・時短中：六角形のパネルに「▲ EMERGENCY ▼」。警報保留は四角いパネルに「警戒」。
    ST 中（右側の縦並び）：台形の箱。無地は黒い箱に赤い「CAUTION」、色が付くと光って「EMERGENCY」。
-   形・縁・面・文字・光は変数で持ち、::before が縁、::after が面と文字。
+   形・縁・面・文字・光は変数で持つ。::before が縁、::after が面。中身（script.js の HOLD_INNER）は
+   奥から 光（.hx-glow）・厚みの板 4 枚（.hx-side）・消化中の白縁（.hx-ring）・文字（.hx-text）。
+   厚みは 3D（preserve-3d）で板を奥へずらして重ねる。filter や opacity を .heso-ball に掛けると
+   3D が平らになるので、光や白縁も filter ではなく板で出す。
    ============================================================ */
 body.theme-eva .heso-ball {
   --hx-shape: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
@@ -480,6 +483,8 @@ body.theme-eva .heso-ball {
   --hx-text: "";
   --hx-size: 5px;
   --hx-glow: transparent;
+  --hx-inset: 2px;
+  --hx-depth: 1.3px; /* 厚みの板 1 枚ごとの奥行き */
   position: relative;
   width: 30px;
   height: 26px;
@@ -487,33 +492,105 @@ body.theme-eva .heso-ball {
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
-  filter: drop-shadow(0 0 3px var(--hx-glow));
+  transform-style: preserve-3d;
+}
+
+/* 保留が無い枠は出さない */
+body.theme-eva .heso-ball.heso-empty {
+  visibility: hidden;
 }
 
 body.theme-eva .heso-ball::before,
-body.theme-eva .heso-ball::after {
+body.theme-eva .heso-ball::after,
+body.theme-eva .heso-ball > .hx-side,
+body.theme-eva .heso-ball > .hx-ring,
+body.theme-eva .heso-ball > .hx-text {
   position: absolute;
   clip-path: var(--hx-shape);
 }
 
+body.theme-eva .heso-ball > i {
+  display: block;
+  pointer-events: none;
+}
+
+/* 縁（いちばん手前の板） */
 body.theme-eva .heso-ball::before {
   content: "";
   inset: 0;
   background: var(--hx-edge);
+  transform: translateZ(0);
 }
 
+/* 面 */
 body.theme-eva .heso-ball::after {
-  content: var(--hx-text);
-  inset: 2px;
+  content: "";
+  inset: var(--hx-inset);
   background: var(--hx-face);
-  color: var(--hx-ink);
-  font: 700 var(--hx-size) / 1.15 sans-serif;
-  letter-spacing: -0.2px;
-  white-space: pre;
-  text-align: center;
+  transform: translateZ(0.4px);
+}
+
+/* 厚み：縁の色を暗くした板を奥へ 4 枚重ねる（揺れて横を向いたときに側面に見える） */
+body.theme-eva .heso-ball > .hx-side {
+  inset: 0;
+  background: color-mix(in srgb, var(--hx-edge) 45%, #000);
+}
+body.theme-eva .heso-ball > .hx-side1 {
+  transform: translateZ(calc(var(--hx-depth) * -1));
+}
+body.theme-eva .heso-ball > .hx-side2 {
+  transform: translateZ(calc(var(--hx-depth) * -2));
+}
+body.theme-eva .heso-ball > .hx-side3 {
+  transform: translateZ(calc(var(--hx-depth) * -3));
+}
+body.theme-eva .heso-ball > .hx-side4 {
+  transform: translateZ(calc(var(--hx-depth) * -4));
+  background: color-mix(in srgb, var(--hx-edge) 25%, #000);
+}
+
+/* 光：いちばん奥にぼかした色 */
+body.theme-eva .heso-ball > .hx-glow {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--hx-glow), transparent);
+  transform: translateZ(calc(var(--hx-depth) * -5));
+}
+
+/* 消化中の白縁（縁より少し大きい白い板を縁のすぐ奥に置く） */
+body.theme-eva .heso-ball > .hx-ring {
+  display: none;
+  inset: -2px;
+  background: #fff;
+  transform: translateZ(-0.2px);
+}
+body.theme-eva .heso-ball.heso-current > .hx-ring {
+  display: block;
+}
+
+/* 文字（面より手前） */
+body.theme-eva .heso-ball > .hx-text {
+  inset: var(--hx-inset);
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  color: var(--hx-ink);
+  font: 700 var(--hx-size) / 1.15 sans-serif;
+  letter-spacing: -0.2px;
+  transform: translateZ(0.8px);
+}
+body.theme-eva .heso-ball > .hx-text::before {
+  content: var(--hx-text);
+  display: block;
+  white-space: pre;
+  text-align: center;
+}
+
+/* EVA 以外の機種では中身を出さない */
+body:not(.theme-eva) .heso-ball > i {
+  display: none;
 }
 
 /* 通常時・時短中の保留は 3D で左右にゆらゆら揺れる（ST の箱は揺らさない）。
@@ -591,10 +668,9 @@ body.theme-eva .heso-overlay.hold-shift:not(.right-mode) .heso-ball {
   }
 }
 
-/* 消化中の保留（左端）は白く縁取って少し大きく */
+/* 消化中の保留（左端）は白く縁取って（.hx-ring）少し大きく */
 body.theme-eva .heso-ball.heso-current {
-  transform: scale(1.12);
-  filter: drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 4px var(--hx-glow));
+  scale: 1.12;
 }
 
 /* デフォルト（無地）の保留：銀 */
@@ -673,6 +749,9 @@ body.theme-eva .heso-ball.heso-rainbow {
 body.theme-eva .heso-ball.heso-rainbow::after {
   background-size: 300% 100%;
   animation: hx-rainbow 1.2s linear infinite;
+}
+
+body.theme-eva .heso-ball.heso-rainbow > .hx-text {
   text-shadow: 0 0 2px #000;
 }
 
@@ -728,21 +807,49 @@ body.theme-eva .heso-ball.heso-alert-purple {
   --hx-glow: #9d4edd;
 }
 
-/* --- ST 中：台形の箱 --- */
+/* --- ST 中：台形の箱（録画どおり上下に枠の帯、中を文字が横に流れる） ---
+   色ごとに --hx-base（箱の地）と --hx-band（上下の帯）を決め、面はそれを組み立てる。
+   違和感保留は見て分かるように：中の文字なし＝帯だけ、文字が逆に流れる、全体にノイズ */
 body.theme-eva .heso-overlay.right-mode .heso-ball {
-  --hx-shape: polygon(14% 0, 86% 0, 100% 100%, 0 100%);
-  --hx-size: 4px;
-  width: 28px;
-  height: 18px;
+  --hx-shape: polygon(12% 0, 88% 0, 100% 100%, 0 100%);
+  --hx-size: 6px;
+  --hx-inset: 1.5px;
+  --hx-base: linear-gradient(#2b2b2b, #0b0b0b);
+  --hx-band: #555;
+  --hx-face:
+    linear-gradient(
+      to bottom,
+      var(--hx-band) 0 17%,
+      transparent 17% 83%,
+      var(--hx-band) 83% 100%
+    ),
+    var(--hx-base);
+  width: 34px;
+  height: 22px;
 }
 
-body.theme-eva .heso-overlay.right-mode .heso-ball::after {
-  inset: 1.5px;
+/* 中の文字は帯の間を右から左へ流れる */
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-text {
+  justify-content: flex-start;
+  letter-spacing: 0;
+}
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-text::before {
+  padding-left: 100%;
+  animation: hx-marquee 2.4s linear infinite;
+}
+
+@keyframes hx-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
 }
 
 body.theme-eva .heso-overlay.right-mode .heso-ball.heso-none {
   --hx-edge: #555;
-  --hx-face: linear-gradient(#2b2b2b, #0b0b0b);
+  --hx-band: #7a1010;
   --hx-ink: #ff3030;
   --hx-text: "CAUTION";
   --hx-glow: rgba(255, 40, 40, 0.35);
@@ -750,7 +857,8 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-none {
 
 body.theme-eva .heso-overlay.right-mode .heso-ball.heso-blue {
   --hx-edge: #8fdcff;
-  --hx-face: linear-gradient(#1a5aa8, #071a3a);
+  --hx-base: linear-gradient(#1a5aa8, #071a3a);
+  --hx-band: #8fdcff;
   --hx-ink: #b8eeff;
   --hx-text: "EMERGENCY";
   --hx-glow: #2aa8ff;
@@ -758,7 +866,8 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-blue {
 
 body.theme-eva .heso-overlay.right-mode .heso-ball.heso-green {
   --hx-edge: #a8ffa8;
-  --hx-face: linear-gradient(#1f7a2c, #062010);
+  --hx-base: linear-gradient(#1f7a2c, #062010);
+  --hx-band: #a8ffa8;
   --hx-ink: #c8ffc8;
   --hx-text: "EMERGENCY";
   --hx-glow: #22ff44;
@@ -766,38 +875,79 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-green {
 
 body.theme-eva .heso-overlay.right-mode .heso-ball.heso-red {
   --hx-edge: #ff9a9a;
-  --hx-face: linear-gradient(#b01c1c, #3a0505);
+  --hx-base: linear-gradient(#b01c1c, #3a0505);
+  --hx-band: #ff9a9a;
   --hx-ink: #ffd6d6;
   --hx-text: "EMERGENCY";
   --hx-glow: #ff2222;
 }
 
-body.theme-eva .heso-overlay.right-mode .heso-ball.heso-rainbow,
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-rainbow {
+  --hx-base: linear-gradient(
+    90deg,
+    #ff1744,
+    #ff9100,
+    #ffea00,
+    #00e676,
+    #2979ff,
+    #d500f9,
+    #ff1744
+  );
+  --hx-band: #fff;
+  --hx-text: "EMERGENCY";
+}
+
 body.theme-eva .heso-overlay.right-mode .heso-ball.heso-vibe {
+  --hx-base: radial-gradient(circle, #fff, #ff8c00);
+  --hx-band: #fff;
   --hx-text: "EMERGENCY";
 }
 
 /* CAUTION/EMERGENCY 保留（期待薄）：黒い箱のまま文字だけ黄色の EMERGENCY */
 body.theme-eva .heso-overlay.right-mode .heso-ball.heso-caution {
   --hx-edge: #777;
-  --hx-face: linear-gradient(#2b2b2b, #0b0b0b);
+  --hx-band: #806a00;
   --hx-ink: #ffd400;
   --hx-text: "EMERGENCY";
   --hx-glow: rgba(255, 212, 0, 0.35);
 }
 
-/* 違和感保留（中の文字なし・逆流・ノイズ）：文字の無い箱がちらつく */
-body.theme-eva .heso-overlay.right-mode .heso-ball.heso-odd {
+/* 違和感保留：無地（CAUTION）の箱が元。どこが違うかが見て分かるように */
+body.theme-eva
+  .heso-overlay.right-mode
+  .heso-ball:is(.heso-odd-blank, .heso-odd-reverse, .heso-odd-noise) {
   --hx-edge: #777;
-  --hx-face: repeating-linear-gradient(0deg, #2b2b2b 0 1px, #0b0b0b 1px 2px);
-  --hx-text: "";
+  --hx-band: #7a1010;
+  --hx-ink: #ff3030;
+  --hx-text: "CAUTION";
   --hx-glow: rgba(255, 255, 255, 0.3);
-  animation: hx-noise 0.35s steps(2) infinite;
+}
+
+/* 中の文字なし：帯だけで中が空っぽ */
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-odd-blank {
+  --hx-text: "";
+}
+
+/* 文字が逆に流れる（左から右へ） */
+body.theme-eva
+  .heso-overlay.right-mode
+  .heso-ball.heso-odd-reverse
+  > .hx-text::before {
+  animation-direction: reverse;
+}
+
+/* 全体がノイズっぽい：走査線とちらつき */
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-odd-noise {
+  --hx-base: repeating-linear-gradient(0deg, #3a3a3a 0 1px, #0b0b0b 1px 2px);
+}
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-odd-noise > .hx-text {
+  animation: hx-noise 0.3s steps(2) infinite;
 }
 
 @keyframes hx-noise {
   50% {
-    opacity: 0.55;
+    opacity: 0.35;
+    translate: 1px 0;
   }
 }
 
@@ -816,7 +966,7 @@ body.theme-eva .heso-overlay {
 }
 
 body.theme-eva .heso-overlay.right-mode {
-  --hx-step: 36px;
+  --hx-step: 42px; /* 箱の幅 34px＋間隔 8px */
 }
 
 body.theme-eva .heso-overlay.hold-shift .heso-ball {

@@ -1728,21 +1728,22 @@ const EVA_LAYERS_S = [
         name: "違和感保留(文字が逆に流れる)",
         trust: 69.8,
         share: 1,
-        holdType: "odd",
+        // ST の箱は中の文字が流れるので、違和感は 3 種を見た目で分ける（style.css の heso-odd-*）
+        holdType: "odd-reverse",
       },
       {
         id: "odd-noise",
         name: "違和感保留(全体にノイズ)",
         trust: 28.0,
         share: 0.3,
-        holdType: "odd",
+        holdType: "odd-noise",
       },
       {
         id: "odd-blank",
         name: "違和感保留(中の文字なし)",
         trust: 13.9,
         share: 0.2,
-        holdType: "odd",
+        holdType: "odd-blank",
       },
       {
         id: "caution",
