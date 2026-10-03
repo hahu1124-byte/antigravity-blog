@@ -966,6 +966,54 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   }
 }
 
+/* 復活当り：ハズレ目で止まった後、閃光と揺れで当り図柄へ（eva-reel.js の復活） */
+.screen.fx-revive {
+  animation: fx-revive 0.6s ease-out;
+}
+
+@keyframes fx-revive {
+  0% {
+    filter: brightness(3.2);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+  100% {
+    filter: none;
+    transform: none;
+  }
+}
+
+/* 全回転リーチ：7 で止まって図柄が震える（eva-reel.js の evaZenkaitenLap） */
+.digit-container.zen-shake {
+  animation: zen-shake 0.09s linear infinite;
+  filter: drop-shadow(0 0 10px #ffd700);
+}
+
+@keyframes zen-shake {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-3px, 2px);
+  }
+  50% {
+    transform: translate(3px, -2px);
+  }
+  75% {
+    transform: translate(-2px, -1px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
 /* ST 中の保留変化：液晶いっぱいに「変化」の立方体が回る（script.js の playChangeStage。
    1.0 秒、0.8 秒で回りきって保留の色が変わる。実機の録画どおり黒い箱に白い文字） */
 .change-stage {
@@ -1353,23 +1401,27 @@ body.light-mode .stat-label {
   color: #666;
 }
 
+/* 横のボタンが 3 つ（全・先バレ・サウンド）になったので、高さは中身に合わせて伸ばす（最低 65px） */
 .control-panel {
   margin-top: 12px;
   display: flex;
   gap: 8px;
   width: 100%;
-  height: 65px;
+  min-height: 65px;
 }
 
 .side-btns {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  width: 55px;
+  width: 68px;
 }
 
 .side-btn {
   flex: 1;
+  min-height: 22px;
+  padding: 2px 4px;
+  white-space: nowrap;
   background: #222;
   color: #666;
   border: 1px solid #444;
@@ -1502,6 +1554,69 @@ body.light-mode .log {
   border-radius: 5px;
   display: none;
   text-align: center;
+}
+
+/* ログとその下のデバッグメニュー */
+.side-col {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+}
+
+.debug-panel {
+  margin-top: 12px;
+  padding: 8px 10px 10px;
+  border: 1px dashed #555;
+  border-radius: 6px;
+  background: #0b0b0b;
+}
+
+.debug-title {
+  font-size: 0.72rem;
+  color: #999;
+  margin-bottom: 6px;
+}
+
+.debug-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.debug-btn {
+  flex: 1 1 45%;
+  min-height: 30px;
+  background: #222;
+  color: #ccc;
+  border: 1px solid #555;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* 押してあって次の変動で効くもの */
+.debug-btn.armed {
+  background: #b8860b;
+  color: #fff;
+  border-color: #ffd700;
+}
+
+body.light-mode .debug-panel {
+  background: #f4f4f4;
+  border-color: #bbb;
+}
+
+body.light-mode .debug-btn {
+  background: #e6e6e6;
+  color: #333;
+  border-color: #bbb;
+}
+
+/* デバッグメニューは EVA だけ（強制の抽選は EVA のエンジンで作る） */
+body:not(.theme-eva) .debug-panel {
+  display: none;
 }
 
 /* ページ下のフッター（クレジット・出典）。.main-content（PC では横並び）の外に置く */
@@ -1788,8 +1903,12 @@ body.light-mode .machine-select-btn .machine-spec {
     flex-direction: column;
   }
 
-  .log {
+  /* ログとデバッグメニューの列 */
+  .side-col {
     flex: 2;
+  }
+
+  .log {
     margin-top: 0;
     height: 515px;
   }

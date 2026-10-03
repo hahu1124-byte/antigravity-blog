@@ -8,7 +8,7 @@
     />
     <title>EVANGELION Sim -2025 Final-</title>
     <!-- 分割したCSSを読み込み -->
-    <link rel="stylesheet" href="css/style.css?v=20261003-cube11" />
+    <link rel="stylesheet" href="css/style.css?v=20261003-debug12" />
   </head>
 
   <body class="theme-eva">
@@ -184,7 +184,31 @@
           </button>
         </div>
       </div>
-      <div class="log" id="log">> システム起動完了</div>
+      <!-- ログとその下のデバッグメニュー（PC では液晶の横に縦に並べる） -->
+      <div class="side-col">
+        <div class="log" id="log">> システム起動完了</div>
+        <div class="debug-panel" id="debug-panel">
+          <div class="debug-title">デバッグ（押すと次の変動に効く）</div>
+          <div class="debug-btns">
+            <button class="debug-btn" id="dbg-hit" onclick="toggleDebug('hit')">
+              強制大当り
+            </button>
+            <button
+              class="debug-btn"
+              id="dbg-zenkaiten"
+              onclick="toggleDebug('zenkaiten')"
+            >
+              強制全回転
+            </button>
+            <button class="debug-btn" id="dbg-sp" onclick="toggleDebug('sp')">
+              強制SPハズレ
+            </button>
+            <button class="debug-btn" id="dbg-hold" onclick="debugAddRedHold()">
+              赤保留の当りを追加
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- フッター：EVA のサウンドのクレジットと出典（.main-content の段組みの外に置く） -->
@@ -207,10 +231,10 @@
     <!-- Chart.js ライブラリ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- 分割したJSを読み込み（EVA の演出データ → 抽選エンジン → 本体の順） -->
-    <script src="js/eva-effects.js?v=20261003-cube11"></script>
-    <script src="js/eva-voice.js?v=20261003-cube11"></script>
-    <script src="js/eva-engine.js?v=20261003-cube11"></script>
-    <script src="js/eva-reel.js?v=20261003-cube11"></script>
-    <script src="js/script.js?v=20261003-cube11"></script>
+    <script src="js/eva-effects.js?v=20261003-debug12"></script>
+    <script src="js/eva-voice.js?v=20261003-debug12"></script>
+    <script src="js/eva-engine.js?v=20261003-debug12"></script>
+    <script src="js/eva-reel.js?v=20261003-debug12"></script>
+    <script src="js/script.js?v=20261003-debug12"></script>
   </body>
 </html>

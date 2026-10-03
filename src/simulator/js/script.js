@@ -708,10 +708,13 @@ function vanishCurrentHold(job) {
 // 大当り中に残保留の当否が決まるので、V ストック・保留連の示唆が出せる
 function rejudgeStocks(regime) {
   if (currentMachine !== "eva") return;
-  const fix = (job) =>
-    job.regime === regime
-      ? job
-      : carryHold(job, createJob(job.isRight, regime));
+  const fix = (job) => {
+    if (job.regime === regime) return job;
+    const next = carryHold(job, createJob(job.isRight, regime));
+    // 判定し直して当り・強い先読みになった保留も、高速オートなら低速に落とす
+    slowDownForSakiyomi(next);
+    return next;
+  };
   leftStock = leftStock.map(fix);
   rightStock = rightStock.map(fix);
 }
@@ -727,6 +730,10 @@ function trustLabel(eff) {
 // ============================================================
 async function startProcess() {
   if (!isAuto || isAnim) return;
+  // 1 回転の最初から最後まで（リール・演出・当りの処理）を走っている扱いにする。
+  // 回っている途中にオートのボタンを押すと 2 本目のループが始まり、
+  // 当りが 2 重に数えられていた（「当たり！ 0回転」。ユーザー指摘 2026-10-03）
+  isAnim = true;
   if (mode !== "通常" && rRem <= 0) {
     const endedMode = mode;
     const modeLabel = M.modeLabel(mode);
@@ -758,6 +765,8 @@ async function startProcess() {
   }
 
   activeJob = refreshStaleJob(activeJob);
+  // デバッグメニューで押してあれば、この変動を強制の回転に差し替える
+  activeJob = applyDebugFlag(activeJob);
   // 残りの保留が当該の位置へ詰まる（高速オートは毎回動くと見づらいので省く）
   if (currentMachine === "eva" && autoSpeed !== "fast") animateHoldShift(from);
   // EVA は当該の色を finishHold で変える（変化保留）。他の機種は入賞時の色のまま
@@ -848,6 +857,7 @@ async function startProcess() {
       steps: [...leadSteps, ...(eff.steps || [])],
       onSp: () => vanishCurrentHold(eff),
     });
+    if (eff.revived) addLog(">> 復活！！");
     if (eff.isHit) hitDigit = eff.bosoShown ? "1・3・5" : eff.hitDigit;
   } else {
     await spinPlainDigits(eff, currentSpeed);
@@ -900,7 +910,6 @@ async function startProcess() {
   document.getElementById("lamp").classList.remove("lamp-active");
   document.getElementById("effect-overlay").style.display = "none";
   if (eff.isHit) {
-    isAnim = true;
     hits++;
     if (mode === "通常") {
       initialHitCount++;
@@ -916,6 +925,8 @@ async function startProcess() {
     await M.resolveHit({ eff, hitDigit });
   }
   isAnim = false;
+  // 先読みで低速にした保留がハズレたら、この 0.5 秒の待ちの後から高速オートに戻す
+  if (currentMachine === "eva") backToFastAfterMiss(eff);
   updateUI();
   updateAutoBtns();
   // 次回転への待機時間（高速時は5ms、低速時は図柄が止まってから0.5秒）
@@ -1049,14 +1060,28 @@ function takeLeadSteps(current) {
   return out;
 }
 
-// 高速オート中に当りの保留が入ったら低速オートに切り替える
-// （当りまでの保留の先読み・保留変化を見せるため。ユーザー方針 2026-10-03「当たりの保留が入ったら低速オートに」）
+// 高速オート中に、当りの保留か、信頼度 50% 以上の先読み（保留の見た目・前兆・入賞時）の保留が入ったら
+// 低速オートに切り替える（先読みと保留変化を見せるため）。その保留がハズレたら、図柄が止まって
+// 0.5 秒後（低速の待ち時間）から高速オートに戻す（ユーザー方針 2026-10-03）
+let autoBackToFast = false; // 自動で低速にしたか（ボタンを押したら解除）
 function slowDownForSakiyomi(job) {
-  if (currentMachine !== "eva" || !isAuto || autoSpeed !== "fast") return;
-  if (!job.isHit) return;
+  if (currentMachine !== "eva" || !isAuto) return;
+  if (!job.isHit && !(job.preTrust >= 50)) return;
+  job.autoSlow = true;
+  if (autoSpeed !== "fast") return;
   autoSpeed = "slow";
+  autoBackToFast = true;
   updateAutoBtns();
-  addLog("低速オートに切り替えました");
+}
+
+// 低速に落とした保留がハズレたら高速に戻す（まだ低速に落とす保留が残っていれば戻さない）
+function backToFastAfterMiss(eff) {
+  if (!eff.autoSlow || eff.isHit || !autoBackToFast) return;
+  if (!isAuto || autoSpeed !== "slow") return;
+  if ([...leftStock, ...rightStock].some((j) => j.autoSlow)) return;
+  autoSpeed = "fast";
+  autoBackToFast = false;
+  updateAutoBtns();
 }
 
 function updateHesoUI() {
@@ -1116,6 +1141,8 @@ function paintHold(el, job, isCurrent) {
 }
 
 function toggleAuto(s) {
+  // ボタンで速さを選んだら、先読みで自動に低速にした分の「高速に戻す」は取りやめる
+  autoBackToFast = false;
   if (isAuto && autoSpeed === s) {
     isAuto = false;
   } else {
@@ -1151,6 +1178,70 @@ function updateUI() {
   document.getElementById("sub-display").innerText =
     mode === "通常" ? `通常:${lcdCount}` : `${modeLabel}:${rRem}`;
   updateHesoUI();
+}
+
+// ============================================================
+// デバッグメニュー（EVA）：次の変動を強制する。抽選のエンジンで条件に合う回転を引き直すので、
+// 演出と信頼度・当り種別の関係は普段と同じ（強制したことはログに [デバッグ] と出す）
+// ============================================================
+let debugFlag = null; // 次の変動に効かせるもの："hit" | "zenkaiten" | "sp"
+const DEBUG_PICKS = {
+  hit: (j) => j.isHit,
+  zenkaiten: (j) => j.isHit && j.reachId === "zenkaiten",
+  sp: (j) => !j.isHit && j.sp,
+};
+const DEBUG_LABELS = {
+  hit: "強制大当り",
+  zenkaiten: "強制全回転",
+  sp: "強制SPハズレ",
+};
+const DEBUG_MAX_DRAWS = 3000000;
+
+function debugDraw(isRight, pick) {
+  for (let i = 0; i < DEBUG_MAX_DRAWS; i++) {
+    const j = createJob(isRight);
+    if (pick(j)) return j;
+  }
+  return null;
+}
+
+function toggleDebug(kind) {
+  debugFlag = debugFlag === kind ? null : kind;
+  updateDebugBtns();
+}
+
+function updateDebugBtns() {
+  for (const k of Object.keys(DEBUG_PICKS)) {
+    const b = document.getElementById("dbg-" + k);
+    if (b) b.classList.toggle("armed", debugFlag === k);
+  }
+}
+
+// 消化する保留を、押してあるデバッグの条件に合う回転に差し替える（1 回きり）
+function applyDebugFlag(job) {
+  if (!debugFlag || currentMachine !== "eva" || !job) return job;
+  const kind = debugFlag;
+  debugFlag = null;
+  updateDebugBtns();
+  const forced = debugDraw(job.isRight, DEBUG_PICKS[kind]);
+  if (!forced) return job;
+  addLog(`[デバッグ] ${DEBUG_LABELS[kind]}`);
+  return forced;
+}
+
+// 赤保留の当りを保留の最後に足す（先読み・槍の保留変化・低速オートの確認用）
+function debugAddRedHold() {
+  if (currentMachine !== "eva") return;
+  const isRight = mode !== "通常";
+  const job = debugDraw(isRight, (j) => j.isHit && j.holdType === "red");
+  if (!job) return;
+  const stock = isRight ? rightStock : leftStock;
+  if (stock.length >= 4) stock.pop();
+  scheduleLeads(job, stock.length + 1);
+  stock.push(job);
+  slowDownForSakiyomi(job);
+  updateHesoUI();
+  addLog("[デバッグ] 赤保留の当りを保留に追加");
 }
 
 // ログは下に足していき、いちばん下（新しい行）が見えるようにする

@@ -440,8 +440,13 @@ function createEvaJob(isRight, regime) {
   let holdId = "";
   // 先読みの演出（保留に居る間の変動に出す段。script.js の scheduleLeads が変動に割り振る）
   const leads = [];
+  // 先読み（保留の見た目・前兆・入賞時）のうち一番高い信頼度。高速オートを低速に落とす判断に使う
+  let preTrust = 0;
   for (const { layer, state } of shown) {
     name.push(state.name);
+    if (layer.lead || layer.key === "hold") {
+      preTrust = Math.max(preTrust, state.trust);
+    }
     if (state.holdType) {
       holdType = state.holdType;
       holdId = state.id;
@@ -513,7 +518,9 @@ function createEvaJob(isRight, regime) {
   let hitDigit = null;
   let upgrade = false;
   if (isHit) {
-    if (isRight && regime !== "n") hitDigit = Math.random() < 0.5 ? 3 : 1;
+    // 全回転リーチは ST 中でも 7 で止める（液晶で 1 周して 7 で止まる演出。eva-reel.js）
+    if (reach.id === "zenkaiten") hitDigit = 7;
+    else if (isRight && regime !== "n") hitDigit = Math.random() < 0.5 ? 3 : 1;
     else if (kind === "r10") hitDigit = 7;
     else if (kind === "k3") {
       // 偶数図柄からの昇格演出は通常時のヘソ当りだけ（電サポ中の当りは確変図柄で見せる）
@@ -549,6 +556,7 @@ function createEvaJob(isRight, regime) {
     holdStep: 0,
     leads,
     leadPlan: null,
+    preTrust,
     notice: evaNoticeOf(shown), // 一発告知音（eva-voice.js）。保留を消化した瞬間に鳴らす
     // SP リーチ（全回転を含む）：SP に発展したら当該保留を消す
     sp: reach.id === "zenkaiten" || T.spec.spReaches.includes(reach.id),

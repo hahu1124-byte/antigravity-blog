@@ -28,6 +28,10 @@ const EVA_BOSO_SHOW_RATE = 0.12;
 const EVA_SURE_REACH_RATE = 0.15;
 // リーチのうちダブルライン（上段と下段が同時にリーチ）にする割合
 const EVA_DOUBLE_REACH_RATE = 0.15;
+// リーチの当りのうち、いったんハズレ目で止まってから復活する割合と、その間（ミリ秒）
+const EVA_REVIVE_RATE = 0.15;
+const EVA_REVIVE_WAIT_MS = 900;
+const EVA_REVIVE_SHOW_MS = 600;
 // 大当り濃厚のリーチ（段 → 数字）
 const EVA_SURE_REACH = { top: 4, bot: 2 };
 const EVA_ROWS = ["top", "mid", "bot"];
@@ -304,7 +308,8 @@ async function evaRunDisplay(eff, opts) {
     // 暴走図柄の当りは確変濃厚（見せ方だけ。通常当りでは出さない）：
     // 通常時は 3R確変（昇格なし）の当り、右打ちは当りがすべて 10R 確変なのでどの当りでも
     let boso = false;
-    if (eff.isHit) {
+    // 全回転リーチは 7 で揃える演出なので暴走図柄にしない
+    if (eff.isHit && eff.reachId !== "zenkaiten") {
       boso = eff.isRight
         ? Math.random() < EVA_BOSO_SHOW_RATE
         : eff.kind === "k3" &&
@@ -428,6 +433,13 @@ async function evaRunDisplay(eff, opts) {
     show(t);
     await evaSleep(EVA_STEP_MS);
   }
+  // 全回転リーチ：3 列とも同じ図柄を並べてゆっくり 1 周させ、7 で止まって震える
+  if (eff.reachId === "zenkaiten" && eff.isHit) {
+    clearInterval(timer);
+    if (eff.sp && opts.onSp) opts.onSp();
+    await evaZenkaitenLap(eff, show, reachText, grid);
+    return;
+  }
   await evaSleep(Math.max(0, EVA_REEL_LEFT_MS - pre.length * EVA_STEP_MS));
   show("");
   spinning[0] = false;
@@ -469,13 +481,63 @@ async function evaRunDisplay(eff, opts) {
       await evaSleep(120 + s * 90);
     }
   }
+  // 復活当り：中が 1 コマ手前（ハズレ目）でいったん止まり、リーチの光も消えて間を置いてから、
+  // 閃光と告知音で当り図柄へ滑り込む（ハズレからのメリハリ。ユーザー方針 2026-10-03）
+  const revive =
+    reach && eff.isHit && !eff.bosoShown && Math.random() < EVA_REVIVE_RATE;
+  const screenEl = document.getElementById("screen");
+  if (revive) {
+    setCol(0, finals[0]);
+    setCol(2, finals[2]);
+    await evaSleep(EVA_REVIVE_WAIT_MS);
+    eff.revived = true;
+    if (screenEl) screenEl.classList.add("fx-revive");
+    show([{ text: "復活！！", color: "gold" }]);
+    evaPlayNotice("impact");
+    await evaSleep(150);
+  }
   // 止まったらリーチの光を消し、当りならその段を光らせる
   [0, 1, 2].forEach((col) => setCol(col, finals[col], null, winKeys));
+  if (revive) {
+    await evaSleep(EVA_REVIVE_SHOW_MS);
+    if (screenEl) screenEl.classList.remove("fx-revive");
+  }
   // 暴走図柄の当りは確変濃厚
   if (eff.bosoShown) {
     show([{ text: "暴走ボーナス\n確変濃厚", color: "rainbow" }]);
     await evaSleep(EVA_STEP_MS);
   }
+  show("");
+}
+
+// 全回転リーチ：3 列とも同じ図柄（3×3 は中段）を並べ、当り図柄の次から 1 周ゆっくり回して
+// 最後は当り図柄（7）で止めて震わせる。後半ほどゆっくり
+const EVA_ZENKAI_STEP_MS = 260;
+const EVA_ZENKAI_SHAKE_MS = 900;
+async function evaZenkaitenLap(eff, show, reachText, grid) {
+  if (reachText.length) show(reachText);
+  const target = eff.hitDigit;
+  const setAll = (n, win) => {
+    if (grid) {
+      [0, 1, 2].forEach((col) =>
+        evaGridSetCol(col, [null, n, null], null, win ? ["mid"] : null),
+      );
+    } else {
+      [1, 2, 3].forEach((i) =>
+        evaPlainSet(i, n, getDigitClass(n, mode) + (win ? " win" : "")),
+      );
+    }
+  };
+  for (let k = 1; k <= 8; k++) {
+    setAll(evaWrap(target + k), false);
+    await evaSleep(EVA_ZENKAI_STEP_MS + Math.max(0, k - 5) * 110);
+  }
+  setAll(target, true);
+  const d1 = document.getElementById("d1");
+  const box = d1 && d1.parentElement;
+  if (box && box.classList) box.classList.add("zen-shake");
+  await evaSleep(EVA_ZENKAI_SHAKE_MS);
+  if (box && box.classList) box.classList.remove("zen-shake");
   show("");
 }
 

@@ -491,13 +491,44 @@ function assertClose(label, actual, expected, tolerance) {
     if (C.currentView !== "red" || !timeoutCalls.includes(HOLD_CHANGE_STAGE_MS)) throw new Error("ST の当該変化（立方体→槍）が違う: " + timeoutCalls);
     mode = "通常";
     if (holdStepMs({ fx: "spin" }) !== HOLD_ANIM_MS) throw new Error("通常時の横回転に立方体が出る");
-    // 高速オートは当りの保留が入ったときだけ低速オートに切り替わる（先読みや色保留だけでは切り替えない）
-    currentMachine = "eva"; isAuto = true; autoSpeed = "fast";
-    slowDownForSakiyomi({ isHit: false, holdType: "red", trust: 91, leads: [{}], holdSeq: [{}] });
-    if (autoSpeed !== "fast") throw new Error("ハズレの保留で低速オートに切り替わった");
-    slowDownForSakiyomi({ isHit: true, holdType: "none", trust: 0, leads: [], holdSeq: [] });
-    if (autoSpeed !== "slow") throw new Error("当りの保留で低速オートに切り替わらない");
+    // 高速オートは「当りの保留」か「信頼度 50% 以上の先読みの保留」が入ったら低速に。
+    // その保留がハズレたら高速に戻す（他にまだ低速に落とす保留が残っていれば戻さない）
+    currentMachine = "eva"; isAuto = true; autoSpeed = "fast"; autoBackToFast = false;
+    leftStock = []; rightStock = [];
+    slowDownForSakiyomi({ isHit: false, preTrust: 20 });
+    if (autoSpeed !== "fast") throw new Error("弱い先読みのハズレで低速オートに切り替わった");
+    const strong = { isHit: false, preTrust: 91 };
+    slowDownForSakiyomi(strong);
+    if (autoSpeed !== "slow" || !strong.autoSlow) throw new Error("信頼度 50% 以上の先読みで低速オートに切り替わらない");
+    leftStock = [{ autoSlow: true }];
+    backToFastAfterMiss(strong);
+    if (autoSpeed !== "slow") throw new Error("低速に落とす保留が残っているのに高速に戻った");
+    leftStock = [];
+    backToFastAfterMiss(strong);
+    if (autoSpeed !== "fast") throw new Error("先読みの保留がハズレても高速に戻らない");
+    const hitJob = { isHit: true, preTrust: 0 };
+    slowDownForSakiyomi(hitJob);
+    backToFastAfterMiss(hitJob);
+    if (autoSpeed !== "slow") throw new Error("当りの保留で低速のままにならない");
+    toggleAuto("slow"); // ボタンを押したら自動の切り替えは解除（ここではオート停止）
+    if (autoBackToFast) throw new Error("ボタンで自動の高速戻しが解除されない");
     isAuto = false;
+    // デバッグ：次の変動を強制（1 回きり）。全回転は ST 中でも 7 で揃う
+    Math.random = makeRandomStrong(20261011);
+    for (const md of ["通常", "ST"]) {
+      mode = md;
+      toggleDebug("zenkaiten");
+      const z = applyDebugFlag(createJob(md !== "通常"));
+      if (!z.isHit || z.reachId !== "zenkaiten" || z.hitDigit !== 7 || debugFlag !== null) throw new Error(md + ": 強制全回転が違う");
+    }
+    mode = "通常";
+    toggleDebug("sp");
+    const s = applyDebugFlag(createJob(false));
+    if (s.isHit || !s.sp) throw new Error("強制SPハズレが違う");
+    leftStock = [];
+    debugAddRedHold();
+    if (leftStock.length !== 1 || !leftStock[0].isHit || leftStock[0].holdType !== "red") throw new Error("赤保留の当りが保留に入らない");
+    leftStock = [];
     // ログは下に足していく
     document.getElementById("log").innerHTML = "> a";
     addLog("b");
