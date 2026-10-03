@@ -574,7 +574,7 @@ function stepHold(job, anim) {
     playLanceStage();
     setTimeout(apply, HOLD_LANCE_HIT_MS);
   } else if (anim && st.fx === "spin" && useChangeStage()) {
-    playChangeStage();
+    playChangeStage(holdElementOf(job));
     setTimeout(apply, HOLD_CHANGE_HIT_MS);
   } else {
     apply();
@@ -589,13 +589,26 @@ function holdStepMs(st) {
   return HOLD_ANIM_MS;
 }
 
-// 液晶全体の「変化」立方体：ST 中の保留変化（実機の録画どおり）
+// ST 中の保留変化：変わる保留の位置に「変化」の立方体が出て回る（実機の録画どおり）
 const HOLD_CHANGE_STAGE_MS = 1000; // 演出全体の長さ（style.css の .change-stage と合わせる）
 const HOLD_CHANGE_HIT_MS = 800; // 立方体が回りきって保留の色が変わるまで
 function useChangeStage() {
   return currentMachine === "eva" && mode === "ST";
 }
-function playChangeStage() {
+
+// その保留が今出ている要素（当該は h0 / d_h0、保留は並びの順）
+function holdElementOf(job) {
+  if (job === activeJob) {
+    return document.getElementById(job.isRight ? "d_h0" : "h0");
+  }
+  const r = rightStock.indexOf(job);
+  if (r >= 0) return document.getElementById("d_h" + (r + 1));
+  const l = leftStock.indexOf(job);
+  if (l >= 0) return document.getElementById("h" + (l + 1));
+  return null;
+}
+
+function playChangeStage(holdEl) {
   const screen = document.getElementById("screen");
   if (!screen) return;
   let stage = document.getElementById("change-stage");
@@ -614,6 +627,13 @@ function playChangeStage() {
       face("cs-bottom", "") +
       "</div>";
     screen.appendChild(stage);
+  }
+  // 変わる保留の真上に重ねる（液晶の中での位置に直す）
+  if (holdEl && holdEl.getBoundingClientRect && screen.getBoundingClientRect) {
+    const h = holdEl.getBoundingClientRect();
+    const s = screen.getBoundingClientRect();
+    stage.style.left = `${h.left - s.left + h.width / 2}px`;
+    stage.style.top = `${h.top - s.top + h.height / 2}px`;
   }
   stage.classList.remove("on");
   void stage.offsetWidth;
@@ -819,14 +839,18 @@ async function startProcess() {
   }
   let currentSpeed = autoSpeed;
 
-  // 消化中(eff) または その次 の変動が信頼度50%以上かチェック
+  // 消化中(eff) または その次 の変動が信頼度50%以上かチェック。
+  // EVA は当該（消化中の変動）だけを見る：先読みの無い保留で手前の変動まで低速にしない
+  // （先読みのある保留は入った時点で slowDownForSakiyomi が低速オートにする）
   let hasSakiyomiOrIkiatsu = false;
   let nextJob =
-    rightStock.length > 0
-      ? rightStock[0]
-      : leftStock.length > 0
-        ? leftStock[0]
-        : null;
+    currentMachine === "eva"
+      ? null
+      : rightStock.length > 0
+        ? rightStock[0]
+        : leftStock.length > 0
+          ? leftStock[0]
+          : null;
   for (let j of [eff, nextJob]) {
     if (j && (j.trust >= 50.0 || j.saibare || j.sure)) {
       hasSakiyomiOrIkiatsu = true;
@@ -1060,13 +1084,14 @@ function takeLeadSteps(current) {
   return out;
 }
 
-// 高速オート中に、当りの保留か、信頼度 50% 以上の先読み（保留の見た目・前兆・入賞時）の保留が入ったら
-// 低速オートに切り替える（先読みと保留変化を見せるため）。その保留がハズレたら、図柄が止まって
-// 0.5 秒後（低速の待ち時間）から高速オートに戻す（ユーザー方針 2026-10-03）
+// 高速オート中に、保留に居る間に見える先読み（前兆・入賞時・保留の見た目）で信頼度 50% 以上の
+// 保留が入ったら、その時点で低速オートに切り替える（先読みと保留変化を見せるため）。
+// その保留がハズレたら、図柄が止まって 0.5 秒後（低速の待ち時間）から高速オートに戻す。
+// 先読みの無い保留は当りでも切り替えない（当該の変動だけ startProcess で低速にする）。ユーザー方針 2026-10-03
 let autoBackToFast = false; // 自動で低速にしたか（ボタンを押したら解除）
 function slowDownForSakiyomi(job) {
   if (currentMachine !== "eva" || !isAuto) return;
-  if (!job.isHit && !(job.preTrust >= 50)) return;
+  if (!(job.preTrust >= 50)) return;
   job.autoSlow = true;
   if (autoSpeed !== "fast") return;
   autoSpeed = "slow";

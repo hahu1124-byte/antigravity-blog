@@ -18,27 +18,16 @@ const EVA_VOICE_ROLES = {
 };
 
 // 音声の一覧：id（voice/<id>.mp3）・役・読み上げる文（読みを直すためにかなや数字に置き換える）・
-// 対応する演出の文字（eva-effects.js の state.text と同じもの）
+// 対応する演出の文字（eva-effects.js の state.text と同じもの）。
+// リーチの演出（リーチ名・リーチボイス・カットイン・SP 発展）には付けない。付けるのは次回予告の
+// ミサトのナレーション・ゲンドウ発言・背景予告・タイトルや警報の読み上げだけ（ユーザー方針 2026-10-03）
 const EVA_VOICES = [
-  // ミサト
-  { id: "reach", role: "misato", line: "リーチ！", texts: ["リーチ！"] },
-  {
-    id: "chotto",
-    role: "misato",
-    line: "ちょっち、期待して",
-    texts: ["ちょっち期待して"],
-  },
+  // ミサト（次回予告）
   {
     id: "service",
     role: "misato",
     line: "サービス、サービス！",
-    texts: ["サービス、サービス", "次回予告\nサービス、サービス"],
-  },
-  {
-    id: "mirai",
-    role: "misato",
-    line: "あなた達に、未来を託すわ",
-    texts: ["あなた達に未来を託すわ"],
+    texts: ["次回予告\nサービス、サービス"],
   },
   { id: "next", role: "misato", line: "次回予告", texts: ["次回予告"] },
   {
@@ -77,14 +66,7 @@ const EVA_VOICES = [
     line: "次回、エアー。",
     texts: ["次回予告\nAir"],
   },
-  // レイ
-  {
-    id: "rei-shitomeru",
-    role: "rei",
-    line: "必ず、仕留めるわ",
-    texts: ["必ず仕留めるわ"],
-  },
-  // カヲル
+  // カヲル（背景予告）
   { id: "kaworu-come", role: "kaworu", line: "来なさい", texts: ["来なさい"] },
   // ゲンドウ
   {
@@ -105,19 +87,7 @@ const EVA_VOICES = [
     line: "時計の針は、元には戻らない",
     texts: ["時計の針は元に戻らない"],
   },
-  // アナウンス（指定の無い役のセリフもここ）
-  {
-    id: "asuka-indo",
-    role: "announce",
-    line: "引導を、渡してあげるわ",
-    texts: ["引導を渡してあげるわ"],
-  },
-  {
-    id: "shinji-senmetsu",
-    role: "announce",
-    line: "必ず、殲滅する",
-    texts: ["必ず殲滅する"],
-  },
+  // アナウンス（警報・タイトルの読み上げ。指定の無い役のセリフもここ）
   {
     id: "alert",
     role: "announce",
@@ -168,48 +138,6 @@ const EVA_VOICES = [
     line: "最後のシシャ",
     texts: ["最後のシ者", "タイトルランプ\n最後のシ者"],
   },
-  {
-    id: "reach-final",
-    role: "announce",
-    line: "最終号機リーチ",
-    texts: ["最終号機リーチ"],
-  },
-  {
-    id: "reach-sho",
-    role: "announce",
-    line: "初号機リーチ",
-    texts: ["初号機リーチ"],
-  },
-  {
-    id: "reach-zero",
-    role: "announce",
-    line: "ゼロ号機リーチ",
-    texts: ["零号機リーチ"],
-  },
-  {
-    id: "reach-ni",
-    role: "announce",
-    line: "ニ号機リーチ",
-    texts: ["弐号機リーチ"],
-  },
-  {
-    id: "reach-synchro",
-    role: "announce",
-    line: "シンクロリーチ",
-    texts: ["シンクロリーチ"],
-  },
-  {
-    id: "reach-dummy",
-    role: "announce",
-    line: "ダミー初号機リーチ",
-    texts: ["ダミー初号機リーチ"],
-  },
-  {
-    id: "reach-zenkaiten",
-    role: "announce",
-    line: "全回転リーチ",
-    texts: ["全回転リーチ\n祝"],
-  },
 ];
 
 // 演出の文字 → 音声の id
@@ -253,11 +181,10 @@ function evaRenderVoiceCredit() {
   const el =
     typeof document !== "undefined" && document.getElementById("voice-credit");
   if (!el) return;
+  // 実際に音声を使っている役だけ
   const credits = [
     ...new Set(
-      Object.values(EVA_VOICE_ROLES)
-        .map((r) => r.credit)
-        .filter(Boolean),
+      EVA_VOICES.map((v) => EVA_VOICE_ROLES[v.role].credit).filter(Boolean),
     ),
   ];
   el.textContent =

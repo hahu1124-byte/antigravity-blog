@@ -77,6 +77,7 @@ const context = vm.createContext({
   nativeRandom: Math.random,
   makeRandom,
   makeRandomStrong,
+  fs_exists: (p) => fs.existsSync(p),
 });
 
 // index.html と同じ順（EVA の演出データ → 抽選エンジン → 本体）で読み込む
@@ -454,6 +455,8 @@ function assertClose(label, actual, expected, tolerance) {
       }
       if (j.currentView !== "none" || seq.at(-1).view !== j.holdType) throw new Error("変化保留の流れが違う: " + JSON.stringify(seq));
       if (j.holdWhen === "stock") stock++; else current++;
+      // 当該で変わる保留は保留に居る間は無地なので、先読みの信頼度に数えない
+      if (j.holdWhen === "current" && !j.leads.length && j.preTrust !== 0) throw new Error("当該変化の保留が先読みに数えられた: " + j.name.join("+"));
       const isLanceState = j.name.some((n) => n.startsWith("ロンギヌスの槍保留変化"));
       if (j.holdType === "red" || j.holdType === "rainbow") {
         if (seq.at(-1).fx !== "lance") throw new Error("赤・虹が槍で変わらない");
@@ -506,10 +509,10 @@ function assertClose(label, actual, expected, tolerance) {
     leftStock = [];
     backToFastAfterMiss(strong);
     if (autoSpeed !== "fast") throw new Error("先読みの保留がハズレても高速に戻らない");
-    const hitJob = { isHit: true, preTrust: 0 };
-    slowDownForSakiyomi(hitJob);
-    backToFastAfterMiss(hitJob);
-    if (autoSpeed !== "slow") throw new Error("当りの保留で低速のままにならない");
+    // 先読みの無い保留は当りでも入った時点では切り替えない（当該の変動だけ低速）
+    slowDownForSakiyomi({ isHit: true, preTrust: 0 });
+    if (autoSpeed !== "fast") throw new Error("先読みの無い当り保留で低速オートに切り替わった");
+    autoSpeed = "slow";
     toggleAuto("slow"); // ボタンを押したら自動の切り替えは解除（ここではオート停止）
     if (autoBackToFast) throw new Error("ボタンで自動の高速戻しが解除されない");
     isAuto = false;
@@ -783,7 +786,12 @@ function assertClose(label, actual, expected, tolerance) {
       if (!EVA_VOICE_ROLES[v.role]) throw new Error("ボイスの役が無い: " + v.id);
       for (const t of v.texts) if (!allTexts.has(t)) throw new Error("ボイスの文字に対応する演出が無い: " + JSON.stringify(t));
     }
-    if (evaVoiceOf("ちょっち期待して") !== "chotto" || evaVoiceOf("ドデカ図柄") !== null) throw new Error("ボイスの引き当てが違う");
+    if (evaVoiceOf("次回予告\\nレイ、心のむこうに") !== "next-rei" || evaVoiceOf("ドデカ図柄") !== null) throw new Error("ボイスの引き当てが違う");
+    // リーチの演出（リーチ名・リーチボイス・カットイン）にはボイスを付けない
+    for (const t of ["最終号機リーチ", "全回転リーチ\\n祝", "リーチ！", "ちょっち期待して", "サービス、サービス", "必ず殲滅する", "あなた達に未来を託すわ"]) {
+      if (evaVoiceOf(t) !== null) throw new Error("リーチの演出にボイスが付いている: " + t);
+    }
+    for (const v of EVA_VOICES) if (!fs_exists("src/simulator/voice/" + v.id + ".mp3")) throw new Error("ボイスの音声ファイルが無い: " + v.id);
     // 一発告知音：インパクトフラッシュを優先、福音エアーは諸人こぞりて、他の 100% の一発告知はインパクトフラッシュの音
     const one = (id, trust = 100, key = "oneshot") => ({ layer: { key }, state: { id, trust } });
     if (evaNoticeOf([one("fukuin-air"), one("impact-flash")]) !== "impact") throw new Error("インパクトフラッシュの音が優先されない");

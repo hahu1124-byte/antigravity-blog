@@ -516,6 +516,86 @@ body.theme-eva .heso-ball::after {
   justify-content: center;
 }
 
+/* 通常時・時短中の保留は 3D で左右にゆらゆら揺れる（ST の箱は揺らさない）。
+   違和感保留は揺れの周期が違うので見分けられる。横回転・槍・詰めるアニメの間は止める。
+   transform（拡大など）とぶつからないよう rotate で回す */
+body.theme-eva .heso-overlay:not(.right-mode) {
+  perspective: 160px;
+}
+
+body.theme-eva
+  .heso-overlay:not(.right-mode):not(.hold-shift)
+  .heso-ball:is(
+    .heso-none,
+    .heso-blue,
+    .heso-green,
+    .heso-red,
+    .heso-rainbow,
+    .heso-shogoki,
+    .heso-alert-red,
+    .heso-alert-purple,
+    .heso-odd,
+    .heso-blink,
+    .heso-blink-strong
+  ):not(.heso-anim-spin, .heso-anim-lance) {
+  animation: hx-sway 2.6s ease-in-out infinite alternate;
+}
+
+/* 点滅保留は揺れと点滅を両方 */
+body.theme-eva
+  .heso-overlay:not(.right-mode):not(.hold-shift)
+  .heso-ball.heso-blink:not(.heso-anim-spin, .heso-anim-lance) {
+  animation:
+    hx-sway 2.6s ease-in-out infinite alternate,
+    heso-blink 0.6s steps(2) infinite;
+}
+
+body.theme-eva
+  .heso-overlay:not(.right-mode):not(.hold-shift)
+  .heso-ball.heso-blink-strong:not(.heso-anim-spin, .heso-anim-lance) {
+  animation:
+    hx-sway 2.6s ease-in-out infinite alternate,
+    heso-blink 0.25s steps(2) infinite;
+}
+
+/* 違和感保留：揺れの周期が違う（速い） */
+body.theme-eva
+  .heso-overlay:not(.right-mode):not(.hold-shift)
+  .heso-ball.heso-odd:not(.heso-anim-spin, .heso-anim-lance) {
+  animation-duration: 1.1s;
+}
+
+/* 並びごとに揺れをずらす（揺れているときだけ。横回転・槍のアニメはずらさない） */
+body.theme-eva
+  .heso-overlay:not(.right-mode):not(.hold-shift)
+  .heso-ball:nth-child(2):not(.heso-anim-spin, .heso-anim-lance) {
+  animation-delay: -0.5s;
+}
+body.theme-eva
+  .heso-overlay:not(.right-mode):not(.hold-shift)
+  .heso-ball:nth-child(3):not(.heso-anim-spin, .heso-anim-lance) {
+  animation-delay: -1s;
+}
+body.theme-eva
+  .heso-overlay:not(.right-mode):not(.hold-shift)
+  .heso-ball:nth-child(4):not(.heso-anim-spin, .heso-anim-lance) {
+  animation-delay: -1.5s;
+}
+body.theme-eva
+  .heso-overlay:not(.right-mode):not(.hold-shift)
+  .heso-ball:nth-child(5):not(.heso-anim-spin, .heso-anim-lance) {
+  animation-delay: -2s;
+}
+
+@keyframes hx-sway {
+  from {
+    rotate: y -24deg;
+  }
+  to {
+    rotate: y 24deg;
+  }
+}
+
 /* 消化中の保留（左端）は白く縁取って少し大きく */
 body.theme-eva .heso-ball.heso-current {
   transform: scale(1.12);
@@ -1014,29 +1094,31 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   }
 }
 
-/* ST 中の保留変化：液晶いっぱいに「変化」の立方体が回る（script.js の playChangeStage。
-   1.0 秒、0.8 秒で回りきって保留の色が変わる。実機の録画どおり黒い箱に白い文字） */
+/* ST 中の保留変化：変わる保留の真上に「変化」の立方体が出て回る（script.js の playChangeStage が
+   left/top に保留の中心を入れる。1.0 秒、0.8 秒で回りきって保留の色が変わる。黒い箱に白い文字） */
 .change-stage {
   position: absolute;
-  inset: 0;
-  z-index: 5;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  z-index: 7; /* 保留（z-index 6）の上 */
   display: none;
-  align-items: center;
-  justify-content: center;
-  perspective: 600px;
+  perspective: 240px;
   pointer-events: none;
-  background: radial-gradient(circle, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.6));
 }
 
 .change-stage.on {
-  display: flex;
+  display: block;
 }
 
 .change-stage .cs-cube {
-  --cs-half: 55px;
-  position: relative;
-  width: 110px;
-  height: 110px;
+  --cs-half: 21px;
+  position: absolute;
+  left: -21px;
+  top: -21px;
+  width: 42px;
+  height: 42px;
   transform-style: preserve-3d;
   animation: cs-spin 1s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
 }
@@ -1049,15 +1131,15 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   justify-content: center;
   box-sizing: border-box;
   font-family: "Shippori Mincho B1", serif;
-  font-size: 34px;
+  font-size: 13px;
   font-weight: 900;
   color: #f4f7ff;
   background: linear-gradient(160deg, #262b35, #07090d);
-  border: 2px solid #8a93a3;
-  box-shadow: inset 0 0 16px rgba(255, 60, 60, 0.35);
+  border: 1px solid #8a93a3;
+  box-shadow: inset 0 0 6px rgba(255, 60, 60, 0.4);
   text-shadow:
-    0 0 6px #fff,
-    0 0 12px #ff3b3b;
+    0 0 3px #fff,
+    0 0 6px #ff3b3b;
 }
 
 .change-stage .cs-front {

@@ -440,13 +440,14 @@ function createEvaJob(isRight, regime) {
   let holdId = "";
   // 先読みの演出（保留に居る間の変動に出す段。script.js の scheduleLeads が変動に割り振る）
   const leads = [];
-  // 先読み（保留の見た目・前兆・入賞時）のうち一番高い信頼度。高速オートを低速に落とす判断に使う
-  let preTrust = 0;
+  // 保留に居る間に見える先読み（前兆・入賞時・保留の見た目）のうち一番高い信頼度。
+  // 高速オートを保留が入った時点で低速に落とす判断に使う（当該で変わる保留は下で除く）
+  let leadTrust = 0;
+  let holdTrust = 0;
   for (const { layer, state } of shown) {
     name.push(state.name);
-    if (layer.lead || layer.key === "hold") {
-      preTrust = Math.max(preTrust, state.trust);
-    }
+    if (layer.lead) leadTrust = Math.max(leadTrust, state.trust);
+    if (layer.key === "hold") holdTrust = state.trust;
     if (state.holdType) {
       holdType = state.holdType;
       holdId = state.id;
@@ -504,6 +505,8 @@ function createEvaJob(isRight, regime) {
 
   // 保留の色が変わる流れ（見せ方だけ。当否と holdType はもう決まっている）
   const hold = evaHoldPlan(holdType, holdId, shift);
+  // 当該で変わる保留（シフト変化・当該変化）は保留に居る間は無地なので先読みに数えない
+  const preTrust = Math.max(leadTrust, hold.when === "current" ? 0 : holdTrust);
 
   let sure = null;
   if (acc.any && f >= 1) {
