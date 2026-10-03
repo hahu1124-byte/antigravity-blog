@@ -317,11 +317,40 @@ function evaPickHesoKind(forced) {
 }
 
 // 演出を液晶に出す段階：リーチ前（pre）・リーチ成立（reach）・リーチ後（post）
-const EVA_POST_LAYERS = ["after", "launch", "chanceup", "device", "shutter"];
+const EVA_POST_LAYERS = [
+  "after",
+  "launch",
+  "chanceup",
+  "device",
+  "shutter",
+  "aori",
+  "expect",
+];
 function evaPhaseOf(layer) {
   if (layer.isReach) return "reach";
   return EVA_POST_LAYERS.includes(layer.key) ? "post" : "pre";
 }
+
+// 液晶に出す文字の色。state.color があればそれ、なければ演出名に入っている色から決める
+// （CHANCE緑・赤テロップ・金シャッターなど。強い色を優先）
+const EVA_TEXT_COLORS = [
+  ["虹", "rainbow"],
+  ["金", "gold"],
+  ["朱", "vermilion"],
+  ["赤", "red"],
+  ["緑", "green"],
+  ["青", "blue"],
+  ["紫", "purple"],
+  ["銀", "silver"],
+];
+function evaColorOf(state) {
+  if (state.color) return state.color;
+  const hit = EVA_TEXT_COLORS.find(([ch]) => state.name.includes(ch));
+  return hit ? hit[1] : null;
+}
+
+// 全回転リーチのうち格納庫背景(四号機)を前段に見せる割合（見せ方だけ）
+const EVA_HANGAR4_RATE = 0.2;
 
 function createEvaJob(isRight, regime) {
   const T = evaTablesFor(regime);
@@ -357,6 +386,7 @@ function createEvaJob(isRight, regime) {
   const name = [];
   let text = "";
   let holdType = "none";
+  let shift = false; // シフト変化：保留にいる間は無地、当該になってから色が付く
   let vibe = false;
   let vibeColor = "none";
   const fx = []; // 液晶に付ける効果のクラス（style.css の fx-*）
@@ -364,9 +394,14 @@ function createEvaJob(isRight, regime) {
   for (const { layer, state } of shown) {
     name.push(state.name);
     if (state.holdType) holdType = state.holdType;
+    if (state.shift) shift = true;
     if (state.text) {
       text = text ? text + "\n" + state.text : state.text;
-      steps.push({ phase: evaPhaseOf(layer), text: state.text });
+      steps.push({
+        phase: evaPhaseOf(layer),
+        text: state.text,
+        color: evaColorOf(state),
+      });
     }
     if (state.fx) fx.push(state.fx);
     // 液晶の揺れ（vibe）は当該レバブルのときだけ
@@ -379,6 +414,17 @@ function createEvaJob(isRight, regime) {
   if (holdType === "none" && vibe) {
     holdType = "vibe";
     name.unshift("レバブル保留");
+  }
+  // 格納庫背景(四号機)は 10R確変濃厚。通常時の 10R はすべて全回転リーチなので、
+  // 全回転リーチの一部にだけ前段として見せる（抽選には影響しない）
+  if (
+    reach.id === "zenkaiten" &&
+    regime === "n" &&
+    Math.random() < EVA_HANGAR4_RATE
+  ) {
+    name.unshift("格納庫背景(四号機)");
+    text = text ? "格納庫\n四号機\n" + text : "格納庫\n四号機";
+    steps.unshift({ phase: "pre", text: "格納庫\n四号機" });
   }
   // 演出なしの当りは突発当り（初号機が画面を引き裂いて告知）
   if (isHit && !acc.any) {
@@ -431,7 +477,7 @@ function createEvaJob(isRight, regime) {
     flash: false,
     text,
     holdType,
-    currentView: holdType,
+    currentView: shift ? "none" : holdType,
     isRushSure: false,
     bonusType: null,
     deferHitLog: false,

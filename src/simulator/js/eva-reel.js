@@ -241,15 +241,32 @@ function evaShowTriple(n, cls) {
   }
 }
 
-// 多すぎる段は前からまとめて最大 max 段にする（1 回転が長くなりすぎないように）
-function evaChunkSteps(texts, max) {
-  if (texts.length <= max) return texts;
-  const size = Math.ceil(texts.length / max);
+// 多すぎる段は前からまとめて最大 max 段にする（1 回転が長くなりすぎないように）。
+// 1 段は items の配列（色を行ごとに分けて出すため、文字列にはつながない）
+function evaChunkSteps(items, max) {
+  const size = items.length <= max ? 1 : Math.ceil(items.length / max);
   const out = [];
-  for (let i = 0; i < texts.length; i += size) {
-    out.push(texts.slice(i, i + size).join("\n"));
+  for (let i = 0; i < items.length; i += size) {
+    out.push(items.slice(i, i + size));
   }
   return out;
+}
+
+// 液晶の文字を出す。lines は文字列か [{ text, color }] の配列。色は style.css の .tc-*
+function evaShowText(ov, lines) {
+  if (!ov) return;
+  const items = typeof lines === "string" ? [{ text: lines }] : lines || [];
+  ov.textContent = "";
+  for (const it of items) {
+    for (const row of String(it.text || "").split("\n")) {
+      if (!row) continue;
+      const div = document.createElement("div");
+      if (it.color) div.className = "tc-" + it.color;
+      div.textContent = row;
+      ov.appendChild(div);
+    }
+  }
+  ov.style.display = ov.childNodes.length ? "block" : "none";
 }
 
 // 1 回転の液晶。opts.steps：[{ phase: "pre"|"reach"|"post", text }]。
@@ -345,24 +362,18 @@ async function evaRunDisplay(eff, opts) {
   }
 
   const ov = document.getElementById("effect-overlay");
-  const show = (t) => {
-    if (!ov) return;
-    ov.innerText = t || "";
-    ov.style.display = t ? "block" : "none";
-  };
+  const show = (t) => evaShowText(ov, t);
   const steps = opts.steps || [];
   const pre = evaChunkSteps(
-    steps.filter((s) => s.phase === "pre").map((s) => s.text),
+    steps.filter((s) => s.phase === "pre"),
     EVA_STEP_MAX,
   );
   const reachText = [
-    label,
-    ...steps.filter((s) => s.phase === "reach").map((s) => s.text),
-  ]
-    .filter(Boolean)
-    .join("\n");
+    { text: label },
+    ...steps.filter((s) => s.phase === "reach"),
+  ].filter((s) => s.text);
   const post = evaChunkSteps(
-    steps.filter((s) => s.phase === "post").map((s) => s.text),
+    steps.filter((s) => s.phase === "post"),
     EVA_STEP_MAX,
   );
 
@@ -397,7 +408,7 @@ async function evaRunDisplay(eff, opts) {
     // リーチ名 → リーチ後の予告・チャンスアップ。中の回転は SP・激アツなら長く
     const total = opts.heavy ? EVA_REEL_SP_MS : EVA_REEL_REACH_MS;
     let used = 0;
-    if (reachText) {
+    if (reachText.length) {
       show(reachText);
       await evaSleep(EVA_STEP_MS);
       used += EVA_STEP_MS;
@@ -426,7 +437,7 @@ async function evaRunDisplay(eff, opts) {
   [0, 1, 2].forEach((col) => setCol(col, finals[col], null, winKeys));
   // 暴走図柄の当りは確変濃厚
   if (eff.bosoShown) {
-    show("暴走ボーナス\n確変濃厚");
+    show([{ text: "暴走ボーナス\n確変濃厚", color: "rainbow" }]);
     await evaSleep(EVA_STEP_MS);
   }
   show("");

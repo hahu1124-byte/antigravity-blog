@@ -251,15 +251,20 @@ function assertClose(label, actual, expected, tolerance) {
       Math.random = makeRandomStrong(seed);
       const r = { spins, hits: 0, kinds: { r10: 0, k3: 0, t3: 0 }, bands: {}, solo: {}, names: {},
         combo2: { n: 0, hit: 0, low: 0 }, combo3: { n: 0, hit: 0 }, sure: { n: 0, hit: 0 },
-        leverHits: 0, leverMiss: 0, leverMismatch: 0, vibeMismatch: 0, r10NotZenkaiten: 0, zenkaitenNotR10: 0 };
+        leverHits: 0, leverMiss: 0, leverMismatch: 0, vibeMismatch: 0, r10NotZenkaiten: 0, zenkaitenNotR10: 0,
+        hangar4: 0, hangar4Bad: 0 };
       for (let i = 0; i < spins; i++) {
         const job = createJob(md !== "通常");
         if (job.isHit) { r.hits++; r.kinds[job.kind]++; }
         const hasLever = job.name.includes("白レバブル") || job.name.includes("赤レバブル") || job.name.includes("虹レバブル");
         if (hasLever) { if (job.isHit) r.leverHits++; else r.leverMiss++; }
         if (job.vibe !== hasLever) r.vibeMismatch++;
-        const colorHold = job.effects.some((e) => /保留/.test(e.name));
+        const colorHold = job.effects.some((e) => /保留|シフト変化/.test(e.name));
         if (job.name.includes("レバブル保留") !== (hasLever && !colorHold)) r.leverMismatch++;
+        if (job.name.includes("格納庫背景(四号機)")) {
+          r.hangar4++;
+          if (!job.isHit || job.kind !== "r10" || job.reachId !== "zenkaiten") r.hangar4Bad++;
+        }
         if (job.isHit && job.kind === "r10" && md === "通常" && job.reachId !== "zenkaiten") r.r10NotZenkaiten++;
         if (job.isHit && md === "通常" && job.reachId === "zenkaiten" && job.kind !== "r10") r.zenkaitenNotR10++;
         for (const nm of job.name) {
@@ -307,6 +312,14 @@ function assertClose(label, actual, expected, tolerance) {
       throw new Error(
         `EVA ${label}: レバブル保留の表示が食い違う ${r.leverMismatch} 件`,
       );
+    if (r.hangar4Bad)
+      throw new Error(
+        `EVA ${label}: 格納庫背景(四号機)が全回転の 10R 以外で出た ${r.hangar4Bad} 件`,
+      );
+    if (label !== "st" && !r.hangar4)
+      throw new Error(`EVA ${label}: 格納庫背景(四号機)が一度も出ない`);
+    if (label === "st" && r.hangar4)
+      throw new Error("EVA st: 格納庫背景(四号機)が ST 中に出た");
     if (r.sure.hit !== r.sure.n)
       throw new Error(
         `EVA ${label}: 濃厚なのにハズレ ${r.sure.n - r.sure.hit} 件`,
@@ -419,6 +432,22 @@ function assertClose(label, actual, expected, tolerance) {
     if (!job.name.includes("赤保留") || job.holdType !== "red" || job.currentView !== "red") {
       throw new Error("EVA hold currentView mismatch: " + job.name.join("+"));
     }
+  `);
+
+  // ST 中のシフト変化：保留にいる間は無地、当該になってから色が付く
+  await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "ST"; currentRot = 0;
+    Math.random = makeRandomStrong(20261006);
+    let shifts = 0;
+    for (let i = 0; i < 200000; i++) {
+      const job = createJob(true);
+      if (!job.name.some((n) => n.startsWith("シフト変化"))) continue;
+      shifts++;
+      if (job.currentView !== "none" || job.holdType === "none") {
+        throw new Error("EVA shift hold shown before activation: " + job.name.join("+"));
+      }
+    }
+    if (shifts === 0) throw new Error("EVA shift hold never appeared in ST");
   `);
 
   // ST 中に入賞した保留を通常時に消化するときは通常の確率で抽選し直す（残保留の引き戻し 約1.25%）
@@ -552,7 +581,13 @@ function assertClose(label, actual, expected, tolerance) {
     }
     // 液晶に出す段：多いときは最大段数にまとめる
     const chunked = evaChunkSteps(["a", "b", "c", "d", "e", "f"], 4);
-    if (chunked.length > 4 || chunked.join("\\n").split("\\n").length !== 6) throw new Error("段のまとめ方が違う");
+    if (chunked.length > 4 || chunked.flat().join("") !== "abcdef") throw new Error("段のまとめ方が違う");
+    if (evaChunkSteps(["a", "b"], 4).length !== 2) throw new Error("少ない段をまとめてしまう");
+    // 文字の色：演出名の色（強い色を優先）
+    if (evaColorOf({ name: "エヴァチャンス文字(CHANCE緑)" }) !== "green") throw new Error("CHANCE緑の色が違う");
+    if (evaColorOf({ name: "パネル予告(左選択・左赤右金)" }) !== "gold") throw new Error("金と赤の優先が違う");
+    if (evaColorOf({ name: "ドデカ図柄" }) !== null) throw new Error("色の無い演出に色が付いた");
+    if (evaColorOf({ name: "x", color: "white" }) !== "white") throw new Error("color 指定が効かない");
     // SP リーチの回転はリーチ名を reach の段に持つ
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常"; currentRot = 0;
     let checked = 0;

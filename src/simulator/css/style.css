@@ -460,6 +460,12 @@ body.light-mode .machine {
   transform: scale(1.2);
 }
 
+/* ST 中の CAUTION/EMERGENCY 保留（期待薄） */
+.heso-caution {
+  background: repeating-linear-gradient(45deg, #ffd400 0 4px, #111 4px 8px);
+  border-color: #ffd400;
+}
+
 @keyframes rainbow-border {
   0% {
     border-color: #f00;
@@ -912,6 +918,53 @@ body.light-mode .log {
   border-radius: 5px;
   display: none;
   text-align: center;
+}
+
+/* EVA：液晶の文字色（演出名の色。eva-reel.js の evaShowText が行ごとに付ける） */
+.effect-text .tc-white {
+  color: #fff;
+}
+.effect-text .tc-silver {
+  color: #d9dde3;
+  text-shadow:
+    0 0 6px #8a96a8,
+    0 0 10px #000;
+}
+.effect-text .tc-blue {
+  color: #4aa8ff;
+}
+.effect-text .tc-green {
+  color: #3dff6e;
+}
+.effect-text .tc-purple {
+  color: #c77dff;
+}
+.effect-text .tc-red {
+  color: #ff2b2b;
+}
+.effect-text .tc-vermilion {
+  color: #ff5a1f;
+}
+.effect-text .tc-gold {
+  color: #ffd700;
+  text-shadow:
+    0 0 8px #b8860b,
+    0 0 10px #000;
+}
+.effect-text .tc-rainbow {
+  color: transparent;
+  background: linear-gradient(
+    90deg,
+    #ff1744,
+    #ff9100,
+    #ffea00,
+    #00e676,
+    #2979ff,
+    #d500f9
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  text-shadow: none;
 }
 
 .freeze-bonus-overlay {
