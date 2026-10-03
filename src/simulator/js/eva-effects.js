@@ -2012,13 +2012,27 @@ const EVA_LAYERS_S = [
         trust: 100,
         share: 0.2,
       },
-      { id: "stop-green", name: "図柄停止時発光(緑)", trust: 45.2, share: 0.7 },
-      { id: "stop-red", name: "図柄停止時発光(赤)", trust: 60.1, share: 0.7 },
+      // spark：図柄が止まったとき、その色のキラキラを図柄に付ける（虹は色が流れる。style.css の .spark-*）
+      {
+        id: "stop-green",
+        name: "図柄停止時発光(緑)",
+        trust: 45.2,
+        share: 0.7,
+        spark: "green",
+      },
+      {
+        id: "stop-red",
+        name: "図柄停止時発光(赤)",
+        trust: 60.1,
+        share: 0.7,
+        spark: "red",
+      },
       {
         id: "stop-rainbow",
         name: "図柄停止時発光(虹)",
         trust: 100,
         share: 0.2,
+        spark: "rainbow",
       },
       { id: "mute-white", name: "変動音オフ(白)", trust: 81.7, share: 1 },
       { id: "mute-red", name: "変動音オフ(赤)", trust: 90.7, share: 0.7 },
@@ -2633,12 +2647,14 @@ const EVA_LINKED_S = [
     label: "リーチ時シャッター",
     component: true,
     reaches: EVA_ST_SP,
+    // stage：液晶の上・左下・右下の 3 方向から閉まるシャッター（eva-reel.js の evaPlayShutter。色は style.css）
     states: [
       {
         id: "shutter-normal",
         name: "シャッター(通常)",
         trust: 30.0,
         rate: 0.55,
+        stage: "shutter-normal",
       },
       {
         id: "shutter-red",
@@ -2654,6 +2670,7 @@ const EVA_LINKED_S = [
           mission: 0.1,
         },
         text: "赤シャッター",
+        stage: "shutter-red",
       },
       {
         id: "shutter-gold",
@@ -2669,6 +2686,7 @@ const EVA_LINKED_S = [
           mission: 0.02,
         },
         text: "金シャッター",
+        stage: "shutter-gold",
       },
       {
         id: "shutter-dummy",
@@ -2677,6 +2695,7 @@ const EVA_LINKED_S = [
         reaches: ["dummy"],
         rate: 0.1,
         text: "ダミープラグ",
+        stage: "shutter-dummy",
       },
     ],
   },

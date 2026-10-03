@@ -638,6 +638,47 @@ function assertClose(label, actual, expected, tolerance) {
     if (!evaUseGrid()) throw new Error("待機に戻っても 1×1 のまま");
   `);
 
+  // 窓の上下に少し見える段は、リールの並びの続き（上下が数字ならブランク、上下がブランクなら隣の数字）
+  await run(`
+    for (let col = 0; col < 3; col++) {
+      for (let p = 0; p < EVA_REEL_LEN; p++) {
+        const w = evaWindow(col, p);
+        const [above, below] = evaPeekOf(col, w);
+        const realAbove = evaWindow(col, p - 1)[0];
+        const realBelow = evaWindow(col, p + 1)[2];
+        if (above !== realAbove || below !== realBelow) throw new Error("はみ出す段がリールと違う: col=" + col + " " + JSON.stringify({ w, above, below, realAbove, realBelow }));
+      }
+    }
+  `);
+
+  // ST のシャッターは液晶の段に stage が付き（3 方向から閉まる）、図柄停止時発光は spark が付く
+  await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "ST"; currentRot = 0;
+    Math.random = makeRandomStrong(20261009);
+    const stages = new Set();
+    let sparks = 0;
+    for (let i = 0; i < 60000; i++) {
+      const job = createEvaJob(true, "s");
+      for (const s of job.steps) if (s.stage) stages.add(s.stage);
+      const shutter = job.name.find((n) => n.startsWith("シャッター("));
+      if (shutter && !job.steps.some((s) => s.stage && s.stage.startsWith("shutter-"))) throw new Error("シャッターに stage が無い: " + shutter);
+      // ドックンの先読みは炎の効果を持ち、当該の段は専用画面（takeover）になる
+      const dokkun = job.name.find((n) => n.startsWith("ドックン"));
+      if (dokkun) {
+        const fx = dokkun.includes("赤") ? "fx-flame-red" : "fx-flame-blue";
+        if (!job.leads.some((l) => l.fx === fx)) throw new Error("ドックンの先読みに炎が無い: " + dokkun);
+        if (!job.steps.some((s) => s.takeover && s.fx === fx)) throw new Error("ドックンの当該が専用画面にならない: " + dokkun);
+      }
+      const stop = job.name.find((n) => n.startsWith("図柄停止時発光"));
+      if (stop) {
+        sparks++;
+        if (!job.leads.some((l) => l.spark) && !job.steps.some((s) => s.spark)) throw new Error("図柄停止時発光に spark が無い: " + stop);
+      }
+    }
+    for (const k of ["shutter-normal", "shutter-red", "shutter-gold"]) if (!stages.has(k)) throw new Error("シャッターが出ない: " + k);
+    if (!sparks) throw new Error("図柄停止時発光が出ない");
+  `);
+
   // 昇格演出：昇格なら必ず奇数（滑りは 1 以外）、昇格しないなら偶数。滑り・槍・一撃は昇格のときだけ
   await run(`
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常";

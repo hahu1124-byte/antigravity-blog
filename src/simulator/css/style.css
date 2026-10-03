@@ -191,91 +191,107 @@ body.light-mode .machine {
   text-shadow: 0 0 20px #4444ff;
 }
 
-/* EVA 通常時・時短中：3×3 の図柄（列ごとに 3 段のパネル） */
+/* EVA 通常時・時短中：3×3 の図柄（列ごとに 3 段）。図柄の枠は付けず、ブランクとの間を詰める
+   （ユーザー指摘 2026-10-03）。段の高さと間は --cell-h / --cell-gap で、スクロール・図柄拡大も同じ値を使う */
+.digit-container {
+  --cell-h: 62px;
+  --cell-gap: 0px;
+  --cell-peek: 20px; /* 窓の上下に少しだけ見える前後の段の高さ */
+  --grid-h: calc(
+    var(--cell-h) * 3 + var(--cell-gap) * 2 + var(--cell-peek) * 2
+  );
+}
+
+/* 列は 5 段（はみ出す段・上段・中段・下段・はみ出す段）を並べ、3 段＋上下の少しだけを窓から見せる。
+   中身が窓より高いので justify-content: center で上下に同じだけはみ出させる */
 .digit.grid-col {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  justify-content: center;
+  gap: var(--cell-gap);
   width: 31%;
+  height: var(--grid-h);
+  overflow: hidden;
   font-size: clamp(2.4rem, 10vw, 3.8rem);
   line-height: 1;
+  /* 窓の上下の端をぼかしてリールらしく */
+  -webkit-mask-image: linear-gradient(
+    transparent,
+    #000 12%,
+    #000 88%,
+    transparent
+  );
+  mask-image: linear-gradient(transparent, #000 12%, #000 88%, transparent);
 }
 
 .digit.grid-col .cell {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  height: 80px;
-  border: 2px solid #3a3a5a;
-  border-radius: 8px;
-  background: linear-gradient(160deg, #1d1d3d, #0a0a18);
+  height: var(--cell-h);
   box-sizing: border-box;
 }
 
-/* 中段はブランクの図柄（ラインではない） */
+/* はみ出して見える段は少し暗く */
+.digit.grid-col .cell.peek {
+  opacity: 0.55;
+}
+
+/* ブランクの図柄（数字と数字の間の ◆） */
 .digit.grid-col .cell.blank {
   font-size: 1rem;
   color: #4a6cff;
-  border-color: transparent;
-  background: none;
   text-shadow: 0 0 8px #4a6cff;
 }
 
-/* リーチのライン：左右のパネルが光る */
+/* リーチのライン：左右の図柄が光る */
 .digit.grid-col .cell.hot,
 .digit.hot {
   animation: reach-glow 0.4s ease-in-out infinite alternate;
 }
 
-.digit.grid-col .cell.hot {
-  border-color: #fff;
+/* 当りのライン：図柄が金色に光る（枠の代わり） */
+.digit.grid-col .cell.win,
+.digit-container.zoom .digit.win {
+  filter: drop-shadow(0 0 6px #ffd54f) drop-shadow(0 0 14px #ffb300);
 }
 
-/* 当りのライン */
-.digit.grid-col .cell.win {
-  border-color: #ffd54f;
-  box-shadow:
-    0 0 16px #ffd54f,
-    inset 0 0 12px rgba(255, 213, 79, 0.4);
+/* 昇格演出のスクロール：列の中に図柄を縦に並べた帯を入れ、3 段ぶんの窓から見せる（eva-reel.js の evaUpgradeScroll） */
+.digit.grid-col.upg-scroll {
+  display: block;
+  height: var(--grid-h);
+  overflow: hidden;
 }
 
-/* 図柄拡大（通常時・時短中）：3×3 をやめ、列ごとに 3 段ぶんの高さの縦長の図柄 1 つ */
+.digit.grid-col.upg-scroll .upg-strip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--cell-gap);
+  will-change: transform;
+}
+
+/* 図柄拡大（通常時・時短中）：3×3 をやめ、列ごとに 3 段ぶんの高さの縦長の図柄 1 つ（枠なし） */
 .digit-container.zoom .digit {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 31%;
-  height: 252px; /* 3×3 と同じ高さ（80px×3＋間 6px×2）で液晶がずれないように */
+  height: var(--grid-h); /* 3×3 と同じ高さで液晶がずれないように */
   overflow: hidden;
   font-size: clamp(5rem, 24vw, 8.4rem);
   line-height: 1;
-  border: 2px solid #3a3a5a;
-  border-radius: 10px;
-  background: linear-gradient(160deg, #1d1d3d, #0a0a18);
   box-sizing: border-box;
 }
 
 .digit-container.zoom .digit .zoom-glyph {
   display: inline-block;
-  transform: scaleY(1.7);
+  transform: scaleY(1.45);
 }
 
-.digit-container.zoom .digit.hot {
-  border-color: #fff;
-}
-
-.digit-container.zoom .digit.win {
-  border-color: #ffd54f;
-  box-shadow:
-    0 0 16px #ffd54f,
-    inset 0 0 12px rgba(255, 213, 79, 0.4);
-}
-
-/* 図柄拡大(赤)：枠と背景を赤く */
+/* 図柄拡大(赤)：図柄の周りを赤く光らせる */
 .digit-container.zoom-red .digit {
-  border-color: #ff3b3b;
-  background: linear-gradient(160deg, #4a0d0d, #160404);
-  box-shadow: 0 0 14px rgba(255, 40, 40, 0.6);
+  filter: drop-shadow(0 0 8px #ff2020) drop-shadow(0 0 18px #ff2020);
 }
 
 @keyframes reach-glow {
@@ -1283,15 +1299,28 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   }
 }
 
-/* 復活当り：ハズレ目で止まった後、閃光と揺れで当り図柄へ（eva-reel.js の復活） */
+/* 復活当り：ハズレ目で止まった後、閃光と揺れで当り図柄へ（eva-reel.js の復活）。
+   閃光は液晶全体を明るくすると「復活！！」まで白く飛ぶので、白い膜（::after）を重ねる */
 .screen.fx-revive {
   animation: fx-revive 0.6s ease-out;
 }
 
-@keyframes fx-revive {
+.screen.fx-revive::after {
+  background: #fff;
+  animation: fx-revive-flash 0.5s ease-out both;
+}
+
+@keyframes fx-revive-flash {
   0% {
-    filter: brightness(3.2);
+    opacity: 0.95;
   }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fx-revive {
   25% {
     transform: translateX(-5px);
   }
@@ -1302,8 +1331,84 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
     transform: translateX(-2px);
   }
   100% {
-    filter: none;
     transform: none;
+  }
+}
+
+/* 前兆（先読み系）の専用画面：図柄を隠して暗い画面に演出の文字を大きく出す（ドックンなら炎だけ）。
+   eva-reel.js の evaTakeover が .lead-takeover と演出の効果のクラスを付ける */
+.screen.lead-takeover {
+  background: radial-gradient(ellipse at 50% 60%, #14141f, #000 70%);
+}
+
+.screen.lead-takeover .digit-container {
+  visibility: hidden;
+}
+
+.screen.lead-takeover .effect-text {
+  background: none;
+  font-size: clamp(1.8rem, 9vw, 3.2rem);
+  letter-spacing: 0.08em;
+  text-shadow:
+    0 0 10px #000,
+    0 0 18px rgba(255, 255, 255, 0.35);
+  animation: takeover-in 0.25s ease-out;
+}
+
+@keyframes takeover-in {
+  from {
+    opacity: 0;
+    scale: 1.3;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* 「復活！！」：閃光（z-index 4）と演出文字（5）より手前に、太い縁取りの大きな文字で出す */
+.revive-banner {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  z-index: 8;
+  display: none;
+  pointer-events: none;
+  white-space: nowrap;
+  font-family: "Shippori Mincho B1", serif;
+  font-size: clamp(2.6rem, 12vw, 4.8rem);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: #fff6c8;
+  -webkit-text-stroke: 2px #b00000;
+  paint-order: stroke fill;
+  text-shadow:
+    0 0 6px #ff1a1a,
+    0 0 18px #ff1a1a,
+    0 0 30px #ffd700,
+    3px 3px 0 #000;
+}
+
+.revive-banner.on {
+  display: block;
+  animation: revive-pop 0.35s ease-out;
+}
+
+@keyframes revive-pop {
+  0% {
+    scale: 2.2;
+    opacity: 0;
+  }
+
+  60% {
+    scale: 0.92;
+    opacity: 1;
+  }
+
+  100% {
+    scale: 1;
   }
 }
 
@@ -2094,12 +2199,53 @@ body:not(.theme-eva) .voice-credit {
 .effect-text .tc-vermilion {
   color: #ff5a1f;
 }
+/* 金：黄色と見分けやすいよう、光沢の帯が流れ、周りにキラキラを付ける（ユーザー指摘 2026-10-03） */
 .effect-text .tc-gold {
-  color: #ffd700;
-  text-shadow:
-    0 0 8px #b8860b,
-    0 0 10px #000;
+  position: relative;
+  display: table; /* キラキラを文字の幅に合わせる */
+  margin: 0 auto;
+  color: transparent;
+  background: linear-gradient(
+    100deg,
+    #b8860b 0%,
+    #ffd700 30%,
+    #fffbe0 45%,
+    #ffd700 60%,
+    #b8860b 100%
+  );
+  background-size: 250% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  filter: drop-shadow(0 0 4px #ffb300) drop-shadow(0 0 2px #000);
+  animation: gold-sheen 1.6s linear infinite;
 }
+
+.effect-text .tc-gold::before,
+.effect-text .tc-gold::after {
+  --sp: #fff3a0;
+  content: "";
+  position: absolute;
+  inset: -10px -14px;
+  pointer-events: none;
+  animation: spark-twinkle 0.9s ease-in-out infinite;
+}
+
+.effect-text .tc-gold::after {
+  rotate: 180deg;
+  animation-delay: -0.45s;
+}
+
+@keyframes gold-sheen {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -150% 0;
+  }
+}
+
+/* 虹：色が横に流れる */
 .effect-text .tc-rainbow {
   color: transparent;
   background: linear-gradient(
@@ -2109,11 +2255,270 @@ body:not(.theme-eva) .voice-credit {
     #ffea00,
     #00e676,
     #2979ff,
-    #d500f9
+    #d500f9,
+    #ff1744
   );
+  background-size: 200% 100%;
   background-clip: text;
   -webkit-background-clip: text;
   text-shadow: none;
+  animation: rainbow-flow 1.2s linear infinite;
+}
+
+@keyframes rainbow-flow {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* キラキラの粒（--sp の色と白の小さな光の点）。図柄停止時発光・金の文字・金シャッターで使う。
+   --sp は使う要素ごとに決まるので、変数にまとめず要素ごとに背景として書く */
+.effect-text .tc-gold::before,
+.effect-text .tc-gold::after,
+.digit-container[class*="spark-"] .digit::before,
+.digit-container[class*="spark-"] .digit::after,
+.shutter-stage.shutter-gold .sh-panel::after {
+  background:
+    radial-gradient(circle at 12% 18%, var(--sp) 0 2px, transparent 3px),
+    radial-gradient(circle at 78% 26%, #fff 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 38% 62%, var(--sp) 0 2.5px, transparent 3.5px),
+    radial-gradient(circle at 88% 82%, #fff 0 2px, transparent 3px),
+    radial-gradient(circle at 18% 88%, var(--sp) 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 58% 8%, #fff 0 1.5px, transparent 2.5px),
+    radial-gradient(circle at 66% 50%, var(--sp) 0 1.5px, transparent 2.5px);
+}
+
+@keyframes spark-twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    scale: 0.9;
+  }
+
+  50% {
+    opacity: 1;
+    scale: 1.06;
+  }
+}
+
+/* 図柄停止時発光：止まった図柄に色の光とキラキラ（緑・赤・虹。虹は色が回る） */
+.digit-container[class*="spark-"] .digit {
+  position: relative;
+}
+
+.digit-container[class*="spark-"] .digit::before,
+.digit-container[class*="spark-"] .digit::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  pointer-events: none;
+  z-index: 2;
+  animation: spark-twinkle 0.8s ease-in-out infinite;
+}
+
+.digit-container[class*="spark-"] .digit::after {
+  rotate: 180deg;
+  animation-delay: -0.4s;
+}
+
+.digit-container.spark-green .digit {
+  --sp: #5dff7a;
+  filter: drop-shadow(0 0 6px #18e04a) drop-shadow(0 0 14px #18e04a);
+}
+
+.digit-container.spark-red .digit {
+  --sp: #ff7070;
+  filter: drop-shadow(0 0 6px #ff2020) drop-shadow(0 0 14px #ff2020);
+}
+
+.digit-container.spark-rainbow .digit {
+  --sp: #ff5050;
+  animation: spark-rainbow-glow 1.2s linear infinite;
+}
+
+.digit-container.spark-rainbow .digit::before,
+.digit-container.spark-rainbow .digit::after {
+  animation:
+    spark-twinkle 0.8s ease-in-out infinite,
+    spark-hue 1.2s linear infinite;
+}
+
+@keyframes spark-hue {
+  from {
+    filter: hue-rotate(0deg);
+  }
+
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes spark-rainbow-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px #ff1744) drop-shadow(0 0 16px #ff1744);
+  }
+
+  20% {
+    filter: drop-shadow(0 0 8px #ff9100) drop-shadow(0 0 16px #ff9100);
+  }
+
+  40% {
+    filter: drop-shadow(0 0 8px #ffea00) drop-shadow(0 0 16px #ffea00);
+  }
+
+  60% {
+    filter: drop-shadow(0 0 8px #00e676) drop-shadow(0 0 16px #00e676);
+  }
+
+  80% {
+    filter: drop-shadow(0 0 8px #2979ff) drop-shadow(0 0 16px #d500f9);
+  }
+}
+
+/* ST のリーチ時シャッター：上・左下・右下の 3 枚が中央へ閉まり、止まってから開く（半透明）。
+   eva-reel.js の evaPlayShutter が .on を付け、EVA_SHUTTER_MS（1.5 秒）後に外す */
+.shutter-stage {
+  position: absolute;
+  inset: 0;
+  z-index: 5; /* 液晶の効果（4）より上、保留（6）より下 */
+  pointer-events: none;
+  display: none;
+}
+
+.shutter-stage.on {
+  display: block;
+}
+
+.shutter-stage .sh-panel {
+  position: absolute;
+  inset: 0;
+  opacity: 0.72;
+  background: var(--sh-bg);
+  filter: drop-shadow(0 0 3px var(--sh-edge));
+}
+
+.shutter-stage .sh-top {
+  clip-path: polygon(0 0, 100% 0, 100% 30%, 50% 52%, 0 30%);
+}
+
+.shutter-stage .sh-bl {
+  clip-path: polygon(0 30%, 50% 52%, 50% 100%, 0 100%);
+}
+
+.shutter-stage .sh-br {
+  clip-path: polygon(100% 30%, 50% 52%, 50% 100%, 100% 100%);
+}
+
+.shutter-stage.on .sh-top {
+  animation: sh-top 1.5s ease-in-out both;
+}
+
+.shutter-stage.on .sh-bl {
+  animation: sh-bl 1.5s ease-in-out both;
+}
+
+.shutter-stage.on .sh-br {
+  animation: sh-br 1.5s ease-in-out both;
+}
+
+@keyframes sh-top {
+  0%,
+  100% {
+    translate: 0 -100%;
+  }
+
+  22%,
+  72% {
+    translate: 0 0;
+  }
+}
+
+@keyframes sh-bl {
+  0%,
+  100% {
+    translate: -70% 70%;
+  }
+
+  22%,
+  72% {
+    translate: 0 0;
+  }
+}
+
+@keyframes sh-br {
+  0%,
+  100% {
+    translate: 70% 70%;
+  }
+
+  22%,
+  72% {
+    translate: 0 0;
+  }
+}
+
+.shutter-stage.shutter-normal {
+  --sh-bg: repeating-linear-gradient(
+    135deg,
+    rgba(70, 82, 104, 0.95) 0 14px,
+    rgba(42, 50, 66, 0.95) 14px 28px
+  );
+  --sh-edge: #b8c4d8;
+}
+
+.shutter-stage.shutter-red {
+  --sh-bg: repeating-linear-gradient(
+    135deg,
+    rgba(210, 20, 20, 0.95) 0 14px,
+    rgba(120, 0, 0, 0.95) 14px 28px
+  );
+  --sh-edge: #ff6a6a;
+}
+
+.shutter-stage.shutter-gold {
+  --sh-bg: repeating-linear-gradient(
+    135deg,
+    rgba(255, 215, 0, 0.95) 0 14px,
+    rgba(184, 134, 11, 0.95) 14px 28px
+  );
+  --sh-edge: #fff3a0;
+}
+
+/* 金シャッターは板の上にもキラキラ */
+.shutter-stage.shutter-gold .sh-panel::after {
+  --sp: #fffbe0;
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-size: 120px 120px;
+  animation: spark-twinkle 0.7s ease-in-out infinite;
+}
+
+.shutter-stage.shutter-dummy {
+  --sh-bg: repeating-linear-gradient(
+    135deg,
+    rgba(70, 0, 80, 0.95) 0 14px,
+    rgba(20, 0, 24, 0.95) 14px 28px
+  );
+  --sh-edge: #d070ff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .effect-text .tc-gold,
+  .effect-text .tc-rainbow,
+  .effect-text .tc-gold::before,
+  .effect-text .tc-gold::after,
+  .digit-container[class*="spark-"] .digit,
+  .digit-container[class*="spark-"] .digit::before,
+  .digit-container[class*="spark-"] .digit::after,
+  .shutter-stage.shutter-gold .sh-panel::after {
+    animation: none;
+  }
 }
 
 .freeze-bonus-overlay {

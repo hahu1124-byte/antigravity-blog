@@ -559,16 +559,24 @@ function createEvaJob(isRight, regime, opts = {}) {
         text: state.text || state.name,
         color: evaColorOf(state),
         voice: evaVoiceOf(state.text),
+        spark: state.spark || null,
+        fx: state.fx || null, // 先読みの段でも当該と同じ液晶の効果（ドックンの炎など）を出す
       });
     }
-    // 入賞時の演出は入賞した変動で出すので、当該の段には入れない
-    if (state.text && layer.lead !== "entry") {
-      text = text ? text + "\n" + state.text : state.text;
+    // 入賞時の演出は入賞した変動で出すので、当該の段には入れない。
+    // 文字の無い演出でも、液晶の見た目（stage：シャッター、spark：図柄のキラキラ）があれば段にする
+    if ((state.text || state.stage || state.spark) && layer.lead !== "entry") {
+      if (state.text) text = text ? text + "\n" + state.text : state.text;
       steps.push({
         phase: evaPhaseOf(layer),
-        text: state.text,
+        text: state.text || "",
         color: evaColorOf(state),
         voice: evaVoiceOf(state.text), // eva-voice.js
+        stage: state.stage || null, // eva-reel.js の evaPlayShutter
+        spark: state.spark || null,
+        // 前兆（先読み系）の段は、図柄を隠してその演出の専用画面に切り替える（eva-reel.js）
+        takeover: layer.lead === "pre",
+        fx: layer.lead === "pre" ? state.fx || null : null,
       });
     }
     if (state.fx) fx.push(state.fx);
