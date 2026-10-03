@@ -6,12 +6,7 @@ const vm = require("vm");
 
 const [jsDir, outFile] = process.argv.slice(2);
 const ctx = vm.createContext({ console, Math });
-for (const f of [
-  "eva-effects.js",
-  "eva-tune.js",
-  "eva-voice.js",
-  "eva-engine.js",
-]) {
+for (const f of ["eva-effects.js", "eva-voice.js", "eva-engine.js"]) {
   vm.runInContext(fs.readFileSync(path.join(jsDir, f), "utf8"), ctx, {
     filename: f,
   });
@@ -21,9 +16,8 @@ const rows = vm.runInContext(
   `(() => {
     const out = [];
     for (const [table, T] of [["low", EVA_T_N_LOW], ["high", EVA_T_N_HIGH], ["st", EVA_T_S]]) {
-      for (const { layer, state: s, freq: p } of evaStateFreqs(T)) {
-        out.push({ table, layer: layer.label, name: s.name, trust: s.trust, p,
-          solo: (p * s.trust / 100) / T.pHit * 100 });
+      for (const { layer, state: s, freq: p, hit } of evaStateFreqs(T)) {
+        out.push({ table, layer: layer.label, name: s.name, trust: s.trust, p, solo: hit * 100 });
       }
     }
     return out;
@@ -52,15 +46,13 @@ const lines = [];
 lines.push("# EVA15風シミュ 演出の出現頻度一覧");
 lines.push("");
 lines.push(
-  "- 「出現頻度」は 1 回転あたりに出る割合（1/N 回転に 1 回）。「単独なら」は、その演出だけが出た回転が当り全体の何%を占めるか（出しやすさの重み）",
+  "- 「出現頻度」は 1 回転あたりに出る割合（1/N 回転に 1 回）。「当りのうち」は、当り全体のうちその演出が出る割合（当り用の表の出現率）",
 );
 lines.push("- 信頼度は資料の値（その演出が出たときの当りやすさ）。濃厚は 100%");
 lines.push("");
 lines.push("## 通常時（ヘソ）");
 lines.push("");
-lines.push(
-  "| 層 | 演出 | 信頼度 | 400回転以下 | 401回転以上 | 単独なら当りの |",
-);
+lines.push("| 層 | 演出 | 信頼度 | 400回転以下 | 401回転以上 | 当りのうち |");
 lines.push("| --- | --- | --- | --- | --- | --- |");
 for (const r of normal.values()) {
   const solo = (r.high || r.low).solo;
@@ -71,7 +63,7 @@ for (const r of normal.values()) {
 lines.push("");
 lines.push("## ST 中（IMPACT MODE）");
 lines.push("");
-lines.push("| 層 | 演出 | 信頼度 | 出現頻度 | 単独なら当りの |");
+lines.push("| 層 | 演出 | 信頼度 | 出現頻度 | 当りのうち |");
 lines.push("| --- | --- | --- | --- | --- |");
 for (const r of rows.filter((r) => r.table === "st")) {
   lines.push(
