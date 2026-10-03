@@ -466,6 +466,266 @@ body.light-mode .machine {
   border-color: #ffd400;
 }
 
+/* ============================================================
+   EVA の保留（なな徹の画像を参考）
+   通常時・時短中：六角形のパネルに「▲ EMERGENCY ▼」。警報保留は四角いパネルに「警戒」。
+   ST 中（右側の縦並び）：台形の箱。無地は黒い箱に赤い「CAUTION」、色が付くと光って「EMERGENCY」。
+   形・縁・面・文字・光は変数で持ち、::before が縁、::after が面と文字。
+   ============================================================ */
+body.theme-eva .heso-ball {
+  --hx-shape: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+  --hx-edge: #30353d;
+  --hx-face: #14171c;
+  --hx-ink: transparent;
+  --hx-text: "";
+  --hx-size: 5px;
+  --hx-glow: transparent;
+  position: relative;
+  width: 30px;
+  height: 26px;
+  background: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  filter: drop-shadow(0 0 3px var(--hx-glow));
+}
+
+body.theme-eva .heso-ball::before,
+body.theme-eva .heso-ball::after {
+  position: absolute;
+  clip-path: var(--hx-shape);
+}
+
+body.theme-eva .heso-ball::before {
+  content: "";
+  inset: 0;
+  background: var(--hx-edge);
+}
+
+body.theme-eva .heso-ball::after {
+  content: var(--hx-text);
+  inset: 2px;
+  background: var(--hx-face);
+  color: var(--hx-ink);
+  font: 700 var(--hx-size) / 1.15 sans-serif;
+  letter-spacing: -0.2px;
+  white-space: pre;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 消化中の保留（左端）は白く縁取って少し大きく */
+body.theme-eva .heso-ball.heso-current {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 1.5px #fff) drop-shadow(0 0 4px var(--hx-glow));
+}
+
+/* デフォルト（無地）の保留：銀 */
+body.theme-eva .heso-ball.heso-none,
+body.theme-eva .heso-ball.heso-odd {
+  --hx-edge: #f5f7fb;
+  --hx-face: linear-gradient(160deg, #eef1f6, #a9b2bf);
+  --hx-ink: #2b2f36;
+  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-glow: rgba(150, 180, 255, 0.5);
+}
+
+/* 違和感保留：三角形が逆向き（サイズは .heso-odd の拡大のまま） */
+body.theme-eva .heso-ball.heso-odd {
+  --hx-text: "▼\A EMERGENCY\A ▲";
+}
+
+/* 点滅：オレンジの枠だけ光る */
+body.theme-eva .heso-ball.heso-blink {
+  --hx-edge: #ff9a3c;
+  --hx-face: rgba(255, 140, 40, 0.18);
+  --hx-ink: #ffd2a0;
+  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-glow: #ff8c00;
+}
+
+body.theme-eva .heso-ball.heso-blink-strong {
+  --hx-edge: #ffd54f;
+  --hx-face: rgba(255, 213, 79, 0.3);
+  --hx-ink: #fff;
+  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-glow: #ffd54f;
+}
+
+body.theme-eva .heso-ball.heso-blue {
+  --hx-edge: #9cc4ff;
+  --hx-face: linear-gradient(160deg, #4d8cff, #0a2a8a);
+  --hx-ink: #001a55;
+  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-glow: #2f6bff;
+}
+
+body.theme-eva .heso-ball.heso-green {
+  --hx-edge: #a8ffa8;
+  --hx-face: linear-gradient(160deg, #46e046, #0b6b0b);
+  --hx-ink: #022a02;
+  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-glow: #00ff00;
+}
+
+body.theme-eva .heso-ball.heso-red {
+  --hx-edge: #ffb3b3;
+  --hx-face: linear-gradient(160deg, #ff4242, #9a0000);
+  --hx-ink: #3a0000;
+  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-glow: #ff0000;
+}
+
+body.theme-eva .heso-ball.heso-rainbow {
+  --hx-edge: #fff;
+  --hx-face: linear-gradient(
+    90deg,
+    #ff1744,
+    #ff9100,
+    #ffea00,
+    #00e676,
+    #2979ff,
+    #d500f9,
+    #ff1744
+  );
+  --hx-ink: #fff;
+  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-glow: #fff;
+}
+
+body.theme-eva .heso-ball.heso-rainbow::after {
+  background-size: 300% 100%;
+  animation: hx-rainbow 1.2s linear infinite;
+  text-shadow: 0 0 2px #000;
+}
+
+@keyframes hx-rainbow {
+  to {
+    background-position: 300% 0;
+  }
+}
+
+/* 初号機保留：紫に緑 */
+body.theme-eva .heso-ball.heso-shogoki {
+  --hx-edge: #7cff4f;
+  --hx-face: linear-gradient(160deg, #7a3fc4, #2b0f50);
+  --hx-ink: #7cff4f;
+  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-glow: #7cff4f;
+}
+
+/* レバブル保留：白からオレンジ（揺れは .heso-vibe のまま） */
+body.theme-eva .heso-ball.heso-vibe {
+  --hx-edge: #fff;
+  --hx-face: radial-gradient(circle, #fff, #ff8c00);
+  --hx-ink: #5a1a00;
+  --hx-text: "▲\A EMERGENCY\A ▼";
+  --hx-glow: #ff8c00;
+}
+
+/* 警報保留：四角いパネルに斜線と「警戒」 */
+body.theme-eva .heso-ball.heso-alert-red,
+body.theme-eva .heso-ball.heso-alert-purple {
+  --hx-shape: inset(0 round 2px);
+  --hx-text: "警戒";
+  --hx-size: 9px;
+}
+
+body.theme-eva .heso-ball.heso-alert-red {
+  --hx-edge: #ff2b2b;
+  --hx-face:
+    repeating-linear-gradient(135deg, #ff2b2b 0 2px, transparent 2px 4px) top /
+      100% 28% no-repeat,
+    #160404;
+  --hx-ink: #ff3b3b;
+  --hx-glow: #ff0000;
+}
+
+body.theme-eva .heso-ball.heso-alert-purple {
+  --hx-edge: #c77dff;
+  --hx-face:
+    repeating-linear-gradient(135deg, #c77dff 0 2px, transparent 2px 4px) top /
+      100% 28% no-repeat,
+    #12061c;
+  --hx-ink: #d9a6ff;
+  --hx-glow: #9d4edd;
+}
+
+/* --- ST 中：台形の箱 --- */
+body.theme-eva .heso-overlay.right-mode .heso-ball {
+  --hx-shape: polygon(14% 0, 86% 0, 100% 100%, 0 100%);
+  --hx-size: 4px;
+  width: 28px;
+  height: 18px;
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball::after {
+  inset: 1.5px;
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-none {
+  --hx-edge: #555;
+  --hx-face: linear-gradient(#2b2b2b, #0b0b0b);
+  --hx-ink: #ff3030;
+  --hx-text: "CAUTION";
+  --hx-glow: rgba(255, 40, 40, 0.35);
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-blue {
+  --hx-edge: #8fdcff;
+  --hx-face: linear-gradient(#1a5aa8, #071a3a);
+  --hx-ink: #b8eeff;
+  --hx-text: "EMERGENCY";
+  --hx-glow: #2aa8ff;
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-green {
+  --hx-edge: #a8ffa8;
+  --hx-face: linear-gradient(#1f7a2c, #062010);
+  --hx-ink: #c8ffc8;
+  --hx-text: "EMERGENCY";
+  --hx-glow: #22ff44;
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-red {
+  --hx-edge: #ff9a9a;
+  --hx-face: linear-gradient(#b01c1c, #3a0505);
+  --hx-ink: #ffd6d6;
+  --hx-text: "EMERGENCY";
+  --hx-glow: #ff2222;
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-rainbow,
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-vibe {
+  --hx-text: "EMERGENCY";
+}
+
+/* CAUTION/EMERGENCY 保留（期待薄）：黒い箱のまま文字だけ黄色の EMERGENCY */
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-caution {
+  --hx-edge: #777;
+  --hx-face: linear-gradient(#2b2b2b, #0b0b0b);
+  --hx-ink: #ffd400;
+  --hx-text: "EMERGENCY";
+  --hx-glow: rgba(255, 212, 0, 0.35);
+}
+
+/* 違和感保留（中の文字なし・逆流・ノイズ）：文字の無い箱がちらつく */
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-odd {
+  --hx-edge: #777;
+  --hx-face: repeating-linear-gradient(0deg, #2b2b2b 0 1px, #0b0b0b 1px 2px);
+  --hx-text: "";
+  --hx-glow: rgba(255, 255, 255, 0.3);
+  animation: hx-noise 0.35s steps(2) infinite;
+}
+
+@keyframes hx-noise {
+  50% {
+    opacity: 0.55;
+  }
+}
+
 @keyframes rainbow-border {
   0% {
     border-color: #f00;

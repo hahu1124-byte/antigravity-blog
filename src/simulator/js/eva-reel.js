@@ -8,8 +8,8 @@
 //   すぐ外（1 コマずれた所）で止まる（ズレ目）。
 //   上段 4・下段 2 のリーチは特別な大当り濃厚リーチ（ハズレでは出さない）。当りは 4・4・4／2・2・2 か、
 //   ズレて暴走図柄の 1・3・5 が揃う（暴走ボーナス・確変濃厚）。
-//   ダブルライン（上段と下段が同時にリーチ）は並びでは止まらない形なので、見た目の演出として右列だけ
-//   並びから外して出す。
+//   ダブルラインは上下のクロス（左上→中段→右下・左下→中段→右上）。左が上 a・下 a+1 なら、
+//   逆回転の右は上 a+1・下 a で止まるので、2 本の斜めが同時にリーチになる（中段で交わる）。
 // ST 中：数字 3 つだけ（止める順番と演出の文字の出し方は同じ）。
 // ============================================================
 
@@ -30,6 +30,19 @@ const EVA_DOUBLE_REACH_RATE = 0.15;
 // 大当り濃厚のリーチ（段 → 数字）
 const EVA_SURE_REACH = { top: 4, bot: 2 };
 const EVA_ROWS = ["top", "mid", "bot"];
+// ライン → 左・中・右それぞれの段（0=上段 1=中段 2=下段）。x1・x2 はダブルラインのクロス
+const EVA_LINES = {
+  top: [0, 0, 0],
+  mid: [1, 1, 1],
+  bot: [2, 2, 2],
+  x1: [0, 1, 2],
+  x2: [2, 1, 0],
+};
+const EVA_LINE_KEYS = Object.keys(EVA_LINES);
+// ラインの一覧を、列 col の光らせる段（"top"/"mid"/"bot"）に直す
+function evaRowsForCol(lines, col) {
+  return (lines || []).map((k) => EVA_ROWS[EVA_LINES[k][col]]);
+}
 
 function evaWrap(n) {
   return ((((n - 1) % 9) + 9) % 9) + 1;
@@ -75,12 +88,13 @@ function evaPosOf(col, n, row) {
   return EVA_REEL_CELLS[col].indexOf(n) - row;
 }
 
+// ラインごとの図柄（左・中・右）
 function evaRowsOf(grid) {
-  return {
-    top: grid.map((w) => w[0]),
-    mid: grid.map((w) => w[1]),
-    bot: grid.map((w) => w[2]),
-  };
+  const out = {};
+  for (const k of EVA_LINE_KEYS) {
+    out[k] = EVA_LINES[k].map((row, col) => grid[col][row]);
+  }
+  return out;
 }
 function evaIsBoso(row) {
   return (
@@ -90,17 +104,17 @@ function evaIsBoso(row) {
 function evaRowHit(row) {
   return row[0] !== null && row[0] === row[1] && row[1] === row[2];
 }
-// 左右がそろっている段（リーチ）
+// 左右がそろっているライン（リーチ）
 function evaReachLines(grid) {
   const rows = evaRowsOf(grid);
-  return EVA_ROWS.filter(
+  return EVA_LINE_KEYS.filter(
     (k) => rows[k][0] !== null && rows[k][0] === rows[k][2],
   );
 }
-// 当りになっている段（図柄揃い・暴走図柄）
+// 当りになっているライン（図柄揃い・暴走図柄）
 function evaWinRows(grid) {
   const rows = evaRowsOf(grid);
-  return EVA_ROWS.filter((k) => evaRowHit(rows[k]) || evaIsBoso(rows[k]));
+  return EVA_LINE_KEYS.filter((k) => evaRowHit(rows[k]) || evaIsBoso(rows[k]));
 }
 
 function evaPickLine() {
@@ -134,21 +148,25 @@ function evaBuildGrid(spec) {
         win = ["bot"];
       }
     } else if ((isHit || tenpai) && spec.double) {
-      // 上段 a・下段 a+1。左は並びどおり、右は見た目の演出として左と同じ形に。
-      // 当りは中が上段か下段の一方に止まって揃う（濃厚の上段 4・下段 2 はハズレでは出さない）
-      const dline =
-        line === "mid" ? (Math.random() < 0.5 ? "top" : "bot") : line;
+      // 上下のクロス：左は上 a・下 a+1、逆回転の右は上 a+1・下 a。
+      // x1（左上→右下）が a、x2（左下→右上）が a+1 のリーチ。中が中段に a か a+1 で止まれば当り
+      const dline = Math.random() < 0.5 ? "x1" : "x2";
       const a = isHit
-        ? dline === "top"
+        ? dline === "x1"
           ? hitDigit
           : evaWrap(hitDigit - 1)
-        : evaRandDigit([4, 1]);
-      const left = W(0, evaPosOf(0, a, 0));
-      const target = dline === "top" ? a : evaWrap(a + 1);
-      const hitPos = evaPosOf(1, target, EVA_ROWS.indexOf(dline));
-      cpos = isHit ? hitPos : hitPos + (Math.random() < 0.5 ? 2 : -2);
-      grid = [left, W(1, cpos), left.slice()];
-      reach = ["top", "bot"];
+        : evaRandDigit();
+      const target = dline === "x1" ? a : evaWrap(a + 1);
+      const hitPos = evaPosOf(1, target, 1);
+      // ハズレは中段が揃う数字のすぐ外（中は 9→1 の並び：x1 なら a の 2 セル下の a-1、
+      // x2 なら a+1 の 2 セル上の a+2）
+      cpos = isHit ? hitPos : hitPos + (dline === "x1" ? 2 : -2);
+      grid = [
+        W(0, evaPosOf(0, a, 0)),
+        W(1, cpos),
+        W(2, evaPosOf(2, evaWrap(a + 1), 0)),
+      ];
+      reach = ["x1", "x2"];
       win = isHit ? [dline] : [];
     } else if (isHit || tenpai) {
       let n;
@@ -320,7 +338,14 @@ async function evaRunDisplay(eff, opts) {
     finals = g.grid;
     reachKeys = g.reach;
     winKeys = g.win;
-    setCol = (col, cells, hot, win) => evaGridSetCol(col, cells, hot, win);
+    // hot・win はラインで持つので、列ごとの段に直して光らせる（クロスは列で段が違う）
+    setCol = (col, cells, hot, win) =>
+      evaGridSetCol(
+        col,
+        cells,
+        hot && evaRowsForCol(hot, col),
+        win && evaRowsForCol(win, col),
+      );
     frameOf = (col, p) => evaWindow(col, p);
     // 左と、中・右は逆回転
     step = (col, p) => (col === 0 ? p - 1 : p + 1);

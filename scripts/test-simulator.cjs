@@ -29,6 +29,12 @@ function createElement() {
     style: {},
     innerText: "",
     innerHTML: "",
+    textContent: "",
+    childNodes: [],
+    appendChild(child) {
+      this.childNodes.push(child);
+      return child;
+    },
     offsetWidth: 0,
     getContext() {
       return {};
@@ -48,6 +54,7 @@ const context = vm.createContext({
     querySelectorAll() {
       return [];
     },
+    createElement,
   },
   window: {},
   Chart: class {
@@ -520,6 +527,31 @@ function assertClose(label, actual, expected, tolerance) {
     if (mode !== "ST" || rRem !== 163 || rushCount !== 5) throw new Error("電サポ中のヘソ確変当りが ST になっていない");
   `);
 
+  // 右打ち中の保留は少しずつ溜まる：ヘソ 1 個の消化で右 2 個、右 1 個の消化で平均 1.2 個（上限 4）
+  await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "ST"; currentRot = 0;
+    Math.random = makeRandomStrong(20261008);
+    leftStock = [createJob(false), createJob(false)]; rightStock = [];
+    refillStock();
+    if (rightStock.length !== 0) throw new Error("ST に入った瞬間に右保留が溜まった: " + rightStock.length);
+    refillStock("left");
+    if (rightStock.length !== 2) throw new Error("ヘソ 1 個の消化で右保留が 2 個にならない: " + rightStock.length);
+    let added = 0;
+    const n = 20000;
+    for (let i = 0; i < n; i++) {
+      rightStock = [];
+      refillStock("right");
+      added += rightStock.length;
+    }
+    if (Math.abs(added / n - 1.2) > 0.02) throw new Error("右 1 個の消化で溜まる数が平均 1.2 個でない: " + added / n);
+    rightStock = [createJob(true), createJob(true), createJob(true), createJob(true)];
+    refillStock("left");
+    if (rightStock.length !== 4) throw new Error("右保留が 4 個を超えた");
+    leftStock = []; rightStock = [];
+    refillStock();
+    if (rightStock.length !== 1) throw new Error("保留が空のとき右保留が 1 個入らない");
+  `);
+
   // ハズレ図柄：リーチは左右が揃い中は 1 コマ先（ズレ目）、リーチなしは左右が揃わない
   await run(`
     Math.random = makeRandomStrong(20261007);
@@ -546,9 +578,10 @@ function assertClose(label, actual, expected, tolerance) {
       const rows = evaRowsOf(miss.grid);
       if ((miss.reach[0] === "top" && rows.top[0] === 4) || (miss.reach[0] === "bot" && rows.bot[0] === 2)) throw new Error("大当り濃厚のリーチがハズレで出た: " + JSON.stringify(miss));
       const dbl = evaBuildGrid({ tenpai: true, isHit: false, double: true });
-      if (evaReachLines(dbl.grid).join() !== "top,bot" || evaWinRows(dbl.grid).length) throw new Error("ダブルラインのハズレが違う: " + JSON.stringify(dbl));
-      const dr = evaRowsOf(dbl.grid);
-      if (dr.top[0] === 4 || dr.bot[0] === 2) throw new Error("ダブルラインのハズレに大当り濃厚の段: " + JSON.stringify(dbl));
+      if (evaReachLines(dbl.grid).join() !== "x1,x2" || evaWinRows(dbl.grid).length) throw new Error("ダブルラインのハズレが違う: " + JSON.stringify(dbl));
+      // ダブルラインは上下のクロス：左が上 a・下 a+1 なら逆回転の右は上 a+1・下 a（右列も実際の並び）
+      const [lc, , rc] = dbl.grid;
+      if (rc[0] !== evaWrap(lc[0] + 1) || rc[2] !== lc[0] || lc[2] !== evaWrap(lc[0] + 1)) throw new Error("ダブルラインの右列が並びどおりでない: " + JSON.stringify(dbl));
       const d = 1 + (i % 9);
       for (const double of [false, true]) {
         const hit = evaBuildGrid({ tenpai: true, isHit: true, hitDigit: d, double });

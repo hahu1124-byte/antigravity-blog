@@ -567,18 +567,22 @@ async function startProcess() {
     updateUI();
   }
 
+  let from;
   if (rightStock.length > 0) {
     activeJob = rightStock.shift();
+    from = "right";
   } else if (leftStock.length > 0) {
     activeJob = leftStock.shift();
+    from = "left";
   } else {
     refillStock();
-    activeJob = mode === "通常" ? leftStock.shift() : rightStock.shift();
+    from = mode === "通常" ? "left" : "right";
+    activeJob = from === "left" ? leftStock.shift() : rightStock.shift();
   }
 
   activeJob = refreshStaleJob(activeJob);
   if (activeJob) activeJob.currentView = activeJob.holdType;
-  refillStock();
+  refillStock(from);
   updateUI();
   let eff = activeJob;
   totalRot++;
@@ -781,11 +785,27 @@ function generateFinalDigits() {
   return [d1, d2, d3];
 }
 
-function refillStock() {
+// 右打ち中の保留は少しずつ溜まる（ST・時短に入った瞬間に 4 個そろうのは不自然なため）：
+// ヘソ保留を 1 個消化する間に右は 2 個、右を 1 個消化すると平均 1.2 個（2 割で 2 個）
+const RIGHT_REFILL_FROM_LEFT = 2;
+const RIGHT_REFILL_EXTRA_RATE = 0.2;
+
+// from：直前に消化した保留（"left" / "right"。消化していないときは省く）
+function refillStock(from) {
   if (mode === "通常") {
     while (leftStock.length < 4) leftStock.push(createJob(false));
   } else {
-    while (rightStock.length < 4) rightStock.push(createJob(true));
+    let add =
+      from === "left"
+        ? RIGHT_REFILL_FROM_LEFT
+        : from === "right"
+          ? Math.random() < RIGHT_REFILL_EXTRA_RATE
+            ? 2
+            : 1
+          : 0;
+    // 保留が 1 つも無ければ回せないので 1 個は入れる
+    if (!add && !rightStock.length && !leftStock.length) add = 1;
+    while (add-- > 0 && rightStock.length < 4) rightStock.push(createJob(true));
   }
   updateHesoUI();
 }
@@ -796,7 +816,14 @@ function updateHesoUI() {
   const denchuArea = document.getElementById("denchu-area");
   if (isRightMode) {
     if (hesoArea) hesoArea.style.display = "none";
-    if (denchuArea) denchuArea.style.display = "flex";
+    if (denchuArea) {
+      denchuArea.style.display = "flex";
+      // EVA の時短中は右打ちの保留も通常時と同じ位置・同じ見た目で出す（ST 中だけ右側の縦並び）
+      denchuArea.classList.toggle(
+        "right-mode",
+        currentMachine !== "eva" || mode === "ST",
+      );
+    }
   } else {
     if (hesoArea) hesoArea.style.display = "flex";
     if (denchuArea) denchuArea.style.display = "none";
