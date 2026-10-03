@@ -273,10 +273,12 @@ function createEvaJob(isRight, regime) {
   let holdType = "none";
   let vibe = false;
   let vibeColor = "none";
+  const fx = []; // 液晶に付ける効果のクラス（style.css の fx-*）
   for (const { layer, state } of shown) {
     name.push(state.name);
     if (state.holdType) holdType = state.holdType;
     if (state.text) text = text ? text + "\n" + state.text : state.text;
+    if (state.fx) fx.push(state.fx);
     // 液晶の揺れ（vibe）は当該レバブルのときだけ
     if (layer.key === "lever") {
       vibe = true;
@@ -287,6 +289,12 @@ function createEvaJob(isRight, regime) {
   if (holdType === "none" && vibe) {
     holdType = "vibe";
     name.unshift("レバブル保留");
+  }
+  // 演出なしの当りは突発当り（初号機が画面を引き裂いて告知）
+  if (isHit && !acc.any) {
+    name.push("突発当り");
+    text = "突発当り";
+    fx.push("fx-tear");
   }
 
   let sure = null;
@@ -326,6 +334,7 @@ function createEvaJob(isRight, regime) {
     })),
     vibe,
     vibeColor,
+    fx,
     flash: false,
     text,
     holdType,
@@ -343,14 +352,14 @@ function createEvaJob(isRight, regime) {
   };
 }
 
-// ハズレ図柄：リーチがかかった回転だけ左右を揃える
+// ハズレ図柄：リーチがかかった回転は左右を揃え、中は当り図柄の 1 コマ先で止める（ズレ目）
 function evaMissDigits(tenpai) {
   const d1 = Math.floor(Math.random() * 9) + 1;
   let d2 = Math.floor(Math.random() * 9) + 1;
   let d3 = Math.floor(Math.random() * 9) + 1;
   if (tenpai) {
     d3 = d1;
-    while (d2 === d1) d2 = Math.floor(Math.random() * 9) + 1;
+    d2 = (d1 % 9) + 1;
   } else {
     while (d3 === d1) d3 = Math.floor(Math.random() * 9) + 1;
   }

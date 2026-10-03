@@ -188,6 +188,47 @@ body.light-mode .machine {
   text-shadow: 0 0 20px #4444ff;
 }
 
+/* EVA：縦に流れる図柄リール（止まった図柄の上下に前後の図柄を小さく出す） */
+.digit.reel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-size: 7.2rem;
+}
+
+.digit.reel .reel-side {
+  font-size: 2.4rem;
+  opacity: 0.3;
+  text-shadow: none;
+  margin: 4px 0;
+}
+
+/* リーチ：左右の図柄が光る */
+.digit-container.reach-on #d1 .reel-cur,
+.digit-container.reach-on #d3 .reel-cur {
+  animation: reach-glow 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes reach-glow {
+  from {
+    filter: brightness(1);
+  }
+
+  to {
+    filter: brightness(1.8) drop-shadow(0 0 12px #fff);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .digit-container.reach-on #d1 .reel-cur,
+  .digit-container.reach-on #d3 .reel-cur {
+    animation: none;
+    filter: brightness(1.5);
+  }
+}
+
 .hidden-lamp {
   position: absolute;
   top: 12px;
@@ -343,6 +384,215 @@ body.light-mode .machine {
   background: radial-gradient(circle, #fff, #ff8c00) !important;
   box-shadow: 0 0 12px #ff8c00;
   border-color: #f00 !important;
+}
+
+/* EVA：保留の種類（点滅・警報・初号機・違和感） */
+.heso-blink {
+  background: radial-gradient(circle, #fff, #888);
+  animation: heso-blink 0.6s steps(2) infinite;
+}
+
+.heso-blink-strong {
+  background: radial-gradient(circle, #fff, #ffd54f);
+  box-shadow: 0 0 10px #ffd54f;
+  border-color: #ffd54f;
+  animation: heso-blink 0.25s steps(2) infinite;
+}
+
+@keyframes heso-blink {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.heso-alert-purple {
+  background: radial-gradient(circle, #c77dff, #5a189a);
+  box-shadow: 0 0 8px #9d4edd;
+  border-color: #c77dff;
+  border-radius: 3px;
+}
+
+.heso-alert-red {
+  background: radial-gradient(circle, #ff4444, #880000);
+  box-shadow: 0 0 8px #ff0000;
+  border-color: #f00;
+  border-radius: 3px;
+}
+
+.heso-shogoki {
+  background: radial-gradient(circle, #7cff4f, #5b2a86);
+  box-shadow: 0 0 10px #7cff4f;
+  border-color: #7cff4f;
+}
+
+.heso-odd {
+  background: radial-gradient(circle, #ddd, #555);
+  border-color: #fff;
+  transform: scale(1.2);
+}
+
+@keyframes rainbow-border {
+  0% {
+    border-color: #f00;
+  }
+
+  33% {
+    border-color: #0f0;
+  }
+
+  66% {
+    border-color: #00f;
+  }
+
+  100% {
+    border-color: #f0f;
+  }
+}
+
+/* EVA：演出ごとの液晶の効果（eva-effects.js の fx） */
+.screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+}
+
+.screen.fx-impact-red::after {
+  background: radial-gradient(circle, rgba(255, 0, 0, 0.55), transparent 70%);
+  animation: fx-pulse 0.5s ease-out 2;
+}
+
+.screen.fx-logo-red::after {
+  box-shadow: inset 0 0 40px #f00;
+  opacity: 1;
+}
+
+.screen.fx-impact-flash::after {
+  background: #fff;
+  animation: fx-pulse 0.18s steps(2) 4;
+}
+
+.screen.fx-fukuin::after {
+  background: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(180, 255, 255, 0.55) 50%,
+    transparent 70%
+  );
+  animation: fx-wind 0.7s linear infinite;
+}
+
+.screen.fx-roar {
+  animation: vibration 0.06s infinite;
+}
+
+.screen.fx-roar::after {
+  background: radial-gradient(circle, rgba(124, 255, 79, 0.4), transparent 70%);
+  opacity: 1;
+}
+
+.screen.fx-heartbeat::after {
+  background: radial-gradient(circle, rgba(255, 0, 60, 0.35), transparent 65%);
+  animation: fx-beat 0.8s ease-in-out infinite;
+}
+
+.screen.fx-moon::after {
+  background:
+    radial-gradient(
+      circle at 75% 22%,
+      rgba(255, 250, 200, 0.7) 0 7%,
+      transparent 8%
+    ),
+    rgba(0, 0, 40, 0.35);
+  opacity: 1;
+}
+
+.screen.fx-boso::after {
+  background: rgba(255, 60, 0, 0.35);
+  animation: fx-pulse 0.3s infinite;
+}
+
+.screen.fx-awake::after {
+  box-shadow: inset 0 0 60px #ff0;
+  animation: fx-pulse 0.4s infinite;
+}
+
+.screen.fx-rainbow-frame {
+  border-width: 3px;
+  animation: rainbow-border 0.2s infinite;
+}
+
+.screen.fx-tear::after {
+  background: linear-gradient(
+    115deg,
+    transparent 47%,
+    #fff 49%,
+    #f00 50%,
+    #fff 51%,
+    transparent 53%
+  );
+  animation: fx-pulse 0.3s 3;
+}
+
+@keyframes fx-pulse {
+  0% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fx-wind {
+  0% {
+    opacity: 1;
+    transform: translateX(-100%);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes fx-beat {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  30% {
+    opacity: 0.3;
+  }
+
+  45% {
+    opacity: 0.9;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen[class*="fx-"]::after,
+  .screen.fx-roar,
+  .screen.fx-rainbow-frame,
+  .heso-blink,
+  .heso-blink-strong {
+    animation: none;
+  }
+
+  .screen[class*="fx-"]::after {
+    opacity: 0.6;
+  }
 }
 
 @keyframes upgrade-flash {

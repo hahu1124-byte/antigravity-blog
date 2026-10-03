@@ -73,7 +73,12 @@ const context = vm.createContext({
 });
 
 // index.html と同じ順（EVA の演出データ → 抽選エンジン → 本体）で読み込む
-for (const file of ["eva-effects.js", "eva-engine.js", "script.js"]) {
+for (const file of [
+  "eva-effects.js",
+  "eva-engine.js",
+  "eva-reel.js",
+  "script.js",
+]) {
   const source = fs.readFileSync(`src/simulator/js/${file}`, "utf8");
   vm.runInContext(source, context, { filename: file });
 }
@@ -248,7 +253,7 @@ function assertClose(label, actual, expected, tolerance) {
         const hasLever = job.name.includes("白レバブル") || job.name.includes("赤レバブル") || job.name.includes("虹レバブル");
         if (hasLever) { if (job.isHit) r.leverHits++; else r.leverMiss++; }
         if (job.vibe !== hasLever) r.vibeMismatch++;
-        const colorHold = !["none", "vibe"].includes(job.holdType) || job.effects.some((e) => /違和感/.test(e.name));
+        const colorHold = job.effects.some((e) => /保留/.test(e.name));
         if (job.name.includes("レバブル保留") !== (hasLever && !colorHold)) r.leverMismatch++;
         if (job.isHit && job.kind === "r10" && md === "通常" && job.reachId !== "zenkaiten") r.r10NotZenkaiten++;
         if (job.isHit && md === "通常" && job.reachId === "zenkaiten" && job.kind !== "r10") r.zenkaitenNotR10++;
@@ -417,6 +422,18 @@ function assertClose(label, actual, expected, tolerance) {
     const jitanJob = createJob(true);
     mode = "通常";
     if (refreshStaleJob(jitanJob) !== jitanJob) throw new Error("時短の保留を不要に作り直した");
+  `);
+
+  // ハズレ図柄：リーチは左右が揃い中は 1 コマ先（ズレ目）、リーチなしは左右が揃わない
+  await run(`
+    Math.random = makeRandomStrong(20261007);
+    for (let i = 0; i < 2000; i++) {
+      const [a, b, c] = evaMissDigits(true);
+      if (a !== c || b !== evaReelNext(a)) throw new Error("リーチのズレ目が違う: " + [a, b, c]);
+      const [x, , z] = evaMissDigits(false);
+      if (x === z) throw new Error("リーチなしで左右が揃った: " + [x, z]);
+    }
+    if (evaReelNext(9) !== 1 || evaReelPrev(1) !== 9) throw new Error("図柄の並びの折り返しが違う");
   `);
 
   console.log(

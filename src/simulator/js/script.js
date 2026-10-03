@@ -199,11 +199,7 @@ const MACHINES = {
         let nextOdd = [1, 3, 5, 9][Math.floor(Math.random() * 4)];
         addLog(`>> ${nextOdd}図柄へ昇格！！`);
         document.getElementById("lamp").classList.add("lamp-active");
-        [1, 2, 3].forEach((i) => {
-          const el = document.getElementById("d" + i);
-          el.innerText = nextOdd;
-          el.className = "digit odd";
-        });
+        [1, 2, 3].forEach((i) => evaReelSet(i, nextOdd, "digit odd"));
         await new Promise((r) => setTimeout(r, 800));
         document.getElementById("lamp").classList.remove("lamp-active");
       }
@@ -211,11 +207,7 @@ const MACHINES = {
         const machineEl = document.getElementById("machine");
         machineEl.classList.add("vibe-rainbow");
         document.getElementById("lamp").classList.add("lamp-active");
-        [1, 2, 3].forEach((i) => {
-          const el = document.getElementById("d" + i);
-          el.innerText = 7;
-          el.className = "digit gold";
-        });
+        [1, 2, 3].forEach((i) => evaReelSet(i, 7, "digit gold"));
         await new Promise((r) => setTimeout(r, 1000));
         machineEl.classList.remove("vibe-rainbow");
         document.getElementById("lamp").classList.remove("lamp-active");
@@ -583,6 +575,9 @@ async function startProcess() {
   const vStockEl = document.getElementById("v-stock");
   if (vStockEl) vStockEl.style.display = "none";
   if (eff.flash) document.getElementById("lamp").classList.add("lamp-active");
+  // 演出ごとの液晶の効果（福音エアー・インパクトフラッシュなど。style.css の fx-*）
+  const fxClasses = eff.fx || [];
+  if (fxClasses.length) screenEl.classList.add(...fxClasses);
   if (eff.text) {
     const ov = document.getElementById("effect-overlay");
     ov.innerText = eff.text;
@@ -611,23 +606,25 @@ async function startProcess() {
   }
 
   // スピード調整。高速オート(fast)時は5ms、低速オート・チャンス時(slow)は600ms、激熱(heavy)は1800ms
-  let spinTime = eff.heavy ? 1800 : currentSpeed === "fast" ? 5 : 600;
-  let spinInterval = currentSpeed === "fast" ? 5 : 40;
-  let spin = setInterval(() => {
-    [1, 2, 3].forEach((i) => {
-      let n = Math.floor(Math.random() * 9) + 1;
-      const el = document.getElementById("d" + i);
-      el.innerText = n;
-      el.className = getDigitClass(n, mode);
-    });
-  }, spinInterval);
-  await new Promise((r) => setTimeout(r, spinTime));
-  clearInterval(spin);
   let finalNums, hitDigit;
-  if (eff.isHit && currentMachine === "eva") {
-    // EVA は当り種別から図柄を抽選時に決めている（10R=7・3R確変=奇数/昇格用の偶数・3R通常=偶数）
-    hitDigit = eff.hitDigit;
-    finalNums = [hitDigit, hitDigit, hitDigit];
+  if (currentMachine === "eva") {
+    // EVA は当り種別から図柄を抽選時に決めている（10R=7・3R確変=奇数/昇格用の偶数・3R通常=偶数）。
+    // 液晶は左→右→中の順に止め、リーチなら中だけ回し続ける（eva-reel.js）
+    if (eff.isHit) {
+      hitDigit = eff.hitDigit;
+      finalNums = [hitDigit, hitDigit, hitDigit];
+    } else {
+      finalNums = evaMissDigits(eff.tenpai);
+    }
+    await evaRunReels(finalNums, {
+      instant: currentSpeed === "fast" && !eff.heavy,
+      heavy: eff.heavy,
+    });
+  } else {
+    await spinPlainDigits(eff, currentSpeed);
+  }
+  if (currentMachine === "eva") {
+    // 図柄はリールで表示済み
   } else if (eff.isHit) {
     if (eff.isRushSure && (mode === "通常" || mode === "時短")) {
       hitDigit = [1, 3, 5, 9][Math.floor(Math.random() * 4)];
@@ -648,16 +645,16 @@ async function startProcess() {
       }
     }
     finalNums = [hitDigit, hitDigit, hitDigit];
-  } else if (currentMachine === "eva") {
-    finalNums = evaMissDigits(eff.tenpai);
   } else {
     finalNums = generateFinalDigits();
   }
-  [1, 3, 2].forEach((i) => {
-    const el = document.getElementById("d" + i);
-    el.innerText = finalNums[i - 1];
-    el.className = getDigitClass(finalNums[i - 1], mode);
-  });
+  if (currentMachine !== "eva") {
+    [1, 3, 2].forEach((i) => {
+      const el = document.getElementById("d" + i);
+      el.innerText = finalNums[i - 1];
+      el.className = getDigitClass(finalNums[i - 1], mode);
+    });
+  }
   machineEl.classList.remove(
     "vibrate",
     "vibe-white",
@@ -669,6 +666,7 @@ async function startProcess() {
     "vibe-white",
     "vibe-red",
     "vibe-rainbow",
+    ...fxClasses,
   );
   document.getElementById("lamp").classList.remove("lamp-active");
   document.getElementById("effect-overlay").style.display = "none";
@@ -699,6 +697,37 @@ async function startProcess() {
 // ============================================================
 // ユーティリティ
 // ============================================================
+// リゼロ機の回転（3 つの数字を同時に回して同時に止める従来の表示）
+async function spinPlainDigits(eff, currentSpeed) {
+  // 高速オート(fast)時は5ms、低速オート・チャンス時(slow)は600ms、激熱(heavy)は1800ms
+  const spinTime = eff.heavy ? 1800 : currentSpeed === "fast" ? 5 : 600;
+  const spinInterval = currentSpeed === "fast" ? 5 : 40;
+  const spin = setInterval(() => {
+    [1, 2, 3].forEach((i) => {
+      const n = Math.floor(Math.random() * 9) + 1;
+      const el = document.getElementById("d" + i);
+      el.innerText = n;
+      el.className = getDigitClass(n, mode);
+    });
+  }, spinInterval);
+  await new Promise((r) => setTimeout(r, spinTime));
+  clearInterval(spin);
+}
+
+// 機種に合わせて待機中の図柄を出す（EVA はリール、リゼロは数字だけ）
+function renderIdleDigits() {
+  const nums = [3, 5, 7];
+  if (currentMachine === "eva") {
+    evaReelIdle(nums);
+    return;
+  }
+  [1, 2, 3].forEach((i) => {
+    const el = document.getElementById("d" + i);
+    el.innerText = nums[i - 1];
+    el.className = getDigitClass(nums[i - 1], "通常");
+  });
+}
+
 function getDigitClass(num, currentMode) {
   if (num === 7 && currentMode !== "通常") return "digit gold";
   return num % 2 !== 0 ? "digit odd" : "digit even";
@@ -933,6 +962,7 @@ function resetState() {
   rushStartBall = 0;
   document.getElementById("max-hamari-box").innerText = "最大ハマリ: 0";
   document.getElementById("log").innerHTML = "> システム起動完了";
+  renderIdleDigits();
   const freezeOverlay = document.getElementById("freeze-bonus-overlay");
   if (freezeOverlay) {
     freezeOverlay.classList.remove("freeze-bonus-active");
@@ -969,6 +999,7 @@ window.onload = () => {
   document.body.classList.add(M.theme);
   document.title = M.title;
   initCharts();
+  renderIdleDigits();
   refillStock();
   updateUI();
 };
