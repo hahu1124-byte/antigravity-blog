@@ -165,7 +165,8 @@ const MACHINES = {
           isST = true;
           bonusBall = 420;
           needsUpgrade = eff.upgrade;
-          if (eff.reachId === "synchro") addLog(">> 暴走ボーナス！！");
+          // 暴走図柄（1・3・5）で止まった当りは暴走ボーナス
+          if (eff.bosoShown) addLog(">> 暴走ボーナス！！（確変濃厚）");
         } else {
           isST = false;
           bonusBall = 420;
@@ -174,6 +175,7 @@ const MACHINES = {
         isST = true;
         bonusBall = 1400;
         isRightUpgrade = true;
+        if (eff.bosoShown) addLog(">> 暴走ボーナス！！（確変濃厚）");
         if (mode === "通常") {
           rushCount = 1;
           addLog(`>> 右打ち残保留（特図2）で引き戻し！！ 【${originalHit}】`);
@@ -199,7 +201,7 @@ const MACHINES = {
         let nextOdd = [1, 3, 5, 9][Math.floor(Math.random() * 4)];
         addLog(`>> ${nextOdd}図柄へ昇格！！`);
         document.getElementById("lamp").classList.add("lamp-active");
-        [1, 2, 3].forEach((i) => evaReelSet(i, nextOdd, "digit odd"));
+        evaShowTriple(nextOdd, "digit odd");
         await new Promise((r) => setTimeout(r, 800));
         document.getElementById("lamp").classList.remove("lamp-active");
       }
@@ -207,7 +209,7 @@ const MACHINES = {
         const machineEl = document.getElementById("machine");
         machineEl.classList.add("vibe-rainbow");
         document.getElementById("lamp").classList.add("lamp-active");
-        [1, 2, 3].forEach((i) => evaReelSet(i, 7, "digit gold"));
+        evaShowTriple(7, "digit gold");
         await new Promise((r) => setTimeout(r, 1000));
         machineEl.classList.remove("vibe-rainbow");
         document.getElementById("lamp").classList.remove("lamp-active");
@@ -374,7 +376,7 @@ const MACHINES = {
 // ============================================================
 // グローバル状態
 // ============================================================
-let currentMachine = "rezero";
+let currentMachine = "eva"; // 初期状態はエヴァ15風（ユーザー方針 2026-10-03）
 let M = MACHINES[currentMachine];
 let SPECS = M.specs;
 let rushStyle = "強欲RUSH";
@@ -610,18 +612,13 @@ async function startProcess() {
   let finalNums, hitDigit;
   if (currentMachine === "eva") {
     // EVA は当り種別から図柄を抽選時に決めている（10R=7・3R確変=奇数/昇格用の偶数・3R通常=偶数）。
-    // 液晶は左→右→中の順に止め、リーチなら中だけ回し続ける（eva-reel.js）
-    if (eff.isHit) {
-      hitDigit = eff.hitDigit;
-      finalNums = [hitDigit, hitDigit, hitDigit];
-    } else {
-      finalNums = evaMissDigits(eff.tenpai);
-    }
-    await evaRunReels(finalNums, {
+    // 液晶は通常時・時短中が 3×3（5 ライン）、ST 中が数字 3 つ。左→右→中の順に止める（eva-reel.js）
+    await evaRunDisplay(eff, {
       instant: currentSpeed === "fast" && !eff.heavy,
       heavy: eff.heavy,
       steps: eff.steps,
     });
+    if (eff.isHit) hitDigit = eff.bosoShown ? "1・3・5" : eff.hitDigit;
   } else {
     await spinPlainDigits(eff, currentSpeed);
   }
@@ -720,7 +717,7 @@ async function spinPlainDigits(eff, currentSpeed) {
 function renderIdleDigits() {
   const nums = [3, 5, 7];
   if (currentMachine === "eva") {
-    evaReelIdle(nums);
+    evaDisplayIdle();
     return;
   }
   [1, 2, 3].forEach((i) => {

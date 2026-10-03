@@ -430,17 +430,3 @@ function createEvaJob(isRight, regime) {
     tenpai: reach.id !== "none",
   };
 }
-
-// ハズレ図柄：リーチがかかった回転は左右を揃え、中は当り図柄の 1 コマ先で止める（ズレ目）
-function evaMissDigits(tenpai) {
-  const d1 = Math.floor(Math.random() * 9) + 1;
-  let d2 = Math.floor(Math.random() * 9) + 1;
-  let d3 = Math.floor(Math.random() * 9) + 1;
-  if (tenpai) {
-    d3 = d1;
-    d2 = (d1 % 9) + 1;
-  } else {
-    while (d3 === d1) d3 = Math.floor(Math.random() * 9) + 1;
-  }
-  return [d1, d2, d3];
-}

@@ -449,6 +449,49 @@ function assertClose(label, actual, expected, tolerance) {
       if (x === z) throw new Error("リーチなしで左右が揃った: " + [x, z]);
     }
     if (evaReelNext(9) !== 1 || evaReelPrev(1) !== 9) throw new Error("図柄の並びの折り返しが違う");
+    // 3×3 の盤面（通常時・時短中）：ラインは上段と下段。ハズレで暴走図柄（1・3・5）は揃わず、
+    // 上段 4・下段 2 のリーチ（ズレても暴走図柄で当り）はハズレでは出ない
+    const nat = (col, t) => evaNatural(col, t);
+    let sureReachHits = 0;
+    for (let i = 0; i < 5000; i++) {
+      const none = evaBuildGrid({ tenpai: false, isHit: false });
+      if (evaReachLines(none.grid).length || evaWinRows(none.grid).length) throw new Error("リーチなしの盤面が違う: " + JSON.stringify(none.grid));
+      if (none.grid.some((c, col) => c[1] !== nat(col, c[0])[1])) throw new Error("リーチなしの列が逆回転の並びでない");
+      const miss = evaBuildGrid({ tenpai: true, isHit: false });
+      if (evaReachLines(miss.grid).join() !== miss.reach.join() || miss.reach.length !== 1 || evaWinRows(miss.grid).length) throw new Error("リーチのハズレが違う: " + JSON.stringify(miss));
+      const rows = evaRowsOf(miss.grid);
+      const line = rows[miss.reach[0]];
+      if ((miss.reach[0] === "top" && line[0] === 4) || (miss.reach[0] === "bot" && line[0] === 2)) throw new Error("大当り濃厚のリーチがハズレで出た: " + JSON.stringify(miss));
+      if (line[1] !== evaReelNext(line[0]) && line[1] !== evaReelPrev(line[0])) throw new Error("ズレ目になっていない: " + JSON.stringify(miss));
+      const dbl = evaBuildGrid({ tenpai: true, isHit: false, double: true });
+      if (evaReachLines(dbl.grid).join() !== "top,bot" || evaWinRows(dbl.grid).length) throw new Error("ダブルラインのハズレが違う: " + JSON.stringify(dbl));
+      const d = 1 + (i % 9);
+      for (const spec of [{ double: false }, { double: true }]) {
+        const hit = evaBuildGrid({ tenpai: true, isHit: true, hitDigit: d, double: spec.double });
+        const hr = evaRowsOf(hit.grid)[hit.win];
+        if (!evaRowHit(hr) || hr[0] !== d || evaWinRows(hit.grid).join() !== hit.win) throw new Error("当りの盤面が違う: " + JSON.stringify(hit));
+        if (!spec.double && ((hit.win === "top" && d === 4) || (hit.win === "bot" && d === 2))) sureReachHits++;
+      }
+      const sure = evaBuildGrid({ tenpai: true, isHit: true, hitDigit: 4, line: "top" });
+      if (evaWinRows(sure.grid).join() !== "top" || evaRowsOf(sure.grid).top[0] !== 4) throw new Error("上段4の当りが違う");
+      const boso = evaBuildGrid({ tenpai: true, isHit: true, hitDigit: 3, boso: true });
+      if (!boso.boso || !evaIsBoso(evaRowsOf(boso.grid)[boso.win]) || evaReachLines(boso.grid).join() !== boso.reach.join()) throw new Error("暴走図柄の当りが違う: " + JSON.stringify(boso));
+    }
+    if (!sureReachHits) throw new Error("上段4・下段2 の当りが出ない");
+    // 上段 4 のリーチがズレると下段 5・3・1、下段 2 のリーチがズレると上段 1・3・5（暴走）
+    const sure4 = [nat(0, 4), nat(1, 5), nat(2, 4)];
+    const sure2 = [nat(0, 1), nat(1, 3), nat(2, 5)];
+    if (evaWinRows(sure4).join() !== "bot" || evaWinRows(sure2).join() !== "top") throw new Error("濃厚リーチのズレ目が暴走図柄にならない");
+    // 暴走図柄で見せるのは確変の当りだけ（通常時の 3R通常・昇格の当りでは出さない）
+    mode = "通常"; currentRot = 0;
+    for (let i = 0; i < 300; i++) {
+      for (const kind of ["t3", "k3"]) {
+        const eff = { isHit: true, isRight: false, tenpai: true, kind, hitDigit: kind === "t3" ? 2 : 3, upgrade: false, reachId: "synchro", steps: [] };
+        await evaRunDisplay(eff, { instant: true });
+        if (kind === "t3" && eff.bosoShown) throw new Error("3R通常の当りが暴走図柄で出た");
+        if (kind === "k3" && !eff.bosoShown) throw new Error("シンクロ経由の3R確変が暴走図柄で出ない");
+      }
+    }
     // 液晶に出す段：多いときは最大段数にまとめる
     const chunked = evaChunkSteps(["a", "b", "c", "d", "e", "f"], 4);
     if (chunked.length > 4 || chunked.join("\\n").split("\\n").length !== 6) throw new Error("段のまとめ方が違う");

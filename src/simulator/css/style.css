@@ -148,6 +148,8 @@ body.light-mode .machine {
 .digit-container {
   display: flex;
   gap: 8px;
+  width: 94%;
+  justify-content: center;
 }
 
 .digit {
@@ -188,27 +190,53 @@ body.light-mode .machine {
   text-shadow: 0 0 20px #4444ff;
 }
 
-/* EVA：縦に流れる図柄リール（止まった図柄の上下に前後の図柄を小さく出す） */
-.digit.reel {
+/* EVA 通常時・時短中：3×3 の図柄（列ごとに 3 段のパネル） */
+.digit.grid-col {
   display: flex;
   flex-direction: column;
+  gap: 6px;
+  width: 31%;
+  font-size: clamp(2.8rem, 12vw, 4.6rem);
+  line-height: 1;
+}
+
+.digit.grid-col .cell {
+  display: flex;
   align-items: center;
   justify-content: center;
-  line-height: 1;
-  font-size: 7.2rem;
+  height: 108px;
+  border: 2px solid #3a3a5a;
+  border-radius: 8px;
+  background: linear-gradient(160deg, #1d1d3d, #0a0a18);
+  box-sizing: border-box;
 }
 
-.digit.reel .reel-side {
-  font-size: 2.4rem;
-  opacity: 0.3;
-  text-shadow: none;
-  margin: 4px 0;
+/* 中段はブランクの図柄（ラインではない） */
+.digit.grid-col .cell.blank {
+  height: 34px;
+  font-size: 1rem;
+  color: #4a6cff;
+  border-color: transparent;
+  background: none;
+  text-shadow: 0 0 8px #4a6cff;
 }
 
-/* リーチ：左右の図柄が光る */
-.digit-container.reach-on #d1 .reel-cur,
-.digit-container.reach-on #d3 .reel-cur {
+/* リーチのライン：左右のパネルが光る */
+.digit.grid-col .cell.hot,
+.digit.hot {
   animation: reach-glow 0.4s ease-in-out infinite alternate;
+}
+
+.digit.grid-col .cell.hot {
+  border-color: #fff;
+}
+
+/* 当りのライン */
+.digit.grid-col .cell.win {
+  border-color: #ffd54f;
+  box-shadow:
+    0 0 16px #ffd54f,
+    inset 0 0 12px rgba(255, 213, 79, 0.4);
 }
 
 @keyframes reach-glow {
@@ -222,8 +250,8 @@ body.light-mode .machine {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .digit-container.reach-on #d1 .reel-cur,
-  .digit-container.reach-on #d3 .reel-cur {
+  .digit.grid-col .cell.hot,
+  .digit.hot {
     animation: none;
     filter: brightness(1.5);
   }
