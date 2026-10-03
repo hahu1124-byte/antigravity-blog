@@ -87,6 +87,12 @@ async function run(code) {
   return vm.runInContext(`(async () => { ${code} })()`, context);
 }
 
+// 実測の割合（%）を見るときの許容幅：標準誤差の 3.5 倍（最低 2pt）
+function statTol(pct, n) {
+  const p = Math.min(Math.max(pct / 100, 0.01), 0.99);
+  return Math.max(2, 3.5 * Math.sqrt((p * (1 - p)) / n) * 100);
+}
+
 function assertClose(label, actual, expected, tolerance) {
   if (Math.abs(actual - expected) > tolerance) {
     throw new Error(
@@ -196,12 +202,10 @@ function assertClose(label, actual, expected, tolerance) {
   const evaCal = await run(`
     const rows = [];
     for (const [label, T] of [["通常(401以上)", EVA_T_N_HIGH], ["ST", EVA_T_S]]) {
+      for (const { layer, state: s, freq: p } of evaStateFreqs(T)) {
+        rows.push({ table: label, layer: layer.label, name: s.name, trust: s.trust, every: Math.round(1 / p), soloShare: (p * s.trust / 100) / T.pHit * 100 });
+      }
       for (const L of T.free) {
-        L.probs.forEach((p, i) => {
-          const s = L.states[i];
-          if (s.id === "none") return;
-          rows.push({ table: label, layer: L.label, name: s.name, trust: s.trust, every: Math.round(1 / p), soloShare: (p * s.trust / 100) / T.pHit * 100 });
-        });
         const sum = L.probs.reduce((a, b) => a + b, 0);
         if (Math.abs(sum - 1) > 1e-9) throw new Error(label + " " + L.label + ": 出現率の合計 " + sum);
       }
@@ -214,14 +218,15 @@ function assertClose(label, actual, expected, tolerance) {
     }
     const summary = [["通常(400以下)", EVA_T_N_LOW], ["通常(401以上)", EVA_T_N_HIGH], ["ST", EVA_T_S]].map(([label, T]) => ({
       label, alpha: T.alpha, base0Share: (T.base0 * T.expect.none) / T.pHit, k3Rate: T.k3Rate,
+      spEvery: 1 / T.reach.states.reduce((sum, rs, i) => (T.spec.spReaches.includes(rs.id) ? sum + T.reach.probs[i] : sum), 0),
     }));
     return { rows, summary };
   `);
   for (const s of evaCal.summary) {
     console.log(
-      `[EVA] ${s.label}: 出現率の係数 alpha=${s.alpha.toFixed(3)} 無演出当り=当りの ${(s.base0Share * 100).toFixed(1)}% 3R確変の比=${s.k3Rate.toFixed(3)}`,
+      `[EVA] ${s.label}: 出現率の係数 alpha=${s.alpha.toFixed(3)} 無演出当り=当りの ${(s.base0Share * 100).toFixed(1)}% 3R確変の比=${s.k3Rate.toFixed(3)} SPリーチ=1/${Math.round(s.spEvery)} 回転`,
     );
-    if (!(s.alpha > 0 && s.alpha <= 1))
+    if (!(s.alpha > 0 && s.alpha <= 4))
       throw new Error(`EVA ${s.label}: alpha が範囲外`);
   }
   console.log(
@@ -331,7 +336,12 @@ function assertClose(label, actual, expected, tolerance) {
         `  帯 ${band}% n=${row.n} 表示平均 ${shown.toFixed(2)}% → 実測 ${actual.toFixed(2)}%`,
       );
       if (row.n >= 1000)
-        assertClose(`EVA ${label} 帯${band}% 表示と実測`, actual, shown, 3);
+        assertClose(
+          `EVA ${label} 帯${band}% 表示と実測`,
+          actual,
+          shown,
+          statTol(shown, row.n),
+        );
       if (band >= 40 && band < 90) {
         mid.n += row.n;
         mid.hit += row.hit;
@@ -347,7 +357,7 @@ function assertClose(label, actual, expected, tolerance) {
       );
     }
     console.log(
-      `[EVA] ${label}: 演出が 1 つだけ出た回転の実測（n≥2000 は ±3pt で判定）`,
+      `[EVA] ${label}: 演出が 1 つだけ出た回転の実測（n≥2000 は標準誤差の3.5倍で判定）`,
     );
     for (const [nm, row] of Object.entries(r.solo).sort(
       (a, b) => b[1].n - a[1].n,
@@ -358,7 +368,12 @@ function assertClose(label, actual, expected, tolerance) {
           `  ${nm} n=${row.n} 信頼度 ${row.trust}% → 実測 ${actual.toFixed(1)}%`,
         );
       if (row.n >= 2000)
-        assertClose(`EVA ${label} ${nm} 単独`, actual, row.trust, 3);
+        assertClose(
+          `EVA ${label} ${nm} 単独`,
+          actual,
+          row.trust,
+          statTol(row.trust, row.n),
+        );
     }
   }
   // 当り種別（通常時）：10R 3%（すべて全回転リーチ）・3R確変 56%・3R通常 41%
