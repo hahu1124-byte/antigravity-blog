@@ -358,7 +358,15 @@ const EVA_LAYERS_N = [
       },
       { id: "board-in", name: "盤面ランプ(集光)", trust: 5.4, share: 0.3 },
       { id: "board-out", name: "盤面ランプ(散光)", trust: 0.1, share: 0.05 },
-      // 図柄拡大：この回転は 3×3 を縦長の 1×1（大きな図柄 1 つずつ）にして回す（eva-reel.js）
+    ],
+  },
+  {
+    // 図柄拡大：この回転は 3×3 を縦長の 1×1（大きな図柄 1 つずつ）にして回す（eva-reel.js）。
+    // 変動開始時のランプとは別の層（同じ回転に重なって出られる）
+    key: "zoom",
+    spBoost: EVA_SP_BOOST,
+    label: "図柄拡大",
+    states: [
       {
         id: "zoom",
         name: "図柄拡大",
@@ -655,7 +663,8 @@ const EVA_LAYERS_N = [
     ],
   },
   {
-    // リーチ前予告（ゲンドウ発言・変動中フラッシュ・槍役物・図柄送り・ドデカ図柄）
+    // リーチ前予告（ゲンドウ発言・変動中フラッシュ・ドデカ図柄）。
+    // 槍役物・図柄送り・背景変化は別の層（同じ回転に重なって出られる）
     key: "pre-misc",
     spBoost: EVA_SP_BOOST,
     label: "リーチ前予告(その他)",
@@ -710,23 +719,44 @@ const EVA_LAYERS_N = [
         fx: "fx-mono",
       },
       {
-        id: "lance-gimmick",
-        name: "槍役物",
-        trust: 33.8,
-        share: 0.5,
-        text: "ロンギヌスの槍",
-      },
-      { id: "order-rl", name: "図柄送り(右→左停止)", trust: 17.0, share: 0.3 },
-      { id: "order-sync", name: "図柄送り(同時停止)", trust: 42.6, share: 0.4 },
-      { id: "slide-5", name: "図柄送り(5コマ滑り)", trust: 26.6, share: 0.3 },
-      {
         id: "dodeka",
         name: "ドデカ図柄",
         trust: 29.2,
         share: 0.5,
         text: "ドデカ図柄",
       },
-      // 背景変化（1geki）
+    ],
+  },
+  {
+    key: "lance",
+    spBoost: EVA_SP_BOOST,
+    label: "槍役物",
+    states: [
+      {
+        id: "lance-gimmick",
+        name: "槍役物",
+        trust: 33.8,
+        share: 0.5,
+        text: "ロンギヌスの槍",
+      },
+    ],
+  },
+  {
+    key: "order",
+    spBoost: EVA_SP_BOOST,
+    label: "図柄送り",
+    states: [
+      { id: "order-rl", name: "図柄送り(右→左停止)", trust: 17.0, share: 0.3 },
+      { id: "order-sync", name: "図柄送り(同時停止)", trust: 42.6, share: 0.4 },
+      { id: "slide-5", name: "図柄送り(5コマ滑り)", trust: 26.6, share: 0.3 },
+    ],
+  },
+  {
+    // 背景変化（1geki）
+    key: "bg",
+    spBoost: EVA_SP_BOOST,
+    label: "背景変化",
+    states: [
       {
         id: "bg-evening",
         name: "背景変化(夕方)",
@@ -858,7 +888,7 @@ const EVA_LAYERS_N = [
 const EVA_LINKED_N = [
   {
     key: "after",
-    label: "リーチ後予告",
+    label: "リーチ後予告(背景・群予告)",
     reaches: EVA_SP_REACHES,
     states: [
       // レイ背景は 400 回転まで。401 回転からは代わりに群予告（下の minRot: 401）が出る（ユーザー方針 2026-10-03）
@@ -932,6 +962,15 @@ const EVA_LINKED_N = [
         minRot: 401,
         text: "群予告",
       },
+    ],
+  },
+  // リーチ後予告は種類ごとに別の層（同じリーチに重なって出られる）。key は "after" で始める
+  // （eva-engine.js の evaPhaseOf がリーチ後の段に出す）
+  {
+    key: "after-voice",
+    label: "リーチボイス",
+    reaches: EVA_SP_REACHES,
+    states: [
       {
         id: "voice-anime",
         name: "リーチボイス(図柄アニメ＋キャラボイス)",
@@ -954,6 +993,13 @@ const EVA_LINKED_N = [
         share: 0.1,
         text: "サービス、サービス",
       },
+    ],
+  },
+  {
+    key: "after-lance",
+    label: "ロンギヌスの槍通過",
+    reaches: EVA_SP_REACHES,
+    states: [
       {
         id: "lance-pass-synchro",
         name: "ロンギヌスの槍通過(シンクロ発展)",
@@ -981,6 +1027,13 @@ const EVA_LINKED_N = [
         text: "ロンギヌスの槍",
         fx: "fx-lance",
       },
+    ],
+  },
+  {
+    key: "after-lamp",
+    label: "使徒襲来ランプ",
+    reaches: EVA_SP_REACHES,
+    states: [
       {
         id: "shito-lamp",
         name: "使徒襲来ランプ(白→赤発光)",
@@ -995,6 +1048,13 @@ const EVA_LINKED_N = [
         share: 0.15,
         text: "使徒襲来",
       },
+    ],
+  },
+  {
+    key: "after-kidou",
+    label: "起動確率",
+    reaches: EVA_SP_REACHES,
+    states: [
       {
         id: "kidou-50",
         name: "起動確率50%",
@@ -1044,6 +1104,13 @@ const EVA_LINKED_N = [
         share: 0.05,
         text: "起動確率 77%",
       },
+    ],
+  },
+  {
+    key: "after-toka",
+    label: "初号機透過",
+    reaches: EVA_SP_REACHES,
+    states: [
       {
         id: "toka",
         name: "初号機透過",

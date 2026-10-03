@@ -20,10 +20,24 @@ const out = vm.runInContext(
     for (const [name, T] of [["low", EVA_T_N_LOW], ["st", EVA_T_S]]) {
       const byState = new Map();
       const byLayer = new Map();
+      // 重なり方の内訳（層を分けたり倍率を変えたりした前後で比べる）：
+      // 濃厚・数える演出 3 つ以上・2 つ・1 つ・0 個（低信頼度だけ）・演出なし
+      const combo = new Map();
       let hits = 0;
       for (let i = 0; i < N; i++) {
         const d = evaDrawEffects(T);
         hits += d.f;
+        const cat = !d.acc.any
+          ? "演出なし"
+          : d.acc.sure
+            ? "濃厚"
+            : d.acc.k >= 3
+              ? "数える3つ以上"
+              : "数える" + d.acc.k + "つ";
+        const c = combo.get(cat) || { n: 0, hit: 0 };
+        c.n += 1;
+        c.hit += d.f;
+        combo.set(cat, c);
         const seen = new Set();
         for (const { layer, state } of d.shown) {
           const k = layer.label + "|" + state.name + "|" + state.trust;
@@ -38,6 +52,7 @@ const out = vm.runInContext(
         alpha: T.alpha,
         hitRate: hits / N,
         pHit: T.pHit,
+        combo: [...combo].map(([k, c]) => [k, c.n / N, c.hit / hits, c.hit / c.n]),
         layers: [...byLayer].map(([k, v]) => [k, (v / hits) * 100]),
         states: [...byState].map(([k, v]) => [k, (v / hits) * 100]),
       };
@@ -50,6 +65,11 @@ for (const [name, r] of Object.entries(out)) {
   console.log(
     `## ${name} alpha=${r.alpha.toFixed(3)} 当り 1/${(1 / r.hitRate).toFixed(1)}（仕様 1/${(1 / r.pHit).toFixed(1)}）`,
   );
+  console.log("### 重なり方（1 回転あたり・当りのうち・その回転の当りやすさ）");
+  for (const [k, perSpin, ofHits, f] of r.combo.sort((a, b) => b[2] - a[2]))
+    console.log(
+      `  ${k}\t1/${Math.round(1 / perSpin)} 回転\t当りの ${(ofHits * 100).toFixed(1)}%\t${(f * 100).toFixed(1)}%`,
+    );
   console.log("### 層（当りのうち出た%）");
   for (const [k, v] of r.layers.sort((a, b) => b[1] - a[1]))
     console.log(`  ${k}\t${v.toFixed(1)}%`);

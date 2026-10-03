@@ -386,9 +386,9 @@ function evaPickHesoKind(forced) {
   return "t3";
 }
 
-// 演出を液晶に出す段階：リーチ前（pre）・リーチ成立（reach）・リーチ後（post）
+// 演出を液晶に出す段階：リーチ前（pre）・リーチ成立（reach）・リーチ後（post）。
+// リーチ後予告の層は key が "after" で始まる（after・after-voice など）
 const EVA_POST_LAYERS = [
-  "after",
   "launch",
   "chanceup",
   "device",
@@ -398,7 +398,9 @@ const EVA_POST_LAYERS = [
 ];
 function evaPhaseOf(layer) {
   if (layer.isReach) return "reach";
-  return EVA_POST_LAYERS.includes(layer.key) ? "post" : "pre";
+  return layer.key.startsWith("after") || EVA_POST_LAYERS.includes(layer.key)
+    ? "post"
+    : "pre";
 }
 
 // 液晶に出す文字の色。state.color があればそれ、なければ演出名に入っている色から決める
