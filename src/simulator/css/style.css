@@ -725,6 +725,48 @@ body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-f3-right {
   transform: rotateY(90deg);
 }
 
+/* ST の箱の芯：面は上の狭い台形（上辺は左右 12% ずつ内側）なので、箱の角で隣の面どうしが上のほうで合わさらず
+   三角のすき間ができる（奥が透けて「間が空いて見えた」。ユーザー指摘 2026-10-04）。
+   左右 12% ずつ内側の一回り小さい四角い箱（幅・奥行きとも 76%）を暗い色で入れて、すき間から見えるのを芯にする。
+   正面から見ると前面の台形の上辺の幅と同じなので、外にははみ出さない。通常時の六角形では使わない */
+body.theme-eva .heso-ball > .hx-core {
+  display: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 76%;
+  background: color-mix(in srgb, var(--hx-edge) 30%, #000);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-core {
+  display: block;
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-core-front {
+  left: 12%;
+  transform: translateZ(calc(var(--hx-w) * -0.12));
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-core-back {
+  left: 12%;
+  transform: translateZ(calc(var(--hx-w) * -0.88)) rotateY(180deg);
+}
+
+/* 左右の板：前面から見て 12% 内側の位置で、奥行き 12%〜88% にわたって立てる */
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-core-left {
+  right: 88%;
+  transform-origin: right center;
+  transform: translateZ(calc(var(--hx-w) * -0.12)) rotateY(-90deg);
+}
+
+body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-core-right {
+  left: 88%;
+  transform-origin: left center;
+  transform: translateZ(calc(var(--hx-w) * -0.12)) rotateY(90deg);
+}
+
 /* ST の箱の文字は 4 面とも同じように右から左へ流す（違和感保留は逆向き） */
 body.theme-eva .heso-overlay.right-mode .heso-ball > .hx-f3 > .hx-f3-text {
   justify-content: flex-start;

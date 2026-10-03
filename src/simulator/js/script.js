@@ -1381,6 +1381,10 @@ const HOLD_INNER =
   ["back", "left", "right"]
     .map((f) => `<i class="hx-f3 hx-f3-${f}"><i class="hx-f3-text"></i></i>`)
     .join("") +
+  // ST の箱の芯（台形の面どうしが角の上のほうで合わさらないすき間を埋める四角い板 4 枚）
+  ["front", "back", "left", "right"]
+    .map((f) => `<i class="hx-core hx-core-${f}"></i>`)
+    .join("") +
   [1, 2, 3, 4, 5, 6, 7, 8]
     .map((n) => `<i class="hx-side hx-side${n}"></i>`)
     .join("") +
