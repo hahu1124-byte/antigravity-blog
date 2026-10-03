@@ -1592,6 +1592,168 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   }
 }
 
+/* ST の残り回数の違和感：液晶の真ん中に大きく「残り N」（eva-reel.js の evaShowRemain）。
+   白は無演出即当りの前。赤文字・ノイズ大／小・ガタガタ・虹文字で見分ける */
+.remain-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at 50% 55%,
+    rgba(10, 30, 70, 0.85),
+    rgba(0, 0, 0, 0.6) 75%
+  );
+}
+
+.remain-panel.on {
+  display: flex;
+  animation: remain-in 0.2s ease-out;
+}
+
+.remain-panel .rp-label {
+  color: #9fd8ff;
+  font-weight: 900;
+  font-size: clamp(1.2rem, 6vw, 2rem);
+  letter-spacing: 0.2em;
+  text-shadow: 0 0 8px #000;
+}
+
+.remain-panel .rp-num {
+  color: #eef6ff;
+  font-family: "Shippori Mincho B1", serif;
+  font-weight: 900;
+  font-size: clamp(4rem, 26vw, 8.5rem);
+  line-height: 1;
+  -webkit-text-stroke: 3px #1d5fa8;
+  paint-order: stroke fill;
+  text-shadow:
+    0 0 12px #3fa9ff,
+    4px 4px 0 #000;
+}
+
+.remain-panel.rp-red .rp-num {
+  color: #ff3b3b;
+  -webkit-text-stroke-color: #5a0000;
+  text-shadow:
+    0 0 14px #ff1a1a,
+    4px 4px 0 #000;
+}
+
+.remain-panel.rp-rainbow .rp-num {
+  background: linear-gradient(
+    90deg,
+    #ff3b3b,
+    #ffb43b,
+    #fff23b,
+    #3bff6a,
+    #3bb8ff,
+    #a43bff
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+  filter: drop-shadow(3px 3px 0 #000);
+}
+
+.remain-panel.rp-shake .rp-num {
+  animation: remain-shake 0.08s linear infinite;
+}
+
+.remain-panel.rp-noise-s .rp-num,
+.remain-panel.rp-noise-l .rp-num {
+  animation: remain-noise 0.12s steps(2) infinite;
+}
+
+.remain-panel.rp-noise-l {
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.12) 0 2px,
+      transparent 2px 5px
+    ),
+    radial-gradient(
+      ellipse at 50% 55%,
+      rgba(60, 10, 70, 0.85),
+      rgba(0, 0, 0, 0.6) 75%
+    );
+}
+
+.remain-panel.rp-noise-l .rp-num {
+  animation-duration: 0.07s;
+}
+
+@keyframes remain-in {
+  from {
+    opacity: 0;
+    scale: 1.4;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+@keyframes remain-shake {
+  0% {
+    translate: -4px 2px;
+  }
+
+  50% {
+    translate: 4px -2px;
+  }
+
+  100% {
+    translate: -2px -3px;
+  }
+}
+
+@keyframes remain-noise {
+  0% {
+    translate: 3px 0;
+    filter: hue-rotate(0deg);
+    clip-path: inset(0 0 40% 0);
+  }
+
+  100% {
+    translate: -3px 0;
+    filter: hue-rotate(90deg);
+    clip-path: inset(30% 0 0 0);
+  }
+}
+
+/* 画面が白く光る（無演出即当りで 7 が止まる前。eva-reel.js の evaWhiteout） */
+.whiteout {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: none;
+  pointer-events: none;
+  background: #fff;
+}
+
+.whiteout.on {
+  display: block;
+  animation: whiteout-fade 0.45s ease-out forwards;
+}
+
+@keyframes whiteout-fade {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
 /* 全回転リーチ：7 で止まって図柄が震える（eva-reel.js の evaZenkaitenLap） */
 .digit-container.zen-shake {
   animation: zen-shake 0.09s linear infinite;

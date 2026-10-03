@@ -447,6 +447,44 @@ function evaSpark(color) {
   }
 }
 
+// ST の残り回数の違和感：液晶の真ん中に大きく「残り N」（N は今の残り回転）を出す（実機の動画 2026-10-04）。
+// kind：white（無演出即当りの前）・red（赤文字）・noise-l／noise-s（ノイズ大／小）・shake（ガタガタ）・rainbow（虹文字）
+const EVA_REMAIN_MS = 1000;
+function evaShowRemain(kind) {
+  const screen = document.getElementById("screen");
+  if (!screen || !screen.appendChild) return;
+  let el = document.getElementById("remain-panel");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "remain-panel";
+    el.innerHTML = '<div class="rp-label">残り</div><div class="rp-num"></div>';
+    screen.appendChild(el);
+  }
+  if (el.lastChild) el.lastChild.textContent = String(rRem);
+  el.className = "remain-panel on rp-" + kind;
+  const token = (evaShowRemain.token = (evaShowRemain.token || 0) + 1);
+  setTimeout(() => {
+    if (evaShowRemain.token === token) el.className = "remain-panel";
+  }, EVA_REMAIN_MS);
+}
+
+// 画面が白く光る（無演出即当りで 7 が止まる前）
+const EVA_WHITEOUT_MS = 450;
+function evaWhiteout() {
+  const screen = document.getElementById("screen");
+  if (!screen || !screen.appendChild) return;
+  let el = document.getElementById("whiteout");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "whiteout";
+    screen.appendChild(el);
+  }
+  el.className = "whiteout";
+  void el.offsetWidth; // 続けて出たときもアニメを最初からにする
+  el.className = "whiteout on";
+  setTimeout(() => (el.className = "whiteout"), EVA_WHITEOUT_MS);
+}
+
 // ST のリーチ時シャッター：上・左下・右下の 3 枚が液晶の中央へ閉まり、少し止まって開く。
 // 半透明で、種類（通常・赤・金・ダミープラグ）ごとの色は style.css の .shutter-stage.shutter-*
 const EVA_SHUTTER_MS = 1500; // 閉まって開くまで（style.css の shutter-close と合わせる）
@@ -638,6 +676,8 @@ async function evaRunDisplayMain(eff, opts) {
     if (sp) evaSparkPending = sp.spark;
     const bg = t.find((s) => s.bg);
     if (bg) evaSetBg(bg.bg);
+    const rm = t.find((s) => s.remain);
+    if (rm) evaShowRemain(rm.remain);
   };
   const steps = opts.steps || [];
   const pre = evaChunkSteps(
@@ -733,9 +773,14 @@ async function evaRunDisplayMain(eff, opts) {
       preUsed += EVA_STEP_MS;
     }
   }
-  // ST の高速区間の無演出即当り：告知も文字もなく、7 が左・中・右の順に止まって揃う
+  // ST の高速区間の無演出即当り：回っている途中で液晶の真ん中に「残り N」が大きく出て、画面が白く光り、
+  // 7 が左・中・右の順に止まって揃う（告知音・文字なし。実機の動画 2026-10-04）
   if (eff.instant777) {
     await evaSleep(EVA_INSTANT_FIRST_MS);
+    evaShowRemain("white");
+    await evaSleep(EVA_REMAIN_MS);
+    evaWhiteout();
+    await evaSleep(EVA_WHITEOUT_MS / 2);
     for (const col of [0, 1, 2]) {
       spinning[col] = false;
       setCol(col, finals[col], null, col === 2 ? winKeys : null);

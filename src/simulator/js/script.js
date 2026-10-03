@@ -1209,6 +1209,7 @@ function scheduleLeads(job, count) {
         color: o.color !== undefined ? o.color : l.color,
         voice: l.kind === "entry" ? l.voice : null,
         spark: l.spark || null, // 図柄停止時発光：その変動の図柄が止まったらキラキラ
+        remain: l.remain || null, // ST の残り回数の違和感：液晶の真ん中に「残り N」
         // 前兆（先読み）の段は図柄を隠して専用画面に切り替え、当該と同じ効果（ドックンの炎など）を出す
         takeover: l.kind === "pre",
         fx:

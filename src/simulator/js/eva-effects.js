@@ -4094,35 +4094,42 @@ const EVA_LAYERS_S = [
       },
       { id: "mute-white", name: "変動音オフ(白)", trust: 81.7, share: 1 },
       { id: "mute-red", name: "変動音オフ(赤)", trust: 90.7, share: 0.7 },
+      // 残り回数表示の違和感：液晶の真ん中に大きく「残り N」が出る（remain：見た目の種類。eva-reel.js の
+      // evaShowRemain。白い「残り N」は高速区間の無演出即当りの前に出る。実機の動画 2026-10-04）
       {
         id: "remain-red",
         name: "残り回数表示(赤文字)",
         trust: 86.8,
         share: 0.7,
+        remain: "red",
       },
       {
         id: "remain-noise",
         name: "残り回数表示(ノイズ大)",
         trust: 90.3,
         share: 0.4,
+        remain: "noise-l",
       },
       {
         id: "remain-noise-small",
         name: "残り回数表示(ノイズ小)",
         trust: 53.0,
         share: 0.4,
+        remain: "noise-s",
       },
       {
         id: "remain-shake",
         name: "残り回数表示(ガタガタ)",
         trust: 52.3,
         share: 0.4,
+        remain: "shake",
       },
       {
         id: "remain-rainbow",
         name: "残り回数表示(虹文字)",
         trust: 100,
         share: 0.1,
+        remain: "rainbow",
       },
       {
         id: "chance-bg",

@@ -922,16 +922,21 @@ function createEvaJob(isRight, regime, opts = {}) {
       leads.push({
         kind: layer.lead,
         seq: state.lead || null,
-        text: state.text || state.name,
+        // 残り回数の違和感は文字を出さず「残り N」の表示だけ
+        text: state.remain ? "" : state.text || state.name,
         color: evaColorOf(state),
         voice: evaVoiceOf(state.text),
         spark: state.spark || null,
+        remain: state.remain || null, // ST の残り回数の違和感（eva-reel.js の evaShowRemain）
         fx: state.fx || null, // 先読みの段でも当該と同じ液晶の効果（ドックンの炎など）を出す
       });
     }
     // 入賞時の演出は入賞した変動で出すので、当該の段には入れない。
     // 文字の無い演出でも、液晶の見た目（stage：シャッター、spark：図柄のキラキラ）があれば段にする
-    if ((state.text || state.stage || state.spark) && layer.lead !== "entry") {
+    if (
+      (state.text || state.stage || state.spark || state.remain) &&
+      layer.lead !== "entry"
+    ) {
       if (state.text) text = text ? text + "\n" + state.text : state.text;
       steps.push({
         phase: evaPhaseOf(layer),
@@ -940,6 +945,7 @@ function createEvaJob(isRight, regime, opts = {}) {
         voice: evaVoiceOf(state.text), // eva-voice.js
         stage: state.stage || null, // eva-reel.js の evaPlayShutter
         spark: state.spark || null,
+        remain: state.remain || null,
         bg: state.bg || null, // 液晶の背景の画像（格納庫など。eva-reel.js の evaSetBg）
         // 次回予告：図柄を消して「予告」の画面と曲（28 秒）→ 各予告のタイトル（eva-reel.js の evaPlayNextMovie）
         movie: EVA_NEXT_MOVIE_IDS.includes(state.id) ? "next" : null,
