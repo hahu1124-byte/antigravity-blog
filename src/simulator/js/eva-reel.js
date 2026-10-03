@@ -530,7 +530,9 @@ function evaShowRemain(kind) {
     el.innerHTML = '<div class="rp-label">残り</div><div class="rp-num"></div>';
     screen.appendChild(el);
   }
-  if (el.lastChild) el.lastChild.textContent = String(rRem);
+  // 出す数は左下の残り回転と同じ「この変動を消化する前の残り」（rRem は変動の始めに 1 減らしてあるので +1。
+  // そのまま出すと左下より 1 少なくずれていた。ユーザー指摘 2026-10-04）
+  if (el.lastChild) el.lastChild.textContent = String(rRem + 1);
   el.className = "remain-panel on rp-" + kind;
   const token = (evaShowRemain.token = (evaShowRemain.token || 0) + 1);
   setTimeout(() => {
@@ -634,7 +636,7 @@ async function evaRunDisplay(eff, opts) {
     !opts.instant &&
     typeof mode !== "undefined" &&
     mode === "ST" &&
-    EVA_REMAIN_ANNOUNCE.includes(rRem)
+    EVA_REMAIN_ANNOUNCE.includes(rRem + 1)
   ) {
     evaShowRemain("white");
   }
