@@ -4176,164 +4176,6 @@ const EVA_LAYERS_S = [
     ],
   },
   {
-    // 擬似連：当該の変動の中で段が進む出方（前兆とは値が違う。1geki・でちゃう！）。
-    // 名前を「ドックン」で始めない（前兆のドックンと見分けるため）
-    key: "pseudo",
-    label: "擬似連",
-    groups: {
-      dokkun: ["pseudo-dokkun"],
-      cd: ["pseudo-cd"],
-      eye: ["pseudo-eye"],
-      accel: ["pseudo-accel"],
-      caution: ["pseudo-caution"],
-      logo: ["pseudo-logo"],
-      stop: ["pseudo-stop"],
-      remain: ["pseudo-remain"],
-      noise: ["pseudo-noise"],
-    },
-    states: [
-      {
-        id: "pseudo-dokkun",
-        name: "擬似連ドックン(青)",
-        trust: 99.7,
-        share: 0.3,
-        text: "擬似連\nドックン",
-        fx: "fx-flame-blue",
-      },
-      {
-        id: "pseudo-dokkun-red",
-        name: "擬似連ドックン(赤)",
-        trust: 99.9,
-        share: 0.2,
-        text: "擬似連\nドックン",
-        color: "red",
-        fx: "fx-flame-red",
-      },
-      {
-        id: "pseudo-cd2",
-        name: "擬似連カウントダウン(2段:シンジ)",
-        trust: 77.2,
-        share: 0.3,
-        text: "擬似連\nカウントダウン",
-      },
-      {
-        id: "pseudo-cd3",
-        name: "擬似連カウントダウン(3段:シンジ)",
-        trust: 79.3,
-        share: 0.3,
-        text: "擬似連\nカウントダウン",
-      },
-      {
-        id: "pseudo-cd4",
-        name: "擬似連カウントダウン(4段:シンジ)",
-        trust: 78.9,
-        share: 0.2,
-        text: "擬似連\nカウントダウン",
-      },
-      {
-        id: "pseudo-cd-noise",
-        name: "擬似連カウントダウン(シンジ・ノイズ)",
-        trust: 79.4,
-        share: 0.2,
-        text: "擬似連\nカウントダウン\nノイズ",
-        color: "purple",
-      },
-      // 擬似連の何回目に出たかで値が違う（1geki・パチ7・でちゃう！）
-      ...evaRowStates("pseudo-eye", "擬似連アイキャッチ", [
-        ["1w", "1回目・白", 0.2, 0.1, { text: "擬似連\nアイキャッチ" }],
-        [
-          "1r",
-          "1回目・赤",
-          69.4,
-          0.15,
-          { text: "擬似連\nアイキャッチ", color: "red" },
-        ],
-        ["23w", "2・3回目・白", 0.1, 0.1, { text: "擬似連\nアイキャッチ" }],
-        ["4w", "4回目・白", 76.7, 0.05, { text: "擬似連\nアイキャッチ" }],
-        [
-          "4r",
-          "4回目・赤",
-          89.6,
-          0.05,
-          { text: "擬似連\nアイキャッチ", color: "red" },
-        ],
-      ]),
-      ...evaRowStates("pseudo-accel", "擬似連初号機加速", [
-        [
-          "1",
-          "1段階でテンパイ煽りへ",
-          26.7,
-          0.1,
-          { text: "擬似連\n初号機加速" },
-        ],
-        [
-          "3",
-          "3段階でテンパイ煽りへ",
-          37.1,
-          0.05,
-          { text: "擬似連\n初号機加速" },
-        ],
-      ]),
-      ...evaRowStates(
-        "pseudo-caution",
-        "擬似連ミッションモード前兆",
-        [
-          ["now", "当該で突入", 45.4, 0.08],
-          ["14", "1/4→4/4", 45.2, 0.05],
-          ["24", "2/4→4/4", 46.8, 0.05],
-          ["34", "3/4→4/4", 45.9, 0.05],
-          ["wait", "突入待機", 45.8, 0.05],
-        ],
-        { reaches: ["mission"], text: "擬似連\nCAUTION", color: "gold" },
-      ),
-      ...evaRowStates(
-        "pseudo-logo",
-        "擬似連ロゴフラッシュ",
-        [
-          ["1w", "1回目・白ロング", 6.7, 0.1, { color: "white" }],
-          ["1g", "1回目・緑ロング", 79.9, 0.08, { color: "green" }],
-          ["1r", "1回目・赤ロング", 91.2, 0.08, { color: "red" }],
-          ["4w", "4回目・白ロング", 80.8, 0.04, { color: "white" }],
-          ["4g", "4回目・緑ロング", 76.7, 0.04, { color: "green" }],
-          ["4r", "4回目・赤ロング", 89.3, 0.04, { color: "red" }],
-        ],
-        { text: "擬似連\nロゴフラッシュ" },
-      ),
-      ...evaRowStates("pseudo-stop", "擬似連図柄停止時発光", [
-        ["1w", "1回目・白", 0.3, 0.1, { spark: "white" }],
-        ["1g", "1回目・緑", 46.3, 0.08, { spark: "green" }],
-        ["1r", "1回目・赤", 61.1, 0.08, { spark: "red" }],
-        ["4w", "4回目・白", 44.1, 0.04, { spark: "white" }],
-        ["4g", "4回目・緑", 58.8, 0.04, { spark: "green" }],
-        ["4r", "4回目・赤", 73.5, 0.04, { spark: "red" }],
-      ]),
-      ...evaRowStates(
-        "pseudo-remain",
-        "擬似連残り回数表示",
-        [
-          ["shake", "モニタがガタガタ", 56.9, 0.06],
-          ["red", "赤文字", 57.3, 0.06, { color: "red" }],
-          ["noise-s", "ノイズ小", 56.6, 0.06],
-          ["noise-l", "ノイズ大", 82.0, 0.04, { color: "purple" }],
-          ["freeze1", "フリーズ1段階", 0.1, 0.05],
-          ["freeze2", "フリーズ2段階", 0.1, 0.05],
-          ["freeze3", "フリーズ3段階", 64.2, 0.04, { color: "red" }],
-        ],
-        { text: "擬似連\n残り回数" },
-      ),
-      ...evaRowStates(
-        "pseudo-noise",
-        "擬似連背景ノイズ違和感",
-        [
-          ["4s", "4回目・小", 78.1, 0.04],
-          ["4m", "4回目・中", 79.2, 0.04],
-          ["4l", "4回目・大", 80.0, 0.04],
-        ],
-        { reaches: ["dummy"], text: "擬似連\nノイズ", color: "purple" },
-      ),
-    ],
-  },
-  {
     key: "midway",
     label: "変動中予告",
     groups: {
@@ -5298,7 +5140,8 @@ const EVA_LINKED_S = [
   },
 ];
 
-// ST 中の出る割合（通常時の EVA_PLAN_N と同じ決まり。2026-10-04 暫定：今までの share の合計をまとまりの目安に
+// ST 中の出る割合（通常時の EVA_PLAN_N と同じ決まり。エヴァ15 の ST に擬似連は無い（ユーザー指摘 2026-10-04、層ごと削除）。
+// 2026-10-04 暫定：今までの share の合計をまとまりの目安に
 // そのまま移したもの。数字はユーザーと決め直す）。
 // 決まり：10%未満は当りのうち＝信頼度×信頼度、濃厚は share か 0.1% の大きいほう、10%以上はまとまりの目安を
 // 同じ割合ずつ。リーチに付く部品（入力デバイス・テロップ・SP発展・シャッターなど、rate を持つ層）は、
@@ -5323,17 +5166,6 @@ const EVA_PLAN_S = {
       remain: 1.9,
       chancebg: 1.5,
       noise: 0.7,
-    },
-    pseudo: {
-      dokkun: 0.5,
-      cd: 1,
-      eye: 0.25,
-      accel: 0.15,
-      caution: 0.3,
-      logo: 0.3,
-      stop: 0.3,
-      remain: 0.25,
-      noise: 0.1,
     },
     midway: {
       su: 4.9,
@@ -5360,5 +5192,8 @@ const EVA_PLAN_S = {
       zenkaiten: 4.1,
       tenpai: 6.2,
     },
+    // 新次回予告（どちらも濃厚）は 2 種で当りの 20%（通常時の次回予告と同じくらい。ユーザー方針 2026-10-04）。
+    // 2 種の比は前の暫定値（0.15：0.1）のまま
+    midway: { "next-preview": 12, "next-last": 8 },
   },
 };
