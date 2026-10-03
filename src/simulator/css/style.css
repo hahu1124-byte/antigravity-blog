@@ -321,6 +321,7 @@ body.light-mode .machine {
 .heso-overlay {
   position: absolute;
   bottom: 10px;
+  z-index: 6; /* 液晶の効果（.screen::after）より上に保留を出す */
   display: flex;
   align-items: center;
   gap: 10px;
