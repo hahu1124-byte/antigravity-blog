@@ -895,6 +895,8 @@ function createEvaJob(isRight, regime, opts = {}) {
         bg: state.bg || null, // 液晶の背景の画像（格納庫など。eva-reel.js の evaSetBg）
         // 次回予告：図柄を消して「予告」の画面と曲（28 秒）→ 各予告のタイトル（eva-reel.js の evaPlayNextMovie）
         movie: EVA_NEXT_MOVIE_IDS.includes(state.id) ? "next" : null,
+        // キャラ連続：キャラが出るたびに図柄が仮停止して擬似連のように続く（eva-reel.js の evaPlayChara）
+        chara: state.chara || null,
         // 前兆（先読み系）の段は、図柄を隠してその演出の専用画面に切り替える（eva-reel.js）
         takeover: layer.lead === "pre",
         fx: layer.lead === "pre" ? state.fx || null : null,

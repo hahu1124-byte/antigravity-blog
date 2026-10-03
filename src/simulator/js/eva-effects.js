@@ -860,7 +860,10 @@ const EVA_LAYERS_N = [
         text: "セクシー",
       },
       // キャラ連続はキャラのリーチへ発展する（レイ→零号機・アスカ→弐号機・シンジ→初号機）。
-      // 違うリーチへ発展したら大当り濃厚（なな徹 7334。下の chara-contra）
+      // 違うリーチへ発展したら大当り濃厚（なな徹 7334。下の chara-contra）。
+      // 見せ方（chara：who が n 回出る）：図柄を隠して窓にキャラと「×1」→ 図柄が戻って回り、左・中が同じ数字で
+      // 右だけ 1 つずれて仮停止 → 次のキャラ「×2」…と擬似連のように続く（実機の動画 2026-10-04。
+      // 4 段階は 3 回目が青・4 回目が赤の窓）。colors は回ごとの窓の色
       {
         id: "chara-rei1",
         name: "キャラ連続(レイ×1)",
@@ -868,6 +871,7 @@ const EVA_LAYERS_N = [
         share: 0.4,
         reaches: ["zero"],
         text: "レイ",
+        chara: { who: "レイ", n: 1 },
       },
       {
         id: "chara-rei3",
@@ -876,6 +880,7 @@ const EVA_LAYERS_N = [
         share: 0.5,
         reaches: ["zero"],
         text: "レイ×3",
+        chara: { who: "レイ", n: 3 },
       },
       {
         id: "chara-asuka1",
@@ -884,6 +889,7 @@ const EVA_LAYERS_N = [
         share: 0.4,
         reaches: ["ni"],
         text: "アスカ",
+        chara: { who: "アスカ", n: 1 },
       },
       {
         id: "chara-asuka3",
@@ -892,6 +898,7 @@ const EVA_LAYERS_N = [
         share: 0.5,
         reaches: ["ni"],
         text: "アスカ×3",
+        chara: { who: "アスカ", n: 3 },
       },
       {
         id: "chara-shinji1",
@@ -900,6 +907,7 @@ const EVA_LAYERS_N = [
         share: 0.5,
         reaches: ["sho"],
         text: "シンジ",
+        chara: { who: "シンジ", n: 1 },
       },
       {
         id: "chara-shinji3",
@@ -908,6 +916,7 @@ const EVA_LAYERS_N = [
         share: 1,
         reaches: ["sho"],
         text: "シンジ×3",
+        chara: { who: "シンジ", n: 3 },
       },
       {
         id: "chara-contra",
@@ -916,6 +925,7 @@ const EVA_LAYERS_N = [
         share: 0.1,
         reaches: ["synchro", "armisael", "sahaquiel", "final"],
         text: "キャラ連続",
+        chara: { who: ["レイ", "アスカ", "シンジ"], n: 3 },
       },
       {
         id: "chara-4",
@@ -923,6 +933,11 @@ const EVA_LAYERS_N = [
         trust: 100,
         share: 0.2,
         text: "連続×4",
+        chara: {
+          who: ["レイ", "アスカ", "シンジ"],
+          n: 4,
+          colors: [null, null, "blue", "red"],
+        },
       },
       {
         id: "chara-kaworu",
@@ -931,6 +946,7 @@ const EVA_LAYERS_N = [
         share: 0.1,
         only: EVA_KAKUHEN,
         text: "カヲル",
+        chara: { who: "カヲル", n: 1 },
       },
       // セリフ予告の段の進み方、加持の 1 段階目、2 段階目のセリフ（1geki・パチ7・でちゃう！）
       ...evaRowStates("serif-x", "セリフ予告", [

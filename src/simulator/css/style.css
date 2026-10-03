@@ -1513,6 +1513,85 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   }
 }
 
+/* キャラ連続：図柄を隠し、液晶の中央の窓（水色の枠）にキャラの名前と回数（×1・×2…）を出す。
+   回ごとに窓の色が変わる（4 段階は 3 回目が青・4 回目が赤）。eva-reel.js の evaPlayChara */
+.screen.chara-on .digit-container {
+  visibility: hidden;
+}
+
+.chara-window {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  translate: -50% -50%;
+  z-index: 8;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64%;
+  aspect-ratio: 4 / 3;
+  pointer-events: none;
+  border: 4px solid #8fd8ff;
+  border-radius: 6px;
+  background: linear-gradient(160deg, #1b2c4a, #070b16);
+  box-shadow:
+    0 0 14px rgba(143, 216, 255, 0.7),
+    inset 0 0 18px rgba(0, 0, 0, 0.8);
+}
+
+.chara-window.on {
+  display: flex;
+  animation: chara-in 0.3s ease-out;
+}
+
+.chara-window .cw-who {
+  color: #fff;
+  font-family: "Shippori Mincho B1", serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 10vw, 3.6rem);
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 10px #000;
+}
+
+.chara-window .cw-count {
+  margin-top: 0.2em;
+  color: #8fd8ff;
+  font-weight: 900;
+  font-size: clamp(1.3rem, 6vw, 2.2rem);
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 8px #000;
+}
+
+.chara-window.cw-blue {
+  border-color: #3a7bff;
+  background: linear-gradient(160deg, #1c4fd8, #071a52);
+  box-shadow: 0 0 20px rgba(58, 123, 255, 0.9);
+}
+
+.chara-window.cw-red {
+  border-color: #ff3b3b;
+  background: linear-gradient(160deg, #d81c1c, #4a0505);
+  box-shadow: 0 0 22px rgba(255, 59, 59, 0.95);
+}
+
+.chara-window.cw-blue .cw-count,
+.chara-window.cw-red .cw-count {
+  color: #fff;
+}
+
+@keyframes chara-in {
+  from {
+    opacity: 0;
+    scale: 0.4;
+  }
+
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
 /* 全回転リーチ：7 で止まって図柄が震える（eva-reel.js の evaZenkaitenLap） */
 .digit-container.zen-shake {
   animation: zen-shake 0.09s linear infinite;

@@ -465,6 +465,51 @@ function evaPlayShutter(kind) {
   }, EVA_SHUTTER_MS);
 }
 
+// キャラ連続：図柄を隠して窓にキャラと「×k」→ 図柄が戻って回り、左・中が同じ数字で右だけ 1 つずれて仮停止
+// → 次のキャラ、を n 回くり返す（擬似連のように続き、回を追うごとに ×1・×2… と分かる。実機の動画 2026-10-04）。
+// 最後のキャラの後は図柄が回ったまま、ふだんの止まり方へ戻る。ctl：回っている図柄の止め・仮停止・再開
+const EVA_CHARA_SHOW_MS = 1200; // キャラの窓を出している時間
+const EVA_CHARA_SPIN_MS = 700; // 図柄が戻って回る時間
+const EVA_CHARA_STOP_MS = 650; // 仮停止を見せる時間
+async function evaPlayChara(item, ctl) {
+  const c = item.chara;
+  const who = Array.isArray(c.who)
+    ? c.who[Math.floor(Math.random() * c.who.length)]
+    : c.who;
+  const screen = document.getElementById("screen");
+  let el = document.getElementById("chara-window");
+  if (!el && screen && screen.appendChild) {
+    el = document.createElement("div");
+    el.id = "chara-window";
+    el.innerHTML = '<div class="cw-who"></div><div class="cw-count"></div>';
+    screen.appendChild(el);
+  }
+  for (let k = 1; k <= c.n; k++) {
+    ctl.pause();
+    const color = (c.colors && c.colors[k - 1]) || "";
+    if (el && el.firstChild) {
+      el.firstChild.textContent = who;
+      el.lastChild.textContent = "×" + k;
+      el.className = "chara-window on" + (color ? " cw-" + color : "");
+    }
+    if (screen && screen.classList) screen.classList.add("chara-on");
+    if (k === 1 && item.voice) evaPlayVoice(item.voice);
+    await evaSleep(EVA_CHARA_SHOW_MS);
+    if (el) el.className = "chara-window";
+    if (screen && screen.classList) screen.classList.remove("chara-on");
+    ctl.resume();
+    await evaSleep(EVA_CHARA_SPIN_MS);
+    if (k < c.n) {
+      ctl.fakeStop();
+      await evaSleep(EVA_CHARA_STOP_MS);
+    }
+  }
+  return (
+    c.n * (EVA_CHARA_SHOW_MS + EVA_CHARA_SPIN_MS) +
+    (c.n - 1) * EVA_CHARA_STOP_MS
+  );
+}
+
 async function evaRunDisplay(eff, opts) {
   evaSpark(null);
   evaSetBg(null);
@@ -613,13 +658,45 @@ async function evaRunDisplayMain(eff, opts) {
     });
   }, EVA_REEL_TICK_MS);
 
+  // キャラ連続の仮停止：左・中が同じ数字 a（7 は 10R 濃厚の見た目なので使わない）、右だけ隣の数字で止める。
+  // 3×3 は中段に並べる（上下の段はブランクなので斜めのラインも揃わない）
+  const charaCtl = {
+    pause() {
+      spinning.fill(false);
+    },
+    resume() {
+      spinning.fill(true);
+    },
+    fakeStop() {
+      spinning.fill(false);
+      const a = evaRandDigit([7]);
+      const right = evaWrap(a + (Math.random() < 0.5 ? 1 : -1));
+      const nums = [a, a, right === 7 ? evaWrap(a - 1) : right];
+      nums.forEach((n, col) => {
+        frames[col] = grid ? evaPosOf(col, n, 1) : n;
+        setCol(col, frameOf(col, frames[col]));
+      });
+    },
+  };
+
   // リーチ前の予告：全部の列が回っている間に 1 段ずつ。
   // 前兆（先読み系）の段は図柄を隠し、その演出の専用画面（ドックンなら炎だけ）に切り替える
   let preUsed = 0;
   for (const t of pre) {
     const take = Array.isArray(t) && t.some((s) => s.takeover);
     const movie = Array.isArray(t) && t.find((s) => s.movie === "next");
-    if (movie) {
+    const chara = Array.isArray(t) && t.find((s) => s.chara);
+    if (chara) {
+      // キャラ連続：同じ段の他の文字を先に出してから、キャラと仮停止をくり返す
+      const rest = t.filter((s) => s !== chara);
+      if (rest.length) {
+        show(rest);
+        await evaSleep(EVA_STEP_MS);
+        preUsed += EVA_STEP_MS;
+      }
+      show("");
+      preUsed += await evaPlayChara(chara, charaCtl);
+    } else if (movie) {
       // 次回予告：図柄を消して「予告」の画面と曲。同じ段の他の文字はその後に出す
       show("");
       await evaPlayNextMovie(movie);
