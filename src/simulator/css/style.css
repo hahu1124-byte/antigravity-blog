@@ -209,8 +209,9 @@ body.light-mode .machine {
   flex-direction: column;
   justify-content: center;
   gap: var(--cell-gap);
-  /* 列の幅は ST の数字（.digit の 112px）と同じに（間があきすぎてスカスカに見えた。ユーザー方針 2026-10-04） */
-  width: min(112px, 31%);
+  /* 列の幅は 72px（112px では字が小さいぶん間があきすぎてスカスカに見えた。ST の大きい数字と同じくらいの
+     詰まり具合に。ユーザー方針 2026-10-04） */
+  width: min(72px, 31%);
   height: var(--grid-h);
   overflow: hidden;
   font-size: clamp(2.4rem, 10vw, 3.8rem);
@@ -373,7 +374,12 @@ body.light-mode .machine {
     inset 0 0 20px #ff0000 !important;
 }
 
+/* 虹の枠の色は変動のあいだずっと、震えは .vibrate が付いている間だけ（script.js が白 0.3 秒・赤と虹 0.8 秒で外す） */
 .vibe-rainbow {
+  animation: rainbow-border 0.2s infinite !important;
+}
+
+.vibe-rainbow.vibrate {
   animation:
     vibration 0.05s infinite,
     rainbow-border 0.2s infinite !important;

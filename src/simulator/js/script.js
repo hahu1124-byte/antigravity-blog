@@ -970,11 +970,16 @@ async function startProcess() {
     const vibeClasses = ["vibrate", "vibe-" + eff.vibeColor];
     machineEl.classList.add(...vibeClasses);
     screenEl.classList.add(...vibeClasses);
-    // 枠が震える時間：ショート（白）0.3 秒、ロング（赤）と虹 0.8 秒（ずっと震え続けないように。ユーザー方針 2026-10-04）
+    // 枠が震える時間：ショート（白）0.3 秒、ロング（赤）と虹 0.8 秒（ずっと震え続けないように。ユーザー方針 2026-10-04）。
+    // 外すのは震え（vibrate）だけで、枠の色の光は変動の終わりまで残す（震えと一緒に光も外していたので、
+    // 白レバブルが 0.3 秒しか見えず「出ていない」ように見えた）。前の変動のタイマーで今の震えを外さないよう印で見分ける
+    const vibeToken = (startProcess.vibeToken =
+      (startProcess.vibeToken || 0) + 1);
     setTimeout(
       () => {
-        machineEl.classList.remove(...vibeClasses);
-        screenEl.classList.remove(...vibeClasses);
+        if (startProcess.vibeToken !== vibeToken) return;
+        machineEl.classList.remove("vibrate");
+        screenEl.classList.remove("vibrate");
       },
       eff.vibeColor === "white" ? 300 : 800,
     );
