@@ -540,9 +540,14 @@ function createJob(isRight = false, regimeOverride, opts) {
   }
 
   res.heavy = res.trust >= 50 || res.saibare || !!res.sure;
-  res.displayName =
-    Array.from(new Set(res.name)).join("+").replace(/ST/g, "") || "通常";
+  refreshDisplayName(res);
   return res;
+}
+
+// ログに出す名前（演出名をつないだもの）。あとから名前を足したとき（判定し直し・保留連）も呼んで作り直す
+function refreshDisplayName(job) {
+  job.displayName =
+    Array.from(new Set(job.name)).join("+").replace(/ST/g, "") || "通常";
 }
 
 // ============================================================
@@ -587,13 +592,25 @@ const HOLD_VIEW_RANK = { none: 0, blue: 1, green: 2, red: 3, rainbow: 4 };
 // 保留の種類が同じなら変化の途中経過も引き継ぐ。違うときは、見えている色から新しい流れへ進む
 // （見えている色より弱い色へは戻さない）
 function carryHold(oldJob, newJob) {
-  if (oldJob.holdShake) newJob.holdShake = true;
+  // 震え（デバイス振動先読み・レバブル先読み）は見えていたので引き継ぐ。新しい保留にその演出が無くても
+  // ログで分かるよう名前を残す（画面で震えたのにログに出ないことがあった。ユーザー指摘 2026-10-04）
+  if (oldJob.holdShake) {
+    if (!newJob.holdShake) {
+      const shakeName = oldJob.name.find((n) =>
+        /振動先読み|レバブル先読み/.test(n),
+      );
+      newJob.name.push((shakeName || "レバブル先読み") + "(判定し直し前から)");
+    }
+    newJob.holdShake = true;
+    refreshDisplayName(newJob);
+  }
   // 保留連の一発告知（rejudgeStocks）は判定し直しても引き継ぐ（同じ番号なので当りのまま）
   if (oldJob.holdChain && newJob.isHit) {
     newJob.holdChain = true;
     newJob.notice = oldJob.notice;
     if (!newJob.name.includes("保留連の一発告知"))
       newJob.name.push("保留連の一発告知");
+    refreshDisplayName(newJob);
   }
   if (oldJob.leadPlan) newJob.leadPlan = oldJob.leadPlan;
   if (oldJob.holdType === newJob.holdType && oldJob.holdSeq) {
@@ -871,6 +888,7 @@ function rejudgeStocks(newMode, remain) {
     job.holdChain = true;
     job.notice = Math.random() < 0.5 ? "ninth" : "gospel";
     job.name.push("保留連の一発告知");
+    refreshDisplayName(job);
   }
   // 判定し直して強い先読みになった保留も、高速オートなら低速に落とす
   [...rightStock, ...leftStock].forEach(slowDownForSakiyomi);
@@ -958,7 +976,11 @@ async function startProcess() {
     addLog(`${M.modeLabel(mode)} ${lcdCount}回転【先バレ】信頼度:40.0%`);
   }
   // trustが50以上（激熱以上）、または当落が確定している場合のみログに出力
-  if ((eff.trust >= 50.0 || eff.isHit) && !eff.deferHitLog) {
+  // レバブル（枠の震え・保留の震え）が出た変動は、信頼度が低くても必ずログに出す
+  if (
+    (eff.trust >= 50.0 || eff.isHit || eff.vibe || eff.holdShake) &&
+    !eff.deferHitLog
+  ) {
     const modeLabel = M.modeLabel(mode);
     addLog(
       `${modeLabel} ${lcdCount}回転【${eff.displayName}】${trustLabel(eff)}`,
