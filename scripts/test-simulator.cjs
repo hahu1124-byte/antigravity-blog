@@ -449,6 +449,19 @@ function assertClose(label, actual, expected, tolerance) {
       if (x === z) throw new Error("リーチなしで左右が揃った: " + [x, z]);
     }
     if (evaReelNext(9) !== 1 || evaReelPrev(1) !== 9) throw new Error("図柄の並びの折り返しが違う");
+    // 液晶に出す段：多いときは最大段数にまとめる
+    const chunked = evaChunkSteps(["a", "b", "c", "d", "e", "f"], 4);
+    if (chunked.length > 4 || chunked.join("\\n").split("\\n").length !== 6) throw new Error("段のまとめ方が違う");
+    // SP リーチの回転はリーチ名を reach の段に持つ
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常"; currentRot = 0;
+    let checked = 0;
+    for (let i = 0; i < 400000 && checked < 50; i++) {
+      const job = createJob(false);
+      if (job.reachId !== "final") continue;
+      if (!job.steps.some((s) => s.phase === "reach" && s.text === "最終号機リーチ")) throw new Error("リーチ名の段が無い");
+      checked++;
+    }
+    if (!checked) throw new Error("最終号機リーチのサンプルが得られなかった");
   `);
 
   console.log(

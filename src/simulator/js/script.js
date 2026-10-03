@@ -578,7 +578,8 @@ async function startProcess() {
   // 演出ごとの液晶の効果（福音エアー・インパクトフラッシュなど。style.css の fx-*）
   const fxClasses = eff.fx || [];
   if (fxClasses.length) screenEl.classList.add(...fxClasses);
-  if (eff.text) {
+  // EVA は演出の文字を回転中に順番に出す（eva-reel.js）。リゼロは今どおり最初にまとめて出す
+  if (eff.text && currentMachine !== "eva") {
     const ov = document.getElementById("effect-overlay");
     ov.innerText = eff.text;
     ov.style.display = "block";
@@ -619,6 +620,7 @@ async function startProcess() {
     await evaRunReels(finalNums, {
       instant: currentSpeed === "fast" && !eff.heavy,
       heavy: eff.heavy,
+      steps: eff.steps,
     });
   } else {
     await spinPlainDigits(eff, currentSpeed);

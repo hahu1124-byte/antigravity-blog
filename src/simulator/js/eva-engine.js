@@ -306,6 +306,13 @@ function evaTablesFor(regime) {
   return currentRot > 400 ? EVA_T_N_HIGH : EVA_T_N_LOW;
 }
 
+// 演出を液晶に出す段階：リーチ前（pre）・リーチ成立（reach）・リーチ後（post）
+const EVA_POST_LAYERS = ["after", "launch", "chanceup", "device", "shutter"];
+function evaPhaseOf(layer) {
+  if (layer.isReach) return "reach";
+  return EVA_POST_LAYERS.includes(layer.key) ? "post" : "pre";
+}
+
 function createEvaJob(isRight, regime) {
   const T = evaTablesFor(regime);
   const r = evaPick(T.reach.probs);
@@ -340,10 +347,14 @@ function createEvaJob(isRight, regime) {
   let vibe = false;
   let vibeColor = "none";
   const fx = []; // 液晶に付ける効果のクラス（style.css の fx-*）
+  const steps = []; // 液晶に順番に出す文字（eva-reel.js が回転中に出す）
   for (const { layer, state } of shown) {
     name.push(state.name);
     if (state.holdType) holdType = state.holdType;
-    if (state.text) text = text ? text + "\n" + state.text : state.text;
+    if (state.text) {
+      text = text ? text + "\n" + state.text : state.text;
+      steps.push({ phase: evaPhaseOf(layer), text: state.text });
+    }
     if (state.fx) fx.push(state.fx);
     // 液晶の揺れ（vibe）は当該レバブルのときだけ
     if (layer.key === "lever") {
@@ -360,6 +371,7 @@ function createEvaJob(isRight, regime) {
   if (isHit && !acc.any) {
     name.push("突発当り");
     text = "突発当り";
+    steps.push({ phase: "post", text: "突発当り" });
     fx.push("fx-tear");
   }
 
@@ -401,6 +413,7 @@ function createEvaJob(isRight, regime) {
     vibe,
     vibeColor,
     fx,
+    steps,
     flash: false,
     text,
     holdType,
