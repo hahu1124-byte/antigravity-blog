@@ -24,8 +24,9 @@ const EVA_STEP_MS = 450; // 液晶に出す演出の文字 1 段の時間
 const EVA_STEP_MAX = 4; // リーチ前・リーチ後それぞれの最大段数（多いときはまとめる）
 // 確変の当りのうち暴走図柄（1・3・5）で見せる割合（シンクロ経由の当りは必ず暴走）
 const EVA_BOSO_SHOW_RATE = 0.12;
-// 偶数図柄の当りのうち上段 4・下段 2 の大当り濃厚リーチで揃える割合
-const EVA_SURE_REACH_RATE = 0.15;
+// 偶数図柄の当りのうち上段 4・下段 2 の大当り濃厚リーチで揃える割合。
+// これ以外の当りでは上段 4・下段 2 のリーチにしない（偶然の分が重なって多すぎた。ユーザー指摘 2026-10-03）
+const EVA_SURE_REACH_RATE = 0.05;
 // リーチのうちダブルライン（上段と下段が同時にリーチ）にする割合
 const EVA_DOUBLE_REACH_RATE = 0.15;
 // リーチの当りのうち、いったんハズレ目で止まってから復活する割合と、その間（ミリ秒）
@@ -145,6 +146,8 @@ function evaBuildGrid(spec) {
   const W = evaWindow;
   for (let tries = 0; tries < 500; tries++) {
     const line = spec.line || evaPickLine();
+    // 上段 4・下段 2 の濃厚リーチは spec.line で指定したときだけ（たまたまその段になった当りは引き直す）
+    if (!spec.line && isHit && EVA_SURE_REACH[line] === hitDigit) continue;
     const row = EVA_ROWS.indexOf(line);
     let grid;
     let cpos = null;
@@ -555,6 +558,141 @@ async function evaZenkaitenLap(eff, show, reachText, grid) {
   await evaSleep(EVA_ZENKAI_SHAKE_MS);
   if (box && box.classList) box.classList.remove("zen-shake");
   show("");
+}
+
+// --- 昇格演出 ---
+// ヘソの偶数図柄の当りは必ず昇格演出を挟む（奇数図柄・暴走図柄の当りは挟まない。ユーザー方針 2026-10-03）。
+// 実機の録画（E:/rec 2026-10-03 21-44-54）どおり：白く光った後、炎の背景の上で 3×3 の図柄が
+// 3 列そろったまま縦に流れ、中段が奇数図柄で止まれば「確変GET」、偶数図柄で止まれば時短。
+// チャンスアップは背景がオール赤。昇格の仕上げは録画の 4 つ：
+//   普通に止まる／滑り（偶数で止まってからズルッと奇数へ）／槍（槍が貫いて図柄が大きく出る）／一撃（流れている途中で白く光って奇数）
+// 滑り・槍・一撃とオール赤の昇格しない回は出さない／ほとんど出さない（「激熱昇格」）
+const EVA_UPGRADE_ALLRED_IF_UP = 0.3; // 昇格するときオール赤になる割合
+const EVA_UPGRADE_ALLRED_IF_DOWN = 0.03; // 昇格しないときオール赤になる割合
+// 昇格するときの仕上げの振り分け（合計 1）
+const EVA_UPGRADE_FINISH = [
+  ["stop", 0.5],
+  ["slide", 0.2],
+  ["lance", 0.15],
+  ["ichigeki", 0.15],
+];
+const EVA_UPGRADE_FLASH_MS = 350; // 始まりの白い光
+const EVA_UPGRADE_STEP_MS = 260; // 図柄が 1 段流れる時間（最初）
+const EVA_UPGRADE_SLOW_MS = 90; // 止まる手前で 1 段ごとに足す時間
+const EVA_UPGRADE_SLIDE_WAIT_MS = 700; // 滑りの前の止まっている間
+const EVA_UPGRADE_ZOOM_MS = 1000; // 槍の後に図柄が大きく出る時間
+const EVA_UPGRADE_RESULT_MS = 1100; // 結果を見せる時間
+
+// 3 列とも同じ図柄で、上段・中段・下段を出す（中段が n。リールの並びどおり上が n+1・下が n-1）。
+// 数字 3 つの表示（ST 中のヘソ当りなど）なら中段の n だけ
+function evaUpgradeRows(n, win) {
+  if (evaUseGrid()) {
+    const cells = [evaReelNext(n), n, evaReelPrev(n)];
+    [0, 1, 2].forEach((col) =>
+      evaGridSetCol(col, cells, null, win ? ["mid"] : null),
+    );
+  } else {
+    [1, 2, 3].forEach((i) =>
+      evaPlainSet(i, n, getDigitClass(n, "通常") + (win ? " win" : "")),
+    );
+  }
+}
+
+function evaUpgradeFinish() {
+  let r = Math.random();
+  for (const [id, p] of EVA_UPGRADE_FINISH) {
+    if (r < p) return id;
+    r -= p;
+  }
+  return "stop";
+}
+
+// digit：止まっている偶数図柄。up：昇格するか。fast：高速オート（演出を省いて結果だけ）。
+// jitan：昇格しなかったときの時短回数。返り値：{ digit：最後の図柄, allRed, finish }
+async function evaPlayUpgrade(digit, up, fast, jitan) {
+  const allRed =
+    Math.random() <
+    (up ? EVA_UPGRADE_ALLRED_IF_UP : EVA_UPGRADE_ALLRED_IF_DOWN);
+  const finish = up ? evaUpgradeFinish() : "stop";
+  // 滑りは「奇数の 1 つ手前の偶数」で止まるので、手前が 9 になる 1 は使わない
+  const odds = finish === "slide" ? [3, 5, 9] : [1, 3, 5, 9];
+  const finalDigit = up
+    ? odds[Math.floor(Math.random() * odds.length)]
+    : [2, 4, 6, 8][Math.floor(Math.random() * 4)];
+  if (fast) {
+    evaUpgradeRows(finalDigit, up);
+    return { digit: finalDigit, allRed, finish };
+  }
+  const ov = document.getElementById("effect-overlay");
+  const screenEl = document.getElementById("screen");
+  const bg = allRed ? "fx-upg-allred" : "fx-upg-flame";
+  const setFx = (on, ...cls) => {
+    if (screenEl) screenEl.classList[on ? "add" : "remove"](...cls);
+  };
+  evaSetZoom(null);
+  evaShowText(ov, "");
+  // 白く光ってから炎の背景へ
+  setFx(true, "fx-upg-white");
+  await evaSleep(EVA_UPGRADE_FLASH_MS);
+  setFx(false, "fx-upg-white");
+  setFx(true, bg);
+  if (allRed) evaShowText(ov, [{ text: "オール赤", color: "red" }]);
+
+  // どこで止まるか：滑りは 1 つ手前の偶数、一撃は途中で切り上げる
+  const stopAt = finish === "slide" ? evaReelPrev(finalDigit) : finalDigit;
+  const dist = (((stopAt - digit) % 9) + 9) % 9;
+  const steps = 9 + dist; // 1 周以上流してから止める
+  const cut = finish === "ichigeki" ? Math.max(3, steps - 6) : steps;
+  let n = digit;
+  for (let s = 1; s <= cut; s++) {
+    n = evaReelNext(n);
+    evaUpgradeRows(n, false);
+    const left = steps - s;
+    await evaSleep(
+      EVA_UPGRADE_STEP_MS + Math.max(0, 5 - left) * EVA_UPGRADE_SLOW_MS,
+    );
+  }
+  if (finish === "slide") {
+    // 偶数で止まって、間を置いてからズルッと奇数へ
+    await evaSleep(EVA_UPGRADE_SLIDE_WAIT_MS);
+    evaShowText(ov, [{ text: "ズルッ", color: "gold" }]);
+    n = finalDigit;
+    evaUpgradeRows(n, false);
+    await evaSleep(EVA_UPGRADE_STEP_MS * 2);
+  } else if (finish === "lance") {
+    // 槍が貫いて、赤い画面に図柄が大きく出てから 3×3 に戻る
+    setFx(true, "fx-lance");
+    evaShowText(ov, [{ text: "槍", color: "red" }]);
+    await evaSleep(700);
+    setFx(false, "fx-lance");
+    setFx(true, "fx-upg-allred");
+    evaSetZoom("red");
+    n = finalDigit;
+    [1, 2, 3].forEach((i) => evaPlainSet(i, n, "digit odd"));
+    await evaSleep(EVA_UPGRADE_ZOOM_MS);
+    evaSetZoom(null);
+  } else if (finish === "ichigeki") {
+    // 流れている途中で白く光り、いきなり奇数図柄
+    setFx(true, "fx-upg-white");
+    await evaSleep(EVA_UPGRADE_FLASH_MS);
+    setFx(false, "fx-upg-white");
+    n = finalDigit;
+  }
+  setFx(false, "fx-upg-flame", "fx-upg-allred");
+  evaUpgradeRows(finalDigit, up);
+  if (up) {
+    const lamp = document.getElementById("lamp");
+    if (lamp) lamp.classList.add("lamp-active");
+    evaShowText(ov, [{ text: "確変GET", color: "gold" }]);
+    evaPlayNotice("impact", 1);
+    await evaSleep(EVA_UPGRADE_RESULT_MS);
+    if (lamp) lamp.classList.remove("lamp-active");
+  } else {
+    evaShowText(ov, `時短 ${jitan}回`);
+    await evaSleep(EVA_UPGRADE_RESULT_MS);
+  }
+  evaShowText(ov, "");
+  return { digit: finalDigit, allRed, finish };
 }
 
 // ハズレ図柄（数字 3 つ・ST 中）：リーチは左右を揃え、中は当り図柄の 1 コマ先（ズレ目）。

@@ -273,12 +273,24 @@ const EVA_LAYERS_N = [
         text: "SOUND ONLY\n約束の時は近い",
       },
       {
+        // ドックン予告は通常時・時短・ST とも青い炎と赤い炎の 2 種類（ユーザー指摘 2026-10-03）
         id: "dokkun",
-        name: "ドックン前兆",
+        name: "ドックン(青)",
         trust: 67.4,
         share: 2,
         text: "ドックン…",
-        fx: "fx-heartbeat",
+        fx: "fx-flame-blue",
+      },
+      {
+        // 通常時の赤の値は資料に無いので、IMPACT MODE の赤（1geki 84.8%）を仮に使う
+        // （青は通常 67.4%・IMPACT MODE 66.4% でほぼ同じ）
+        id: "dokkun-red",
+        name: "ドックン(赤)",
+        trust: 84.8,
+        share: 1,
+        text: "ドックン…",
+        color: "red",
+        fx: "fx-flame-red",
       },
       {
         id: "alert-max",
@@ -1919,10 +1931,11 @@ const EVA_LAYERS_S = [
       },
       {
         id: "dokkun",
-        name: "ドックン",
+        name: "ドックン(青)",
         trust: 66.4,
         share: 1,
         text: "ドックン",
+        fx: "fx-flame-blue", // 青い炎
       },
       {
         id: "dokkun-red",
@@ -1930,6 +1943,8 @@ const EVA_LAYERS_S = [
         trust: 84.8,
         share: 1,
         text: "ドックン",
+        color: "red",
+        fx: "fx-flame-red", // 赤いドックンは赤い炎
       },
       // 使徒襲来前兆は、出た使徒の即 SP へ発展する
       {

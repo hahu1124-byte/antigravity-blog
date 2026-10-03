@@ -638,6 +638,22 @@ function assertClose(label, actual, expected, tolerance) {
     if (!evaUseGrid()) throw new Error("待機に戻っても 1×1 のまま");
   `);
 
+  // 昇格演出：昇格なら必ず奇数（滑りは 1 以外）、昇格しないなら偶数。滑り・槍・一撃は昇格のときだけ
+  await run(`
+    currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; mode = "通常";
+    Math.random = makeRandomStrong(20261008);
+    const seen = {};
+    for (let i = 0; i < 2000; i++) {
+      const up = i % 2 === 0;
+      const r = await evaPlayUpgrade([2, 4, 6, 8][i % 4], up, i % 10 === 0, 100);
+      if (up ? r.digit % 2 !== 1 || r.digit === 7 : r.digit % 2 !== 0) throw new Error("昇格演出の最後の図柄が違う: " + JSON.stringify(r) + " up=" + up);
+      if (!up && r.finish !== "stop") throw new Error("昇格しないのに " + r.finish);
+      if (r.finish === "slide" && r.digit === 1) throw new Error("滑りで 1 に止まった");
+      seen[r.finish] = (seen[r.finish] || 0) + 1;
+    }
+    for (const f of ["stop", "slide", "lance", "ichigeki"]) if (!seen[f]) throw new Error("昇格の仕上げが出ない: " + f);
+  `);
+
   // 保留は番号で持つ：消化時に状態が予測と違えば、同じ番号を新しい状態の範囲で判定し直す
   await run(`
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs; currentRot = 0;
@@ -881,7 +897,12 @@ function assertClose(label, actual, expected, tolerance) {
         if (hit.win.length !== 1) throw new Error("当りの段が 1 つでない: " + JSON.stringify(hit));
         const hr = evaRowsOf(hit.grid)[hit.win[0]];
         if (!evaRowHit(hr) || hr[0] !== d || evaWinRows(hit.grid).join() !== hit.win.join()) throw new Error("当りの盤面が違う: " + JSON.stringify(hit));
-        if ((hit.win[0] === "top" && d === 4) || (hit.win[0] === "bot" && d === 2)) sureHits++;
+        // 上段 4・下段 2 は指定したときだけ（たまたまその段で揃えない。ユーザー指摘 2026-10-03）
+        if ((hit.win[0] === "top" && d === 4) || (hit.win[0] === "bot" && d === 2)) throw new Error("指定していないのに上段4・下段2 で当った: " + JSON.stringify(hit));
+      }
+      for (const [line, sd] of [["top", 4], ["bot", 2]]) {
+        const sure = evaBuildGrid({ tenpai: true, isHit: true, hitDigit: sd, line });
+        if (sure.win.join() === line) sureHits++;
       }
       for (const line of ["top", "bot"]) {
         const boso = evaBuildGrid({ tenpai: true, isHit: true, hitDigit: 3, boso: true, line });
@@ -1013,12 +1034,25 @@ function assertClose(label, actual, expected, tolerance) {
     currentMachine = "eva"; M = MACHINES.eva; SPECS = M.specs;
     mode = "通常"; lcdCount = 25; totalBall = 0; currentRot = 25;
     Math.random = () => 0.9;
+    document.getElementById("log").innerHTML = "";
     await M.resolveHit({ eff: { isRight: false, kind: "t3", upgrade: false }, hitDigit: 2 });
     if (currentRot !== 0 || totalBall !== 420 || mode !== "時短" || rRem !== 100) throw new Error("Eva normal hit failed");
+    // ヘソの偶数図柄の当りは必ず昇格演出を挟む（3R通常は昇格ならず）
+    if (!/昇格演出.*昇格ならず/.test(document.getElementById("log").innerHTML)) throw new Error("3R通常の偶数図柄で昇格演出が出ない");
 
     mode = "通常"; lcdCount = 30; totalBall = 0; currentRot = 30;
+    document.getElementById("log").innerHTML = "";
     await M.resolveHit({ eff: { isRight: false, kind: "k3", upgrade: true, reachId: "synchro" }, hitDigit: 4 });
     if (totalBall !== 420 || mode !== "ST" || rRem !== 163) throw new Error("Eva 3R kakuhen hit failed");
+    if (!/昇格演出.*[1359]図柄へ昇格/.test(document.getElementById("log").innerHTML)) throw new Error("3R確変の偶数図柄で昇格しない");
+
+    // 奇数図柄・暴走図柄の当りは昇格演出を挟まない
+    for (const eff of [{ isRight: false, kind: "k3", upgrade: false }, { isRight: false, kind: "k3", upgrade: false, bosoShown: true }]) {
+      mode = "通常"; lcdCount = 30; totalBall = 0; currentRot = 30;
+      document.getElementById("log").innerHTML = "";
+      await M.resolveHit({ eff, hitDigit: eff.bosoShown ? "1・3・5" : 3 });
+      if (/昇格演出/.test(document.getElementById("log").innerHTML)) throw new Error("奇数・暴走図柄の当りで昇格演出が出た");
+    }
 
     mode = "通常"; lcdCount = 40; totalBall = 0; currentRot = 40;
     await M.resolveHit({ eff: { isRight: false, kind: "r10", upgrade: false, reachId: "zenkaiten" }, hitDigit: 7 });

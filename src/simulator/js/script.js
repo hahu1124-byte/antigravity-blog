@@ -216,13 +216,32 @@ const MACHINES = {
       await new Promise((r) => setTimeout(r, 1000));
       const hitOv = document.getElementById("effect-overlay");
       if (hitOv) hitOv.style.display = "none";
-      if (prevMode === "通常" && needsUpgrade) {
-        let nextOdd = [1, 3, 5, 9][Math.floor(Math.random() * 4)];
-        addLog(`>> ${nextOdd}図柄へ昇格！！`);
-        document.getElementById("lamp").classList.add("lamp-active");
-        evaShowTriple(nextOdd, "digit odd");
-        await new Promise((r) => setTimeout(r, 800));
-        document.getElementById("lamp").classList.remove("lamp-active");
+      // ヘソの偶数図柄の当りは必ず昇格演出を挟む（奇数図柄・暴走図柄は挟まない。ユーザー方針 2026-10-03）。
+      // 3R確変なら奇数図柄へ昇格、3R通常なら偶数のまま時短
+      if (
+        !eff.isRight &&
+        !eff.bosoShown &&
+        typeof originalHit === "number" &&
+        originalHit % 2 === 0
+      ) {
+        const up = needsUpgrade || eff.kind === "k3";
+        const res = await evaPlayUpgrade(
+          originalHit,
+          up,
+          autoSpeed === "fast",
+          jitanCount,
+        );
+        const finishLabel = {
+          slide: "（滑り）",
+          lance: "（槍）",
+          ichigeki: "（一撃）",
+        };
+        addLog(
+          `>> 昇格演出${res.allRed ? "（オール赤）" : ""} → ` +
+            (up
+              ? `${res.digit}図柄へ昇格！！${finishLabel[res.finish] || ""}`
+              : "昇格ならず"),
+        );
       }
       if (isRightUpgrade) {
         const machineEl = document.getElementById("machine");
@@ -654,6 +673,22 @@ function holdElementOf(job) {
   return null;
 }
 
+// 保留の中心の、液晶の中での位置。消化した直後は残りの保留が詰まるアニメ（hold-shift）の最中で、
+// 見た目の位置（getBoundingClientRect）はまだ 1 つ前の枠にある。槍・立方体が 1 つずれた保留に
+// 出ていた（ユーザー指摘 2026-10-03）ので、アニメの影響を受けない並びの位置（offsetLeft/Top）で測る
+function holdCenterIn(holdEl, screen) {
+  if (!holdEl || !screen) return null;
+  let x = (holdEl.offsetWidth || 0) / 2;
+  let y = (holdEl.offsetHeight || 0) / 2;
+  let n = holdEl;
+  while (n && n !== screen) {
+    x += n.offsetLeft || 0;
+    y += n.offsetTop || 0;
+    n = n.offsetParent;
+  }
+  return n === screen ? { x, y } : null;
+}
+
 function playChangeStage(holdEl) {
   const screen = document.getElementById("screen");
   if (!screen) return;
@@ -675,11 +710,10 @@ function playChangeStage(holdEl) {
     screen.appendChild(stage);
   }
   // 変わる保留の真上に重ねる（液晶の中での位置に直す）
-  if (holdEl && holdEl.getBoundingClientRect && screen.getBoundingClientRect) {
-    const h = holdEl.getBoundingClientRect();
-    const s = screen.getBoundingClientRect();
-    stage.style.left = `${h.left - s.left + h.width / 2}px`;
-    stage.style.top = `${h.top - s.top + h.height / 2}px`;
+  const c = holdCenterIn(holdEl, screen);
+  if (c) {
+    stage.style.left = `${c.x}px`;
+    stage.style.top = `${c.y}px`;
   }
   stage.classList.remove("on");
   void stage.offsetWidth;
@@ -708,11 +742,10 @@ function playLanceStage(holdEl) {
     screen.appendChild(stage);
   }
   // 刺さる位置（液晶の中での保留の中心）を style.css の --ls-x / --ls-y に渡す
-  if (holdEl && holdEl.getBoundingClientRect && screen.getBoundingClientRect) {
-    const h = holdEl.getBoundingClientRect();
-    const s = screen.getBoundingClientRect();
-    stage.style.setProperty("--ls-x", `${h.left - s.left + h.width / 2}px`);
-    stage.style.setProperty("--ls-y", `${h.top - s.top + h.height / 2}px`);
+  const c = holdCenterIn(holdEl, screen);
+  if (c) {
+    stage.style.setProperty("--ls-x", `${c.x}px`);
+    stage.style.setProperty("--ls-y", `${c.y}px`);
   }
   // 続けて出たときもアニメを最初からにする
   stage.classList.remove("on");
@@ -767,6 +800,29 @@ function animateHoldShift(from) {
   setTimeout(() => {
     if (animateHoldShift.token === token) area.classList.remove("hold-shift");
   }, HOLD_SHIFT_MS);
+}
+
+// 新しく入った保留を、詰まるアニメの後にばらばらの間で 1 つずつ見せる
+const HOLD_IN_MIN_MS = 250; // 詰まり終わってから最初の入賞までの最短
+const HOLD_IN_SPREAD_MS = 900; // そこからのばらつき
+const HOLD_IN_GAP_MS = 350; // 2 つ目以降の間隔の最短
+const HOLD_IN_POP_MS = 300; // 入賞したときの膨らむアニメ（style.css の .heso-in）
+function delayHoldEntry(jobs) {
+  let at = HOLD_SHIFT_MS + HOLD_IN_MIN_MS + Math.random() * HOLD_IN_SPREAD_MS;
+  for (const job of jobs) {
+    job.pendingIn = true;
+    setTimeout(() => {
+      if (!job.pendingIn) return; // 先に消化された
+      job.pendingIn = false;
+      job.justIn = true;
+      updateHesoUI();
+      setTimeout(() => {
+        job.justIn = false;
+        updateHesoUI();
+      }, HOLD_IN_POP_MS);
+    }, at);
+    at += HOLD_IN_GAP_MS + Math.random() * HOLD_IN_SPREAD_MS;
+  }
 }
 
 // SP リーチに発展したら当該保留を消す（次の保留を消化する流れを見せる）
@@ -853,7 +909,16 @@ async function startProcess() {
     activeJob.currentView = activeJob.holdType;
   // 先読みの変化は前から居た保留だけ（入賞した瞬間には変わらない）
   if (currentMachine === "eva") advanceStockHolds(autoSpeed !== "fast");
+  if (activeJob) activeJob.pendingIn = false;
+  const stockBefore = new Set([...leftStock, ...rightStock]);
   refillStock(from);
+  // 消化と同時に入るとベルトコンベアのように見えるので、詰まってから少し遅れて入賞させる
+  // （抽選と先読みの割り振りはここで済ませ、見た目だけ遅らせる。ユーザー方針 2026-10-03）
+  if (currentMachine === "eva" && autoSpeed !== "fast") {
+    delayHoldEntry(
+      [...leftStock, ...rightStock].filter((job) => !stockBefore.has(job)),
+    );
+  }
   updateUI();
   let eff = activeJob;
   totalRot++;
@@ -1241,9 +1306,12 @@ function paintHold(el, job, isCurrent) {
     el.innerHTML = HOLD_INNER;
     el._built = true;
   }
+  // 入賞を見せる前の保留（delayHoldEntry）は、まだ空の枠として描く
+  if (job && job.pendingIn && !isCurrent) job = null;
   el.className = `heso-ball ${isCurrent ? "heso-current" : ""}`;
   // 保留が無い枠は出さない（通常時・時短中・ST 中とも）
   if (!job) el.classList.add("heso-empty");
+  else if (job.justIn) el.classList.add("heso-in");
   if (job) {
     el.classList.add("heso-" + job.currentView);
     if (job.holdAnim) el.classList.add("heso-anim-" + job.holdAnim);
