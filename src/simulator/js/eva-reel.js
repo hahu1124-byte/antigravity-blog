@@ -1501,6 +1501,8 @@ async function evaPlayUpgrade(digit, up, fast, jitan) {
   evaSpark(null);
   evaSetBg(null);
   evaShowText(ov, "");
+  // 昇格演出の間は画面下の保留を出さない（style.css の .upgrading。ユーザー方針 2026-10-04）
+  setFx(true, "upgrading");
   // 白く光ってから炎の背景へ
   setFx(true, "fx-upg-white");
   await evaSleep(EVA_UPGRADE_FLASH_MS);
@@ -1589,6 +1591,7 @@ async function evaPlayUpgrade(digit, up, fast, jitan) {
   // 昇格しなかったときは文字を出さずにそのまま時短へ（「時短 100回」の表示は要らない。ユーザー方針 2026-10-04）
   await evaSleep(EVA_UPGRADE_RESULT_MS - EVA_UPGRADE_ALONE_MS);
   if (lamp) lamp.classList.remove("lamp-active");
+  setFx(false, "upgrading");
   evaShowText(ov, "");
   return { digit: finalDigit, allRed, finish };
 }

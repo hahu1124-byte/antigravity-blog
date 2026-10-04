@@ -2889,11 +2889,17 @@ body.theme-eva .heso-overlay.hold-shift .heso-ball.heso-current > .hx-ring {
     rgba(0, 0, 0, 0.6);
 }
 
-/* 次回予告の画面（z-index 9）が出ている間も、保留の数・保留・回転数は手前に残す（ユーザー方針 2026-10-04） */
+/* 次回予告の画面（z-index 9）が出ている間も、左上の保留の数と左下の回転数は手前に残す。
+   画面下の保留は出さない（ユーザー方針 2026-10-04） */
 .screen.movie-next #stock-count-display,
-.screen.movie-next .st-remain,
-.screen.movie-next .heso-overlay {
+.screen.movie-next .st-remain {
   z-index: 10;
+}
+
+/* 次回予告の画面・昇格演出の間は画面下の保留を出さない（eva-reel.js の evaPlayUpgrade が .upgrading） */
+.screen.movie-next .heso-overlay,
+.screen.upgrading .heso-overlay {
+  visibility: hidden;
 }
 
 /* SP リーチ以上に発展したら、リーチの間は保留の表示を隠す（通常時・時短・ST 共通。script.js の onSp） */
