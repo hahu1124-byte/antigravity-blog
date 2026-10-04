@@ -407,6 +407,11 @@ function evaBuildTables(spec, rot) {
           // ハズレは、信頼度 10%未満ならどの回転にも（リーチなしでハズレ、次の回転へ）、
           // 10%以上は SP リーチのハズレだけ（強い予告がリーチなしで終わらない。2026-10-03 方針）
           const b = a * evaMissFactor(t, P);
+          // リーチなしで当る演出（ST の新次回予告）：当りの「リーチなし」の行にだけ置く（濃厚なのでハズレ用は無し）
+          if (spec.noReachIds && spec.noReachIds.includes(s.id)) {
+            hit[noneR][i] = aR[noneR] > 0 ? Math.min(1, a / aR[noneR]) : 0;
+            return;
+          }
           if (ids) {
             const rows = idsToRows(ids);
             const cap = sumOver(aR, rows);
@@ -594,6 +599,15 @@ const EVA_SPEC_N = {
   spReaches: EVA_SP_REACHES,
   plan: EVA_PLAN_N,
 };
+// ST の新次回予告は出ただけで当り（タイトルの後いきなり揃う）なので、リーチなしの当りにする
+// （ユーザー方針 2026-10-04）。表では当りの「リーチなし」の行にだけ置き、その分リーチの当りの合計を縮める
+// （リーチやリーチに付く演出の信頼度は変わらない。抽選の後で外すと、外した分だけ信頼度が下がった）
+const EVA_ST_NEXT_IDS = ["next-preview", "next-last"];
+const EVA_ST_NEXT_SHARE =
+  EVA_ST_NEXT_IDS.reduce(
+    (a, id) => a + ((EVA_PLAN_S.hit.midway || {})[id] || 0),
+    0,
+  ) / 100;
 // ST も通常時と同じ決まり（EVA_PLAN_S。値は暫定）
 const EVA_SPEC_S = {
   pHit: EVA_S_HIT / EVA_BIT,
@@ -603,6 +617,8 @@ const EVA_SPEC_S = {
   spReaches: EVA_ST_SP,
   preMissReaches: ["tenpai"],
   plan: EVA_PLAN_S,
+  suddenShare: EVA_SUDDEN_SHARE + EVA_ST_NEXT_SHARE,
+  noReachIds: EVA_ST_NEXT_IDS,
 };
 // 時短（チャンスタイム）中はストーリーリーチ（vsアルミサエル・vsサハクィエル）が大当り濃厚
 // （なな徹 7335）。通常時の表をもとに、その 2 本の信頼度だけ 100% にした表を使う（ハズレ用の表に出ない）
@@ -630,7 +646,11 @@ const EVA_T_S = evaBuildTables(EVA_SPEC_S, 0);
 const EVA_ST_FAST_FROM = 101; // 消化する前の残り回転がこれ以上なら高速区間
 const EVA_ST_INSTANT_SHARE = 0.05; // 無演出即当り（当りのうち）
 const EVA_T_S_FAST = evaBuildTables(
-  { ...EVA_SPEC_S, suddenShare: EVA_SUDDEN_SHARE + EVA_ST_INSTANT_SHARE },
+  {
+    ...EVA_SPEC_S,
+    suddenShare:
+      EVA_SUDDEN_SHARE + EVA_ST_INSTANT_SHARE + EVA_ST_NEXT_SHARE,
+  },
   0,
 );
 
