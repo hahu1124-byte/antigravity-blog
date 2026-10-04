@@ -709,10 +709,12 @@ const EVA_HANGAR4_RATE = 0.2;
 // （見た目で区別できるように）。シフト変化は当該だけ。
 const EVA_HOLD_CHANGE = ["blue", "green", "red", "rainbow"];
 const EVA_HOLD_STOCK_RATE = 0.65; // 先読みで変わる割合（残りは当該で変わる）
+// ST 中は先読みで変わるのは稀で、消化中（当該）に変わるのがほとんど（ユーザー指摘 2026-10-04）
+const EVA_HOLD_STOCK_RATE_ST = 0.1;
 const EVA_HOLD_TWO_STEP_RATE = 0.6; // 通常の赤・虹のうち青か緑を挟む割合
 
 // 返り値：{ seq：[{ view, fx: "spin"|"lance" }]（順に適用）, when："stock"|"current"|null, view：入賞時の見た目 }
-function evaHoldPlan(holdType, holdId, shift) {
+function evaHoldPlan(holdType, holdId, shift, regime) {
   if (!EVA_HOLD_CHANGE.includes(holdType)) {
     return { seq: [], when: null, view: holdType };
   }
@@ -726,8 +728,11 @@ function evaHoldPlan(holdType, holdId, shift) {
     seq.push({ view: Math.random() < 0.5 ? "blue" : "green", fx: "spin" });
   }
   seq.push({ view: holdType, fx: lance ? "lance" : "spin" });
-  const when =
-    shift || Math.random() >= EVA_HOLD_STOCK_RATE ? "current" : "stock";
+  const stockRate =
+    regime === "s" || regime === "sf"
+      ? EVA_HOLD_STOCK_RATE_ST
+      : EVA_HOLD_STOCK_RATE;
+  const when = shift || Math.random() >= stockRate ? "current" : "stock";
   return { seq, when, view: "none" };
 }
 
@@ -1029,7 +1034,7 @@ function createEvaJob(isRight, regime, opts = {}) {
   }
 
   // 保留の色が変わる流れ（見せ方だけ。当否と holdType はもう決まっている）
-  const hold = evaHoldPlan(holdType, holdId, shift);
+  const hold = evaHoldPlan(holdType, holdId, shift, regime);
   // 当該で変わる保留（シフト変化・当該変化）は保留に居る間は無地なので先読みに数えない
   const preTrust = Math.max(leadTrust, hold.when === "current" ? 0 : holdTrust);
 

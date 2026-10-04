@@ -636,8 +636,11 @@ function carryHold(oldJob, newJob) {
 const HOLD_ANIM_MS = 650; // 横回転・槍のアニメの長さ
 const HOLD_STOCK_STEP_RATE = 0.5; // 先読み：変動が始まるたびに 1 段進む確率
 
-// 保留の色を 1 段進める。anim：横回転か槍のアニメを付ける
-function stepHold(job, anim) {
+// 保留の色を 1 段進める。anim：横回転か槍のアニメを付ける。
+// afterShift：ST 中、保留が詰まり終わってから変える。横回転の変化は箱に「変化」の文字をしばらく見せてから
+// 立方体が回る（詰まると同時に立方体が出て、すぐ色が変わって見えた。ユーザー指摘 2026-10-04）。
+// 段は呼んだ時点で進めておく（待っている間に当該になっても finishHold が同じ段をもう一度出さない）
+function stepHold(job, anim, afterShift) {
   const st = job.holdSeq && job.holdSeq[job.holdStep];
   if (!st) return false;
   job.holdStep++;
@@ -659,15 +662,29 @@ function stepHold(job, anim) {
   };
   // 槍の変化は液晶全体の槍演出を出し、槍が刺さった瞬間に色を変える（実機の録画と同じ流れ）。
   // ST 中の横回転の変化は、液晶いっぱいに「変化」の立方体が回ってから色を変える
-  if (anim && st.fx === "lance") {
-    playLanceStage(holdElementOf(job));
-    setTimeout(apply, HOLD_LANCE_HIT_MS);
-  } else if (anim && st.fx === "spin" && useChangeStage()) {
-    playChangeStage(holdElementOf(job));
-    setTimeout(apply, HOLD_CHANGE_HIT_MS);
-  } else {
-    apply();
+  const run = () => {
+    if (anim && st.fx === "lance") {
+      playLanceStage(holdElementOf(job));
+      setTimeout(apply, HOLD_LANCE_HIT_MS);
+    } else if (anim && st.fx === "spin" && useChangeStage()) {
+      playChangeStage(holdElementOf(job));
+      setTimeout(apply, HOLD_CHANGE_HIT_MS);
+    } else {
+      apply();
+    }
+  };
+  if (!afterShift) {
+    run();
+    return true;
   }
+  const spin = st.fx === "spin";
+  setTimeout(() => {
+    if (spin && job.currentView !== "gone") {
+      job.holdAnim = "wait"; // 箱に「変化」の文字（色は前のまま。style.css の .heso-anim-wait）
+      updateHesoUI();
+    }
+    setTimeout(run, spin ? HOLD_CHANGE_WAIT_MS : 0);
+  }, HOLD_SHIFT_MS);
   return true;
 }
 
@@ -678,9 +695,15 @@ function holdStepMs(st) {
   return HOLD_ANIM_MS;
 }
 
+// afterShift の段が始まるまでの待ち（保留が詰まる時間＋「変化」の文字を見せる時間）
+function holdShiftLeadMs(st) {
+  return HOLD_SHIFT_MS + (st.fx === "spin" ? HOLD_CHANGE_WAIT_MS : 0);
+}
+
 // ST 中の保留変化：変わる保留の位置に「変化」の立方体が出て回る（実機の録画どおり）
 const HOLD_CHANGE_STAGE_MS = 1000; // 演出全体の長さ（style.css の .change-stage と合わせる）
 const HOLD_CHANGE_HIT_MS = 800; // 立方体が回りきって保留の色が変わるまで
+const HOLD_CHANGE_WAIT_MS = 700; // 立方体の前に箱へ「変化」の文字を見せる時間
 function useChangeStage() {
   return currentMachine === "eva" && mode === "ST";
 }
@@ -751,7 +774,8 @@ function playChangeStage(holdEl) {
 // 液晶全体のロンギヌスの槍演出：炎の中を大きな槍が落ちてきて保留に刺さり、閃光が走る
 const HOLD_LANCE_STAGE_MS = 1500; // 演出全体の長さ（style.css の .lance-stage と合わせる）
 const HOLD_LANCE_HIT_MS = 1000; // 槍が刺さって保留の色が変わるまで
-// holdEl：変わる保留。槍はその保留へ右斜め上から落ちて刺さる（無ければ保留の並びの真ん中あたり）
+const HOLD_LANCE_ANGLE = 10; // 槍の傾き（度。style.css の --ls-a と合わせる）
+// holdEl：変わる保留。槍は図柄の真ん中の高さから、その保留へほぼ真上から伸びて刺さる（無ければ保留の並びの真ん中あたり）
 function playLanceStage(holdEl) {
   const screen = document.getElementById("screen");
   if (!screen) return;
@@ -767,11 +791,17 @@ function playLanceStage(holdEl) {
       '<div class="ls-flash"></div><div class="ls-text">ロンギヌスの槍</div>';
     screen.appendChild(stage);
   }
-  // 刺さる位置（液晶の中での保留の中心）を style.css の --ls-x / --ls-y に渡す
+  // 刺さる位置（液晶の中での保留の中心）を style.css の --ls-x / --ls-y に渡す。
+  // --ls-d：穂先が出てくる図柄の真ん中の高さ（液晶の上下の真ん中）から保留までの、柄の向きの長さ
   const c = holdCenterIn(holdEl, screen);
   if (c) {
     stage.style.setProperty("--ls-x", `${c.x}px`);
     stage.style.setProperty("--ls-y", `${c.y}px`);
+    const rise = Math.max(0, c.y - screen.clientHeight / 2);
+    stage.style.setProperty(
+      "--ls-d",
+      `${Math.round(rise / Math.cos((HOLD_LANCE_ANGLE * Math.PI) / 180))}px`,
+    );
   }
   // 続けて出たときもアニメを最初からにする
   stage.classList.remove("on");
@@ -795,11 +825,16 @@ function finishHold(job, instant) {
     updateHesoUI();
     return;
   }
-  // 前の段の演出（横回転・変化の立方体・槍）が終わってから次の段を出す
+  // 前の段の演出（横回転・変化の立方体・槍）が終わってから次の段を出す。
+  // ST 中は最初の段を保留が当該の位置へ詰まり終わってから（stepHold の afterShift）
+  const afterShift = useChangeStage();
+  const first = job.holdStep;
   let at = 0;
-  for (let i = job.holdStep; i < job.holdSeq.length; i++) {
-    setTimeout(() => stepHold(job, true), at);
-    at += holdStepMs(job.holdSeq[i]);
+  for (let i = first; i < job.holdSeq.length; i++) {
+    const lead = afterShift && i === first;
+    setTimeout(() => stepHold(job, true, lead), at);
+    at +=
+      holdStepMs(job.holdSeq[i]) + (lead ? holdShiftLeadMs(job.holdSeq[i]) : 0);
   }
 }
 
@@ -810,7 +845,9 @@ function advanceStockHolds(anim) {
   for (const job of [...left, ...rightStock]) {
     if (job.holdWhen !== "stock" || !job.holdSeq) continue;
     if (job.holdStep >= job.holdSeq.length) continue;
-    if (Math.random() < HOLD_STOCK_STEP_RATE) stepHold(job, anim);
+    // ST 中は詰まり終わってから変える（stepHold の afterShift）
+    if (Math.random() < HOLD_STOCK_STEP_RATE)
+      stepHold(job, anim, anim && useChangeStage());
   }
 }
 
