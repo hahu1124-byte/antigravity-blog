@@ -712,8 +712,12 @@ const EVA_HOLD_STOCK_RATE = 0.65; // 先読みで変わる割合（残りは当�
 // ST 中は先読みで変わるのは稀で、消化中（当該）に変わるのがほとんど（ユーザー指摘 2026-10-04）
 const EVA_HOLD_STOCK_RATE_ST = 0.1;
 const EVA_HOLD_TWO_STEP_RATE = 0.6; // 通常の赤・虹のうち青か緑を挟む割合
+// ST の色の保留（シフト変化を除く）のうち、入るときの見た目をノイズ保留にする割合。変化してもノイズの模様のまま
+// 色が付く（見せ方だけ。色ごとの信頼度は変わらない。ユーザー方針 2026-10-04）
+const EVA_HOLD_NOISE_RATE_ST = 0.1;
 
-// 返り値：{ seq：[{ view, fx: "spin"|"lance" }]（順に適用）, when："stock"|"current"|null, view：入賞時の見た目 }。
+// 返り値：{ seq：[{ view, fx: "spin"|"lance" }]（順に適用）, when："stock"|"current"|null, view：入賞時の見た目,
+//   noise：ノイズ保留の見た目から変わる（ST） }。
 // ST 中は必ず「変化」（立方体の横回転）を挟む（ユーザー方針 2026-10-04）：
 //   通常保留 → 変化 → 青〜虹（1 段）／通常保留 → 変化 → 青か緑 → 槍 → 赤・虹（2 段。赤・虹の EVA_HOLD_TWO_STEP_RATE）。
 //   槍でいきなり赤・虹になる流れは ST には無い
@@ -738,7 +742,8 @@ function evaHoldPlan(holdType, holdId, shift, regime) {
   });
   const stockRate = st ? EVA_HOLD_STOCK_RATE_ST : EVA_HOLD_STOCK_RATE;
   const when = shift || Math.random() >= stockRate ? "current" : "stock";
-  return { seq, when, view: "none" };
+  const noise = st && !shift && Math.random() < EVA_HOLD_NOISE_RATE_ST;
+  return { seq, when, view: noise ? "odd-noise" : "none", noise };
 }
 
 // デバッグ：指定した演出（force = { key：層の key, id：state.id }）を今の表から探す。
@@ -1136,6 +1141,7 @@ function createEvaJob(isRight, regime, opts = {}) {
 
   // 保留の色が変わる流れ（見せ方だけ。当否と holdType はもう決まっている）
   const hold = evaHoldPlan(holdType, holdId, shift, regime);
+  if (hold.noise) name.push("ノイズ保留から変化");
   // 当該で変わる保留（シフト変化・当該変化）は保留に居る間は無地なので先読みに数えない
   const preTrust = Math.max(leadTrust, hold.when === "current" ? 0 : holdTrust);
 
@@ -1195,6 +1201,7 @@ function createEvaJob(isRight, regime, opts = {}) {
     currentView: hold.view,
     holdSeq: hold.seq,
     holdWhen: hold.when,
+    holdNoise: !!hold.noise, // ノイズ保留の見た目から変わり、色が付いてもノイズの模様のまま（style.css の .heso-noisy）
     holdStep: 0,
     leads,
     leadPlan: null,

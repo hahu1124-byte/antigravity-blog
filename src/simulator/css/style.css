@@ -1262,6 +1262,29 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-odd-noise > .hx-text {
   animation: hx-noise 0.3s steps(2) infinite;
 }
 
+/* ノイズ保留から変わった保留（script.js の holdNoise）：色の地の上にノイズのます目と走査線を半透明で重ねる。
+   ちらつき（hx-mosaic の filter）は付けない（横回転・槍の 3D が平らになるので） */
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-noisy {
+  --hx-face:
+    linear-gradient(
+      to bottom,
+      var(--hx-band) 0 17%,
+      transparent 17% 83%,
+      var(--hx-band) 83% 100%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.45) 0 1px,
+      transparent 1px 2px
+    ),
+    repeating-conic-gradient(
+        rgba(255, 255, 255, 0.28) 0 25%,
+        rgba(0, 0, 0, 0.32) 0 50%
+      )
+      0 0 / 3px 3px,
+    var(--hx-base);
+}
+
 @keyframes hx-noise {
   50% {
     opacity: 0.35;
