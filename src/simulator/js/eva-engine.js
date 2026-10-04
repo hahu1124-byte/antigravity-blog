@@ -1071,6 +1071,12 @@ function createEvaJob(isRight, regime, opts = {}) {
     name,
     // 液晶に出す信頼度：出た組合せの事後確率（表示と実際の当りやすさが一致する）
     trust: acc.any ? f * 100 : 0,
+    // 出た演出の資料の信頼度の最大（ログの「信頼度 50% 以上」はこちらで判断して出す。組合せの事後確率は
+    // 演出が多く重なるハズレで数 % 以下まで下がり、50% 以上のハズレがログにほぼ出なくなっていた。ユーザー指摘 2026-10-04）
+    maxTrust: Math.max(
+      0,
+      ...shown.map(({ state }) => Math.min(100, state.trust)),
+    ),
     sure,
     instant777, // ST の高速区間の無演出即当り（eva-reel.js で 7 を左から順に止める）
     effects: shown.map(({ state, no }) => ({
