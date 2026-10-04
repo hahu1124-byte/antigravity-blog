@@ -142,6 +142,12 @@ function evaWinRows(grid) {
   return EVA_LINE_KEYS.filter((k) => evaRowHit(rows[k]) || evaIsBoso(rows[k]));
 }
 
+// キャラ連続の仮停止（擬似連のズレ目）と同じ形：同じ数字が 3 列とも見えている（ラインにはそろっていない）。
+// キャラ連続でしか出ない形なので、通常時・時短中のふだんのハズレ（リーチなし）では止めない（ユーザー指摘 2026-10-04）
+function evaLooksLikeCharaStop(grid) {
+  return EVA_STRIP_UP.some((n) => grid.every((cells) => cells.includes(n)));
+}
+
 function evaPickLine() {
   const r = Math.random();
   return r < 0.35 ? "top" : r < 0.65 ? "mid" : "bot";
@@ -222,7 +228,9 @@ function evaBuildGrid(spec) {
     }
     const reachOk = evaReachLines(grid).join() === reach.join();
     const winOk = evaWinRows(grid).join() === win.join();
-    if (reachOk && winOk) {
+    // リーチなしのハズレは、キャラ連続の仮停止と同じ形（3 列とも同じ数字が見えている）で止めない
+    const pseudoOk = isHit || tenpai || !evaLooksLikeCharaStop(grid);
+    if (reachOk && winOk && pseudoOk) {
       return { grid, cpos, reach, win, boso: !!(isHit && spec.boso) };
     }
   }
