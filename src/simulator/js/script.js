@@ -1585,7 +1585,8 @@ function buildDebugEffectList() {
   sel.innerHTML = html;
 }
 
-// 選んだ演出で次の変動を作る。当否は選択欄（抽選どおり・当り・ハズレ）。今の状態で出せない演出はログで知らせる
+// 選んだ演出で次の変動を作る。当否は選択欄（信頼度どおり＝その演出の資料の信頼度で引く・当り・ハズレ）。
+// 今の状態で出せない演出はログで知らせる
 function debugEffectJob(job) {
   const sel = document.getElementById("dbg-effect");
   const hitSel = document.getElementById("dbg-effect-hit");

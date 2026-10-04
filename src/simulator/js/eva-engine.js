@@ -757,6 +757,25 @@ function evaFindForced(T, force) {
   return { L, si, canHit: can(R.hit, L.hit), canMiss: can(R.miss, L.miss) };
 }
 
+// 指定した演出が出た回の当りやすさ（当り用・ハズレ用の表での出現率から。check-b.cjs の「出た回」と同じ数え方）
+function evaForcedHitRate(T, found) {
+  const R = T.reach;
+  let a = 0;
+  let b = 0;
+  if (found.L === R) {
+    a = R.hit[found.si];
+    b = R.miss[found.si];
+  } else {
+    R.states.forEach((_, r) => {
+      a += R.hit[r] * found.L.hit[r][found.si];
+      b += R.miss[r] * found.L.miss[r][found.si];
+    });
+  }
+  const H = T.pHit * a;
+  const M = (1 - T.pHit) * b;
+  return H + M > 0 ? H / (H + M) : 0;
+}
+
 // 指定した演出が、決まった当否の表で出られるリーチの番号（evaDrawEffects の plan）
 function evaForcePlan(T, found, isHit) {
   const R = T.reach;
@@ -874,6 +893,10 @@ function createEvaJob(isRight, regime, opts = {}) {
   let forceHit = opts.forceHit;
   if (found && !found.canMiss) forceHit = true;
   else if (found && !found.canHit) forceHit = false;
+  // デバッグで演出を指定して当否を「信頼度どおり」にしたときは、その演出が出た回の当りやすさ（資料の信頼度）で
+  // 当否を引く。ふだんの 1/319.7 で引いてから演出を乗せると、赤保留でもほとんど当たらない（ユーザー方針 2026-10-04）
+  else if (found && forceHit === undefined && opts.lotNo === undefined)
+    forceHit = Math.random() < evaForcedHitRate(T, found);
   const lotNo =
     opts.lotNo !== undefined
       ? opts.lotNo
