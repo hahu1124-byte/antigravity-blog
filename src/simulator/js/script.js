@@ -921,13 +921,14 @@ function holdKeepLeft(job) {
   if (!job || !job.holdChangedAt) return 0;
   return Math.max(0, job.holdChangedAt + HOLD_KEEP_MS - Date.now());
 }
-function vanishCurrentHold(job) {
+// now：待ちを済ませた後の呼び出し（もう待たずに消す。待ち直すと、すぐ呼ぶ setTimeout の試験で止まらなくなる）
+function vanishCurrentHold(job, now) {
   if (!job || activeJob !== job) return;
   if (job.holdSeq) job.holdStep = job.holdSeq.length; // 残りの変化は打ち切る
-  // 変わったばかりなら 0.7 秒たつまで待ってから消す（待っている間に槍の色が付いたら、そこからまた 0.7 秒）
-  const wait = holdKeepLeft(job);
+  // 変わったばかりなら 0.7 秒たつまで待ってから消す
+  const wait = now ? 0 : holdKeepLeft(job);
   if (wait > 0) {
-    setTimeout(() => vanishCurrentHold(job), wait);
+    setTimeout(() => vanishCurrentHold(job, true), wait);
     return;
   }
   job.holdAnim = null;

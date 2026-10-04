@@ -752,7 +752,7 @@ function evaFlameSet(screen, color) {
 const EVA_FLAME_OFF_MS = 500;
 function evaFlameOffAfterReach() {
   const screen = document.getElementById("screen");
-  if (!screen || !screen.classList) return;
+  if (!screen || !screen.classList || !screen.classList.contains) return;
   if (
     !screen.classList.contains("fx-flame-blue") &&
     !screen.classList.contains("fx-flame-red")
