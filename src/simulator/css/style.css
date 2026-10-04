@@ -191,27 +191,26 @@ body.light-mode .machine {
   text-shadow: 0 0 20px #4444ff;
 }
 
-/* EVA 通常時・時短中：3×3 の図柄（列ごとに 3 段）。図柄の枠は付けず、ブランクとの間を詰める
-   （ユーザー指摘 2026-10-03）。段の高さと間は --cell-h / --cell-gap で、スクロール・図柄拡大も同じ値を使う */
+/* EVA 通常時・時短中：3×3 の図柄（列ごとに 3 段）。数字の段（--cell-h）は大きく、間のブランクの段（--blank-h）は
+   小さくして、数字どうしを昇格演出の帯くらいに詰める（ユーザー方針 2026-10-04）。
+   数字が真ん中の列とブランクが真ん中の列で、上段・中段・下段の中心はどちらも 0・±(数字＋ブランク)/2 にそろう
+   （そのぶん数字が少しずれて見える）。槍の高さ・昇格演出の帯・図柄拡大も同じ値を使う */
 .digit-container {
-  --cell-h: 62px;
+  --cell-h: 76px;
+  --blank-h: 18px;
   --cell-gap: 0px;
-  --cell-peek: 20px; /* 窓の上下に少しだけ見える前後の段の高さ */
-  --grid-h: calc(
-    var(--cell-h) * 3 + var(--cell-gap) * 2 + var(--cell-peek) * 2
-  );
+  --grid-h: 244px;
 }
 
-/* 列は 5 段（はみ出す段・上段・中段・下段・はみ出す段）を並べ、3 段＋上下の少しだけを窓から見せる。
+/* 列は 7 段（はみ出す段 2 つずつ・上段・中段・下段）を並べ、窓から見せる。
    中身が窓より高いので justify-content: center で上下に同じだけはみ出させる */
 .digit.grid-col {
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: var(--cell-gap);
-  /* 列の幅は 72px（112px では字が小さいぶん間があきすぎてスカスカに見えた。ST の大きい数字と同じくらいの
-     詰まり具合に。ユーザー方針 2026-10-04） */
-  width: min(72px, 31%);
+  /* 列の幅（112px では字が小さいぶん間があきすぎてスカスカに見えた。ユーザー方針 2026-10-04） */
+  width: min(84px, 31%);
   height: var(--grid-h);
   overflow: hidden;
   font-size: clamp(2.4rem, 10vw, 3.8rem);
@@ -240,11 +239,238 @@ body.light-mode .machine {
   opacity: 0.55;
 }
 
-/* ブランクの図柄（数字と数字の間の ◆） */
+/* ブランクの図柄（数字と数字の間の小さい ◆） */
 .digit.grid-col .cell.blank {
-  font-size: 1rem;
+  height: var(--blank-h);
+  font-size: 0.75rem;
   color: #4a6cff;
-  text-shadow: 0 0 8px #4a6cff;
+  text-shadow: 0 0 6px #4a6cff;
+}
+
+/* EVA の図柄のカード（3×3 の数字・図柄拡大）：図柄一覧の画像に寄せる（2026-10-04 ユーザー依頼。前の「枠を付けない」方針を置き換え）。
+   角を欠いた金属の枠（::before）・中の絵（::after：背景・人物の髪・顔・服・下の「EVANGELION」の帯）・
+   右下に斜体の数字。eva-reel.js が .zcard と data-n（色）を付ける。中身の DOM は数字だけ。
+   奇数は橙の枠に赤い数字、2・6 は青、4・8 は紫、時短・ST の 7 は金 */
+body.theme-eva .digit-container .zcard {
+  --zg-cut: polygon(
+    9% 0,
+    91% 0,
+    100% 9%,
+    100% 91%,
+    91% 100%,
+    9% 100%,
+    0 91%,
+    0 9%
+  );
+  --zg-frame: linear-gradient(
+    160deg,
+    #fff2b0 0%,
+    #ffb020 35%,
+    #ff7a00 60%,
+    #8a3a00 100%
+  );
+  --zg-bg: radial-gradient(
+    circle at 45% 40%,
+    #ff8a2a 0%,
+    #b42000 55%,
+    #3a0500 100%
+  );
+  --zg-ink: #ff2a1a;
+  --zg-hair: #2a2a3a;
+  --zg-suit: #2a3a6a;
+  --zg-skin: #f6d6bf;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0 7% 13% 0;
+  font-family: "Arial Black", "Arial", sans-serif;
+  font-size: 2.3rem;
+  line-height: 1;
+  font-style: italic;
+  font-weight: 900;
+  color: var(--zg-ink);
+  -webkit-text-stroke: 3px #fff;
+  paint-order: stroke fill;
+  text-shadow: 2px 2px 0 #000;
+}
+
+/* 枠 */
+body.theme-eva .digit-container .zcard::before,
+body.theme-eva .digit-container .zcard::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  clip-path: var(--zg-cut);
+  animation: none;
+  rotate: none;
+  filter: none;
+}
+
+body.theme-eva .digit-container .zcard::before {
+  inset: 2px 0;
+  background: var(--zg-frame);
+}
+
+/* 中の絵：上から 帯・顔・髪・服・背景 */
+body.theme-eva .digit-container .zcard::after {
+  inset: 6px 4px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'%3E%3Crect width='100' height='14' fill='%23101014'/%3E%3Ctext x='38' y='10.5' font-size='9' font-family='Arial' font-weight='700' fill='%23d8dce4' text-anchor='middle'%3EEVANGELION%3C/text%3E%3C/svg%3E")
+      bottom / 100% 16% no-repeat,
+    radial-gradient(
+        ellipse 17% 21% at 42% 46%,
+        var(--zg-skin) 0 96%,
+        transparent 100%
+      )
+      no-repeat,
+    radial-gradient(
+        ellipse 27% 33% at 42% 38%,
+        var(--zg-hair) 0 96%,
+        transparent 100%
+      )
+      no-repeat,
+    radial-gradient(
+        ellipse 42% 30% at 42% 92%,
+        var(--zg-suit) 0 96%,
+        transparent 100%
+      )
+      no-repeat,
+    var(--zg-bg);
+}
+
+/* 図柄拡大（縦長の 1×1）のカード：横幅は 3×3 と同じで縦だけ伸ばす。人物は縦長に合わせて描き直し、
+   数字は 3×3 と同じ幅のまま縦に伸ばす（.zoom-glyph） */
+body.theme-eva .digit-container.zoom .zcard {
+  padding: 0 8% 9% 0;
+  font-size: 2.6rem;
+}
+
+body.theme-eva .digit-container.zoom .zcard::before {
+  inset: 0;
+}
+
+body.theme-eva .digit-container.zoom .zcard::after {
+  inset: 6px 5px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'%3E%3Crect width='100' height='14' fill='%23101014'/%3E%3Ctext x='38' y='10.5' font-size='9' font-family='Arial' font-weight='700' fill='%23d8dce4' text-anchor='middle'%3EEVANGELION%3C/text%3E%3C/svg%3E")
+      bottom / 100% 7% no-repeat,
+    radial-gradient(
+        ellipse 26% 12% at 44% 34%,
+        var(--zg-skin) 0 96%,
+        transparent 100%
+      )
+      no-repeat,
+    radial-gradient(
+        ellipse 40% 19% at 44% 29%,
+        var(--zg-hair) 0 96%,
+        transparent 100%
+      )
+      no-repeat,
+    radial-gradient(
+        ellipse 62% 22% at 44% 66%,
+        var(--zg-suit) 0 96%,
+        transparent 100%
+      )
+      no-repeat,
+    var(--zg-bg);
+}
+
+body.theme-eva .digit-container.zoom .zcard .zoom-glyph {
+  transform: scaleY(2.3);
+  transform-origin: bottom;
+}
+
+/* 図柄拡大のリーチで流れる帯（evaRollCenter）は列の幅いっぱい */
+.digit-container.zoom .roll-strip {
+  width: 100%;
+}
+
+/* 2・6：青 */
+body.theme-eva .digit-container .zcard:is([data-n="2"], [data-n="6"]) {
+  --zg-frame: linear-gradient(
+    160deg,
+    #e6f0ff 0%,
+    #5a8cff 35%,
+    #2a50d0 60%,
+    #0e1f6a 100%
+  );
+  --zg-bg: radial-gradient(
+    circle at 45% 40%,
+    #5aa0ff 0%,
+    #1a3a9a 55%,
+    #050f3a 100%
+  );
+  --zg-ink: #2a5aff;
+}
+
+/* 4・8：紫 */
+body.theme-eva .digit-container .zcard:is([data-n="4"], [data-n="8"]) {
+  --zg-frame: linear-gradient(
+    160deg,
+    #f0e4ff 0%,
+    #a070ff 35%,
+    #6a30d0 60%,
+    #2a0e6a 100%
+  );
+  --zg-bg: radial-gradient(
+    circle at 45% 40%,
+    #b070ff 0%,
+    #4a1a9a 55%,
+    #12053a 100%
+  );
+  --zg-ink: #7a3aff;
+}
+
+/* 時短・ST の 7：金 */
+body.theme-eva .digit-container .zcard.gold {
+  --zg-frame: linear-gradient(
+    160deg,
+    #fffbe0 0%,
+    #ffd84a 35%,
+    #e0a800 60%,
+    #7a5400 100%
+  );
+  --zg-ink: #ffd400;
+}
+
+/* 人物の色（一覧の画像の髪・服の色に合わせる） */
+body.theme-eva .digit-container .zcard[data-n="1"] {
+  --zg-hair: #3a2f6a;
+  --zg-suit: #7a1020;
+}
+body.theme-eva .digit-container .zcard[data-n="2"] {
+  --zg-hair: #2a2220;
+  --zg-suit: #8a9ab0;
+}
+body.theme-eva .digit-container .zcard[data-n="3"] {
+  --zg-hair: #c8d8f0;
+  --zg-suit: #f0f0f0;
+}
+body.theme-eva .digit-container .zcard[data-n="4"] {
+  --zg-hair: #c0c0c8;
+  --zg-suit: #4a4a52;
+}
+body.theme-eva .digit-container .zcard[data-n="5"] {
+  --zg-hair: #e0702a;
+  --zg-suit: #c02020;
+}
+body.theme-eva .digit-container .zcard[data-n="6"] {
+  --zg-hair: #4a3020;
+  --zg-suit: #e8eef8;
+}
+body.theme-eva .digit-container .zcard[data-n="7"] {
+  --zg-hair: #22222e;
+  --zg-suit: #2a3a6a;
+}
+body.theme-eva .digit-container .zcard[data-n="8"] {
+  --zg-hair: #f0d890;
+  --zg-suit: #3a4a7a;
+}
+body.theme-eva .digit-container .zcard[data-n="9"] {
+  --zg-hair: #3a2a20;
+  --zg-suit: #8a2a1a;
 }
 
 /* リーチのライン：左右の図柄が光る */
@@ -273,12 +499,27 @@ body.light-mode .machine {
   will-change: transform;
 }
 
-/* 図柄拡大（通常時・時短中）：3×3 をやめ、列ごとに 3 段ぶんの高さの縦長の図柄 1 つ（枠なし） */
+/* リーチの中の列（数字 3 つ・図柄拡大）：数字を縦に並べた帯をなめらかに流して止める（eva-reel.js の evaRollCenter）。
+   図柄拡大の列は flex で上下中央なので、帯は上端にそろえる */
+.digit .roll-strip {
+  display: block;
+  align-self: flex-start;
+  will-change: transform;
+}
+
+.digit .roll-strip .roll-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 図柄拡大（通常時・時短中）：3×3 をやめ、列ごとに 3 段ぶんの高さの縦長の図柄 1 つ（EVA は縦長のカード .zcard） */
 .digit-container.zoom .digit {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 31%;
+  /* 横幅は 3×3 の列と同じ（縦だけ伸ばす。ユーザー指摘 2026-10-04） */
+  width: min(84px, 31%);
   height: var(--grid-h); /* 3×3 と同じ高さで液晶がずれないように */
   overflow: hidden;
   font-size: clamp(5rem, 24vw, 8.4rem);
@@ -566,8 +807,10 @@ body.theme-eva .heso-ball.heso-empty {
 body.theme-eva .heso-ball::before,
 body.theme-eva .heso-ball::after,
 body.theme-eva .heso-ball > .hx-side,
+body.theme-eva .heso-ball > .hx-trim,
 body.theme-eva .heso-ball > .hx-ring,
-body.theme-eva .heso-ball > .hx-text {
+body.theme-eva .heso-ball > .hx-text,
+body.theme-eva .heso-ball > .hx-arrows {
   position: absolute;
   clip-path: var(--hx-shape);
 }
@@ -577,11 +820,11 @@ body.theme-eva .heso-ball > i {
   pointer-events: none;
 }
 
-/* 縁（いちばん手前の板） */
+/* 縁（いちばん手前の板）。通常時の六角形は金属のグラデーション（--hx-bezel）、無ければ --hx-edge の単色 */
 body.theme-eva .heso-ball::before {
   content: "";
   inset: 0;
-  background: var(--hx-edge);
+  background: var(--hx-bezel, var(--hx-edge));
   transform: translateZ(0);
 }
 
@@ -684,8 +927,10 @@ body.theme-eva .heso-ball > .hx-f3-right {
 
 body.theme-eva .heso-ball::before,
 body.theme-eva .heso-ball::after,
+body.theme-eva .heso-ball > .hx-trim,
 body.theme-eva .heso-ball > .hx-ring,
-body.theme-eva .heso-ball > .hx-text {
+body.theme-eva .heso-ball > .hx-text,
+body.theme-eva .heso-ball > .hx-arrows {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -828,6 +1073,46 @@ body.theme-eva .heso-ball > .hx-text::before {
   text-align: center;
 }
 
+/* 通常時・時短中の六角形の上下の三角（▲ EMERGENCY ▼。キーホルダーの画像に合わせる 2026-10-04）。
+   文字で 3 行にすると潰れたので、三角は mask の図形で描いて文字と同じ色（--hx-ink）で塗る */
+body.theme-eva .heso-ball > .hx-arrows {
+  display: none;
+  inset: var(--hx-inset);
+  background: var(--hx-ink);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 18' preserveAspectRatio='none'%3E%3Cpath d='M11 1.3L13.9 4.7H8.1Z M8.1 13.3H13.9L11 16.7Z'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 18' preserveAspectRatio='none'%3E%3Cpath d='M11 1.3L13.9 4.7H8.1Z M8.1 13.3H13.9L11 16.7Z'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+  transform: translateZ(0.8px);
+}
+
+body.theme-eva
+  .heso-overlay:not(.right-mode)
+  .heso-ball:not(
+    .heso-alert-red,
+    .heso-alert-purple,
+    .heso-anim-spin,
+    .heso-anim-wait
+  )
+  > .hx-arrows {
+  display: block;
+}
+
+/* 時短中の通常保留：白い保留の縁と面の間に細い赤枠（縁と面の間の板。キーホルダーの画像の白＋赤枠） */
+body.theme-eva .heso-ball > .hx-trim {
+  display: none;
+  inset: calc(var(--hx-inset) - 0.9px);
+  background: #e01414;
+  transform: translateZ(0.2px);
+}
+
+body.theme-eva
+  #denchu-area:not(.right-mode)
+  .heso-ball:is(.heso-none, .heso-odd)
+  > .hx-trim {
+  display: block;
+}
+
 /* EVA 以外の機種では中身を出さない */
 body:not(.theme-eva) .heso-ball > i {
   display: none;
@@ -944,12 +1229,27 @@ body.theme-eva .heso-overlay:not(.right-mode) .heso-ball.heso-current {
   height: 29px;
 }
 
-/* デフォルト（無地）の保留：銀 */
+/* デフォルト（無地）の保留：銀。縁（--hx-bezel）と面は金属の光沢（上から明るい帯→中→暗い）。
+   色の付いた保留も同じ作り（キーホルダーの画像に合わせる 2026-10-04） */
 body.theme-eva .heso-ball.heso-none,
 body.theme-eva .heso-ball.heso-odd {
-  --hx-edge: #f5f7fb;
-  --hx-face: linear-gradient(160deg, #eef1f6, #a9b2bf);
-  --hx-ink: #2b2f36;
+  --hx-edge: #d9dee6;
+  --hx-bezel: linear-gradient(
+    160deg,
+    #ffffff 0%,
+    #9aa3b0 42%,
+    #eef1f5 58%,
+    #636b77 100%
+  );
+  --hx-face: linear-gradient(
+    180deg,
+    #c3c9d2 0%,
+    #ffffff 28%,
+    #e6e9ee 50%,
+    #b9c0ca 76%,
+    #8f97a3 100%
+  );
+  --hx-ink: #23272d;
   --hx-text: "EMERGENCY";
   --hx-glow: rgba(150, 180, 255, 0.5);
 }
@@ -1010,15 +1310,43 @@ body.theme-eva .heso-ball.heso-blink-strong {
 
 body.theme-eva .heso-ball.heso-blue {
   --hx-edge: #9cc4ff;
-  --hx-face: linear-gradient(160deg, #4d8cff, #0a2a8a);
-  --hx-ink: #f0f6ff; /* 紺の文字は青地に沈んで読めなかった */
+  --hx-bezel: linear-gradient(
+    160deg,
+    #dcebff 0%,
+    #3d7bff 42%,
+    #a9cbff 58%,
+    #0b2f8f 100%
+  );
+  --hx-face: linear-gradient(
+    180deg,
+    #2a66de 0%,
+    #86b6ff 28%,
+    #3f7ff0 50%,
+    #1a49b8 76%,
+    #0a2a7a 100%
+  );
+  --hx-ink: #0a1430; /* キーホルダーの画像どおり濃い色の文字（2026-10-04） */
   --hx-text: "EMERGENCY";
   --hx-glow: #2f6bff;
 }
 
 body.theme-eva .heso-ball.heso-green {
   --hx-edge: #a8ffa8;
-  --hx-face: linear-gradient(160deg, #46e046, #0b6b0b);
+  --hx-bezel: linear-gradient(
+    160deg,
+    #e0ffe0 0%,
+    #2fbf2f 42%,
+    #b0ffb0 58%,
+    #0a5a0a 100%
+  );
+  --hx-face: linear-gradient(
+    180deg,
+    #1f9a1f 0%,
+    #86ee86 28%,
+    #3cc63c 50%,
+    #158c15 76%,
+    #0b5a0b 100%
+  );
   --hx-ink: #022a02;
   --hx-text: "EMERGENCY";
   --hx-glow: #00ff00;
@@ -1026,16 +1354,31 @@ body.theme-eva .heso-ball.heso-green {
 
 body.theme-eva .heso-ball.heso-red {
   --hx-edge: #ffb3b3;
-  --hx-face: linear-gradient(160deg, #ff4242, #9a0000);
-  --hx-ink: #fff4f4; /* 暗い赤の文字は赤地に沈んで読めなかった */
+  --hx-bezel: linear-gradient(
+    160deg,
+    #ffe0e0 0%,
+    #e02828 42%,
+    #ffbcbc 58%,
+    #7a0000 100%
+  );
+  --hx-face: linear-gradient(
+    180deg,
+    #d41c1c 0%,
+    #ff8080 28%,
+    #ef3636 50%,
+    #b81010 76%,
+    #7a0000 100%
+  );
+  --hx-ink: #2a0000; /* キーホルダーの画像どおり濃い色の文字（2026-10-04） */
   --hx-text: "EMERGENCY";
   --hx-glow: #ff0000;
 }
 
 body.theme-eva .heso-ball.heso-rainbow {
   --hx-edge: #fff;
+  --hx-bezel: linear-gradient(160deg, #ffffff 0%, #c9ced6 50%, #ffffff 100%);
   --hx-face: linear-gradient(
-    90deg,
+    135deg,
     #ff1744,
     #ff9100,
     #ffea00,
@@ -1115,6 +1458,7 @@ body.theme-eva .heso-ball.heso-alert-purple {
    違和感保留は見て分かるように：中の文字なし＝帯だけ、文字が逆に流れる、全体にノイズ */
 body.theme-eva .heso-overlay.right-mode .heso-ball {
   --hx-shape: polygon(12% 0, 88% 0, 100% 100%, 0 100%);
+  --hx-bezel: var(--hx-edge); /* 金属の縁は通常時の六角形だけ */
   --hx-size: 6px;
   --hx-inset: 1.5px;
   --hx-base: linear-gradient(#2b2b2b, #0b0b0b);
@@ -1731,51 +2075,6 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-wait {
 
   to {
     opacity: 1;
-    scale: 1;
-  }
-}
-
-/* 「復活！！」：閃光（z-index 4）と演出文字（5）より手前に、太い縁取りの大きな文字で出す */
-.revive-banner {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  translate: -50% -50%;
-  z-index: 8;
-  display: none;
-  pointer-events: none;
-  white-space: nowrap;
-  font-family: "Shippori Mincho B1", serif;
-  font-size: clamp(2.6rem, 12vw, 4.8rem);
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  color: #fff6c8;
-  -webkit-text-stroke: 2px #b00000;
-  paint-order: stroke fill;
-  text-shadow:
-    0 0 6px #ff1a1a,
-    0 0 18px #ff1a1a,
-    0 0 30px #ffd700,
-    3px 3px 0 #000;
-}
-
-.revive-banner.on {
-  display: block;
-  animation: revive-pop 0.35s ease-out;
-}
-
-@keyframes revive-pop {
-  0% {
-    scale: 2.2;
-    opacity: 0;
-  }
-
-  60% {
-    scale: 0.92;
-    opacity: 1;
-  }
-
-  100% {
     scale: 1;
   }
 }
@@ -2560,49 +2859,61 @@ body.theme-eva .heso-overlay.hold-shift .heso-ball.heso-current > .hx-ring {
   animation: fx-pulse 0.6s ease-out 2;
 }
 
-/* ドックン予告の炎：液晶の真ん中に大きな炎の柱が立って揺らめく。青と赤の 2 種類（通常時・時短・ST 共通）
-   （実機の録画 E:/rec 2026-10-03 21-44-54 の最初の数秒） */
+/* ドックン予告の炎：炎そのものは eva-reel.js が canvas（.eva-flame）に火の粒で描く。
+   青も赤も液晶の真ん中に高く立つ炎の柱で色だけ違う（実機の録画 E:/rec 2026-10-03 21-44-54 の 3.5〜6 秒）。
+   リーチがかかって 0.5 秒で消える（eva-reel.js の evaFlameOffAfterReach）。
+   ここは炎の後ろを暗くする膜だけ（canvas より下の z-index 3。図柄よりは上） */
 .screen.fx-flame-blue::after,
 .screen.fx-flame-red::after {
-  background:
-    radial-gradient(
-      ellipse 16% 42% at 50% 62%,
-      var(--flame-core) 0%,
-      var(--flame) 40%,
-      transparent 72%
-    ),
-    radial-gradient(
-      ellipse 26% 60% at 50% 70%,
-      var(--flame-mid) 0%,
-      transparent 70%
-    ),
-    rgba(0, 0, 0, 0.35);
-  transform-origin: 50% 100%;
-  animation: fx-flame 0.2s ease-in-out infinite alternate;
+  z-index: 3;
+  opacity: 1;
 }
 
 .screen.fx-flame-blue::after {
-  --flame-core: rgba(220, 245, 255, 0.95);
-  --flame: rgba(40, 140, 255, 0.85);
-  --flame-mid: rgba(20, 70, 255, 0.45);
+  background:
+    radial-gradient(
+      ellipse 30% 70% at 50% 100%,
+      rgba(0, 40, 160, 0.35),
+      transparent 70%
+    ),
+    rgba(0, 0, 0, 0.6);
 }
 
 .screen.fx-flame-red::after {
-  --flame-core: rgba(255, 245, 200, 0.95);
-  --flame: rgba(255, 50, 20, 0.85);
-  --flame-mid: rgba(200, 0, 0, 0.5);
+  background:
+    radial-gradient(
+      ellipse 30% 70% at 50% 100%,
+      rgba(160, 10, 0, 0.35),
+      transparent 70%
+    ),
+    rgba(0, 0, 0, 0.6);
 }
 
-@keyframes fx-flame {
-  from {
-    opacity: 0.85;
-    transform: scale(0.96, 0.94) skewX(-3deg);
-  }
+/* 次回予告の画面（z-index 9）が出ている間も、左上の保留の数と左下の回転数は手前に残す。
+   画面下の保留は出さない（ユーザー方針 2026-10-04） */
+.screen.movie-next #stock-count-display,
+.screen.movie-next .st-remain {
+  z-index: 10;
+}
 
-  to {
-    opacity: 1;
-    transform: scale(1.03, 1.06) skewX(3deg);
-  }
+/* 次回予告の画面・昇格演出の間は画面下の保留を出さない（eva-reel.js の evaPlayUpgrade が .upgrading） */
+.screen.movie-next .heso-overlay,
+.screen.upgrading .heso-overlay {
+  visibility: hidden;
+}
+
+/* SP リーチ以上に発展したら、リーチの間は保留の表示を隠す（通常時・時短・ST 共通。script.js の onSp） */
+.screen.sp-reach .heso-overlay {
+  visibility: hidden;
+}
+
+.screen .eva-flame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
 }
 
 /* 昇格演出：図柄の後ろが燃える背景（オール赤はチャンスアップ）と、始まり・一撃の白い光 */
@@ -3295,6 +3606,45 @@ body:not(.theme-eva) .voice-credit {
     spark-hue 1.2s linear infinite;
 }
 
+/* ST の数字 3 つ（大きい数字）：小さい粒では大きい数字の上でほとんど見えなかったので、粒を大きく・多くし、
+   瞬きながらふわっと上へ流れるキラキラにする（ユーザー依頼 2026-10-04）。3×3 は今までどおり */
+.digit-container[class*="spark-"] .digit:not(.grid-col)::before,
+.digit-container[class*="spark-"] .digit:not(.grid-col)::after {
+  inset: -18px -14px;
+  background:
+    radial-gradient(circle at 8% 14%, var(--sp) 0 4px, transparent 6px),
+    radial-gradient(circle at 30% 6%, #fff 0 3px, transparent 5px),
+    radial-gradient(circle at 74% 12%, var(--sp) 0 5px, transparent 7px),
+    radial-gradient(circle at 92% 34%, #fff 0 3.5px, transparent 5.5px),
+    radial-gradient(circle at 16% 46%, #fff 0 3px, transparent 5px),
+    radial-gradient(circle at 54% 40%, var(--sp) 0 3.5px, transparent 5.5px),
+    radial-gradient(circle at 86% 62%, var(--sp) 0 4.5px, transparent 6.5px),
+    radial-gradient(circle at 6% 76%, var(--sp) 0 4px, transparent 6px),
+    radial-gradient(circle at 40% 84%, #fff 0 4px, transparent 6px),
+    radial-gradient(circle at 70% 94%, var(--sp) 0 3px, transparent 5px);
+  animation:
+    spark-twinkle 0.9s ease-in-out infinite,
+    spark-drift 1.6s ease-in-out infinite alternate;
+}
+
+.digit-container.spark-rainbow .digit:not(.grid-col)::before,
+.digit-container.spark-rainbow .digit:not(.grid-col)::after {
+  animation:
+    spark-twinkle 0.9s ease-in-out infinite,
+    spark-drift 1.6s ease-in-out infinite alternate,
+    spark-hue 1.2s linear infinite;
+}
+
+@keyframes spark-drift {
+  from {
+    translate: 0 8px;
+  }
+
+  to {
+    translate: 0 -8px;
+  }
+}
+
 @keyframes spark-hue {
   from {
     filter: hue-rotate(0deg);
@@ -3464,6 +3814,8 @@ body:not(.theme-eva) .voice-credit {
   .digit-container[class*="spark-"] .digit,
   .digit-container[class*="spark-"] .digit::before,
   .digit-container[class*="spark-"] .digit::after,
+  .digit-container[class*="spark-"] .digit:not(.grid-col)::before,
+  .digit-container[class*="spark-"] .digit:not(.grid-col)::after,
   .shutter-stage.shutter-gold .sh-panel::after {
     animation: none;
   }

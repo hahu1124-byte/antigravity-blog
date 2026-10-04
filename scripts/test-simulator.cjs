@@ -254,7 +254,7 @@ function assertClose(label, actual, expected, tolerance) {
       mode = md; currentRot = rot;
       Math.random = makeRandomStrong(seed);
       const r = { spins, hits: 0, kinds: { r10: 0, k3: 0, t3: 0 }, bands: {}, effects: {}, reaches: {}, names: {},
-        sure: { n: 0, hit: 0 }, noReachHits: 0,
+        sure: { n: 0, hit: 0 }, noReachHits: 0, nextNoReachHits: 0,
         leverHits: 0, leverMiss: 0, leverMismatch: 0, vibeMismatch: 0, r10NotZenkaiten: 0, zenkaitenNotR10: 0,
         hangar4: 0, hangar4Bad: 0 };
       for (let i = 0; i < spins; i++) {
@@ -288,7 +288,11 @@ function assertClose(label, actual, expected, tolerance) {
         }
         const rr = r.reaches[job.reachId] || (r.reaches[job.reachId] = { n: 0, hit: 0 });
         rr.n++; if (job.isHit) rr.hit++;
-        if (job.isHit && job.reachId === "none") r.noReachHits++;
+        // ST の新次回予告の当りはリーチを出さない（いきなり揃う）ので、リーチなしの当りとは別に数える
+        if (job.isHit && job.reachId === "none") {
+          if ((job.steps || []).some((s) => s.nextHit)) r.nextNoReachHits++;
+          else r.noReachHits++;
+        }
         if (job.sure) { r.sure.n++; if (job.isHit) r.sure.hit++; }
       }
       const T = md === "通常" ? evaTablesFor("n", rot) : EVA_T_S;
@@ -332,13 +336,14 @@ function assertClose(label, actual, expected, tolerance) {
       throw new Error(
         `EVA ${label}: 濃厚なのにハズレ ${r.sure.n - r.sure.hit} 件`,
       );
-    // リーチなしの当りは突発当り（当りの 1%）だけ
+    // リーチなしの当りは突発当り（当りの 1%）だけ（ST の新次回予告でいきなり揃う当りは別に数える）
     console.log(
-      `[EVA] ${label}: リーチなしの当り＝当りの ${((r.noReachHits / r.hits) * 100).toFixed(2)}%（突発当り ${(r.sudden * 100).toFixed(2)}%）／ 濃厚 n=${r.sure.n}`,
+      `[EVA] ${label}: リーチなしの当り＝当りの ${((r.noReachHits / r.hits) * 100).toFixed(2)}%（突発当り ${(r.sudden * 100).toFixed(2)}%）・新次回予告でいきなり揃う当り ${((r.nextNoReachHits / r.hits) * 100).toFixed(2)}%／ 濃厚 n=${r.sure.n}`,
     );
+    // 表の「リーチなし」の当りの割合（ST は新次回予告の当りも含む）と比べる
     assertClose(
       `EVA ${label} リーチなしの当り`,
-      r.noReachHits / r.hits,
+      (r.noReachHits + r.nextNoReachHits) / r.hits,
       r.sudden,
       shareTol(r.sudden, r.hits),
     );
@@ -716,15 +721,17 @@ function assertClose(label, actual, expected, tolerance) {
     if (n < 200) throw new Error("演出の数が少なすぎる: " + n);
   `);
 
-  // 窓の上下に少し見える段は、リールの並びの続き（上下が数字ならブランク、上下がブランクなら隣の数字）
+  // 窓の上下にはみ出して見える段（2 段ずつ）は、リールの並びの続き（上下が数字ならブランク、上下がブランクなら隣の数字）
   await run(`
     for (let col = 0; col < 3; col++) {
       for (let p = 0; p < EVA_REEL_LEN; p++) {
         const w = evaWindow(col, p);
-        const [above, below] = evaPeekOf(col, w);
+        const [above, above2, below, below2] = evaPeekOf(col, w);
         const realAbove = evaWindow(col, p - 1)[0];
+        const realAbove2 = evaWindow(col, p - 2)[0];
         const realBelow = evaWindow(col, p + 1)[2];
-        if (above !== realAbove || below !== realBelow) throw new Error("はみ出す段がリールと違う: col=" + col + " " + JSON.stringify({ w, above, below, realAbove, realBelow }));
+        const realBelow2 = evaWindow(col, p + 2)[2];
+        if (above !== realAbove || below !== realBelow || above2 !== realAbove2 || below2 !== realBelow2) throw new Error("はみ出す段がリールと違う: col=" + col + " " + JSON.stringify({ w, above, above2, below, below2, realAbove, realAbove2, realBelow, realBelow2 }));
       }
     }
   `);
@@ -993,7 +1000,9 @@ function assertClose(label, actual, expected, tolerance) {
         const strong = j.holdType === "red" || j.name.some((nm) => nm.startsWith("カウントダウン(0:シンジ)") || nm === "カウントダウン");
         if (!strong) continue;
         reds++;
-        if (!j.sp && !(md === "ST" && j.reachId === "tenpai")) throw new Error(md + ": 信頼度の高い保留・前兆が SP リーチ以外で出た: " + j.name.join("+") + " / " + j.reachId);
+        // 見るのはハズレだけ（当りはリーチのある当りに一様に乗るので、赤保留→ノーマルリーチの当りはありうる。
+        // 乱数の並びが変わって初めてその当りを引いた 2026-10-04）
+        if (!j.isHit && !j.sp && !(md === "ST" && j.reachId === "tenpai")) throw new Error(md + ": 信頼度の高い保留・前兆が SP リーチ以外のハズレで出た: " + j.name.join("+") + " / " + j.reachId);
       }
       if (!reds) throw new Error(md + ": 赤保留・カウントダウンが出ない");
     }

@@ -407,6 +407,11 @@ function evaBuildTables(spec, rot) {
           // ハズレは、信頼度 10%未満ならどの回転にも（リーチなしでハズレ、次の回転へ）、
           // 10%以上は SP リーチのハズレだけ（強い予告がリーチなしで終わらない。2026-10-03 方針）
           const b = a * evaMissFactor(t, P);
+          // リーチなしで当る演出（ST の新次回予告）：当りの「リーチなし」の行にだけ置く（濃厚なのでハズレ用は無し）
+          if (spec.noReachIds && spec.noReachIds.includes(s.id)) {
+            hit[noneR][i] = aR[noneR] > 0 ? Math.min(1, a / aR[noneR]) : 0;
+            return;
+          }
           if (ids) {
             const rows = idsToRows(ids);
             const cap = sumOver(aR, rows);
@@ -594,6 +599,15 @@ const EVA_SPEC_N = {
   spReaches: EVA_SP_REACHES,
   plan: EVA_PLAN_N,
 };
+// ST の新次回予告は出ただけで当り（タイトルの後いきなり揃う）なので、リーチなしの当りにする
+// （ユーザー方針 2026-10-04）。表では当りの「リーチなし」の行にだけ置き、その分リーチの当りの合計を縮める
+// （リーチやリーチに付く演出の信頼度は変わらない。抽選の後で外すと、外した分だけ信頼度が下がった）
+const EVA_ST_NEXT_IDS = ["next-preview", "next-last"];
+const EVA_ST_NEXT_SHARE =
+  EVA_ST_NEXT_IDS.reduce(
+    (a, id) => a + ((EVA_PLAN_S.hit.midway || {})[id] || 0),
+    0,
+  ) / 100;
 // ST も通常時と同じ決まり（EVA_PLAN_S。値は暫定）
 const EVA_SPEC_S = {
   pHit: EVA_S_HIT / EVA_BIT,
@@ -603,6 +617,8 @@ const EVA_SPEC_S = {
   spReaches: EVA_ST_SP,
   preMissReaches: ["tenpai"],
   plan: EVA_PLAN_S,
+  suddenShare: EVA_SUDDEN_SHARE + EVA_ST_NEXT_SHARE,
+  noReachIds: EVA_ST_NEXT_IDS,
 };
 // 時短（チャンスタイム）中はストーリーリーチ（vsアルミサエル・vsサハクィエル）が大当り濃厚
 // （なな徹 7335）。通常時の表をもとに、その 2 本の信頼度だけ 100% にした表を使う（ハズレ用の表に出ない）
@@ -630,7 +646,11 @@ const EVA_T_S = evaBuildTables(EVA_SPEC_S, 0);
 const EVA_ST_FAST_FROM = 101; // 消化する前の残り回転がこれ以上なら高速区間
 const EVA_ST_INSTANT_SHARE = 0.05; // 無演出即当り（当りのうち）
 const EVA_T_S_FAST = evaBuildTables(
-  { ...EVA_SPEC_S, suddenShare: EVA_SUDDEN_SHARE + EVA_ST_INSTANT_SHARE },
+  {
+    ...EVA_SPEC_S,
+    suddenShare:
+      EVA_SUDDEN_SHARE + EVA_ST_INSTANT_SHARE + EVA_ST_NEXT_SHARE,
+  },
   0,
 );
 
@@ -999,6 +1019,72 @@ function createEvaJob(isRight, regime, opts = {}) {
     tries++
   ) {
     draw = evaDrawEffects(T, isHit, plan, after);
+  }
+  // ST の新次回予告は出ただけで当り（タイトルの後いきなり図柄が揃う）なので、リーチとリーチに付く演出
+  // （リーチ・リーチ後の段）は出さない（ユーザー方針 2026-10-04）。デバッグでリーチ側を指定したときは除く
+  const onReach = (L) => L === T.reach || L.isLinked || evaPhaseOf(L) !== "pre";
+  const stNext =
+    (regime === "s" || regime === "sf") &&
+    draw.reach.id !== "none" &&
+    draw.shown.some(({ state }) => EVA_NEXT_MOVIE_IDS.includes(state.id)) &&
+    !(plan && onReach(plan.L));
+  if (stNext) {
+    const kept = draw.shown.filter(({ layer }) => !onReach(layer));
+    draw = {
+      ...draw,
+      reach: T.reach.states.find((s) => s.id === "none"),
+      shown: kept,
+      acc: evaSummarize(kept),
+    };
+  }
+  // キャラ連続の回は図柄拡大を出さない（キャラ連続は 3×3 の図柄で仮停止を見せる。ユーザー方針 2026-10-04）。
+  // デバッグで図柄拡大を指定したときは除く
+  const isZoom = (s) => s.zoom || s.zoomRed;
+  if (
+    draw.shown.some(({ state }) => state.chara) &&
+    draw.shown.some(({ state }) => isZoom(state)) &&
+    !(plan && isZoom(plan.L.states[plan.si]))
+  ) {
+    const kept = draw.shown.filter(({ state }) => !isZoom(state));
+    draw = { ...draw, shown: kept, acc: evaSummarize(kept) };
+  }
+  // 震える保留（振動保留・デバイス振動先読み・レバブル先読み）は消化すると必ず当該レバブルが起きる
+  // （ユーザー方針 2026-10-04。全状態共通）。レバブルの層が「なし」なら、その当否・リーチの表の割合で
+  // レバブルを 1 つ引いて足す
+  const lever = T.layers.find((l) => l.key === "lever");
+  if (
+    lever &&
+    draw.shown.some(
+      ({ state }) => state.holdType === "vibe" || state.holdShake,
+    ) &&
+    !draw.shown.some(({ layer }) => layer === lever)
+  ) {
+    const r = T.reach.states.indexOf(draw.reach);
+    const row = (r >= 0 && (isHit ? lever.hit : lever.miss)[r]) || [];
+    const last = lever.states.length - 1;
+    let sum = 0;
+    for (let i = 0; i < last; i++) sum += row[i] || 0;
+    let pick = -1;
+    if (sum > 0) {
+      let x = Math.random() * sum;
+      for (let i = 0; i < last && pick < 0; i++) {
+        x -= row[i] || 0;
+        if (x < 0) pick = i;
+      }
+      if (pick < 0) pick = 0;
+    } else {
+      // 表に無いときは、ハズレは 100% 未満のもの、当りはいちばん弱いもの
+      pick = isHit
+        ? 0
+        : lever.states.findIndex((s, i) => i < last && s.trust < 100);
+    }
+    if (pick >= 0) {
+      const kept = [
+        ...draw.shown,
+        { layer: lever, state: lever.states[pick], no: -1 },
+      ];
+      draw = { ...draw, shown: kept, acc: evaSummarize(kept) };
+    }
   }
   const { reach, shown, acc, f } = draw;
 

@@ -649,6 +649,7 @@ function stepHold(job, anim, afterShift) {
   const apply = () => {
     if (job.currentView === "gone") return; // SP 発展で消えた後は変えない
     job.currentView = st.view;
+    job.holdChangedAt = Date.now(); // 変わってから消えるまで最低 HOLD_KEEP_MS 見せる（vanishCurrentHold）
     if (anim) {
       job.holdAnim = st.fx;
       const token = (job.holdAnimToken = (job.holdAnimToken || 0) + 1);
@@ -914,9 +915,22 @@ function delayHoldEntry(jobs) {
 
 // SP リーチに発展したら当該保留を消す（次の保留を消化する流れを見せる）
 const HOLD_GONE_MS = 350; // 当該保留が消えるアニメ（style.css の .heso-gone）
-function vanishCurrentHold(job) {
+// 当該保留は色が変わってから最低 0.7 秒は消さない（通常時・時短・ST 共通。ユーザー方針 2026-10-04）
+const HOLD_KEEP_MS = 700;
+function holdKeepLeft(job) {
+  if (!job || !job.holdChangedAt) return 0;
+  return Math.max(0, job.holdChangedAt + HOLD_KEEP_MS - Date.now());
+}
+// now：待ちを済ませた後の呼び出し（もう待たずに消す。待ち直すと、すぐ呼ぶ setTimeout の試験で止まらなくなる）
+function vanishCurrentHold(job, now) {
   if (!job || activeJob !== job) return;
   if (job.holdSeq) job.holdStep = job.holdSeq.length; // 残りの変化は打ち切る
+  // 変わったばかりなら 0.7 秒たつまで待ってから消す
+  const wait = now ? 0 : holdKeepLeft(job);
+  if (wait > 0) {
+    setTimeout(() => vanishCurrentHold(job, true), wait);
+    return;
+  }
   job.holdAnim = null;
   job.currentView = "gone";
   updateHesoUI();
@@ -1030,6 +1044,7 @@ async function startProcess() {
   lcdCount++;
   if (mode !== "通常") {
     rRem--;
+    updateRemainUI(); // 残り回転は消化が始まった瞬間に減らして見せる
   }
   if (eff.isRight) {
     totalBall -= 0.05;
@@ -1041,16 +1056,21 @@ async function startProcess() {
     addLog(`${M.modeLabel(mode)} ${lcdCount}回転【先バレ】信頼度:40.0%`);
   }
   // trustが50以上（激熱以上）、または当落が確定している場合のみログに出力
-  // レバブル（枠の震え・保留の震え）が出た変動は、信頼度が低くても必ずログに出す
-  if (
+  // レバブル（枠の震え・保留の震え）が出た変動は、信頼度が低くても必ずログに出す。
+  // EVA はリーチが終わった（中が止まった）ところで出す（evaRunDisplay の onResult。リーチがかかった時点で
+  // 結果が分からないように。ユーザー方針 2026-10-04）。リーチの無い変動は図柄が止まってから
+  const resultLog =
     (logTrustOf(eff) >= 50.0 || eff.isHit || eff.vibe || eff.holdShake) &&
     !eff.deferHitLog
-  ) {
-    const modeLabel = M.modeLabel(mode);
-    addLog(
-      `${modeLabel} ${lcdCount}回転【${eff.displayName}】${trustLabel(eff)}`,
-    );
-  }
+      ? `${M.modeLabel(mode)} ${lcdCount}回転【${eff.displayName}】${trustLabel(eff)}`
+      : null;
+  let resultLogged = false;
+  const flushResultLog = () => {
+    if (!resultLog || resultLogged) return;
+    resultLogged = true;
+    addLog(resultLog);
+  };
+  if (currentMachine !== "eva") flushResultLog();
   const machineEl = document.getElementById("machine"),
     screenEl = document.getElementById("screen");
   if (eff.vibe) {
@@ -1138,11 +1158,29 @@ async function startProcess() {
       heavy: eff.heavy,
       steps: [...leadSteps, ...(eff.steps || [])],
       holdMs,
-      onSp: () => vanishCurrentHold(eff),
+      // SP リーチ以上に発展：当該保留を消し、リーチの間は保留の表示を隠す（style.css の .sp-reach）。
+      // 変わったばかりの保留は 0.7 秒見せてから隠す（HOLD_KEEP_MS）
+      onSp: () => {
+        vanishCurrentHold(eff);
+        const tok = (startProcess.spToken = (startProcess.spToken || 0) + 1);
+        setTimeout(() => {
+          if (startProcess.spToken === tok) screenEl.classList.add("sp-reach");
+        }, holdKeepLeft(eff));
+      },
+      onResult: flushResultLog,
+      onRevive: () => addLog(">> 復活！！"),
     });
-    // 変化を見せた当該保留は、図柄が止まったら消す（次の回転はその 0.5 秒後。下の nextDelay）
-    if (eff.holdShown) vanishCurrentHold(eff);
-    if (eff.revived) addLog(">> 復活！！");
+    // リーチが終わったら保留の表示を戻す
+    startProcess.spToken = (startProcess.spToken || 0) + 1;
+    screenEl.classList.remove("sp-reach");
+    flushResultLog();
+    // 変化を見せた当該保留は、図柄が止まったら消す（次の回転はその 0.5 秒後。下の nextDelay）。
+    // 色が変わって 0.7 秒たっていなければ、たつまで待ってから消す
+    if (eff.holdShown) {
+      const keep = holdKeepLeft(eff);
+      if (keep > 0) await evaSleep(keep);
+      vanishCurrentHold(eff);
+    }
     if (eff.isHit) hitDigit = eff.bosoShown ? "1・3・5" : eff.hitDigit;
   } else {
     await spinPlainDigits(eff, currentSpeed);
@@ -1453,7 +1491,8 @@ function updateHesoUI() {
 // 保留 1 つの見た目。変化中は横回転（「変化」の文字）・槍が刺さった閃光のクラスを付ける
 // （槍そのものは液晶全体の playLanceStage で出す）
 // EVA の保留の中身（一度だけ作る）：奥から光・裏と左右の面（ST の箱は 4 面とも同じ見た目で回る。
-// 通常時は裏の面だけ）・厚みの板 8 枚・消化中の白縁・文字。前面の縁と面は .heso-ball の ::before / ::after（style.css）
+// 通常時は裏の面だけ）・厚みの板 8 枚・時短中の赤い細枠・消化中の白縁・文字・上下の三角（▲▼）。
+// 前面の縁と面は .heso-ball の ::before / ::after（style.css）
 const HOLD_INNER =
   '<i class="hx-glow"></i>' +
   ["back", "left", "right"]
@@ -1466,7 +1505,7 @@ const HOLD_INNER =
   [1, 2, 3, 4, 5, 6, 7, 8]
     .map((n) => `<i class="hx-side hx-side${n}"></i>`)
     .join("") +
-  '<i class="hx-ring"></i><i class="hx-text"></i>';
+  '<i class="hx-trim"></i><i class="hx-ring"></i><i class="hx-text"></i><i class="hx-arrows"></i>';
 function paintHold(el, job, isCurrent) {
   if (!el._built) {
     el.innerHTML = HOLD_INNER;
@@ -1517,6 +1556,17 @@ function toggleOpt(t) {
   document.getElementById("btn-" + t).classList.toggle("active");
 }
 
+// 回転数の表示（液晶の左下と下の欄）。ST・時短の残り回転は変動が始まった瞬間に 1 減らして出す
+// （startProcess が rRem を減らした直後にも呼ぶ。ユーザー方針 2026-10-04）
+function updateRemainUI() {
+  const sub = document.getElementById("sub-display");
+  if (sub)
+    sub.innerText =
+      mode === "通常" ? `通常:${lcdCount}` : `${M.modeLabel(mode)}:${rRem}`;
+  const stNum = document.getElementById("st-remain-num");
+  if (stNum) stNum.innerText = mode === "通常" ? currentRot : rRem;
+}
+
 function updateUI() {
   document.getElementById("hits").innerText = hits;
   document.getElementById("rush-count").innerText = rushCount;
@@ -1524,9 +1574,6 @@ function updateUI() {
   document.getElementById("total-rot").innerText = totalRot;
   document.getElementById("balance").innerText =
     Math.floor(totalBall).toLocaleString();
-  const modeLabel = M.modeLabel(mode);
-  document.getElementById("sub-display").innerText =
-    mode === "通常" ? `通常:${lcdCount}` : `${modeLabel}:${rRem}`;
   // EVA は液晶の左下に回転数（通常時は現在回転、時短・ST は残り回転）を出し、その右に保留を並べる
   // （style.css の .screen.eva-lcd .lcd-bottom）。ST 中は保留の箱を小さく（.screen.st-mode）
   const isEva = currentMachine === "eva";
@@ -1534,8 +1581,7 @@ function updateUI() {
   if (stBox) stBox.style.display = isEva ? "flex" : "none";
   const stLabel = document.getElementById("st-remain-label");
   if (stLabel) stLabel.innerText = mode === "通常" ? "回転" : "残り";
-  const stNum = document.getElementById("st-remain-num");
-  if (stNum) stNum.innerText = mode === "通常" ? currentRot : rRem;
+  updateRemainUI();
   const scr = document.getElementById("screen");
   if (scr && scr.classList) {
     scr.classList.toggle("eva-lcd", isEva);

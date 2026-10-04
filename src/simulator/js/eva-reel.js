@@ -40,7 +40,7 @@ const EVA_DOUBLE_REACH_RATE = 0.15;
 // 当りのうち 3%（どのリーチでも。ユーザー方針 2026-10-04）
 const EVA_REVIVE_RATE = 0.03;
 const EVA_REVIVE_WAIT_MS = 900;
-const EVA_REVIVE_SHOW_MS = 1100; // 「復活！！」と当り図柄を見せる時間
+const EVA_REVIVE_SHOW_MS = 1100; // 復活の閃光の後に当り図柄を見せる時間
 // 大当り濃厚のリーチ（段 → 数字）
 const EVA_SURE_REACH = { top: 4, bot: 2 };
 const EVA_ROWS = ["top", "mid", "bot"];
@@ -142,6 +142,12 @@ function evaWinRows(grid) {
   return EVA_LINE_KEYS.filter((k) => evaRowHit(rows[k]) || evaIsBoso(rows[k]));
 }
 
+// キャラ連続の仮停止（擬似連のズレ目）と同じ形：同じ数字が 3 列とも見えている（ラインにはそろっていない）。
+// キャラ連続でしか出ない形なので、通常時・時短中のふだんのハズレ（リーチなし）では止めない（ユーザー指摘 2026-10-04）
+function evaLooksLikeCharaStop(grid) {
+  return EVA_STRIP_UP.some((n) => grid.every((cells) => cells.includes(n)));
+}
+
 function evaPickLine() {
   const r = Math.random();
   return r < 0.35 ? "top" : r < 0.65 ? "mid" : "bot";
@@ -222,7 +228,9 @@ function evaBuildGrid(spec) {
     }
     const reachOk = evaReachLines(grid).join() === reach.join();
     const winOk = evaWinRows(grid).join() === win.join();
-    if (reachOk && winOk) {
+    // リーチなしのハズレは、キャラ連続の仮停止と同じ形（3 列とも同じ数字が見えている）で止めない
+    const pseudoOk = isHit || tenpai || !evaLooksLikeCharaStop(grid);
+    if (reachOk && winOk && pseudoOk) {
       return { grid, cpos, reach, win, boso: !!(isHit && spec.boso) };
     }
   }
@@ -255,43 +263,148 @@ function evaReelBelow(col, d) {
   return col === 0 ? evaReelNext(d) : evaReelPrev(d);
 }
 
-// 窓の外に少しだけ見える上下の段（リールの続き）。上下が数字ならその外はブランク、
-// 上下がブランクならその外は隣の数字（ユーザー方針 2026-10-03）
+// 窓の外にはみ出して見える上下の段（リールの続き）を 2 段ずつ：[上の 1 段目, 上の 2 段目, 下の 1 段目, 下の 2 段目]。
+// 上下が数字ならその外はブランク、さらに外は隣の数字。上下がブランクならその外は隣の数字、さらに外はブランク
+// （ユーザー方針 2026-10-03。ブランクを小さくして数字を詰めたので 2 段目まで見える。2026-10-04）
 function evaPeekOf(col, cells) {
   const [t, m, b] = cells;
-  const above = t === null && m !== null ? evaReelAbove(col, m) : null;
-  const below = b === null && m !== null ? evaReelBelow(col, m) : null;
-  return [above, below];
+  const a1 = t === null && m !== null ? evaReelAbove(col, m) : null;
+  const a2 = t !== null ? evaReelAbove(col, t) : null;
+  const b1 = b === null && m !== null ? evaReelBelow(col, m) : null;
+  const b2 = b !== null ? evaReelBelow(col, b) : null;
+  return [a1, a2, b1, b2];
+}
+
+// 3×3 の 1 段（null はブランクの小さい ◆）。extraCls は前に空白を付けたクラス（" hot" など）。
+// zcard・data-n：図柄のカードとその色（style.css の .zcard[data-n]）
+function evaCellHtml(n, extraCls) {
+  if (n === null) return `<span class="cell blank${extraCls}">◆</span>`;
+  return `<span class="cell zcard ${evaCellClass(n)}${extraCls}" data-n="${n}">${n}</span>`;
+}
+
+// リーチの中の列の止まり方：最後の数コマを 1 コマずつ差し替えるとカクカクして見えた（ユーザー指摘 2026-10-04）ので、
+// 列の中に図柄を縦に並べた帯を作り、translateY を CSS の transition でなめらかに動かして止める（通常時・時短・ST 共通）。
+// 3×3（grid）：中の列のリールの位置 from → to（位置が減ると図柄は下へ流れる。回っている間と同じ向き）。
+// 数字 3 つ：数字 from → to（evaReelNext の順に、上から下へ流れる）
+const EVA_ROLL_MS = 1100; // リーチの中の列が流れて止まるまで
+const EVA_ROLL_REVIVE_MS = 260; // 復活で当り図柄へ滑り込む 1 コマ
+const EVA_ROLL_EASE = "cubic-bezier(0.15, 0.6, 0.3, 1)"; // 止まり際がゆっくり
+async function evaRollCenter(grid, from, to, ms) {
+  const el = document.getElementById("d2");
+  const done = () => {
+    if (grid) evaGridSetCol(1, evaWindow(1, to));
+    else evaPlainSet(2, to);
+  };
+  if (!el || !el.style) {
+    await evaSleep(ms);
+    done();
+    return;
+  }
+  if (grid) {
+    const cs = EVA_REEL_CELLS[1];
+    const at = (p) => cs[((p % EVA_REEL_LEN) + EVA_REEL_LEN) % EVA_REEL_LEN];
+    // 帯は from と to の小さいほうの 2 つ上から、大きいほうの 4 つ下まで（上下にはみ出す段を含む）
+    const lo = Math.min(from, to);
+    const hi = Math.max(from, to);
+    let html = "";
+    for (let p = lo - 2; p <= hi + 4; p++) html += evaCellHtml(at(p), "");
+    el.className = "digit grid-col upg-scroll";
+    el.innerHTML = `<div class="upg-strip">${html}</div>`;
+    const strip = el.firstChild;
+    const c = strip && strip.children;
+    const winH = el.clientHeight || 0;
+    if (!strip || !strip.style || !c || c.length < 2 || !winH) {
+      await evaSleep(ms);
+      done();
+      return;
+    }
+    // 数字とブランクで段の高さが違うので、測った位置で合わせる：位置 p のとき中段（帯の p-lo+3 番目）の
+    // 真ん中を窓の真ん中に
+    const y = (p) => {
+      const k = c[p - lo + 3];
+      return winH / 2 - (k.offsetTop - c[0].offsetTop + k.offsetHeight / 2);
+    };
+    strip.style.transition = "none";
+    strip.style.transform = `translateY(${y(from)}px)`;
+    void strip.offsetHeight;
+    strip.style.transition = `transform ${ms}ms ${EVA_ROLL_EASE}`;
+    strip.style.transform = `translateY(${y(to)}px)`;
+    await evaSleep(ms);
+    done();
+    return;
+  }
+  // 数字 3 つ：今の高さの窓に数字を縦に並べ、上から下へ流す（帯の上が to、下が from）
+  const h = el.offsetHeight || 0;
+  if (!h) {
+    await evaSleep(ms);
+    done();
+    return;
+  }
+  const seq = [from];
+  for (let n = from; n !== to && seq.length < 12;) {
+    n = evaReelNext(n);
+    seq.push(n);
+  }
+  // 図柄拡大は 1 つずつが縦長のカード（.zcard）。流れている間は列そのもののカードを外す
+  const item = (d) => {
+    const color = getDigitClass(d, mode).replace("digit ", "");
+    const glyph = evaZoomNow ? `<span class="zoom-glyph">${d}</span>` : d;
+    const card = evaZoomNow ? ` zcard" data-n="${d}` : "";
+    return `<span class="roll-item ${color}${card}" style="height:${h}px;line-height:${h}px">${glyph}</span>`;
+  };
+  if (el.classList) el.classList.remove("zcard");
+  el.style.height = `${h}px`;
+  el.style.overflow = "hidden";
+  el.innerHTML = `<div class="roll-strip">${[...seq].reverse().map(item).join("")}</div>`;
+  const strip = el.firstChild;
+  if (strip && strip.style) {
+    strip.style.transition = "none";
+    strip.style.transform = `translateY(${-(seq.length - 1) * h}px)`;
+    void strip.offsetHeight;
+    strip.style.transition = `transform ${ms}ms ${EVA_ROLL_EASE}`;
+    strip.style.transform = "translateY(0px)";
+  }
+  await evaSleep(ms);
+  el.style.height = "";
+  el.style.overflow = "";
+  done();
 }
 
 // 列 col（0〜2）に 3 段（null はブランク）を出す。hot の段は光らせる（リーチ）、win の段は当りの光。
-// 窓の上下には 1 段ずつ少しだけはみ出して見える段（peek）を付ける（省けばリールの並びから決める）
+// 窓の上下にはみ出して見える段を 2 段ずつ付ける（省けばリールの並びから決める）。
+// peek を渡すとき（昇格演出の帯。ブランクなし）は [上, 下] の 1 段ずつ
 function evaGridSetCol(col, cells, hot, win, peek) {
   const el = document.getElementById("d" + (col + 1));
   if (!el) return;
   el.className = "digit grid-col";
-  const [above, below] = peek || evaPeekOf(col, cells);
+  const [a1, a2, b1, b2] = peek
+    ? [peek[0], undefined, peek[1], undefined]
+    : evaPeekOf(col, cells);
   const cell = (n, key, extra) => {
-    if (n === null) return `<span class="cell blank${extra}">◆</span>`;
-    const cls = ["cell", evaCellClass(n)];
-    if (key && hot && hot.includes(key)) cls.push("hot");
-    if (key && win && win.includes(key)) cls.push("win");
-    return `<span class="${cls.join(" ")}${extra}">${n}</span>`;
+    if (n === undefined) return "";
+    let cls = extra;
+    if (n !== null && key && hot && hot.includes(key)) cls = " hot" + cls;
+    if (n !== null && key && win && win.includes(key)) cls = " win" + cls;
+    return evaCellHtml(n, cls);
   };
   el.innerHTML =
-    cell(above, null, " peek") +
+    cell(a2, null, " peek") +
+    cell(a1, null, " peek") +
     cells.map((n, row) => cell(n, EVA_ROWS[row], "")).join("") +
-    cell(below, null, " peek");
+    cell(b1, null, " peek") +
+    cell(b2, null, " peek");
 }
 
-// --- 数字 3 つ（ST 中） ---
+// --- 数字 3 つ（ST 中）・図柄拡大（縦長のカード） ---
 function evaPlainSet(i, n, cls) {
   const el = document.getElementById("d" + i);
   if (!el) return;
-  el.className = cls || getDigitClass(n, mode);
-  // 図柄拡大中は数字を縦に伸ばす（style.css の .zoom-glyph）
-  if (evaZoomNow) el.innerHTML = `<span class="zoom-glyph">${n}</span>`;
-  else el.innerText = n;
+  el.className = (cls || getDigitClass(n, mode)) + (evaZoomNow ? " zcard" : "");
+  // 図柄拡大中は縦長のカードに数字（style.css の .zcard・.zoom-glyph）
+  if (evaZoomNow) {
+    if (el.setAttribute) el.setAttribute("data-n", String(n));
+    el.innerHTML = `<span class="zoom-glyph">${n}</span>`;
+  } else el.innerText = n;
 }
 
 // 待機中の図柄（起動・機種選択・リセット時）：中段に 3・5・7（上段・下段はブランク）
@@ -478,20 +591,204 @@ async function evaPlayNextMovie(item) {
   screen.classList.remove("movie-next");
 }
 
-// 復活当りの「復活！！」（style.css の .revive-banner）
-function evaReviveBanner(on) {
-  const screen = document.getElementById("screen");
-  if (!screen || !screen.appendChild) return;
-  let el = document.getElementById("revive-banner");
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "revive-banner";
-    el.className = "revive-banner";
-    el.textContent = "復活！！";
-    screen.appendChild(el);
+// --- ドックン予告の炎 ---
+// 液晶（#screen）に fx-flame-blue / fx-flame-red が付いている間、canvas に炎を描く（クラスの付け外しを見張る）。
+// 楕円のグラデーションを伸び縮みさせるだけでは炎に見えなかった（ユーザー指摘 2026-10-04）ので、
+// 火の粒を下から湧かせ、揺れながら細り、色が芯 → 炎の色 → 外側へ変わって消える。
+// 実機の録画（E:/rec 2026-10-03 21-44-54 の 3.5〜6 秒）どおり、液晶の真ん中に高く立つ炎の柱。
+// 赤も青と同じ形で色だけ違う（液晶いっぱいに広げた赤は分かりにくかった。ユーザー指摘 2026-10-04）
+const EVA_FLAME_COLORS = {
+  // 芯・炎・外側（RGB）
+  blue: [
+    [200, 245, 255],
+    [40, 160, 255],
+    [10, 30, 200],
+  ],
+  red: [
+    [255, 190, 110],
+    [255, 45, 20],
+    [150, 0, 20],
+  ],
+};
+// 形：spread＝根元の広がり（液晶の幅に対して。wall は幅いっぱいに一様）、pull＝真ん中へ寄る強さ、
+// spawn＝1 コマ（60fps 換算）に湧かせる粒の数、rise＝上る速さ（液晶の高さに対して）、life＝寿命（コマ）、
+// size＝粒の大きさ（高さに対して）、stretch＝粒の縦の伸び
+const EVA_FLAME_STYLE = {
+  blue: {
+    spread: 0.11,
+    pull: 0.0018,
+    spawn: 8,
+    rise: [0.011, 0.007],
+    life: [55, 40],
+    size: [0.075, 0.05],
+    stretch: 1.5,
+  },
+};
+EVA_FLAME_STYLE.red = EVA_FLAME_STYLE.blue;
+const EVA_FLAME_SPRITES = 24; // 色の段（寿命の割合ごとの粒の絵）
+const evaFlame = {
+  canvas: null,
+  ctx: null,
+  raf: 0,
+  color: null,
+  parts: [],
+  sprites: null,
+  last: 0,
+};
+
+// 色の段ごとの粒（ぼかした丸）を先に描いておき、毎コマはそれを置くだけにする
+function evaFlameSprites(color) {
+  const [core, mid, out] = EVA_FLAME_COLORS[color];
+  const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  const list = [];
+  for (let k = 0; k < EVA_FLAME_SPRITES; k++) {
+    const t = k / (EVA_FLAME_SPRITES - 1);
+    const c =
+      t < 0.35 ? mix(core, mid, t / 0.35) : mix(mid, out, (t - 0.35) / 0.65);
+    const s = document.createElement("canvas");
+    s.width = s.height = 64;
+    const g = s.getContext("2d");
+    const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grd.addColorStop(0, `rgba(${c},1)`);
+    grd.addColorStop(0.4, `rgba(${c},0.55)`);
+    grd.addColorStop(1, `rgba(${c},0)`);
+    g.fillStyle = grd;
+    g.fillRect(0, 0, 64, 64);
+    list.push(s);
   }
-  el.classList.toggle("on", !!on);
+  return list;
 }
+
+function evaFlameFrame(now) {
+  const f = evaFlame;
+  if (!f.color || !f.ctx) return;
+  const cv = f.canvas;
+  const W = cv.width;
+  const H = cv.height;
+  const dt = Math.min(3, f.last ? (now - f.last) / 16.7 : 1);
+  f.last = now;
+  const cx = W / 2;
+  const st = EVA_FLAME_STYLE[f.color];
+  // 粒を湧かせる（柱は真ん中ほど多く、壁は幅いっぱいに一様）
+  const n = Math.round(st.spawn * dt);
+  for (let i = 0; i < n; i++) {
+    const g = (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
+    const x0 = st.wall ? Math.random() * W : cx + g * W * st.spread;
+    f.parts.push({
+      x: x0,
+      x0,
+      y: H * (0.98 + Math.random() * 0.06),
+      vx: (Math.random() - 0.5) * W * 0.002,
+      vy: -H * (st.rise[0] + Math.random() * st.rise[1]),
+      r: H * (st.size[0] + Math.random() * st.size[1]),
+      life: 0,
+      max: st.life[0] + Math.random() * st.life[1],
+      ph: Math.random() * Math.PI * 2,
+    });
+  }
+  const ctx = f.ctx;
+  ctx.clearRect(0, 0, W, H);
+  ctx.globalCompositeOperation = "lighter";
+  const sway = Math.sin(now / 260) * W * 0.0015; // 炎全体がゆらっと傾く
+  const keep = [];
+  for (const p of f.parts) {
+    p.life += dt;
+    const t = p.life / p.max;
+    if (t >= 1) continue;
+    // 揺らぎ（粒ごとに位相のずれた横揺れ）と、柱は上へ行くほど真ん中へ寄る（壁は湧いた位置の上へ）
+    const home = st.wall ? p.x0 : cx;
+    p.vx +=
+      ((home - p.x) * (st.wall ? 0.002 : st.pull) +
+        (Math.random() - 0.5) * W * 0.0012) *
+      dt;
+    p.x += (p.vx + Math.sin(now / 90 + p.ph) * W * 0.0018 + sway) * dt;
+    p.y += p.vy * dt;
+    p.vy *= 1 - 0.004 * dt;
+    const r = p.r * (1 - t * 0.85);
+    const a = t < 0.1 ? t / 0.1 : 1 - (t - 0.1) / 0.9;
+    ctx.globalAlpha = Math.max(0, a) * 0.55;
+    const sp =
+      f.sprites[
+        Math.min(EVA_FLAME_SPRITES - 1, Math.floor(t * EVA_FLAME_SPRITES))
+      ];
+    // 縦に長い粒にして、炎の舌のように見せる
+    ctx.drawImage(sp, p.x - r, p.y - r * st.stretch, r * 2, r * 2 * st.stretch);
+    keep.push(p);
+  }
+  f.parts = keep;
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "source-over";
+  f.raf = requestAnimationFrame(evaFlameFrame);
+}
+
+function evaFlameSet(screen, color) {
+  const f = evaFlame;
+  if (color === f.color) return;
+  f.color = color;
+  if (!color) {
+    cancelAnimationFrame(f.raf);
+    f.parts = [];
+    if (f.canvas) f.canvas.style.display = "none";
+    return;
+  }
+  if (!f.canvas) {
+    f.canvas = document.createElement("canvas");
+    f.canvas.className = "eva-flame";
+    screen.appendChild(f.canvas);
+    f.ctx = f.canvas.getContext("2d");
+  }
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  f.canvas.width = Math.round((screen.clientWidth || 300) * dpr);
+  f.canvas.height = Math.round((screen.clientHeight || 350) * dpr);
+  f.canvas.style.display = "block";
+  f.sprites = evaFlameSprites(color);
+  f.parts = [];
+  f.last = 0;
+  cancelAnimationFrame(f.raf);
+  f.raf = requestAnimationFrame(evaFlameFrame);
+}
+
+// リーチがかかったら 0.5 秒後に炎（液晶の fx-flame-*）を消す。次の変動が始まっていたら何もしない
+const EVA_FLAME_OFF_MS = 500;
+function evaFlameOffAfterReach() {
+  const screen = document.getElementById("screen");
+  if (!screen || !screen.classList || !screen.classList.contains) return;
+  if (
+    !screen.classList.contains("fx-flame-blue") &&
+    !screen.classList.contains("fx-flame-red")
+  )
+    return;
+  const spin = typeof lcdCount !== "undefined" ? lcdCount : null;
+  setTimeout(() => {
+    if (typeof lcdCount !== "undefined" && lcdCount !== spin) return;
+    screen.classList.remove("fx-flame-blue", "fx-flame-red");
+  }, EVA_FLAME_OFF_MS);
+}
+
+// 液晶のクラスの付け外しを見張って炎を出し入れする（試験の簡易 DOM など見張れない環境では何もしない）
+(function evaFlameWatch() {
+  if (
+    typeof document === "undefined" ||
+    typeof MutationObserver === "undefined"
+  )
+    return;
+  const screen = document.getElementById("screen");
+  if (!screen || !screen.classList) return;
+  const sync = () =>
+    evaFlameSet(
+      screen,
+      screen.classList.contains("fx-flame-red")
+        ? "red"
+        : screen.classList.contains("fx-flame-blue")
+          ? "blue"
+          : null,
+    );
+  new MutationObserver(sync).observe(screen, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  sync();
+})();
 
 // --- 図柄のキラキラ（図柄停止時発光）とシャッター ---
 // 図柄停止時発光の段が出た変動は、図柄が全部止まったらその色のキラキラを付ける（次の変動の始めまで）
@@ -500,7 +797,8 @@ function evaSpark(color) {
   const d1 = document.getElementById("d1");
   const box = d1 && d1.parentElement;
   if (!box || !box.classList) return;
-  for (const c of ["green", "red", "rainbow"]) {
+  // 白（ST の図柄停止時発光(白)）も入れる（抜けていて白はキラキラが付かなかった）
+  for (const c of ["white", "green", "red", "rainbow"]) {
     box.classList.toggle("spark-" + c, c === color);
   }
 }
@@ -530,9 +828,8 @@ function evaShowRemain(kind) {
     el.innerHTML = '<div class="rp-label">残り</div><div class="rp-num"></div>';
     screen.appendChild(el);
   }
-  // 出す数は左下の残り回転と同じ「この変動を消化する前の残り」（rRem は変動の始めに 1 減らしてあるので +1。
-  // そのまま出すと左下より 1 少なくずれていた。ユーザー指摘 2026-10-04）
-  if (el.lastChild) el.lastChild.textContent = String(rRem + 1);
+  // 出す数は左下の残り回転と同じ（左下も変動の始めに 1 減らした rRem を出す。ユーザー方針 2026-10-04）
+  if (el.lastChild) el.lastChild.textContent = String(rRem);
   el.className = "remain-panel on rp-" + kind;
   const token = (evaShowRemain.token = (evaShowRemain.token || 0) + 1);
   setTimeout(() => {
@@ -631,12 +928,13 @@ async function evaRunDisplay(eff, opts) {
   evaSpark(null);
   evaSetBg(null);
   evaMarkRemain(null);
-  // 残り 100・50・10 は毎回、変動の始めに真ん中で告知する
+  // 残り 100・50・10 は毎回、変動の始めに真ん中で告知する。
+  // 左下の残り回転は変動の始めに減らして出す（rRem）ので、その数が 100・50・10 になった変動で出す
   if (
     !opts.instant &&
     typeof mode !== "undefined" &&
     mode === "ST" &&
-    EVA_REMAIN_ANNOUNCE.includes(rRem + 1)
+    EVA_REMAIN_ANNOUNCE.includes(rRem)
   ) {
     evaShowRemain("white");
   }
@@ -645,13 +943,18 @@ async function evaRunDisplay(eff, opts) {
   if (evaSparkPending && !opts.instant) evaSpark(evaSparkPending);
 }
 
+// 直前の当りが 3×3 のどのラインで揃ったか（昇格演出の後にその盤面へ戻す。evaPlayUpgrade）。
+// { line, double }。3×3 以外（数字 3 つ・図柄拡大）で当ったら null
+let evaLastWin = null;
+
 async function evaRunDisplayMain(eff, opts) {
   // 図柄拡大は 3×3 をやめ、1 列 1 つの縦長の図柄で回す（瞬時表示では拡大しない）
   evaSetZoom(opts.instant ? null : eff.zoom);
   const grid = evaUseGrid();
+  evaLastWin = null;
   const tenpai = eff.isHit || eff.tenpai;
   // 止まる図柄と表示の部品（3×3 と数字 3 つで同じ流れにする）。回っている間はリールの位置で持つ
-  let finals, reachKeys, winKeys, setCol, frameOf, step, centerSeq;
+  let finals, reachKeys, winKeys, setCol, frameOf, step, centerRoll;
   let label = "";
   if (grid) {
     // 暴走図柄の当りは確変濃厚（見せ方だけ。通常当りでは出さない）：
@@ -693,6 +996,8 @@ async function evaRunDisplayMain(eff, opts) {
       eff.upgrade = false;
     }
     if (double) label = "ダブルリーチ！";
+    if (eff.isHit && g.win.length)
+      evaLastWin = { line: g.win[0], double: !!double };
     finals = g.grid;
     reachKeys = g.reach;
     winKeys = g.win;
@@ -705,10 +1010,10 @@ async function evaRunDisplayMain(eff, opts) {
         win && evaRowsForCol(win, col),
       );
     frameOf = (col, p) => evaWindow(col, p);
-    // 左と、中・右は逆回転
-    step = (col, p) => (col === 0 ? p - 1 : p + 1);
-    // 中は 4 セルかけて止まる（中の回る向きのまま止まる位置に近づく）
-    centerSeq = () => [g.cpos - 4, g.cpos - 3, g.cpos - 2, g.cpos - 1];
+    // 3 列とも下向きに回る（リールの位置が減ると図柄は下へ流れる。中・右が上向きに見えていた。ユーザー指摘 2026-10-04）
+    step = (col, p) => p - 1;
+    // リーチの中は 8 セル（数字 4 つ）手前からなめらかに流れて止まる（evaRollCenter）
+    centerRoll = { from: g.cpos + 8, to: g.cpos, prev: g.cpos + 1 };
   } else {
     const nums = eff.isHit
       ? [eff.hitDigit, eff.hitDigit, eff.hitDigit]
@@ -726,15 +1031,10 @@ async function evaRunDisplayMain(eff, opts) {
       );
     frameOf = (col, n) => n;
     step = (col, n) => evaReelNext(n);
-    centerSeq = () => {
-      let n = nums[1];
-      const seq = [];
-      for (let s = 0; s < 4; s++) {
-        n = evaReelPrev(n);
-        seq.unshift(n);
-      }
-      return seq;
-    };
+    // リーチの中は数字 4 つ手前からなめらかに流れて止まる（evaRollCenter）
+    let from = nums[1];
+    for (let s = 0; s < 4; s++) from = evaReelPrev(from);
+    centerRoll = { from, to: nums[1], prev: evaReelPrev(nums[1]) };
   }
   const hotOf = (col) => (col === 1 ? [] : reachKeys);
 
@@ -924,7 +1224,9 @@ async function evaRunDisplayMain(eff, opts) {
     // リーチ名 → リーチ後の予告・チャンスアップ。中の回転は SP・激アツなら長く
     const total = opts.heavy ? EVA_REEL_SP_MS : EVA_REEL_REACH_MS;
     let used = 0;
-    // SP リーチに発展したら当該保留を消す（script.js の vanishCurrentHold）
+    // ドックンの炎はリーチがかかって 0.5 秒で消す（ユーザー方針 2026-10-04）
+    evaFlameOffAfterReach();
+    // SP リーチに発展したら当該保留を消し、保留の表示をリーチ中は隠す（script.js の onSp）
     if (eff.sp && opts.onSp) opts.onSp();
     if (reachText.length) {
       show(reachText);
@@ -944,18 +1246,22 @@ async function evaRunDisplayMain(eff, opts) {
   spinning[1] = false;
   spinning[2] = false;
 
-  if (reach) {
-    // 中は最後の数コマをだんだん遅くして止める
-    const seq = centerSeq();
-    for (let s = 0; s < seq.length; s++) {
-      setCol(1, frameOf(1, seq[s]));
-      await evaSleep(120 + s * 90);
-    }
-  }
   // 復活当り：中が 1 コマ手前（ハズレ目）でいったん止まり、リーチの光も消えて間を置いてから、
   // 閃光と告知音で当り図柄へ滑り込む（ハズレからのメリハリ。ユーザー方針 2026-10-03）
   const revive =
     reach && eff.isHit && !eff.bosoShown && Math.random() < EVA_REVIVE_RATE;
+  if (reach) {
+    // 中はなめらかに流れて、だんだん遅くなって止まる（復活は 1 コマ手前で止まる）
+    await evaRollCenter(
+      grid,
+      centerRoll.from,
+      revive ? centerRoll.prev : centerRoll.to,
+      EVA_ROLL_MS,
+    );
+    // 抽選ログはリーチが終わった（中が止まった）ところで出す（リーチがかかった時点で結果が分からないように。
+    // 復活はハズレ目で止まったここで出してから復活する。ユーザー方針 2026-10-04）
+    if (opts.onResult) opts.onResult();
+  }
   const screenEl = document.getElementById("screen");
   if (revive) {
     setCol(0, finals[0]);
@@ -963,19 +1269,24 @@ async function evaRunDisplayMain(eff, opts) {
     await evaSleep(EVA_REVIVE_WAIT_MS);
     eff.revived = true;
     if (screenEl) screenEl.classList.add("fx-revive");
-    // 「復活！！」は閃光より手前の専用の大きな文字で出す（演出文字の枠だと閃光で潰れて読めなかった。
-    // ユーザー指摘 2026-10-03）
+    // 液晶に「復活！！」の文字は出さない（閃光と告知音だけ。ユーザー方針 2026-10-04）
     show("");
-    evaReviveBanner(true);
+    if (opts.onRevive) opts.onRevive();
     evaPlayNotice("impact", 1); // 復活の合図は 1 回
     await evaSleep(150);
+    // 1 コマだけなめらかに滑り込む
+    await evaRollCenter(
+      grid,
+      centerRoll.prev,
+      centerRoll.to,
+      EVA_ROLL_REVIVE_MS,
+    );
   }
   // 止まったらリーチの光を消し、当りならその段を光らせる
   [0, 1, 2].forEach((col) => setCol(col, finals[col], null, winKeys));
   if (revive) {
     await evaSleep(EVA_REVIVE_SHOW_MS);
     if (screenEl) screenEl.classList.remove("fx-revive");
-    evaReviveBanner(false);
   }
   // 暴走図柄の当りは確変濃厚
   if (eff.bosoShown) {
@@ -1037,8 +1348,8 @@ const EVA_UPGRADE_FLASH_MS = 350; // 始まりの白い光
 const EVA_UPGRADE_SCROLL_BASE_MS = 4200; // 流れる時間（1 周）
 const EVA_UPGRADE_SCROLL_STEP_MS = 180; // 1 周を超える 1 段ごとに足す時間
 const EVA_UPGRADE_SCROLL_EASE = "cubic-bezier(0.25, 0.55, 0.3, 1)"; // 止まり際がゆっくり
-const EVA_UPGRADE_ROW_PX = 62; // 1 段の高さ（style.css の --cell-h。測れたら測った値）
-const EVA_UPGRADE_PEEK_PX = 20; // 窓の上下にはみ出して見える高さ（--cell-peek。測れたら測った値）
+const EVA_UPGRADE_ROW_PX = 76; // 1 段の高さ（style.css の --cell-h。測れたら測った値）
+const EVA_UPGRADE_PEEK_PX = 8; // 窓の上下にはみ出して見える高さ（(--grid-h − 3 段) ÷ 2。測れたら測った値）
 const EVA_UPGRADE_STEP_MS = 260; // 数字 3 つの表示で 1 段進む時間（最初）
 const EVA_UPGRADE_SLOW_MS = 90; // 止まる手前で 1 段ごとに足す時間
 const EVA_UPGRADE_SLIDE_WAIT_MS = 700; // 滑りの前の止まっている間
@@ -1046,13 +1357,45 @@ const EVA_UPGRADE_SLIDE_MS = 450; // 滑りでズルッと 1 段動く時間
 const EVA_UPGRADE_ZOOM_MS = 1000; // 槍の後に図柄が大きく出る時間
 const EVA_UPGRADE_RESULT_MS = 1100; // 結果を見せる時間
 
+// オール赤の昇格演出は流れる図柄を奇数だけにする（ユーザー方針 2026-10-04）。
+// n の次の奇数・前の奇数（1→3→5→7→9→1。偶数なら隣の奇数）
+function evaOddNext(n) {
+  return n % 2 === 0 ? evaWrap(n + 1) : n === 9 ? 1 : n + 2;
+}
+function evaOddPrev(n) {
+  return n % 2 === 0 ? evaWrap(n - 1) : n === 1 ? 9 : n - 2;
+}
+function evaOddStep(n, k) {
+  for (; k > 0; k--) n = evaOddNext(n);
+  for (; k < 0; k++) n = evaOddPrev(n);
+  return n;
+}
+
+// 昇格演出の帯の i 段目（0 が始まりの from、steps が止まる to）の図柄。
+// odd：オール赤。始まりの from と止まる to のほかは奇数だけ
+// （to が偶数＝滑り・槍・昇格しない回は、止まる to だけ偶数）
+function evaUpgradeAt(from, steps, to, i, odd) {
+  if (!odd) return evaWrap(from + i);
+  if (i === 0) return from;
+  if (i < 0) return evaOddStep(from, i);
+  if (i >= steps) return i === steps ? to : evaOddStep(to, i - steps);
+  return evaOddStep(
+    to % 2 === 0 ? evaOddPrev(to) : to,
+    -(steps - i - (to % 2 === 0 ? 1 : 0)),
+  );
+}
+
 // 3 列とも同じ図柄で、上段・中段・下段を出す（中段が n。リールの並びどおり上が n+1・下が n-1）。
-// 数字 3 つの表示（ST 中のヘソ当りなど）なら中段の n だけ
-function evaUpgradeRows(n, win) {
+// 数字 3 つの表示（ST 中のヘソ当りなど）なら中段の n だけ。odd：オール赤（上下の段も奇数）
+function evaUpgradeRows(n, win, odd) {
   if (evaUseGrid()) {
     // 昇格演出の帯はブランクを挟まず数字が続くので、はみ出す段も続きの数字
-    const cells = [evaReelNext(n), n, evaReelPrev(n)];
-    const peek = [evaWrap(n + 2), evaWrap(n - 2)];
+    const cells = odd
+      ? [evaOddNext(n), n, evaOddPrev(n)]
+      : [evaReelNext(n), n, evaReelPrev(n)];
+    const peek = odd
+      ? [evaOddStep(n, 2), evaOddStep(n, -2)]
+      : [evaWrap(n + 2), evaWrap(n - 2)];
     [0, 1, 2].forEach((col) =>
       evaGridSetCol(col, cells, null, win ? ["mid"] : null, peek),
     );
@@ -1065,15 +1408,16 @@ function evaUpgradeRows(n, win) {
 
 // 3×3 の 3 列を、中段が from から steps 段先の図柄になるまでなめらかに流す（上から下へ。上段が次に中段へ来る）。
 // 各列の中に図柄を縦に並べた帯を作り、translateY を CSS の transition で動かす。
-// ms：流れる時間。途中で止めるとき（一撃）は evaUpgradeRows で帯ごと差し替える
-function evaUpgradeScroll(from, steps, ms, ease) {
+// ms：流れる時間。途中で止めるとき（一撃）は evaUpgradeRows で帯ごと差し替える。
+// to・odd：オール赤は流れる図柄を奇数だけにして to で止める（evaUpgradeAt）
+function evaUpgradeScroll(from, steps, ms, ease, to, odd) {
   // 帯の上から：steps+2 段先 … from の 2 つ手前。窓には 3 段と、その上下に少しはみ出す 1 段ずつが見える。
-  // 最初は from が中段、最後は from+steps が中段
+  // 最初は from が中段、最後は from+steps（オール赤は to）が中段
+  const end = odd ? to : evaWrap(from + steps);
   const seq = [];
-  for (let i = steps + 2; i >= -2; i--) seq.push(evaWrap(from + i));
-  const cells = seq
-    .map((n) => `<span class="cell ${evaCellClass(n)}">${n}</span>`)
-    .join("");
+  for (let i = steps + 2; i >= -2; i--)
+    seq.push(evaUpgradeAt(from, steps, end, i, odd));
+  const cells = seq.map((n) => evaCellHtml(n, "")).join("");
   const strips = [];
   [1, 2, 3].forEach((i) => {
     const el = document.getElementById("d" + i);
@@ -1119,14 +1463,32 @@ async function evaPlayUpgrade(digit, up, fast, jitan) {
   const allRed =
     Math.random() <
     (up ? EVA_UPGRADE_ALLRED_IF_UP : EVA_UPGRADE_ALLRED_IF_DOWN);
-  const finish = up ? evaUpgradeFinish() : "stop";
-  // 滑りは「奇数の 1 つ手前の偶数」で止まるので、手前が 9 になる 1 は使わない
-  const odds = finish === "slide" ? [3, 5, 9] : [1, 3, 5, 9];
-  const finalDigit = up
-    ? odds[Math.floor(Math.random() * odds.length)]
-    : [2, 4, 6, 8][Math.floor(Math.random() * 4)];
+  let finish = up ? evaUpgradeFinish() : "stop";
+  const pickOdd = () => {
+    // 滑りは「奇数の 1 つ手前の偶数」で止まるので、手前が 9 になる 1 は使わない
+    const odds = finish === "slide" ? [3, 5, 9] : [1, 3, 5, 9];
+    return odds[Math.floor(Math.random() * odds.length)];
+  };
+  let finalDigit = up ? pickOdd() : [2, 4, 6, 8][Math.floor(Math.random() * 4)];
+  // 最後に戻す盤面のライン（リーチ後に揃ったライン。3×3 以外で当ったら中段）
+  const won = evaLastWin;
+  let backLine = won ? won.line : "mid";
+  // ダブルリーチ（斜め 2 本）の偶数の当りが昇格するときは、もう 1 本の斜めの奇数に変わる
+  // （その斜めで揃い直す）。もう 1 本が 7（10R の見た目）なら、昇格の仕上げを必ず滑り・槍・一撃のどれかにする
+  // （ユーザー方針 2026-10-04）
+  if (up && won && won.double) {
+    const other = won.line === "x1" ? evaWrap(digit + 1) : evaWrap(digit - 1);
+    if (other !== 7) {
+      finalDigit = other;
+      backLine = won.line === "x1" ? "x2" : "x1";
+      if (finish === "slide" && other === 1) finish = "stop";
+    } else {
+      finish = ["slide", "lance", "ichigeki"][Math.floor(Math.random() * 3)];
+      finalDigit = pickOdd();
+    }
+  }
   if (fast) {
-    evaUpgradeRows(finalDigit, up);
+    evaUpgradeBack(backLine, finalDigit, up, allRed);
     return { digit: finalDigit, allRed, finish };
   }
   const ov = document.getElementById("effect-overlay");
@@ -1139,6 +1501,8 @@ async function evaPlayUpgrade(digit, up, fast, jitan) {
   evaSpark(null);
   evaSetBg(null);
   evaShowText(ov, "");
+  // 昇格演出の間は画面下の保留を出さない（style.css の .upgrading。ユーザー方針 2026-10-04）
+  setFx(true, "upgrading");
   // 白く光ってから炎の背景へ
   setFx(true, "fx-upg-white");
   await evaSleep(EVA_UPGRADE_FLASH_MS);
@@ -1158,17 +1522,17 @@ async function evaPlayUpgrade(digit, up, fast, jitan) {
   if (evaUseGrid()) {
     // 3×3：時間をかけてなめらかに 1 周ほど流れ、だんだん遅くなって止まる
     const ms = EVA_UPGRADE_SCROLL_BASE_MS + dist * EVA_UPGRADE_SCROLL_STEP_MS;
-    evaUpgradeScroll(digit, steps, ms);
+    evaUpgradeScroll(digit, steps, ms, null, stopAt, allRed);
     // 一撃は流れている途中（6 割ほど）で白く光って切り上げる
     await evaSleep(finish === "ichigeki" ? ms * 0.6 : ms);
-    if (finish !== "ichigeki") evaUpgradeRows(stopAt, false);
+    if (finish !== "ichigeki") evaUpgradeRows(stopAt, false, allRed);
   } else {
     // 数字 3 つ（電サポ中のヘソ当り）：1 段ずつ進めて止める
     const cut = finish === "ichigeki" ? Math.max(3, steps - 6) : steps;
     let n = digit;
     for (let s = 1; s <= cut; s++) {
-      n = evaReelNext(n);
-      evaUpgradeRows(n, false);
+      n = evaUpgradeAt(digit, steps, stopAt, s, allRed);
+      evaUpgradeRows(n, false, allRed);
       const left = steps - s;
       await evaSleep(
         EVA_UPGRADE_STEP_MS + Math.max(0, 5 - left) * EVA_UPGRADE_SLOW_MS,
@@ -1181,10 +1545,17 @@ async function evaPlayUpgrade(digit, up, fast, jitan) {
     await evaSleep(EVA_UPGRADE_SLIDE_WAIT_MS);
     n = finalDigit;
     if (evaUseGrid()) {
-      evaUpgradeScroll(stopAt, 1, EVA_UPGRADE_SLIDE_MS, "ease-out");
+      evaUpgradeScroll(
+        stopAt,
+        1,
+        EVA_UPGRADE_SLIDE_MS,
+        "ease-out",
+        finalDigit,
+        allRed,
+      );
       await evaSleep(EVA_UPGRADE_SLIDE_MS);
     } else {
-      evaUpgradeRows(n, false);
+      evaUpgradeRows(n, false, allRed);
       await evaSleep(EVA_UPGRADE_SLIDE_MS);
     }
   } else if (finish === "lance") {
@@ -1207,19 +1578,57 @@ async function evaPlayUpgrade(digit, up, fast, jitan) {
     n = finalDigit;
   }
   setFx(false, "fx-upg-flame", "fx-upg-allred");
-  evaUpgradeRows(finalDigit, up);
+  // 止まったら、ほかの図柄を消して揃った図柄だけを 0.5 秒見せ、そのあとリーチ後に揃ったラインの盤面に戻す
+  // （昇格したらその図柄で揃い直す。ユーザー方針 2026-10-04）
+  evaUpgradeAlone(finalDigit, up, allRed);
+  const lamp = up ? document.getElementById("lamp") : null;
   if (up) {
-    const lamp = document.getElementById("lamp");
     if (lamp) lamp.classList.add("lamp-active");
     evaPlayNotice("impact", 1);
-    await evaSleep(EVA_UPGRADE_RESULT_MS);
-    if (lamp) lamp.classList.remove("lamp-active");
-  } else {
-    // 昇格しなかったときは文字を出さずにそのまま時短へ（「時短 100回」の表示は要らない。ユーザー方針 2026-10-04）
-    await evaSleep(EVA_UPGRADE_RESULT_MS);
   }
+  await evaSleep(EVA_UPGRADE_ALONE_MS);
+  evaUpgradeBack(backLine, finalDigit, up, allRed);
+  // 昇格しなかったときは文字を出さずにそのまま時短へ（「時短 100回」の表示は要らない。ユーザー方針 2026-10-04）
+  await evaSleep(EVA_UPGRADE_RESULT_MS - EVA_UPGRADE_ALONE_MS);
+  if (lamp) lamp.classList.remove("lamp-active");
+  setFx(false, "upgrading");
   evaShowText(ov, "");
   return { digit: finalDigit, allRed, finish };
+}
+
+// 昇格演出で揃った図柄だけを見せる（3×3 は 3 列とも真ん中に 1 つずつ。数字 3 つはそのまま）
+const EVA_UPGRADE_ALONE_MS = 500;
+function evaUpgradeAlone(n, win, odd) {
+  if (!evaUseGrid()) {
+    evaUpgradeRows(n, win, odd);
+    return;
+  }
+  [1, 2, 3].forEach((i) => {
+    const el = document.getElementById("d" + i);
+    if (!el) return;
+    el.className = "digit grid-col";
+    el.innerHTML = evaCellHtml(n, win ? " win" : "");
+  });
+}
+
+// 3×3 の盤面を、ライン line に図柄 n が揃った形にする（各列はリールの並びどおり）
+function evaGridForLine(line, n) {
+  return [0, 1, 2].map((col) =>
+    evaWindow(col, evaPosOf(col, n, EVA_LINES[line][col])),
+  );
+}
+
+// 昇格演出の後の盤面：3×3 はリーチ後に揃ったライン line の盤面に、図柄 n で戻す（そのラインを光らせる）。
+// 数字 3 つ（電サポ中のヘソ当り）は揃った数字のまま
+function evaUpgradeBack(line, n, win, odd) {
+  if (!evaUseGrid()) {
+    evaUpgradeRows(n, win, odd);
+    return;
+  }
+  const grid = evaGridForLine(line, n);
+  [0, 1, 2].forEach((col) =>
+    evaGridSetCol(col, grid[col], null, evaRowsForCol([line], col)),
+  );
 }
 
 // ハズレ図柄（数字 3 つ・ST 中）：リーチは左右を揃え、中は当り図柄の 1 コマ先（ズレ目）。
