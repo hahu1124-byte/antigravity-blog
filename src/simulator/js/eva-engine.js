@@ -806,10 +806,42 @@ function evaIsLeadLayer(L) {
   return !!L.lead || L.key === "hold";
 }
 
+// 層の中の次回予告（EVA_NEXT_MOVIE_IDS）の番号（層ごとに 1 回だけ数える）
+function evaNextIdx(L) {
+  if (!L._nextIdx) {
+    L._nextIdx = L.states
+      .map((s, i) => (EVA_NEXT_MOVIE_IDS.includes(s.id) ? i : -1))
+      .filter((i) => i >= 0);
+  }
+  return L._nextIdx;
+}
+
+// 先読み・前兆の層の出る割合を 1/(1−q) 倍にする（次回予告の出なかった回だけで引くため）。
+// 合計が 1 を超えたら 1 に収める（その分だけ出た回の当りやすさが表からずれる）
+function evaBoostRow(row, q) {
+  if (q <= 0 || q >= 1) return row;
+  const out = row.slice();
+  const last = out.length - 1;
+  let sum = 0;
+  for (let i = 0; i < last; i++) {
+    out[i] /= 1 - q;
+    sum += out[i];
+  }
+  if (sum > 1) {
+    for (let i = 0; i < last; i++) out[i] /= sum;
+    sum = 1;
+  }
+  out[last] = 1 - sum;
+  return out;
+}
+
 // 当否の決まった表から演出の組合せを 1 つ引く（リーチ → 各層。層の中は 1 つ）。
 // plan（evaForcePlan）があれば、その層はその演出に決め、リーチはその演出が出られるものから引く。
 // noLead：保留に居る間に見える層を「なし」にする（抜けの残保留）。
-// f：その組合せの事後確率（液晶に出す信頼度）
+// 次回予告はいきなり来る（ユーザー方針 2026-10-04）：次回予告の層を先に引き、出たら先読み・前兆の層
+// （evaIsLeadLayer）を「なし」にする。出なかった回は先読み・前兆の出る割合を 1/(1−q) 倍
+// （q：このリーチ・当否で次回予告が出る割合）にして、各演出の出た回の当りやすさを表のまま保つ。
+// f：その組合せの事後確率（液晶に出す信頼度。上の引き方どおりの割合で数える）
 function evaDrawEffects(T, isHit, plan, noLead) {
   const R = T.reach;
   const P = T.pHit;
@@ -828,16 +860,57 @@ function evaDrawEffects(T, isHit, plan, noLead) {
       shown.push({ layer: R, state: reach, no: rp.no });
     reachPushed = true;
   };
+  // 次回予告の層を先に引く（層は当否とリーチが決まれば互いに独立なので、引く順は割合を変えない）
+  const nextPick = new Map();
+  let nextShown = false;
+  let keepH = 1; // このリーチで次回予告が出ない割合（当り用・ハズレ用）
+  let keepM = 1;
+  for (const L of T.layers) {
+    const idx = evaNextIdx(L);
+    if (!idx.length) continue;
+    const p =
+      plan && plan.L === L
+        ? { i: plan.si, no: -1 }
+        : evaPickNo((isHit ? L.hit : L.miss)[r]);
+    nextPick.set(L, p);
+    if (idx.includes(p.i)) nextShown = true;
+    keepH *= 1 - idx.reduce((a, i) => a + L.hit[r][i], 0);
+    keepM *= 1 - idx.reduce((a, i) => a + L.miss[r][i], 0);
+  }
+  // デバッグで先読み・前兆を指定したときは、そちらを出して次回予告を外す
+  if (nextShown && plan && evaIsLeadLayer(plan.L)) {
+    for (const [L, p] of nextPick) {
+      if (evaNextIdx(L).includes(p.i))
+        nextPick.set(L, { i: L.states.length - 1, no: -1 });
+    }
+    nextShown = false;
+  }
   for (const L of T.layers) {
     // リーチ前の層 → リーチ → リーチに付く層の順に並べる（液晶の段の順）
     if (L.isLinked) pushReach();
     const none = L.states.length - 1;
+    const lead = evaIsLeadLayer(L);
     let p;
-    if (plan && plan.L === L) p = { i: plan.si, no: -1 };
-    else if (noLead && evaIsLeadLayer(L)) p = { i: none, no: -1 };
-    else p = evaPickNo((isHit ? L.hit : L.miss)[r]);
-    H *= L.hit[r][p.i];
-    M *= L.miss[r][p.i];
+    // 先読み・前兆の層の当り用・ハズレ用の割合（次回予告の出なかった回は 1/(1−q) 倍）
+    let rowH = L.hit[r];
+    let rowM = L.miss[r];
+    if (nextPick.has(L)) p = nextPick.get(L);
+    else if (plan && plan.L === L) p = { i: plan.si, no: -1 };
+    else if (noLead && lead) p = { i: none, no: -1 };
+    else if (lead && nextShown) {
+      p = { i: none, no: -1 };
+      rowH = rowM = null; // 次回予告が出たら必ず「なし」
+    } else {
+      if (lead) {
+        rowH = evaBoostRow(rowH, 1 - keepH);
+        rowM = evaBoostRow(rowM, 1 - keepM);
+      }
+      p = evaPickNo(isHit ? rowH : rowM);
+    }
+    if (rowH) {
+      H *= rowH[p.i];
+      M *= rowM[p.i];
+    }
     const s = L.states[p.i];
     if (s.id !== "none") shown.push({ layer: L, state: s, no: p.no });
   }
