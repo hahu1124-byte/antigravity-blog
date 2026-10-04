@@ -781,9 +781,10 @@ const HOLD_LANCE_GLYPH = 0.72; // ST の数字の字の高さ（文字の大き�
 // 槍が出てくる高さ＝液晶の数字の下端（液晶の上端からの px）。通常時・時短中は 3×3 の中段の数字、
 // ST は数字 3 つ。どちらも数字の並びの上下の真ん中に置いてある
 function lanceClipTop(screen) {
-  const dc = screen.querySelector(".digit-container");
-  const col = dc && dc.querySelector(".digit");
-  if (!col) return screen.clientHeight / 2;
+  // 測れない環境（試験の簡易 DOM など）では液晶の上下の真ん中
+  const dc = screen.querySelector && screen.querySelector(".digit-container");
+  const col = dc && dc.querySelector && dc.querySelector(".digit");
+  if (!col || !dc.getBoundingClientRect) return (screen.clientHeight || 0) / 2;
   const sr = screen.getBoundingClientRect();
   const r = dc.getBoundingClientRect();
   const mid = r.top - sr.top + r.height / 2;
@@ -816,7 +817,11 @@ function playLanceStage(holdEl) {
     stage.style.setProperty("--ls-x", `${c.x}px`);
     stage.style.setProperty("--ls-y", `${c.y}px`);
   }
-  stage.style.setProperty("--ls-clip", `${Math.round(lanceClipTop(screen))}px`);
+  if (stage.style && stage.style.setProperty)
+    stage.style.setProperty(
+      "--ls-clip",
+      `${Math.round(lanceClipTop(screen))}px`,
+    );
   // 続けて出たときもアニメを最初からにする
   stage.classList.remove("on");
   void stage.offsetWidth;
