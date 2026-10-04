@@ -1043,6 +1043,7 @@ async function startProcess() {
   lcdCount++;
   if (mode !== "通常") {
     rRem--;
+    updateRemainUI(); // 残り回転は消化が始まった瞬間に減らして見せる
   }
   if (eff.isRight) {
     totalBall -= 0.05;
@@ -1543,6 +1544,17 @@ function toggleOpt(t) {
   document.getElementById("btn-" + t).classList.toggle("active");
 }
 
+// 回転数の表示（液晶の左下と下の欄）。ST・時短の残り回転は変動が始まった瞬間に 1 減らして出す
+// （startProcess が rRem を減らした直後にも呼ぶ。ユーザー方針 2026-10-04）
+function updateRemainUI() {
+  const sub = document.getElementById("sub-display");
+  if (sub)
+    sub.innerText =
+      mode === "通常" ? `通常:${lcdCount}` : `${M.modeLabel(mode)}:${rRem}`;
+  const stNum = document.getElementById("st-remain-num");
+  if (stNum) stNum.innerText = mode === "通常" ? currentRot : rRem;
+}
+
 function updateUI() {
   document.getElementById("hits").innerText = hits;
   document.getElementById("rush-count").innerText = rushCount;
@@ -1550,9 +1562,6 @@ function updateUI() {
   document.getElementById("total-rot").innerText = totalRot;
   document.getElementById("balance").innerText =
     Math.floor(totalBall).toLocaleString();
-  const modeLabel = M.modeLabel(mode);
-  document.getElementById("sub-display").innerText =
-    mode === "通常" ? `通常:${lcdCount}` : `${modeLabel}:${rRem}`;
   // EVA は液晶の左下に回転数（通常時は現在回転、時短・ST は残り回転）を出し、その右に保留を並べる
   // （style.css の .screen.eva-lcd .lcd-bottom）。ST 中は保留の箱を小さく（.screen.st-mode）
   const isEva = currentMachine === "eva";
@@ -1560,8 +1569,7 @@ function updateUI() {
   if (stBox) stBox.style.display = isEva ? "flex" : "none";
   const stLabel = document.getElementById("st-remain-label");
   if (stLabel) stLabel.innerText = mode === "通常" ? "回転" : "残り";
-  const stNum = document.getElementById("st-remain-num");
-  if (stNum) stNum.innerText = mode === "通常" ? currentRot : rRem;
+  updateRemainUI();
   const scr = document.getElementById("screen");
   if (scr && scr.classList) {
     scr.classList.toggle("eva-lcd", isEva);

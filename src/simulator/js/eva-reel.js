@@ -610,9 +610,8 @@ function evaShowRemain(kind) {
     el.innerHTML = '<div class="rp-label">残り</div><div class="rp-num"></div>';
     screen.appendChild(el);
   }
-  // 出す数は左下の残り回転と同じ「この変動を消化する前の残り」（rRem は変動の始めに 1 減らしてあるので +1。
-  // そのまま出すと左下より 1 少なくずれていた。ユーザー指摘 2026-10-04）
-  if (el.lastChild) el.lastChild.textContent = String(rRem + 1);
+  // 出す数は左下の残り回転と同じ（左下も変動の始めに 1 減らした rRem を出す。ユーザー方針 2026-10-04）
+  if (el.lastChild) el.lastChild.textContent = String(rRem);
   el.className = "remain-panel on rp-" + kind;
   const token = (evaShowRemain.token = (evaShowRemain.token || 0) + 1);
   setTimeout(() => {
@@ -711,12 +710,13 @@ async function evaRunDisplay(eff, opts) {
   evaSpark(null);
   evaSetBg(null);
   evaMarkRemain(null);
-  // 残り 100・50・10 は毎回、変動の始めに真ん中で告知する
+  // 残り 100・50・10 は毎回、変動の始めに真ん中で告知する。
+  // 左下の残り回転は変動の始めに減らして出す（rRem）ので、その数が 100・50・10 になった変動で出す
   if (
     !opts.instant &&
     typeof mode !== "undefined" &&
     mode === "ST" &&
-    EVA_REMAIN_ANNOUNCE.includes(rRem + 1)
+    EVA_REMAIN_ANNOUNCE.includes(rRem)
   ) {
     evaShowRemain("white");
   }

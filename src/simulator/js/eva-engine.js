@@ -1017,6 +1017,17 @@ function createEvaJob(isRight, regime, opts = {}) {
       acc: evaSummarize(kept),
     };
   }
+  // キャラ連続の回は図柄拡大を出さない（キャラ連続は 3×3 の図柄で仮停止を見せる。ユーザー方針 2026-10-04）。
+  // デバッグで図柄拡大を指定したときは除く
+  const isZoom = (s) => s.zoom || s.zoomRed;
+  if (
+    draw.shown.some(({ state }) => state.chara) &&
+    draw.shown.some(({ state }) => isZoom(state)) &&
+    !(plan && isZoom(plan.L.states[plan.si]))
+  ) {
+    const kept = draw.shown.filter(({ state }) => !isZoom(state));
+    draw = { ...draw, shown: kept, acc: evaSummarize(kept) };
+  }
   const { reach, shown, acc, f } = draw;
 
   // 当り種別：全回転は 10R、確変濃厚の演出かシンクロ当りは 3R確変、他は逆算した比で
