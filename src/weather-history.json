@@ -1,11 +1,5 @@
 [
   {
-    "date": "2026-08-26",
-    "tempMax": "38",
-    "tempMin": null,
-    "telop": "晴のち曇"
-  },
-  {
     "date": "2026-08-27",
     "tempMax": "34",
     "tempMin": null,
@@ -236,6 +230,12 @@
   {
     "date": "2026-10-04",
     "tempMax": "25",
+    "tempMin": null,
+    "telop": "曇り"
+  },
+  {
+    "date": "2026-10-05",
+    "tempMax": "23",
     "tempMin": null,
     "telop": "曇り"
   }
