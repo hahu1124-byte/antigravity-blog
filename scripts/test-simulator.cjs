@@ -505,6 +505,15 @@ function assertClose(label, actual, expected, tolerance) {
       }
     }
     if (!lanceOne || !twoStep || !spin || !fixed || !stock || !current) throw new Error("変化保留の種類が出そろわない: " + [lanceOne, twoStep, spin, fixed, stock, current]);
+    // ST 中は必ず「変化」（横回転）を挟む：赤・虹は 1 段なら横回転で直接、2 段なら青か緑の後に槍
+    let stOne = 0, stTwo = 0;
+    for (let i = 0; i < 2000; i++) {
+      const v = i % 2 ? "red" : "rainbow";
+      const p = evaHoldPlan(v, v, false, "s");
+      if (p.seq[0].fx !== "spin" || p.seq.at(-1).view !== v || (p.seq.length === 2 && p.seq[1].fx !== "lance")) throw new Error("ST の赤・虹の変化の流れが違う: " + JSON.stringify(p.seq));
+      if (p.seq.length === 1) stOne++; else stTwo++;
+    }
+    if (!stOne || !stTwo) throw new Error("ST の赤・虹の 1 段・2 段が出そろわない: " + [stOne, stTwo]);
 
     // 当該の残りの段：高速オートは最後の色をすぐ、SP に発展したら当該保留は消えて残りの変化は打ち切る
     const k = { holdSeq: [{ view: "blue", fx: "spin" }, { view: "red", fx: "lance" }], holdStep: 0, currentView: "none" };

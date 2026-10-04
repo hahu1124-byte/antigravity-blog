@@ -713,25 +713,30 @@ const EVA_HOLD_STOCK_RATE = 0.65; // 先読みで変わる割合（残りは当�
 const EVA_HOLD_STOCK_RATE_ST = 0.1;
 const EVA_HOLD_TWO_STEP_RATE = 0.6; // 通常の赤・虹のうち青か緑を挟む割合
 
-// 返り値：{ seq：[{ view, fx: "spin"|"lance" }]（順に適用）, when："stock"|"current"|null, view：入賞時の見た目 }
+// 返り値：{ seq：[{ view, fx: "spin"|"lance" }]（順に適用）, when："stock"|"current"|null, view：入賞時の見た目 }。
+// ST 中は必ず「変化」（立方体の横回転）を挟む（ユーザー方針 2026-10-04）：
+//   通常保留 → 変化 → 青〜虹（1 段）／通常保留 → 変化 → 青か緑 → 槍 → 赤・虹（2 段。赤・虹の EVA_HOLD_TWO_STEP_RATE）。
+//   槍でいきなり赤・虹になる流れは ST には無い
 function evaHoldPlan(holdType, holdId, shift, regime) {
   if (!EVA_HOLD_CHANGE.includes(holdType)) {
     return { seq: [], when: null, view: holdType };
   }
+  const st = regime === "s" || regime === "sf";
   const lance = holdType === "red" || holdType === "rainbow";
   const seq = [];
-  if (
+  const twoStep =
     lance &&
     !holdId.startsWith("lance") &&
-    Math.random() < EVA_HOLD_TWO_STEP_RATE
-  ) {
+    Math.random() < EVA_HOLD_TWO_STEP_RATE;
+  if (twoStep) {
     seq.push({ view: Math.random() < 0.5 ? "blue" : "green", fx: "spin" });
   }
-  seq.push({ view: holdType, fx: lance ? "lance" : "spin" });
-  const stockRate =
-    regime === "s" || regime === "sf"
-      ? EVA_HOLD_STOCK_RATE_ST
-      : EVA_HOLD_STOCK_RATE;
+  // ST の 1 段の赤・虹は変化（横回転）で直接。それ以外の赤・虹は槍
+  seq.push({
+    view: holdType,
+    fx: lance && (twoStep || !st) ? "lance" : "spin",
+  });
+  const stockRate = st ? EVA_HOLD_STOCK_RATE_ST : EVA_HOLD_STOCK_RATE;
   const when = shift || Math.random() >= stockRate ? "current" : "stock";
   return { seq, when, view: "none" };
 }
