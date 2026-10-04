@@ -1054,16 +1054,21 @@ async function startProcess() {
     addLog(`${M.modeLabel(mode)} ${lcdCount}回転【先バレ】信頼度:40.0%`);
   }
   // trustが50以上（激熱以上）、または当落が確定している場合のみログに出力
-  // レバブル（枠の震え・保留の震え）が出た変動は、信頼度が低くても必ずログに出す
-  if (
+  // レバブル（枠の震え・保留の震え）が出た変動は、信頼度が低くても必ずログに出す。
+  // EVA はリーチが終わった（中が止まった）ところで出す（evaRunDisplay の onResult。リーチがかかった時点で
+  // 結果が分からないように。ユーザー方針 2026-10-04）。リーチの無い変動は図柄が止まってから
+  const resultLog =
     (logTrustOf(eff) >= 50.0 || eff.isHit || eff.vibe || eff.holdShake) &&
     !eff.deferHitLog
-  ) {
-    const modeLabel = M.modeLabel(mode);
-    addLog(
-      `${modeLabel} ${lcdCount}回転【${eff.displayName}】${trustLabel(eff)}`,
-    );
-  }
+      ? `${M.modeLabel(mode)} ${lcdCount}回転【${eff.displayName}】${trustLabel(eff)}`
+      : null;
+  let resultLogged = false;
+  const flushResultLog = () => {
+    if (!resultLog || resultLogged) return;
+    resultLogged = true;
+    addLog(resultLog);
+  };
+  if (currentMachine !== "eva") flushResultLog();
   const machineEl = document.getElementById("machine"),
     screenEl = document.getElementById("screen");
   if (eff.vibe) {
@@ -1152,7 +1157,10 @@ async function startProcess() {
       steps: [...leadSteps, ...(eff.steps || [])],
       holdMs,
       onSp: () => vanishCurrentHold(eff),
+      onResult: flushResultLog,
+      onRevive: () => addLog(">> 復活！！"),
     });
+    flushResultLog();
     // 変化を見せた当該保留は、図柄が止まったら消す（次の回転はその 0.5 秒後。下の nextDelay）。
     // 色が変わって 0.7 秒たっていなければ、たつまで待ってから消す
     if (eff.holdShown) {
@@ -1160,7 +1168,6 @@ async function startProcess() {
       if (keep > 0) await evaSleep(keep);
       vanishCurrentHold(eff);
     }
-    if (eff.revived) addLog(">> 復活！！");
     if (eff.isHit) hitDigit = eff.bosoShown ? "1・3・5" : eff.hitDigit;
   } else {
     await spinPlainDigits(eff, currentSpeed);

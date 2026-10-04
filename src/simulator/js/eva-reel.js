@@ -40,7 +40,7 @@ const EVA_DOUBLE_REACH_RATE = 0.15;
 // 当りのうち 3%（どのリーチでも。ユーザー方針 2026-10-04）
 const EVA_REVIVE_RATE = 0.03;
 const EVA_REVIVE_WAIT_MS = 900;
-const EVA_REVIVE_SHOW_MS = 1100; // 「復活！！」と当り図柄を見せる時間
+const EVA_REVIVE_SHOW_MS = 1100; // 復活の閃光の後に当り図柄を見せる時間
 // 大当り濃厚のリーチ（段 → 数字）
 const EVA_SURE_REACH = { top: 4, bot: 2 };
 const EVA_ROWS = ["top", "mid", "bot"];
@@ -273,7 +273,7 @@ function evaCellHtml(n, extraCls) {
 
 // リーチの中の列の止まり方：最後の数コマを 1 コマずつ差し替えるとカクカクして見えた（ユーザー指摘 2026-10-04）ので、
 // 列の中に図柄を縦に並べた帯を作り、translateY を CSS の transition でなめらかに動かして止める（通常時・時短・ST 共通）。
-// 3×3（grid）：中の列のリールの位置 from → to（位置が増えると図柄は上へ流れる。回っている間と同じ向き）。
+// 3×3（grid）：中の列のリールの位置 from → to（位置が減ると図柄は下へ流れる。回っている間と同じ向き）。
 // 数字 3 つ：数字 from → to（evaReelNext の順に、上から下へ流れる）
 const EVA_ROLL_MS = 1100; // リーチの中の列が流れて止まるまで
 const EVA_ROLL_REVIVE_MS = 260; // 復活で当り図柄へ滑り込む 1 コマ
@@ -292,8 +292,11 @@ async function evaRollCenter(grid, from, to, ms) {
   if (grid) {
     const cs = EVA_REEL_CELLS[1];
     const at = (p) => cs[((p % EVA_REEL_LEN) + EVA_REEL_LEN) % EVA_REEL_LEN];
+    // 帯は from と to の小さいほうの 1 つ上から、大きいほうの 3 つ下まで（上下にはみ出す段を含む）
+    const lo = Math.min(from, to);
+    const hi = Math.max(from, to);
     let html = "";
-    for (let p = from - 1; p <= to + 3; p++) html += evaCellHtml(at(p), "");
+    for (let p = lo - 1; p <= hi + 3; p++) html += evaCellHtml(at(p), "");
     el.className = "digit grid-col upg-scroll";
     el.innerHTML = `<div class="upg-strip">${html}</div>`;
     const strip = el.firstChild;
@@ -311,8 +314,8 @@ async function evaRollCenter(grid, from, to, ms) {
       el.clientHeight > 3 * row
         ? (el.clientHeight - 3 * row) / 2
         : EVA_UPGRADE_PEEK_PX;
-    // 位置 p のとき、帯の p-from+1 番目（上にはみ出す段の次＝上段）の上端を窓の peek に合わせる
-    const y = (p) => peek - row * (p - from + 1);
+    // 位置 p のとき、帯の p-lo+1 番目（上にはみ出す段の次＝上段）の上端を窓の peek に合わせる
+    const y = (p) => peek - row * (p - lo + 1);
     strip.style.transition = "none";
     strip.style.transform = `translateY(${y(from)}px)`;
     void strip.offsetHeight;
@@ -569,21 +572,6 @@ async function evaPlayNextMovie(item) {
   screen.classList.remove("movie-next");
 }
 
-// 復活当りの「復活！！」（style.css の .revive-banner）
-function evaReviveBanner(on) {
-  const screen = document.getElementById("screen");
-  if (!screen || !screen.appendChild) return;
-  let el = document.getElementById("revive-banner");
-  if (!el) {
-    el = document.createElement("div");
-    el.id = "revive-banner";
-    el.className = "revive-banner";
-    el.textContent = "復活！！";
-    screen.appendChild(el);
-  }
-  el.classList.toggle("on", !!on);
-}
-
 // --- 図柄のキラキラ（図柄停止時発光）とシャッター ---
 // 図柄停止時発光の段が出た変動は、図柄が全部止まったらその色のキラキラを付ける（次の変動の始めまで）
 let evaSparkPending = null;
@@ -591,7 +579,8 @@ function evaSpark(color) {
   const d1 = document.getElementById("d1");
   const box = d1 && d1.parentElement;
   if (!box || !box.classList) return;
-  for (const c of ["green", "red", "rainbow"]) {
+  // 白（ST の図柄停止時発光(白)）も入れる（抜けていて白はキラキラが付かなかった）
+  for (const c of ["white", "green", "red", "rainbow"]) {
     box.classList.toggle("spark-" + c, c === color);
   }
 }
@@ -796,10 +785,10 @@ async function evaRunDisplayMain(eff, opts) {
         win && evaRowsForCol(win, col),
       );
     frameOf = (col, p) => evaWindow(col, p);
-    // 左と、中・右は逆回転
-    step = (col, p) => (col === 0 ? p - 1 : p + 1);
+    // 3 列とも下向きに回る（リールの位置が減ると図柄は下へ流れる。中・右が上向きに見えていた。ユーザー指摘 2026-10-04）
+    step = (col, p) => p - 1;
     // リーチの中は 8 セル（数字 4 つ）手前からなめらかに流れて止まる（evaRollCenter）
-    centerRoll = { from: g.cpos - 8, to: g.cpos, prev: g.cpos - 1 };
+    centerRoll = { from: g.cpos + 8, to: g.cpos, prev: g.cpos + 1 };
   } else {
     const nums = eff.isHit
       ? [eff.hitDigit, eff.hitDigit, eff.hitDigit]
@@ -1042,6 +1031,9 @@ async function evaRunDisplayMain(eff, opts) {
       revive ? centerRoll.prev : centerRoll.to,
       EVA_ROLL_MS,
     );
+    // 抽選ログはリーチが終わった（中が止まった）ところで出す（リーチがかかった時点で結果が分からないように。
+    // 復活はハズレ目で止まったここで出してから復活する。ユーザー方針 2026-10-04）
+    if (opts.onResult) opts.onResult();
   }
   const screenEl = document.getElementById("screen");
   if (revive) {
@@ -1050,10 +1042,9 @@ async function evaRunDisplayMain(eff, opts) {
     await evaSleep(EVA_REVIVE_WAIT_MS);
     eff.revived = true;
     if (screenEl) screenEl.classList.add("fx-revive");
-    // 「復活！！」は閃光より手前の専用の大きな文字で出す（演出文字の枠だと閃光で潰れて読めなかった。
-    // ユーザー指摘 2026-10-03）
+    // 液晶に「復活！！」の文字は出さない（閃光と告知音だけ。ユーザー方針 2026-10-04）
     show("");
-    evaReviveBanner(true);
+    if (opts.onRevive) opts.onRevive();
     evaPlayNotice("impact", 1); // 復活の合図は 1 回
     await evaSleep(150);
     // 1 コマだけなめらかに滑り込む
@@ -1069,7 +1060,6 @@ async function evaRunDisplayMain(eff, opts) {
   if (revive) {
     await evaSleep(EVA_REVIVE_SHOW_MS);
     if (screenEl) screenEl.classList.remove("fx-revive");
-    evaReviveBanner(false);
   }
   // 暴走図柄の当りは確変濃厚
   if (eff.bosoShown) {

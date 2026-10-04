@@ -1000,6 +1000,23 @@ function createEvaJob(isRight, regime, opts = {}) {
   ) {
     draw = evaDrawEffects(T, isHit, plan, after);
   }
+  // ST の新次回予告は出ただけで当り（タイトルの後いきなり図柄が揃う）なので、リーチとリーチに付く演出
+  // （リーチ・リーチ後の段）は出さない（ユーザー方針 2026-10-04）。デバッグでリーチ側を指定したときは除く
+  const onReach = (L) => L === T.reach || L.isLinked || evaPhaseOf(L) !== "pre";
+  const stNext =
+    (regime === "s" || regime === "sf") &&
+    draw.reach.id !== "none" &&
+    draw.shown.some(({ state }) => EVA_NEXT_MOVIE_IDS.includes(state.id)) &&
+    !(plan && onReach(plan.L));
+  if (stNext) {
+    const kept = draw.shown.filter(({ layer }) => !onReach(layer));
+    draw = {
+      ...draw,
+      reach: T.reach.states.find((s) => s.id === "none"),
+      shown: kept,
+      acc: evaSummarize(kept),
+    };
+  }
   const { reach, shown, acc, f } = draw;
 
   // 当り種別：全回転は 10R、確変濃厚の演出かシンクロ当りは 3R確変、他は逆算した比で

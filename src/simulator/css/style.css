@@ -2026,51 +2026,6 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-wait {
   }
 }
 
-/* 「復活！！」：閃光（z-index 4）と演出文字（5）より手前に、太い縁取りの大きな文字で出す */
-.revive-banner {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  translate: -50% -50%;
-  z-index: 8;
-  display: none;
-  pointer-events: none;
-  white-space: nowrap;
-  font-family: "Shippori Mincho B1", serif;
-  font-size: clamp(2.6rem, 12vw, 4.8rem);
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  color: #fff6c8;
-  -webkit-text-stroke: 2px #b00000;
-  paint-order: stroke fill;
-  text-shadow:
-    0 0 6px #ff1a1a,
-    0 0 18px #ff1a1a,
-    0 0 30px #ffd700,
-    3px 3px 0 #000;
-}
-
-.revive-banner.on {
-  display: block;
-  animation: revive-pop 0.35s ease-out;
-}
-
-@keyframes revive-pop {
-  0% {
-    scale: 2.2;
-    opacity: 0;
-  }
-
-  60% {
-    scale: 0.92;
-    opacity: 1;
-  }
-
-  100% {
-    scale: 1;
-  }
-}
-
 /* キャラ連続：図柄を隠し、液晶の中央の窓（水色の枠）にキャラの名前と回数（×1・×2…）を出す。
    回ごとに窓の色が変わる（4 段階は 3 回目が青・4 回目が赤）。eva-reel.js の evaPlayChara */
 .screen.chara-on .digit-container {
@@ -3586,6 +3541,45 @@ body:not(.theme-eva) .voice-credit {
     spark-hue 1.2s linear infinite;
 }
 
+/* ST の数字 3 つ（大きい数字）：小さい粒では大きい数字の上でほとんど見えなかったので、粒を大きく・多くし、
+   瞬きながらふわっと上へ流れるキラキラにする（ユーザー依頼 2026-10-04）。3×3 は今までどおり */
+.digit-container[class*="spark-"] .digit:not(.grid-col)::before,
+.digit-container[class*="spark-"] .digit:not(.grid-col)::after {
+  inset: -18px -14px;
+  background:
+    radial-gradient(circle at 8% 14%, var(--sp) 0 4px, transparent 6px),
+    radial-gradient(circle at 30% 6%, #fff 0 3px, transparent 5px),
+    radial-gradient(circle at 74% 12%, var(--sp) 0 5px, transparent 7px),
+    radial-gradient(circle at 92% 34%, #fff 0 3.5px, transparent 5.5px),
+    radial-gradient(circle at 16% 46%, #fff 0 3px, transparent 5px),
+    radial-gradient(circle at 54% 40%, var(--sp) 0 3.5px, transparent 5.5px),
+    radial-gradient(circle at 86% 62%, var(--sp) 0 4.5px, transparent 6.5px),
+    radial-gradient(circle at 6% 76%, var(--sp) 0 4px, transparent 6px),
+    radial-gradient(circle at 40% 84%, #fff 0 4px, transparent 6px),
+    radial-gradient(circle at 70% 94%, var(--sp) 0 3px, transparent 5px);
+  animation:
+    spark-twinkle 0.9s ease-in-out infinite,
+    spark-drift 1.6s ease-in-out infinite alternate;
+}
+
+.digit-container.spark-rainbow .digit:not(.grid-col)::before,
+.digit-container.spark-rainbow .digit:not(.grid-col)::after {
+  animation:
+    spark-twinkle 0.9s ease-in-out infinite,
+    spark-drift 1.6s ease-in-out infinite alternate,
+    spark-hue 1.2s linear infinite;
+}
+
+@keyframes spark-drift {
+  from {
+    translate: 0 8px;
+  }
+
+  to {
+    translate: 0 -8px;
+  }
+}
+
 @keyframes spark-hue {
   from {
     filter: hue-rotate(0deg);
@@ -3755,6 +3749,8 @@ body:not(.theme-eva) .voice-credit {
   .digit-container[class*="spark-"] .digit,
   .digit-container[class*="spark-"] .digit::before,
   .digit-container[class*="spark-"] .digit::after,
+  .digit-container[class*="spark-"] .digit:not(.grid-col)::before,
+  .digit-container[class*="spark-"] .digit:not(.grid-col)::after,
   .shutter-stage.shutter-gold .sh-panel::after {
     animation: none;
   }
