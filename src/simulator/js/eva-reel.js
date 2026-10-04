@@ -580,6 +580,196 @@ async function evaPlayNextMovie(item) {
   screen.classList.remove("movie-next");
 }
 
+// --- ドックン予告の炎 ---
+// 液晶（#screen）に fx-flame-blue / fx-flame-red が付いている間、canvas に炎を描く（クラスの付け外しを見張る）。
+// 楕円のグラデーションを伸び縮みさせるだけでは炎に見えなかった（ユーザー指摘 2026-10-04）ので、
+// 火の粒を下から湧かせ、揺れながら細り、色が芯 → 炎の色 → 外側へ変わって消える。
+// 実機の録画（E:/rec 2026-10-03 21-44-54 の 3.5〜6 秒）どおり、青は液晶の真ん中に高く立つ炎の柱、
+// 赤は液晶いっぱいに縦に燃え上がる炎の壁
+const EVA_FLAME_COLORS = {
+  // 芯・炎・外側（RGB）
+  blue: [
+    [200, 245, 255],
+    [40, 160, 255],
+    [10, 30, 200],
+  ],
+  red: [
+    [255, 190, 110],
+    [255, 45, 20],
+    [150, 0, 20],
+  ],
+};
+// 形：spread＝根元の広がり（液晶の幅に対して。wall は幅いっぱいに一様）、pull＝真ん中へ寄る強さ、
+// spawn＝1 コマ（60fps 換算）に湧かせる粒の数、rise＝上る速さ（液晶の高さに対して）、life＝寿命（コマ）、
+// size＝粒の大きさ（高さに対して）、stretch＝粒の縦の伸び
+const EVA_FLAME_STYLE = {
+  blue: {
+    spread: 0.11,
+    pull: 0.0018,
+    spawn: 8,
+    rise: [0.011, 0.007],
+    life: [55, 40],
+    size: [0.075, 0.05],
+    stretch: 1.5,
+  },
+  red: {
+    wall: true,
+    pull: 0,
+    spawn: 16,
+    rise: [0.012, 0.008],
+    life: [45, 40],
+    size: [0.06, 0.05],
+    stretch: 2.4,
+  },
+};
+const EVA_FLAME_SPRITES = 24; // 色の段（寿命の割合ごとの粒の絵）
+const evaFlame = {
+  canvas: null,
+  ctx: null,
+  raf: 0,
+  color: null,
+  parts: [],
+  sprites: null,
+  last: 0,
+};
+
+// 色の段ごとの粒（ぼかした丸）を先に描いておき、毎コマはそれを置くだけにする
+function evaFlameSprites(color) {
+  const [core, mid, out] = EVA_FLAME_COLORS[color];
+  const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  const list = [];
+  for (let k = 0; k < EVA_FLAME_SPRITES; k++) {
+    const t = k / (EVA_FLAME_SPRITES - 1);
+    const c =
+      t < 0.35 ? mix(core, mid, t / 0.35) : mix(mid, out, (t - 0.35) / 0.65);
+    const s = document.createElement("canvas");
+    s.width = s.height = 64;
+    const g = s.getContext("2d");
+    const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grd.addColorStop(0, `rgba(${c},1)`);
+    grd.addColorStop(0.4, `rgba(${c},0.55)`);
+    grd.addColorStop(1, `rgba(${c},0)`);
+    g.fillStyle = grd;
+    g.fillRect(0, 0, 64, 64);
+    list.push(s);
+  }
+  return list;
+}
+
+function evaFlameFrame(now) {
+  const f = evaFlame;
+  if (!f.color || !f.ctx) return;
+  const cv = f.canvas;
+  const W = cv.width;
+  const H = cv.height;
+  const dt = Math.min(3, f.last ? (now - f.last) / 16.7 : 1);
+  f.last = now;
+  const cx = W / 2;
+  const st = EVA_FLAME_STYLE[f.color];
+  // 粒を湧かせる（柱は真ん中ほど多く、壁は幅いっぱいに一様）
+  const n = Math.round(st.spawn * dt);
+  for (let i = 0; i < n; i++) {
+    const g = (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
+    const x0 = st.wall ? Math.random() * W : cx + g * W * st.spread;
+    f.parts.push({
+      x: x0,
+      x0,
+      y: H * (0.98 + Math.random() * 0.06),
+      vx: (Math.random() - 0.5) * W * 0.002,
+      vy: -H * (st.rise[0] + Math.random() * st.rise[1]),
+      r: H * (st.size[0] + Math.random() * st.size[1]),
+      life: 0,
+      max: st.life[0] + Math.random() * st.life[1],
+      ph: Math.random() * Math.PI * 2,
+    });
+  }
+  const ctx = f.ctx;
+  ctx.clearRect(0, 0, W, H);
+  ctx.globalCompositeOperation = "lighter";
+  const sway = Math.sin(now / 260) * W * 0.0015; // 炎全体がゆらっと傾く
+  const keep = [];
+  for (const p of f.parts) {
+    p.life += dt;
+    const t = p.life / p.max;
+    if (t >= 1) continue;
+    // 揺らぎ（粒ごとに位相のずれた横揺れ）と、柱は上へ行くほど真ん中へ寄る（壁は湧いた位置の上へ）
+    const home = st.wall ? p.x0 : cx;
+    p.vx +=
+      ((home - p.x) * (st.wall ? 0.002 : st.pull) +
+        (Math.random() - 0.5) * W * 0.0012) *
+      dt;
+    p.x += (p.vx + Math.sin(now / 90 + p.ph) * W * 0.0018 + sway) * dt;
+    p.y += p.vy * dt;
+    p.vy *= 1 - 0.004 * dt;
+    const r = p.r * (1 - t * 0.85);
+    const a = t < 0.1 ? t / 0.1 : 1 - (t - 0.1) / 0.9;
+    ctx.globalAlpha = Math.max(0, a) * 0.55;
+    const sp =
+      f.sprites[
+        Math.min(EVA_FLAME_SPRITES - 1, Math.floor(t * EVA_FLAME_SPRITES))
+      ];
+    // 縦に長い粒にして、炎の舌のように見せる
+    ctx.drawImage(sp, p.x - r, p.y - r * st.stretch, r * 2, r * 2 * st.stretch);
+    keep.push(p);
+  }
+  f.parts = keep;
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = "source-over";
+  f.raf = requestAnimationFrame(evaFlameFrame);
+}
+
+function evaFlameSet(screen, color) {
+  const f = evaFlame;
+  if (color === f.color) return;
+  f.color = color;
+  if (!color) {
+    cancelAnimationFrame(f.raf);
+    f.parts = [];
+    if (f.canvas) f.canvas.style.display = "none";
+    return;
+  }
+  if (!f.canvas) {
+    f.canvas = document.createElement("canvas");
+    f.canvas.className = "eva-flame";
+    screen.appendChild(f.canvas);
+    f.ctx = f.canvas.getContext("2d");
+  }
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  f.canvas.width = Math.round((screen.clientWidth || 300) * dpr);
+  f.canvas.height = Math.round((screen.clientHeight || 350) * dpr);
+  f.canvas.style.display = "block";
+  f.sprites = evaFlameSprites(color);
+  f.parts = [];
+  f.last = 0;
+  cancelAnimationFrame(f.raf);
+  f.raf = requestAnimationFrame(evaFlameFrame);
+}
+
+// 液晶のクラスの付け外しを見張って炎を出し入れする（試験の簡易 DOM など見張れない環境では何もしない）
+(function evaFlameWatch() {
+  if (
+    typeof document === "undefined" ||
+    typeof MutationObserver === "undefined"
+  )
+    return;
+  const screen = document.getElementById("screen");
+  if (!screen || !screen.classList) return;
+  const sync = () =>
+    evaFlameSet(
+      screen,
+      screen.classList.contains("fx-flame-red")
+        ? "red"
+        : screen.classList.contains("fx-flame-blue")
+          ? "blue"
+          : null,
+    );
+  new MutationObserver(sync).observe(screen, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+  sync();
+})();
+
 // --- 図柄のキラキラ（図柄停止時発光）とシャッター ---
 // 図柄停止時発光の段が出た変動は、図柄が全部止まったらその色のキラキラを付ける（次の変動の始めまで）
 let evaSparkPending = null;

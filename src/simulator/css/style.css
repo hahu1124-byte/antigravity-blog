@@ -2806,49 +2806,40 @@ body.theme-eva .heso-overlay.hold-shift .heso-ball.heso-current > .hx-ring {
   animation: fx-pulse 0.6s ease-out 2;
 }
 
-/* ドックン予告の炎：液晶の真ん中に大きな炎の柱が立って揺らめく。青と赤の 2 種類（通常時・時短・ST 共通）
-   （実機の録画 E:/rec 2026-10-03 21-44-54 の最初の数秒） */
+/* ドックン予告の炎：炎そのものは eva-reel.js が canvas（.eva-flame）に火の粒で描く。
+   青は液晶の真ん中に高く立つ炎の柱、赤は液晶いっぱいの炎の壁（実機の録画 E:/rec 2026-10-03 21-44-54 の 3.5〜6 秒）。
+   ここは炎の後ろを暗くする膜だけ（canvas より下の z-index 3。図柄よりは上） */
 .screen.fx-flame-blue::after,
 .screen.fx-flame-red::after {
-  background:
-    radial-gradient(
-      ellipse 16% 42% at 50% 62%,
-      var(--flame-core) 0%,
-      var(--flame) 40%,
-      transparent 72%
-    ),
-    radial-gradient(
-      ellipse 26% 60% at 50% 70%,
-      var(--flame-mid) 0%,
-      transparent 70%
-    ),
-    rgba(0, 0, 0, 0.35);
-  transform-origin: 50% 100%;
-  animation: fx-flame 0.2s ease-in-out infinite alternate;
+  z-index: 3;
+  opacity: 1;
 }
 
 .screen.fx-flame-blue::after {
-  --flame-core: rgba(220, 245, 255, 0.95);
-  --flame: rgba(40, 140, 255, 0.85);
-  --flame-mid: rgba(20, 70, 255, 0.45);
+  background:
+    radial-gradient(
+      ellipse 30% 70% at 50% 100%,
+      rgba(0, 40, 160, 0.35),
+      transparent 70%
+    ),
+    rgba(0, 0, 0, 0.6);
 }
 
 .screen.fx-flame-red::after {
-  --flame-core: rgba(255, 245, 200, 0.95);
-  --flame: rgba(255, 50, 20, 0.85);
-  --flame-mid: rgba(200, 0, 0, 0.5);
+  background: linear-gradient(
+    to top,
+    rgba(120, 0, 0, 0.55),
+    rgba(20, 0, 0, 0.5)
+  );
 }
 
-@keyframes fx-flame {
-  from {
-    opacity: 0.85;
-    transform: scale(0.96, 0.94) skewX(-3deg);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1.03, 1.06) skewX(3deg);
-  }
+.screen .eva-flame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
 }
 
 /* 昇格演出：図柄の後ろが燃える背景（オール赤はチャンスアップ）と、始まり・一撃の白い光 */
