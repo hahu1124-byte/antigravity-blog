@@ -167,31 +167,152 @@ function evaVoiceOf(text) {
 }
 
 // ============================================================
-// 再生。ボタンで ON/OFF（初期は ON。オートボタンを押した後に鳴るので、ブラウザの自動再生制限に
-// かからない）。同時に重ねず、新しい声が来たら前の声を止める
+// 再生。ボタンで ON/OFF（初期は ON）。同時に重ねず、新しい声が来たら前の声を止める。
+// 音は Web Audio（AudioContext）で鳴らす。スマホのブラウザ（特に iPhone の Safari）は、画面をタップした
+// 処理の中で鳴らし始めた音しか許さない。演出のタイミング（タイマーの中）で初めて鳴らす <audio> は断られて
+// 無音になっていた（PC の Chrome は一度クリックすれば後から鳴らせるので気づかなかった。ユーザー指摘 2026-10-04）。
+// AudioContext はタップ・クリック・キー操作の処理の中で resume しておけば、その後はタイマーの中からでも鳴る。
+// iPhone は <audio> の volume も変えられない（告知音の音量・フェードが効かない）ので、音量は GainNode で下げる。
+// なお Web Audio は iPhone のマナーモード中は鳴らない
 // ============================================================
 let evaVoiceOn = true;
-let evaVoicePlaying = null;
-const evaVoiceCache = {};
+const evaAudio = {
+  ctx: null,
+  buffers: {}, // URL → 読み込んだ音（AudioBuffer）
+  loading: {}, // URL → 読み込み中の Promise
+  voice: null, // 鳴っている声（evaStartSound の返り値）
+  notices: [], // 鳴っている告知音
+};
+// 読み込み中に頼まれた音は読み込み後に鳴らすが、これより遅れたら演出とずれるので鳴らさない
+const EVA_AUDIO_LATE_MS = 1500;
+
+function evaAudioCtx() {
+  if (evaAudio.ctx) return evaAudio.ctx;
+  const AC =
+    typeof window !== "undefined" &&
+    (window.AudioContext || window.webkitAudioContext);
+  if (!AC) return null;
+  try {
+    evaAudio.ctx = new AC();
+  } catch (e) {
+    return null;
+  }
+  return evaAudio.ctx;
+}
+
+// ?v= は作り直した音声をブラウザに古いまま残さないため（作り直したら EVA_VOICE_VER を上げる）
+function evaVoiceUrl(id) {
+  return `voice/${id}.mp3?v=${EVA_VOICE_VER}`;
+}
+
+// 音声を読み込んで AudioBuffer にする（1 回だけ。失敗したら null で、次に頼まれたとき読み直す）
+function evaLoadBuffer(url) {
+  if (evaAudio.buffers[url]) return Promise.resolve(evaAudio.buffers[url]);
+  if (evaAudio.loading[url]) return evaAudio.loading[url];
+  const ctx = evaAudioCtx();
+  if (!ctx || typeof fetch === "undefined") return Promise.resolve(null);
+  const p = fetch(url)
+    .then((r) => {
+      if (!r.ok) throw new Error(String(r.status));
+      return r.arrayBuffer();
+    })
+    // 古い Safari の decodeAudioData は Promise を返さないのでコールバックで受ける
+    .then((data) => new Promise((ok, ng) => ctx.decodeAudioData(data, ok, ng)))
+    .then((buf) => (evaAudio.buffers[url] = buf))
+    .catch(() => null)
+    .then((buf) => {
+      delete evaAudio.loading[url];
+      return buf;
+    });
+  evaAudio.loading[url] = p;
+  return p;
+}
+
+// 音を 1 つ鳴らす。返り値は止めるための札 { stopped, src, gain, onended }（鳴らせない環境では null）。
+// onended を入れておくと鳴り終わったときに呼ぶ（止めたときは呼ばない）
+function evaStartSound(url, volume) {
+  const ctx = evaAudioCtx();
+  if (!ctx) return null;
+  const h = { stopped: false, src: null, gain: null, onended: null };
+  const asked = Date.now();
+  const start = (buf) => {
+    if (!buf || h.stopped || !evaVoiceOn) return;
+    if (Date.now() - asked > EVA_AUDIO_LATE_MS) return;
+    const gain = ctx.createGain();
+    gain.gain.value = volume;
+    gain.connect(ctx.destination);
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(gain);
+    src.onended = () => {
+      if (!h.stopped && h.onended) h.onended();
+    };
+    src.start(0);
+    h.src = src;
+    h.gain = gain;
+  };
+  const buf = evaAudio.buffers[url];
+  if (buf) start(buf);
+  else evaLoadBuffer(url).then(start);
+  return h;
+}
+
+function evaStopSound(h) {
+  if (!h) return;
+  h.stopped = true;
+  if (h.src) {
+    try {
+      h.src.stop();
+    } catch (e) {
+      // 止まっている音は止めなくてよい
+    }
+  }
+}
+
+// 全部の音を先に読み込んでおく（初めて操作されたとき。鳴らすときに読み込みを待たないように）
+function evaPreloadSounds() {
+  for (const v of EVA_VOICES) evaLoadBuffer(evaVoiceUrl(v.id));
+  for (const s of Object.values(EVA_NOTICE_SOUNDS)) evaLoadBuffer(s.file);
+}
+
+// タップ・クリック・キー操作のたびに呼ぶ（その処理の中で resume しないとスマホでは鳴らない）
+function evaUnlockAudio() {
+  const ctx = evaAudioCtx();
+  if (!ctx) return;
+  if (ctx.state !== "running") {
+    const p = ctx.resume();
+    if (p && p.catch) p.catch(() => {});
+    // 古い iPhone は無音を 1 回鳴らさないと鳴るようにならない
+    try {
+      const src = ctx.createBufferSource();
+      src.buffer = ctx.createBuffer(1, 1, 22050);
+      src.connect(ctx.destination);
+      src.start(0);
+    } catch (e) {
+      // 鳴らせなくてもよい
+    }
+  }
+  if (!evaUnlockAudio.loaded) {
+    evaUnlockAudio.loaded = true;
+    evaPreloadSounds();
+  }
+}
+
+if (typeof document !== "undefined" && document.addEventListener) {
+  // ボタンの onclick より先に呼ぶ（capture）。どのボタンを押しても鳴るようになる
+  for (const type of ["touchend", "click", "keydown"]) {
+    document.addEventListener(type, evaUnlockAudio, true);
+  }
+  // iPhone は裏に回すと止まるので、戻ったら鳴るように戻す（まだ一度も操作されていなければ何もしない）
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && evaAudio.ctx) evaUnlockAudio();
+  });
+}
 
 function evaPlayVoice(id) {
-  if (!evaVoiceOn || !id || typeof Audio === "undefined") return;
-  let a = evaVoiceCache[id];
-  if (!a) {
-    // ?v= は作り直した音声をブラウザに古いまま残さないため（作り直したら EVA_VOICE_VER を上げる）
-    a = new Audio(`voice/${id}.mp3?v=${EVA_VOICE_VER}`);
-    a.preload = "auto";
-    evaVoiceCache[id] = a;
-  }
-  if (evaVoicePlaying && evaVoicePlaying !== a) evaVoicePlaying.pause();
-  evaVoicePlaying = a;
-  try {
-    a.currentTime = 0;
-    const p = a.play();
-    if (p && p.catch) p.catch(() => {});
-  } catch (e) {
-    // 再生できない環境では鳴らさない
-  }
+  if (!evaVoiceOn || !id) return;
+  evaStopSound(evaAudio.voice);
+  evaAudio.voice = evaStartSound(evaVoiceUrl(id), 1);
 }
 
 // クレジット表記（使っている役の声だけ。音声素材としての配布ではない旨も添える）
@@ -249,55 +370,54 @@ function evaNoticeOf(shown) {
   return notice;
 }
 
-const evaNoticeCache = {};
-let evaNoticeTimer = null;
-// times：続けて鳴らす回数（省くと音ごとの既定。復活当りの合図などは 1 回）
+// 鳴っている告知音をすべて止める
+function evaStopNotices() {
+  for (const h of evaAudio.notices) evaStopSound(h);
+  evaAudio.notices = [];
+}
+
+// 少しずつ小さくして止める（着メロの maxMs）
+function evaFadeStop(h) {
+  if (!h || h.stopped || !h.gain || !evaAudio.ctx) return;
+  const t = evaAudio.ctx.currentTime;
+  const end = t + EVA_NOTICE_FADE_MS / 1000;
+  const g = h.gain.gain;
+  g.setValueAtTime(g.value, t);
+  g.linearRampToValueAtTime(0, end);
+  h.stopped = true; // 鳴り終わりでもう一度鳴らさない
+  try {
+    h.src.stop(end);
+  } catch (e) {
+    // 止まっている音は止めなくてよい
+  }
+}
+
+// times：続けて鳴らす回数（省くと音ごとの既定。復活当りの合図などは 1 回）。
+// 前の告知音は止めてから鳴らす
 function evaPlayNotice(id, times) {
   const snd = EVA_NOTICE_SOUNDS[id];
-  if (!evaVoiceOn || !snd || typeof Audio === "undefined") return;
-  let a = evaNoticeCache[id];
-  if (!a) {
-    a = new Audio(snd.file);
-    a.preload = "auto";
-    evaNoticeCache[id] = a;
-  }
-  clearInterval(evaNoticeTimer);
+  if (!evaVoiceOn || !snd) return;
+  evaStopNotices();
   // 鳴り終わったら残りの回数だけ頭からもう一度
-  let rest = (times || snd.times || 1) - 1;
-  a.onended = () => {
+  let rest = times || snd.times || 1;
+  const play = () => {
     if (rest-- <= 0 || !evaVoiceOn) return;
-    a.currentTime = 0;
-    const p = a.play();
-    if (p && p.catch) p.catch(() => {});
+    const h = evaStartSound(snd.file, snd.volume);
+    if (!h) return;
+    h.onended = play;
+    evaAudio.notices.push(h);
+    if (snd.maxMs) setTimeout(() => evaFadeStop(h), snd.maxMs);
   };
-  try {
-    a.volume = snd.volume;
-    a.currentTime = 0;
-    const p = a.play();
-    if (p && p.catch) p.catch(() => {});
-  } catch (e) {
-    return;
-  }
-  if (!snd.maxMs) return;
-  // 着メロは maxMs で少しずつ小さくして止める
-  setTimeout(() => {
-    const step = snd.volume / (EVA_NOTICE_FADE_MS / 50);
-    evaNoticeTimer = setInterval(() => {
-      a.volume = Math.max(0, a.volume - step);
-      if (a.volume <= 0) {
-        clearInterval(evaNoticeTimer);
-        a.pause();
-      }
-    }, 50);
-  }, snd.maxMs);
+  play();
 }
 
 // ボイスと告知音をまとめて ON/OFF
 function evaToggleVoice() {
   evaVoiceOn = !evaVoiceOn;
   if (!evaVoiceOn) {
-    if (evaVoicePlaying) evaVoicePlaying.pause();
-    for (const a of Object.values(evaNoticeCache)) a.pause();
+    evaStopSound(evaAudio.voice);
+    evaAudio.voice = null;
+    evaStopNotices();
   }
   const btn = document.getElementById("btn-voice");
   if (btn) {

@@ -1342,9 +1342,11 @@ body.theme-eva .heso-ball.heso-anim-lance {
   }
 }
 
-/* 横回転で変わる間は保留に「変化」と出す（ST の変化保留の箱と同じ） */
+/* 横回転で変わる間は保留に「変化」と出す（ST の変化保留の箱と同じ）。
+   ST 中は立方体の前から「変化」の文字の箱を見せる（heso-anim-wait。色は前のまま。script.js の stepHold） */
 body.theme-eva .heso-ball.heso-anim-spin,
-body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin,
+body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-wait {
   --hx-text: "変化";
   --hx-size: 8px;
 }
@@ -1400,12 +1402,16 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
   }
 }
 
-/* 大きな槍：赤い柄に二又の穂先。変わる保留へ右斜め上から落ちて刺さる。
+/* 大きな槍：赤い柄に二又の穂先。変わる保留へほぼ真上から伸びて刺さる。
    穂先（下端）を保留の中心（--ls-x / --ls-y。script.js の playLanceStage が入れる）に置き、
-   穂先を軸に 28 度傾けて右上から来る向きにする。落ちる動きは柄の向きに沿ってずらす */
+   穂先を軸に --ls-a だけ傾ける。動きは柄の向きに沿って、穂先が図柄の真ん中の高さ（下の切り抜きの線）に
+   ちょうど居る所（--ls-d：線から保留までの柄の向きの長さ。script.js が測る）から保留まで。
+   28 度で線より上から落としていたので、線を横切って右上から斜めに入ってくるように見えた（ユーザー指摘 2026-10-04） */
 .lance-stage {
   --ls-x: 50%;
   --ls-y: calc(100% - 22px);
+  --ls-d: 150px;
+  --ls-a: 10deg;
 }
 
 /* 槍は図柄の真ん中の高さ（液晶の上下の真ん中）より下にだけ見せ、そこから出てくるようにする
@@ -1444,22 +1450,15 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-spin {
 @keyframes ls-spear {
   0%,
   35% {
-    transform: rotate(28deg) translateY(-130%);
-    opacity: 0;
+    transform: rotate(var(--ls-a)) translateY(calc(var(--ls-d) * -1));
   }
-  45% {
-    opacity: 1;
-  }
-  66% {
-    transform: rotate(28deg) translateY(0);
-    opacity: 1;
-  }
+  66%,
   90% {
-    transform: rotate(28deg) translateY(0);
+    transform: rotate(var(--ls-a)) translateY(0);
     opacity: 1;
   }
   100% {
-    transform: rotate(28deg) translateY(0);
+    transform: rotate(var(--ls-a)) translateY(0);
     opacity: 0;
   }
 }
@@ -2306,8 +2305,25 @@ body.theme-eva .heso-overlay.hold-shift .heso-ball.heso-current > .hx-ring {
   pointer-events: none;
 }
 
+/* 出始めと消え際の透明度は外側の枠にかける。立方体（preserve-3d）そのものの opacity を動かすと、
+   PC の Chrome・Edge は立方体を平らに描いてペラペラに見えた（iPhone の Safari は平らにしないので
+   スマホでは 3D に見えていた。ユーザー指摘 2026-10-04） */
 .change-stage.on {
   display: block;
+  animation: cs-fade 1s linear forwards;
+}
+
+@keyframes cs-fade {
+  0% {
+    opacity: 0;
+  }
+  20%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 .change-stage .cs-cube {
@@ -2362,22 +2378,19 @@ body.theme-eva .heso-overlay.hold-shift .heso-ball.heso-current > .hx-ring {
   transform: rotateX(-90deg) translateZ(var(--cs-half));
 }
 
+/* 立方体は回転と大きさだけ（透明度は .change-stage の cs-fade） */
 @keyframes cs-spin {
   0% {
     transform: scale(0.3) rotateX(-14deg) rotateY(0deg);
-    opacity: 0;
   }
   20% {
     transform: scale(1) rotateX(-14deg) rotateY(120deg);
-    opacity: 1;
   }
   80% {
     transform: scale(1) rotateX(-14deg) rotateY(720deg);
-    opacity: 1;
   }
   100% {
     transform: scale(1.5) rotateX(-14deg) rotateY(720deg);
-    opacity: 0;
   }
 }
 
