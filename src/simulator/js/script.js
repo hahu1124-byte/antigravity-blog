@@ -943,10 +943,15 @@ function rejudgeStocks(newMode, remain) {
   [...rightStock, ...leftStock].forEach(slowDownForSakiyomi);
 }
 
+// ログに出す信頼度。EVA は出た演出の資料の信頼度の最大（eva-engine.js の maxTrust）
+function logTrustOf(eff) {
+  return eff.maxTrust !== undefined ? eff.maxTrust : eff.trust;
+}
+
 function trustLabel(eff) {
   // 右打ち（ST・時短・残保留）の当りはすべて 10R 確変なので、種別まで書かずに「当り濃厚」とする
   if (eff.sure && eff.isRight) return "当り濃厚";
-  return eff.sure ? eff.sure : `信頼度:${eff.trust.toFixed(1)}%`;
+  return eff.sure ? eff.sure : `信頼度:${logTrustOf(eff).toFixed(1)}%`;
 }
 
 // ============================================================
@@ -1027,7 +1032,7 @@ async function startProcess() {
   // trustが50以上（激熱以上）、または当落が確定している場合のみログに出力
   // レバブル（枠の震え・保留の震え）が出た変動は、信頼度が低くても必ずログに出す
   if (
-    (eff.trust >= 50.0 || eff.isHit || eff.vibe || eff.holdShake) &&
+    (logTrustOf(eff) >= 50.0 || eff.isHit || eff.vibe || eff.holdShake) &&
     !eff.deferHitLog
   ) {
     const modeLabel = M.modeLabel(mode);
