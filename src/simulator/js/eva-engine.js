@@ -1028,6 +1028,44 @@ function createEvaJob(isRight, regime, opts = {}) {
     const kept = draw.shown.filter(({ state }) => !isZoom(state));
     draw = { ...draw, shown: kept, acc: evaSummarize(kept) };
   }
+  // 震える保留（振動保留・デバイス振動先読み・レバブル先読み）は消化すると必ず当該レバブルが起きる
+  // （ユーザー方針 2026-10-04。全状態共通）。レバブルの層が「なし」なら、その当否・リーチの表の割合で
+  // レバブルを 1 つ引いて足す
+  const lever = T.layers.find((l) => l.key === "lever");
+  if (
+    lever &&
+    draw.shown.some(
+      ({ state }) => state.holdType === "vibe" || state.holdShake,
+    ) &&
+    !draw.shown.some(({ layer }) => layer === lever)
+  ) {
+    const r = T.reach.states.indexOf(draw.reach);
+    const row = (r >= 0 && (isHit ? lever.hit : lever.miss)[r]) || [];
+    const last = lever.states.length - 1;
+    let sum = 0;
+    for (let i = 0; i < last; i++) sum += row[i] || 0;
+    let pick = -1;
+    if (sum > 0) {
+      let x = Math.random() * sum;
+      for (let i = 0; i < last && pick < 0; i++) {
+        x -= row[i] || 0;
+        if (x < 0) pick = i;
+      }
+      if (pick < 0) pick = 0;
+    } else {
+      // 表に無いときは、ハズレは 100% 未満のもの、当りはいちばん弱いもの
+      pick = isHit
+        ? 0
+        : lever.states.findIndex((s, i) => i < last && s.trust < 100);
+    }
+    if (pick >= 0) {
+      const kept = [
+        ...draw.shown,
+        { layer: lever, state: lever.states[pick], no: -1 },
+      ];
+      draw = { ...draw, shown: kept, acc: evaSummarize(kept) };
+    }
+  }
   const { reach, shown, acc, f } = draw;
 
   // 当り種別：全回転は 10R、確変濃厚の演出かシンクロ当りは 3R確変、他は逆算した比で

@@ -943,10 +943,15 @@ async function evaRunDisplay(eff, opts) {
   if (evaSparkPending && !opts.instant) evaSpark(evaSparkPending);
 }
 
+// 直前の当りが 3×3 のどのラインで揃ったか（昇格演出の後にその盤面へ戻す。evaPlayUpgrade）。
+// { line, double }。3×3 以外（数字 3 つ・図柄拡大）で当ったら null
+let evaLastWin = null;
+
 async function evaRunDisplayMain(eff, opts) {
   // 図柄拡大は 3×3 をやめ、1 列 1 つの縦長の図柄で回す（瞬時表示では拡大しない）
   evaSetZoom(opts.instant ? null : eff.zoom);
   const grid = evaUseGrid();
+  evaLastWin = null;
   const tenpai = eff.isHit || eff.tenpai;
   // 止まる図柄と表示の部品（3×3 と数字 3 つで同じ流れにする）。回っている間はリールの位置で持つ
   let finals, reachKeys, winKeys, setCol, frameOf, step, centerRoll;
@@ -991,6 +996,8 @@ async function evaRunDisplayMain(eff, opts) {
       eff.upgrade = false;
     }
     if (double) label = "ダブルリーチ！";
+    if (eff.isHit && g.win.length)
+      evaLastWin = { line: g.win[0], double: !!double };
     finals = g.grid;
     reachKeys = g.reach;
     winKeys = g.win;
@@ -1456,14 +1463,32 @@ async function evaPlayUpgrade(digit, up, fast, jitan) {
   const allRed =
     Math.random() <
     (up ? EVA_UPGRADE_ALLRED_IF_UP : EVA_UPGRADE_ALLRED_IF_DOWN);
-  const finish = up ? evaUpgradeFinish() : "stop";
-  // 滑りは「奇数の 1 つ手前の偶数」で止まるので、手前が 9 になる 1 は使わない
-  const odds = finish === "slide" ? [3, 5, 9] : [1, 3, 5, 9];
-  const finalDigit = up
-    ? odds[Math.floor(Math.random() * odds.length)]
-    : [2, 4, 6, 8][Math.floor(Math.random() * 4)];
+  let finish = up ? evaUpgradeFinish() : "stop";
+  const pickOdd = () => {
+    // 滑りは「奇数の 1 つ手前の偶数」で止まるので、手前が 9 になる 1 は使わない
+    const odds = finish === "slide" ? [3, 5, 9] : [1, 3, 5, 9];
+    return odds[Math.floor(Math.random() * odds.length)];
+  };
+  let finalDigit = up ? pickOdd() : [2, 4, 6, 8][Math.floor(Math.random() * 4)];
+  // 最後に戻す盤面のライン（リーチ後に揃ったライン。3×3 以外で当ったら中段）
+  const won = evaLastWin;
+  let backLine = won ? won.line : "mid";
+  // ダブルリーチ（斜め 2 本）の偶数の当りが昇格するときは、もう 1 本の斜めの奇数に変わる
+  // （その斜めで揃い直す）。もう 1 本が 7（10R の見た目）なら、昇格の仕上げを必ず滑り・槍・一撃のどれかにする
+  // （ユーザー方針 2026-10-04）
+  if (up && won && won.double) {
+    const other = won.line === "x1" ? evaWrap(digit + 1) : evaWrap(digit - 1);
+    if (other !== 7) {
+      finalDigit = other;
+      backLine = won.line === "x1" ? "x2" : "x1";
+      if (finish === "slide" && other === 1) finish = "stop";
+    } else {
+      finish = ["slide", "lance", "ichigeki"][Math.floor(Math.random() * 3)];
+      finalDigit = pickOdd();
+    }
+  }
   if (fast) {
-    evaUpgradeRows(finalDigit, up, allRed);
+    evaUpgradeBack(backLine, finalDigit, up, allRed);
     return { digit: finalDigit, allRed, finish };
   }
   const ov = document.getElementById("effect-overlay");
@@ -1551,19 +1576,56 @@ async function evaPlayUpgrade(digit, up, fast, jitan) {
     n = finalDigit;
   }
   setFx(false, "fx-upg-flame", "fx-upg-allred");
-  evaUpgradeRows(finalDigit, up, allRed);
+  // 止まったら、ほかの図柄を消して揃った図柄だけを 0.5 秒見せ、そのあとリーチ後に揃ったラインの盤面に戻す
+  // （昇格したらその図柄で揃い直す。ユーザー方針 2026-10-04）
+  evaUpgradeAlone(finalDigit, up, allRed);
+  const lamp = up ? document.getElementById("lamp") : null;
   if (up) {
-    const lamp = document.getElementById("lamp");
     if (lamp) lamp.classList.add("lamp-active");
     evaPlayNotice("impact", 1);
-    await evaSleep(EVA_UPGRADE_RESULT_MS);
-    if (lamp) lamp.classList.remove("lamp-active");
-  } else {
-    // 昇格しなかったときは文字を出さずにそのまま時短へ（「時短 100回」の表示は要らない。ユーザー方針 2026-10-04）
-    await evaSleep(EVA_UPGRADE_RESULT_MS);
   }
+  await evaSleep(EVA_UPGRADE_ALONE_MS);
+  evaUpgradeBack(backLine, finalDigit, up, allRed);
+  // 昇格しなかったときは文字を出さずにそのまま時短へ（「時短 100回」の表示は要らない。ユーザー方針 2026-10-04）
+  await evaSleep(EVA_UPGRADE_RESULT_MS - EVA_UPGRADE_ALONE_MS);
+  if (lamp) lamp.classList.remove("lamp-active");
   evaShowText(ov, "");
   return { digit: finalDigit, allRed, finish };
+}
+
+// 昇格演出で揃った図柄だけを見せる（3×3 は 3 列とも真ん中に 1 つずつ。数字 3 つはそのまま）
+const EVA_UPGRADE_ALONE_MS = 500;
+function evaUpgradeAlone(n, win, odd) {
+  if (!evaUseGrid()) {
+    evaUpgradeRows(n, win, odd);
+    return;
+  }
+  [1, 2, 3].forEach((i) => {
+    const el = document.getElementById("d" + i);
+    if (!el) return;
+    el.className = "digit grid-col";
+    el.innerHTML = evaCellHtml(n, win ? " win" : "");
+  });
+}
+
+// 3×3 の盤面を、ライン line に図柄 n が揃った形にする（各列はリールの並びどおり）
+function evaGridForLine(line, n) {
+  return [0, 1, 2].map((col) =>
+    evaWindow(col, evaPosOf(col, n, EVA_LINES[line][col])),
+  );
+}
+
+// 昇格演出の後の盤面：3×3 はリーチ後に揃ったライン line の盤面に、図柄 n で戻す（そのラインを光らせる）。
+// 数字 3 つ（電サポ中のヘソ当り）は揃った数字のまま
+function evaUpgradeBack(line, n, win, odd) {
+  if (!evaUseGrid()) {
+    evaUpgradeRows(n, win, odd);
+    return;
+  }
+  const grid = evaGridForLine(line, n);
+  [0, 1, 2].forEach((col) =>
+    evaGridSetCol(col, grid[col], null, evaRowsForCol([line], col)),
+  );
 }
 
 // ハズレ図柄（数字 3 つ・ST 中）：リーチは左右を揃え、中は当り図柄の 1 コマ先（ズレ目）。

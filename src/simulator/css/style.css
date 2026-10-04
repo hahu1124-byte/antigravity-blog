@@ -340,10 +340,11 @@ body.theme-eva .digit-container .zcard::after {
     var(--zg-bg);
 }
 
-/* 図柄拡大（縦長の 1×1）のカード：縦長に合わせて人物を描き直し、数字を大きく */
+/* 図柄拡大（縦長の 1×1）のカード：横幅は 3×3 と同じで縦だけ伸ばす。人物は縦長に合わせて描き直し、
+   数字は 3×3 と同じ幅のまま縦に伸ばす（.zoom-glyph） */
 body.theme-eva .digit-container.zoom .zcard {
   padding: 0 8% 9% 0;
-  font-size: clamp(4rem, 19vw, 6.4rem);
+  font-size: 2.6rem;
 }
 
 body.theme-eva .digit-container.zoom .zcard::before {
@@ -377,7 +378,7 @@ body.theme-eva .digit-container.zoom .zcard::after {
 }
 
 body.theme-eva .digit-container.zoom .zcard .zoom-glyph {
-  transform: scaleY(1.25);
+  transform: scaleY(2.3);
   transform-origin: bottom;
 }
 
@@ -517,7 +518,8 @@ body.theme-eva .digit-container .zcard[data-n="9"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 31%;
+  /* 横幅は 3×3 の列と同じ（縦だけ伸ばす。ユーザー指摘 2026-10-04） */
+  width: min(84px, 31%);
   height: var(--grid-h); /* 3×3 と同じ高さで液晶がずれないように */
   overflow: hidden;
   font-size: clamp(5rem, 24vw, 8.4rem);
