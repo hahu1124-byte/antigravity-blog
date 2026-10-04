@@ -618,6 +618,7 @@ function carryHold(oldJob, newJob) {
     newJob.holdWhen = oldJob.holdWhen;
     newJob.holdStep = oldJob.holdStep;
     newJob.currentView = oldJob.currentView;
+    newJob.holdNoise = oldJob.holdNoise;
   } else if (oldJob.currentView && oldJob.currentView !== "none") {
     const seen = HOLD_VIEW_RANK[oldJob.currentView];
     const last = newJob.holdSeq && newJob.holdSeq[newJob.holdSeq.length - 1];
@@ -628,6 +629,7 @@ function carryHold(oldJob, newJob) {
       newJob.holdSeq = [];
     }
     newJob.currentView = oldJob.currentView;
+    if (oldJob.holdNoise) newJob.holdNoise = true; // 見えていたノイズの模様も引き継ぐ
   }
   return newJob;
 }
@@ -1473,6 +1475,9 @@ function paintHold(el, job, isCurrent) {
   else if (job.justIn) el.classList.add("heso-in");
   if (job) {
     el.classList.add("heso-" + job.currentView);
+    // ノイズ保留から変わった保留は、色が付いてもノイズの模様のまま（ST）
+    if (job.holdNoise && job.currentView !== "odd-noise")
+      el.classList.add("heso-noisy");
     if (job.holdAnim) el.classList.add("heso-anim-" + job.holdAnim);
     // レバブル先読みの保留は入賞から消化まで震える（変化のアニメ中・消えた後は除く）
     else if (job.holdShake && job.currentView !== "gone")
