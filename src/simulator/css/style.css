@@ -247,6 +247,180 @@ body.light-mode .machine {
   text-shadow: 0 0 8px #4a6cff;
 }
 
+/* EVA の 3×3 の図柄：図柄一覧の画像に寄せたカード（2026-10-04 ユーザー依頼。前の「枠を付けない」方針を置き換え）。
+   角を欠いた金属の枠（::before）・中の絵（::after：背景・人物の髪・顔・服・下の「EVANGELION」の帯）・
+   右下に斜体の数字。中身の DOM は数字だけのまま（eva-reel.js の data-n で色を変える）。
+   奇数は橙の枠に赤い数字、2・6 は青、4・8 は紫、時短・ST の 7 は金 */
+body.theme-eva .digit.grid-col .cell:not(.blank) {
+  --zg-cut: polygon(
+    9% 0,
+    91% 0,
+    100% 9%,
+    100% 91%,
+    91% 100%,
+    9% 100%,
+    0 91%,
+    0 9%
+  );
+  --zg-frame: linear-gradient(
+    160deg,
+    #fff2b0 0%,
+    #ffb020 35%,
+    #ff7a00 60%,
+    #8a3a00 100%
+  );
+  --zg-bg: radial-gradient(
+    circle at 45% 40%,
+    #ff8a2a 0%,
+    #b42000 55%,
+    #3a0500 100%
+  );
+  --zg-ink: #ff2a1a;
+  --zg-hair: #2a2a3a;
+  --zg-suit: #2a3a6a;
+  --zg-skin: #f6d6bf;
+  position: relative;
+  isolation: isolate;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0 7% 13% 0;
+  font-family: "Arial Black", "Arial", sans-serif;
+  font-size: 1.85rem;
+  font-style: italic;
+  font-weight: 900;
+  color: var(--zg-ink);
+  -webkit-text-stroke: 3px #fff;
+  paint-order: stroke fill;
+  text-shadow: 2px 2px 0 #000;
+}
+
+/* 枠 */
+body.theme-eva .digit.grid-col .cell:not(.blank)::before,
+body.theme-eva .digit.grid-col .cell:not(.blank)::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  clip-path: var(--zg-cut);
+}
+
+body.theme-eva .digit.grid-col .cell:not(.blank)::before {
+  inset: 2px 0;
+  background: var(--zg-frame);
+}
+
+/* 中の絵：上から 帯・顔・髪・服・背景 */
+body.theme-eva .digit.grid-col .cell:not(.blank)::after {
+  inset: 6px 4px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'%3E%3Crect width='100' height='14' fill='%23101014'/%3E%3Ctext x='38' y='10.5' font-size='9' font-family='Arial' font-weight='700' fill='%23d8dce4' text-anchor='middle'%3EEVANGELION%3C/text%3E%3C/svg%3E")
+      bottom / 100% 16% no-repeat,
+    radial-gradient(
+        ellipse 17% 21% at 42% 46%,
+        var(--zg-skin) 0 96%,
+        transparent 100%
+      )
+      no-repeat,
+    radial-gradient(
+        ellipse 27% 33% at 42% 38%,
+        var(--zg-hair) 0 96%,
+        transparent 100%
+      )
+      no-repeat,
+    radial-gradient(
+        ellipse 42% 30% at 42% 92%,
+        var(--zg-suit) 0 96%,
+        transparent 100%
+      )
+      no-repeat,
+    var(--zg-bg);
+}
+
+/* 2・6：青 */
+body.theme-eva .digit.grid-col .cell:is([data-n="2"], [data-n="6"]) {
+  --zg-frame: linear-gradient(
+    160deg,
+    #e6f0ff 0%,
+    #5a8cff 35%,
+    #2a50d0 60%,
+    #0e1f6a 100%
+  );
+  --zg-bg: radial-gradient(
+    circle at 45% 40%,
+    #5aa0ff 0%,
+    #1a3a9a 55%,
+    #050f3a 100%
+  );
+  --zg-ink: #2a5aff;
+}
+
+/* 4・8：紫 */
+body.theme-eva .digit.grid-col .cell:is([data-n="4"], [data-n="8"]) {
+  --zg-frame: linear-gradient(
+    160deg,
+    #f0e4ff 0%,
+    #a070ff 35%,
+    #6a30d0 60%,
+    #2a0e6a 100%
+  );
+  --zg-bg: radial-gradient(
+    circle at 45% 40%,
+    #b070ff 0%,
+    #4a1a9a 55%,
+    #12053a 100%
+  );
+  --zg-ink: #7a3aff;
+}
+
+/* 時短・ST の 7：金 */
+body.theme-eva .digit.grid-col .cell.gold {
+  --zg-frame: linear-gradient(
+    160deg,
+    #fffbe0 0%,
+    #ffd84a 35%,
+    #e0a800 60%,
+    #7a5400 100%
+  );
+  --zg-ink: #ffd400;
+}
+
+/* 人物の色（一覧の画像の髪・服の色に合わせる） */
+body.theme-eva .digit.grid-col .cell[data-n="1"] {
+  --zg-hair: #3a2f6a;
+  --zg-suit: #7a1020;
+}
+body.theme-eva .digit.grid-col .cell[data-n="2"] {
+  --zg-hair: #2a2220;
+  --zg-suit: #8a9ab0;
+}
+body.theme-eva .digit.grid-col .cell[data-n="3"] {
+  --zg-hair: #c8d8f0;
+  --zg-suit: #f0f0f0;
+}
+body.theme-eva .digit.grid-col .cell[data-n="4"] {
+  --zg-hair: #c0c0c8;
+  --zg-suit: #4a4a52;
+}
+body.theme-eva .digit.grid-col .cell[data-n="5"] {
+  --zg-hair: #e0702a;
+  --zg-suit: #c02020;
+}
+body.theme-eva .digit.grid-col .cell[data-n="6"] {
+  --zg-hair: #4a3020;
+  --zg-suit: #e8eef8;
+}
+body.theme-eva .digit.grid-col .cell[data-n="7"] {
+  --zg-hair: #22222e;
+  --zg-suit: #2a3a6a;
+}
+body.theme-eva .digit.grid-col .cell[data-n="8"] {
+  --zg-hair: #f0d890;
+  --zg-suit: #3a4a7a;
+}
+body.theme-eva .digit.grid-col .cell[data-n="9"] {
+  --zg-hair: #3a2a20;
+  --zg-suit: #8a2a1a;
+}
+
 /* リーチのライン：左右の図柄が光る */
 .digit.grid-col .cell.hot,
 .digit.hot {

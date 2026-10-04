@@ -276,7 +276,8 @@ function evaGridSetCol(col, cells, hot, win, peek) {
     const cls = ["cell", evaCellClass(n)];
     if (key && hot && hot.includes(key)) cls.push("hot");
     if (key && win && win.includes(key)) cls.push("win");
-    return `<span class="${cls.join(" ")}${extra}">${n}</span>`;
+    // data-n：図柄ごとの枠・背景・人物の色（style.css の .cell[data-n]）
+    return `<span class="${cls.join(" ")}${extra}" data-n="${n}">${n}</span>`;
   };
   el.innerHTML =
     cell(above, null, " peek") +
@@ -1072,7 +1073,9 @@ function evaUpgradeScroll(from, steps, ms, ease) {
   const seq = [];
   for (let i = steps + 2; i >= -2; i--) seq.push(evaWrap(from + i));
   const cells = seq
-    .map((n) => `<span class="cell ${evaCellClass(n)}">${n}</span>`)
+    .map(
+      (n) => `<span class="cell ${evaCellClass(n)}" data-n="${n}">${n}</span>`,
+    )
     .join("");
   const strips = [];
   [1, 2, 3].forEach((i) => {
