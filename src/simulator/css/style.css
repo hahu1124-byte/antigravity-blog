@@ -1084,7 +1084,7 @@ body.theme-eva .heso-ball.heso-blue {
     #1a49b8 76%,
     #0a2a7a 100%
   );
-  --hx-ink: #f0f6ff; /* 紺の文字は青地に沈んで読めなかった */
+  --hx-ink: #0a1430; /* キーホルダーの画像どおり濃い色の文字（2026-10-04） */
   --hx-text: "EMERGENCY";
   --hx-glow: #2f6bff;
 }
@@ -1128,7 +1128,7 @@ body.theme-eva .heso-ball.heso-red {
     #b81010 76%,
     #7a0000 100%
   );
-  --hx-ink: #fff4f4; /* 暗い赤の文字は赤地に沈んで読めなかった */
+  --hx-ink: #2a0000; /* キーホルダーの画像どおり濃い色の文字（2026-10-04） */
   --hx-text: "EMERGENCY";
   --hx-glow: #ff0000;
 }
