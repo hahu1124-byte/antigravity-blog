@@ -370,10 +370,14 @@ function evaNoticeOf(shown) {
   return notice;
 }
 
-// 鳴っている告知音をすべて止める
-function evaStopNotices() {
-  for (const h of evaAudio.notices) evaStopSound(h);
-  evaAudio.notices = [];
+// 鳴っている告知音を止める（id を渡せばその音だけ。省けば全部）
+function evaStopNotices(id) {
+  const keep = [];
+  for (const h of evaAudio.notices) {
+    if (!id || h.id === id) evaStopSound(h);
+    else if (!h.stopped) keep.push(h);
+  }
+  evaAudio.notices = keep;
 }
 
 // 少しずつ小さくして止める（着メロの maxMs）
@@ -393,17 +397,18 @@ function evaFadeStop(h) {
 }
 
 // times：続けて鳴らす回数（省くと音ごとの既定。復活当りの合図などは 1 回）。
-// 前の告知音は止めてから鳴らす
+// 同じ音が鳴っていれば止めて頭から鳴らす（違う音は重ねる。次回予告の曲で一発告知を切らない）
 function evaPlayNotice(id, times) {
   const snd = EVA_NOTICE_SOUNDS[id];
   if (!evaVoiceOn || !snd) return;
-  evaStopNotices();
+  evaStopNotices(id);
   // 鳴り終わったら残りの回数だけ頭からもう一度
   let rest = times || snd.times || 1;
   const play = () => {
     if (rest-- <= 0 || !evaVoiceOn) return;
     const h = evaStartSound(snd.file, snd.volume);
     if (!h) return;
+    h.id = id;
     h.onended = play;
     evaAudio.notices.push(h);
     if (snd.maxMs) setTimeout(() => evaFadeStop(h), snd.maxMs);
