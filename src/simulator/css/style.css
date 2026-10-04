@@ -447,6 +447,20 @@ body.theme-eva .digit.grid-col .cell[data-n="9"] {
   will-change: transform;
 }
 
+/* リーチの中の列（数字 3 つ・図柄拡大）：数字を縦に並べた帯をなめらかに流して止める（eva-reel.js の evaRollCenter）。
+   図柄拡大の列は flex で上下中央なので、帯は上端にそろえる */
+.digit .roll-strip {
+  display: block;
+  align-self: flex-start;
+  will-change: transform;
+}
+
+.digit .roll-strip .roll-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* 図柄拡大（通常時・時短中）：3×3 をやめ、列ごとに 3 段ぶんの高さの縦長の図柄 1 つ（枠なし） */
 .digit-container.zoom .digit {
   display: flex;

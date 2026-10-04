@@ -649,6 +649,7 @@ function stepHold(job, anim, afterShift) {
   const apply = () => {
     if (job.currentView === "gone") return; // SP 発展で消えた後は変えない
     job.currentView = st.view;
+    job.holdChangedAt = Date.now(); // 変わってから消えるまで最低 HOLD_KEEP_MS 見せる（vanishCurrentHold）
     if (anim) {
       job.holdAnim = st.fx;
       const token = (job.holdAnimToken = (job.holdAnimToken || 0) + 1);
@@ -914,9 +915,21 @@ function delayHoldEntry(jobs) {
 
 // SP リーチに発展したら当該保留を消す（次の保留を消化する流れを見せる）
 const HOLD_GONE_MS = 350; // 当該保留が消えるアニメ（style.css の .heso-gone）
+// 当該保留は色が変わってから最低 0.7 秒は消さない（通常時・時短・ST 共通。ユーザー方針 2026-10-04）
+const HOLD_KEEP_MS = 700;
+function holdKeepLeft(job) {
+  if (!job || !job.holdChangedAt) return 0;
+  return Math.max(0, job.holdChangedAt + HOLD_KEEP_MS - Date.now());
+}
 function vanishCurrentHold(job) {
   if (!job || activeJob !== job) return;
   if (job.holdSeq) job.holdStep = job.holdSeq.length; // 残りの変化は打ち切る
+  // 変わったばかりなら 0.7 秒たつまで待ってから消す（待っている間に槍の色が付いたら、そこからまた 0.7 秒）
+  const wait = holdKeepLeft(job);
+  if (wait > 0) {
+    setTimeout(() => vanishCurrentHold(job), wait);
+    return;
+  }
   job.holdAnim = null;
   job.currentView = "gone";
   updateHesoUI();
@@ -1140,8 +1153,13 @@ async function startProcess() {
       holdMs,
       onSp: () => vanishCurrentHold(eff),
     });
-    // 変化を見せた当該保留は、図柄が止まったら消す（次の回転はその 0.5 秒後。下の nextDelay）
-    if (eff.holdShown) vanishCurrentHold(eff);
+    // 変化を見せた当該保留は、図柄が止まったら消す（次の回転はその 0.5 秒後。下の nextDelay）。
+    // 色が変わって 0.7 秒たっていなければ、たつまで待ってから消す
+    if (eff.holdShown) {
+      const keep = holdKeepLeft(eff);
+      if (keep > 0) await evaSleep(keep);
+      vanishCurrentHold(eff);
+    }
     if (eff.revived) addLog(">> 復活！！");
     if (eff.isHit) hitDigit = eff.bosoShown ? "1・3・5" : eff.hitDigit;
   } else {
