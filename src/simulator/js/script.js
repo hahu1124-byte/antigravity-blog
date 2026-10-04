@@ -825,17 +825,18 @@ function playLanceStage(holdEl) {
   }, HOLD_LANCE_STAGE_MS);
 }
 
-// 当該になった保留の残りの段。高速オートは最後の色をすぐ出す（タイマーを残さない）
+// 当該になった保留の残りの段。高速オートは最後の色をすぐ出す（タイマーを残さない）。
+// 返り値：変化の流れが全部終わるまでの時間（ms）。液晶はそれまで図柄を止めない（evaRunDisplay の holdMs）
 function finishHold(job, instant) {
-  if (!job || !job.holdSeq) return;
+  if (!job || !job.holdSeq) return 0;
   const rest = job.holdSeq.length - job.holdStep;
-  if (rest <= 0) return;
+  if (rest <= 0) return 0;
   if (instant) {
     job.holdStep = job.holdSeq.length;
     job.currentView = job.holdSeq[job.holdSeq.length - 1].view;
     job.holdAnim = null;
     updateHesoUI();
-    return;
+    return 0;
   }
   // 前の段の演出（横回転・変化の立方体・槍）が終わってから次の段を出す。
   // ST 中は最初の段を保留が当該の位置へ詰まり終わってから（stepHold の afterShift）
@@ -848,6 +849,8 @@ function finishHold(job, instant) {
     at +=
       holdStepMs(job.holdSeq[i]) + (lead ? holdShiftLeadMs(job.holdSeq[i]) : 0);
   }
+  job.holdShown = true; // 変化を見せた当該保留（図柄が止まったら消して 0.5 秒あけて次へ）
+  return at;
 }
 
 // 先読み：保留にいる間、変動が始まるたびに確率で 1 段ずつ変わる
@@ -903,6 +906,7 @@ function delayHoldEntry(jobs) {
 }
 
 // SP リーチに発展したら当該保留を消す（次の保留を消化する流れを見せる）
+const HOLD_GONE_MS = 350; // 当該保留が消えるアニメ（style.css の .heso-gone）
 function vanishCurrentHold(job) {
   if (!job || activeJob !== job) return;
   if (job.holdSeq) job.holdStep = job.holdSeq.length; // 残りの変化は打ち切る
@@ -1105,8 +1109,10 @@ async function startProcess() {
     // EVA は当り種別から図柄を抽選時に決めている（10R=7・3R確変=奇数/昇格用の偶数・3R通常=偶数）。
     // 液晶は通常時・時短中が 3×3（5 ライン）、ST 中が数字 3 つ。左→右→中の順に止める（eva-reel.js）
     const instant = currentSpeed === "fast" && !eff.heavy;
-    // 当該で変わる保留（シフト変化・当該変化）と、先読みで変わりきらなかった残り
-    finishHold(eff, instant);
+    // 当該で変わる保留（シフト変化・当該変化）と、先読みで変わりきらなかった残り。
+    // 変化が終わるまで図柄は止めない（止まると次の回転に進み、SP 発展で保留が消えて変化が見られなかった。
+    // ユーザー指摘 2026-10-04）
+    const holdMs = finishHold(eff, instant);
     // 保留に居る先読み（カウントダウンの 3→2→1 など）はこの変動のリーチ前に出す
     const leadSteps = takeLeadSteps(eff);
     // ST の高速区間（残り 163〜101）で演出の無いハズレは 1 回転 0.8 秒・待機 0.2 秒（ユーザー方針 2026-10-04）
@@ -1124,8 +1130,11 @@ async function startProcess() {
       quick: quickSpin,
       heavy: eff.heavy,
       steps: [...leadSteps, ...(eff.steps || [])],
+      holdMs,
       onSp: () => vanishCurrentHold(eff),
     });
+    // 変化を見せた当該保留は、図柄が止まったら消す（次の回転はその 0.5 秒後。下の nextDelay）
+    if (eff.holdShown) vanishCurrentHold(eff);
     if (eff.revived) addLog(">> 復活！！");
     if (eff.isHit) hitDigit = eff.bosoShown ? "1・3・5" : eff.hitDigit;
   } else {
@@ -1198,8 +1207,16 @@ async function startProcess() {
   if (currentMachine === "eva") backToFastAfterSlow();
   updateUI();
   updateAutoBtns();
-  // 次回転への待機時間（高速時は5ms、低速時は図柄が止まってから0.5秒）
-  let nextDelay = currentSpeed === "fast" ? 5 : quickSpin ? 200 : 500;
+  // 次回転への待機時間（高速時は5ms、低速時は図柄が止まってから0.5秒）。
+  // 変化を見せた当該保留は、消えきって（0.35 秒）から 0.5 秒あける
+  let nextDelay =
+    currentSpeed === "fast"
+      ? 5
+      : quickSpin
+        ? 200
+        : eff.holdShown
+          ? HOLD_GONE_MS + 500
+          : 500;
   if (isAuto) setTimeout(startProcess, nextDelay);
 }
 

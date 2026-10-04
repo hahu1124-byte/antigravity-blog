@@ -889,8 +889,11 @@ async function evaRunDisplayMain(eff, opts) {
     [0, 1, 2].forEach((col) => setCol(col, finals[col], null, winKeys));
     return;
   }
+  // 当該保留の変化（script.js の finishHold）が終わるまでは図柄を止めない（opts.holdMs：変動の始めからの時間）
+  const holdLeft = () => Math.max(0, (opts.holdMs || 0) - preUsed);
   // 全回転リーチ：3 列とも同じ図柄を並べてゆっくり 1 周させ、7 で止まって震える
   if (eff.reachId === "zenkaiten" && eff.isHit) {
+    await evaSleep(holdLeft());
     clearInterval(timer);
     if (eff.sp && opts.onSp) opts.onSp();
     await evaZenkaitenLap(eff, show, reachText, grid);
@@ -903,7 +906,7 @@ async function evaRunDisplayMain(eff, opts) {
   const reach = reachKeys.length > 0;
   // ST（数字 3 つ）はリーチ以外のとき左→中→右の順に止まる。リーチのときだけ左→右→中（実機。ユーザー指摘 2026-10-04）
   const lcr = !grid && !reach;
-  await evaSleep(Math.max(0, leftMs - preUsed));
+  await evaSleep(Math.max(0, leftMs - preUsed, holdLeft()));
   show("");
   spinning[0] = false;
   setCol(0, finals[0]);
