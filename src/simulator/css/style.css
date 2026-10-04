@@ -566,8 +566,10 @@ body.theme-eva .heso-ball.heso-empty {
 body.theme-eva .heso-ball::before,
 body.theme-eva .heso-ball::after,
 body.theme-eva .heso-ball > .hx-side,
+body.theme-eva .heso-ball > .hx-trim,
 body.theme-eva .heso-ball > .hx-ring,
-body.theme-eva .heso-ball > .hx-text {
+body.theme-eva .heso-ball > .hx-text,
+body.theme-eva .heso-ball > .hx-arrows {
   position: absolute;
   clip-path: var(--hx-shape);
 }
@@ -577,11 +579,11 @@ body.theme-eva .heso-ball > i {
   pointer-events: none;
 }
 
-/* 縁（いちばん手前の板） */
+/* 縁（いちばん手前の板）。通常時の六角形は金属のグラデーション（--hx-bezel）、無ければ --hx-edge の単色 */
 body.theme-eva .heso-ball::before {
   content: "";
   inset: 0;
-  background: var(--hx-edge);
+  background: var(--hx-bezel, var(--hx-edge));
   transform: translateZ(0);
 }
 
@@ -684,8 +686,10 @@ body.theme-eva .heso-ball > .hx-f3-right {
 
 body.theme-eva .heso-ball::before,
 body.theme-eva .heso-ball::after,
+body.theme-eva .heso-ball > .hx-trim,
 body.theme-eva .heso-ball > .hx-ring,
-body.theme-eva .heso-ball > .hx-text {
+body.theme-eva .heso-ball > .hx-text,
+body.theme-eva .heso-ball > .hx-arrows {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -828,6 +832,46 @@ body.theme-eva .heso-ball > .hx-text::before {
   text-align: center;
 }
 
+/* 通常時・時短中の六角形の上下の三角（▲ EMERGENCY ▼。キーホルダーの画像に合わせる 2026-10-04）。
+   文字で 3 行にすると潰れたので、三角は mask の図形で描いて文字と同じ色（--hx-ink）で塗る */
+body.theme-eva .heso-ball > .hx-arrows {
+  display: none;
+  inset: var(--hx-inset);
+  background: var(--hx-ink);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 18' preserveAspectRatio='none'%3E%3Cpath d='M11 1.3L13.9 4.7H8.1Z M8.1 13.3H13.9L11 16.7Z'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 18' preserveAspectRatio='none'%3E%3Cpath d='M11 1.3L13.9 4.7H8.1Z M8.1 13.3H13.9L11 16.7Z'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+  transform: translateZ(0.8px);
+}
+
+body.theme-eva
+  .heso-overlay:not(.right-mode)
+  .heso-ball:not(
+    .heso-alert-red,
+    .heso-alert-purple,
+    .heso-anim-spin,
+    .heso-anim-wait
+  )
+  > .hx-arrows {
+  display: block;
+}
+
+/* 時短中の通常保留：白い保留の縁と面の間に細い赤枠（縁と面の間の板。キーホルダーの画像の白＋赤枠） */
+body.theme-eva .heso-ball > .hx-trim {
+  display: none;
+  inset: calc(var(--hx-inset) - 0.9px);
+  background: #e01414;
+  transform: translateZ(0.2px);
+}
+
+body.theme-eva
+  #denchu-area:not(.right-mode)
+  .heso-ball:is(.heso-none, .heso-odd)
+  > .hx-trim {
+  display: block;
+}
+
 /* EVA 以外の機種では中身を出さない */
 body:not(.theme-eva) .heso-ball > i {
   display: none;
@@ -944,12 +988,27 @@ body.theme-eva .heso-overlay:not(.right-mode) .heso-ball.heso-current {
   height: 29px;
 }
 
-/* デフォルト（無地）の保留：銀 */
+/* デフォルト（無地）の保留：銀。縁（--hx-bezel）と面は金属の光沢（上から明るい帯→中→暗い）。
+   色の付いた保留も同じ作り（キーホルダーの画像に合わせる 2026-10-04） */
 body.theme-eva .heso-ball.heso-none,
 body.theme-eva .heso-ball.heso-odd {
-  --hx-edge: #f5f7fb;
-  --hx-face: linear-gradient(160deg, #eef1f6, #a9b2bf);
-  --hx-ink: #2b2f36;
+  --hx-edge: #d9dee6;
+  --hx-bezel: linear-gradient(
+    160deg,
+    #ffffff 0%,
+    #9aa3b0 42%,
+    #eef1f5 58%,
+    #636b77 100%
+  );
+  --hx-face: linear-gradient(
+    180deg,
+    #c3c9d2 0%,
+    #ffffff 28%,
+    #e6e9ee 50%,
+    #b9c0ca 76%,
+    #8f97a3 100%
+  );
+  --hx-ink: #23272d;
   --hx-text: "EMERGENCY";
   --hx-glow: rgba(150, 180, 255, 0.5);
 }
@@ -1010,7 +1069,21 @@ body.theme-eva .heso-ball.heso-blink-strong {
 
 body.theme-eva .heso-ball.heso-blue {
   --hx-edge: #9cc4ff;
-  --hx-face: linear-gradient(160deg, #4d8cff, #0a2a8a);
+  --hx-bezel: linear-gradient(
+    160deg,
+    #dcebff 0%,
+    #3d7bff 42%,
+    #a9cbff 58%,
+    #0b2f8f 100%
+  );
+  --hx-face: linear-gradient(
+    180deg,
+    #2a66de 0%,
+    #86b6ff 28%,
+    #3f7ff0 50%,
+    #1a49b8 76%,
+    #0a2a7a 100%
+  );
   --hx-ink: #f0f6ff; /* 紺の文字は青地に沈んで読めなかった */
   --hx-text: "EMERGENCY";
   --hx-glow: #2f6bff;
@@ -1018,7 +1091,21 @@ body.theme-eva .heso-ball.heso-blue {
 
 body.theme-eva .heso-ball.heso-green {
   --hx-edge: #a8ffa8;
-  --hx-face: linear-gradient(160deg, #46e046, #0b6b0b);
+  --hx-bezel: linear-gradient(
+    160deg,
+    #e0ffe0 0%,
+    #2fbf2f 42%,
+    #b0ffb0 58%,
+    #0a5a0a 100%
+  );
+  --hx-face: linear-gradient(
+    180deg,
+    #1f9a1f 0%,
+    #86ee86 28%,
+    #3cc63c 50%,
+    #158c15 76%,
+    #0b5a0b 100%
+  );
   --hx-ink: #022a02;
   --hx-text: "EMERGENCY";
   --hx-glow: #00ff00;
@@ -1026,7 +1113,21 @@ body.theme-eva .heso-ball.heso-green {
 
 body.theme-eva .heso-ball.heso-red {
   --hx-edge: #ffb3b3;
-  --hx-face: linear-gradient(160deg, #ff4242, #9a0000);
+  --hx-bezel: linear-gradient(
+    160deg,
+    #ffe0e0 0%,
+    #e02828 42%,
+    #ffbcbc 58%,
+    #7a0000 100%
+  );
+  --hx-face: linear-gradient(
+    180deg,
+    #d41c1c 0%,
+    #ff8080 28%,
+    #ef3636 50%,
+    #b81010 76%,
+    #7a0000 100%
+  );
   --hx-ink: #fff4f4; /* 暗い赤の文字は赤地に沈んで読めなかった */
   --hx-text: "EMERGENCY";
   --hx-glow: #ff0000;
@@ -1034,8 +1135,9 @@ body.theme-eva .heso-ball.heso-red {
 
 body.theme-eva .heso-ball.heso-rainbow {
   --hx-edge: #fff;
+  --hx-bezel: linear-gradient(160deg, #ffffff 0%, #c9ced6 50%, #ffffff 100%);
   --hx-face: linear-gradient(
-    90deg,
+    135deg,
     #ff1744,
     #ff9100,
     #ffea00,
@@ -1115,6 +1217,7 @@ body.theme-eva .heso-ball.heso-alert-purple {
    違和感保留は見て分かるように：中の文字なし＝帯だけ、文字が逆に流れる、全体にノイズ */
 body.theme-eva .heso-overlay.right-mode .heso-ball {
   --hx-shape: polygon(12% 0, 88% 0, 100% 100%, 0 100%);
+  --hx-bezel: var(--hx-edge); /* 金属の縁は通常時の六角形だけ */
   --hx-size: 6px;
   --hx-inset: 1.5px;
   --hx-base: linear-gradient(#2b2b2b, #0b0b0b);

@@ -1453,7 +1453,8 @@ function updateHesoUI() {
 // 保留 1 つの見た目。変化中は横回転（「変化」の文字）・槍が刺さった閃光のクラスを付ける
 // （槍そのものは液晶全体の playLanceStage で出す）
 // EVA の保留の中身（一度だけ作る）：奥から光・裏と左右の面（ST の箱は 4 面とも同じ見た目で回る。
-// 通常時は裏の面だけ）・厚みの板 8 枚・消化中の白縁・文字。前面の縁と面は .heso-ball の ::before / ::after（style.css）
+// 通常時は裏の面だけ）・厚みの板 8 枚・時短中の赤い細枠・消化中の白縁・文字・上下の三角（▲▼）。
+// 前面の縁と面は .heso-ball の ::before / ::after（style.css）
 const HOLD_INNER =
   '<i class="hx-glow"></i>' +
   ["back", "left", "right"]
@@ -1466,7 +1467,7 @@ const HOLD_INNER =
   [1, 2, 3, 4, 5, 6, 7, 8]
     .map((n) => `<i class="hx-side hx-side${n}"></i>`)
     .join("") +
-  '<i class="hx-ring"></i><i class="hx-text"></i>';
+  '<i class="hx-trim"></i><i class="hx-ring"></i><i class="hx-text"></i><i class="hx-arrows"></i>';
 function paintHold(el, job, isCurrent) {
   if (!el._built) {
     el.innerHTML = HOLD_INNER;
