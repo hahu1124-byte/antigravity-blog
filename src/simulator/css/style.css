@@ -1402,24 +1402,22 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-wait {
   }
 }
 
-/* 大きな槍：赤い柄に二又の穂先。変わる保留へほぼ真上から伸びて刺さる。
+/* 大きな槍：赤い柄に二又の穂先。変わる保留へ右斜め上から落ちて刺さる。
    穂先（下端）を保留の中心（--ls-x / --ls-y。script.js の playLanceStage が入れる）に置き、
-   穂先を軸に --ls-a だけ傾ける。動きは柄の向きに沿って、穂先が図柄の真ん中の高さ（下の切り抜きの線）に
-   ちょうど居る所（--ls-d：線から保留までの柄の向きの長さ。script.js が測る）から保留まで。
-   28 度で線より上から落としていたので、線を横切って右上から斜めに入ってくるように見えた（ユーザー指摘 2026-10-04） */
+   穂先を軸に 28 度傾けて右上から来る向きにする。落ちる動きは柄の向きに沿ってずらす */
 .lance-stage {
   --ls-x: 50%;
   --ls-y: calc(100% - 22px);
-  --ls-d: 150px;
-  --ls-a: 10deg;
+  --ls-clip: 59%;
 }
 
-/* 槍は図柄の真ん中の高さ（液晶の上下の真ん中）より下にだけ見せ、そこから出てくるようにする
-   （ユーザー方針：保留変化の槍は図柄の半分下から出る） */
+/* 槍は液晶の数字の下端（--ls-clip。script.js が測る）より下にだけ見せ、そこから出てくるようにする。
+   液晶の上下の真ん中（＝3×3 の中段の数字の真ん中）で切っていたので、数字の下半分の高さから出て見えた
+   （ユーザー方針：保留変化の槍は数字の下半分より下から出る。2026-10-04 再指摘） */
 .lance-stage .ls-spear-clip {
   position: absolute;
   inset: 0;
-  clip-path: inset(50% 0 0 0);
+  clip-path: inset(var(--ls-clip) 0 0 0);
 }
 
 .lance-stage .ls-spear {
@@ -1450,15 +1448,22 @@ body.theme-eva .heso-overlay.right-mode .heso-ball.heso-anim-wait {
 @keyframes ls-spear {
   0%,
   35% {
-    transform: rotate(var(--ls-a)) translateY(calc(var(--ls-d) * -1));
+    transform: rotate(28deg) translateY(-130%);
+    opacity: 0;
   }
-  66%,
+  45% {
+    opacity: 1;
+  }
+  66% {
+    transform: rotate(28deg) translateY(0);
+    opacity: 1;
+  }
   90% {
-    transform: rotate(var(--ls-a)) translateY(0);
+    transform: rotate(28deg) translateY(0);
     opacity: 1;
   }
   100% {
-    transform: rotate(var(--ls-a)) translateY(0);
+    transform: rotate(28deg) translateY(0);
     opacity: 0;
   }
 }

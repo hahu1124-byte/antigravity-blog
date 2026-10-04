@@ -774,8 +774,24 @@ function playChangeStage(holdEl) {
 // 液晶全体のロンギヌスの槍演出：炎の中を大きな槍が落ちてきて保留に刺さり、閃光が走る
 const HOLD_LANCE_STAGE_MS = 1500; // 演出全体の長さ（style.css の .lance-stage と合わせる）
 const HOLD_LANCE_HIT_MS = 1000; // 槍が刺さって保留の色が変わるまで
-const HOLD_LANCE_ANGLE = 10; // 槍の傾き（度。style.css の --ls-a と合わせる）
-// holdEl：変わる保留。槍は図柄の真ん中の高さから、その保留へほぼ真上から伸びて刺さる（無ければ保留の並びの真ん中あたり）
+const HOLD_LANCE_GLYPH = 0.72; // ST の数字の字の高さ（文字の大きさに対して）
+
+// 槍が出てくる高さ＝液晶の数字の下端（液晶の上端からの px）。通常時・時短中は 3×3 の中段の数字、
+// ST は数字 3 つ。どちらも数字の並びの上下の真ん中に置いてある
+function lanceClipTop(screen) {
+  const dc = screen.querySelector(".digit-container");
+  const col = dc && dc.querySelector(".digit");
+  if (!col) return screen.clientHeight / 2;
+  const sr = screen.getBoundingClientRect();
+  const r = dc.getBoundingClientRect();
+  const mid = r.top - sr.top + r.height / 2;
+  const h = col.classList.contains("grid-col")
+    ? parseFloat(getComputedStyle(dc).getPropertyValue("--cell-h")) || 62
+    : parseFloat(getComputedStyle(col).fontSize) * HOLD_LANCE_GLYPH;
+  return mid + h / 2;
+}
+
+// holdEl：変わる保留。槍は液晶の数字の下端より下から、その保留へ右斜め上から落ちて刺さる（無ければ保留の並びの真ん中あたり）
 function playLanceStage(holdEl) {
   const screen = document.getElementById("screen");
   if (!screen) return;
@@ -785,24 +801,20 @@ function playLanceStage(holdEl) {
     stage.id = "lance-stage";
     stage.className = "lance-stage";
     stage.innerHTML =
-      // 槍は図柄の真ん中の高さより下にだけ見える（そこから出てくる。style.css の .ls-spear-clip）
+      // 槍は液晶の数字の下端より下にだけ見える（そこから出てくる。style.css の .ls-spear-clip）
       '<div class="ls-fire"></div>' +
       '<div class="ls-spear-clip"><div class="ls-spear"></div></div>' +
       '<div class="ls-flash"></div><div class="ls-text">ロンギヌスの槍</div>';
     screen.appendChild(stage);
   }
-  // 刺さる位置（液晶の中での保留の中心）を style.css の --ls-x / --ls-y に渡す。
-  // --ls-d：穂先が出てくる図柄の真ん中の高さ（液晶の上下の真ん中）から保留までの、柄の向きの長さ
+  // 刺さる位置（液晶の中での保留の中心）を style.css の --ls-x / --ls-y に、
+  // 槍が出てくる高さ（液晶の数字の下端）を --ls-clip に渡す
   const c = holdCenterIn(holdEl, screen);
   if (c) {
     stage.style.setProperty("--ls-x", `${c.x}px`);
     stage.style.setProperty("--ls-y", `${c.y}px`);
-    const rise = Math.max(0, c.y - screen.clientHeight / 2);
-    stage.style.setProperty(
-      "--ls-d",
-      `${Math.round(rise / Math.cos((HOLD_LANCE_ANGLE * Math.PI) / 180))}px`,
-    );
   }
+  stage.style.setProperty("--ls-clip", `${Math.round(lanceClipTop(screen))}px`);
   // 続けて出たときもアニメを最初からにする
   stage.classList.remove("on");
   void stage.offsetWidth;
