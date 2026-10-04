@@ -263,20 +263,23 @@ function evaReelBelow(col, d) {
   return col === 0 ? evaReelNext(d) : evaReelPrev(d);
 }
 
-// 窓の外に少しだけ見える上下の段（リールの続き）。上下が数字ならその外はブランク、
-// 上下がブランクならその外は隣の数字（ユーザー方針 2026-10-03）
+// 窓の外にはみ出して見える上下の段（リールの続き）を 2 段ずつ：[上の 1 段目, 上の 2 段目, 下の 1 段目, 下の 2 段目]。
+// 上下が数字ならその外はブランク、さらに外は隣の数字。上下がブランクならその外は隣の数字、さらに外はブランク
+// （ユーザー方針 2026-10-03。ブランクを小さくして数字を詰めたので 2 段目まで見える。2026-10-04）
 function evaPeekOf(col, cells) {
   const [t, m, b] = cells;
-  const above = t === null && m !== null ? evaReelAbove(col, m) : null;
-  const below = b === null && m !== null ? evaReelBelow(col, m) : null;
-  return [above, below];
+  const a1 = t === null && m !== null ? evaReelAbove(col, m) : null;
+  const a2 = t !== null ? evaReelAbove(col, t) : null;
+  const b1 = b === null && m !== null ? evaReelBelow(col, m) : null;
+  const b2 = b !== null ? evaReelBelow(col, b) : null;
+  return [a1, a2, b1, b2];
 }
 
-// 3×3 の 1 段（null はブランクの ◆）。extraCls は前に空白を付けたクラス（" hot" など）。
-// data-n：図柄ごとの枠・背景・人物の色（style.css の .cell[data-n]）
+// 3×3 の 1 段（null はブランクの小さい ◆）。extraCls は前に空白を付けたクラス（" hot" など）。
+// zcard・data-n：図柄のカードとその色（style.css の .zcard[data-n]）
 function evaCellHtml(n, extraCls) {
   if (n === null) return `<span class="cell blank${extraCls}">◆</span>`;
-  return `<span class="cell ${evaCellClass(n)}${extraCls}" data-n="${n}">${n}</span>`;
+  return `<span class="cell zcard ${evaCellClass(n)}${extraCls}" data-n="${n}">${n}</span>`;
 }
 
 // リーチの中の列の止まり方：最後の数コマを 1 コマずつ差し替えるとカクカクして見えた（ユーザー指摘 2026-10-04）ので、
@@ -300,30 +303,27 @@ async function evaRollCenter(grid, from, to, ms) {
   if (grid) {
     const cs = EVA_REEL_CELLS[1];
     const at = (p) => cs[((p % EVA_REEL_LEN) + EVA_REEL_LEN) % EVA_REEL_LEN];
-    // 帯は from と to の小さいほうの 1 つ上から、大きいほうの 3 つ下まで（上下にはみ出す段を含む）
+    // 帯は from と to の小さいほうの 2 つ上から、大きいほうの 4 つ下まで（上下にはみ出す段を含む）
     const lo = Math.min(from, to);
     const hi = Math.max(from, to);
     let html = "";
-    for (let p = lo - 1; p <= hi + 3; p++) html += evaCellHtml(at(p), "");
+    for (let p = lo - 2; p <= hi + 4; p++) html += evaCellHtml(at(p), "");
     el.className = "digit grid-col upg-scroll";
     el.innerHTML = `<div class="upg-strip">${html}</div>`;
     const strip = el.firstChild;
     const c = strip && strip.children;
-    if (!strip || !strip.style || !c || c.length < 2) {
+    const winH = el.clientHeight || 0;
+    if (!strip || !strip.style || !c || c.length < 2 || !winH) {
       await evaSleep(ms);
       done();
       return;
     }
-    const row =
-      c[1].offsetTop > c[0].offsetTop
-        ? c[1].offsetTop - c[0].offsetTop
-        : EVA_UPGRADE_ROW_PX;
-    const peek =
-      el.clientHeight > 3 * row
-        ? (el.clientHeight - 3 * row) / 2
-        : EVA_UPGRADE_PEEK_PX;
-    // 位置 p のとき、帯の p-lo+1 番目（上にはみ出す段の次＝上段）の上端を窓の peek に合わせる
-    const y = (p) => peek - row * (p - lo + 1);
+    // 数字とブランクで段の高さが違うので、測った位置で合わせる：位置 p のとき中段（帯の p-lo+3 番目）の
+    // 真ん中を窓の真ん中に
+    const y = (p) => {
+      const k = c[p - lo + 3];
+      return winH / 2 - (k.offsetTop - c[0].offsetTop + k.offsetHeight / 2);
+    };
     strip.style.transition = "none";
     strip.style.transform = `translateY(${y(from)}px)`;
     void strip.offsetHeight;
@@ -345,11 +345,14 @@ async function evaRollCenter(grid, from, to, ms) {
     n = evaReelNext(n);
     seq.push(n);
   }
+  // 図柄拡大は 1 つずつが縦長のカード（.zcard）。流れている間は列そのもののカードを外す
   const item = (d) => {
     const color = getDigitClass(d, mode).replace("digit ", "");
     const glyph = evaZoomNow ? `<span class="zoom-glyph">${d}</span>` : d;
-    return `<span class="roll-item ${color}" style="height:${h}px;line-height:${h}px">${glyph}</span>`;
+    const card = evaZoomNow ? ` zcard" data-n="${d}` : "";
+    return `<span class="roll-item ${color}${card}" style="height:${h}px;line-height:${h}px">${glyph}</span>`;
   };
+  if (el.classList) el.classList.remove("zcard");
   el.style.height = `${h}px`;
   el.style.overflow = "hidden";
   el.innerHTML = `<div class="roll-strip">${[...seq].reverse().map(item).join("")}</div>`;
@@ -368,32 +371,40 @@ async function evaRollCenter(grid, from, to, ms) {
 }
 
 // 列 col（0〜2）に 3 段（null はブランク）を出す。hot の段は光らせる（リーチ）、win の段は当りの光。
-// 窓の上下には 1 段ずつ少しだけはみ出して見える段（peek）を付ける（省けばリールの並びから決める）
+// 窓の上下にはみ出して見える段を 2 段ずつ付ける（省けばリールの並びから決める）。
+// peek を渡すとき（昇格演出の帯。ブランクなし）は [上, 下] の 1 段ずつ
 function evaGridSetCol(col, cells, hot, win, peek) {
   const el = document.getElementById("d" + (col + 1));
   if (!el) return;
   el.className = "digit grid-col";
-  const [above, below] = peek || evaPeekOf(col, cells);
+  const [a1, a2, b1, b2] = peek
+    ? [peek[0], undefined, peek[1], undefined]
+    : evaPeekOf(col, cells);
   const cell = (n, key, extra) => {
+    if (n === undefined) return "";
     let cls = extra;
     if (n !== null && key && hot && hot.includes(key)) cls = " hot" + cls;
     if (n !== null && key && win && win.includes(key)) cls = " win" + cls;
     return evaCellHtml(n, cls);
   };
   el.innerHTML =
-    cell(above, null, " peek") +
+    cell(a2, null, " peek") +
+    cell(a1, null, " peek") +
     cells.map((n, row) => cell(n, EVA_ROWS[row], "")).join("") +
-    cell(below, null, " peek");
+    cell(b1, null, " peek") +
+    cell(b2, null, " peek");
 }
 
-// --- 数字 3 つ（ST 中） ---
+// --- 数字 3 つ（ST 中）・図柄拡大（縦長のカード） ---
 function evaPlainSet(i, n, cls) {
   const el = document.getElementById("d" + i);
   if (!el) return;
-  el.className = cls || getDigitClass(n, mode);
-  // 図柄拡大中は数字を縦に伸ばす（style.css の .zoom-glyph）
-  if (evaZoomNow) el.innerHTML = `<span class="zoom-glyph">${n}</span>`;
-  else el.innerText = n;
+  el.className = (cls || getDigitClass(n, mode)) + (evaZoomNow ? " zcard" : "");
+  // 図柄拡大中は縦長のカードに数字（style.css の .zcard・.zoom-glyph）
+  if (evaZoomNow) {
+    if (el.setAttribute) el.setAttribute("data-n", String(n));
+    el.innerHTML = `<span class="zoom-glyph">${n}</span>`;
+  } else el.innerText = n;
 }
 
 // 待機中の図柄（起動・機種選択・リセット時）：中段に 3・5・7（上段・下段はブランク）
@@ -584,8 +595,8 @@ async function evaPlayNextMovie(item) {
 // 液晶（#screen）に fx-flame-blue / fx-flame-red が付いている間、canvas に炎を描く（クラスの付け外しを見張る）。
 // 楕円のグラデーションを伸び縮みさせるだけでは炎に見えなかった（ユーザー指摘 2026-10-04）ので、
 // 火の粒を下から湧かせ、揺れながら細り、色が芯 → 炎の色 → 外側へ変わって消える。
-// 実機の録画（E:/rec 2026-10-03 21-44-54 の 3.5〜6 秒）どおり、青は液晶の真ん中に高く立つ炎の柱、
-// 赤は液晶いっぱいに縦に燃え上がる炎の壁
+// 実機の録画（E:/rec 2026-10-03 21-44-54 の 3.5〜6 秒）どおり、液晶の真ん中に高く立つ炎の柱。
+// 赤も青と同じ形で色だけ違う（液晶いっぱいに広げた赤は分かりにくかった。ユーザー指摘 2026-10-04）
 const EVA_FLAME_COLORS = {
   // 芯・炎・外側（RGB）
   blue: [
@@ -612,16 +623,8 @@ const EVA_FLAME_STYLE = {
     size: [0.075, 0.05],
     stretch: 1.5,
   },
-  red: {
-    wall: true,
-    pull: 0,
-    spawn: 16,
-    rise: [0.012, 0.008],
-    life: [45, 40],
-    size: [0.06, 0.05],
-    stretch: 2.4,
-  },
 };
+EVA_FLAME_STYLE.red = EVA_FLAME_STYLE.blue;
 const EVA_FLAME_SPRITES = 24; // 色の段（寿命の割合ごとの粒の絵）
 const evaFlame = {
   canvas: null,
@@ -743,6 +746,23 @@ function evaFlameSet(screen, color) {
   f.last = 0;
   cancelAnimationFrame(f.raf);
   f.raf = requestAnimationFrame(evaFlameFrame);
+}
+
+// リーチがかかったら 0.5 秒後に炎（液晶の fx-flame-*）を消す。次の変動が始まっていたら何もしない
+const EVA_FLAME_OFF_MS = 500;
+function evaFlameOffAfterReach() {
+  const screen = document.getElementById("screen");
+  if (!screen || !screen.classList) return;
+  if (
+    !screen.classList.contains("fx-flame-blue") &&
+    !screen.classList.contains("fx-flame-red")
+  )
+    return;
+  const spin = typeof lcdCount !== "undefined" ? lcdCount : null;
+  setTimeout(() => {
+    if (typeof lcdCount !== "undefined" && lcdCount !== spin) return;
+    screen.classList.remove("fx-flame-blue", "fx-flame-red");
+  }, EVA_FLAME_OFF_MS);
 }
 
 // 液晶のクラスの付け外しを見張って炎を出し入れする（試験の簡易 DOM など見張れない環境では何もしない）
@@ -1197,7 +1217,9 @@ async function evaRunDisplayMain(eff, opts) {
     // リーチ名 → リーチ後の予告・チャンスアップ。中の回転は SP・激アツなら長く
     const total = opts.heavy ? EVA_REEL_SP_MS : EVA_REEL_REACH_MS;
     let used = 0;
-    // SP リーチに発展したら当該保留を消す（script.js の vanishCurrentHold）
+    // ドックンの炎はリーチがかかって 0.5 秒で消す（ユーザー方針 2026-10-04）
+    evaFlameOffAfterReach();
+    // SP リーチに発展したら当該保留を消し、保留の表示をリーチ中は隠す（script.js の onSp）
     if (eff.sp && opts.onSp) opts.onSp();
     if (reachText.length) {
       show(reachText);
@@ -1319,8 +1341,8 @@ const EVA_UPGRADE_FLASH_MS = 350; // 始まりの白い光
 const EVA_UPGRADE_SCROLL_BASE_MS = 4200; // 流れる時間（1 周）
 const EVA_UPGRADE_SCROLL_STEP_MS = 180; // 1 周を超える 1 段ごとに足す時間
 const EVA_UPGRADE_SCROLL_EASE = "cubic-bezier(0.25, 0.55, 0.3, 1)"; // 止まり際がゆっくり
-const EVA_UPGRADE_ROW_PX = 62; // 1 段の高さ（style.css の --cell-h。測れたら測った値）
-const EVA_UPGRADE_PEEK_PX = 20; // 窓の上下にはみ出して見える高さ（--cell-peek。測れたら測った値）
+const EVA_UPGRADE_ROW_PX = 76; // 1 段の高さ（style.css の --cell-h。測れたら測った値）
+const EVA_UPGRADE_PEEK_PX = 8; // 窓の上下にはみ出して見える高さ（(--grid-h − 3 段) ÷ 2。測れたら測った値）
 const EVA_UPGRADE_STEP_MS = 260; // 数字 3 つの表示で 1 段進む時間（最初）
 const EVA_UPGRADE_SLOW_MS = 90; // 止まる手前で 1 段ごとに足す時間
 const EVA_UPGRADE_SLIDE_WAIT_MS = 700; // 滑りの前の止まっている間
@@ -1388,11 +1410,7 @@ function evaUpgradeScroll(from, steps, ms, ease, to, odd) {
   const seq = [];
   for (let i = steps + 2; i >= -2; i--)
     seq.push(evaUpgradeAt(from, steps, end, i, odd));
-  const cells = seq
-    .map(
-      (n) => `<span class="cell ${evaCellClass(n)}" data-n="${n}">${n}</span>`,
-    )
-    .join("");
+  const cells = seq.map((n) => evaCellHtml(n, "")).join("");
   const strips = [];
   [1, 2, 3].forEach((i) => {
     const el = document.getElementById("d" + i);

@@ -1157,10 +1157,21 @@ async function startProcess() {
       heavy: eff.heavy,
       steps: [...leadSteps, ...(eff.steps || [])],
       holdMs,
-      onSp: () => vanishCurrentHold(eff),
+      // SP リーチ以上に発展：当該保留を消し、リーチの間は保留の表示を隠す（style.css の .sp-reach）。
+      // 変わったばかりの保留は 0.7 秒見せてから隠す（HOLD_KEEP_MS）
+      onSp: () => {
+        vanishCurrentHold(eff);
+        const tok = (startProcess.spToken = (startProcess.spToken || 0) + 1);
+        setTimeout(() => {
+          if (startProcess.spToken === tok) screenEl.classList.add("sp-reach");
+        }, holdKeepLeft(eff));
+      },
       onResult: flushResultLog,
       onRevive: () => addLog(">> 復活！！"),
     });
+    // リーチが終わったら保留の表示を戻す
+    startProcess.spToken = (startProcess.spToken || 0) + 1;
+    screenEl.classList.remove("sp-reach");
     flushResultLog();
     // 変化を見せた当該保留は、図柄が止まったら消す（次の回転はその 0.5 秒後。下の nextDelay）。
     // 色が変わって 0.7 秒たっていなければ、たつまで待ってから消す
