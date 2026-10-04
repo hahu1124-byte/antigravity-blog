@@ -648,8 +648,7 @@ const EVA_ST_INSTANT_SHARE = 0.05; // 無演出即当り（当りのうち）
 const EVA_T_S_FAST = evaBuildTables(
   {
     ...EVA_SPEC_S,
-    suddenShare:
-      EVA_SUDDEN_SHARE + EVA_ST_INSTANT_SHARE + EVA_ST_NEXT_SHARE,
+    suddenShare: EVA_SUDDEN_SHARE + EVA_ST_INSTANT_SHARE + EVA_ST_NEXT_SHARE,
   },
   0,
 );
