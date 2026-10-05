@@ -290,8 +290,15 @@ function playLever() {
     const B = play.bonus;
     current = { allowed: ["bonusFuurin"], mode: "bonus", bet };
     if (B.type === "big" && B.games === 0) {
-      // BB 1 ゲーム目: 技術介入。すべりなしで止まり、左リール中段に赤7 なら 14 枚役
-      current = { allowed: [], mode: "bonus", bet, free: true, tech: "bbVita" };
+      // BB 1 ゲーム目: 枚数調整の技術介入。左第一停止で中段に赤7 をビタ押しすると 14 枚役
+      // （中・右は平行風鈴か斜め風鈴に止まる）。外したらふつうの BB 中のゲーム（風鈴 15 枚）
+      current = {
+        allowed: ["bonusFuurin"],
+        mode: "bonus",
+        bet,
+        tech: "bbVita",
+        techOk: false,
+      };
       message("BB 1G目：左リール中段に赤7をビタ押し！");
     } else if (B.type === "reg") {
       const v = Math.random();
@@ -307,6 +314,7 @@ function playLever() {
         };
       }
       if (v < one + 1 / RB_COMMON_ODDS) {
+        if (v >= one) current.rbCommon = true;
         sfx.notice();
         message("予告音！左リールに3連ドン狙い");
       }
@@ -389,7 +397,28 @@ function renderLamp() {
   $("moLamp").classList.toggle("on", mode === "play" && play.lamp);
 }
 
+// 止まり終わったゲームで成立していたフラグの表示名（「設定」の右のタイルに出す）
+const FLAG_LABEL = {
+  big: "BIG",
+  reg: "REG",
+  replay: "リプレイ",
+  fuurin: "風鈴",
+  kori: "氷",
+  cherry: "チェリー",
+  bonusFuurin: "風鈴（15枚）",
+};
+function flagLabel() {
+  if (current.tech === "bbVita") return "14枚役（ビタ押し）";
+  if (current.tech === "rbOne") return "1枚役";
+  if (current.rbCommon) return "共通15枚役";
+  const names = current.allowed
+    .filter((f) => FLAG_LABEL[f])
+    .map((f) => FLAG_LABEL[f]);
+  return names.length ? names.join("＋") : "ハズレ";
+}
+
 function finishPlay(stops) {
+  play.lastFlag = flagLabel();
   const bet = current.bet;
   const wins = judge(stops, current.mode, bet);
   const payTotal = Math.min(
@@ -406,11 +435,15 @@ function finishPlay(stops) {
     let pay = payTotal;
     let note = "";
     if (current.tech === "bbVita") {
-      const ok = symAt(0, stops[0]) === "S";
-      pay = ok ? BB_VITA_PAY : 0;
-      note = ok ? "ビタ押し成功！14枚" : "ビタ押し失敗";
-      if (ok) sfx.hit();
-      else sfx.miss();
+      // 成功なら 14 枚役（枚数調整）、外したらふつうに風鈴 15 枚
+      if (current.techOk) {
+        pay = BB_VITA_PAY;
+        note = "ビタ押し成功！14枚（枚数調整）";
+        sfx.hit();
+      } else {
+        note = "ビタ押し失敗（15枚）";
+        sfx.miss();
+      }
     } else if (current.tech === "rbOne") {
       // 左リールの窓（中段の上下）に 3 連ドンのどれかが入っていれば 1 枚役を外せる
       const win = [stops[0] - 1, stops[0], stops[0] + 1].map(mod);
@@ -501,7 +534,8 @@ function renderPlayStats() {
     <div class="mo-stat"><span>合算</span><b>${odds(total)}</b></div>
     <div class="mo-stat"><span>差枚</span><b class="${play.diff >= 0 ? "ok" : "ng"}">${play.diff >= 0 ? "+" : ""}${play.diff}</b></div>
     <div class="mo-stat"><span>状態</span><b>${B ? (B.type === "big" ? "BIG 中" : "REG 中") : play.replay ? "リプレイ" : "通常"}</b></div>
-    <div class="mo-stat"><span>設定</span><b>${store.setting === "?" && !play.revealed ? "?" : play.setting}</b></div>`;
+    <div class="mo-stat"><span>設定</span><b>${store.setting === "?" && !play.revealed ? "?" : play.setting}</b></div>
+    <div class="mo-stat"><span>前のゲームのフラグ</span><b class="mo-flag">${anySpinning() ? "…" : play.lastFlag || "-"}</b></div>`;
   renderOddsTable();
 }
 
@@ -564,14 +598,42 @@ function push(r, timeStamp) {
     return;
   }
   const stops = reels.map((x) => (x.stopAt === null ? null : mod(x.stopAt)));
-  // 技術介入のゲーム（BB 1G目のビタ押し・RB の 1 枚役）はすべらせず、押した位置で止める
-  const res = current.free
-    ? { slip: 0 }
-    : decideStop(stops, r, pushed, current.allowed, current.mode, current.bet);
+  let res;
+  if (current.tech === "bbVita" && r === 0 && stops.every((s) => s === null)) {
+    // BB 1G目: 左第一停止で、押したコマがちょうど赤7（すべり 0 で中段に止まる）ならビタ押し成功
+    if (symAt(0, pushed) === "S") {
+      current.techOk = true;
+      res = { slip: 0 };
+    }
+  }
+  if (!res && current.techOk) {
+    // 成功後の中・右: 風鈴を下段（平行風鈴）か、右は上段（斜め風鈴）に止める
+    res = { slip: vitaFuurinSlip(r, pushed) };
+  }
+  if (!res)
+    // 技術介入のゲーム（RB の 1 枚役）はすべらせず、押した位置で止める
+    res = current.free
+      ? { slip: 0 }
+      : decideStop(
+          stops,
+          r,
+          pushed,
+          current.allowed,
+          current.mode,
+          current.bet,
+        );
   R.stopAt = pushed + res.slip;
   // リールの下に、押してから何コマすべったかを出す
   document.querySelectorAll(".mo-result")[r].innerHTML =
     res.slip === 0 ? "すべりなし" : `${res.slip}コマすべり`;
+}
+
+// ビタ押し成功後の中・右リールのすべり。風鈴が下段に来る位置（右は上段でもよい）を 0〜4 コマから選ぶ
+function vitaFuurinSlip(r, pushed) {
+  const isF = (i) => ["F", "G"].includes(symAt(r, i));
+  for (let s = 0; s <= 4; s++) if (isF(pushed + s - 1)) return s; // 下段
+  if (r === 2) for (let s = 0; s <= 4; s++) if (isF(pushed + s + 1)) return s; // 上段（斜め）
+  return 0;
 }
 
 function finishGame() {

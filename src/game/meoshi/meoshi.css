@@ -205,6 +205,9 @@ button {
 .mo-bet-note {
   margin-top: 0.4rem;
 }
+.mo-stat .mo-flag {
+  font-size: 0.95rem;
+}
 .mo-odds-title {
   margin-top: 1rem;
 }
