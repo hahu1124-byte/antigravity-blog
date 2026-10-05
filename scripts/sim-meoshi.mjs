@@ -1,8 +1,10 @@
 // 目押しチャレンジの出玉の試算（リールは回さず、成立役だけで遊技を進める）
 // 使い方: node scripts/sim-meoshi.mjs [ゲーム数（既定 500 万）]
-// 打ち方 2 通り: 完全攻略（小役は全部取る・チェリーは角で 4 枚・ボーナスはすぐ揃える・BIG の枚数調整・
-// REG の 1 枚役ハズシ・花火チャレンジのリプレイハズシは成功）と、技術介入なし（氷は 1/3 取りこぼし・
-// チェリーは中段の 2 枚・技術介入はしない）
+// 打ち方 2 通り。どちらも小役は全部取り（チェリーは角で 4 枚）、ボーナスはすぐ揃える
+//   完全攻略: BIG の枚数調整・REG の 1 枚役ハズシ・花火チャレンジの JAC IN ハズシを成功させる
+//   技術介入なし: それらをしない（1geki の「通常」は完全攻略との差がどの設定でも 1.6% なので、この前提と見る）
+// 出玉率は 2 通り出す。1geki の値に合うのは「リプレイを 3 枚入れて 3 枚出た」と数える方（2026-10-06 の試算で
+// 4 設定とも差 0.3 以内）。リプレイを数えない「払い出し ÷ 投入」だと高設定ほど高く出る
 const base = new URL("../src/game/meoshi/", import.meta.url).href;
 const {
   SETTINGS,
@@ -38,11 +40,15 @@ function run(setting, perfect) {
   const bonusStats = { big: { n: 0, net: 0 }, reg: { n: 0, net: 0 } };
   const rtStats = { chal: 0, game: 0, net: 0 };
   let games = 0;
+  // 内訳: 通常時（RT を除く）の小役ごとの払い出しと、リプレイで遊んだゲーム数（掛け枚数 0）
+  const smallOut = { fuurin: 0, kori: 0, cherry: 0 };
+  let replays = 0;
 
+  // 小役はどちらの打ち方も全部取る（チェリーは A・B とも角の 4 枚。1geki /2/）
   const pay = (small) => {
     if (small === "fuurin") return 8;
-    if (small === "kori") return perfect || Math.random() > 1 / 3 ? 15 : 0;
-    if (small === "cherry") return perfect ? 4 : 2;
+    if (small === "kori") return 15;
+    if (small === "cherry") return 4;
     return 0;
   };
 
@@ -91,6 +97,7 @@ function run(setting, perfect) {
   while (games < N) {
     games++;
     const bet = replay ? 0 : BET;
+    if (replay) replays++;
     replay = false;
     // RT 中の増減は、このゲームの掛け枚数も含めて数える
     const rtBefore = coinOut - coinIn;
@@ -115,6 +122,7 @@ function run(setting, perfect) {
       aligned = !hazushi;
     } else if (small) {
       out = pay(small);
+      if (!inRt) smallOut[small] += out;
     } else if (held) {
       // 小役が無いゲームでボーナスを揃える（完全攻略はすぐ。技術介入なしも同じとする）
       coinOut += out;
@@ -141,6 +149,19 @@ function run(setting, perfect) {
   }
   return {
     rate: (coinOut / coinIn) * 100,
+    // リプレイを「3 枚入れて 3 枚出た」と数える出し方（機械割の表でよく使われる）
+    rateReplay3: ((coinOut + 3 * replays) / (coinIn + 3 * replays)) * 100,
+    // 1000 ゲームあたりの差枚の内訳（ゲームはボーナス中を除く）
+    per1000: {
+      normalBet: (-normalIn / games) * 1000,
+      ...Object.fromEntries(
+        Object.entries(smallOut).map(([k, v]) => [k, (v / games) * 1000]),
+      ),
+      big: (bonusStats.big.net / games) * 1000,
+      reg: (bonusStats.reg.net / games) * 1000,
+      rt: (rtStats.net / games) * 1000,
+      total: ((coinOut - coinIn) / games) * 1000,
+    },
     base: 50 / ((normalIn - normalOut) / normalGames),
     big: bonusStats.big,
     reg: bonusStats.reg,
@@ -162,6 +183,13 @@ for (const s of SETTINGS) {
         `  BIG 純増 ${(r.big.net / r.big.n).toFixed(1)}  REG 純増 ${(r.reg.net / r.reg.n).toFixed(1)}` +
         `  RT 1 回の増減 ${(r.rt.net / Math.max(1, r.rt.chal)).toFixed(1)}（花火GAME 到達 ${((r.rt.game / Math.max(1, r.rt.chal)) * 100).toFixed(0)}%）` +
         `  通常時のベース ${r.base.toFixed(1)}G/50枚`,
+    );
+    const p = r.per1000;
+    const f = (x) => (x >= 0 ? "+" : "") + x.toFixed(0);
+    console.log(
+      `    リプレイを 3 枚入れて 3 枚出たと数えると ${r.rateReplay3.toFixed(1)}%（差 ${(r.rateReplay3 - target).toFixed(1)}）` +
+        `  1000G あたりの差枚: 通常時の投入 ${f(p.normalBet)}・風鈴 ${f(p.fuurin)}・氷 ${f(p.kori)}・チェリー ${f(p.cherry)}` +
+        `・BIG ${f(p.big)}・REG ${f(p.reg)}・RT ${f(p.rt)}＝${f(p.total)}`,
     );
   }
 }
