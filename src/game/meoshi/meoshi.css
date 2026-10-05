@@ -126,6 +126,14 @@ button {
 .mo-array .mo-note {
   margin-bottom: 0;
 }
+.mo-footer {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem 1.5rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
 .mo-cabinet {
   background: linear-gradient(180deg, #23233a, #15151f);
   border: 1px solid var(--line);

@@ -52,16 +52,17 @@ export const LINES_BY_BET = { 1: [0], 3: [0, 1, 2, 3, 4] };
 // kind: bonus はボーナス、small は小役、replay は再遊技
 const FUURIN = ["F", "G"];
 export const ROLES = {
+  // BIG はヒバナ BIG（女の子揃い。実機のドン BIG）と赤7 BIG（赤7 揃い）に分かれ、フラグも別
   big1: {
-    flag: "big",
+    flag: "bigDon",
     kind: "bonus",
-    name: "BIG",
+    name: "ヒバナBIG",
     reels: [["D", "d"], ["D"], ["D"]],
   },
   big2: {
-    flag: "big",
+    flag: "bigSeven",
     kind: "bonus",
-    name: "BIG",
+    name: "赤7BIG",
     reels: [["S"], ["S"], ["S"]],
   },
   reg1: {
@@ -88,7 +89,8 @@ export const ROLES = {
     kind: "small",
     name: "風鈴",
     reels: [FUURIN, FUURIN, FUURIN],
-    pay: 10,
+    // 払い出しが掛け枚数で変わる役は { 掛け枚数: 枚数 }（スマスロ ハナビの配当表: 1 枚掛けは 5 枚）
+    pay: { 1: 5, 3: 8 },
   },
   // 左の小ドン（左 5 番）は風鈴の代わり。中・右から押して左の中段に風鈴が届かないとき、
   // 3 連のドンの位置で取りこぼさないようにする。揃えられるときは本物の風鈴を優先する（alt）
@@ -97,7 +99,7 @@ export const ROLES = {
     kind: "small",
     name: "風鈴",
     reels: [["d"], FUURIN, FUURIN],
-    pay: 10,
+    pay: { 1: 5, 3: 8 },
     alt: true,
   },
   kori: {
@@ -107,8 +109,7 @@ export const ROLES = {
     // 暖簾は右リールだけ氷の代わり（p-town の配当表・1geki のリーチ目画像の重ね描きも右。
     // 左の暖簾は代わりにならないので、上段の「暖簾・氷・暖簾」はハズレ＝r34 のリーチ目）
     reels: [["I"], ["I"], ["I", "N"]],
-    // 払い出しが掛け枚数で変わる役は { 掛け枚数: 枚数 }（2015 年版の配当表）
-    pay: { 1: 10, 3: 15 },
+    pay: 15,
   },
   cherry: {
     flag: "cherry",
@@ -151,57 +152,7 @@ export const ROLES_BY_MODE = {
   bonus: ["bonusFuurin", "bonusFuurinAlt"],
 };
 
-// 通常時の抽選（分母 65536）。スマスロ ハナビの解析値（1geki。設定 3・4 は非公開）
-//   BB・RB・風鈴（A＋B）・チェリー（A1＋A2＋B）は設定差あり、リプレイ 1/7.3・氷 1/46.3＋1/1560.4 は共通
-// 値は「1/x」の x。重なった役は合算した
-export const SETTINGS = [1, 2, 5, 6];
-const ODDS = {
-  1: {
-    big: 297.9,
-    reg: 394.8,
-    fuurin: [12.9, 38.4],
-    cherry: [99.4, 21.0, 307.7],
-  },
-  2: {
-    big: 292.6,
-    reg: 358.1,
-    fuurin: [12.5, 38.7],
-    cherry: [99.4, 19.4, 306.2],
-  },
-  5: {
-    big: 284.9,
-    reg: 313.6,
-    fuurin: [12.1, 36.2],
-    cherry: [99.4, 20.5, 300.6],
-  },
-  6: {
-    big: 273.1,
-    reg: 282.5,
-    fuurin: [11.5, 34.5],
-    cherry: [99.3, 19.6, 297.9],
-  },
-};
-const REPLAY_ODDS = 7.3;
-const KORI_ODDS = [46.3, 1560.4];
-export const LOTTERY_DENOM = 65536;
-const w = (...xs) =>
-  Math.round(LOTTERY_DENOM * xs.reduce((a, x) => a + 1 / x, 0));
-export const LOTTERY_BY_SETTING = Object.fromEntries(
-  SETTINGS.map((s) => {
-    const o = ODDS[s];
-    return [
-      s,
-      [
-        { flag: "big", weight: w(o.big) },
-        { flag: "reg", weight: w(o.reg) },
-        { flag: "replay", weight: w(REPLAY_ODDS) },
-        { flag: "fuurin", weight: w(...o.fuurin) },
-        { flag: "kori", weight: w(...KORI_ODDS) },
-        { flag: "cherry", weight: w(...o.cherry) },
-      ],
-    ];
-  }),
-);
+// 抽選（確率の表）は game-rules.js
 
 // 1 ライン分の払い出し（掛け枚数で変わる役は表から引く）
 export function payOf(roleId, bet) {
@@ -219,18 +170,16 @@ export const REACH_SHOW_RATE = 0.6;
 export const DELAY_MS = 800;
 export const DELAY_RATE = { cherry: 0.135, bonus: 0.35 };
 
-// ボーナス（スマスロ ハナビ。1geki /61/・/63/ と役構成の画像）
-// BB: 279 枚を超えたら終了。1 ゲーム目だけ「左リール中段に赤7 をビタ押し」で 14 枚役（技術介入）、あとは 15 枚
+// ボーナス（スマスロ ハナビ。1geki の配当表・/61/・/63/）
+// BB: 279 枚を超えたら終了。枚数調整（左リール中段に赤7 をビタ押しで 14 枚役・1 回だけ）の 14 枚は
+// 279 枚の数に入れない（ユーザーの計算: 15 枚 × 19G ＋ 14 枚 × 1G で純増 12×19＋11 ＝ 最大 239 枚）
 export const BIG_END_PAYOUT = 279;
 export const BB_VITA_PAY = 14;
-// RB: 12 ゲームか 8 回入賞で終了。1 枚役が成立すると予告音が鳴り、左リールに 3 連ドンを狙うと外せる
-// （入賞回数を 1 枚役で使わないため）。共通 15 枚役でも予告音は鳴る
+// RB: 12 ゲームか 8 回入賞で終了（最大 96 枚 ＝ 15×8 − 3×8）。1 枚役が成立すると予告音が鳴り、
+// 左リールに 3 連ドンを狙うと外せる（入賞回数を 1 枚役で使わないため）。共通 15 枚役でも予告音は鳴る
 export const REG_END_GAMES = 12;
 export const REG_END_WINS = 8;
-export const RB_ONE_ODDS = { 1: 8.0, 2: 8.0, 5: 7.0, 6: 7.0 }; // 1 枚役 1/x
-export const RB_COMMON_ODDS = 32.8; // 共通 15 枚役 1/x
 // 3 連ドンの位置（左リールの 0 始まりの番号）。窓にどれか 1 つでも入っていれば外し成功（アバウトで OK）
 export const TRIPLE_DON = [2, 3, 4];
-// ボーナス中の掛け枚数。1 枚掛けで自動（役構成の表でボーナス中の払い出しは 3 枚掛け・2 枚掛けとは別。
-// 3 枚掛けで 15 枚の役はない）。有効ラインは 1 枚掛けと同じ中段だけ
-export const BONUS_BET = 1;
+// ボーナス中は自動で 3 枚掛け（REG の最大 96 枚が 3 枚掛けでぴったり合う。ユーザー決定）
+export const BONUS_BET = 3;

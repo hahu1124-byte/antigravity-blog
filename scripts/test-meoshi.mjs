@@ -74,35 +74,31 @@ const ORDERS = [
   [2, 1, 0],
 ];
 // must はどの押し順でも取りこぼさない役（3 枚掛けのとき）
+const BONUS_FLAGS = ["bigDon", "bigSeven", "reg"];
 const CASES = [
   { allowed: [], mode: "normal" },
   { allowed: ["replay"], mode: "normal", must: true },
   { allowed: ["fuurin"], mode: "normal", must: true },
   { allowed: ["kori"], mode: "normal" },
   { allowed: ["cherry"], mode: "normal" },
-  { allowed: ["big"], mode: "normal", bonus: true },
-  { allowed: ["reg"], mode: "normal", bonus: true },
-  // "reach" はリーチ目を優先して止めるゲームの目印
-  { allowed: ["big", "reach"], mode: "normal", bonus: true },
-  { allowed: ["reg", "reach"], mode: "normal", bonus: true },
-  // "pull" はリーチ目・ランプの後にボーナス図柄を引き込むゲームの目印
-  { allowed: ["big", "pull"], mode: "normal", bonus: true },
-  { allowed: ["reg", "pull"], mode: "normal", bonus: true },
-  { allowed: ["big", "replay"], mode: "normal", must: true },
-  { allowed: ["big", "fuurin"], mode: "normal", must: true },
-  { allowed: ["big", "kori"], mode: "normal" },
-  { allowed: ["big", "cherry"], mode: "normal" },
-  { allowed: ["reg", "replay"], mode: "normal", must: true },
-  { allowed: ["reg", "fuurin"], mode: "normal", must: true },
-  { allowed: ["reg", "kori"], mode: "normal" },
-  { allowed: ["reg", "cherry"], mode: "normal" },
+  // ボーナス（持ち越し中の小役も含めて全部の組み合わせ）。
+  // "reach" はリーチ目を優先して止めるゲーム、"pull" はリーチ目・ランプの後にボーナス図柄を引き込むゲームの目印
+  ...BONUS_FLAGS.flatMap((b) => [
+    { allowed: [b], mode: "normal", bonus: true },
+    { allowed: [b, "reach"], mode: "normal", bonus: true },
+    { allowed: [b, "pull"], mode: "normal", bonus: true },
+    { allowed: [b, "replay"], mode: "normal", must: true },
+    { allowed: [b, "fuurin"], mode: "normal", must: true },
+    { allowed: [b, "kori"], mode: "normal" },
+    { allowed: [b, "cherry"], mode: "normal" },
+  ]),
   { allowed: ["bonusFuurin"], mode: "bonus", must: true },
   { allowed: [], mode: "bonus" },
 ];
 for (const bet of BETS) {
   console.log(`--- ${bet} 枚掛け ---`);
   for (const c of CASES) {
-    const hasBonus = c.allowed.includes("big") || c.allowed.includes("reg");
+    const hasBonus = BONUS_FLAGS.some((f) => c.allowed.includes(f));
     let total = 0;
     let hit = 0;
     let bonusHit = 0;

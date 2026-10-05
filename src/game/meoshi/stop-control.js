@@ -9,12 +9,13 @@ import {
   BETS,
   ROLES,
   ROLES_BY_MODE,
-  LOTTERY_BY_SETTING,
-  LOTTERY_DENOM,
 } from "./reel-data.js";
 import { REACH_PATTERNS } from "./reach-data.js";
 
 export const mod = (n) => ((n % FRAMES) + FRAMES) % FRAMES;
+
+// ボーナスのフラグ（ドン BIG・赤7 BIG・REG）
+export const BONUS_FLAGS = ["bigDon", "bigSeven", "reg"];
 
 // リール i の idx 番（0 始まり）の図柄
 export const symAt = (reel, idx) => REELS[reel][mod(idx)];
@@ -234,7 +235,7 @@ function tableOf(allowed, mode, bet) {
       mode,
       bet,
       allowed: allowed.slice(),
-      hasBonus: allowed.includes("big") || allowed.includes("reg"),
+      hasBonus: BONUS_FLAGS.some((f) => allowed.includes(f)),
       // "reach" はフラグではなく目印。ボーナス成立中にリーチ目の形を優先して止めるゲーム
       reachPref: allowed.includes("reach"),
       // "pull" も目印。リーチ目やランプでボーナスが分かった後のゲームで、ボーナス図柄を引き込む。
@@ -324,17 +325,21 @@ function bestSlip(s, reel, pushed, t) {
 const toInner = (stops) =>
   stops.map((v) => (v === null || v === undefined ? -1 : v));
 
-// 起こりうるフラグの組み合わせ × 掛け枚数（ページを開いたときに先読みしておく）
+// 起こりうるフラグの組み合わせ × 掛け枚数（ページを開いたときに先読みしておく）。
+// 3 枚掛けを先に並べる（よく使う方から）
 export const FLAG_SETS = (() => {
   const small = [[], ["replay"], ["fuurin"], ["kori"], ["cherry"]];
   const sets = [];
-  for (const bet of BETS) {
-    for (const b of [[], ["big"], ["reg"], ["big", "reach"], ["reg", "reach"]])
+  for (const bet of [3, 1]) {
+    sets.push({ allowed: ["bonusFuurin"], mode: "bonus", bet });
+    for (const b of [[], ...BONUS_FLAGS.map((f) => [f])])
       for (const s of small)
         sets.push({ allowed: [...b, ...s], mode: "normal", bet });
-    sets.push({ allowed: ["big", "pull"], mode: "normal", bet });
-    sets.push({ allowed: ["reg", "pull"], mode: "normal", bet });
-    sets.push({ allowed: ["bonusFuurin"], mode: "bonus", bet });
+    for (const f of BONUS_FLAGS) {
+      for (const s of small)
+        sets.push({ allowed: [f, ...s, "reach"], mode: "normal", bet });
+      sets.push({ allowed: [f, "pull"], mode: "normal", bet });
+    }
   }
   return sets;
 })();
@@ -361,14 +366,4 @@ export function decideStop(
     tableOf(allowed, mode, bet),
   );
   return { mid: mod(pushed + best.slip), slip: best.slip };
-}
-
-// 通常時の抽選。setting は設定（1・2・5・6）、rand は 0 以上 1 未満を返す関数
-export function drawFlag(setting = 1, rand = Math.random) {
-  let v = Math.floor(rand() * LOTTERY_DENOM);
-  for (const e of LOTTERY_BY_SETTING[setting] || LOTTERY_BY_SETTING[1]) {
-    if (v < e.weight) return e.flag;
-    v -= e.weight;
-  }
-  return "none";
 }

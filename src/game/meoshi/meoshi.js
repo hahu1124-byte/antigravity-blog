@@ -6,8 +6,6 @@ import {
   BB_VITA_PAY,
   REG_END_GAMES,
   REG_END_WINS,
-  RB_ONE_ODDS,
-  RB_COMMON_ODDS,
   TRIPLE_DON,
   BONUS_BET,
   ROLES,
@@ -15,20 +13,26 @@ import {
   REACH_SHOW_RATE,
   DELAY_MS,
   DELAY_RATE,
-  SETTINGS,
   BETS,
   LINES,
   LINES_BY_BET,
-  LOTTERY_BY_SETTING,
-  LOTTERY_DENOM,
   payOf,
 } from "./reel-data.js";
+import {
+  SETTINGS,
+  drawNormal,
+  drawBB,
+  drawRB,
+  theoryOdds,
+  nextRt,
+  RT_GAMES,
+  CHAL_EXTEND_LEFT,
+} from "./game-rules.js";
 import {
   pushedFrame,
   pushOffsetMs,
   decideStop,
   judge,
-  drawFlag,
   prepare,
   reachAt,
   reachKindOf,
@@ -241,10 +245,13 @@ function renderPracticeResults() {
 
 // ---- 遊技モード ----
 const NEW_PLAY = () => ({
-  games: 0,
+  games: 0, // 通常時と RT のゲーム数（ボーナス中は数えない）
+  normalGames: 0, // RT を除いた通常時のゲーム数（小役の確率の分母）
   diff: 0,
-  big: 0,
+  bigDon: 0,
+  bigSeven: 0,
   reg: 0,
+  rt: null, // { type: "chal"|"game", left }
   bonusFlag: null,
   notice: null,
   lamp: false,
@@ -261,6 +268,11 @@ function pickSetting() {
 }
 let play = store.play || NEW_PLAY();
 if (!SETTINGS.includes(play.setting)) play.setting = pickSetting();
+// BIG をドン・赤7 に分ける前に保存したデータは、作り直す（数え方が変わったため）
+if (play.bigDon === undefined || play.normalGames === undefined) {
+  play = NEW_PLAY();
+  store.play = play;
+}
 let current = { allowed: [], mode: "normal", bet: 3 };
 
 function setSetting(c) {
@@ -293,67 +305,84 @@ function playLever() {
   play.replay = false;
   if (play.bonus) {
     const B = play.bonus;
-    current = { allowed: ["bonusFuurin"], mode: "bonus", bet };
-    if (B.type === "big" && !B.vitaDone) {
-      // BB 中の枚数調整（1 回だけ）。成功するまでは毎ゲーム、左第一停止で中段に赤7 をビタ押しすると 14 枚役
-      // （中・右は平行風鈴か斜め風鈴に止まる）。外したらふつうの BB 中のゲーム（風鈴 15 枚）
+    if (B.type === "big") {
+      // BIG 中: 風鈴A（平行）・風鈴B（斜め）は 15 枚、バラケ目は小役が揃わず払い出しなし（ユーザー説明）
+      const f = drawBB(play.setting);
       current = {
-        allowed: ["bonusFuurin"],
+        allowed: f === "bara" ? [] : ["bonusFuurin"],
         mode: "bonus",
         bet,
-        tech: "bbVita",
-        techOk: false,
+        bbFlag: f,
       };
-      message("BB中：左リール中段に赤7をビタ押し！（成功まで毎ゲーム）");
-    } else if (B.type === "reg") {
-      const v = Math.random();
-      const one = 1 / RB_ONE_ODDS[play.setting];
-      if (v < one) {
-        // 1 枚役: すべりなしで止まり、左リールの窓に 3 連ドンが入れば外せる。
-        // 回数の制限はなく、予告音が鳴って 1 枚役が成立したゲームなら毎回外せる
-        current = {
-          allowed: [],
-          mode: "bonus",
-          bet,
-          free: true,
-          tech: "rbOne",
-        };
+      if (f !== "bara" && !B.vitaDone) {
+        // 枚数調整（1 回だけ）。成功するまでは毎ゲーム、左第一停止で中段に赤7 をビタ押しすると 14 枚役
+        // （中・右は平行風鈴か斜め風鈴に止まる）。外したらふつうに風鈴 15 枚
+        current.tech = "bbVita";
+        current.techOk = false;
+        message("BB中：左リール中段に赤7をビタ押し！（成功まで毎ゲーム）");
       }
-      if (v < one + 1 / RB_COMMON_ODDS) {
-        if (v >= one) current.rbCommon = true;
+    } else {
+      // REG 中: 1 枚役（予告音・3 連ドン狙いで外せる）・共通 15 枚（予告音）・特殊役（崩れ目 15 枚）・風鈴・ハズレ
+      const f = drawRB(play.setting);
+      current =
+        f === "one"
+          ? { allowed: [], mode: "bonus", bet, free: true, tech: "rbOne" }
+          : {
+              allowed: f === "none" ? [] : ["bonusFuurin"],
+              mode: "bonus",
+              bet,
+            };
+      current.rbFlag = f;
+      if (f === "one" || f === "common" || f === "bara") {
         sfx.notice();
         message("予告音！左リールに3連ドン狙い");
       }
     }
   } else {
     play.games++;
-    const flag = drawFlag(play.setting);
+    const rtType = play.rt ? play.rt.type : null;
+    if (!rtType) play.normalGames++;
+    const { bonus, small } = drawNormal(play.setting, rtType);
     let fresh = false;
-    if ((flag === "big" || flag === "reg") && !play.bonusFlag) {
-      play.bonusFlag = flag;
+    if (bonus && !play.bonusFlag) {
+      play.bonusFlag = bonus;
       fresh = true;
     }
-    const small = ["replay", "fuurin", "kori", "cherry"].includes(flag)
-      ? flag
-      : null;
-    // 成立した回数（取りこぼしも数える。確率の表のかっこ内に出す）
+    // 移行リプレイ・RT リプレイは、止め方はリプレイと同じ
+    const ctrlSmall =
+      small === "jacIn" || small === "rtReplay" ? "replay" : small;
+    // 成立した回数（取りこぼしも数える。確率の表のかっこ内に出す）。小役は RT 中を除く
     play.flagCounts = play.flagCounts || {};
-    const counted = small || (fresh ? flag : null);
-    if (counted) play.flagCounts[counted] = (play.flagCounts[counted] || 0) + 1;
+    const countUp = (f) => (play.flagCounts[f] = (play.flagCounts[f] || 0) + 1);
+    if (fresh) countUp(bonus);
+    if (small && !rtType) countUp(small);
     // ボーナス成立中の止め方の目印:
     //   リーチ目かランプでボーナスが分かった後は、ボーナス図柄を引き込む（"pull"。小役が成立していないゲームだけ）
     //   まだ分かっていないうちは、一定の割合でリーチ目の形を優先して止める（"reach"）
     let mark = null;
     if (play.bonusFlag) {
-      if ((play.reachSeen || play.lamp) && !small) mark = "pull";
+      if ((play.reachSeen || play.lamp) && !ctrlSmall) mark = "pull";
       else if (!play.reachSeen && Math.random() < REACH_SHOW_RATE)
         mark = "reach";
     }
     current = {
-      allowed: [play.bonusFlag, small, mark].filter(Boolean),
+      allowed: [play.bonusFlag, ctrlSmall, mark].filter(Boolean),
       mode: "normal",
       bet,
+      small,
+      bonus: fresh ? bonus : null,
+      rt: rtType,
     };
+    // 花火チャレンジの移行リプレイ: 残り 8G までは逆押しナビ（左を最後に上段暖簾でハズすと延命）、
+    // 残り 7G からは順押しナビ（揃えて花火GAME へ）
+    if (small === "jacIn") {
+      current.navi = play.rt.left >= CHAL_EXTEND_LEFT ? "reverse" : "forward";
+      message(
+        current.navi === "reverse"
+          ? "逆押しナビ：中・右を先に、左リール上段に暖簾を狙ってハズす"
+          : "順押しナビ：揃えて花火GAMEへ",
+      );
+    }
     // 告知ランプ: 成立したゲームのレバーで 25%・第 3 停止で 50%・残りは持ち越し中のゲームで 1/4 ずつ
     if (fresh) {
       const v = Math.random();
@@ -369,7 +398,7 @@ function playLever() {
     }
     // 遅れ（リール始動音が遅れる）: チェリーかボーナスが成立したゲームで抽選する
     current.delay =
-      (small === "cherry" && Math.random() < DELAY_RATE.cherry) ||
+      (ctrlSmall === "cherry" && Math.random() < DELAY_RATE.cherry) ||
       (fresh && Math.random() < DELAY_RATE.bonus);
   }
   if (!current.free) prepare(current.allowed, current.mode, current.bet);
@@ -415,19 +444,36 @@ function renderLamp() {
 
 // 止まり終わったゲームで成立していたフラグの表示名（「設定」の右のタイルに出す）
 const FLAG_LABEL = {
-  big: "BIG",
+  bigDon: "ヒバナBIG",
+  bigSeven: "赤7BIG",
   reg: "REG",
   replay: "リプレイ",
+  jacIn: "移行リプレイ",
+  rtReplay: "RTリプレイ",
   fuurin: "風鈴",
   kori: "氷",
   cherry: "チェリー",
-  bonusFuurin: "風鈴（15枚）",
+};
+const BB_FLAG_LABEL = {
+  fuurinA: "風鈴（平行）",
+  fuurinB: "風鈴（斜め）",
+  bara: "バラケ目",
+};
+const RB_FLAG_LABEL = {
+  fuurin: "風鈴（15枚）",
+  one: "1枚役",
+  common: "共通15枚役",
+  bara: "特殊役（崩れ目）",
+  none: "ハズレ",
 };
 function flagLabel() {
-  if (current.tech === "bbVita") return "14枚役（ビタ押し）";
-  if (current.tech === "rbOne") return "1枚役";
-  if (current.rbCommon) return "共通15枚役";
-  const names = current.allowed
+  if (current.mode === "bonus") {
+    if (current.techOk) return "14枚役（ビタ押し）";
+    return current.bbFlag
+      ? BB_FLAG_LABEL[current.bbFlag]
+      : RB_FLAG_LABEL[current.rbFlag];
+  }
+  const names = [play.bonusFlag || current.bonus, current.small]
     .filter((f) => FLAG_LABEL[f])
     .map((f) => FLAG_LABEL[f]);
   const label = names.length ? names.join("＋") : "ハズレ";
@@ -436,9 +482,11 @@ function flagLabel() {
 }
 
 function finishPlay(stops) {
+  // 揃えたボーナスのフラグは finishPlay の中で消えるので、表示用の名前を先に作る
   play.lastFlag = flagLabel();
   const bet = current.bet;
-  const wins = judge(stops, current.mode, bet);
+  // リプレイハズシで止めたゲームは何も揃っていない扱い（左の窓に暖簾・氷・風鈴で、リプレイ図柄が無い）
+  const wins = current.hazushi ? [] : judge(stops, current.mode, bet);
   const payTotal = Math.min(
     15,
     wins.reduce((a, w) => a + payOf(w.role, bet), 0),
@@ -473,8 +521,12 @@ function finishPlay(stops) {
       if (dodged) sfx.hit();
       else sfx.miss();
     }
+    if (current.bbFlag === "bara") note = "バラケ目（払い出しなし）";
     B.games++;
     B.paid += pay;
+    B.net = (B.net || 0) + pay - bet;
+    // BIG の終了の数（279 枚超え）は、枚数調整の 14 枚役を除いた払い出しで数える
+    if (!current.techOk) B.count = (B.count || 0) + pay;
     play.diff += pay;
     if (pay) {
       B.wins++;
@@ -483,14 +535,19 @@ function finishPlay(stops) {
     const label = B.type === "big" ? "BIG" : "REG";
     const over =
       B.type === "big"
-        ? B.paid > BIG_END_PAYOUT
+        ? B.count > BIG_END_PAYOUT
         : B.games >= REG_END_GAMES || B.wins >= REG_END_WINS;
     const status =
       B.type === "big"
-        ? `${B.paid}/${BIG_END_PAYOUT}枚`
+        ? `${B.count || 0}/${BIG_END_PAYOUT}枚`
         : `${B.wins}/${REG_END_WINS}回・${B.games}/${REG_END_GAMES}G`;
     if (over) {
-      message(`${note ? note + "　" : ""}${label} 終了 ${B.paid}枚獲得`);
+      // BIG の後は花火チャレンジ（RT）。REG の後は通常
+      play.rt = B.type === "big" ? { type: "chal", left: RT_GAMES } : null;
+      message(
+        `${note ? note + "　" : ""}${label} 終了 ${B.paid}枚（純増 ${B.net}枚）` +
+          (play.rt ? "　花火チャレンジへ" : ""),
+      );
       play.bonus = null;
       // ボーナスが終わったら 3 枚掛けに戻す
       store.bet = 3;
@@ -500,22 +557,39 @@ function finishPlay(stops) {
     }
   } else {
     const bonusWin = wins.find((w) => ROLES[w.role].kind === "bonus");
+    const replayWin = wins.some((w) => ROLES[w.role].kind === "replay");
     if (bonusWin) {
-      const type = ROLES[bonusWin.role].flag;
-      play[type]++;
-      play.bonus = { type, paid: 0, games: 0, wins: 0 };
+      const flag = ROLES[bonusWin.role].flag;
+      play[flag]++;
+      play.bonus = {
+        type: flag === "reg" ? "reg" : "big",
+        flag,
+        paid: 0,
+        count: 0,
+        net: 0,
+        games: 0,
+        wins: 0,
+      };
       play.bonusFlag = null;
       play.reachSeen = false;
       play.notice = null;
       play.lamp = false;
+      // ボーナスが揃えば RT は終わる
+      play.rt = null;
       flashUntil = performance.now() + 400;
       sfx.bonus();
-      message(type === "big" ? "BIG BONUS!" : "REG BONUS!");
-    } else if (wins.some((w) => ROLES[w.role].kind === "replay")) {
+      message(`${FLAG_LABEL[flag]} BONUS!`);
+    } else if (replayWin) {
       play.replay = true;
       play.replayBet = bet;
       sfx.replay();
-      message("リプレイ");
+      message(
+        current.small === "jacIn"
+          ? "JAC IN！花火GAMEへ"
+          : current.small === "rtReplay"
+            ? "RTリプレイ"
+            : "リプレイ",
+      );
     } else if (wins.length) {
       play.diff += payTotal;
       sfx.payout(payTotal);
@@ -523,9 +597,30 @@ function finishPlay(stops) {
     } else {
       message(play.bonusFlag && play.lamp ? "ボーナスを揃えよう" : "");
     }
-    // 小役の入賞回数（確率の表に出す）
+    // RT（花火チャレンジ・花火GAME）の残りゲーム数を進める
+    if (play.rt && !bonusWin) {
+      const before = play.rt;
+      play.rt = nextRt(before, {
+        jacIn: current.small === "jacIn",
+        aligned: replayWin,
+      });
+      if (play.rt && play.rt.type === "game" && before.type === "chal")
+        message("JAC IN！花火GAME 20G");
+      else if (!play.rt)
+        message(
+          `${before.type === "chal" ? "花火チャレンジ" : "花火GAME"} 終了`,
+        );
+      else if (current.small === "jacIn" && !replayWin && play.rt === before) {
+        // ハズしても再遊技（1geki: 移行リプレイの欄は「逆押しのときに出るリプレイ」）。移行はせず、残りも減らない
+        play.replay = true;
+        play.replayBet = bet;
+        sfx.replay();
+        message("リプレイハズシ成功！延命（再遊技）");
+      }
+    }
+    // 小役の入賞回数（確率の表に出す。RT 中は数えない）
     const smallWin = wins.find((w) => ROLES[w.role].kind !== "bonus");
-    if (smallWin) {
+    if (smallWin && !current.rt) {
       const f = ROLES[smallWin.role].flag;
       play.counts = play.counts || {};
       play.counts[f] = (play.counts[f] || 0) + 1;
@@ -546,47 +641,59 @@ function finishPlay(stops) {
   renderPlayStats();
 }
 
-function renderPlayStats() {
-  const total = play.big + play.reg;
-  const odds = (n) => (n ? `1/${(play.games / n).toFixed(1)}` : "-");
+function stateLabel() {
   const B = play.bonus;
+  if (B) return B.type === "big" ? `${FLAG_LABEL[B.flag]} 中` : "REG 中";
+  if (play.rt)
+    return `${play.rt.type === "chal" ? "花火チャレンジ" : "花火GAME"} 残り${play.rt.left}G`;
+  return play.replay ? "リプレイ" : "通常";
+}
+
+function renderPlayStats() {
+  const big = play.bigDon + play.bigSeven;
+  const total = big + play.reg;
+  const odds = (n) => (n ? `1/${(play.games / n).toFixed(1)}` : "-");
   $("moPlayStats").innerHTML = `
     <div class="mo-stat"><span>ゲーム数</span><b>${play.games}</b></div>
-    <div class="mo-stat"><span>BIG</span><b>${play.big}</b><small>${odds(play.big)}</small></div>
+    <div class="mo-stat"><span>BIG</span><b>${big}</b><small>${odds(big)}（ヒバナ${play.bigDon}・赤7 ${play.bigSeven}）</small></div>
     <div class="mo-stat"><span>REG</span><b>${play.reg}</b><small>${odds(play.reg)}</small></div>
     <div class="mo-stat"><span>合算</span><b>${odds(total)}</b></div>
     <div class="mo-stat"><span>差枚</span><b class="${play.diff >= 0 ? "ok" : "ng"}">${play.diff >= 0 ? "+" : ""}${play.diff}</b></div>
-    <div class="mo-stat"><span>状態</span><b>${B ? (B.type === "big" ? "BIG 中" : "REG 中") : play.replay ? "リプレイ" : "通常"}</b></div>
+    <div class="mo-stat"><span>状態</span><b class="mo-flag">${stateLabel()}</b></div>
     <div class="mo-stat"><span>設定</span><b>${store.setting === "?" && !play.revealed ? "?" : play.setting}</b></div>
     <div class="mo-stat"><span>前のゲームのフラグ</span><b class="mo-flag">${anySpinning() ? "…" : play.lastFlag || "-"}</b></div>`;
   renderOddsTable();
 }
 
 // 役ごとの確率の表（実戦の入賞回数と、設定が見えているときは設定の値）
+// [表示名, 数えるフラグ, 設定値のキー（theoryOdds）, ボーナスか]。小役は RT を除いた通常時のゲーム数で割る
 const ODDS_ROWS = [
-  ["BIG", ["big"]],
-  ["REG", ["reg"]],
-  ["合算", ["big", "reg"]],
-  ["リプレイ", ["replay"]],
-  ["風鈴", ["fuurin"]],
-  ["氷", ["kori"]],
-  ["チェリー", ["cherry"]],
+  ["ヒバナBIG", ["bigDon"], "bigDon", true],
+  ["赤7BIG", ["bigSeven"], "bigSeven", true],
+  ["REG", ["reg"], "reg", true],
+  ["合算", ["bigDon", "bigSeven", "reg"], "bonus", true],
+  ["リプレイ", ["replay"], "replay", false],
+  ["風鈴", ["fuurin"], "fuurin", false],
+  ["氷", ["kori"], "kori", false],
+  ["チェリー", ["cherry"], "cherry", false],
 ];
 function renderOddsTable() {
   const shown = !(store.setting === "?" && !play.revealed);
-  const lottery = LOTTERY_BY_SETTING[play.setting];
-  const counts = { ...(play.counts || {}), big: play.big, reg: play.reg };
+  const theory = theoryOdds(play.setting);
+  const counts = {
+    ...(play.counts || {}),
+    bigDon: play.bigDon,
+    bigSeven: play.bigSeven,
+    reg: play.reg,
+  };
   const flagCounts = play.flagCounts || {};
-  const fmt = (x) => (x ? `1/${x.toFixed(1)}` : "-");
-  const rows = ODDS_ROWS.map(([label, flags]) => {
+  const fmt = (x) => (x && isFinite(x) ? `1/${x.toFixed(1)}` : "-");
+  const rows = ODDS_ROWS.map(([label, flags, key, isBonus]) => {
     // 入賞（揃えた）回数と、かっこ内に成立した回数（取りこぼしも含む）
     const n = flags.reduce((a, f) => a + (counts[f] || 0), 0);
     const m = flags.reduce((a, f) => a + (flagCounts[f] || 0), 0);
-    const w = flags.reduce(
-      (a, f) => a + lottery.find((e) => e.flag === f).weight,
-      0,
-    );
-    return `<tr><th>${label}</th><td>${n}<small>（${m}）</small></td><td>${n ? fmt(play.games / n) : "-"}<br><small>（${m ? fmt(play.games / m) : "-"}）</small></td><td>${shown ? fmt(LOTTERY_DENOM / w) : "?"}</td></tr>`;
+    const g = isBonus ? play.games : play.normalGames;
+    return `<tr><th>${label}</th><td>${n}<small>（${m}）</small></td><td>${n ? fmt(g / n) : "-"}<br><small>（${m ? fmt(g / m) : "-"}）</small></td><td>${shown ? fmt(theory[key]) : "?"}</td></tr>`;
   }).join("");
   $("moOdds").innerHTML = `
     <thead><tr><th></th><th>回数<br><small>（成立）</small></th><th>実戦<br><small>（成立）</small></th><th>設定値</th></tr></thead>
@@ -626,6 +733,10 @@ function push(r, timeStamp) {
   stopAtFrame(r, pos, pushed);
 }
 
+// リプレイハズシで左リールを止める中段の位置（上段が暖簾＝0 始まりで 8 番）と、受け付ける押したコマ
+const HAZUSHI_MID = REELS[0].indexOf("N") - 1;
+const HAZUSHI_PUSHES = [HAZUSHI_MID - 1, HAZUSHI_MID];
+
 // 押したコマ pushed（巻き戻らない連続値）からすべりを決めて止める。手で押したときとオートで共通
 function stopAtFrame(r, pos, pushed) {
   const R = reels[r];
@@ -649,6 +760,19 @@ function stopAtFrame(r, pos, pushed) {
   if (!res && current.techOk) {
     // 成功後の中・右: 風鈴を下段（平行風鈴）か、右は上段（斜め風鈴）に止める
     res = { slip: vitaFuurinSlip(r, pushed) };
+  }
+  // 花火チャレンジのリプレイハズシ: 逆押しナビで左を最後に押し、暖簾が枠上〜上段に来る位置（押したコマが
+  // 6・7 番）なら、暖簾を上段に止めて移行リプレイを揃えない（左の窓が氷・風鈴・暖簾でリプレイ図柄が無い）
+  if (
+    !res &&
+    current.navi === "reverse" &&
+    r === 0 &&
+    stops[1] !== null &&
+    stops[2] !== null &&
+    HAZUSHI_PUSHES.includes(mod(pushed))
+  ) {
+    res = { slip: HAZUSHI_MID - mod(pushed) };
+    current.hazushi = true;
   }
   if (!res)
     // 技術介入のゲーム（RB の 1 枚役）はすべらせず、押した位置で止める
@@ -684,6 +808,7 @@ let autoNextAt = 0;
 let autoPlan = null;
 const JUN = [0, 1, 2]; // 順押し
 const HASAMI = [0, 2, 1]; // ハサミ打ち（左→右→中）
+const GYAKU = [2, 1, 0]; // 逆押し（右→中→左）
 const idxOf = (r, sym) => REELS[r].indexOf(sym);
 
 function setAuto(m, byUser = true) {
@@ -712,6 +837,9 @@ function planAuto() {
       ? { order: HASAMI, pushes: [TRIPLE_DON[1], null, null] }
       : rnd();
   if (current.mode === "bonus") return rnd();
+  // 完全: 花火チャレンジの逆押しナビは、中・右をすぐ押してから左の暖簾を上段に狙ってリプレイハズシ
+  if (full && current.navi === "reverse")
+    return { order: GYAKU, pushes: [HAZUSHI_MID, null, null] };
   // 完全: 押し位置は先に決めず、各リールの番が来たときに「取れる最高の結果を保てる、いちばん早い位置」で押す
   if (full)
     return {
@@ -719,14 +847,18 @@ function planAuto() {
       pushes: ["best", "best", "best"],
       best: bestScoreFrom([null, null, null], HASAMI),
     };
-  // 最低限: ボーナスが分かったら（リーチ目・ランプ）ボーナス図柄を中段の 2 コマ手前で狙い、引き込みに任せる
+  // 最低限: ボーナスが分かったら（リーチ目・ランプ）ボーナス図柄を中段の 2 コマ手前で狙い、引き込みに任せる。
+  // ドン BIG はドン、赤7 BIG は赤7、REG は「赤7・赤7・暖簾」
   if (play.bonusFlag && (play.reachSeen || play.lamp)) {
-    const right = play.bonusFlag === "reg" ? "N" : "S";
+    const syms =
+      play.bonusFlag === "bigDon"
+        ? ["D", "D", "D"]
+        : play.bonusFlag === "bigSeven"
+          ? ["S", "S", "S"]
+          : ["S", "S", "N"];
     return {
       order: JUN,
-      pushes: [idxOf(0, "S"), idxOf(1, "S"), idxOf(2, right)].map((i) =>
-        mod(i - 2),
-      ),
+      pushes: syms.map((s, r) => mod(idxOf(r, s) - 2)),
     };
   }
   // ふだん: 左リール上段に暖簾を狙うハサミ打ち。右はすぐ押す（氷は引き込む）。
