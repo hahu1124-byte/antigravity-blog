@@ -274,11 +274,17 @@ button {
   text-decoration: underline;
   font-size: inherit;
 }
+/* 長いメッセージでリールが上下に動かないよう、2 行分の高さに固定 */
 .mo-message {
   margin: 0;
   font-weight: 700;
   color: var(--gold);
-  min-height: 1.4em;
+  height: 2.6em;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .mo-reels {
   display: block;
@@ -290,7 +296,8 @@ button {
   grid-template-columns: repeat(3, 1fr);
   gap: 0.4rem;
   margin-top: 0.4rem;
-  min-height: 1.6em;
+  height: 2.6em;
+  overflow: hidden;
   font-size: 0.8rem;
   text-align: center;
   color: var(--muted);
@@ -402,12 +409,58 @@ button {
   grid-template-columns: repeat(2, 1fr);
   gap: 0.5rem;
 }
+/* 中身の行数で大きさが変わらないように、カードの高さを決めておく（長い文字は 2 行まで） */
 .mo-stat {
   background: rgba(255, 255, 255, 0.04);
   border-radius: 10px;
   padding: 0.5rem 0.6rem;
   display: flex;
   flex-direction: column;
+  height: 4.6rem;
+  overflow: hidden;
+}
+.mo-stat .mo-flag {
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* ボーナス履歴は高さを決めておき、あふれたら枠の中でスクロール */
+.mo-history-box {
+  height: 15rem;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.mo-history thead th {
+  position: sticky;
+  top: 0;
+  background: var(--panel);
+}
+.mo-history th,
+.mo-history td {
+  text-align: center;
+}
+.mo-history td small {
+  display: block;
+}
+.mo-history .mo-h-rt {
+  text-align: left;
+  white-space: normal;
+  font-size: 0.74rem;
+}
+.mo-h-big {
+  color: var(--accent);
+  font-weight: 800;
+}
+.mo-h-reg {
+  color: #60a5fa;
+  font-weight: 800;
+}
+.mo-history .mo-h-empty {
+  color: var(--muted);
+  padding: 1.2rem 0;
 }
 .mo-stat span {
   font-size: 0.72rem;

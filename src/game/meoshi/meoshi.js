@@ -289,7 +289,12 @@ const NEW_PLAY = () => ({
   bonus: null,
   setting: pickSetting(),
   revealed: false,
+  // ボーナスの履歴（新しい順）。{ type, flag, start（前のボーナスからのゲーム数）, total（当選時の総ゲーム数）,
+  //   paid（獲得枚数）, net（純増）, inRt（当選したときの RT）, chal・game（後の RT のゲーム数）, rtOpen }
+  history: [],
+  lastBonusAt: 0, // 前のボーナスが揃ったときの総ゲーム数
 });
+const HISTORY_MAX = 200;
 // 設定の選び方: 1・2・5・6 はその設定、"?" は 1・2・5・6 から伏せて選ぶ（「設定を見る」で開ける）
 function pickSetting() {
   const c = store.setting;
@@ -303,6 +308,9 @@ if (play.bigDon === undefined || play.normalGames === undefined) {
   play = NEW_PLAY();
   store.play = play;
 }
+// 履歴を足す前に保存したデータは、空の履歴から始める
+if (!Array.isArray(play.history)) play.history = [];
+if (!Number.isFinite(play.lastBonusAt)) play.lastBonusAt = play.games;
 let current = { allowed: [], mode: "normal", bet: 3 };
 
 function setSetting(c) {
@@ -562,6 +570,11 @@ function finishPlay(stops) {
       B.wins++;
       sfx.payout(pay);
     }
+    const h = play.history[0];
+    if (h) {
+      h.paid = B.paid;
+      h.net = B.net;
+    }
     const label = B.type === "big" ? "BIG" : "REG";
     const over =
       B.type === "big"
@@ -574,6 +587,11 @@ function finishPlay(stops) {
     if (over) {
       // BIG の後は花火チャレンジ（RT）。REG の後は通常
       play.rt = B.type === "big" ? { type: "chal", left: RT_GAMES } : null;
+      // 履歴: BIG の後の RT のゲーム数をここから数える
+      if (h && play.rt) {
+        h.chal = 0;
+        h.rtOpen = true;
+      }
       message(
         `${note ? note + "　" : ""}${label} 終了 ${B.paid}枚（純増 ${B.net}枚）` +
           (play.rt ? "　花火チャレンジへ" : ""),
@@ -591,6 +609,23 @@ function finishPlay(stops) {
     if (bonusWin) {
       const flag = ROLES[bonusWin.role].flag;
       play[flag]++;
+      // 履歴: 前のボーナスの RT はここで終わり（RT 中の当選）、新しい行を足す
+      const prev = play.history[0];
+      if (prev) prev.rtOpen = false;
+      play.history.unshift({
+        type: flag === "reg" ? "reg" : "big",
+        flag,
+        start: play.games - play.lastBonusAt,
+        total: play.games,
+        paid: 0,
+        net: 0,
+        inRt: play.rt ? play.rt.type : null,
+        chal: null,
+        game: null,
+        rtOpen: false,
+      });
+      play.history.length = Math.min(play.history.length, HISTORY_MAX);
+      play.lastBonusAt = play.games;
       play.bonus = {
         type: flag === "reg" ? "reg" : "big",
         flag,
@@ -634,6 +669,15 @@ function finishPlay(stops) {
         jacIn: current.small === "jacIn",
         aligned: replayWin,
       });
+      // 履歴: 花火チャレンジ・花火GAME のゲーム数（JAC IN のゲームは花火チャレンジに数える）
+      const h = play.history[0];
+      if (h && h.rtOpen) {
+        if (before.type === "chal") h.chal++;
+        else h.game++;
+        if (play.rt && play.rt.type === "game" && before.type === "chal")
+          h.game = 0;
+        if (!play.rt) h.rtOpen = false;
+      }
       if (play.rt && play.rt.type === "game" && before.type === "chal")
         message("JAC IN！花火GAME 20G");
       else if (!play.rt)
@@ -682,19 +726,45 @@ function stateLabel() {
 }
 
 function renderPlayStats() {
-  const big = play.bigDon + play.bigSeven;
-  const total = big + play.reg;
-  const odds = (n) => (n ? `1/${(play.games / n).toFixed(1)}` : "-");
+  // ボーナスの回数・確率は下の「役の確率」の表に出すので、ここには出さない
   $("moPlayStats").innerHTML = `
-    <div class="mo-stat"><span>ゲーム数</span><b>${play.games}</b></div>
-    <div class="mo-stat"><span>BIG</span><b>${big}</b><small>${odds(big)}（ヒバナ${play.bigDon}・赤7 ${play.bigSeven}）</small></div>
-    <div class="mo-stat"><span>REG</span><b>${play.reg}</b><small>${odds(play.reg)}</small></div>
-    <div class="mo-stat"><span>合算</span><b>${odds(total)}</b></div>
+    <div class="mo-stat"><span>総ゲーム数</span><b>${play.games}</b></div>
+    <div class="mo-stat"><span>ボーナス後</span><b>${play.games - play.lastBonusAt}G</b></div>
     <div class="mo-stat"><span>差枚</span><b class="${play.diff >= 0 ? "ok" : "ng"}">${play.diff >= 0 ? "+" : ""}${play.diff}</b></div>
     <div class="mo-stat"><span>状態</span><b class="mo-flag">${stateLabel()}</b></div>
     <div class="mo-stat"><span>設定</span><b>${store.setting === "?" && !play.revealed ? "?" : play.setting}</b></div>
     <div class="mo-stat"><span>前のゲームのフラグ</span><b class="mo-flag">${anySpinning() ? "…" : play.lastFlag || "-"}</b></div>`;
   renderOddsTable();
+  renderHistory();
+}
+
+// ボーナスの履歴（ホールのデータ表示機のように、新しい順）
+//   回・種別・スタート（前のボーナスから何 G で当たったか）・獲得枚数・その後の RT
+function renderHistory() {
+  const H = play.history;
+  const n = H.length;
+  const rtText = (h) => {
+    if (h.type === "reg") return "-";
+    // BIG 中（RT はまだ）。… は数えている途中
+    if (h.chal === null) return "BIG中…";
+    const now = h.rtOpen ? "…" : "";
+    return h.game === null
+      ? `チャレンジ ${h.chal}G${now}`
+      : `チャレンジ ${h.chal}G → GAME ${h.game}G${now}`;
+  };
+  const rows = H.map((h, i) => {
+    const kind =
+      h.type === "reg"
+        ? `<span class="mo-h-reg">REG</span>`
+        : `<span class="mo-h-big">${h.flag === "bigSeven" ? "赤7" : "ヒバナ"}</span>`;
+    const from = h.inRt
+      ? `<small>${h.inRt === "chal" ? "チャレンジ中" : "GAME中"}</small>`
+      : "";
+    return `<tr><td>${n - i}</td><td>${kind}</td><td>${h.start}G${from}</td><td>${h.paid}枚</td><td class="mo-h-rt">${rtText(h)}</td></tr>`;
+  }).join("");
+  $("moHistory").innerHTML = `
+    <thead><tr><th>回</th><th>種別</th><th>スタート</th><th>獲得</th><th>RT</th></tr></thead>
+    <tbody>${rows || `<tr><td colspan="5" class="mo-h-empty">まだボーナスはありません</td></tr>`}</tbody>`;
 }
 
 // 役ごとの確率の表（実戦の入賞回数と、設定が見えているときは設定の値）
