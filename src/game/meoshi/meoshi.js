@@ -304,7 +304,8 @@ function playLever() {
       const v = Math.random();
       const one = 1 / RB_ONE_ODDS[play.setting];
       if (v < one) {
-        // 1 枚役: すべりなしで止まり、左リールの窓に 3 連ドンが入れば外せる
+        // 1 枚役: すべりなしで止まり、左リールの窓に 3 連ドンが入れば外せる。
+        // 回数の制限はなく、予告音が鳴って 1 枚役が成立したゲームなら毎回外せる
         current = {
           allowed: [],
           mode: "bonus",
@@ -312,22 +313,11 @@ function playLever() {
           free: true,
           tech: "rbOne",
         };
-      } else if (!B.vitaDone) {
-        // RB 中も BB と同じく、成功するまで毎ゲーム左リール中段に赤7 のビタ押しで 14 枚役（枚数調整は 1 回だけ）
-        current = {
-          allowed: ["bonusFuurin"],
-          mode: "bonus",
-          bet,
-          tech: "bbVita",
-          techOk: false,
-        };
       }
       if (v < one + 1 / RB_COMMON_ODDS) {
         if (v >= one) current.rbCommon = true;
         sfx.notice();
         message("予告音！左リールに3連ドン狙い");
-      } else if (current.tech === "bbVita") {
-        message("RB中：左リール中段に赤7をビタ押し！（成功まで毎ゲーム）");
       }
     }
   } else {
