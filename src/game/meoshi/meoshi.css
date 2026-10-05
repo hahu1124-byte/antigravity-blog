@@ -223,6 +223,10 @@ button {
   text-align: right;
   white-space: nowrap;
 }
+.mo-odds small {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
 .mo-odds th:first-child {
   text-align: left;
 }

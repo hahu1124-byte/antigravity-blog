@@ -31,10 +31,12 @@
         <a href="/game/" class="mo-back">← GAME</a>
         <h1 class="mo-title">目押しチャレンジ</h1>
         <div class="mo-tabs" role="tablist">
-          <button type="button" class="mo-tab active" data-mode="practice">
+          <button type="button" class="mo-tab active" data-mode="play">
+            遊技
+          </button>
+          <button type="button" class="mo-tab" data-mode="practice">
             練習
           </button>
-          <button type="button" class="mo-tab" data-mode="play">遊技</button>
         </div>
         <button
           type="button"
@@ -117,6 +119,25 @@
         </section>
 
         <section id="moPlay" class="mo-panel" hidden>
+          <div class="mo-bets mo-settings">
+            <span class="mo-settings-label">オート</span>
+            <button type="button" class="mo-chip mo-auto" data-auto="off">
+              なし
+            </button>
+            <button type="button" class="mo-chip mo-auto" data-auto="basic">
+              最低限
+            </button>
+            <button type="button" class="mo-chip mo-auto" data-auto="full">
+              完全
+            </button>
+          </div>
+          <p class="mo-note mo-bet-note">
+            最低限:
+            左リール上段に暖簾を狙うハサミ打ち（中は氷狙い、右は適当）。ボーナスが分かったら
+            1 枚掛けにして赤7（REG は右に暖簾）を狙う。完全:
+            小役もボーナスも全部取り（ボーナスは 1 枚掛け）、BIG のビタ押しと
+            REG の 1 枚役ハズシも成功させる。
+          </p>
           <div class="mo-bets">
             <button type="button" class="mo-bet" data-bet="1">1BET</button>
             <button type="button" class="mo-bet" data-bet="3">MAX BET</button>
@@ -158,7 +179,7 @@
           <h2 class="mo-odds-title">役の確率</h2>
           <table id="moOdds" class="mo-odds"></table>
           <p class="mo-note">
-            実戦は入賞した回数から（氷・チェリーは取りこぼした分を含まない）。設定値は「?」のときは伏せます。
+            回数と実戦は入賞した回数から、かっこ内は成立した回数から（取りこぼした分も含む）。設定値は「?」のときは伏せます。
           </p>
           <p class="mo-note">
             押した位置から最大 4

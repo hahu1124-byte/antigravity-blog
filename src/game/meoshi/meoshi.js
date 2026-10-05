@@ -154,6 +154,7 @@ function frame() {
     finishing = false;
   }
   updateStopButtons(now);
+  autoTick(now);
   requestAnimationFrame(frame);
 }
 
@@ -333,6 +334,10 @@ function playLever() {
     const small = ["replay", "fuurin", "kori", "cherry"].includes(flag)
       ? flag
       : null;
+    // 成立した回数（取りこぼしも数える。確率の表のかっこ内に出す）
+    play.flagCounts = play.flagCounts || {};
+    const counted = small || (fresh ? flag : null);
+    if (counted) play.flagCounts[counted] = (play.flagCounts[counted] || 0) + 1;
     // ボーナス成立中の止め方の目印:
     //   リーチ目かランプでボーナスが分かった後は、ボーナス図柄を引き込む（"pull"。小役が成立していないゲームだけ）
     //   まだ分かっていないうちは、一定の割合でリーチ目の形を優先して止める（"reach"）
@@ -567,17 +572,20 @@ function renderOddsTable() {
   const shown = !(store.setting === "?" && !play.revealed);
   const lottery = LOTTERY_BY_SETTING[play.setting];
   const counts = { ...(play.counts || {}), big: play.big, reg: play.reg };
+  const flagCounts = play.flagCounts || {};
   const fmt = (x) => (x ? `1/${x.toFixed(1)}` : "-");
   const rows = ODDS_ROWS.map(([label, flags]) => {
+    // 入賞（揃えた）回数と、かっこ内に成立した回数（取りこぼしも含む）
     const n = flags.reduce((a, f) => a + (counts[f] || 0), 0);
+    const m = flags.reduce((a, f) => a + (flagCounts[f] || 0), 0);
     const w = flags.reduce(
       (a, f) => a + lottery.find((e) => e.flag === f).weight,
       0,
     );
-    return `<tr><th>${label}</th><td>${n}</td><td>${n ? fmt(play.games / n) : "-"}</td><td>${shown ? fmt(LOTTERY_DENOM / w) : "?"}</td></tr>`;
+    return `<tr><th>${label}</th><td>${n}<small>（${m}）</small></td><td>${n ? fmt(play.games / n) : "-"}<br><small>（${m ? fmt(play.games / m) : "-"}）</small></td><td>${shown ? fmt(LOTTERY_DENOM / w) : "?"}</td></tr>`;
   }).join("");
   $("moOdds").innerHTML = `
-    <thead><tr><th></th><th>回数</th><th>実戦</th><th>設定値</th></tr></thead>
+    <thead><tr><th></th><th>回数<br><small>（成立）</small></th><th>実戦<br><small>（成立）</small></th><th>設定値</th></tr></thead>
     <tbody>${rows}</tbody>`;
 }
 
@@ -611,6 +619,12 @@ function push(r, timeStamp) {
     practicePush(r, pos, pushed);
     return;
   }
+  stopAtFrame(r, pos, pushed);
+}
+
+// 押したコマ pushed（巻き戻らない連続値）からすべりを決めて止める。手で押したときとオートで共通
+function stopAtFrame(r, pos, pushed) {
+  const R = reels[r];
   const stops = reels.map((x) => (x.stopAt === null ? null : mod(x.stopAt)));
   let res;
   let vitaLabel = "";
@@ -658,8 +672,152 @@ function vitaFuurinSlip(r, pushed) {
   return 0;
 }
 
+// ---- オート ----
+// "off"・"basic"（最低限の目押し）・"full"（小役からビタ押しまで全部）
+let autoMode = "off";
+let autoNextAt = 0;
+// このゲームの押す順（order）と各リールを押すコマ（pushes。0 始まり）
+let autoPlan = null;
+const JUN = [0, 1, 2]; // 順押し
+const HASAMI = [0, 2, 1]; // ハサミ打ち（左→右→中）
+const randFrame = () => Math.floor(Math.random() * FRAMES);
+const idxOf = (r, sym) => REELS[r].indexOf(sym);
+// その図柄がある位置のどれかを選ぶ
+const pickIdx = (r, sym) => {
+  const list = [...REELS[r]]
+    .map((s, i) => (s === sym ? i : -1))
+    .filter((i) => i >= 0);
+  return list[Math.floor(Math.random() * list.length)];
+};
+
+function setAuto(m, byUser = true) {
+  autoMode = m;
+  autoNextAt = performance.now() + 300;
+  // 音はボタンを押した処理の中で解禁する（ページを開いたときは鳴らせない）
+  if (byUser) unlockAudio();
+  document
+    .querySelectorAll(".mo-auto")
+    .forEach((b) => b.classList.toggle("active", b.dataset.auto === m));
+}
+
+// このゲームの押す順と、各リールをどのコマで押すかを決める（レバーの直後に呼ぶ）
+function planAuto() {
+  const rnd = () => ({
+    order: JUN,
+    pushes: [randFrame(), randFrame(), randFrame()],
+  });
+  const full = autoMode === "full";
+  // BB 中の枚数調整: 完全は左リールの赤7 をちょうどで押す（ビタ）
+  if (current.tech === "bbVita")
+    return full
+      ? { order: JUN, pushes: [idxOf(0, "S"), randFrame(), randFrame()] }
+      : rnd();
+  // RB の 1 枚役: 完全は左リールの窓に 3 連ドンが入る位置で押す
+  if (current.tech === "rbOne")
+    return full
+      ? { order: JUN, pushes: [TRIPLE_DON[1], randFrame(), randFrame()] }
+      : rnd();
+  if (current.mode === "bonus") return rnd();
+  if (full) return { order: JUN, pushes: bestPushes() };
+  // 最低限: ボーナスが分かったら（リーチ目・ランプ）ボーナス図柄を中段の 2 コマ手前で狙い、引き込みに任せる
+  if (play.bonusFlag && (play.reachSeen || play.lamp)) {
+    const right = play.bonusFlag === "reg" ? "N" : "S";
+    return {
+      order: JUN,
+      pushes: [idxOf(0, "S"), idxOf(1, "S"), idxOf(2, right)].map((i) =>
+        mod(i - 2),
+      ),
+    };
+  }
+  // ふだん: 左リール上段に暖簾を狙うハサミ打ち。右は適当（氷は引き込む）、中は氷を中段の 1 コマ手前で狙う
+  return {
+    order: HASAMI,
+    pushes: [mod(idxOf(0, "N") - 1), mod(pickIdx(1, "I") - 1), randFrame()],
+  };
+}
+
+// 完全オート: 順押しで 21³ 通りの押し位置を全部試し、いちばん得な止まり方になる押し位置を選ぶ
+function bestPushes() {
+  const { allowed, mode: m, bet } = current;
+  let best = [0, 0, 0];
+  let bestScore = -Infinity;
+  for (let a = 0; a < FRAMES; a++) {
+    const s0 = decideStop([null, null, null], 0, a, allowed, m, bet).mid;
+    for (let b = 0; b < FRAMES; b++) {
+      const s1 = decideStop([s0, null, null], 1, b, allowed, m, bet).mid;
+      for (let c = 0; c < FRAMES; c++) {
+        const s2 = decideStop([s0, s1, null], 2, c, allowed, m, bet).mid;
+        const score = autoScore([s0, s1, s2]);
+        if (score > bestScore) {
+          bestScore = score;
+          best = [a, b, c];
+        }
+      }
+    }
+  }
+  return best;
+}
+
+// 止まり方の得点: ボーナス揃い ＞ 払い出し ＞ リプレイ。同点はばらす。
+// 小役も成立しているゲームは小役を先に取る（ボーナスは持ち越すので次のゲームで揃えられる）
+function autoScore(stops) {
+  const hasSmall = current.allowed.some((f) =>
+    ["replay", "fuurin", "kori", "cherry"].includes(f),
+  );
+  let v = Math.random();
+  for (const w of judge(stops, current.mode, current.bet)) {
+    const role = ROLES[w.role];
+    v +=
+      role.kind === "bonus"
+        ? hasSmall
+          ? 50
+          : 100000
+        : role.kind === "replay"
+          ? 300
+          : payOf(w.role, current.bet) * 100;
+  }
+  return v;
+}
+
+// 毎フレーム呼ぶ。止まっていればレバー、回っていれば順押しで決めたコマが来たところで止める
+function autoTick(now) {
+  if (autoMode === "off" || mode !== "play" || calib.active) return;
+  if (now < autoNextAt) return;
+  if (!anySpinning()) {
+    // ボーナスを狙うときは 1 枚掛けにする（最低限はリーチ目・ランプで分かってから、完全は成立したら）。
+    // ボーナスが終わると 3 枚掛けに戻る（finishPlay）
+    const aimBonus =
+      !play.bonus &&
+      play.bonusFlag &&
+      (autoMode === "full" || play.reachSeen || play.lamp);
+    if (aimBonus && store.bet !== 1 && !play.replay) {
+      store.bet = 1;
+      save();
+      renderBet();
+    }
+    lever(now);
+    autoPlan = planAuto();
+    autoNextAt = now + 450; // 回り始めてから押し始める
+    return;
+  }
+  if (!autoPlan) return;
+  const r = autoPlan.order.find(
+    (i) => reels[i].spinning && reels[i].stopAt === null,
+  );
+  if (r === undefined) return;
+  const R = reels[r];
+  const pos = R.phase + (now - R.t0) / FRAME_MS;
+  const p0 = pushedFrame(pos);
+  // 狙うコマが次に来る位置で押す（ちょうどビタの真ん中で押したことにする）
+  const pushed = p0 + mod(autoPlan.pushes[r] - p0);
+  stopAtFrame(r, pushed - 0.5, pushed);
+  autoNextAt = now + 260;
+}
+
 function finishGame() {
   if (mode === "play") finishPlay(reels.map((R) => R.rest));
+  // オートは、止まり終わってから少し待って次のレバー
+  autoNextAt = performance.now() + (play.bonus ? 500 : 650);
 }
 
 const KEY_STOP = {
@@ -709,6 +867,7 @@ document.querySelectorAll(".mo-stop").forEach((b) =>
 function setMode(m) {
   if (anySpinning()) return;
   mode = m;
+  if (m !== "play") setAuto("off");
   document
     .querySelectorAll(".mo-tab")
     .forEach((b) => b.classList.toggle("active", b.dataset.mode === m));
@@ -876,7 +1035,12 @@ renderTargets();
 renderPracticeResults();
 renderPlayStats();
 renderSettingButtons();
-setMode("practice");
+document
+  .querySelectorAll(".mo-auto")
+  .forEach((b) => b.addEventListener("click", () => setAuto(b.dataset.auto)));
+setAuto("off", false);
+// 初期状態は遊技モード
+setMode("play");
 requestAnimationFrame(frame);
 loadSymbols(BASE).then((imgs) => {
   renderer.setSymbols(imgs);
