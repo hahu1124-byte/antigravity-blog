@@ -796,7 +796,9 @@ function autoTick(now) {
       renderBet();
     }
     lever(now);
+    pressFx($("moLever"));
     autoPlan = planAuto();
+    autoPlan.at = [];
     autoNextAt = now + 450; // 回り始めてから押し始める
     return;
   }
@@ -807,11 +809,25 @@ function autoTick(now) {
   if (r === undefined) return;
   const R = reels[r];
   const pos = R.phase + (now - R.t0) / FRAME_MS;
-  const p0 = pushedFrame(pos);
-  // 狙うコマが次に来る位置で押す（ちょうどビタの真ん中で押したことにする）
-  const pushed = p0 + mod(autoPlan.pushes[r] - p0);
-  stopAtFrame(r, pushed - 0.5, pushed);
-  autoNextAt = now + 260;
+  // 狙うコマが次に来る位置（巻き戻らない連続値）を 1 回だけ決める
+  if (autoPlan.at[r] === undefined) {
+    const p0 = pushedFrame(pos);
+    autoPlan.at[r] = p0 + mod(autoPlan.pushes[r] - p0);
+  }
+  const pushed = autoPlan.at[r];
+  // 手で押すのと同じく、狙うコマが中段に来る直前（ビタの窓の中）まで待ってから押す。
+  // 押した瞬間に下の停止ボタンも押した見た目にする
+  if (pos < pushed - 0.6) return;
+  stopAtFrame(r, Math.min(pos, pushed), pushed);
+  pressFx(document.querySelector(`.mo-stop[data-reel="${r}"]`));
+  autoNextAt = now + 200;
+}
+
+// ボタンを押した見た目（オートが押したとき）
+function pressFx(el) {
+  if (!el) return;
+  el.classList.add("pressed");
+  setTimeout(() => el.classList.remove("pressed"), 160);
 }
 
 function finishGame() {

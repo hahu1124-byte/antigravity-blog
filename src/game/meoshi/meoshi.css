@@ -334,6 +334,13 @@ button {
 .mo-stop:active {
   transform: translateY(2px);
 }
+/* オートが押したとき（手で押したときの :active と同じ見た目＋少し光る） */
+.mo-lever.pressed,
+.mo-stop.pressed {
+  transform: translateY(3px);
+  filter: brightness(1.4);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.35);
+}
 .mo-keys {
   margin: 0.6rem 0 0;
   font-size: 0.75rem;
