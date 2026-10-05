@@ -19,7 +19,7 @@ const { BIG_END_PAYOUT, BB_VITA_PAY, REG_END_GAMES, REG_END_WINS, BONUS_BET } =
   await import(base + "reel-data.js");
 
 const N = Number(process.argv[2]) || 5_000_000;
-// 花火チャレンジで JAC IN をハズす条件「残り x G 以上」（既定はゲームと同じ 7 ＝ 1〜14G 目。8 なら 1〜13G 目）
+// 花火チャレンジで JAC IN をハズす条件「残り x G 以上」（既定はゲームと同じ 9 ＝ 1〜12G 目。8 なら 1〜13G 目）
 const EXTEND_LEFT = Number(process.argv[3]) || CHAL_EXTEND_LEFT;
 const BET = 3;
 // 1geki の出玉率（通常・完全攻略）
@@ -30,7 +30,37 @@ const TARGET = {
   6: [106.4, 108.0],
 };
 
-function run(setting, perfect) {
+// 打ち方。kori: 氷を取れる割合（通常時と RT 中）、rtHazushi: 花火チャレンジの JAC IN ハズシの成功率（失敗は揃って花火GAME へ）、
+// bigVita: BIG の枚数調整、regHazushi: REG の 1 枚役ハズシ。target は 1geki の出玉率（無ければ比べない）
+const SCENARIOS = [
+  {
+    name: "技術介入なし",
+    kori: 1,
+    rtHazushi: 0,
+    bigVita: false,
+    regHazushi: false,
+    target: (s) => TARGET[s][0],
+  },
+  {
+    name: "完全攻略",
+    kori: 1,
+    rtHazushi: 1,
+    bigVita: true,
+    regHazushi: true,
+    target: (s) => TARGET[s][1],
+  },
+  // ユーザー指定（2026-10-06）: ビタ・1 枚役ハズシは必ず成功、氷 75%・リプレイハズシ 75%
+  {
+    name: "氷75%・ハズシ75%",
+    kori: 0.75,
+    rtHazushi: 0.75,
+    bigVita: true,
+    regHazushi: true,
+    target: null,
+  },
+];
+
+function run(setting, sc) {
   let coinIn = 0;
   let coinOut = 0;
   let replay = false;
@@ -46,10 +76,10 @@ function run(setting, perfect) {
   const smallOut = { fuurin: 0, kori: 0, cherry: 0 };
   let replays = 0;
 
-  // 小役はどちらの打ち方も全部取る（チェリーは A・B とも角の 4 枚。1geki /2/）
+  // 風鈴・チェリーはどの打ち方も全部取る（チェリーは A・B とも角の 4 枚。1geki /2/）。氷は打ち方の割合で取る
   const pay = (small) => {
     if (small === "fuurin") return 8;
-    if (small === "kori") return 15;
+    if (small === "kori") return Math.random() < sc.kori ? 15 : 0;
     if (small === "cherry") return 4;
     return 0;
   };
@@ -58,7 +88,7 @@ function run(setting, perfect) {
     let net = 0;
     if (type === "big") {
       let count = 0;
-      let adjusted = !perfect; // 技術介入なしは枚数調整をしない
+      let adjusted = !sc.bigVita; // 枚数調整をしない打ち方は、最初から調整済みとして 15 枚だけ
       while (count <= BIG_END_PAYOUT) {
         coinIn += BONUS_BET;
         net -= BONUS_BET;
@@ -85,7 +115,7 @@ function run(setting, perfect) {
         net -= BONUS_BET;
         const f = drawRB(setting);
         let p = 0;
-        if (f === "one") p = perfect ? 0 : 1;
+        if (f === "one") p = sc.regHazushi ? 0 : 1;
         else if (f !== "none") p = 15;
         if (p) wins++;
         coinOut += p;
@@ -117,9 +147,10 @@ function run(setting, perfect) {
       replay = true;
       aligned = true;
     } else if (small === "jacIn") {
-      // 完全攻略: 残り 8G まではハズして花火チャレンジを続け、それ以降は揃えて花火GAME へ。技術介入なし: いつも揃える。
-      // ハズしても再遊技（1geki: 移行リプレイの欄は「逆押しのときに出るリプレイ」）。残りは 1 減る（nextRt）
-      const hazushi = perfect && rt.left >= EXTEND_LEFT;
+      // 残り EXTEND_LEFT G まではハズして花火チャレンジを続け（成功率 sc.rtHazushi。失敗は揃って花火GAME へ）、
+      // それ以降は揃えて花火GAME へ。ハズしても再遊技（1geki: 移行リプレイの欄は「逆押しのときに出るリプレイ」）。
+      // 残りは 1 減る（nextRt）
+      const hazushi = rt.left >= EXTEND_LEFT && Math.random() < sc.rtHazushi;
       replay = true;
       aligned = !hazushi;
     } else if (small) {
@@ -173,16 +204,25 @@ function run(setting, perfect) {
   };
 }
 
+// 4 つ目の引数で打ち方を名前の一部で絞れる（例: 氷75）
+const only = process.argv[4];
+const scenarios = only
+  ? SCENARIOS.filter((sc) => sc.name.includes(only))
+  : SCENARIOS;
 const t0 = performance.now();
 console.log(
-  `試算 ${N.toLocaleString()} ゲーム × 設定 ${SETTINGS.length} × 打ち方 2`,
+  `試算 ${N.toLocaleString()} ゲーム × 設定 ${SETTINGS.length} × 打ち方 ${scenarios.length}`,
 );
 for (const s of SETTINGS) {
-  for (const perfect of [false, true]) {
-    const r = run(s, perfect);
-    const target = TARGET[s][perfect ? 1 : 0];
+  for (const sc of scenarios) {
+    const r = run(s, sc);
+    const target = sc.target ? sc.target(s) : null;
+    const vs =
+      target === null
+        ? ""
+        : `（1geki ${target}%・差 ${(r.rate - target).toFixed(1)}）`;
     console.log(
-      `設定${s} ${perfect ? "完全攻略" : "技術介入なし"}: 出玉率 ${r.rate.toFixed(1)}%（1geki ${target}%・差 ${(r.rate - target).toFixed(1)}）` +
+      `設定${s} ${sc.name}: 出玉率 ${r.rate.toFixed(1)}%${vs}` +
         `  BIG 純増 ${(r.big.net / r.big.n).toFixed(1)}  REG 純増 ${(r.reg.net / r.reg.n).toFixed(1)}` +
         `  RT 1 回の増減 ${(r.rt.net / Math.max(1, r.rt.chal)).toFixed(1)}（花火GAME 到達 ${((r.rt.game / Math.max(1, r.rt.chal)) * 100).toFixed(0)}%）` +
         `  通常時のベース ${r.base.toFixed(1)}G/50枚`,
