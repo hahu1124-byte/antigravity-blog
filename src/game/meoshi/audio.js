@@ -39,11 +39,45 @@ export function unlockAudio() {
   }
 }
 
-// 1 音。at は今からの秒
+// 段の変わり目の切れ目（秒）。参考動画の音は段が変わるたびに一瞬音が細くなる
+const STEP_GAP = 0.005;
+
+// 音量を段々に下げる形（phrase 用）。dur を steps の数で等分し、
+// 段 i は vol×steps[i] で始まって段の中で ×fall まで下がり、最後の 5ms で切れ目を作る。
+// attack が 0 より大きければ段の頭で 0.3 倍から attack 秒かけて上げる。最後の段は 0 まで下げる
+function shapeSteps(p, t, dur, vol, steps, fall, attack) {
+  const len = dur / steps.length;
+  steps.forEach((s, i) => {
+    const t0 = t + i * len;
+    const v = vol * s;
+    if (attack > 0) {
+      p.setValueAtTime(v * 0.3, t0);
+      p.linearRampToValueAtTime(v, t0 + attack);
+    } else {
+      p.setValueAtTime(v, t0);
+    }
+    p.exponentialRampToValueAtTime(v * fall, t0 + len - STEP_GAP);
+    p.linearRampToValueAtTime(
+      i === steps.length - 1 ? 0 : v * fall * 0.1,
+      t0 + len,
+    );
+  });
+}
+
+// 1 音。at は今からの秒。
+// steps を渡したときだけ shapeSteps の形にする。渡さなければ今まで通り 0.001 まで指数で下げる
 function tone(
   freq,
   dur,
-  { type = "square", vol = 0.5, at = 0, slideTo = 0 } = {},
+  {
+    type = "square",
+    vol = 0.5,
+    at = 0,
+    slideTo = 0,
+    steps = null,
+    fall = 1,
+    attack = 0,
+  } = {},
 ) {
   const c = audioCtx();
   if (!c || !enabled) return;
@@ -53,8 +87,12 @@ function tone(
   osc.type = type;
   osc.frequency.setValueAtTime(freq, t);
   if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
-  g.gain.setValueAtTime(vol, t);
-  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  if (steps) {
+    shapeSteps(g.gain, t, dur, vol, steps, fall, attack);
+  } else {
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  }
   osc.connect(g);
   g.connect(master);
   osc.start(t);
@@ -83,21 +121,83 @@ function noise(dur, { vol = 0.4, at = 0, freq = 1800 } = {}) {
   src.start(t);
 }
 
+// 2 音ずつ重ねた矩形波の短いフレーズ。notes は [[高さ1, 高さ2, 長さ秒], ...]
+// （参考動画の音を周波数・音量の変化で測り、同じ高さ・長さ・形を合成で作ったもの。動画の音そのものは使っていない）
+// fall: 途中の音が 1 音の間に下がる割合（終わりの音量 / 頭の音量）
+// last: 最後の音の段ごとの音量（頭の音量に掛ける倍率。最後の音の長さを段の数で等分する）
+// lastFall: 最後の音の 1 段の中で下がる割合
+// attack: 音の頭の立ち上がり秒
+// click: 段の頭で鳴らす低い「カチ」（190Hz）の音量。0 なら鳴らさない
+function phrase(
+  notes,
+  vol,
+  { fall = 1, last = [1], lastFall = 1, attack = 0, click = 0 } = {},
+) {
+  let at = 0;
+  notes.forEach(([f1, f2, dur], i) => {
+    const isLast = i === notes.length - 1;
+    const steps = isLast ? last : [1];
+    const shape = { at, steps, fall: isLast ? lastFall : fall, attack };
+    tone(f1, dur, { type: "square", vol, ...shape });
+    tone(f2, dur, { type: "square", vol, ...shape });
+    if (click) {
+      steps.forEach((s, k) =>
+        tone(190, 0.02, {
+          type: "triangle",
+          vol: click * s,
+          at: at + (k * dur) / steps.length,
+        }),
+      );
+    }
+    at += dur;
+  });
+}
+
 export const sfx = {
-  // リール始動音（レバーを叩いてリールが回り始めたとき。遅れのゲームは 0.8 秒後に鳴る）
+  // リール始動音（レバーを叩いてリールが回り始めたとき。遅れのゲームは 0.8 秒後に鳴る）。
+  // ド＋ソ → ミ＋シ → レ＋ソ（0.1 秒ずつ、ほぼ平らに鳴る）→ ミ＋ラが 0.1 秒ごとに約 -5dB ずつ
+  // 7 段で下がって消える。段の頭ごとに低い「カチ」が入る
   lever() {
-    noise(0.07, { vol: 0.6, freq: 1200 });
-    tone(140, 0.12, { type: "triangle", vol: 0.5 });
-    tone(660, 0.18, { type: "square", vol: 0.18, at: 0.04, slideTo: 1320 });
-    tone(1320, 0.12, { type: "square", vol: 0.14, at: 0.22 });
+    noise(0.03, { vol: 0.35, freq: 1200 });
+    phrase(
+      [
+        [523, 784, 0.1],
+        [659, 988, 0.1],
+        [587, 784, 0.1],
+        [659, 880, 0.7],
+      ],
+      0.1,
+      {
+        fall: 0.75,
+        last: [1, 0.54, 0.29, 0.16, 0.085, 0.046, 0.025],
+        lastFall: 0.8,
+        click: 0.3,
+      },
+    );
   },
   stop() {
     noise(0.03, { vol: 0.5, freq: 3000 });
     tone(900, 0.04, { type: "square", vol: 0.15 });
   },
+  // リプレイ音: 4 度離れた 2 音が 0.1 秒ずつ 4 つ上がり（1 音ごとに約 -7dB 下がる）、
+  // 最後の 1 つが 0.4 秒伸びて 0.1 秒ごとの段で消える
   replay() {
-    tone(1320, 0.08, { type: "square", vol: 0.2 });
-    tone(1760, 0.1, { type: "square", vol: 0.2, at: 0.08 });
+    phrase(
+      [
+        [880, 1175, 0.1],
+        [988, 1319, 0.1],
+        [1047, 1397, 0.1],
+        [1175, 1568, 0.1],
+        [988, 1319, 0.4],
+      ],
+      0.1,
+      {
+        fall: 0.45,
+        last: [1, 0.75, 0.28, 0.1],
+        lastFall: 0.6,
+        attack: 0.012,
+      },
+    );
   },
   // 払い出し 1 枚ごとに「ピッ」
   payout(n) {
