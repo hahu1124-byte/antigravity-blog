@@ -12,6 +12,7 @@ export const REACH_KINDS = {
   noren: "暖簾狙い時",
   tanDon: "単ドン狙い時",
   seven: "赤7付近狙い時",
+  tenpai: "テンパイハズレ",
 };
 
 export const REACH_PATTERNS = [

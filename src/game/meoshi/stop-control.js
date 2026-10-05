@@ -104,6 +104,34 @@ function patternMatches(p, stops) {
   return stars.every((s) => s === stars[0]);
 }
 
+// テンパイハズレ: 左と右のリールで小役（リプレイ・風鈴・氷）が 2 ライン以上テンパイしているのに、
+// 全部止まって何も揃っていない形もリーチ目（ハサミ打ちのダブル・トリプルテンパイハズレ）。
+// REACH_PATTERNS の後ろの番号で表す
+export const TENPAI_REACH = REACH_PATTERNS.length;
+const TENPAI_MIN_LINES = 2;
+const TENPAI_ROLES = ["replay", "fuurin", "fuurinAlt", "kori"];
+function tenpaiLines(stops, bet) {
+  let n = 0;
+  for (const l of LINES_BY_BET[bet]) {
+    const rows = LINES[l].rows;
+    const left = symAt(0, stops[0] + rows[0] - 1);
+    const right = symAt(2, stops[2] + rows[2] - 1);
+    if (
+      TENPAI_ROLES.some(
+        (id) =>
+          ROLES[id].reels[0].includes(left) &&
+          ROLES[id].reels[2].includes(right),
+      )
+    )
+      n++;
+  }
+  return n;
+}
+
+// リーチ目の番号から種類（REACH_KINDS のキー）
+export const reachKindOf = (k) =>
+  k === TENPAI_REACH ? "tenpai" : REACH_PATTERNS[k] && REACH_PATTERNS[k].kind;
+
 // 掛け枚数ごとに、全部止まった形（21³ 通り）がどのリーチ目に当たるかを 1 回だけ調べておく（-1 は当たらない）
 const reachTables = {};
 function reachTableOf(bet) {
@@ -124,6 +152,11 @@ function reachTableOf(bet) {
           }
           t[(a * FRAMES + b) * FRAMES + c] = k;
           break;
+        }
+        const i = (a * FRAMES + b) * FRAMES + c;
+        if (t[i] < 0 && tenpaiLines(stops, bet) >= TENPAI_MIN_LINES) {
+          if (noWin === null) noWin = judge(stops, "normal", bet).length === 0;
+          if (noWin) t[i] = TENPAI_REACH;
         }
       }
   reachTables[bet] = t;
@@ -147,6 +180,10 @@ export function reachAllAt(stops, bet = 3) {
     }
     out.push(k);
   });
+  if (tenpaiLines(stops, bet) >= TENPAI_MIN_LINES) {
+    if (noWin === null) noWin = judge(stops, "normal", bet).length === 0;
+    if (noWin) out.push(TENPAI_REACH);
+  }
   return out;
 }
 

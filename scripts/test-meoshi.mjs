@@ -50,7 +50,8 @@ if (Math.abs(w) > 1e-6) ng(`窓の真ん中のずれが 0 でない: ${w}`);
 if (pushedFrame(9.0) !== 9 || pushedFrame(9.01) !== 10) ng("押したコマの計算");
 
 // 3. リーチ目の形が配列上ありうるか（1 つも当たらない形は書き起こしの誤り）
-const reachCount = new Array(REACH_PATTERNS.length).fill(0);
+// 末尾の 1 つはテンパイハズレ（TENPAI_REACH）
+const reachCount = new Array(REACH_PATTERNS.length + 1).fill(0);
 for (let a = 0; a < FRAMES; a++)
   for (let b = 0; b < FRAMES; b++)
     for (let d = 0; d < FRAMES; d++) {
@@ -60,7 +61,7 @@ const never = REACH_PATTERNS.filter((p, k) => reachCount[k] === 0).map(
   (p) => p.id,
 );
 console.log(
-  `  リーチ目 ${REACH_PATTERNS.length} 形・当たる止まり方 ${reachCount.reduce((a, b) => a + b, 0)} 通り・一度も当たらない形 ${never.length}${never.length ? `（${never.join(" ")}）` : ""}`,
+  `  リーチ目 ${REACH_PATTERNS.length} 形・当たる止まり方 ${reachCount.reduce((a, b) => a + b, 0)} 通り（うちテンパイハズレ ${reachCount[REACH_PATTERNS.length]}）・一度も当たらない形 ${never.length}${never.length ? `（${never.join(" ")}）` : ""}`,
 );
 
 // 4. 全フラグ × 掛け枚数 × 押し順 × 押し位置
@@ -142,7 +143,7 @@ for (const bet of BETS) {
               reachHit++;
               if (!hasBonus)
                 ng(
-                  `${bet}BET ${c.allowed.join("+") || "ハズレ"} でリーチ目 ${REACH_PATTERNS[reachAt(stops, bet)].id} 停止${stops}`,
+                  `${bet}BET ${c.allowed.join("+") || "ハズレ"} でリーチ目 ${REACH_PATTERNS[reachAt(stops, bet)]?.id || "テンパイハズレ"} 停止${stops}`,
                 );
             }
             // リプレイと風鈴は 3 枚掛けならどの押し順でも取りこぼさない（左の小ドンが風鈴の代わり）

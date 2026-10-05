@@ -177,35 +177,20 @@ export class ReelRenderer {
         }
         drawCell(sp, x0, phi);
       }
-      // 円筒の陰（上下ほど暗く）と、上からの照明（窓の上の白い光）
+      // 円筒の陰（上下とも同じように、端ほど暗く）
       const sh = g.createLinearGradient(0, stripTop, 0, stripTop + stripH);
-      sh.addColorStop(0, "rgba(0,0,0,0.7)");
-      sh.addColorStop(0.12, "rgba(0,0,0,0.3)");
-      sh.addColorStop(0.3, "rgba(0,0,0,0.04)");
-      sh.addColorStop(0.55, "rgba(0,0,0,0)");
+      sh.addColorStop(0, "rgba(0,0,0,0.75)");
+      sh.addColorStop(0.08, "rgba(0,0,0,0.4)");
+      sh.addColorStop(0.2, "rgba(0,0,0,0.12)");
+      sh.addColorStop(0.35, "rgba(0,0,0,0)");
+      sh.addColorStop(0.65, "rgba(0,0,0,0)");
       sh.addColorStop(0.8, "rgba(0,0,0,0.12)");
       sh.addColorStop(0.92, "rgba(0,0,0,0.4)");
       sh.addColorStop(1, "rgba(0,0,0,0.75)");
       g.fillStyle = sh;
       g.fillRect(x0, stripTop, reelW, stripH);
-      const light = g.createLinearGradient(
-        0,
-        stripTop,
-        0,
-        stripTop + stripH * 0.3,
-      );
-      light.addColorStop(0, "rgba(255,255,255,0.28)");
-      light.addColorStop(1, "rgba(255,255,255,0)");
-      g.fillStyle = light;
-      g.fillRect(x0, stripTop, reelW, stripH * 0.3);
       g.restore();
     }
-    // 窓の上の照明の帯
-    const bar = g.createLinearGradient(0, 0, 0, padY);
-    bar.addColorStop(0, "rgba(255,255,255,0.05)");
-    bar.addColorStop(1, "rgba(235,240,255,0.55)");
-    g.fillStyle = bar;
-    g.fillRect(0, 0, W, padY);
     // 入賞ライン
     if (opts.lines && opts.lines.length) {
       g.save();

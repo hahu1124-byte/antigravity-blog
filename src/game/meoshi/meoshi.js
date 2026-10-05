@@ -9,6 +9,8 @@ import {
   REACH_SHOW_RATE,
   SETTINGS,
   BETS,
+  LOTTERY_BY_SETTING,
+  LOTTERY_DENOM,
   payOf,
 } from "./reel-data.js";
 import {
@@ -19,10 +21,11 @@ import {
   drawFlag,
   prepare,
   reachAt,
+  reachKindOf,
   FLAG_SETS,
   mod,
 } from "./stop-control.js";
-import { REACH_PATTERNS, REACH_KINDS } from "./reach-data.js";
+import { REACH_KINDS } from "./reach-data.js";
 import { ReelRenderer, ArrayRenderer, loadSymbols } from "./render.js";
 import { sfx, unlockAudio, setSoundEnabled } from "./audio.js";
 
@@ -349,7 +352,10 @@ function finishPlay(stops) {
     15,
     wins.reduce((a, w) => a + payOf(w.role, bet), 0),
   );
-  litLines = wins.map((w) => w.line);
+  // 入賞ラインはボーナスが揃ったときだけ光らせる（小役では出さない）
+  litLines = wins
+    .filter((w) => ROLES[w.role].kind === "bonus")
+    .map((w) => w.line);
   litUntil = performance.now() + 1200;
   if (play.bonus) {
     const pay = payTotal;
@@ -394,10 +400,17 @@ function finishPlay(stops) {
     } else {
       message(play.bonusFlag && play.lamp ? "ボーナスを揃えよう" : "");
     }
+    // 小役の入賞回数（確率の表に出す）
+    const smallWin = wins.find((w) => ROLES[w.role].kind !== "bonus");
+    if (smallWin) {
+      const f = ROLES[smallWin.role].flag;
+      play.counts = play.counts || {};
+      play.counts[f] = (play.counts[f] || 0) + 1;
+    }
     // リーチ目（ボーナス成立中にしか出ない形）
     const k = bonusWin ? -1 : reachAt(stops, bet);
     if (k >= 0 && store.reachHint) {
-      const kind = REACH_KINDS[REACH_PATTERNS[k].kind] || "";
+      const kind = REACH_KINDS[reachKindOf(k)] || "";
       message(`リーチ目！（${kind}）`);
     }
     if (play.bonusFlag && !play.lamp && play.notice === "after") lightLamp();
@@ -420,6 +433,35 @@ function renderPlayStats() {
     <div class="mo-stat"><span>差枚</span><b class="${play.diff >= 0 ? "ok" : "ng"}">${play.diff >= 0 ? "+" : ""}${play.diff}</b></div>
     <div class="mo-stat"><span>状態</span><b>${B ? (B.type === "big" ? "BIG 中" : "REG 中") : play.replay ? "リプレイ" : "通常"}</b></div>
     <div class="mo-stat"><span>設定</span><b>${store.setting === "?" && !play.revealed ? "?" : play.setting}</b></div>`;
+  renderOddsTable();
+}
+
+// 役ごとの確率の表（実戦の入賞回数と、設定が見えているときは設定の値）
+const ODDS_ROWS = [
+  ["BIG", ["big"]],
+  ["REG", ["reg"]],
+  ["合算", ["big", "reg"]],
+  ["リプレイ", ["replay"]],
+  ["風鈴", ["fuurin"]],
+  ["氷", ["kori"]],
+  ["チェリー", ["cherry"]],
+];
+function renderOddsTable() {
+  const shown = !(store.setting === "?" && !play.revealed);
+  const lottery = LOTTERY_BY_SETTING[play.setting];
+  const counts = { ...(play.counts || {}), big: play.big, reg: play.reg };
+  const fmt = (x) => (x ? `1/${x.toFixed(1)}` : "-");
+  const rows = ODDS_ROWS.map(([label, flags]) => {
+    const n = flags.reduce((a, f) => a + (counts[f] || 0), 0);
+    const w = flags.reduce(
+      (a, f) => a + lottery.find((e) => e.flag === f).weight,
+      0,
+    );
+    return `<tr><th>${label}</th><td>${n}</td><td>${n ? fmt(play.games / n) : "-"}</td><td>${shown ? fmt(LOTTERY_DENOM / w) : "?"}</td></tr>`;
+  }).join("");
+  $("moOdds").innerHTML = `
+    <thead><tr><th></th><th>回数</th><th>実戦</th><th>設定値</th></tr></thead>
+    <tbody>${rows}</tbody>`;
 }
 
 // ---- 入力 ----
@@ -431,6 +473,9 @@ function lever(t) {
     renderPracticeResults();
     sfx.lever();
   } else {
+    document
+      .querySelectorAll(".mo-result")
+      .forEach((el) => (el.innerHTML = ""));
     playLever();
   }
   litUntil = 0;
@@ -459,6 +504,9 @@ function push(r, timeStamp) {
     current.bet,
   );
   R.stopAt = pushed + res.slip;
+  // リールの下に、押してから何コマすべったかを出す
+  document.querySelectorAll(".mo-result")[r].innerHTML =
+    res.slip === 0 ? "すべりなし" : `${res.slip}コマすべり`;
 }
 
 function finishGame() {

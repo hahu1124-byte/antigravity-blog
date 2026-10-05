@@ -205,6 +205,29 @@ button {
 .mo-bet-note {
   margin-top: 0.4rem;
 }
+.mo-odds-title {
+  margin-top: 1rem;
+}
+.mo-odds {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.mo-odds th,
+.mo-odds td {
+  padding: 0.3rem 0.4rem;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  white-space: nowrap;
+}
+.mo-odds th:first-child {
+  text-align: left;
+}
+.mo-odds thead th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.72rem;
+}
 .mo-settings {
   align-items: center;
 }
