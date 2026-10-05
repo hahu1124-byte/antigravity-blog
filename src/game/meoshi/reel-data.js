@@ -100,7 +100,8 @@ export const ROLES = {
     flag: "kori",
     kind: "small",
     name: "氷",
-    reels: [["I", "N"], ["I"], ["I"]],
+    // 暖簾は左・右リールで氷の代わり
+    reels: [["I", "N"], ["I"], ["I", "N"]],
     pay: 15,
   },
   cherry: {

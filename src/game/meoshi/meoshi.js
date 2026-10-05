@@ -18,7 +18,7 @@ import {
   FLAG_SETS,
   mod,
 } from "./stop-control.js";
-import { ReelRenderer, loadSymbols } from "./render.js";
+import { ReelRenderer, ArrayRenderer, loadSymbols } from "./render.js";
 import { sfx, unlockAudio, setSoundEnabled } from "./audio.js";
 
 const BASE = new URL("./", import.meta.url).href;
@@ -93,10 +93,17 @@ let flashUntil = 0;
 let finishing = false;
 
 const renderer = new ReelRenderer($("moReels"));
-renderer.resize();
-window.addEventListener("resize", () => renderer.resize());
+// 配列の表（PC だけ。スマホの幅では CSS で隠し、描かない）
+const arrayView = new ArrayRenderer($("moArray"));
+const arrayShown = () => $("moArray").offsetParent !== null;
+function resizeAll() {
+  renderer.resize();
+  if (arrayShown()) arrayView.resize();
+}
+resizeAll();
+window.addEventListener("resize", resizeAll);
 // CSS が当たる前に幅を測っていることがあるので、読み込み後にも測り直す
-window.addEventListener("load", () => renderer.resize());
+window.addEventListener("load", resizeAll);
 
 function frame() {
   const now = performance.now();
@@ -106,6 +113,7 @@ function frame() {
     lines: now < litUntil ? litLines : null,
     flash: now < flashUntil ? (flashUntil - now) / 400 : 0,
   });
+  if (arrayShown()) arrayView.draw(positions);
   // 全部のリールが止まりきったら 1 ゲームを締める
   if (
     anySpinning() &&
@@ -569,7 +577,10 @@ renderPracticeResults();
 renderPlayStats();
 setMode("practice");
 requestAnimationFrame(frame);
-loadSymbols(BASE).then((imgs) => renderer.setSymbols(imgs));
+loadSymbols(BASE).then((imgs) => {
+  renderer.setSymbols(imgs);
+  arrayView.setSymbols(imgs);
+});
 
 // 停止制御の先読みを空き時間に済ませる（1 組 20〜30ms）
 let prepIndex = 0;

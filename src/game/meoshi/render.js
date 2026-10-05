@@ -218,3 +218,135 @@ export class ReelRenderer {
     }
   }
 }
+
+// リール配列の表（21 番が上・1 番が下）。窓に見えている 3 コマを枠で囲み、回転に合わせて枠を動かす。
+// 図柄は下へ流れるので、回るほど見えている番号が増えて枠は上へ進む（21 番の上は 1 番につながる）
+export class ArrayRenderer {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.symbols = {};
+    this.layout = null;
+    this.base = null;
+  }
+
+  setSymbols(images) {
+    this.symbols = images;
+    this.base = null;
+  }
+
+  resize() {
+    const cssW = this.canvas.clientWidth;
+    if (!cssW) return false;
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    const W = Math.round(cssW * dpr);
+    const pad = Math.round(4 * dpr);
+    const numW = Math.round(W * 0.15);
+    const gap = Math.round(3 * dpr);
+    const colW = Math.floor((W - numW - pad - gap * 3) / 3);
+    const rowH = Math.round(colW / 2);
+    const H = rowH * FRAMES + pad * 2;
+    this.canvas.width = W;
+    this.canvas.height = H;
+    this.canvas.style.height = `${H / dpr}px`;
+    this.layout = { W, H, pad, numW, gap, colW, rowH, dpr };
+    this.base = null;
+    return true;
+  }
+
+  colX(r) {
+    const { numW, gap, colW } = this.layout;
+    return numW + gap + r * (colW + gap);
+  }
+
+  // 番号 i（0 始まり）の行の上端
+  rowY(i) {
+    const { pad, rowH } = this.layout;
+    return pad + (FRAMES - 1 - i) * rowH;
+  }
+
+  // 番号と図柄の表は変わらないので 1 回だけ描いておく
+  buildBase() {
+    const { W, H, numW, colW, rowH, dpr } = this.layout;
+    const c = document.createElement("canvas");
+    c.width = W;
+    c.height = H;
+    const g = c.getContext("2d");
+    g.fillStyle = "#0b0b12";
+    g.fillRect(0, 0, W, H);
+    g.font = `700 ${Math.round(rowH * 0.5)}px sans-serif`;
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    for (let i = 0; i < FRAMES; i++) {
+      const y = this.rowY(i);
+      g.fillStyle = "#9a9ab0";
+      g.fillText(String(i + 1), numW / 2, y + rowH / 2);
+      for (let r = 0; r < 3; r++) {
+        const x = this.colX(r);
+        g.fillStyle = i % 2 ? "#f6eef3" : "#fffafd";
+        g.fillRect(x, y, colW, rowH);
+        const sym = REELS[r][i];
+        const img = this.symbols[sym];
+        if (img)
+          g.drawImage(
+            img,
+            x + colW * 0.04,
+            y + rowH * 0.04,
+            colW * 0.92,
+            rowH * 0.92,
+          );
+        else {
+          g.fillStyle = "#222";
+          g.fillText(FALLBACK_TEXT[sym] || sym, x + colW / 2, y + rowH / 2);
+        }
+      }
+    }
+    g.strokeStyle = "rgba(0,0,0,0.12)";
+    g.lineWidth = Math.max(1, dpr * 0.5);
+    for (let i = 1; i < FRAMES; i++) {
+      const y = this.rowY(i) + rowH;
+      g.beginPath();
+      g.moveTo(this.colX(0), y);
+      g.lineTo(this.colX(2) + colW, y);
+      g.stroke();
+    }
+    this.base = c;
+  }
+
+  // positions: 各リールの回転位置（ReelRenderer.draw と同じ値）
+  draw(positions) {
+    if (!this.layout && !this.resize()) return;
+    if (!this.base) this.buildBase();
+    const { W, H, pad, colW, rowH, dpr } = this.layout;
+    const g = this.ctx;
+    g.clearRect(0, 0, W, H);
+    g.drawImage(this.base, 0, 0);
+    const total = rowH * FRAMES;
+    for (let r = 0; r < 3; r++) {
+      const p = ((positions[r] % FRAMES) + FRAMES) % FRAMES;
+      // 窓は p-1〜p+1 番。上端は p+1 番の行の上端
+      const top = pad + (FRAMES - 2 - p) * rowH;
+      const x = this.colX(r);
+      g.save();
+      g.beginPath();
+      g.rect(x - 4 * dpr, pad, colW + 8 * dpr, total);
+      g.clip();
+      // 表の上下をまたぐときは反対側にも描く
+      for (const off of [-total, 0, total]) {
+        const y = top + off;
+        if (y + rowH * 3 < pad || y > pad + total) continue;
+        g.fillStyle = "rgba(255,204,51,0.22)";
+        g.fillRect(x, y + rowH, colW, rowH);
+        g.strokeStyle = "#ffcc33";
+        g.lineWidth = Math.max(2, 2 * dpr);
+        g.strokeRect(
+          x + g.lineWidth / 2,
+          y + g.lineWidth / 2,
+          colW - g.lineWidth,
+          rowH * 3 - g.lineWidth,
+        );
+      }
+      g.restore();
+    }
+  }
+}
