@@ -7,6 +7,7 @@ import {
   ROLES,
   REELS,
   REACH_SHOW_RATE,
+  SETTINGS,
   payOf,
 } from "./reel-data.js";
 import {
@@ -38,6 +39,7 @@ const DEFAULTS = {
   play: null,
   bet: 3, // 遊技の掛け枚数（1 か 3）
   reachHint: true, // リーチ目が出たら知らせる
+  setting: "?", // 遊技の設定（"1"・"2"・"5"・"6" か、伏せて決める "?"）
 };
 const store = (() => {
   try {
@@ -230,9 +232,37 @@ const NEW_PLAY = () => ({
   lamp: false,
   replay: false,
   bonus: null,
+  setting: pickSetting(),
+  revealed: false,
 });
+// 設定の選び方: 1・2・5・6 はその設定、"?" は 1・2・5・6 から伏せて選ぶ（「設定を見る」で開ける）
+function pickSetting() {
+  const c = store.setting;
+  if (c !== "?" && SETTINGS.includes(Number(c))) return Number(c);
+  return SETTINGS[Math.floor(Math.random() * SETTINGS.length)];
+}
 let play = store.play || NEW_PLAY();
+if (!SETTINGS.includes(play.setting)) play.setting = pickSetting();
 let current = { allowed: [], mode: "normal", bet: 3 };
+
+function setSetting(c) {
+  if (anySpinning()) return;
+  store.setting = c;
+  play.setting = pickSetting();
+  play.revealed = false;
+  store.play = play;
+  save();
+  renderSettingButtons();
+  renderPlayStats();
+}
+
+function renderSettingButtons() {
+  document
+    .querySelectorAll(".mo-setting")
+    .forEach((b) =>
+      b.classList.toggle("active", b.dataset.setting === String(store.setting)),
+    );
+}
 
 function playLever() {
   // リプレイのときは前のゲームと同じ枚数が自動で掛かる（メダルは減らない）
@@ -243,7 +273,7 @@ function playLever() {
     current = { allowed: ["bonusFuurin"], mode: "bonus", bet };
   } else {
     play.games++;
-    const flag = drawFlag();
+    const flag = drawFlag(play.setting);
     let fresh = false;
     if ((flag === "big" || flag === "reg") && !play.bonusFlag) {
       play.bonusFlag = flag;
@@ -384,7 +414,8 @@ function renderPlayStats() {
     <div class="mo-stat"><span>REG</span><b>${play.reg}</b><small>${odds(play.reg)}</small></div>
     <div class="mo-stat"><span>合算</span><b>${odds(total)}</b></div>
     <div class="mo-stat"><span>差枚</span><b class="${play.diff >= 0 ? "ok" : "ng"}">${play.diff >= 0 ? "+" : ""}${play.diff}</b></div>
-    <div class="mo-stat"><span>状態</span><b>${B ? (B.type === "big" ? "BIG 中" : "REG 中") : play.replay ? "リプレイ" : "通常"}</b></div>`;
+    <div class="mo-stat"><span>状態</span><b>${B ? (B.type === "big" ? "BIG 中" : "REG 中") : play.replay ? "リプレイ" : "通常"}</b></div>
+    <div class="mo-stat"><span>設定</span><b>${store.setting === "?" && !play.revealed ? "?" : play.setting}</b></div>`;
 }
 
 // ---- 入力 ----
@@ -530,6 +561,17 @@ $("moResetPlay").addEventListener("click", () => {
   renderLamp();
   message("");
 });
+document
+  .querySelectorAll(".mo-setting")
+  .forEach((b) =>
+    b.addEventListener("click", () => setSetting(b.dataset.setting)),
+  );
+$("moRevealSetting").addEventListener("click", () => {
+  play.revealed = true;
+  store.play = play;
+  save();
+  renderPlayStats();
+});
 
 // ---- 設定 ----
 function renderSettings() {
@@ -632,6 +674,7 @@ $("moCalibDot").addEventListener("pointerdown", (e) => {
 renderTargets();
 renderPracticeResults();
 renderPlayStats();
+renderSettingButtons();
 setMode("practice");
 requestAnimationFrame(frame);
 loadSymbols(BASE).then((imgs) => {

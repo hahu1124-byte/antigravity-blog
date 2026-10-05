@@ -9,7 +9,7 @@ import {
   BETS,
   ROLES,
   ROLES_BY_MODE,
-  LOTTERY,
+  LOTTERY_BY_SETTING,
   LOTTERY_DENOM,
 } from "./reel-data.js";
 import { REACH_PATTERNS } from "./reach-data.js";
@@ -311,10 +311,10 @@ export function decideStop(
   return { mid: mod(pushed + best.slip), slip: best.slip };
 }
 
-// 通常時の抽選。rand は 0 以上 1 未満を返す関数
-export function drawFlag(rand = Math.random) {
+// 通常時の抽選。setting は設定（1・2・5・6）、rand は 0 以上 1 未満を返す関数
+export function drawFlag(setting = 1, rand = Math.random) {
   let v = Math.floor(rand() * LOTTERY_DENOM);
-  for (const e of LOTTERY) {
+  for (const e of LOTTERY_BY_SETTING[setting] || LOTTERY_BY_SETTING[1]) {
     if (v < e.weight) return e.flag;
     v -= e.weight;
   }

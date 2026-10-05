@@ -202,6 +202,22 @@ button {
 .mo-bet-note {
   margin-top: 0.4rem;
 }
+.mo-settings {
+  align-items: center;
+}
+.mo-settings-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.mo-link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--gold);
+  text-decoration: underline;
+  font-size: inherit;
+}
 .mo-message {
   margin: 0;
   font-weight: 700;

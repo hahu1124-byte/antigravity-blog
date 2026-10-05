@@ -150,18 +150,57 @@ export const ROLES_BY_MODE = {
   bonus: ["bonusFuurin", "bonusFuurinAlt"],
 };
 
-// 通常時の抽選（分母 65536）。2015 年版の設定 1 の解析値:
-// BIG 1/312.1・REG 1/385.5・風鈴 1/15.66・氷 1/52.85（平行）＋1/1638.4（斜め）
-// リプレイとチェリーは通常時の値が見つからないので参考値（リプレイは花火ゲーム中の 1/7.30 を流用）
+// 通常時の抽選（分母 65536）。スマスロ ハナビの解析値（1geki。設定 3・4 は非公開）
+//   BB・RB・風鈴（A＋B）・チェリー（A1＋A2＋B）は設定差あり、リプレイ 1/7.3・氷 1/46.3＋1/1560.4 は共通
+// 値は「1/x」の x。重なった役は合算した
+export const SETTINGS = [1, 2, 5, 6];
+const ODDS = {
+  1: {
+    big: 297.9,
+    reg: 394.8,
+    fuurin: [12.9, 38.4],
+    cherry: [99.4, 21.0, 307.7],
+  },
+  2: {
+    big: 292.6,
+    reg: 358.1,
+    fuurin: [12.5, 38.7],
+    cherry: [99.4, 19.4, 306.2],
+  },
+  5: {
+    big: 284.9,
+    reg: 313.6,
+    fuurin: [12.1, 36.2],
+    cherry: [99.4, 20.5, 300.6],
+  },
+  6: {
+    big: 273.1,
+    reg: 282.5,
+    fuurin: [11.5, 34.5],
+    cherry: [99.3, 19.6, 297.9],
+  },
+};
+const REPLAY_ODDS = 7.3;
+const KORI_ODDS = [46.3, 1560.4];
 export const LOTTERY_DENOM = 65536;
-export const LOTTERY = [
-  { flag: "big", weight: 210 },
-  { flag: "reg", weight: 170 },
-  { flag: "replay", weight: 8978 }, // 約 1/7.30（参考値）
-  { flag: "fuurin", weight: 4185 }, // 約 1/15.66
-  { flag: "kori", weight: 1280 }, // 約 1/51.2（平行と斜めの合算）
-  { flag: "cherry", weight: 1638 }, // 約 1/40（参考値）
-];
+const w = (...xs) =>
+  Math.round(LOTTERY_DENOM * xs.reduce((a, x) => a + 1 / x, 0));
+export const LOTTERY_BY_SETTING = Object.fromEntries(
+  SETTINGS.map((s) => {
+    const o = ODDS[s];
+    return [
+      s,
+      [
+        { flag: "big", weight: w(o.big) },
+        { flag: "reg", weight: w(o.reg) },
+        { flag: "replay", weight: w(REPLAY_ODDS) },
+        { flag: "fuurin", weight: w(...o.fuurin) },
+        { flag: "kori", weight: w(...KORI_ODDS) },
+        { flag: "cherry", weight: w(...o.cherry) },
+      ],
+    ];
+  }),
+);
 
 // 1 ライン分の払い出し（掛け枚数で変わる役は表から引く）
 export function payOf(roleId, bet) {
