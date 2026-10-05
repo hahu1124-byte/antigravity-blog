@@ -186,7 +186,9 @@ button {
   display: flex;
   gap: 0.5rem;
 }
-.mo-bet {
+/* 掛け枚数（.mo-bet）と設定（.mo-chip）のボタン。クラスを分けておかないと掛け枚数の処理が設定ボタンにも効く */
+.mo-bet,
+.mo-chip {
   flex: 1;
   background: transparent;
   border: 1px solid var(--line);
@@ -195,7 +197,8 @@ button {
   padding: 0.45rem;
   font-weight: 800;
 }
-.mo-bet.active {
+.mo-bet.active,
+.mo-chip.active {
   border-color: var(--gold);
   color: var(--gold);
 }

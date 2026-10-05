@@ -90,13 +90,16 @@ export class ReelRenderer {
     const reelW = Math.floor((W - gap * 4) / 3);
     const cellH = Math.round(reelW * 0.5);
     const padY = Math.round(gap * 1.2);
-    // 3×3 の窓の上下に、次の図柄が少しのぞく分（1 コマの約 3 割）
-    const peek = Math.round(cellH * 0.3);
-    const H = cellH * 3 + peek * 2 + padY * 2;
+    // リールは 21 コマを巻いた円筒。中段の 1 コマが cellH の高さに見える半径にする
+    const ang = (Math.PI * 2) / FRAMES;
+    const radius = cellH / (2 * Math.sin(ang / 2));
+    // 見えるのは中段から上下に 1.85 コマ分（3 コマ＋上下に次の図柄が少しのぞく）
+    const half = Math.round(radius * Math.sin(ang * 1.85));
+    const H = half * 2 + padY * 2;
     this.canvas.width = W;
     this.canvas.height = H;
     this.canvas.style.height = `${H / dpr}px`;
-    this.layout = { W, H, gap, reelW, cellH, padY, peek, dpr };
+    this.layout = { W, H, gap, reelW, cellH, padY, dpr, ang, radius, half };
     this.sprites = {};
   }
 
@@ -126,27 +129,36 @@ export class ReelRenderer {
   // opts.spinning: 回転中のリール（残像を付ける）、opts.lines: 光らせるライン、opts.flash: 窓全体を光らせる強さ 0〜1
   draw(positions, opts = {}) {
     if (!this.layout) this.resize();
-    const { W, H, gap, reelW, cellH, padY, peek } = this.layout;
+    const { W, H, gap, reelW, cellH, padY, ang, radius, half } = this.layout;
     const g = this.ctx;
     g.clearRect(0, 0, W, H);
     g.fillStyle = "#0b0b12";
     g.fillRect(0, 0, W, H);
-    // 見えるのは窓（3 コマ）とその上下ののぞき分
     const stripTop = padY;
-    const stripH = cellH * 3 + peek * 2;
-    const winTop = padY + peek;
-    const midY = winTop + cellH * 1.5;
+    const stripH = half * 2;
+    const midY = padY + half;
+    // 円筒に巻いた図柄の、中段からの角度 phi（上が正）の位置。上下ほど縦につぶれて見える
+    const yAt = (phi) => midY - radius * Math.sin(phi);
+    const drawCell = (sp, x0, phi) => {
+      const top = phi + ang / 2;
+      const bottom = phi - ang / 2;
+      if (top <= -Math.PI / 2 || bottom >= Math.PI / 2) return;
+      const y1 = yAt(Math.min(top, Math.PI / 2));
+      const y2 = yAt(Math.max(bottom, -Math.PI / 2));
+      g.drawImage(sp, x0, y1, reelW, y2 - y1);
+    };
     for (let r = 0; r < 3; r++) {
       const x0 = gap + r * (reelW + gap);
       g.save();
       g.beginPath();
       g.rect(x0, stripTop, reelW, stripH);
       g.clip();
-      // リールの帯（白地に薄い桃色の格子）
+      // リールの帯（実機のような明るい灰色。左右の端を少し暗く）
       const bg = g.createLinearGradient(x0, 0, x0 + reelW, 0);
-      bg.addColorStop(0, "#f3e9ef");
-      bg.addColorStop(0.5, "#fffafd");
-      bg.addColorStop(1, "#f3e9ef");
+      bg.addColorStop(0, "#d9dae2");
+      bg.addColorStop(0.18, "#f1f1f6");
+      bg.addColorStop(0.82, "#f1f1f6");
+      bg.addColorStop(1, "#d9dae2");
       g.fillStyle = bg;
       g.fillRect(x0, stripTop, reelW, stripH);
       const pos = positions[r];
@@ -155,32 +167,45 @@ export class ReelRenderer {
       const last = Math.ceil(pos) + 3;
       for (let k = first; k <= last; k++) {
         const sym = REELS[r][((k % FRAMES) + FRAMES) % FRAMES];
-        const y = midY - (k - pos) * cellH - cellH / 2;
+        const phi = (k - pos) * ang;
         const sp = this.sprite(sym);
         if (spinning) {
           // 回転中は半コマ後ろに薄い残像を重ねる
           g.globalAlpha = 0.3;
-          g.drawImage(sp, x0, y - cellH * 0.5);
+          drawCell(sp, x0, phi + ang / 2);
           g.globalAlpha = 1;
         }
-        g.drawImage(sp, x0, y);
+        drawCell(sp, x0, phi);
       }
-      // 円筒の陰（上下ほど暗く。のぞき分はさらに暗くして窓の外だと分かるように）
+      // 円筒の陰（上下ほど暗く）と、上からの照明（窓の上の白い光）
       const sh = g.createLinearGradient(0, stripTop, 0, stripTop + stripH);
-      sh.addColorStop(0, "rgba(0,0,0,0.75)");
-      sh.addColorStop(peek / stripH, "rgba(0,0,0,0.35)");
-      sh.addColorStop(0.3, "rgba(0,0,0,0)");
-      sh.addColorStop(0.7, "rgba(0,0,0,0)");
-      sh.addColorStop(1 - peek / stripH, "rgba(0,0,0,0.35)");
+      sh.addColorStop(0, "rgba(0,0,0,0.7)");
+      sh.addColorStop(0.12, "rgba(0,0,0,0.3)");
+      sh.addColorStop(0.3, "rgba(0,0,0,0.04)");
+      sh.addColorStop(0.55, "rgba(0,0,0,0)");
+      sh.addColorStop(0.8, "rgba(0,0,0,0.12)");
+      sh.addColorStop(0.92, "rgba(0,0,0,0.4)");
       sh.addColorStop(1, "rgba(0,0,0,0.75)");
       g.fillStyle = sh;
       g.fillRect(x0, stripTop, reelW, stripH);
+      const light = g.createLinearGradient(
+        0,
+        stripTop,
+        0,
+        stripTop + stripH * 0.3,
+      );
+      light.addColorStop(0, "rgba(255,255,255,0.28)");
+      light.addColorStop(1, "rgba(255,255,255,0)");
+      g.fillStyle = light;
+      g.fillRect(x0, stripTop, reelW, stripH * 0.3);
       g.restore();
-      // 3×3 の窓の枠
-      g.strokeStyle = "#777";
-      g.lineWidth = Math.max(1, gap * 0.15);
-      g.strokeRect(x0, winTop, reelW, cellH * 3);
     }
+    // 窓の上の照明の帯
+    const bar = g.createLinearGradient(0, 0, 0, padY);
+    bar.addColorStop(0, "rgba(255,255,255,0.05)");
+    bar.addColorStop(1, "rgba(235,240,255,0.55)");
+    g.fillStyle = bar;
+    g.fillRect(0, 0, W, padY);
     // 入賞ライン
     if (opts.lines && opts.lines.length) {
       g.save();
@@ -188,7 +213,7 @@ export class ReelRenderer {
       for (const l of opts.lines) {
         const pts = LINES[l].rows.map((row, r) => [
           gap + r * (reelW + gap) + reelW / 2,
-          midY - (row - 1) * cellH,
+          yAt((row - 1) * ang),
         ]);
         g.strokeStyle = "rgba(255,60,90,0.85)";
         g.shadowColor = "#ff2050";

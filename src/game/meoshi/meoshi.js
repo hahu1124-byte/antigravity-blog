@@ -8,6 +8,7 @@ import {
   REELS,
   REACH_SHOW_RATE,
   SETTINGS,
+  BETS,
   payOf,
 } from "./reel-data.js";
 import {
@@ -51,6 +52,8 @@ const store = (() => {
     return { ...DEFAULTS };
   }
 })();
+// 壊れた値が保存されていたら直す（掛け枚数が 1・3 以外だと判定ができない）
+if (!BETS.includes(store.bet)) store.bet = 3;
 function save() {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify(store));
@@ -311,6 +314,7 @@ function playLever() {
 
 // 掛け枚数の切り替え（遊技モードで、リールが止まっているときだけ）
 function setBet(bet) {
+  if (!BETS.includes(bet)) return;
   if (mode !== "play" || anySpinning() || play.replay) return;
   store.bet = bet;
   save();
