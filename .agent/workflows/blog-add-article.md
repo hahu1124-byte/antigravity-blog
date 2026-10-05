@@ -46,6 +46,8 @@ tags: [タグ1, タグ2]
 **【Antigravity（Gemini）での執筆時】** `generate_image` ツール（Nanobanana）で記事の世界観・テーマに合わせたアイキャッチ（16:9）を生成する。
 
 **【Claude Code での執筆時】** `generate_image` が無いので、Canva の `generate-image`（`aspectRatio: LANDSCAPE_16_9`）で絵を生成し、`get-generate-image-job` で受け取る。プロンプトは下の `--suggest` の案をもとに、見出しを置く左側を暗く空けるよう指定し、`no text, no letters, no logos` を付ける。実在の機種・メーカーのロゴや筐体に似せない。
+- **元の大きさの画像の受け取り方**: `get-generate-image-job`・`get-assets` で受け取れるのは 200×112 の縮小版だけで、縮小版 URL の大きさ指定を書き換えても署名で 403 になる（2026-10-06）。ユーザーに Canva のリンクで画像を開いてもらい、画像の URL（`media.canva.com/v2/image-resize/...x-canva-quality=screen_2x`、1600×899 程度）を貰えば `curl` で取れる。
+- 見出しの合成は `overlay-typography.mjs` と同じ作り（sharp ＋ SVG。左を暗くするグラデーション・バッジ・グラデーションの見出し・副題・GRAVITY PORTAL）。合成した PNG を下の `import-article-image.mjs` に渡す。例: 2026-10-06 の目押しチャレンジ記事。
 
 1. **プロンプト候補の取得（推奨）**:
    記事タイトルからおすすめのプロンプト案（サイバー調・シネマティック調・イラスト調）を生成可能：
