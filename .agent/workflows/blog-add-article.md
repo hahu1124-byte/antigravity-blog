@@ -38,10 +38,14 @@ tags: [タグ1, タグ2]
 
 > **ポイント**: `blog-data.json` の手動編集は不要です！`node build.mjs` が各記事HTMLの先頭コメントからメタデータを自動収集し、`dist/blog-data.json` を生成します。
 
-### 2. ヒーロー画像／OGPアイキャッチ画像 ⚠️Antigravity最重要ルール
+### 2. ヒーロー画像／OGPアイキャッチ画像 ⚠️最重要ルール
 
-**【Antigravity（Gemini）での執筆時・絶対厳守】**
-Antigravityでブログ記事を作成する際は、必ず `generate_image` ツール（Nanobanana）を用いて記事の世界観・テーマに合わせたハイクオリティなアイキャッチ（16:9）を生成する。
+> [!CAUTION]
+> **手で書く記事（自動投稿以外）のアイキャッチは、必ず画像生成 AI で作った絵＋日本語の見出しの合成にする。`generate-og-images.mjs`（sharp で文字だけの OGP を作る自動生成）は使わない。** 自動生成は Uber 日次レポート・週刊テックトレンドなど自動投稿の記事だけ（2026-10-06 ユーザー指示「自動生成スクリプトで作らないでくれ。それは自動投稿での自動生成だけにしてくれ」）。ゲームの図柄など手持ちの素材を並べただけの画像でもなく、ほかの記事のアイキャッチ（AI の絵に見出しを重ねたもの）にそろえる（同日「ゲーム図柄のデザインじゃなくて普通に他のブログ記事のOGP画像みたいな感じで」）。
+
+**【Antigravity（Gemini）での執筆時】** `generate_image` ツール（Nanobanana）で記事の世界観・テーマに合わせたアイキャッチ（16:9）を生成する。
+
+**【Claude Code での執筆時】** `generate_image` が無いので、Canva の `generate-image`（`aspectRatio: LANDSCAPE_16_9`）で絵を生成し、`get-generate-image-job` で受け取る。プロンプトは下の `--suggest` の案をもとに、見出しを置く左側を暗く空けるよう指定し、`no text, no letters, no logos` を付ける。実在の機種・メーカーのロゴや筐体に似せない。
 
 1. **プロンプト候補の取得（推奨）**:
    記事タイトルからおすすめのプロンプト案（サイバー調・シネマティック調・イラスト調）を生成可能：
@@ -64,9 +68,9 @@ Antigravityでブログ記事を作成する際は、必ず `generate_image` ツ
    bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/overlay-typography.mjs
    ```
 
-### 3. OGP画像の自動生成（日次レポート等・画像生成不要な場合のみ）
+### 3. OGP画像の自動生成（自動投稿の記事だけ）
 
-Uber日次レポートなど定型記事で画像生成を行わない場合のみ、sharpによる自動生成CLI（`scripts/generate-og-images.mjs`）を実行する:
+Uber日次レポート・週刊テックトレンドなど**自動投稿の記事だけ**、sharpによる自動生成CLI（`scripts/generate-og-images.mjs`）を使う。**手で書く記事には使わない**（§2）:
 
 ```bash
 bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/generate-og-images.mjs --slug YYYYMM/記事スラッグ
