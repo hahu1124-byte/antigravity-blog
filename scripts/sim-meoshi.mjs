@@ -3,8 +3,8 @@
 // 打ち方 2 通り。どちらも小役は全部取り（チェリーは角で 4 枚）、ボーナスはすぐ揃える
 //   完全攻略: BIG の枚数調整・REG の 1 枚役ハズシ・花火チャレンジの JAC IN ハズシを成功させる
 //   技術介入なし: それらをしない（1geki の「通常」は完全攻略との差がどの設定でも 1.6% なので、この前提と見る）
-// 出玉率は 2 通り出す。1geki の値に合うのは「リプレイを 3 枚入れて 3 枚出た」と数える方（2026-10-06 の試算で
-// 4 設定とも差 0.3 以内）。リプレイを数えない「払い出し ÷ 投入」だと高設定ほど高く出る
+// 出玉率は 1geki と同じく、リプレイを「3 枚入れて 3 枚出た」と数える（2026-10-06 の試算で 4 設定とも差 0.4 以内）。
+// リプレイを数えない「払い出し ÷ 投入」は参考に出す（リプレイの多い高設定ほど高く出る）
 const base = new URL("../src/game/meoshi/", import.meta.url).href;
 const {
   SETTINGS,
@@ -19,7 +19,7 @@ const { BIG_END_PAYOUT, BB_VITA_PAY, REG_END_GAMES, REG_END_WINS, BONUS_BET } =
   await import(base + "reel-data.js");
 
 const N = Number(process.argv[2]) || 5_000_000;
-// 花火チャレンジで JAC IN をハズす条件「残り x G 以上」（既定はゲームと同じ 8 ＝ 1〜13G 目。9 なら 1〜12G 目）
+// 花火チャレンジで JAC IN をハズす条件「残り x G 以上」（既定はゲームと同じ 7 ＝ 1〜14G 目。8 なら 1〜13G 目）
 const EXTEND_LEFT = Number(process.argv[3]) || CHAL_EXTEND_LEFT;
 const BET = 3;
 // 1geki の出玉率（通常・完全攻略）
@@ -150,9 +150,10 @@ function run(setting, perfect) {
     }
   }
   return {
-    rate: (coinOut / coinIn) * 100,
-    // リプレイを「3 枚入れて 3 枚出た」と数える出し方（機械割の表でよく使われる）
-    rateReplay3: ((coinOut + 3 * replays) / (coinIn + 3 * replays)) * 100,
+    // リプレイを「3 枚入れて 3 枚出た」と数える出玉率（1geki の機械割と同じ数え方）
+    rate: ((coinOut + 3 * replays) / (coinIn + 3 * replays)) * 100,
+    // 参考: リプレイを数えない「払い出し ÷ 投入」
+    rateNoReplay: (coinOut / coinIn) * 100,
     // 1000 ゲームあたりの差枚の内訳（ゲームはボーナス中を除く）
     per1000: {
       normalBet: (-normalIn / games) * 1000,
@@ -189,7 +190,7 @@ for (const s of SETTINGS) {
     const p = r.per1000;
     const f = (x) => (x >= 0 ? "+" : "") + x.toFixed(0);
     console.log(
-      `    リプレイを 3 枚入れて 3 枚出たと数えると ${r.rateReplay3.toFixed(1)}%（差 ${(r.rateReplay3 - target).toFixed(1)}）` +
+      `    参考: リプレイを数えない払い出し ÷ 投入 ${r.rateNoReplay.toFixed(1)}%` +
         `  1000G あたりの差枚: 通常時の投入 ${f(p.normalBet)}・風鈴 ${f(p.fuurin)}・氷 ${f(p.kori)}・チェリー ${f(p.cherry)}` +
         `・BIG ${f(p.big)}・REG ${f(p.reg)}・RT ${f(p.rt)}＝${f(p.total)}`,
     );

@@ -411,8 +411,8 @@ function playLever() {
       bonus: fresh ? bonus : null,
       rt: rtType,
     };
-    // 花火チャレンジの移行リプレイ: 残り 8G までは逆押しナビ（左を最後に上段暖簾でハズすと延命）、
-    // 残り 7G からは順押しナビ（揃えて花火GAME へ）
+    // 花火チャレンジの移行リプレイ: 残り 7G までは逆押しナビ（左を最後に上段暖簾でハズすと延命）、
+    // 残り 6G からは順押しナビ（揃えて花火GAME へ）
     if (small === "jacIn") {
       current.navi = play.rt.left >= CHAL_EXTEND_LEFT ? "reverse" : "forward";
       message(

@@ -122,10 +122,11 @@ const RB_ODDS = {
   6: { fuurin: 1.2, one: 7.0, common: 32.8, bara: 1092.3 },
 };
 
-// RT のゲーム数（/81/・/83/）。花火チャレンジは残り 8G まで逆押しナビ（移行リプレイを外して延命）、
-// 残り 7G からは順押しナビ。純増は花火チャレンジ 約 0.2 枚/G・花火GAME 約 0.4 枚/G
+// RT のゲーム数（/81/・/83/）。花火チャレンジは残り 7G まで逆押しナビ（移行リプレイを外して延命）、
+// 残り 6G からは順押しナビ。純増は花火チャレンジ 約 0.2 枚/G・花火GAME 約 0.4 枚/G。
+// 1geki は「残り 8G まで」だが、出玉はどちらでもほぼ同じ（試算）なのでユーザー決定で 7G にした（2026-10-06）
 export const RT_GAMES = 20;
-export const CHAL_EXTEND_LEFT = 8;
+export const CHAL_EXTEND_LEFT = 7;
 
 const inv = (x) =>
   Array.isArray(x) ? x.reduce((a, v) => a + 1 / v, 0) : 1 / x;
