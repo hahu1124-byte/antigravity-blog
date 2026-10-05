@@ -239,6 +239,15 @@ button {
   color: var(--muted);
   white-space: nowrap;
 }
+.mo-setting-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+.mo-setting-actions .mo-sub {
+  margin-top: 0;
+}
 .mo-link {
   background: none;
   border: 0;

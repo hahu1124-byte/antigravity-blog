@@ -289,8 +289,8 @@ function playLever() {
   if (play.bonus) {
     const B = play.bonus;
     current = { allowed: ["bonusFuurin"], mode: "bonus", bet };
-    if (B.type === "big" && B.games === 0) {
-      // BB 1 ゲーム目: 枚数調整の技術介入。左第一停止で中段に赤7 をビタ押しすると 14 枚役
+    if (B.type === "big" && !B.vitaDone) {
+      // BB 中の枚数調整（1 回だけ）。成功するまでは毎ゲーム、左第一停止で中段に赤7 をビタ押しすると 14 枚役
       // （中・右は平行風鈴か斜め風鈴に止まる）。外したらふつうの BB 中のゲーム（風鈴 15 枚）
       current = {
         allowed: ["bonusFuurin"],
@@ -299,7 +299,7 @@ function playLever() {
         tech: "bbVita",
         techOk: false,
       };
-      message("BB 1G目：左リール中段に赤7をビタ押し！");
+      message("BB中：左リール中段に赤7をビタ押し！（成功まで毎ゲーム）");
     } else if (B.type === "reg") {
       const v = Math.random();
       const one = 1 / RB_ONE_ODDS[play.setting];
@@ -312,11 +312,22 @@ function playLever() {
           free: true,
           tech: "rbOne",
         };
+      } else if (!B.vitaDone) {
+        // RB 中も BB と同じく、成功するまで毎ゲーム左リール中段に赤7 のビタ押しで 14 枚役（枚数調整は 1 回だけ）
+        current = {
+          allowed: ["bonusFuurin"],
+          mode: "bonus",
+          bet,
+          tech: "bbVita",
+          techOk: false,
+        };
       }
       if (v < one + 1 / RB_COMMON_ODDS) {
         if (v >= one) current.rbCommon = true;
         sfx.notice();
         message("予告音！左リールに3連ドン狙い");
+      } else if (current.tech === "bbVita") {
+        message("RB中：左リール中段に赤7をビタ押し！（成功まで毎ゲーム）");
       }
     }
   } else {
@@ -438,6 +449,8 @@ function finishPlay(stops) {
       // 成功なら 14 枚役（枚数調整）、外したらふつうに風鈴 15 枚
       if (current.techOk) {
         pay = BB_VITA_PAY;
+        // 枚数調整は 1 回だけ。成功したら、あとは逆押し適当打ちで 15 枚
+        B.vitaDone = true;
         note = "ビタ押し成功！14枚（枚数調整）";
         sfx.hit();
       } else {

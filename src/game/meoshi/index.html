@@ -145,10 +145,15 @@
           </div>
           <p class="mo-note mo-bet-note">
             「?」は 1・2・5・6 から伏せて決まります。
+          </p>
+          <div class="mo-setting-actions">
             <button type="button" id="moRevealSetting" class="mo-link">
               設定を見る
             </button>
-          </p>
+            <button type="button" id="moResetPlay" class="mo-sub">
+              データを消す
+            </button>
+          </div>
           <div id="moPlayStats" class="mo-stats"></div>
           <h2 class="mo-odds-title">役の確率</h2>
           <table id="moOdds" class="mo-odds"></table>
@@ -163,15 +168,13 @@
             REG。リーチ目かランプの後はボーナス図柄を引き込みます。
           </p>
           <p class="mo-note">
-            BIG（279 枚超えで終了）: 1G 目だけ左リール中段に赤7 をビタ押しで 14
-            枚役、あとは 15 枚。 REG（12G か 8 回入賞）:
-            予告音が鳴ったら左リールに 3 連の女の子を狙うと 1 枚役を外せます。
-            ボーナス中は自動で 1 枚掛け（中段 1 ライン）。
+            BIG（279 枚超えで終了）: 左リール中段に赤7 をビタ押しで 14
+            枚役（枚数調整は 1 回だけ。成功するまで毎ゲーム挑戦できる）、ほかは
+            15 枚。 REG（12G か 8 回入賞）: 同じく赤7 のビタ押しで 14 枚役（1
+            回だけ）。予告音が鳴ったら左リールに 3 連の女の子を狙うと 1
+            枚役を外せます。 ボーナス中は自動で 1 枚掛け（中段 1 ライン）。
           </p>
           <p class="mo-note">確率はスマスロ ハナビの設定別の解析値です。</p>
-          <button type="button" id="moResetPlay" class="mo-sub">
-            データを消す
-          </button>
         </section>
       </main>
     </div>
