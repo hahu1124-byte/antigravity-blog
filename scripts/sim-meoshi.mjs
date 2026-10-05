@@ -108,8 +108,8 @@ function run(setting, perfect) {
       replay = true;
       aligned = true;
     } else if (small === "jacIn") {
-      // 完全攻略: 残り 8G まではハズして延命、それ以降は揃えて花火GAME へ。技術介入なし: いつも揃える。
-      // ハズしても再遊技（1geki: 移行リプレイの欄は「逆押しのときに出るリプレイ」）
+      // 完全攻略: 残り 8G まではハズして花火チャレンジを続け、それ以降は揃えて花火GAME へ。技術介入なし: いつも揃える。
+      // ハズしても再遊技（1geki: 移行リプレイの欄は「逆押しのときに出るリプレイ」）。残りは 1 減る（nextRt）
       const hazushi = perfect && rt.left >= CHAL_EXTEND_LEFT;
       replay = true;
       aligned = !hazushi;

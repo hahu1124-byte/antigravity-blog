@@ -640,12 +640,12 @@ function finishPlay(stops) {
         message(
           `${before.type === "chal" ? "花火チャレンジ" : "花火GAME"} 終了`,
         );
-      else if (current.small === "jacIn" && !replayWin && play.rt === before) {
-        // ハズしても再遊技（1geki: 移行リプレイの欄は「逆押しのときに出るリプレイ」）。移行はせず、残りも減らない
+      else if (current.hazushi) {
+        // ハズしても再遊技（1geki: 移行リプレイの欄は「逆押しのときに出るリプレイ」）。移行はしない（残りは 1 減る）
         play.replay = true;
         play.replayBet = bet;
         sfx.replay();
-        message("リプレイハズシ成功！延命（再遊技）");
+        message("JAC INハズシ成功（リプレイ）");
       }
     }
     // 小役の入賞回数（確率の表に出す。RT 中は数えない）

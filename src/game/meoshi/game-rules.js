@@ -122,7 +122,8 @@ const RB_ODDS = {
   6: { fuurin: 1.2, one: 7.0, common: 32.8, bara: 1092.3 },
 };
 
-// RT のゲーム数（/81/・/83/）。花火チャレンジは残り 8G まで移行リプレイを外すと延命
+// RT のゲーム数（/81/・/83/）。花火チャレンジは残り 8G まで逆押しナビ（移行リプレイを外して延命）、
+// 残り 7G からは順押しナビ。純増は花火チャレンジ 約 0.2 枚/G・花火GAME 約 0.4 枚/G
 export const RT_GAMES = 20;
 export const CHAL_EXTEND_LEFT = 8;
 
@@ -227,13 +228,13 @@ export function theoryOdds(setting) {
 
 // 花火チャレンジ・花火GAME の 1 ゲームを終えたあとの RT。rt は { type: "chal"|"game", left }
 //   jacIn: 移行リプレイが成立したか、aligned: そのリプレイが揃ったか（外せば false）
+// 移行リプレイを外したゲームも残りは 1 減る。延命は「花火GAME へ移るのを遅らせて、花火チャレンジの残りを
+// 使い切ってから花火GAME 20G に入る」こと（RT 全体が長くなる）で、花火チャレンジの残りが増えるわけではない。
+// 花火GAME は 20G で必ず終わり、花火チャレンジには戻らない（ユーザー指摘 2026-10-06・1geki /81/・/83/）
 export function nextRt(rt, { jacIn = false, aligned = false } = {}) {
   if (!rt) return null;
-  if (rt.type === "chal") {
-    if (jacIn && aligned) return { type: "game", left: RT_GAMES };
-    // 残り 8G までに移行リプレイを外せば、このゲームは数えない（延命）
-    if (jacIn && !aligned && rt.left >= CHAL_EXTEND_LEFT) return rt;
-  }
+  if (rt.type === "chal" && jacIn && aligned)
+    return { type: "game", left: RT_GAMES };
   const left = rt.left - 1;
   return left > 0 ? { ...rt, left } : null;
 }
