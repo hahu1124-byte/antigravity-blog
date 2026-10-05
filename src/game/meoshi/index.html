@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>目押しチャレンジ | Gravity Portal</title>
+    <meta
+      name="description"
+      content="パチスロのリールをビタ押しで止める練習と、すべり・引き込み・蹴飛ばしを再現した遊技モード。押したタイミングのずれをミリ秒で表示します。"
+    />
+    <meta property="og:title" content="🎯 目押しチャレンジ | Gravity Portal" />
+    <meta
+      property="og:description"
+      content="パチスロのリールをビタ押しで止める練習と、すべり・引き込み・蹴飛ばしを再現した遊技モード。"
+    />
+    <meta
+      property="og:url"
+      content="https://antigravity-portal.com/game/meoshi/"
+    />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="theme-color" content="#0b0b12" />
+    <link rel="stylesheet" href="/game/meoshi/meoshi.css" />
+  </head>
+  <body>
+    <div class="mo-app">
+      <header class="mo-bar">
+        <a href="/game/" class="mo-back">← GAME</a>
+        <h1 class="mo-title">目押しチャレンジ</h1>
+        <div class="mo-tabs" role="tablist">
+          <button type="button" class="mo-tab active" data-mode="practice">
+            練習
+          </button>
+          <button type="button" class="mo-tab" data-mode="play">遊技</button>
+        </div>
+        <button
+          type="button"
+          id="moSettingsBtn"
+          class="mo-icon"
+          aria-label="設定"
+        >
+          ⚙
+        </button>
+      </header>
+
+      <main class="mo-main">
+        <section class="mo-cabinet">
+          <div class="mo-top">
+            <div id="moLamp" class="mo-lamp" aria-hidden="true"></div>
+            <p id="moMessage" class="mo-message"></p>
+          </div>
+          <canvas id="moReels" class="mo-reels" aria-label="リール"></canvas>
+          <div class="mo-results">
+            <div class="mo-result"></div>
+            <div class="mo-result"></div>
+            <div class="mo-result"></div>
+          </div>
+          <div class="mo-controls">
+            <button type="button" id="moLever" class="mo-lever">レバー</button>
+            <div class="mo-stops">
+              <button
+                type="button"
+                class="mo-stop"
+                data-reel="0"
+                aria-label="左リール停止"
+              >
+                左
+              </button>
+              <button
+                type="button"
+                class="mo-stop"
+                data-reel="1"
+                aria-label="中リール停止"
+              >
+                中
+              </button>
+              <button
+                type="button"
+                class="mo-stop"
+                data-reel="2"
+                aria-label="右リール停止"
+              >
+                右
+              </button>
+            </div>
+          </div>
+          <p class="mo-keys">
+            キーボード: スペース＝レバー ／ Z・X・C（←・↓・→）＝停止
+          </p>
+        </section>
+
+        <section id="moPractice" class="mo-panel">
+          <h2>狙う図柄</h2>
+          <div id="moTargets" class="mo-targets"></div>
+          <p class="mo-note">
+            狙った図柄が中段に止まれば「ビタ」。ずれは、ビタで止まる 35.7ms
+            の幅の真ん中からの差です（早いとマイナス）。
+          </p>
+          <h2>記録</h2>
+          <div id="moStats" class="mo-stats"></div>
+          <button type="button" id="moResetPractice" class="mo-sub">
+            記録を消す
+          </button>
+        </section>
+
+        <section id="moPlay" class="mo-panel" hidden>
+          <div id="moPlayStats" class="mo-stats"></div>
+          <p class="mo-note">
+            押した位置から最大 4
+            コマすべって、成立した役を引き込み、成立していない役は蹴飛ばします。リプレイと風鈴はどこから押しても取りこぼしません（左の小ドンは風鈴の代わりになります）。
+            ランプが光ったらボーナス成立。女の子か赤7を 3 つ揃えると BIG、暖簾 3
+            つか「赤7・赤7・暖簾」で REG。
+          </p>
+          <p class="mo-note">
+            確率は 2015 年版の設定 1
+            の解析値です（リプレイとチェリーは参考値）。
+          </p>
+          <button type="button" id="moResetPlay" class="mo-sub">
+            データを消す
+          </button>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="moSettings" class="mo-dialog">
+      <h2>設定</h2>
+      <div class="mo-field">
+        <label for="moLatency">遅延補正（ms）</label>
+        <input
+          id="moLatency"
+          type="number"
+          min="-100"
+          max="300"
+          step="1"
+          inputmode="numeric"
+        />
+        <p class="mo-note">
+          画面とボタンの遅れの分だけ、押した時刻を早めて判定します。今の値:
+          <b id="moLatencyNow"></b>
+        </p>
+        <button type="button" id="moCalibStart" class="mo-sub">
+          自動で測る
+        </button>
+      </div>
+      <label class="mo-check"
+        ><input id="moSound" type="checkbox" /> 効果音</label
+      >
+      <label class="mo-check"
+        ><input id="moGhost" type="checkbox" /> 回転中の残像</label
+      >
+      <div class="mo-dialog-foot">
+        <button type="button" id="moSettingsClose" class="mo-sub">
+          閉じる
+        </button>
+      </div>
+    </dialog>
+
+    <div id="moCalib" class="mo-calib" hidden>
+      <p>円が光った瞬間に、円かスペースキーを押してください（10 回）。</p>
+      <button
+        type="button"
+        id="moCalibDot"
+        class="mo-calib-dot"
+        aria-label="ここを押す"
+      ></button>
+      <p id="moCalibCount" class="mo-calib-count"></p>
+      <p id="moCalibResult" class="mo-calib-result"></p>
+      <button type="button" id="moCalibCancel" class="mo-sub">やめる</button>
+    </div>
+
+    <script type="module" src="/game/meoshi/meoshi.js"></script>
+  </body>
+</html>

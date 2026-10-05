@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+  <!-- 紫の花火札（小さめの図柄） -->
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c49ad4"/>
+      <stop offset="1" stop-color="#8a58a2"/>
+    </linearGradient>
+    <clipPath id="inner">
+      <polygon points="63,50 78,24 122,24 137,50 122,76 78,76"/>
+    </clipPath>
+  </defs>
+
+  <!-- 外枠 -->
+  <polygon points="54,50 73,17 127,17 146,50 127,83 73,83" fill="#5c2068" stroke="#2a0a30" stroke-width="2.4" stroke-linejoin="round"/>
+  <!-- 角の金具 -->
+  <g fill="#44124e" stroke="#2a0a30" stroke-width="1.4">
+    <rect x="49" y="45" width="10" height="10" rx="1"/>
+    <rect x="141" y="45" width="10" height="10" rx="1"/>
+    <rect x="68" y="12" width="10" height="10" rx="1"/>
+    <rect x="122" y="12" width="10" height="10" rx="1"/>
+    <rect x="68" y="78" width="10" height="10" rx="1"/>
+    <rect x="122" y="78" width="10" height="10" rx="1"/>
+  </g>
+
+  <!-- 中の札 -->
+  <polygon points="63,50 78,24 122,24 137,50 122,76 78,76" fill="url(#panel)" stroke="#3a0f42" stroke-width="1.6" stroke-linejoin="round"/>
+  <polygon points="67,50 80.5,27 119.5,27 133,50 119.5,73 80.5,73" fill="none" stroke="#fff" stroke-width="0.9" stroke-dasharray="1.6 1.6" opacity="0.9"/>
+
+  <!-- 白い打ち上げ花火 -->
+  <g clip-path="url(#inner)" fill="#fff" stroke="#fff" stroke-linecap="round">
+    <!-- 左上（下向きに開く） -->
+    <g transform="translate(86 25)" stroke-width="1.3">
+      <line x1="0" y1="4" x2="0" y2="15" transform="rotate(-72)"/>
+      <line x1="0" y1="4" x2="0" y2="15" transform="rotate(-54)"/>
+      <line x1="0" y1="4" x2="0" y2="15" transform="rotate(-36)"/>
+      <line x1="0" y1="4" x2="0" y2="15" transform="rotate(-18)"/>
+      <line x1="0" y1="4" x2="0" y2="15" transform="rotate(0)"/>
+      <line x1="0" y1="4" x2="0" y2="15" transform="rotate(18)"/>
+      <line x1="0" y1="4" x2="0" y2="15" transform="rotate(36)"/>
+      <line x1="0" y1="4" x2="0" y2="15" transform="rotate(54)"/>
+      <line x1="0" y1="4" x2="0" y2="15" transform="rotate(72)"/>
+      <g stroke="none">
+        <circle cx="0" cy="17.5" r="1.2" transform="rotate(-63)"/>
+        <circle cx="0" cy="17.5" r="1.2" transform="rotate(-27)"/>
+        <circle cx="0" cy="17.5" r="1.2" transform="rotate(9)"/>
+        <circle cx="0" cy="17.5" r="1.2" transform="rotate(45)"/>
+      </g>
+    </g>
+    <!-- 右上（小さい） -->
+    <g transform="translate(119 32)" stroke-width="1">
+      <line x1="0" y1="2" x2="0" y2="7" transform="rotate(0)"/>
+      <line x1="0" y1="2" x2="0" y2="7" transform="rotate(45)"/>
+      <line x1="0" y1="2" x2="0" y2="7" transform="rotate(90)"/>
+      <line x1="0" y1="2" x2="0" y2="7" transform="rotate(135)"/>
+      <line x1="0" y1="2" x2="0" y2="7" transform="rotate(180)"/>
+      <line x1="0" y1="2" x2="0" y2="7" transform="rotate(225)"/>
+      <line x1="0" y1="2" x2="0" y2="7" transform="rotate(270)"/>
+      <line x1="0" y1="2" x2="0" y2="7" transform="rotate(315)"/>
+    </g>
+    <!-- 右下（上向きに開く） -->
+    <g transform="translate(114 77)" stroke-width="1.3">
+      <line x1="0" y1="-4" x2="0" y2="-16" transform="rotate(-72)"/>
+      <line x1="0" y1="-4" x2="0" y2="-16" transform="rotate(-54)"/>
+      <line x1="0" y1="-4" x2="0" y2="-16" transform="rotate(-36)"/>
+      <line x1="0" y1="-4" x2="0" y2="-16" transform="rotate(-18)"/>
+      <line x1="0" y1="-4" x2="0" y2="-16" transform="rotate(0)"/>
+      <line x1="0" y1="-4" x2="0" y2="-16" transform="rotate(18)"/>
+      <line x1="0" y1="-4" x2="0" y2="-16" transform="rotate(36)"/>
+      <line x1="0" y1="-4" x2="0" y2="-16" transform="rotate(54)"/>
+      <line x1="0" y1="-4" x2="0" y2="-16" transform="rotate(72)"/>
+      <g stroke="none">
+        <circle cx="0" cy="-18.5" r="1.2" transform="rotate(-45)"/>
+        <circle cx="0" cy="-18.5" r="1.2" transform="rotate(-9)"/>
+        <circle cx="0" cy="-18.5" r="1.2" transform="rotate(27)"/>
+        <circle cx="0" cy="-18.5" r="1.2" transform="rotate(63)"/>
+      </g>
+    </g>
+    <!-- 上がっていく玉の尾 -->
+    <g stroke="none">
+      <circle cx="92" cy="70" r="0.9"/>
+      <circle cx="92" cy="66" r="0.9"/>
+      <circle cx="92" cy="62" r="1"/>
+      <circle cx="92" cy="57.5" r="1.4"/>
+      <circle cx="102" cy="44" r="0.9"/>
+      <circle cx="106" cy="40" r="0.8"/>
+      <circle cx="98" cy="38" r="0.8"/>
+    </g>
+  </g>
+</svg>

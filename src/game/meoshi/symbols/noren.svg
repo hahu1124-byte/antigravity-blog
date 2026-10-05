@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+  <!-- 暖簾（吊り看板）。中の名前は #name の文字だけ差し替える。textLength で枠に収まる -->
+  <defs>
+    <linearGradient id="pole" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a02a2a"/>
+      <stop offset="0.5" stop-color="#6a1414"/>
+      <stop offset="1" stop-color="#3a0808"/>
+    </linearGradient>
+    <linearGradient id="hook" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff5040"/>
+      <stop offset="0.5" stop-color="#e01818"/>
+      <stop offset="1" stop-color="#a00808"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 竿 -->
+  <rect x="8" y="10" width="184" height="9" rx="2" fill="url(#pole)" stroke="#000" stroke-width="3"/>
+  <rect x="5" y="8.5" width="7" height="12" rx="1.5" fill="#2a0606" stroke="#000" stroke-width="2.5"/>
+  <rect x="188" y="8.5" width="7" height="12" rx="1.5" fill="#2a0606" stroke="#000" stroke-width="2.5"/>
+
+  <!-- 看板（黒い太枠・白地・内側に細い線） -->
+  <rect x="19" y="24" width="162" height="70" fill="#000"/>
+  <rect x="25" y="30" width="150" height="58" fill="#fff"/>
+  <rect x="28.5" y="33.5" width="143" height="51" fill="none" stroke="#000" stroke-width="1.6"/>
+
+  <!-- 赤い吊り具 4 か所 -->
+  <g fill="url(#hook)" stroke="#000" stroke-width="2.4" stroke-linejoin="round">
+    <rect x="37" y="6" width="9" height="22" rx="1.5"/>
+    <rect x="77" y="6" width="9" height="22" rx="1.5"/>
+    <rect x="114" y="6" width="9" height="22" rx="1.5"/>
+    <rect x="154" y="6" width="9" height="22" rx="1.5"/>
+  </g>
+
+  <!-- 名前（極太の黒文字） -->
+  <text id="name" x="100" y="77" text-anchor="middle" textLength="134" lengthAdjust="spacingAndGlyphs"
+        font-family="'Arial Black','Hiragino Kaku Gothic StdN','Yu Gothic','Meiryo',sans-serif" font-weight="900"
+        font-size="44" fill="#000" stroke="#000" stroke-width="2.2" stroke-linejoin="round">HIBANA</text>
+</svg>

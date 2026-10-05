@@ -1,0 +1,568 @@
+// 目押しチャレンジ: 画面・入力・遊技の進行
+import {
+  FRAMES,
+  FRAME_MS,
+  BET,
+  BIG_END_PAYOUT,
+  REG_END_PAYOUT,
+  ROLES,
+  REELS,
+} from "./reel-data.js";
+import {
+  pushedFrame,
+  pushOffsetMs,
+  decideStop,
+  judge,
+  drawFlag,
+  prepare,
+  FLAG_SETS,
+  mod,
+} from "./stop-control.js";
+import { ReelRenderer, loadSymbols } from "./render.js";
+import { sfx, unlockAudio, setSoundEnabled } from "./audio.js";
+
+const BASE = new URL("./", import.meta.url).href;
+const STORE_KEY = "meoshi-v1";
+const $ = (id) => document.getElementById(id);
+
+// ---- 保存（使えない環境でも動くように try で囲む） ----
+const DEFAULTS = {
+  latency: 0,
+  sound: true,
+  ghost: true,
+  target: "S",
+  history: [],
+  play: null,
+};
+const store = (() => {
+  try {
+    return {
+      ...DEFAULTS,
+      ...JSON.parse(localStorage.getItem(STORE_KEY) || "{}"),
+    };
+  } catch (e) {
+    return { ...DEFAULTS };
+  }
+})();
+function save() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(store));
+  } catch (e) {
+    // 保存できなくても遊べる
+  }
+}
+setSoundEnabled(store.sound);
+
+// ---- リール ----
+// 回転中は phase（回転開始時の位置）と t0（回転開始の時刻）から位置を計算する。
+// 押したら stopAt（止まる位置。巻き戻らない連続値）を決め、そこまで同じ速さで進んで止まる
+const reels = [0, 1, 2].map(() => ({
+  spinning: false,
+  phase: 0,
+  t0: 0,
+  stopAt: null,
+  rest: Math.floor(Math.random() * FRAMES),
+}));
+
+function posAt(r, t) {
+  const R = reels[r];
+  if (!R.spinning) return R.rest;
+  const p = R.phase + (t - R.t0) / FRAME_MS;
+  return R.stopAt !== null && p > R.stopAt ? R.stopAt : p;
+}
+const moving = (r, t) =>
+  reels[r].spinning &&
+  (reels[r].stopAt === null || posAt(r, t) < reels[r].stopAt);
+const anySpinning = () => reels.some((R) => R.spinning);
+
+function startSpin(now) {
+  for (const R of reels) {
+    R.phase = R.rest;
+    R.t0 = now;
+    R.stopAt = null;
+    R.spinning = true;
+  }
+}
+
+// ---- 画面の状態 ----
+let mode = "practice";
+let litLines = [];
+let litUntil = 0;
+let flashUntil = 0;
+let finishing = false;
+
+const renderer = new ReelRenderer($("moReels"));
+renderer.resize();
+window.addEventListener("resize", () => renderer.resize());
+
+function frame() {
+  const now = performance.now();
+  const positions = [0, 1, 2].map((r) => posAt(r, now));
+  renderer.draw(positions, {
+    spinning: store.ghost ? [0, 1, 2].map((r) => moving(r, now)) : null,
+    lines: now < litUntil ? litLines : null,
+    flash: now < flashUntil ? (flashUntil - now) / 400 : 0,
+  });
+  // 全部のリールが止まりきったら 1 ゲームを締める
+  if (
+    anySpinning() &&
+    !finishing &&
+    reels.every((R) => R.stopAt !== null) &&
+    [0, 1, 2].every((r) => !moving(r, now))
+  ) {
+    finishing = true;
+    for (const R of reels) {
+      R.rest = mod(R.stopAt);
+      R.spinning = false;
+      R.stopAt = null;
+    }
+    finishGame();
+    finishing = false;
+  }
+  updateStopButtons(now);
+  requestAnimationFrame(frame);
+}
+
+function updateStopButtons(now) {
+  document.querySelectorAll(".mo-stop").forEach((b) => {
+    const r = Number(b.dataset.reel);
+    b.classList.toggle("ready", reels[r].spinning && reels[r].stopAt === null);
+  });
+  $("moLever").classList.toggle("ready", !anySpinning());
+}
+
+function message(text) {
+  $("moMessage").textContent = text;
+}
+
+// ---- 練習モード ----
+const TARGETS = {
+  S: { name: "赤7", syms: ["S"] },
+  D: { name: "女の子", syms: ["D", "d"] },
+  N: { name: "暖簾", syms: ["N"] },
+  I: { name: "氷", syms: ["I"] },
+  C: { name: "チェリー", syms: ["C"] },
+};
+const practiceResults = [null, null, null];
+
+function practicePush(r, pos, pushed) {
+  const syms = TARGETS[store.target].syms;
+  let best = null;
+  for (let k = 0; k < FRAMES; k++) {
+    if (!syms.includes(REELS[r][k])) continue;
+    const o = pushOffsetMs(pos, k);
+    if (best === null || Math.abs(o) < Math.abs(best)) best = o;
+  }
+  reels[r].stopAt = pushed;
+  const n = Math.round(best / FRAME_MS);
+  practiceResults[r] = { offset: best, frames: n };
+  store.history.push({ o: Math.round(best * 10) / 10, r, t: store.target });
+  if (store.history.length > 300)
+    store.history.splice(0, store.history.length - 300);
+  save();
+  if (n === 0) sfx.hit();
+  else sfx.miss();
+  renderPracticeResults();
+}
+
+function resultLabel(res) {
+  if (!res) return "";
+  const ms = `${res.offset >= 0 ? "+" : ""}${res.offset.toFixed(0)}ms`;
+  if (res.frames === 0) return `<b class="ok">ビタ</b> ${ms}`;
+  const where = res.frames === -1 ? "上段" : res.frames === 1 ? "下段" : "枠外";
+  return `<b class="ng">${Math.abs(res.frames)}コマ${res.frames < 0 ? "早い" : "遅い"}</b> ${where} ${ms}`;
+}
+
+function renderPracticeResults() {
+  document
+    .querySelectorAll(".mo-result")
+    .forEach((el, r) => (el.innerHTML = resultLabel(practiceResults[r])));
+  const recent = store.history.slice(-50);
+  const n = recent.length;
+  if (!n) {
+    $("moStats").innerHTML = "<p class='mo-note'>まだ記録がありません。</p>";
+    return;
+  }
+  const mean = recent.reduce((a, h) => a + h.o, 0) / n;
+  const sd = Math.sqrt(recent.reduce((a, h) => a + (h.o - mean) ** 2, 0) / n);
+  const hit = recent.filter((h) => Math.abs(h.o) <= FRAME_MS / 2).length;
+  const lean = Math.abs(mean) < 3 ? "ちょうど" : mean < 0 ? "早め" : "遅め";
+  $("moStats").innerHTML = `
+    <div class="mo-stat"><span>ビタ成功率</span><b>${((hit / n) * 100).toFixed(0)}%</b></div>
+    <div class="mo-stat"><span>平均のずれ</span><b>${mean >= 0 ? "+" : ""}${mean.toFixed(1)}ms</b><small>${lean}</small></div>
+    <div class="mo-stat"><span>ばらつき</span><b>±${sd.toFixed(1)}ms</b></div>
+    <div class="mo-stat"><span>回数</span><b>${n}</b><small>直近50回</small></div>`;
+}
+
+// ---- 遊技モード ----
+const NEW_PLAY = () => ({
+  games: 0,
+  diff: 0,
+  big: 0,
+  reg: 0,
+  bonusFlag: null,
+  notice: null,
+  lamp: false,
+  replay: false,
+  bonus: null,
+});
+let play = store.play || NEW_PLAY();
+let current = { allowed: [], mode: "normal" };
+
+function playLever() {
+  if (!play.replay) play.diff -= BET;
+  play.replay = false;
+  if (play.bonus) {
+    current = { allowed: ["bonusFuurin"], mode: "bonus" };
+  } else {
+    play.games++;
+    const flag = drawFlag();
+    let fresh = false;
+    if ((flag === "big" || flag === "reg") && !play.bonusFlag) {
+      play.bonusFlag = flag;
+      fresh = true;
+    }
+    const small = ["replay", "fuurin", "kori", "cherry"].includes(flag)
+      ? flag
+      : null;
+    current = {
+      allowed: [play.bonusFlag, small].filter(Boolean),
+      mode: "normal",
+    };
+    // 告知ランプ: 成立したゲームのレバーで 25%・第 3 停止で 50%・残りは持ち越し中のゲームで 1/4 ずつ
+    if (fresh) {
+      const v = Math.random();
+      play.notice = v < 0.25 ? "now" : v < 0.75 ? "after" : "later";
+      if (play.notice === "now") lightLamp();
+    } else if (
+      play.bonusFlag &&
+      !play.lamp &&
+      play.notice === "later" &&
+      Math.random() < 0.25
+    ) {
+      play.notice = "after";
+    }
+  }
+  prepare(current.allowed, current.mode);
+  sfx.lever();
+}
+
+function lightLamp() {
+  if (play.lamp) return;
+  play.lamp = true;
+  sfx.notice();
+  renderLamp();
+}
+
+function renderLamp() {
+  $("moLamp").classList.toggle("on", mode === "play" && play.lamp);
+}
+
+function finishPlay(stops) {
+  const wins = judge(stops, current.mode);
+  litLines = wins.map((w) => w.line);
+  litUntil = performance.now() + 1200;
+  if (play.bonus) {
+    const pay = Math.min(
+      15,
+      wins.reduce((a, w) => a + (ROLES[w.role].pay || 0), 0),
+    );
+    const B = play.bonus;
+    B.games++;
+    B.paid += pay;
+    play.diff += pay;
+    if (pay) {
+      B.wins++;
+      sfx.payout(pay);
+    }
+    // 2015 年版はどちらも払い出し枚数で終わる（BIG 344 枚・REG 105 枚を超えたら）
+    const end = B.type === "big" ? BIG_END_PAYOUT : REG_END_PAYOUT;
+    const label = B.type === "big" ? "BIG" : "REG";
+    if (B.paid > end) {
+      message(`${label} 終了 ${B.paid}枚獲得`);
+      play.bonus = null;
+    } else {
+      message(`${label} 中 ${B.paid}/${end}枚`);
+    }
+  } else {
+    const bonusWin = wins.find((w) => ROLES[w.role].kind === "bonus");
+    if (bonusWin) {
+      const type = ROLES[bonusWin.role].flag;
+      play[type]++;
+      play.bonus = { type, paid: 0, games: 0, wins: 0 };
+      play.bonusFlag = null;
+      play.notice = null;
+      play.lamp = false;
+      flashUntil = performance.now() + 400;
+      sfx.bonus();
+      message(type === "big" ? "BIG BONUS!" : "REG BONUS!");
+    } else if (wins.some((w) => ROLES[w.role].kind === "replay")) {
+      play.replay = true;
+      sfx.replay();
+      message("リプレイ");
+    } else if (wins.length) {
+      const pay = Math.min(
+        15,
+        wins.reduce((a, w) => a + ROLES[w.role].pay, 0),
+      );
+      play.diff += pay;
+      sfx.payout(pay);
+      message(`${ROLES[wins[0].role].name} ${pay}枚`);
+    } else {
+      message(play.bonusFlag && play.lamp ? "ボーナスを揃えよう" : "");
+    }
+    if (play.bonusFlag && !play.lamp && play.notice === "after") lightLamp();
+  }
+  renderLamp();
+  store.play = play;
+  save();
+  renderPlayStats();
+}
+
+function renderPlayStats() {
+  const total = play.big + play.reg;
+  const odds = (n) => (n ? `1/${(play.games / n).toFixed(1)}` : "-");
+  const B = play.bonus;
+  $("moPlayStats").innerHTML = `
+    <div class="mo-stat"><span>ゲーム数</span><b>${play.games}</b></div>
+    <div class="mo-stat"><span>BIG</span><b>${play.big}</b><small>${odds(play.big)}</small></div>
+    <div class="mo-stat"><span>REG</span><b>${play.reg}</b><small>${odds(play.reg)}</small></div>
+    <div class="mo-stat"><span>合算</span><b>${odds(total)}</b></div>
+    <div class="mo-stat"><span>差枚</span><b class="${play.diff >= 0 ? "ok" : "ng"}">${play.diff >= 0 ? "+" : ""}${play.diff}</b></div>
+    <div class="mo-stat"><span>状態</span><b>${B ? (B.type === "big" ? "BIG 中" : "REG 中") : play.replay ? "リプレイ" : "通常"}</b></div>`;
+}
+
+// ---- 入力 ----
+function lever(t) {
+  if (anySpinning() || calib.active) return;
+  unlockAudio();
+  if (mode === "practice") {
+    practiceResults.fill(null);
+    renderPracticeResults();
+    sfx.lever();
+  } else {
+    playLever();
+  }
+  litUntil = 0;
+  startSpin(performance.now());
+}
+
+function push(r, timeStamp) {
+  const R = reels[r];
+  if (!R.spinning || R.stopAt !== null) return;
+  unlockAudio();
+  // 画面と入力の遅れを引いた時刻で、そのときの位置を計算する
+  const t = Math.max(R.t0, timeStamp - store.latency);
+  const pos = R.phase + (t - R.t0) / FRAME_MS;
+  const pushed = pushedFrame(pos);
+  sfx.stop();
+  if (mode === "practice") {
+    practicePush(r, pos, pushed);
+    return;
+  }
+  const stops = reels.map((x) => (x.stopAt === null ? null : mod(x.stopAt)));
+  const res = decideStop(stops, r, pushed, current.allowed, current.mode);
+  R.stopAt = pushed + res.slip;
+}
+
+function finishGame() {
+  if (mode === "play") finishPlay(reels.map((R) => R.rest));
+}
+
+const KEY_STOP = {
+  KeyZ: 0,
+  ArrowLeft: 0,
+  KeyX: 1,
+  ArrowDown: 1,
+  KeyC: 2,
+  ArrowRight: 2,
+};
+window.addEventListener("keydown", (e) => {
+  if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+  if ($("moSettings").open || (e.target && e.target.tagName === "INPUT"))
+    return;
+  if (calib.active) {
+    if (e.code === "Space" || e.code === "Enter") {
+      e.preventDefault();
+      calibPress(e.timeStamp);
+    } else if (e.code === "Escape") endCalib(false);
+    return;
+  }
+  if (e.code === "Space" || e.code === "ArrowUp" || e.code === "Enter") {
+    e.preventDefault();
+    lever(e.timeStamp);
+  } else if (e.code in KEY_STOP) {
+    e.preventDefault();
+    push(KEY_STOP[e.code], e.timeStamp);
+  }
+});
+
+$("moLever").addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  lever(e.timeStamp);
+});
+document.querySelectorAll(".mo-stop").forEach((b) =>
+  b.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    push(Number(b.dataset.reel), e.timeStamp);
+  }),
+);
+
+// ---- モード切替 ----
+function setMode(m) {
+  if (anySpinning()) return;
+  mode = m;
+  document
+    .querySelectorAll(".mo-tab")
+    .forEach((b) => b.classList.toggle("active", b.dataset.mode === m));
+  $("moPractice").hidden = m !== "practice";
+  $("moPlay").hidden = m !== "play";
+  litUntil = 0;
+  message(
+    m === "practice"
+      ? "狙った図柄を中段に止めよう"
+      : play.bonus
+        ? "ボーナス中"
+        : "",
+  );
+  renderLamp();
+}
+document
+  .querySelectorAll(".mo-tab")
+  .forEach((b) => b.addEventListener("click", () => setMode(b.dataset.mode)));
+
+function renderTargets() {
+  $("moTargets").innerHTML = Object.entries(TARGETS)
+    .map(
+      ([k, v]) =>
+        `<button type="button" class="mo-target${k === store.target ? " active" : ""}" data-target="${k}">${v.name}</button>`,
+    )
+    .join("");
+  document.querySelectorAll(".mo-target").forEach((b) =>
+    b.addEventListener("click", () => {
+      store.target = b.dataset.target;
+      save();
+      renderTargets();
+    }),
+  );
+}
+
+$("moResetPractice").addEventListener("click", () => {
+  store.history = [];
+  save();
+  renderPracticeResults();
+});
+$("moResetPlay").addEventListener("click", () => {
+  if (anySpinning()) return;
+  play = NEW_PLAY();
+  store.play = play;
+  save();
+  renderPlayStats();
+  renderLamp();
+  message("");
+});
+
+// ---- 設定 ----
+function renderSettings() {
+  $("moLatency").value = store.latency;
+  $("moSound").checked = store.sound;
+  $("moGhost").checked = store.ghost;
+  $("moLatencyNow").textContent = `${store.latency}ms`;
+}
+$("moSettingsBtn").addEventListener("click", () => {
+  renderSettings();
+  $("moSettings").showModal();
+});
+$("moSettingsClose").addEventListener("click", () => $("moSettings").close());
+$("moLatency").addEventListener("change", () => {
+  const v = Math.round(Number($("moLatency").value));
+  store.latency = Number.isFinite(v) ? Math.max(-100, Math.min(300, v)) : 0;
+  save();
+  renderSettings();
+});
+$("moSound").addEventListener("change", () => {
+  store.sound = $("moSound").checked;
+  setSoundEnabled(store.sound);
+  save();
+});
+$("moGhost").addEventListener("change", () => {
+  store.ghost = $("moGhost").checked;
+  save();
+});
+
+// ---- 遅延補正（光った瞬間に 10 回押して、ずれの中央値を補正値にする） ----
+const CALIB_BEAT_MS = 750;
+const CALIB_NEED = 10;
+const calib = { active: false, start: 0, diffs: [] };
+
+function startCalib() {
+  $("moSettings").close();
+  unlockAudio();
+  calib.active = true;
+  calib.start = performance.now() + 1000;
+  calib.diffs = [];
+  $("moCalib").hidden = false;
+  $("moCalibCount").textContent = `0 / ${CALIB_NEED}`;
+  $("moCalibResult").textContent = "";
+  calibLoop();
+}
+
+function calibLoop() {
+  if (!calib.active) return;
+  const now = performance.now();
+  const since = now - calib.start;
+  const phase = ((since % CALIB_BEAT_MS) + CALIB_BEAT_MS) % CALIB_BEAT_MS;
+  $("moCalibDot").classList.toggle("on", since >= 0 && phase < 90);
+  requestAnimationFrame(calibLoop);
+}
+
+function calibPress(timeStamp) {
+  const since = timeStamp - calib.start;
+  if (since < -CALIB_BEAT_MS / 2) return;
+  const d = since - Math.round(since / CALIB_BEAT_MS) * CALIB_BEAT_MS;
+  // 最初の 2 拍はリズムをつかむ分なので数えない
+  if (since < CALIB_BEAT_MS * 1.5) return;
+  calib.diffs.push(d);
+  $("moCalibCount").textContent = `${calib.diffs.length} / ${CALIB_NEED}`;
+  if (calib.diffs.length >= CALIB_NEED) endCalib(true);
+}
+
+function endCalib(done) {
+  calib.active = false;
+  $("moCalibDot").classList.remove("on");
+  if (done) {
+    const s = calib.diffs.slice().sort((a, b) => a - b);
+    const med = (s[4] + s[5]) / 2;
+    store.latency = Math.max(-100, Math.min(300, Math.round(med)));
+    save();
+    $("moCalibResult").textContent = `補正値を ${store.latency}ms にしました`;
+    setTimeout(() => ($("moCalib").hidden = true), 1600);
+  } else {
+    $("moCalib").hidden = true;
+  }
+}
+
+$("moCalibStart").addEventListener("click", startCalib);
+$("moCalibCancel").addEventListener("click", () => endCalib(false));
+$("moCalibDot").addEventListener("pointerdown", (e) => {
+  e.preventDefault();
+  calibPress(e.timeStamp);
+});
+
+// ---- 起動 ----
+renderTargets();
+renderPracticeResults();
+renderPlayStats();
+setMode("practice");
+requestAnimationFrame(frame);
+loadSymbols(BASE).then((imgs) => renderer.setSymbols(imgs));
+
+// 停止制御の先読みを空き時間に済ませる（1 組 20〜30ms）
+let prepIndex = 0;
+function prepStep() {
+  if (prepIndex >= FLAG_SETS.length) return;
+  const s = FLAG_SETS[prepIndex++];
+  prepare(s.allowed, s.mode);
+  setTimeout(prepStep, 30);
+}
+setTimeout(prepStep, 300);
