@@ -472,6 +472,9 @@ function finishPlay(stops) {
     if (over) {
       message(`${note ? note + "　" : ""}${label} 終了 ${B.paid}枚獲得`);
       play.bonus = null;
+      // ボーナスが終わったら 3 枚掛けに戻す
+      store.bet = 3;
+      renderBet();
     } else {
       message(`${note ? note + "　" : ""}${label} 中 ${status}`);
     }
@@ -599,8 +602,16 @@ function push(r, timeStamp) {
   }
   const stops = reels.map((x) => (x.stopAt === null ? null : mod(x.stopAt)));
   let res;
+  let vitaLabel = "";
   if (current.tech === "bbVita" && r === 0 && stops.every((s) => s === null)) {
-    // BB 1G目: 左第一停止で、押したコマがちょうど赤7（すべり 0 で中段に止まる）ならビタ押し成功
+    // BB 1G目: 左第一停止で、押したコマがちょうど赤7（すべり 0 で中段に止まる）ならビタ押し成功。
+    // 赤7 が中段の真ん中に来る直前の 1 コマ分（約 36ms）に押す必要がある。ずれは練習モードと同じ表示で出す
+    const sIdx = REELS[0].indexOf("S");
+    const offset = pushOffsetMs(pos, sIdx);
+    vitaLabel = resultLabel({
+      offset,
+      frames: Math.round(offset / FRAME_MS),
+    });
     if (symAt(0, pushed) === "S") {
       current.techOk = true;
       res = { slip: 0 };
@@ -625,7 +636,7 @@ function push(r, timeStamp) {
   R.stopAt = pushed + res.slip;
   // リールの下に、押してから何コマすべったかを出す
   document.querySelectorAll(".mo-result")[r].innerHTML =
-    res.slip === 0 ? "すべりなし" : `${res.slip}コマすべり`;
+    vitaLabel || (res.slip === 0 ? "すべりなし" : `${res.slip}コマすべり`);
 }
 
 // ビタ押し成功後の中・右リールのすべり。風鈴が下段に来る位置（右は上段でもよい）を 0〜4 コマから選ぶ
