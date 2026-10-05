@@ -81,6 +81,7 @@ function startSpin(now) {
     R.t0 = now;
     R.stopAt = null;
     R.spinning = true;
+    R.stopSounded = false;
   }
 }
 
@@ -94,6 +95,8 @@ let finishing = false;
 const renderer = new ReelRenderer($("moReels"));
 renderer.resize();
 window.addEventListener("resize", () => renderer.resize());
+// CSS が当たる前に幅を測っていることがあるので、読み込み後にも測り直す
+window.addEventListener("load", () => renderer.resize());
 
 function frame() {
   const now = performance.now();
@@ -111,6 +114,7 @@ function frame() {
     [0, 1, 2].every((r) => !moving(r, now))
   ) {
     finishing = true;
+    if (reels.some((R) => !R.stopSounded)) sfx.stop();
     for (const R of reels) {
       R.rest = mod(R.stopAt);
       R.spinning = false;
@@ -124,6 +128,14 @@ function frame() {
 }
 
 function updateStopButtons(now) {
+  // 停止音は押した瞬間ではなく、すべり終えて絵が止まった瞬間に鳴らす
+  for (let r = 0; r < 3; r++) {
+    const R = reels[r];
+    if (R.spinning && R.stopAt !== null && !R.stopSounded && !moving(r, now)) {
+      R.stopSounded = true;
+      sfx.stop();
+    }
+  }
   document.querySelectorAll(".mo-stop").forEach((b) => {
     const r = Number(b.dataset.reel);
     b.classList.toggle("ready", reels[r].spinning && reels[r].stopAt === null);
@@ -355,7 +367,6 @@ function push(r, timeStamp) {
   const t = Math.max(R.t0, timeStamp - store.latency);
   const pos = R.phase + (t - R.t0) / FRAME_MS;
   const pushed = pushedFrame(pos);
-  sfx.stop();
   if (mode === "practice") {
     practicePush(r, pos, pushed);
     return;
@@ -418,6 +429,9 @@ function setMode(m) {
   $("moPractice").hidden = m !== "practice";
   $("moPlay").hidden = m !== "play";
   litUntil = 0;
+  // 練習の判定文は練習モードの前のゲームの分だけ出す
+  practiceResults.fill(null);
+  renderPracticeResults();
   message(
     m === "practice"
       ? "狙った図柄を中段に止めよう"
