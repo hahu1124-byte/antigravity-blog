@@ -60,6 +60,7 @@
           <div class="mo-top">
             <div id="moLamp" class="mo-lamp" aria-hidden="true"></div>
             <p id="moMessage" class="mo-message"></p>
+            <span id="moBetLamp" class="mo-bet-lamp"></span>
           </div>
           <canvas id="moReels" class="mo-reels" aria-label="リール"></canvas>
           <div class="mo-results">
@@ -116,6 +117,14 @@
         </section>
 
         <section id="moPlay" class="mo-panel" hidden>
+          <div class="mo-bets">
+            <button type="button" class="mo-bet" data-bet="1">1BET</button>
+            <button type="button" class="mo-bet" data-bet="3">MAX BET</button>
+          </div>
+          <p class="mo-note mo-bet-note">
+            キー 1・3 でも切り替え。1 枚掛けは中段の 1 ラインだけ（氷は 10
+            枚）。
+          </p>
           <div id="moPlayStats" class="mo-stats"></div>
           <p class="mo-note">
             押した位置から最大 4
@@ -159,6 +168,9 @@
       >
       <label class="mo-check"
         ><input id="moGhost" type="checkbox" /> 回転中の残像</label
+      >
+      <label class="mo-check"
+        ><input id="moReachHint" type="checkbox" /> リーチ目を教える</label
       >
       <div class="mo-dialog-foot">
         <button type="button" id="moSettingsClose" class="mo-sub">

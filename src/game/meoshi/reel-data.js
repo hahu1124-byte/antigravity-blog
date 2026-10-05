@@ -44,6 +44,10 @@ export const LINES = [
   { name: "右上がり", rows: [0, 1, 2] },
 ];
 
+// 掛け枚数ごとの有効ライン（LINES の番号）。1 枚掛けは中段だけ
+export const BETS = [1, 3];
+export const LINES_BY_BET = { 1: [0], 3: [0, 1, 2, 3, 4] };
+
 // 役。reels[i] はリール i で揃ってよい図柄（null はどれでもよい）
 // kind: bonus はボーナス、small は小役、replay は再遊技
 const FUURIN = ["F", "G"];
@@ -102,7 +106,8 @@ export const ROLES = {
     name: "氷",
     // 暖簾は左・右リールで氷の代わり
     reels: [["I", "N"], ["I"], ["I", "N"]],
-    pay: 15,
+    // 払い出しが掛け枚数で変わる役は { 掛け枚数: 枚数 }（2015 年版の配当表）
+    pay: { 1: 10, 3: 15 },
   },
   cherry: {
     flag: "cherry",
@@ -158,7 +163,16 @@ export const LOTTERY = [
   { flag: "cherry", weight: 1638 }, // 約 1/40（参考値）
 ];
 
+// 1 ライン分の払い出し（掛け枚数で変わる役は表から引く）
+export function payOf(roleId, bet) {
+  const p = ROLES[roleId].pay || 0;
+  return typeof p === "number" ? p : p[bet];
+}
+
+// ボーナス成立中のゲームで、リーチ目の形を優先して止める割合（解析値が無いので仮の値）。
+// 優先しないゲームでも、押し位置しだいでリーチ目になることはある
+export const REACH_SHOW_RATE = 0.6;
+
 // ボーナスの終わり方（2015 年版）
 export const BIG_END_PAYOUT = 344; // 344 枚を超えたら終了
 export const REG_END_PAYOUT = 105; // 105 枚を超えたら終了
-export const BET = 3;

@@ -1,10 +1,19 @@
-// 目押しチャレンジの停止制御の総当たり試験（全フラグ × 押し順 6 × 押し位置 21³、数秒）
+// 目押しチャレンジの停止制御の総当たり試験（全フラグ × 掛け枚数 1・3 × 押し順 6 × 押し位置 21³、十数秒）
 // 使い方: node scripts/test-meoshi.mjs（NG が 1 件でもあれば終了コード 1）
 const base = new URL("../src/game/meoshi/", import.meta.url).href;
-const { REELS, FRAMES, ROLES } = await import(base + "reel-data.js");
-const { decideStop, judge, symAt, pushOffsetMs, pushedFrame } = await import(
-  base + "stop-control.js"
+const { REELS, FRAMES, ROLES, BETS, LINES_BY_BET } = await import(
+  base + "reel-data.js"
 );
+const {
+  decideStop,
+  judge,
+  symAt,
+  pushOffsetMs,
+  pushedFrame,
+  reachAt,
+  reachAllAt,
+} = await import(base + "stop-control.js");
+const { REACH_PATTERNS } = await import(base + "reach-data.js");
 
 const t0 = performance.now();
 let fail = 0;
@@ -40,7 +49,21 @@ const w = pushOffsetMs(9.5, 10);
 if (Math.abs(w) > 1e-6) ng(`窓の真ん中のずれが 0 でない: ${w}`);
 if (pushedFrame(9.0) !== 9 || pushedFrame(9.01) !== 10) ng("押したコマの計算");
 
-// 3. 全フラグ × 押し順 × 押し位置
+// 3. リーチ目の形が配列上ありうるか（1 つも当たらない形は書き起こしの誤り）
+const reachCount = new Array(REACH_PATTERNS.length).fill(0);
+for (let a = 0; a < FRAMES; a++)
+  for (let b = 0; b < FRAMES; b++)
+    for (let d = 0; d < FRAMES; d++) {
+      for (const k of reachAllAt([a, b, d], 3)) reachCount[k]++;
+    }
+const never = REACH_PATTERNS.filter((p, k) => reachCount[k] === 0).map(
+  (p) => p.id,
+);
+console.log(
+  `  リーチ目 ${REACH_PATTERNS.length} 形・当たる止まり方 ${reachCount.reduce((a, b) => a + b, 0)} 通り・一度も当たらない形 ${never.length}${never.length ? `（${never.join(" ")}）` : ""}`,
+);
+
+// 4. 全フラグ × 掛け枚数 × 押し順 × 押し位置
 const ORDERS = [
   [0, 1, 2],
   [0, 2, 1],
@@ -49,6 +72,7 @@ const ORDERS = [
   [2, 0, 1],
   [2, 1, 0],
 ];
+// must はどの押し順でも取りこぼさない役（3 枚掛けのとき）
 const CASES = [
   { allowed: [], mode: "normal" },
   { allowed: ["replay"], mode: "normal", must: true },
@@ -57,6 +81,9 @@ const CASES = [
   { allowed: ["cherry"], mode: "normal" },
   { allowed: ["big"], mode: "normal", bonus: true },
   { allowed: ["reg"], mode: "normal", bonus: true },
+  // "reach" はリーチ目を優先して止めるゲームの目印
+  { allowed: ["big", "reach"], mode: "normal", bonus: true },
+  { allowed: ["reg", "reach"], mode: "normal", bonus: true },
   { allowed: ["big", "replay"], mode: "normal", must: true },
   { allowed: ["big", "fuurin"], mode: "normal", must: true },
   { allowed: ["big", "kori"], mode: "normal" },
@@ -68,57 +95,71 @@ const CASES = [
   { allowed: ["bonusFuurin"], mode: "bonus", must: true },
   { allowed: [], mode: "bonus" },
 ];
-for (const c of CASES) {
-  let total = 0;
-  let hit = 0;
-  let bonusHit = 0;
-  let maxSlip = 0;
-  let altHit = 0;
-  const byOrder = [];
-  for (const order of ORDERS) {
-    let oTotal = 0;
-    let oHit = 0;
-    for (let a = 0; a < FRAMES; a++)
-      for (let b = 0; b < FRAMES; b++)
-        for (let d = 0; d < FRAMES; d++) {
-          const push = [a, b, d];
-          const stops = [null, null, null];
-          for (const r of order) {
-            const res = decideStop(stops, r, push[r], c.allowed, c.mode);
-            if (res.slip > 4 || res.slip < 0) ng(`すべり ${res.slip}`);
-            maxSlip = Math.max(maxSlip, res.slip);
-            stops[r] = res.mid;
-          }
-          const wins = judge(stops, c.mode);
-          total++;
-          for (const wn of wins) {
-            if (!c.allowed.includes(ROLES[wn.role].flag)) {
-              ng(
-                `${c.allowed.join("+") || "ハズレ"}(${c.mode}) で ${wn.role} が揃った 押し${push} 順${order} 停止${stops}`,
-              );
+for (const bet of BETS) {
+  console.log(`--- ${bet} 枚掛け ---`);
+  for (const c of CASES) {
+    const hasBonus = c.allowed.includes("big") || c.allowed.includes("reg");
+    let total = 0;
+    let hit = 0;
+    let bonusHit = 0;
+    let reachHit = 0;
+    let altHit = 0;
+    const byOrder = [];
+    for (const order of ORDERS) {
+      let oTotal = 0;
+      let oHit = 0;
+      for (let a = 0; a < FRAMES; a++)
+        for (let b = 0; b < FRAMES; b++)
+          for (let d = 0; d < FRAMES; d++) {
+            const push = [a, b, d];
+            const stops = [null, null, null];
+            for (const r of order) {
+              const res = decideStop(stops, r, push[r], c.allowed, c.mode, bet);
+              if (res.slip > 4 || res.slip < 0) ng(`すべり ${res.slip}`);
+              stops[r] = res.mid;
             }
+            const wins = judge(stops, c.mode, bet);
+            total++;
+            for (const wn of wins) {
+              if (!c.allowed.includes(ROLES[wn.role].flag))
+                ng(
+                  `${bet}BET ${c.allowed.join("+") || "ハズレ"}(${c.mode}) で ${wn.role} が揃った 押し${push} 順${order} 停止${stops}`,
+                );
+              if (!LINES_BY_BET[bet].includes(wn.line))
+                ng(`${bet}BET で有効でないライン ${wn.line} に入賞`);
+            }
+            const bonusWin = wins.some((x) => ROLES[x.role].kind === "bonus");
+            const smallWin = wins.some((x) => ROLES[x.role].kind !== "bonus");
+            if (bonusWin && smallWin)
+              ng(`ボーナスと小役が同時に揃った ${stops}`);
+            if (bonusWin) bonusHit++;
+            if (smallWin) hit++;
+            oTotal++;
+            if (smallWin) oHit++;
+            if (wins.some((x) => ROLES[x.role].alt)) altHit++;
+            // リーチ目はボーナスが成立していないときに出てはいけない
+            if (c.mode === "normal" && reachAt(stops, bet) >= 0) {
+              reachHit++;
+              if (!hasBonus)
+                ng(
+                  `${bet}BET ${c.allowed.join("+") || "ハズレ"} でリーチ目 ${REACH_PATTERNS[reachAt(stops, bet)].id} 停止${stops}`,
+                );
+            }
+            // リプレイと風鈴は 3 枚掛けならどの押し順でも取りこぼさない（左の小ドンが風鈴の代わり）
+            if (c.must && bet === 3 && !smallWin)
+              ng(
+                `${c.allowed.join("+")} を取りこぼした 押し${push} 順${order} 停止${stops} 窓${stops.map((m, r) => symAt(r, m - 1) + symAt(r, m) + symAt(r, m + 1))}`,
+              );
           }
-          const bonusWin = wins.some((x) => ROLES[x.role].kind === "bonus");
-          const smallWin = wins.some((x) => ROLES[x.role].kind !== "bonus");
-          if (bonusWin && smallWin) ng(`ボーナスと小役が同時に揃った ${stops}`);
-          if (bonusWin) bonusHit++;
-          if (smallWin) hit++;
-          oTotal++;
-          if (smallWin) oHit++;
-          if (wins.some((x) => ROLES[x.role].alt)) altHit++;
-          // リプレイと風鈴はどの押し順でも取りこぼさない（左の小ドンが風鈴の代わり）
-          if (c.must && !smallWin)
-            ng(
-              `${c.allowed.join("+")} を取りこぼした 押し${push} 順${order} 停止${stops} 窓${stops.map((m, r) => symAt(r, m - 1) + symAt(r, m) + symAt(r, m + 1))}`,
-            );
-        }
-    byOrder.push(`${order.join("")}:${((oHit / oTotal) * 100).toFixed(0)}`);
+      byOrder.push(`${order.join("")}:${((oHit / oTotal) * 100).toFixed(0)}`);
+    }
+    const pct = (n) => ((n / total) * 100).toFixed(1);
+    console.log(
+      `${(c.allowed.join("+") || "ハズレ").padEnd(14)} ${c.mode.padEnd(6)} 小役 ${pct(hit)}%  ボーナス ${pct(bonusHit)}%  リーチ目 ${pct(reachHit)}%  小ドン代わり ${pct(altHit)}%  押し順別 ${byOrder.join(" ")}`,
+    );
+    if (c.bonus && bonusHit === 0)
+      ng(`${bet}BET ${c.allowed} のボーナスを揃えられる押し方がない`);
   }
-  console.log(
-    `${(c.allowed.join("+") || "ハズレ").padEnd(14)} ${c.mode.padEnd(6)} 小役揃い ${((hit / total) * 100).toFixed(1)}%  ボーナス揃い ${((bonusHit / total) * 100).toFixed(1)}%  最大すべり ${maxSlip}  小ドン代わり ${((altHit / total) * 100).toFixed(2)}%  押し順別 ${byOrder.join(" ")}`,
-  );
-  if (c.bonus && bonusHit === 0)
-    ng(`${c.allowed} のボーナスを揃えられる押し方がない`);
 }
 console.log(
   `NG ${fail} 件・${((performance.now() - t0) / 1000).toFixed(1)} 秒`,

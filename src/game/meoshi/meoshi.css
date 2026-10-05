@@ -170,6 +170,38 @@ button {
     filter: brightness(1.35);
   }
 }
+.mo-bet-lamp {
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 0.1rem 0.45rem;
+}
+.mo-bet-lamp:empty {
+  display: none;
+}
+.mo-bets {
+  display: flex;
+  gap: 0.5rem;
+}
+.mo-bet {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 0.45rem;
+  font-weight: 800;
+}
+.mo-bet.active {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.mo-bet-note {
+  margin-top: 0.4rem;
+}
 .mo-message {
   margin: 0;
   font-weight: 700;

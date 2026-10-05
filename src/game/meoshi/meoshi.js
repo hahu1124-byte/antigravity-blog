@@ -2,11 +2,12 @@
 import {
   FRAMES,
   FRAME_MS,
-  BET,
   BIG_END_PAYOUT,
   REG_END_PAYOUT,
   ROLES,
   REELS,
+  REACH_SHOW_RATE,
+  payOf,
 } from "./reel-data.js";
 import {
   pushedFrame,
@@ -15,9 +16,11 @@ import {
   judge,
   drawFlag,
   prepare,
+  reachAt,
   FLAG_SETS,
   mod,
 } from "./stop-control.js";
+import { REACH_PATTERNS, REACH_KINDS } from "./reach-data.js";
 import { ReelRenderer, ArrayRenderer, loadSymbols } from "./render.js";
 import { sfx, unlockAudio, setSoundEnabled } from "./audio.js";
 
@@ -33,6 +36,8 @@ const DEFAULTS = {
   target: "S",
   history: [],
   play: null,
+  bet: 3, // 遊技の掛け枚数（1 か 3）
+  reachHint: true, // リーチ目が出たら知らせる
 };
 const store = (() => {
   try {
@@ -227,13 +232,15 @@ const NEW_PLAY = () => ({
   bonus: null,
 });
 let play = store.play || NEW_PLAY();
-let current = { allowed: [], mode: "normal" };
+let current = { allowed: [], mode: "normal", bet: 3 };
 
 function playLever() {
-  if (!play.replay) play.diff -= BET;
+  // リプレイのときは前のゲームと同じ枚数が自動で掛かる（メダルは減らない）
+  const bet = play.replay ? play.replayBet || store.bet : store.bet;
+  if (!play.replay) play.diff -= bet;
   play.replay = false;
   if (play.bonus) {
-    current = { allowed: ["bonusFuurin"], mode: "bonus" };
+    current = { allowed: ["bonusFuurin"], mode: "bonus", bet };
   } else {
     play.games++;
     const flag = drawFlag();
@@ -245,9 +252,13 @@ function playLever() {
     const small = ["replay", "fuurin", "kori", "cherry"].includes(flag)
       ? flag
       : null;
+    // ボーナス成立中は、一定の割合でリーチ目の形を優先して止める（"reach" の目印）
+    const reach =
+      play.bonusFlag && Math.random() < REACH_SHOW_RATE ? "reach" : null;
     current = {
-      allowed: [play.bonusFlag, small].filter(Boolean),
+      allowed: [play.bonusFlag, small, reach].filter(Boolean),
       mode: "normal",
+      bet,
     };
     // 告知ランプ: 成立したゲームのレバーで 25%・第 3 停止で 50%・残りは持ち越し中のゲームで 1/4 ずつ
     if (fresh) {
@@ -263,8 +274,27 @@ function playLever() {
       play.notice = "after";
     }
   }
-  prepare(current.allowed, current.mode);
+  prepare(current.allowed, current.mode, current.bet);
+  renderBet();
   sfx.lever();
+}
+
+// 掛け枚数の切り替え（遊技モードで、リールが止まっているときだけ）
+function setBet(bet) {
+  if (mode !== "play" || anySpinning() || play.replay) return;
+  store.bet = bet;
+  save();
+  renderBet();
+}
+
+function renderBet() {
+  const bet = play.replay ? play.replayBet || store.bet : store.bet;
+  document
+    .querySelectorAll(".mo-bet")
+    .forEach((b) =>
+      b.classList.toggle("active", Number(b.dataset.bet) === bet),
+    );
+  $("moBetLamp").textContent = mode === "play" ? `${bet}BET` : "";
 }
 
 function lightLamp() {
@@ -279,14 +309,16 @@ function renderLamp() {
 }
 
 function finishPlay(stops) {
-  const wins = judge(stops, current.mode);
+  const bet = current.bet;
+  const wins = judge(stops, current.mode, bet);
+  const payTotal = Math.min(
+    15,
+    wins.reduce((a, w) => a + payOf(w.role, bet), 0),
+  );
   litLines = wins.map((w) => w.line);
   litUntil = performance.now() + 1200;
   if (play.bonus) {
-    const pay = Math.min(
-      15,
-      wins.reduce((a, w) => a + (ROLES[w.role].pay || 0), 0),
-    );
+    const pay = payTotal;
     const B = play.bonus;
     B.games++;
     B.paid += pay;
@@ -318,18 +350,21 @@ function finishPlay(stops) {
       message(type === "big" ? "BIG BONUS!" : "REG BONUS!");
     } else if (wins.some((w) => ROLES[w.role].kind === "replay")) {
       play.replay = true;
+      play.replayBet = bet;
       sfx.replay();
       message("リプレイ");
     } else if (wins.length) {
-      const pay = Math.min(
-        15,
-        wins.reduce((a, w) => a + ROLES[w.role].pay, 0),
-      );
-      play.diff += pay;
-      sfx.payout(pay);
-      message(`${ROLES[wins[0].role].name} ${pay}枚`);
+      play.diff += payTotal;
+      sfx.payout(payTotal);
+      message(`${ROLES[wins[0].role].name} ${payTotal}枚`);
     } else {
       message(play.bonusFlag && play.lamp ? "ボーナスを揃えよう" : "");
+    }
+    // リーチ目（ボーナス成立中にしか出ない形）
+    const k = bonusWin ? -1 : reachAt(stops, bet);
+    if (k >= 0 && store.reachHint) {
+      const kind = REACH_KINDS[REACH_PATTERNS[k].kind] || "";
+      message(`リーチ目！（${kind}）`);
     }
     if (play.bonusFlag && !play.lamp && play.notice === "after") lightLamp();
   }
@@ -380,7 +415,14 @@ function push(r, timeStamp) {
     return;
   }
   const stops = reels.map((x) => (x.stopAt === null ? null : mod(x.stopAt)));
-  const res = decideStop(stops, r, pushed, current.allowed, current.mode);
+  const res = decideStop(
+    stops,
+    r,
+    pushed,
+    current.allowed,
+    current.mode,
+    current.bet,
+  );
   R.stopAt = pushed + res.slip;
 }
 
@@ -410,6 +452,10 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "Space" || e.code === "ArrowUp" || e.code === "Enter") {
     e.preventDefault();
     lever(e.timeStamp);
+  } else if (e.code === "Digit1" || e.code === "Numpad1") {
+    setBet(1);
+  } else if (e.code === "Digit3" || e.code === "Numpad3") {
+    setBet(3);
   } else if (e.code in KEY_STOP) {
     e.preventDefault();
     push(KEY_STOP[e.code], e.timeStamp);
@@ -448,6 +494,7 @@ function setMode(m) {
         : "",
   );
   renderLamp();
+  renderBet();
 }
 document
   .querySelectorAll(".mo-tab")
@@ -489,6 +536,7 @@ function renderSettings() {
   $("moLatency").value = store.latency;
   $("moSound").checked = store.sound;
   $("moGhost").checked = store.ghost;
+  $("moReachHint").checked = store.reachHint;
   $("moLatencyNow").textContent = `${store.latency}ms`;
 }
 $("moSettingsBtn").addEventListener("click", () => {
@@ -511,6 +559,15 @@ $("moGhost").addEventListener("change", () => {
   store.ghost = $("moGhost").checked;
   save();
 });
+$("moReachHint").addEventListener("change", () => {
+  store.reachHint = $("moReachHint").checked;
+  save();
+});
+document
+  .querySelectorAll(".mo-bet")
+  .forEach((b) =>
+    b.addEventListener("click", () => setBet(Number(b.dataset.bet))),
+  );
 
 // ---- 遅延補正（光った瞬間に 10 回押して、ずれの中央値を補正値にする） ----
 const CALIB_BEAT_MS = 750;
@@ -587,7 +644,7 @@ let prepIndex = 0;
 function prepStep() {
   if (prepIndex >= FLAG_SETS.length) return;
   const s = FLAG_SETS[prepIndex++];
-  prepare(s.allowed, s.mode);
+  prepare(s.allowed, s.mode, s.bet);
   setTimeout(prepStep, 30);
 }
 setTimeout(prepStep, 300);
