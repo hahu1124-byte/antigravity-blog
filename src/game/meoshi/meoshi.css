@@ -251,6 +251,12 @@ button {
   color: var(--muted);
   white-space: nowrap;
 }
+.mo-speed-row {
+  margin-top: 0.5rem;
+}
+.mo-speed {
+  white-space: nowrap;
+}
 .mo-setting-actions {
   display: flex;
   align-items: center;

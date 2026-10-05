@@ -59,6 +59,7 @@ const DEFAULTS = {
   bet: 3, // 遊技の掛け枚数（1 か 3）
   reachHint: true, // リーチ目が出たら知らせる
   setting: "?", // 遊技の設定（"1"・"2"・"5"・"6" か、伏せて決める "?"）
+  speed: 1, // オートの速さ（1 等速・2 高速消化・20 超高速消化）
 };
 const store = (() => {
   try {
@@ -72,6 +73,8 @@ const store = (() => {
 })();
 // 壊れた値が保存されていたら直す（掛け枚数が 1・3 以外だと判定ができない）
 if (!BETS.includes(store.bet)) store.bet = 3;
+const SPEEDS = [1, 2, 20];
+if (!SPEEDS.includes(store.speed)) store.speed = 1;
 function save() {
   try {
     localStorage.setItem(STORE_KEY, JSON.stringify(store));
@@ -91,6 +94,14 @@ const reels = [0, 1, 2].map(() => ({
   stopAt: null,
   rest: Math.floor(Math.random() * FRAMES),
 }));
+
+// ---- 時計 ----
+// リールの回転とオートの待ち時間は、この時計で進める。高速消化（オート中だけ）は実時間の speed 倍で進む。
+// 手で打つときはいつも等速なので、押した時刻（event.timeStamp）は toClock で直すだけでよい
+let clockNow = performance.now();
+let clockReal = clockNow;
+const rate = () => (autoMode !== "off" && mode === "play" ? store.speed : 1);
+const toClock = (real) => clockNow + (real - clockReal) * rate();
 
 function posAt(r, t) {
   const R = reels[r];
@@ -133,8 +144,23 @@ window.addEventListener("resize", resizeAll);
 // CSS が当たる前に幅を測っていることがあるので、読み込み後にも測り直す
 window.addEventListener("load", resizeAll);
 
+// 1 秒あたりに締めたゲーム数（高速消化の実測表示）
+const gameTimes = [];
+
 function frame() {
-  const now = performance.now();
+  const real = performance.now();
+  // タブが裏にあった間などは、まとめて進めない
+  let remain = Math.min(real - clockReal, 100) * rate();
+  clockReal = real;
+  // 描画 1 回の間に、半コマずつ時計を進めて止まり・オートを処理する（高速でも押す位置を飛ばさない）。
+  // 計算が描画に間に合わない分は捨てる（固まらないように。そのぶん実際の速さは下がる）
+  do {
+    const step = Math.min(remain, FRAME_MS / 2);
+    clockNow += step;
+    remain -= step;
+    tick(clockNow);
+  } while (remain > 0 && performance.now() - real < 12);
+  const now = clockNow;
   const positions = [0, 1, 2].map((r) => posAt(r, now));
   renderer.draw(positions, {
     spinning: store.ghost ? [0, 1, 2].map((r) => moving(r, now)) : null,
@@ -142,6 +168,12 @@ function frame() {
     flash: now < flashUntil ? (flashUntil - now) / 400 : 0,
   });
   if (arrayShown()) arrayView.draw(positions);
+  updateStopButtons();
+  renderSpeedNow(real);
+  requestAnimationFrame(frame);
+}
+
+function tick(now) {
   // 全部のリールが止まりきったら 1 ゲームを締める
   if (
     anySpinning() &&
@@ -159,12 +191,6 @@ function frame() {
     finishGame();
     finishing = false;
   }
-  updateStopButtons(now);
-  autoTick(now);
-  requestAnimationFrame(frame);
-}
-
-function updateStopButtons(now) {
   // 停止音は押した瞬間ではなく、すべり終えて絵が止まった瞬間に鳴らす
   for (let r = 0; r < 3; r++) {
     const R = reels[r];
@@ -173,6 +199,10 @@ function updateStopButtons(now) {
       sfx.stop();
     }
   }
+  autoTick(now);
+}
+
+function updateStopButtons() {
   document.querySelectorAll(".mo-stop").forEach((b) => {
     const r = Number(b.dataset.reel);
     b.classList.toggle("ready", reels[r].spinning && reels[r].stopAt === null);
@@ -404,7 +434,7 @@ function playLever() {
   if (!current.free) prepare(current.allowed, current.mode, current.bet);
   renderBet();
   // リール始動音。遅れのゲームはリールが回り始めてから 0.8 秒後に鳴る
-  if (current.delay) setTimeout(() => sfx.lever(), DELAY_MS);
+  if (current.delay) setTimeout(() => sfx.lever(), DELAY_MS / rate());
   else sfx.lever();
 }
 
@@ -495,7 +525,7 @@ function finishPlay(stops) {
   litLines = wins
     .filter((w) => ROLES[w.role].kind === "bonus")
     .map((w) => w.line);
-  litUntil = performance.now() + 1200;
+  litUntil = clockNow + 1200;
   if (play.bonus) {
     const B = play.bonus;
     let pay = payTotal;
@@ -576,7 +606,7 @@ function finishPlay(stops) {
       play.lamp = false;
       // ボーナスが揃えば RT は終わる
       play.rt = null;
-      flashUntil = performance.now() + 400;
+      flashUntil = clockNow + 400;
       sfx.bonus();
       message(`${FLAG_LABEL[flag]} BONUS!`);
     } else if (replayWin) {
@@ -626,7 +656,9 @@ function finishPlay(stops) {
       play.counts[f] = (play.counts[f] || 0) + 1;
     }
     // リーチ目（ボーナス成立中にしか出ない形）
-    const k = bonusWin ? -1 : reachAt(stops, bet);
+    // リプレイハズシのゲームは左を手で止めているので、停止制御の保証（ボーナスなしでリーチ目にしない）が無い。
+    // リーチ目として扱わない
+    const k = bonusWin || current.hazushi ? -1 : reachAt(stops, bet);
     // リーチ目が出たら、次のゲームからボーナス図柄を引き込む
     if (k >= 0) play.reachSeen = true;
     if (k >= 0 && store.reachHint) {
@@ -715,7 +747,8 @@ function lever(t) {
     playLever();
   }
   litUntil = 0;
-  startSpin(performance.now());
+  // t はこの時計の時刻（手で引いたときは toClock で直してから渡す）
+  startSpin(t);
 }
 
 function push(r, timeStamp) {
@@ -723,7 +756,7 @@ function push(r, timeStamp) {
   if (!R.spinning || R.stopAt !== null) return;
   unlockAudio();
   // 画面と入力の遅れを引いた時刻で、そのときの位置を計算する
-  const t = Math.max(R.t0, timeStamp - store.latency);
+  const t = Math.max(R.t0, toClock(timeStamp - store.latency));
   const pos = R.phase + (t - R.t0) / FRAME_MS;
   const pushed = pushedFrame(pos);
   if (mode === "practice") {
@@ -813,12 +846,44 @@ const idxOf = (r, sym) => REELS[r].indexOf(sym);
 
 function setAuto(m, byUser = true) {
   autoMode = m;
-  autoNextAt = performance.now() + 300;
+  autoNextAt = clockNow + 300;
   // 音はボタンを押した処理の中で解禁する（ページを開いたときは鳴らせない）
   if (byUser) unlockAudio();
+  applySound();
   document
     .querySelectorAll(".mo-auto")
     .forEach((b) => b.classList.toggle("active", b.dataset.auto === m));
+}
+
+// オートの速さ（等速・高速消化 ×2・超高速消化 ×20）。手で打つときは効かない
+function setSpeed(s) {
+  if (!SPEEDS.includes(s)) return;
+  store.speed = s;
+  save();
+  applySound();
+  gameTimes.length = 0;
+  document
+    .querySelectorAll(".mo-speed")
+    .forEach((b) =>
+      b.classList.toggle("active", Number(b.dataset.speed) === s),
+    );
+}
+
+// 超高速消化は効果音を出さない（音が重なって鳴り続けるため）
+function applySound() {
+  setSoundEnabled(store.sound && rate() <= 2);
+}
+
+// 高速消化の実際の速さ（直近 3 秒に締めたゲーム数から 1 秒あたりを出す）
+let speedNowShown = "";
+function renderSpeedNow(real) {
+  while (gameTimes.length && gameTimes[0] < real - 3000) gameTimes.shift();
+  const text =
+    rate() > 1 && gameTimes.length > 1
+      ? `実測 ${((gameTimes.length - 1) / ((gameTimes.at(-1) - gameTimes[0]) / 1000)).toFixed(1)} ゲーム/秒`
+      : "";
+  if (text !== speedNowShown)
+    $("moSpeedNow").textContent = speedNowShown = text;
 }
 
 // このゲームの押す順と、各リールをどのコマで押すかを決める（レバーの直後に呼ぶ）
@@ -993,7 +1058,8 @@ function pressFx(el) {
 function finishGame() {
   if (mode === "play") finishPlay(reels.map((R) => R.rest));
   // オートは、止まり終わってから少し待って次のレバー
-  autoNextAt = performance.now() + (play.bonus ? 500 : 650);
+  autoNextAt = clockNow + (play.bonus ? 500 : 650);
+  gameTimes.push(performance.now());
 }
 
 const KEY_STOP = {
@@ -1017,7 +1083,7 @@ window.addEventListener("keydown", (e) => {
   }
   if (e.code === "Space" || e.code === "ArrowUp" || e.code === "Enter") {
     e.preventDefault();
-    lever(e.timeStamp);
+    lever(toClock(e.timeStamp));
   } else if (e.code === "Digit1" || e.code === "Numpad1") {
     setBet(1);
   } else if (e.code === "Digit3" || e.code === "Numpad3") {
@@ -1030,7 +1096,7 @@ window.addEventListener("keydown", (e) => {
 
 $("moLever").addEventListener("pointerdown", (e) => {
   e.preventDefault();
-  lever(e.timeStamp);
+  lever(toClock(e.timeStamp));
 });
 document.querySelectorAll(".mo-stop").forEach((b) =>
   b.addEventListener("pointerdown", (e) => {
@@ -1130,7 +1196,7 @@ $("moLatency").addEventListener("change", () => {
 });
 $("moSound").addEventListener("change", () => {
   store.sound = $("moSound").checked;
-  setSoundEnabled(store.sound);
+  applySound();
   save();
 });
 $("moGhost").addEventListener("change", () => {
@@ -1215,6 +1281,12 @@ document
   .querySelectorAll(".mo-auto")
   .forEach((b) => b.addEventListener("click", () => setAuto(b.dataset.auto)));
 setAuto("off", false);
+document
+  .querySelectorAll(".mo-speed")
+  .forEach((b) =>
+    b.addEventListener("click", () => setSpeed(Number(b.dataset.speed))),
+  );
+setSpeed(store.speed);
 // 初期状態は遊技モード
 setMode("play");
 requestAnimationFrame(frame);
