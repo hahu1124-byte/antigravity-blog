@@ -84,9 +84,12 @@ function noise(dur, { vol = 0.4, at = 0, freq = 1800 } = {}) {
 }
 
 export const sfx = {
+  // リール始動音（レバーを叩いてリールが回り始めたとき。遅れのゲームは 0.8 秒後に鳴る）
   lever() {
     noise(0.07, { vol: 0.6, freq: 1200 });
     tone(140, 0.12, { type: "triangle", vol: 0.5 });
+    tone(660, 0.18, { type: "square", vol: 0.18, at: 0.04, slideTo: 1320 });
+    tone(1320, 0.12, { type: "square", vol: 0.14, at: 0.22 });
   },
   stop() {
     noise(0.03, { vol: 0.5, freq: 3000 });

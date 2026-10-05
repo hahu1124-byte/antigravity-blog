@@ -13,6 +13,8 @@ import {
   ROLES,
   REELS,
   REACH_SHOW_RATE,
+  DELAY_MS,
+  DELAY_RATE,
   SETTINGS,
   BETS,
   LOTTERY_BY_SETTING,
@@ -358,10 +360,16 @@ function playLever() {
     ) {
       play.notice = "after";
     }
+    // 遅れ（リール始動音が遅れる）: チェリーかボーナスが成立したゲームで抽選する
+    current.delay =
+      (small === "cherry" && Math.random() < DELAY_RATE.cherry) ||
+      (fresh && Math.random() < DELAY_RATE.bonus);
   }
   if (!current.free) prepare(current.allowed, current.mode, current.bet);
   renderBet();
-  sfx.lever();
+  // リール始動音。遅れのゲームはリールが回り始めてから 0.8 秒後に鳴る
+  if (current.delay) setTimeout(() => sfx.lever(), DELAY_MS);
+  else sfx.lever();
 }
 
 // 掛け枚数の切り替え（遊技モードで、リールが止まっているときだけ）

@@ -445,7 +445,7 @@ export const REACH_PATTERNS = [
     kind: "seven",
     reels: [
       { rows: ["S", "F", "R"] },
-      { rows: ["R", "G", "R"] },
+      { rows: ["R", "G", null] },
       { rows: ["R", null, "G"] },
     ],
   },
