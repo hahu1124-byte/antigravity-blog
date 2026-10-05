@@ -743,28 +743,33 @@ function renderPlayStats() {
 function renderHistory() {
   const H = play.history;
   const n = H.length;
+  // BIG の後の RT は、横にはみ出さないよう次の行に出す（REG は RT なし）
   const rtText = (h) => {
-    if (h.type === "reg") return "-";
     // BIG 中（RT はまだ）。… は数えている途中
-    if (h.chal === null) return "BIG中…";
+    if (h.chal === null) return "BIG 中…";
     const now = h.rtOpen ? "…" : "";
     return h.game === null
-      ? `チャレンジ ${h.chal}G${now}`
-      : `チャレンジ ${h.chal}G → GAME ${h.game}G${now}`;
+      ? `RT: チャレンジ ${h.chal}G${now}`
+      : `RT: チャレンジ ${h.chal}G → GAME ${h.game}G${now}`;
   };
   const rows = H.map((h, i) => {
-    const kind =
-      h.type === "reg"
-        ? `<span class="mo-h-reg">REG</span>`
-        : `<span class="mo-h-big">${h.flag === "bigSeven" ? "赤7" : "ヒバナ"}</span>`;
+    const big = h.type === "big";
+    const kind = big
+      ? `<span class="mo-h-big">${h.flag === "bigSeven" ? "赤7" : "ヒバナ"}</span>`
+      : `<span class="mo-h-reg">REG</span>`;
     const from = h.inRt
       ? `<small>${h.inRt === "chal" ? "チャレンジ中" : "GAME中"}</small>`
       : "";
-    return `<tr><td>${n - i}</td><td>${kind}</td><td>${h.start}G${from}</td><td>${h.paid}枚</td><td class="mo-h-rt">${rtText(h)}</td></tr>`;
+    // 差枚はボーナス中の純増（払い出し − 掛けた枚数）
+    const net = `<b class="${h.net >= 0 ? "ok" : "ng"}">${h.net >= 0 ? "+" : ""}${h.net}</b>`;
+    const main = `<tr class="${big ? "mo-h-has-rt" : ""}"><td>${n - i}</td><td>${kind}</td><td>${h.start}G${from}</td><td>${net}</td></tr>`;
+    return big
+      ? main + `<tr class="mo-h-sub"><td colspan="4">${rtText(h)}</td></tr>`
+      : main;
   }).join("");
   $("moHistory").innerHTML = `
-    <thead><tr><th>回</th><th>種別</th><th>スタート</th><th>獲得</th><th>RT</th></tr></thead>
-    <tbody>${rows || `<tr><td colspan="5" class="mo-h-empty">まだボーナスはありません</td></tr>`}</tbody>`;
+    <thead><tr><th>回</th><th>種別</th><th>スタート</th><th>差枚</th></tr></thead>
+    <tbody>${rows || `<tr><td colspan="4" class="mo-h-empty">まだボーナスはありません</td></tr>`}</tbody>`;
 }
 
 // 役ごとの確率の表（実戦の入賞回数と、設定が見えているときは設定の値）

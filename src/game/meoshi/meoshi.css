@@ -445,10 +445,27 @@ button {
 .mo-history td small {
   display: block;
 }
-.mo-history .mo-h-rt {
+.mo-history-box {
+  overflow-x: hidden;
+}
+.mo-history .ok {
+  color: var(--ok);
+}
+.mo-history .ng {
+  color: var(--ng);
+}
+/* BIG の行と、その下の RT の行は 1 組に見せる（間の線を消す） */
+.mo-history .mo-h-has-rt td {
+  border-bottom: 0;
+  padding-bottom: 0.1rem;
+}
+.mo-history .mo-h-sub td {
   text-align: left;
   white-space: normal;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  padding-top: 0;
+  padding-left: 2.2rem;
 }
 .mo-h-big {
   color: var(--accent);
