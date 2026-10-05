@@ -345,6 +345,11 @@ export class ArrayRenderer {
           colW - g.lineWidth,
           rowH * 3 - g.lineWidth,
         );
+        // 金の枠の外側を黒の細い線（0.5px）で囲む
+        const bw = 0.5 * dpr;
+        g.strokeStyle = "#000";
+        g.lineWidth = bw;
+        g.strokeRect(x - bw / 2, y - bw / 2, colW + bw, rowH * 3 + bw);
       }
       g.restore();
     }
