@@ -428,7 +428,9 @@ function flagLabel() {
   const names = current.allowed
     .filter((f) => FLAG_LABEL[f])
     .map((f) => FLAG_LABEL[f]);
-  return names.length ? names.join("＋") : "ハズレ";
+  const label = names.length ? names.join("＋") : "ハズレ";
+  // 遅れ（リール始動音が 0.8 秒遅れた）ゲームは印を付ける
+  return current.delay ? `${label}（遅れ）` : label;
 }
 
 function finishPlay(stops) {
@@ -680,7 +682,6 @@ let autoNextAt = 0;
 let autoPlan = null;
 const JUN = [0, 1, 2]; // 順押し
 const HASAMI = [0, 2, 1]; // ハサミ打ち（左→右→中）
-const randFrame = () => Math.floor(Math.random() * FRAMES);
 const idxOf = (r, sym) => REELS[r].indexOf(sym);
 // その図柄がある位置のどれかを選ぶ
 const pickIdx = (r, sym) => {
@@ -701,24 +702,22 @@ function setAuto(m, byUser = true) {
 }
 
 // このゲームの押す順と、各リールをどのコマで押すかを決める（レバーの直後に呼ぶ）
+// pushes の null は「狙わずにすぐ押す」（適当打ち。待たない分だけ速い）
 function planAuto() {
-  const rnd = () => ({
-    order: JUN,
-    pushes: [randFrame(), randFrame(), randFrame()],
-  });
+  const rnd = () => ({ order: HASAMI, pushes: [null, null, null] });
   const full = autoMode === "full";
   // BB 中の枚数調整: 完全は左リールの赤7 をちょうどで押す（ビタ）
   if (current.tech === "bbVita")
     return full
-      ? { order: JUN, pushes: [idxOf(0, "S"), randFrame(), randFrame()] }
+      ? { order: HASAMI, pushes: [idxOf(0, "S"), null, null] }
       : rnd();
   // RB の 1 枚役: 完全は左リールの窓に 3 連ドンが入る位置で押す
   if (current.tech === "rbOne")
     return full
-      ? { order: JUN, pushes: [TRIPLE_DON[1], randFrame(), randFrame()] }
+      ? { order: HASAMI, pushes: [TRIPLE_DON[1], null, null] }
       : rnd();
   if (current.mode === "bonus") return rnd();
-  if (full) return { order: JUN, pushes: bestPushes() };
+  if (full) return { order: HASAMI, pushes: bestPushes(HASAMI) };
   // 最低限: ボーナスが分かったら（リーチ目・ランプ）ボーナス図柄を中段の 2 コマ手前で狙い、引き込みに任せる
   if (play.bonusFlag && (play.reachSeen || play.lamp)) {
     const right = play.bonusFlag === "reg" ? "N" : "S";
@@ -732,25 +731,36 @@ function planAuto() {
   // ふだん: 左リール上段に暖簾を狙うハサミ打ち。右は適当（氷は引き込む）、中は氷を中段の 1 コマ手前で狙う
   return {
     order: HASAMI,
-    pushes: [mod(idxOf(0, "N") - 1), mod(pickIdx(1, "I") - 1), randFrame()],
+    pushes: [mod(idxOf(0, "N") - 1), mod(pickIdx(1, "I") - 1), null],
   };
 }
 
-// 完全オート: 順押しで 21³ 通りの押し位置を全部試し、いちばん得な止まり方になる押し位置を選ぶ
-function bestPushes() {
+// 完全オート: order の順で 21³ 通りの押し位置を全部試し、いちばん得な止まり方になる押し位置を選ぶ。
+// 同じ得点なら、待ち時間（狙うコマが来るまでのコマ数の合計）がいちばん短いものにする
+function bestPushes(order) {
   const { allowed, mode: m, bet } = current;
-  let best = [0, 0, 0];
-  let bestScore = -Infinity;
+  const [r1, r2, r3] = order;
+  const startAt = performance.now() + 450;
+  let best = [null, null, null];
+  let bestKey = -Infinity;
   for (let a = 0; a < FRAMES; a++) {
-    const s0 = decideStop([null, null, null], 0, a, allowed, m, bet).mid;
+    const st1 = [null, null, null];
+    st1[r1] = decideStop(st1, r1, a, allowed, m, bet).mid;
     for (let b = 0; b < FRAMES; b++) {
-      const s1 = decideStop([s0, null, null], 1, b, allowed, m, bet).mid;
+      const st2 = st1.slice();
+      st2[r2] = decideStop(st1, r2, b, allowed, m, bet).mid;
       for (let c = 0; c < FRAMES; c++) {
-        const s2 = decideStop([s0, s1, null], 2, c, allowed, m, bet).mid;
-        const score = autoScore([s0, s1, s2]);
-        if (score > bestScore) {
-          bestScore = score;
-          best = [a, b, c];
+        const st3 = st2.slice();
+        st3[r3] = decideStop(st2, r3, c, allowed, m, bet).mid;
+        const pushes = [];
+        pushes[r1] = a;
+        pushes[r2] = b;
+        pushes[r3] = c;
+        const key =
+          autoScore(st3) * 1000 - autoWaitFrames(order, pushes, startAt);
+        if (key > bestKey) {
+          bestKey = key;
+          best = pushes;
         }
       }
     }
@@ -758,13 +768,27 @@ function bestPushes() {
   return best;
 }
 
-// 止まり方の得点: ボーナス揃い ＞ 払い出し ＞ リプレイ。同点はばらす。
+// order の順に押すとき、狙うコマが来るまで待つコマ数の合計（押してから次を押すまで 200ms）
+function autoWaitFrames(order, pushes, startAt) {
+  let t = startAt;
+  let total = 0;
+  for (const r of order) {
+    const R = reels[r];
+    const p0 = pushedFrame(R.phase + (t - R.t0) / FRAME_MS);
+    const wait = mod(pushes[r] - p0);
+    total += wait;
+    t += wait * FRAME_MS + 200;
+  }
+  return total;
+}
+
+// 止まり方の得点: ボーナス揃い ＞ 払い出し ＞ リプレイ。
 // 小役も成立しているゲームは小役を先に取る（ボーナスは持ち越すので次のゲームで揃えられる）
 function autoScore(stops) {
   const hasSmall = current.allowed.some((f) =>
     ["replay", "fuurin", "kori", "cherry"].includes(f),
   );
-  let v = Math.random();
+  let v = 0;
   for (const w of judge(stops, current.mode, current.bet)) {
     const role = ROLES[w.role];
     v +=
@@ -812,7 +836,9 @@ function autoTick(now) {
   // 狙うコマが次に来る位置（巻き戻らない連続値）を 1 回だけ決める
   if (autoPlan.at[r] === undefined) {
     const p0 = pushedFrame(pos);
-    autoPlan.at[r] = p0 + mod(autoPlan.pushes[r] - p0);
+    // null は狙わずにすぐ押す
+    const target = autoPlan.pushes[r];
+    autoPlan.at[r] = target === null ? p0 : p0 + mod(target - p0);
   }
   const pushed = autoPlan.at[r];
   // 手で押すのと同じく、狙うコマが中段に来る直前（ビタの窓の中）まで待ってから押す。

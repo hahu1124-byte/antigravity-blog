@@ -13,6 +13,7 @@ export const REACH_KINDS = {
   tanDon: "単ドン狙い時",
   seven: "赤7付近狙い時",
   tenpai: "テンパイハズレ",
+  getchena: "ゲチェナ",
 };
 
 export const REACH_PATTERNS = [
@@ -582,5 +583,10 @@ export const REACH_PATTERNS = [
       { rows: [null, null, "G"] },
       { rows: ["G", null, null] },
     ],
+  },
+  {
+    id: "getchena",
+    kind: "getchena",
+    reels: ["hazure", "any", { rows: [null, "C", "S"] }],
   },
 ];

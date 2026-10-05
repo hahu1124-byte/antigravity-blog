@@ -1,4 +1,6 @@
 // 目押しチャレンジ: 効果音（WebAudio で合成。音声ファイルは使わない）
+// リール始動音・リプレイ音は、参考動画 https://www.youtube.com/watch?v=-PsvVY0tLLc
+// （18〜19 秒がリプレイ音、20〜21 秒が通常の消化時の音）を周波数・長さ・音量で測って合成した
 let ctx = null;
 let master = null;
 let enabled = true;
