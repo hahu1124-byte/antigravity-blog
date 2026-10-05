@@ -196,6 +196,15 @@ export const REACH_PATTERNS = [
     reels: [{ rows: ["N", "G", "I"] }, "hazure", { rows: ["N", "R", "D"] }],
   },
   {
+    id: "r34",
+    kind: "noren",
+    reels: [
+      { rows: ["N", "G", "I"] },
+      { rows: ["I", "S", "R"] },
+      { rows: ["N", "R", "H"] },
+    ],
+  },
+  {
     id: "r35",
     kind: "noren",
     reels: [
