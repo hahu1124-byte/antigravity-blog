@@ -58,6 +58,14 @@ const SCENARIOS = [
     regHazushi: true,
     target: null,
   },
+  {
+    name: "氷90%・ハズシ75%",
+    kori: 0.9,
+    rtHazushi: 0.75,
+    bigVita: true,
+    regHazushi: true,
+    target: null,
+  },
 ];
 
 function run(setting, sc) {
