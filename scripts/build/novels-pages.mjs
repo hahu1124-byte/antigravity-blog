@@ -62,7 +62,7 @@ export function labWrap({
     <meta property="og:description" content="${escapeHtml(description)}">
     <meta property="og:url" content="${SITE_URL}/lab/novels/">
     <meta property="og:type" content="article">
-    <link rel="stylesheet" href="https://hahu1124-byte.github.io/antigravity-blog/lab/styles.css">
+    <link rel="stylesheet" href="${cssPath}">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <script>
@@ -1704,6 +1704,7 @@ export async function buildNovelsPages() {
       title: "ワールドマップ — 廃城の王 | AI小説 | Gravity Portal",
       description:
         "カクヨム連載中「廃城の王」の舞台エルダリア大陸、廃境、グラウド市街、地下倉庫街のインタラクティブマップ。",
+      cssDepth: 2,
       backHref: "/lab/novels/",
       backLabel: "AI小説に戻る",
       titleIcon: "🗺️",

@@ -50,7 +50,7 @@ v9ページ作成時に **カテゴリ一覧ページ（ai-tools/index.html 等�
 
 | ファイル | 種別 | 形式 |
 |---------|------|------|
-| `src/lab/ai-tools/v{N}/index.html` | 完全HTML | styles.css読み込み・テーマ切替・lab-header・lab-footer |
+| `src/lab/ai-tools/v{N}/index.html` | 完全HTML | styles.css読み込み（相対パス `../../styles.css`。GitHub Pages の絶対 URL にしない）・テーマ切替・lab-header・lab-footer |
 | `src/lab/ai-developers/v{N}/index.html` | 完全HTML | 同上 |
 | `src/lab/ai-trends/v{N}/index.html` | 完全HTML | 同上 |
 | `src/articles/YYYYMM/YYYYMMDD_ai_lab_update_v{N+1}.html` | body-only HTMLフラグメント | `<p>`, `<h2>`, `<ul>`, `<table>` のみ。`<html>/<head>` 不要 |

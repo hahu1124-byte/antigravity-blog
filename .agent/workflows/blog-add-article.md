@@ -11,7 +11,7 @@ description: ブログ記事の新規追加手順（記事HTML作成→OGP自動
 - 記事のHTMLデータは `src/articles/YYYYMM/記事スラッグ.html` に格納（プロジェクトルート: `h:/gravity/projects/antigravity-blog`）
 - 記事メタデータは `src/blog-data.json` に集約する。一覧ページ・タグページ・OGPメタタグ・関連記事・前後ナビは全てここと`src/articles/`から`node build.mjs`が自動生成する
 - **`dist/` を手動編集・手動addする必要はない。** `node build.mjs`がsrc/配下から毎回全ページを再生成し、push後はGitHub Actionsの`deploy.yml`が同じビルドを実行してデプロイする
-- `/blog/*` はGravity PortalのNext.js rewriteで `https://hahu1124-byte.github.io/antigravity-blog/blog/*` にプロキシ
+- `/blog/*` はGravity Portalの rewrite（本番は`vercel.json`）で `https://hahu1124-byte.github.io/antigravity-blog/blog/*` にプロキシ
 - **【重要・個人情報＆内部実務のマスキング方針】**:
   - 記事内で扱う個人情報、プライベートなローカルパス（`G:/...`, `H:/...` 等）、特定クライアント・案件の生々しい固有名詞や内情は**必ず抽象化・マスキングして記述すること**。
   - 「読者が自身の環境で模倣・再現できる汎用的なベストプラクティス・設計パターン」としてクリーンに昇華して記事化する。
