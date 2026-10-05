@@ -85,6 +85,9 @@ const CASES = [
   // "reach" はリーチ目を優先して止めるゲームの目印
   { allowed: ["big", "reach"], mode: "normal", bonus: true },
   { allowed: ["reg", "reach"], mode: "normal", bonus: true },
+  // "pull" はリーチ目・ランプの後にボーナス図柄を引き込むゲームの目印
+  { allowed: ["big", "pull"], mode: "normal", bonus: true },
+  { allowed: ["reg", "pull"], mode: "normal", bonus: true },
   { allowed: ["big", "replay"], mode: "normal", must: true },
   { allowed: ["big", "fuurin"], mode: "normal", must: true },
   { allowed: ["big", "kori"], mode: "normal" },

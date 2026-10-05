@@ -237,6 +237,9 @@ function tableOf(allowed, mode, bet) {
       hasBonus: allowed.includes("big") || allowed.includes("reg"),
       // "reach" はフラグではなく目印。ボーナス成立中にリーチ目の形を優先して止めるゲーム
       reachPref: allowed.includes("reach"),
+      // "pull" も目印。リーチ目やランプでボーナスが分かった後のゲームで、ボーナス図柄を引き込む。
+      // 「どこを押されても取れる値（min）」ではなく、違法にならない範囲で揃う見込みの平均（avg）を優先する
+      pull: allowed.includes("pull"),
       min: new Float64Array(STATE_N),
       avg: new Float64Array(STATE_N),
       done: new Uint8Array(STATE_N),
@@ -287,6 +290,20 @@ function evaluate(s, t) {
   return i;
 }
 
+// 状態 j が状態 i より良いか。ふつうは最悪値 min を先に比べ、同じなら平均 avg。
+// 引き込みのゲーム（pull）は、どちらも違法にならないなら平均 avg を先に比べる
+function betterThan(t, j, i) {
+  if (t.pull) {
+    const lj = t.min[j] > ILLEGAL / 2;
+    const li = t.min[i] > ILLEGAL / 2;
+    if (lj !== li) return lj;
+    if (lj) return t.avg[j] > t.avg[i] + 1e-9;
+  }
+  return (
+    t.min[j] > t.min[i] || (t.min[j] === t.min[i] && t.avg[j] > t.avg[i] + 1e-9)
+  );
+}
+
 function bestSlip(s, reel, pushed, t) {
   const keep = s[reel];
   let slip = -1;
@@ -295,11 +312,7 @@ function bestSlip(s, reel, pushed, t) {
     s[reel] = mod(pushed + k);
     const j = evaluate(s, t);
     // 同じ評価ならすべりの少ない方（k の小さい方が先に入る）
-    if (
-      slip < 0 ||
-      t.min[j] > t.min[bi] ||
-      (t.min[j] === t.min[bi] && t.avg[j] > t.avg[bi] + 1e-9)
-    ) {
+    if (slip < 0 || betterThan(t, j, bi)) {
       slip = k;
       bi = j;
     }
@@ -319,6 +332,8 @@ export const FLAG_SETS = (() => {
     for (const b of [[], ["big"], ["reg"], ["big", "reach"], ["reg", "reach"]])
       for (const s of small)
         sets.push({ allowed: [...b, ...s], mode: "normal", bet });
+    sets.push({ allowed: ["big", "pull"], mode: "normal", bet });
+    sets.push({ allowed: ["reg", "pull"], mode: "normal", bet });
     sets.push({ allowed: ["bonusFuurin"], mode: "bonus", bet });
   }
   return sets;

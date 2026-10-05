@@ -212,6 +212,17 @@ export function payOf(roleId, bet) {
 // 優先しないゲームでも、押し位置しだいでリーチ目になることはある
 export const REACH_SHOW_RATE = 0.6;
 
-// ボーナスの終わり方（2015 年版）
-export const BIG_END_PAYOUT = 344; // 344 枚を超えたら終了
-export const REG_END_PAYOUT = 105; // 105 枚を超えたら終了
+// ボーナス（スマスロ ハナビ。1geki /61/・/63/ と役構成の画像）
+// BB: 279 枚を超えたら終了。1 ゲーム目だけ「左リール中段に赤7 をビタ押し」で 14 枚役（技術介入）、あとは 15 枚
+export const BIG_END_PAYOUT = 279;
+export const BB_VITA_PAY = 14;
+// RB: 12 ゲームか 8 回入賞で終了。1 枚役が成立すると予告音が鳴り、左リールに 3 連ドンを狙うと外せる
+// （入賞回数を 1 枚役で使わないため）。共通 15 枚役でも予告音は鳴る
+export const REG_END_GAMES = 12;
+export const REG_END_WINS = 8;
+export const RB_ONE_ODDS = { 1: 8.0, 2: 8.0, 5: 7.0, 6: 7.0 }; // 1 枚役 1/x
+export const RB_COMMON_ODDS = 32.8; // 共通 15 枚役 1/x
+// 3 連ドンの位置（左リールの 0 始まりの番号）。窓にどれか 1 つでも入っていれば外し成功（アバウトで OK）
+export const TRIPLE_DON = [2, 3, 4];
+// ボーナス中の掛け枚数（資料に載っていないので仮に 3 枚。自動で掛ける）
+export const BONUS_BET = 3;

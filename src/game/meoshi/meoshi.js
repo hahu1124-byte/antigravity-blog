@@ -3,7 +3,13 @@ import {
   FRAMES,
   FRAME_MS,
   BIG_END_PAYOUT,
-  REG_END_PAYOUT,
+  BB_VITA_PAY,
+  REG_END_GAMES,
+  REG_END_WINS,
+  RB_ONE_ODDS,
+  RB_COMMON_ODDS,
+  TRIPLE_DON,
+  BONUS_BET,
   ROLES,
   REELS,
   REACH_SHOW_RATE,
@@ -22,6 +28,7 @@ import {
   prepare,
   reachAt,
   reachKindOf,
+  symAt,
   FLAG_SETS,
   mod,
 } from "./stop-control.js";
@@ -271,12 +278,39 @@ function renderSettingButtons() {
 }
 
 function playLever() {
-  // リプレイのときは前のゲームと同じ枚数が自動で掛かる（メダルは減らない）
-  const bet = play.replay ? play.replayBet || store.bet : store.bet;
+  // リプレイのときは前のゲームと同じ枚数が自動で掛かる（メダルは減らない）。ボーナス中は自動で BONUS_BET 枚
+  const bet = play.bonus
+    ? BONUS_BET
+    : play.replay
+      ? play.replayBet || store.bet
+      : store.bet;
   if (!play.replay) play.diff -= bet;
   play.replay = false;
   if (play.bonus) {
+    const B = play.bonus;
     current = { allowed: ["bonusFuurin"], mode: "bonus", bet };
+    if (B.type === "big" && B.games === 0) {
+      // BB 1 ゲーム目: 技術介入。すべりなしで止まり、左リール中段に赤7 なら 14 枚役
+      current = { allowed: [], mode: "bonus", bet, free: true, tech: "bbVita" };
+      message("BB 1G目：左リール中段に赤7をビタ押し！");
+    } else if (B.type === "reg") {
+      const v = Math.random();
+      const one = 1 / RB_ONE_ODDS[play.setting];
+      if (v < one) {
+        // 1 枚役: すべりなしで止まり、左リールの窓に 3 連ドンが入れば外せる
+        current = {
+          allowed: [],
+          mode: "bonus",
+          bet,
+          free: true,
+          tech: "rbOne",
+        };
+      }
+      if (v < one + 1 / RB_COMMON_ODDS) {
+        sfx.notice();
+        message("予告音！左リールに3連ドン狙い");
+      }
+    }
   } else {
     play.games++;
     const flag = drawFlag(play.setting);
@@ -288,11 +322,17 @@ function playLever() {
     const small = ["replay", "fuurin", "kori", "cherry"].includes(flag)
       ? flag
       : null;
-    // ボーナス成立中は、一定の割合でリーチ目の形を優先して止める（"reach" の目印）
-    const reach =
-      play.bonusFlag && Math.random() < REACH_SHOW_RATE ? "reach" : null;
+    // ボーナス成立中の止め方の目印:
+    //   リーチ目かランプでボーナスが分かった後は、ボーナス図柄を引き込む（"pull"。小役が成立していないゲームだけ）
+    //   まだ分かっていないうちは、一定の割合でリーチ目の形を優先して止める（"reach"）
+    let mark = null;
+    if (play.bonusFlag) {
+      if ((play.reachSeen || play.lamp) && !small) mark = "pull";
+      else if (!play.reachSeen && Math.random() < REACH_SHOW_RATE)
+        mark = "reach";
+    }
     current = {
-      allowed: [play.bonusFlag, small, reach].filter(Boolean),
+      allowed: [play.bonusFlag, small, mark].filter(Boolean),
       mode: "normal",
       bet,
     };
@@ -310,7 +350,7 @@ function playLever() {
       play.notice = "after";
     }
   }
-  prepare(current.allowed, current.mode, current.bet);
+  if (!current.free) prepare(current.allowed, current.mode, current.bet);
   renderBet();
   sfx.lever();
 }
@@ -325,7 +365,11 @@ function setBet(bet) {
 }
 
 function renderBet() {
-  const bet = play.replay ? play.replayBet || store.bet : store.bet;
+  const bet = play.bonus
+    ? BONUS_BET
+    : play.replay
+      ? play.replayBet || store.bet
+      : store.bet;
   document
     .querySelectorAll(".mo-bet")
     .forEach((b) =>
@@ -358,8 +402,24 @@ function finishPlay(stops) {
     .map((w) => w.line);
   litUntil = performance.now() + 1200;
   if (play.bonus) {
-    const pay = payTotal;
     const B = play.bonus;
+    let pay = payTotal;
+    let note = "";
+    if (current.tech === "bbVita") {
+      const ok = symAt(0, stops[0]) === "S";
+      pay = ok ? BB_VITA_PAY : 0;
+      note = ok ? "ビタ押し成功！14枚" : "ビタ押し失敗";
+      if (ok) sfx.hit();
+      else sfx.miss();
+    } else if (current.tech === "rbOne") {
+      // 左リールの窓（中段の上下）に 3 連ドンのどれかが入っていれば 1 枚役を外せる
+      const win = [stops[0] - 1, stops[0], stops[0] + 1].map(mod);
+      const dodged = win.some((i) => TRIPLE_DON.includes(i));
+      pay = dodged ? 0 : 1;
+      note = dodged ? "1枚役ハズシ成功！" : "1枚役が入賞（1回分）";
+      if (dodged) sfx.hit();
+      else sfx.miss();
+    }
     B.games++;
     B.paid += pay;
     play.diff += pay;
@@ -367,14 +427,20 @@ function finishPlay(stops) {
       B.wins++;
       sfx.payout(pay);
     }
-    // 2015 年版はどちらも払い出し枚数で終わる（BIG 344 枚・REG 105 枚を超えたら）
-    const end = B.type === "big" ? BIG_END_PAYOUT : REG_END_PAYOUT;
     const label = B.type === "big" ? "BIG" : "REG";
-    if (B.paid > end) {
-      message(`${label} 終了 ${B.paid}枚獲得`);
+    const over =
+      B.type === "big"
+        ? B.paid > BIG_END_PAYOUT
+        : B.games >= REG_END_GAMES || B.wins >= REG_END_WINS;
+    const status =
+      B.type === "big"
+        ? `${B.paid}/${BIG_END_PAYOUT}枚`
+        : `${B.wins}/${REG_END_WINS}回・${B.games}/${REG_END_GAMES}G`;
+    if (over) {
+      message(`${note ? note + "　" : ""}${label} 終了 ${B.paid}枚獲得`);
       play.bonus = null;
     } else {
-      message(`${label} 中 ${B.paid}/${end}枚`);
+      message(`${note ? note + "　" : ""}${label} 中 ${status}`);
     }
   } else {
     const bonusWin = wins.find((w) => ROLES[w.role].kind === "bonus");
@@ -383,6 +449,7 @@ function finishPlay(stops) {
       play[type]++;
       play.bonus = { type, paid: 0, games: 0, wins: 0 };
       play.bonusFlag = null;
+      play.reachSeen = false;
       play.notice = null;
       play.lamp = false;
       flashUntil = performance.now() + 400;
@@ -409,6 +476,8 @@ function finishPlay(stops) {
     }
     // リーチ目（ボーナス成立中にしか出ない形）
     const k = bonusWin ? -1 : reachAt(stops, bet);
+    // リーチ目が出たら、次のゲームからボーナス図柄を引き込む
+    if (k >= 0) play.reachSeen = true;
     if (k >= 0 && store.reachHint) {
       const kind = REACH_KINDS[reachKindOf(k)] || "";
       message(`リーチ目！（${kind}）`);
@@ -495,14 +564,10 @@ function push(r, timeStamp) {
     return;
   }
   const stops = reels.map((x) => (x.stopAt === null ? null : mod(x.stopAt)));
-  const res = decideStop(
-    stops,
-    r,
-    pushed,
-    current.allowed,
-    current.mode,
-    current.bet,
-  );
+  // 技術介入のゲーム（BB 1G目のビタ押し・RB の 1 枚役）はすべらせず、押した位置で止める
+  const res = current.free
+    ? { slip: 0 }
+    : decideStop(stops, r, pushed, current.allowed, current.mode, current.bet);
   R.stopAt = pushed + res.slip;
   // リールの下に、押してから何コマすべったかを出す
   document.querySelectorAll(".mo-result")[r].innerHTML =
