@@ -17,6 +17,8 @@ import {
   DELAY_RATE,
   SETTINGS,
   BETS,
+  LINES,
+  LINES_BY_BET,
   LOTTERY_BY_SETTING,
   LOTTERY_DENOM,
   payOf,
@@ -683,13 +685,6 @@ let autoPlan = null;
 const JUN = [0, 1, 2]; // 順押し
 const HASAMI = [0, 2, 1]; // ハサミ打ち（左→右→中）
 const idxOf = (r, sym) => REELS[r].indexOf(sym);
-// その図柄がある位置のどれかを選ぶ
-const pickIdx = (r, sym) => {
-  const list = [...REELS[r]]
-    .map((s, i) => (s === sym ? i : -1))
-    .filter((i) => i >= 0);
-  return list[Math.floor(Math.random() * list.length)];
-};
 
 function setAuto(m, byUser = true) {
   autoMode = m;
@@ -717,7 +712,13 @@ function planAuto() {
       ? { order: HASAMI, pushes: [TRIPLE_DON[1], null, null] }
       : rnd();
   if (current.mode === "bonus") return rnd();
-  if (full) return { order: HASAMI, pushes: bestPushes(HASAMI) };
+  // 完全: 押し位置は先に決めず、各リールの番が来たときに「取れる最高の結果を保てる、いちばん早い位置」で押す
+  if (full)
+    return {
+      order: HASAMI,
+      pushes: ["best", "best", "best"],
+      best: bestScoreFrom([null, null, null], HASAMI),
+    };
   // 最低限: ボーナスが分かったら（リーチ目・ランプ）ボーナス図柄を中段の 2 コマ手前で狙い、引き込みに任せる
   if (play.bonusFlag && (play.reachSeen || play.lamp)) {
     const right = play.bonusFlag === "reg" ? "N" : "S";
@@ -728,58 +729,60 @@ function planAuto() {
       ),
     };
   }
-  // ふだん: 左リール上段に暖簾を狙うハサミ打ち。右は適当（氷は引き込む）、中は氷を中段の 1 コマ手前で狙う
+  // ふだん: 左リール上段に暖簾を狙うハサミ打ち。右はすぐ押す（氷は引き込む）。
+  // 中は、左右で氷がテンパイしたときだけ氷を狙い、それ以外はすぐ押す（"kori"）
   return {
     order: HASAMI,
-    pushes: [mod(idxOf(0, "N") - 1), mod(pickIdx(1, "I") - 1), null],
+    pushes: [mod(idxOf(0, "N") - 1), "kori", null],
   };
 }
 
-// 完全オート: order の順で 21³ 通りの押し位置を全部試し、いちばん得な止まり方になる押し位置を選ぶ。
-// 同じ得点なら、待ち時間（狙うコマが来るまでのコマ数の合計）がいちばん短いものにする
-function bestPushes(order) {
+// 完全オート: stops（止まっているリール）から、残りのリールを order の順に押したときに取れる最高の得点
+function bestScoreFrom(stops, order) {
   const { allowed, mode: m, bet } = current;
-  const [r1, r2, r3] = order;
-  const startAt = performance.now() + 450;
-  let best = [null, null, null];
-  let bestKey = -Infinity;
-  for (let a = 0; a < FRAMES; a++) {
-    const st1 = [null, null, null];
-    st1[r1] = decideStop(st1, r1, a, allowed, m, bet).mid;
-    for (let b = 0; b < FRAMES; b++) {
-      const st2 = st1.slice();
-      st2[r2] = decideStop(st1, r2, b, allowed, m, bet).mid;
-      for (let c = 0; c < FRAMES; c++) {
-        const st3 = st2.slice();
-        st3[r3] = decideStop(st2, r3, c, allowed, m, bet).mid;
-        const pushes = [];
-        pushes[r1] = a;
-        pushes[r2] = b;
-        pushes[r3] = c;
-        const key =
-          autoScore(st3) * 1000 - autoWaitFrames(order, pushes, startAt);
-        if (key > bestKey) {
-          bestKey = key;
-          best = pushes;
-        }
-      }
-    }
+  const rest = order.filter((r) => stops[r] === null);
+  if (!rest.length) return autoScore(stops);
+  const r = rest[0];
+  let best = -Infinity;
+  for (let p = 0; p < FRAMES; p++) {
+    const next = stops.slice();
+    next[r] = decideStop(stops, r, p, allowed, m, bet).mid;
+    best = Math.max(best, bestScoreFrom(next, order));
   }
   return best;
 }
 
-// order の順に押すとき、狙うコマが来るまで待つコマ数の合計（押してから次を押すまで 200ms）
-function autoWaitFrames(order, pushes, startAt) {
-  let t = startAt;
-  let total = 0;
-  for (const r of order) {
-    const R = reels[r];
-    const p0 = pushedFrame(R.phase + (t - R.t0) / FRAME_MS);
-    const wait = mod(pushes[r] - p0);
-    total += wait;
-    t += wait * FRAME_MS + 200;
+// 今のリールの押す位置（巻き戻らない連続値）を決める。p0 は今押したら押したことになるコマ
+function resolveAutoPush(r, p0) {
+  const target = autoPlan.pushes[r];
+  if (target === null) return p0;
+  if (typeof target === "number") return p0 + mod(target - p0);
+  const stops = reels.map((x) => (x.stopAt === null ? null : mod(x.stopAt)));
+  const { allowed, mode: m, bet } = current;
+  if (target === "best") {
+    // 今すぐ・1 コマ待つ・2 コマ待つ…の順に試し、取れる最高の得点を保てる最初の位置で押す
+    for (let d = 0; d < FRAMES; d++) {
+      const next = stops.slice();
+      next[r] = decideStop(stops, r, mod(p0 + d), allowed, m, bet).mid;
+      if (bestScoreFrom(next, autoPlan.order) >= autoPlan.best) return p0 + d;
+    }
+    return p0;
   }
-  return total;
+  // "kori": 左右で氷がテンパイしているラインがあれば、そのラインの段に中の氷が来る位置を狙う
+  let bestAt = null;
+  for (const l of LINES_BY_BET[bet]) {
+    const rows = LINES[l].rows;
+    const left = symAt(0, stops[0] + rows[0] - 1);
+    const right = symAt(2, stops[2] + rows[2] - 1);
+    if (left !== "I" || !["I", "N"].includes(right)) continue;
+    for (let i = 0; i < FRAMES; i++) {
+      if (REELS[1][i] !== "I") continue;
+      // 氷が rows[1] の段に来る中段の位置。1 コマ手前で押して引き込みに任せる
+      const at = p0 + mod(i - (rows[1] - 1) - 1 - p0);
+      if (bestAt === null || at < bestAt) bestAt = at;
+    }
+  }
+  return bestAt === null ? p0 : bestAt;
 }
 
 // 止まり方の得点: ボーナス揃い ＞ 払い出し ＞ リプレイ。
@@ -836,9 +839,8 @@ function autoTick(now) {
   // 狙うコマが次に来る位置（巻き戻らない連続値）を 1 回だけ決める
   if (autoPlan.at[r] === undefined) {
     const p0 = pushedFrame(pos);
-    // null は狙わずにすぐ押す
-    const target = autoPlan.pushes[r];
-    autoPlan.at[r] = target === null ? p0 : p0 + mod(target - p0);
+    // null はすぐ押す・数字はそのコマ・"best"／"kori" はその場で決める（resolveAutoPush）
+    autoPlan.at[r] = resolveAutoPush(r, p0);
   }
   const pushed = autoPlan.at[r];
   // 手で押すのと同じく、狙うコマが中段に来る直前（ビタの窓の中）まで待ってから押す。
