@@ -260,13 +260,10 @@ ${m.yutimeTrigger > 0 ? `<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回�
     "utf-8",
   );
 
-  // stats.json — GP等が各種カウントを動的取得するための軽量ファイル
-  // toolCount/gameCount/labCount はGPサイトのカード数（Vercelデプロイなしで更新するためここで管理）
+  // stats.json — 機種ページ数とビルド時刻の軽量ファイル
+  // GP トップのツール・ゲーム・LAB の件数はここでは持たない（GP の page.tsx がカードの枚数から数える）
   const stats = {
     machineCount: generated,
-    toolCount: 9,
-    gameCount: 2,
-    labCount: 4,
     builtAt: BUILD_STAMP,
   };
   writeFileSync(
