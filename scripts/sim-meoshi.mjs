@@ -19,6 +19,8 @@ const { BIG_END_PAYOUT, BB_VITA_PAY, REG_END_GAMES, REG_END_WINS, BONUS_BET } =
   await import(base + "reel-data.js");
 
 const N = Number(process.argv[2]) || 5_000_000;
+// 花火チャレンジで JAC IN をハズす条件「残り x G 以上」（既定はゲームと同じ 8 ＝ 1〜13G 目。9 なら 1〜12G 目）
+const EXTEND_LEFT = Number(process.argv[3]) || CHAL_EXTEND_LEFT;
 const BET = 3;
 // 1geki の出玉率（通常・完全攻略）
 const TARGET = {
@@ -117,7 +119,7 @@ function run(setting, perfect) {
     } else if (small === "jacIn") {
       // 完全攻略: 残り 8G まではハズして花火チャレンジを続け、それ以降は揃えて花火GAME へ。技術介入なし: いつも揃える。
       // ハズしても再遊技（1geki: 移行リプレイの欄は「逆押しのときに出るリプレイ」）。残りは 1 減る（nextRt）
-      const hazushi = perfect && rt.left >= CHAL_EXTEND_LEFT;
+      const hazushi = perfect && rt.left >= EXTEND_LEFT;
       replay = true;
       aligned = !hazushi;
     } else if (small) {
