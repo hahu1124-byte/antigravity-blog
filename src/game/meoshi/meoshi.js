@@ -290,7 +290,8 @@ const NEW_PLAY = () => ({
   setting: pickSetting(),
   revealed: false,
   // ボーナスの履歴（新しい順）。{ type, flag, start（前のボーナスからのゲーム数）, total（当選時の総ゲーム数）,
-  //   paid（獲得枚数）, net（純増）, inRt（当選したときの RT）, chal・game（後の RT のゲーム数）, rtOpen }
+  //   paid（獲得枚数）, net（純増）, inRt（当選したときの RT）, with（当選契機の小役。null は単独）,
+  //   chal・game（後の RT のゲーム数）, rtOpen }
   history: [],
   lastBonusAt: 0, // 前のボーナスが揃ったときの総ゲーム数
 });
@@ -384,6 +385,8 @@ function playLever() {
     let fresh = false;
     if (bonus && !play.bonusFlag) {
       play.bonusFlag = bonus;
+      // 当選契機（一緒に成立した小役。null は単独）。揃えたときに履歴へ写す
+      play.bonusWith = small;
       fresh = true;
     }
     // 移行リプレイ・RT リプレイは、止め方はリプレイと同じ
@@ -620,6 +623,7 @@ function finishPlay(stops) {
         paid: 0,
         net: 0,
         inRt: play.rt ? play.rt.type : null,
+        with: play.bonusWith || null,
         chal: null,
         game: null,
         rtOpen: false,
@@ -636,6 +640,7 @@ function finishPlay(stops) {
         wins: 0,
       };
       play.bonusFlag = null;
+      play.bonusWith = null;
       play.reachSeen = false;
       play.notice = null;
       play.lamp = false;
@@ -738,8 +743,15 @@ function renderPlayStats() {
   renderHistory();
 }
 
+// 当選契機の表示名（単独はリーチ目役 A〜E を含む。game-rules.js の BONUS の alone）
+const WITH_LABEL = {
+  replay: "リプレイ",
+  fuurin: "風鈴",
+  cherry: "チェリー",
+};
+
 // ボーナスの履歴（ホールのデータ表示機のように、新しい順）
-//   回・種別・スタート（前のボーナスから何 G で当たったか）・獲得枚数・その後の RT
+//   回・種別（当選契機）・スタート（前のボーナスから何 G で当たったか）・獲得枚数・その後の RT
 function renderHistory() {
   const H = play.history;
   const n = H.length;
@@ -754,9 +766,15 @@ function renderHistory() {
   };
   const rows = H.map((h, i) => {
     const big = h.type === "big";
-    const kind = big
-      ? `<span class="mo-h-big">${h.flag === "bigSeven" ? "赤7" : "ヒバナ"}</span>`
-      : `<span class="mo-h-reg">REG</span>`;
+    // 当選契機（一緒に成立した小役）を種別の下に出す。契機を残す前に保存した履歴は出さない
+    const trigger =
+      h.with === undefined
+        ? ""
+        : `<small>${WITH_LABEL[h.with] || "単独"}</small>`;
+    const kind =
+      (big
+        ? `<span class="mo-h-big">${h.flag === "bigSeven" ? "赤7" : "ヒバナ"}</span>`
+        : `<span class="mo-h-reg">REG</span>`) + trigger;
     const from = h.inRt
       ? `<small>${h.inRt === "chal" ? "チャレンジ中" : "GAME中"}</small>`
       : "";
@@ -1058,19 +1076,23 @@ function resolveAutoPush(r, p0) {
 }
 
 // 止まり方の得点: ボーナス揃い ＞ 払い出し ＞ リプレイ。
-// 小役も成立しているゲームは小役を先に取る（ボーナスは持ち越すので次のゲームで揃えられる）
+// 小役も成立しているゲームは小役を先に取る（ボーナスは持ち越すので次のゲームで揃えられる）。
+// ボーナスはリーチ目かランプで分かるまでは狙わない（得点 0。成立したゲームで揃えない。偶然揃うのはそのまま）
 function autoScore(stops) {
   const hasSmall = current.allowed.some((f) =>
     ["replay", "fuurin", "kori", "cherry"].includes(f),
   );
+  const known = play.reachSeen || play.lamp;
   let v = 0;
   for (const w of judge(stops, current.mode, current.bet)) {
     const role = ROLES[w.role];
     v +=
       role.kind === "bonus"
-        ? hasSmall
-          ? 50
-          : 100000
+        ? !known
+          ? 0
+          : hasSmall
+            ? 50
+            : 100000
         : role.kind === "replay"
           ? 300
           : payOf(w.role, current.bet) * 100;
@@ -1083,12 +1105,10 @@ function autoTick(now) {
   if (autoMode === "off" || mode !== "play" || calib.active) return;
   if (now < autoNextAt) return;
   if (!anySpinning()) {
-    // ボーナスを狙うときは 1 枚掛けにする（最低限はリーチ目・ランプで分かってから、完全は成立したら）。
+    // ボーナスを狙うときは 1 枚掛けにする（最低限・完全とも、リーチ目・ランプで分かってから）。
     // ボーナスが終わると 3 枚掛けに戻る（finishPlay）
     const aimBonus =
-      !play.bonus &&
-      play.bonusFlag &&
-      (autoMode === "full" || play.reachSeen || play.lamp);
+      !play.bonus && play.bonusFlag && (play.reachSeen || play.lamp);
     if (aimBonus && store.bet !== 1 && !play.replay) {
       store.bet = 1;
       save();
