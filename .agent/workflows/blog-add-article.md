@@ -55,7 +55,10 @@ tags: [タグ1, タグ2]
    bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/import-article-image.mjs --suggest "記事タイトル"
    ```
 2. **Nanobanana画像生成**: `generate_image` ツール（16:9）で画像を生成。
-3. **画像の自動インポート＆記事反映（一括ワンコマンド）**:
+3. **日本語の見出しの合成（必須）**:
+   - `scripts/overlay-typography.mjs` は過去の 1 記事用に入力画像・出力先が固定されているので、そのまま実行しない（過去記事の画像を上書きする）。複製して入力画像・出力先・見出し・副題を今回の記事に書き換えて実行し、文字なしの絵に見出し・バッジを合成する。
+   - 合成した PNG を次の手順 4 に渡す。
+4. **画像の自動インポート＆記事反映（一括ワンコマンド）**:
    ```bash
    bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/import-article-image.mjs "生成画像パス" 記事スラッグ
    ```
@@ -64,11 +67,6 @@ tags: [タグ1, タグ2]
      - 記事 HTML の Frontmatter（`ogImage: スラッグ.webp`）自動設定
      - 記事本文先頭への `<p><img src="/blog/images/スラッグ.webp" alt="..."></p>` の自動挿入（**※画像を変更・再生成した際も同じコマンドを実行するだけで既存タグが安全に自動差し替えされます**）
      - `node build.mjs` による自動再ビルド
-4. **【推奨】日本語タイポグラフィ・見出しの合成（文字化けゼロ＆視認性向上）**:
-   - Nanobananaで生成した文字なしアート画像の上に、SVG＋Sharpで美しい日本語グラデーション見出し・バッジを合成可能：
-   ```bash
-   bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/overlay-typography.mjs
-   ```
 
 ### 3. OGP画像の自動生成（自動投稿の記事だけ）
 
@@ -85,11 +83,11 @@ bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node
 ```
 
 - 出力の `🔗 内部リンクチェックOK` を確認する。
-- 開発サーバーを起動して、アイキャッチ画像・OGP・記事本文の見た目を確認する：
+- 開発サーバーをバックグラウンドで起動し、確認用 URL を提示する（アイキャッチ画像・OGP・記事本文の見た目の確認はユーザーが行う）：
   ```bash
-  bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog 0 npx serve dist -p 4000
+  bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog --bg npx serve dist -p 4000
   ```
-- 確認後、必ず開発サーバーを停止（kill）する。
+- ユーザーの確認が済んだら、`hrun.sh --list` で名前を確かめて `--stop` で止める。
 
 ### 5. ユーザーへの事前提示と確認（絶対遵守🚨）
 
@@ -128,7 +126,7 @@ bash h:/gravity/.agent/scripts/hgit.sh h:/gravity/projects/antigravity-blog push
 
 ### 8. Obsidian保存（weekly_trend記事のみ・週1回手動指示）
 
-`週刊テックトレンド記事自動生成`ワークフロー（gravity-portal）が日曜22:00 JSTに実行されると、`scripts/generate-weekly-trend.mjs` が記事生成と同時に `antigravity-blog/src/obsidian/weekly-trends/weekly-trend-wNN.md` も自動生成してantigravity-blogにpushする（2026-07-06〜対応）。
+`週刊テックトレンド記事自動生成`ワークフロー（gravity-portal）が日曜22:00 JSTに実行されると、`scripts/generate-weekly-trend.mjs` が記事生成と同時に `antigravity-blog/src/obsidian/weekly-trends/weekly-trend-wNN.md` も自動生成してantigravity-blogにpushする。
 
 ローカルの `H:/gravity` にはGitHub Actions側の変更は自動反映されないため、ユーザーから週1回「Obsidianに保存して」等の指示があったら以下を実行する。
 
@@ -149,6 +147,3 @@ pwsh -File h:/gravity/.agent/scripts/sync-weekly-trend-obsidian.ps1
 ```bash
 bash h:/gravity/.agent/scripts/hgit.sh h:/gravity push
 ```
-
-> [!NOTE]
-> `src/obsidian/weekly-trends/` フォルダが存在しない場合（＝該当週のGitHub Actions実行がまだ新スクリプトを反映していない場合）は「同期元フォルダが存在しません」と出力してスキップする。その場合は該当週の記事を手動でMarkdown化する（旧手順は git履歴の本ファイル過去版を参照）。
