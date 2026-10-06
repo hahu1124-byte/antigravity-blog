@@ -998,6 +998,10 @@ function planAuto() {
   // 完全: 花火チャレンジの逆押しナビは、中・右をすぐ押してから左の暖簾を上段に狙ってリプレイハズシ
   if (full && current.navi === "reverse")
     return { order: GYAKU, pushes: [HAZUSHI_MID, null, null] };
+  // レバーでランプが点いたゲーム（最低限・完全とも）: 小役との同時当選を疑い、氷も取れる位置で左→中→右。
+  // 右の番で氷が揃う形になっていなければ、ボーナス優先に切り替える（"cover"。ユーザー決定 2026-10-06）
+  if (current.bonus && play.lamp)
+    return { order: JUN, pushes: ["cover", "cover", "cover"] };
   // 完全: 押し位置は先に決めず、各リールの番が来たときに「取れる最高の結果を保てる、いちばん早い位置」で押す
   if (full)
     return {
@@ -1042,6 +1046,23 @@ function bestScoreFrom(stops, order) {
   return best;
 }
 
+// stops から残りのリールを autoPlan.order の順に押して、フラグ allowed のとき hit に当たる役を揃えられるか
+function canMake(stops, allowed, hit) {
+  const rest = autoPlan.order.filter((r) => stops[r] === null);
+  if (!rest.length) return judge(stops, current.mode, current.bet).some(hit);
+  const r = rest[0];
+  const seen = new Set();
+  for (let p = 0; p < FRAMES; p++) {
+    const mid = decideStop(stops, r, p, allowed, current.mode, current.bet).mid;
+    if (seen.has(mid)) continue;
+    seen.add(mid);
+    const next = stops.slice();
+    next[r] = mid;
+    if (canMake(next, allowed, hit)) return true;
+  }
+  return false;
+}
+
 // 今のリールの押す位置（巻き戻らない連続値）を決める。p0 は今押したら押したことになるコマ
 function resolveAutoPush(r, p0) {
   const target = autoPlan.pushes[r];
@@ -1057,6 +1078,30 @@ function resolveAutoPush(r, p0) {
       if (bestScoreFrom(next, autoPlan.order) >= autoPlan.best) return p0 + d;
     }
     return p0;
+  }
+  if (target === "cover") {
+    // 押す位置の点: 氷も成立していたら氷を取れる 2 点 ＋ ボーナス単独ならボーナスを揃えられる 1 点。
+    // 実際に何が成立しているかは見ない。右で氷が揃う形でなければ氷の 2 点は付かず、ボーナスの点で決まる
+    const flag = play.bonusFlag;
+    const koriFlags = [flag, "kori"];
+    const bonusFlags = [flag, "pull"];
+    let bestD = 0;
+    let bestPt = -1;
+    for (let d = 0; d < FRAMES; d++) {
+      const p = mod(p0 + d);
+      const k = stops.slice();
+      k[r] = decideStop(stops, r, p, koriFlags, m, bet).mid;
+      const b = stops.slice();
+      b[r] = decideStop(stops, r, p, bonusFlags, m, bet).mid;
+      const pt =
+        (canMake(k, koriFlags, (w) => w.role === "kori") ? 2 : 0) +
+        (canMake(b, bonusFlags, (w) => ROLES[w.role].kind === "bonus") ? 1 : 0);
+      if (pt > bestPt) {
+        bestPt = pt;
+        bestD = d;
+      }
+    }
+    return p0 + bestD;
   }
   // "kori": 左右で氷がテンパイしているラインがあれば、そのラインの段に中の氷が来る位置を狙う
   let bestAt = null;
