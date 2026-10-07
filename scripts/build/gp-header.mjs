@@ -100,6 +100,7 @@ export function gpHeaderBlock() {
   </div>
 </header>
 <style id="gpCanonicalHeaderStyles">
+html{overflow-x:clip}
 .gp-blog-header{position:sticky;top:0;z-index:1000;background:rgba(12,13,20,.65);border-bottom:1px solid rgba(180,190,220,.1);box-shadow:0 6px 24px rgba(0,0,0,.16);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
 [data-theme="light"] .gp-blog-header{background:rgba(255,255,255,.85);border-bottom-color:rgba(0,0,0,.1)}
 .header-inner{max-width:1400px;margin:0 auto;padding:0 1.5rem;height:64px;display:flex;align-items:center;justify-content:space-between;gap:1rem}

@@ -548,9 +548,11 @@ a:hover {
   color: var(--lab-text-muted);
 }
 
+/* 過去回のリンクが多い回でもスマホ幅からはみ出さないよう折り返す */
 .lab-footer-nav {
   display: flex;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
   justify-content: center;
   margin-top: 0.75rem;
 }

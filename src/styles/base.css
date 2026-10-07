@@ -92,6 +92,8 @@ a:hover {
   height: 100vh;
   pointer-events: none;
   z-index: -1;
+  /* 中の静止画は 120% の大きさで漂うので、画面の外へはみ出さないよう切る */
+  overflow: hidden;
   transition: opacity 1s ease-in-out;
   opacity: 0;
 }
@@ -107,8 +109,16 @@ a:hover {
 #gp-hero-bg[data-gp-ui-active="space"].visible {
   opacity: 0.8;
   background:
-    radial-gradient(circle at 20% 15%, rgba(124, 127, 242, 0.14), transparent 38%),
-    radial-gradient(circle at 80% 70%, rgba(56, 189, 248, 0.1), transparent 42%),
+    radial-gradient(
+      circle at 20% 15%,
+      rgba(124, 127, 242, 0.14),
+      transparent 38%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      rgba(56, 189, 248, 0.1),
+      transparent 42%
+    ),
     #070911;
 }
 
