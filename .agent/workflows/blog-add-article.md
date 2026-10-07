@@ -46,7 +46,7 @@ tags: [タグ1, タグ2]
 **【Antigravity（Gemini）での執筆時】** `generate_image` ツール（Nanobanana）で記事の世界観・テーマに合わせたアイキャッチ（16:9）を生成する。
 
 **【Claude Code での執筆時】** `generate_image` が無いので、Canva の `generate-image`（`aspectRatio: LANDSCAPE_16_9`）で絵を生成し、`get-generate-image-job` で受け取る。プロンプトは下の `--suggest` の案をもとに、見出しを置く左側を暗く空けるよう指定し、`no text, no letters, no logos` を付ける。実在の機種・メーカーのロゴや筐体に似せない。
-- **元の大きさの画像の受け取り方**: `get-generate-image-job`・`get-assets` で受け取れるのは 200×112 の縮小版だけで、縮小版 URL の大きさ指定を書き換えても署名で 403 になる（2026-10-06）。ユーザーに Canva のリンクで画像を開いてもらい、画像の URL（`media.canva.com/v2/image-resize/...x-canva-quality=screen_2x`、1600×899 程度）を貰えば `curl` で取れる。
+- **元の大きさの画像の受け取り方**: `get-generate-image-job`・`get-assets` で受け取れるのは 200×112 の縮小版だけで、縮小版 URL の大きさ指定を書き換えても署名で 403 になる。Canva のリンク（`canva.com/M/...`）はログインなしの `curl` では「Unsupported client」になる。**ユーザーの手を借りずに取る方法（2026-10-07 確認）**: `create-design`（format `YouTube Thumbnail` → 1920×1080 のページ）で作業用デザインを作る → `read-design`（`open_transaction: true`）→ `edit-design` の `insert_fill`（`asset_id` に生成画像の media id、`top/left 0`・`width 1920`・`height 1080`）で全面に貼る。複数枚は `add_page`（1920×1080）でページを足して 1 ページ 1 枚 → `commit` → `export-design`（`jpg`・`quality 95`・`width 1920`・`height 1080`・`pages`）で返る URL を `curl` で保存する。作業用デザインはユーザーの Canva に残る。
 - 見出しの合成は `overlay-typography.mjs` と同じ作り（sharp ＋ SVG。左を暗くするグラデーション・バッジ・グラデーションの見出し・副題・GRAVITY PORTAL）。合成した PNG を下の `import-article-image.mjs` に渡す。例: 2026-10-06 の目押しチャレンジ記事（`20261006_meoshi_challenge.webp`）。
 
 1. **プロンプト候補の取得（推奨）**:
