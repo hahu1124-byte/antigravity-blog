@@ -49,7 +49,7 @@ const SOCIAL_LINKS = [
 ];
 
 function navLinkHtml(link, hideMobile = false) {
-  return `<a href="${link.href}" class="header-nav-link${hideMobile ? " hidden-mobile" : ""}" aria-label="${link.label}">
+  return `<a href="${link.href}" class="header-nav-link${hideMobile ? " hidden-mobile" : ""}" aria-label="${link.label}" title="${link.label}">
         <span class="nav-emoji">${link.emoji}</span><span class="nav-label">${link.label}</span>
       </a>`;
 }
@@ -93,6 +93,9 @@ export function gpHeaderBlock() {
           <button type="button" class="gp-bh-ui-option" data-gp-ui="space" role="menuitemradio" aria-checked="false">
             <span class="gp-bh-ui-option-icon">🚀</span><span><strong>Space</strong><small>星と粒子の背景</small></span><span class="gp-bh-check">✓</span>
           </button>
+          <a href="${SITE_ORIGIN}/admin/" class="gp-bh-ui-option gp-bh-admin" id="gpBhAdminLink" role="menuitem" hidden>
+            <span class="gp-bh-ui-option-icon">🔧</span><span><strong>管理ページ</strong><small>サイト管理を開く</small></span><span></span>
+          </a>
         </div>
       </div>
       <button type="button" class="theme-toggle" id="gpBhThemeToggle" aria-label="テーマ切替">🌙</button>
@@ -136,6 +139,8 @@ html{overflow-x:clip}
 .gp-bh-ui-option small{margin-top:.12rem;color:#858ca2;font-size:.68rem}
 .gp-bh-check{color:#8b8ef5;font-weight:800;opacity:0}
 .gp-bh-ui-option[aria-checked="true"] .gp-bh-check{opacity:1}
+.gp-bh-admin{margin-top:.25rem;border-top:1px solid rgba(140,155,215,.25);border-radius:0 0 9px 9px;text-decoration:none}
+.gp-bh-admin[hidden]{display:none}
 .theme-toggle{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border:1px solid rgba(180,190,220,.1);border-radius:50%;background:transparent;color:#9aa5be;font-size:1.1rem;cursor:pointer;transition:all 150ms ease;flex-shrink:0}
 [data-theme="light"] .theme-toggle{background:rgba(0,0,0,.025);border-color:rgba(0,0,0,.1);color:#4a5568}
 .theme-toggle:hover{border-color:#7c7ff2;color:#a78bfa;background:rgba(124,127,242,.18)}
@@ -157,6 +162,7 @@ body.gp-ui-shell .hub-card,body.gp-ui-shell .tool-card{background:rgba(24,27,40,
 [data-theme="light"] body.gp-ui-shell .hub-card,[data-theme="light"] body.gp-ui-shell .tool-card{background:rgba(255,255,255,.76)!important}
 @keyframes gpHeroBgDrift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(3%,-2%) scale(1.08)}100%{transform:translate(-3%,2%) scale(1.05)}}
 @media(prefers-reduced-motion:reduce){.gp-hero-image{animation:none}}
+@media(min-width:769px) and (max-width:1199px){.nav-label{display:none}.header-nav-link{width:38px;padding:0;border-radius:50%}.gp-bh-ui-trigger{width:36px;padding:0;justify-content:center;border-radius:50%}.gp-bh-ui-label,.gp-bh-caret{display:none}}
 @media(max-width:768px){.header-inner{padding:0 1rem}.site-logo{font-size:.85rem!important}.header-left{gap:.5rem}.header-nav{gap:.15rem}.nav-label{display:none}.header-nav-link{width:32px;height:32px;padding:0;border-radius:50%;justify-content:center}.nav-emoji{font-size:.9rem}.hidden-mobile{display:none!important}.gp-bh-ui-trigger{width:34px;height:34px;padding:0;justify-content:center}.gp-bh-ui-label,.gp-bh-caret{display:none}.gp-bh-ui-menu{position:fixed;top:60px;right:.5rem;width:min(260px,calc(100vw - 1rem))}.theme-toggle{width:32px;height:32px}}
 </style>
 <script id="gpCanonicalHeaderScript">
@@ -182,6 +188,8 @@ body.gp-ui-shell .hub-card,body.gp-ui-shell .tool-card{background:rgba(24,27,40,
     }
     function closeMenu(){menu.hidden=true;trigger.setAttribute('aria-expanded','false')}
     renderPreference(readPreference());
+    // GP 本体で管理者と判定されたときだけ UiSelectorDropdown が残す印（リンクを出すだけ。/admin の認証はそのまま）
+    try{if(localStorage.getItem('gp-admin-link')==='1')document.getElementById('gpBhAdminLink').hidden=false}catch(e){}
     trigger.addEventListener('click',function(){var open=menu.hidden;menu.hidden=!open;trigger.setAttribute('aria-expanded',open?'true':'false')});
     menu.addEventListener('click',function(event){
         var option=event.target.closest('[data-gp-ui]');
