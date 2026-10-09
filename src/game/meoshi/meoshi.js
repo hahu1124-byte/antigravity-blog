@@ -820,7 +820,9 @@ function renderOddsTable() {
     const g = isBonus ? play.games : play.normalGames;
     return `<tr><th>${label}</th><td>${n}<br><small>（${m}）</small></td><td>${n ? fmt(g / n) : "-"}<br><small>（${m ? fmt(g / m) : "-"}）</small></td><td>${shown ? fmt(theory[key]) : "?"}</td></tr>`;
   }).join("");
+  // 列幅は固定（数字が増えても列が動かない。6 桁まで収まる割合）
   $("moOdds").innerHTML = `
+    <colgroup><col style="width:24%"><col style="width:24%"><col style="width:32%"><col style="width:20%"></colgroup>
     <thead><tr><th></th><th>回数<br><small>（成立）</small></th><th>実戦<br><small>（成立）</small></th><th>設定値</th></tr></thead>
     <tbody>${rows}</tbody>`;
 }

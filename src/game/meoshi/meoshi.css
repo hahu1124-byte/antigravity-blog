@@ -250,7 +250,11 @@ button {
   font-weight: 600;
   font-size: 0.72rem;
 }
-/* 役の確率: かっこ内（成立）は 2 行目。数字の幅をそろえ、各行の 1 行目の高さを合わせる */
+/* 役の確率: かっこ内（成立）は 2 行目。数字の幅をそろえ、各行の 1 行目の高さを合わせる。
+   列幅は colgroup で固定（数字が増えても列が動かない） */
+.mo-rates {
+  table-layout: fixed;
+}
 .mo-rates th,
 .mo-rates td {
   padding: 0.3rem 0.25rem;
