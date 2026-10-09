@@ -447,6 +447,12 @@ button {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+/* 実戦の集計は値をカードの残りの真ん中に置く（見出しは左上のまま） */
+.mo-play-stats .mo-stat b {
+  margin-block: auto;
+  align-self: center;
+  text-align: center;
+}
 /* ボーナス履歴は高さを決めておき、あふれたら枠の中でスクロール */
 .mo-history-box {
   height: 15rem;
