@@ -818,7 +818,7 @@ function renderOddsTable() {
     const n = flags.reduce((a, f) => a + (counts[f] || 0), 0);
     const m = flags.reduce((a, f) => a + (flagCounts[f] || 0), 0);
     const g = isBonus ? play.games : play.normalGames;
-    return `<tr><th>${label}</th><td>${n}<small>（${m}）</small></td><td>${n ? fmt(g / n) : "-"}<br><small>（${m ? fmt(g / m) : "-"}）</small></td><td>${shown ? fmt(theory[key]) : "?"}</td></tr>`;
+    return `<tr><th>${label}</th><td>${n}<br><small>（${m}）</small></td><td>${n ? fmt(g / n) : "-"}<br><small>（${m ? fmt(g / m) : "-"}）</small></td><td>${shown ? fmt(theory[key]) : "?"}</td></tr>`;
   }).join("");
   $("moOdds").innerHTML = `
     <thead><tr><th></th><th>回数<br><small>（成立）</small></th><th>実戦<br><small>（成立）</small></th><th>設定値</th></tr></thead>
