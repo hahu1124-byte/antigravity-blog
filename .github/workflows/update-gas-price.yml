@@ -47,7 +47,13 @@ jobs:
           CHANGES=$(git diff --cached --name-only)
           if [ -n "$CHANGES" ]; then
             git commit -m "⛽ Update gas prices ($(TZ=Asia/Tokyo date +%Y%m%d))"
-            git push
+            # 取得中に手元から push が入ると fetch first で落ちるので、取り込んでから push（最大3回）
+            PUSHED=false
+            for i in 1 2 3; do
+              if git pull --rebase --autostash && git push; then PUSHED=true; break; fi
+              sleep 5
+            done
+            [ "$PUSHED" = "true" ] || exit 1
           else
             echo "No changes to commit"
           fi
