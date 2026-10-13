@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>詰将棋ソルバー — LAB | Gravity Portal</title>
+    <meta
+      name="description"
+      content="盤面を入れると詰将棋を解いて、正解の手順を盤の上で再生します。ブラウザの中だけで動く自作のソルバー（df-pn）。"
+    />
+    <meta property="og:title" content="♟️ 詰将棋ソルバー — LAB" />
+    <meta
+      property="og:description"
+      content="盤面を入れると詰将棋を解いて、正解の手順を盤の上で再生します。"
+    />
+    <meta
+      property="og:url"
+      content="https://www.antigravity-portal.com/lab/shogi/"
+    />
+    <meta property="og:type" content="website" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="shogi.css" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("gp-theme");
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="gp-blog-header"></header>
+
+    <div class="sg-layout">
+      <header class="lab-header">
+        <a href="/lab/" class="lab-back">← LAB に戻る</a>
+        <h1 class="lab-title">♟️ 詰将棋ソルバー</h1>
+        <p class="lab-desc">
+          盤面を入れて「解く」を押すと、詰むかどうかを読み、正解の手順を盤の上で再生します。
+          計算はすべてこのブラウザの中で行います（自作の df-pn 探索）。
+        </p>
+      </header>
+
+      <main class="sg-main">
+        <section class="sg-board-area" aria-label="盤">
+          <div class="sg-hand-row sg-hand-white">
+            <span class="sg-hand-label">△ 受け方の持ち駒</span>
+            <div id="sgHandWhite" class="sg-hand"></div>
+          </div>
+          <div class="sg-board-wrap">
+            <div class="sg-files" aria-hidden="true">
+              <span>9</span><span>8</span><span>7</span><span>6</span
+              ><span>5</span><span>4</span><span>3</span><span>2</span
+              ><span>1</span>
+            </div>
+            <div class="sg-board-row">
+              <div id="sgBoard" class="sg-board" role="grid"></div>
+              <div class="sg-ranks" aria-hidden="true">
+                <span>一</span><span>二</span><span>三</span><span>四</span
+                ><span>五</span><span>六</span><span>七</span><span>八</span
+                ><span>九</span>
+              </div>
+            </div>
+          </div>
+          <div class="sg-hand-row sg-hand-black">
+            <span class="sg-hand-label">▲ 攻め方の持ち駒</span>
+            <div id="sgHandBlack" class="sg-hand"></div>
+          </div>
+        </section>
+
+        <section class="sg-panel">
+          <div class="sg-card">
+            <label class="sg-field">
+              <span>問題を選ぶ</span>
+              <select id="sgSample"></select>
+            </label>
+            <p id="sgSampleNote" class="sg-note"></p>
+          </div>
+
+          <div class="sg-card" id="sgEditCard">
+            <h2 class="sg-h2">盤面を作る</h2>
+            <div class="sg-owner" role="radiogroup" aria-label="置く駒の持ち主">
+              <label
+                ><input type="radio" name="sgOwner" value="0" checked /> ▲
+                攻め方</label
+              >
+              <label
+                ><input type="radio" name="sgOwner" value="1" /> △ 受け方</label
+              >
+            </div>
+            <div id="sgPalette" class="sg-palette"></div>
+            <p class="sg-note">
+              駒を選んで升を押すと置けます。同じ駒の上をもう一度押すと成り／戻し。
+              持ち駒は下の ＋ − で増減します。
+            </p>
+            <div id="sgHandEdit" class="sg-hand-edit"></div>
+            <label class="sg-check">
+              <input type="checkbox" id="sgAutoHand" checked />
+              受け方の持ち駒は「残り全部」（詰将棋の決まり）
+            </label>
+            <div class="sg-buttons">
+              <button type="button" id="sgClear" class="sg-btn">
+                盤を空にする
+              </button>
+            </div>
+            <details class="sg-sfen">
+              <summary>SFEN で読み込む・書き出す</summary>
+              <textarea id="sgSfenText" rows="3" spellcheck="false"></textarea>
+              <div class="sg-buttons">
+                <button type="button" id="sgSfenLoad" class="sg-btn">
+                  読み込む
+                </button>
+                <button type="button" id="sgSfenCopy" class="sg-btn">
+                  今の盤を書き出す
+                </button>
+              </div>
+            </details>
+          </div>
+
+          <div class="sg-card">
+            <div class="sg-solve-row">
+              <button type="button" id="sgSolve" class="sg-btn sg-btn-main">
+                解く
+              </button>
+              <button type="button" id="sgStop" class="sg-btn" hidden>
+                中止
+              </button>
+              <label class="sg-field sg-inline">
+                <span>考える時間の上限</span>
+                <select id="sgLimit">
+                  <option value="5000">5 秒</option>
+                  <option value="15000" selected>15 秒</option>
+                  <option value="30000">30 秒</option>
+                  <option value="60000">60 秒</option>
+                </select>
+              </label>
+            </div>
+            <p id="sgStatus" class="sg-status" aria-live="polite"></p>
+          </div>
+
+          <div class="sg-card" id="sgResultCard" hidden>
+            <h2 class="sg-h2" id="sgResultTitle"></h2>
+            <div class="sg-play">
+              <button
+                type="button"
+                class="sg-btn"
+                data-step="first"
+                aria-label="最初へ"
+              >
+                ⏮
+              </button>
+              <button
+                type="button"
+                class="sg-btn"
+                data-step="prev"
+                aria-label="1 手戻る"
+              >
+                ◀
+              </button>
+              <span id="sgPly" class="sg-ply"></span>
+              <button
+                type="button"
+                class="sg-btn"
+                data-step="next"
+                aria-label="1 手進む"
+              >
+                ▶
+              </button>
+              <button
+                type="button"
+                class="sg-btn"
+                data-step="last"
+                aria-label="最後へ"
+              >
+                ⏭
+              </button>
+            </div>
+            <ol id="sgMoves" class="sg-moves"></ol>
+            <p id="sgResultNote" class="sg-note"></p>
+            <div class="sg-buttons">
+              <button type="button" id="sgBackEdit" class="sg-btn">
+                盤面の編集に戻る
+              </button>
+            </div>
+          </div>
+
+          <div class="sg-card sg-about">
+            <h2 class="sg-h2">このソルバーについて</h2>
+            <ul>
+              <li>
+                攻め方は王手だけ、受け方はすべての手を読み、詰むかを df-pn
+                という方法で調べます。
+              </li>
+              <li>
+                手順は、攻め方は最短、受け方は最長（同じ手数なら攻め方の持ち駒が余らない方）を選びます。
+              </li>
+              <li>
+                無駄合（取られるだけの合駒）は、取った駒を使わなくても詰むものを数えない簡易判定です。
+              </li>
+              <li>
+                LAB の第 1 段です。紛れ・変化の解説や、対局できる CPU
+                は次の段で足していきます。
+              </li>
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="js/ui.js"></script>
+  </body>
+</html>
