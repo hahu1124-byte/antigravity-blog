@@ -40,6 +40,12 @@ export const SAMPLES = [
     answer: "S*2c 1b2a 2c3b 2a1b 1d2c",
   },
   {
+    title: "7手詰 — 成銀で追い詰める",
+    sfen: "9/8k/9/6PR1/9/9/9/9/9 b Sr2b4g3s4n4l17p 1",
+    note: "銀一枚を打って成り、成銀で玉を隅へ追う。飛車と歩が逃げ道をふさいでいる。",
+    answer: "S*2c 1b1c 2c1d+ 1c1b 1d2c 1b1a 2c2b",
+  },
+  {
     title: "不詰の例 — 金一枚",
     sfen: "4k4/9/9/9/9/9/9/9/9 b G2r2b3g4s4n4l18p 1",
     note: "広い所にいる玉は、金一枚では詰まない。「詰みません」と出るのを確かめる例。",
