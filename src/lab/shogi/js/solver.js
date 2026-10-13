@@ -81,6 +81,14 @@ export class Solver {
       moves = this.greedyLine(pos);
       approx = true;
     }
+    // 取り出した手順が詰みで終わっているかを確かめる（途切れていたら approx）
+    this.deadline = performance.now() + 2000;
+    try {
+      if (!this.endsInMate(pos, moves)) approx = true;
+    } catch (e) {
+      if (!(e instanceof Aborted)) throw e;
+      approx = true;
+    }
     return done({
       status: "mate",
       moves,
@@ -88,6 +96,17 @@ export class Solver {
       approx,
       futile: this.futile,
     });
+  }
+
+  // 手順の最後が詰み（受け方に指す手が無いか、無駄合しか無い）になっているか
+  endsInMate(pos, moves) {
+    if (moves.length % 2 === 0) return false;
+    for (const m of moves) pos.doMove(m);
+    try {
+      return legalMoves(pos).every((m) => this.isFutileDrop(pos, m));
+    } finally {
+      for (let i = moves.length - 1; i >= 0; i--) pos.undoMove(moves[i]);
+    }
   }
 
   tick() {
