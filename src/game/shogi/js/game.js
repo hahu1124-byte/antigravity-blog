@@ -73,9 +73,12 @@ function createWorker() {
     if (d.type === "ready") return;
     if (d.id !== thinkingId) return;
     if (d.type === "error") {
+      // 開き直しても答えが出なかったときは、対局を止めないよう合法手から 1 つ選んで指す
+      console.warn("CPU のエラー:", d.message);
+      const list = legalMoves(pos);
       thinking = false;
-      setStatus(`CPU でエラーが起きました（${d.message}）`);
-      return render();
+      if (!list.length) return render();
+      return play(list[Math.floor(Math.random() * list.length)]);
     }
     // どの強さでも考えている感じを出すため、決めた思考時間までは待ってから指す
     const id = d.id;

@@ -138,14 +138,16 @@ export function engineHolder(open) {
   };
 }
 
-// エンジンは長く使い回すと、まれに内部で止まる（WASM の abort。2026-10-15 の自動対戦で数百手に 1 回）。
-// そのときは開き直して、同じ局面を 1 回だけ考え直す。結果に restarted: true を付ける
-export async function thinkSafely(holder, position, level) {
-  try {
-    return await think(await holder.get(), position, level);
-  } catch {
-    holder.reset();
-    const r = await think(await holder.get(), position, level);
-    return { ...r, restarted: true };
+// エンジンはまれに内部で止まる（WASM の abort。2026-10-15 の自動対戦で 20 局に 0〜17 回。原因は未調査）。
+// そのときは開き直して同じ局面を考え直す（3 回まで）。結果に restarted: true を付ける
+export async function thinkSafely(holder, position, level, tries = 3) {
+  for (let i = 0; ; i++) {
+    try {
+      const r = await think(await holder.get(), position, level);
+      return i ? { ...r, restarted: true } : r;
+    } catch (e) {
+      holder.reset();
+      if (i >= tries) throw e;
+    }
   }
 }
