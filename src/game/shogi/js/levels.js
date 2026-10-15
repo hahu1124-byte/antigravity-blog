@@ -8,8 +8,11 @@
 //
 // 決め方（2026-10-15・scripts/shogi/selfplay.mjs）: ユーザー指示「となりの Lv どうしで弱い側の勝率 30% ほど
 // （入門Lv3 対 初級Lv1 も）、各段階の Lv1 と一つ上の段階の Lv1 では 0% ほど、上級Lv3 対 最強は前のまま」。
-// 読む量 3000・候補 8 で幅だけを変えたものさし（40 局ずつ）の勝率を Elo の差に直して足し上げ、
-// 上級Lv3（前の上級）から 30%（約 147）ずつ下へ割り付けた。rating は入門Lv1 を 300 とした目安
+// となりどうしを 100 局ずつ対戦させ、勝率を Elo の差に直して足し上げた強さから、
+// 上級Lv3（前の上級・8000/4/40）を固定して 30%（約 147）ずつ下へ割り付け、3 回り測って直した。
+// 決めた段での弱い側の勝率（となり 100 局ずつ）: 29・36・26・34・38・28・29・27%、
+// 入門Lv1 対 初級Lv1 3%・初級Lv1 対 上級Lv1 5%（40 局）、上級Lv3 対 最強 0%（10 局）。
+// rating は入門Lv1 を 300 とし、上の勝率の Elo の差を足し上げた値（最強は上級Lv3 から +600 の推定）
 export const LEVELS = [
   {
     id: 1,
@@ -17,7 +20,7 @@ export const LEVELS = [
     lv: 1,
     nodes: 3000,
     multiPv: 8,
-    margin: 2500,
+    margin: 1270,
     rating: 300,
   },
   {
@@ -26,8 +29,8 @@ export const LEVELS = [
     lv: 2,
     nodes: 3000,
     multiPv: 8,
-    margin: 1650,
-    rating: 447,
+    margin: 890,
+    rating: 455,
   },
   {
     id: 3,
@@ -35,8 +38,8 @@ export const LEVELS = [
     lv: 3,
     nodes: 3000,
     multiPv: 8,
-    margin: 1150,
-    rating: 594,
+    margin: 680,
+    rating: 555,
   },
   {
     id: 4,
@@ -44,8 +47,8 @@ export const LEVELS = [
     lv: 1,
     nodes: 3000,
     multiPv: 8,
-    margin: 750,
-    rating: 741,
+    margin: 457,
+    rating: 736,
   },
   {
     id: 5,
@@ -53,8 +56,8 @@ export const LEVELS = [
     lv: 2,
     nodes: 3000,
     multiPv: 8,
-    margin: 400,
-    rating: 888,
+    margin: 325,
+    rating: 851,
   },
   {
     id: 6,
@@ -62,17 +65,17 @@ export const LEVELS = [
     lv: 3,
     nodes: 3000,
     multiPv: 8,
-    margin: 270,
-    rating: 1035,
+    margin: 200,
+    rating: 936,
   },
   {
     id: 7,
     group: "上級",
     lv: 1,
-    nodes: 3000,
+    nodes: 3500,
     multiPv: 8,
-    margin: 115,
-    rating: 1182,
+    margin: 70,
+    rating: 1100,
   },
   {
     id: 8,
@@ -81,7 +84,7 @@ export const LEVELS = [
     nodes: 5000,
     multiPv: 6,
     margin: 60,
-    rating: 1329,
+    rating: 1255,
   },
   {
     id: 9,
@@ -90,9 +93,8 @@ export const LEVELS = [
     nodes: 8000,
     multiPv: 4,
     margin: 40,
-    rating: 1476,
+    rating: 1428,
   },
-  // 上級Lv3 には全勝で差が測れないので、+600 は推定
   {
     id: 10,
     group: "最強",
@@ -101,7 +103,7 @@ export const LEVELS = [
     multiPv: 1,
     margin: 0,
     byoyomi: 2000,
-    rating: 2076,
+    rating: 2028,
   },
 ].map((l) => ({
   byoyomi: 3000,

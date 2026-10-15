@@ -158,7 +158,7 @@ eq("頭金で詰み", playLine("4k4/9/4P4/9/9/9/9/9/9 b G 1", "G*5b").result, {
     updateRating({ rating: 800, games: 10 }, 800, 0),
     { rating: 788, games: 11, delta: -12 },
   );
-  eq("いちばん近い段", nearestLevel(900, LEVELS).name, "初級 Lv2");
+  eq("いちばん近い段", nearestLevel(860, LEVELS).name, "初級 Lv2");
   eq(
     "段のレーティングは弱い順に上がる",
     LEVELS.every((l, i) => i === 0 || l.rating > LEVELS[i - 1].rating),
