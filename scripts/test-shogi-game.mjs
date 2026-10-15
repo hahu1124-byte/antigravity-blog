@@ -93,6 +93,50 @@ eq("頭金で詰み", playLine("4k4/9/4P4/9/9/9/9/9/9 b G 1", "G*5b").result, {
   ]);
 }
 
+// 4-2. 候補手の読み取りと、強さに応じた手の選び方
+{
+  const { parseCandidates, pick } = await import(
+    new URL("js/cpu.js", game).href
+  );
+  const lines = [
+    "info depth 5 multipv 1 score cp 120 nodes 900 pv 7g7f 3c3d",
+    "info depth 5 multipv 2 score cp 40 nodes 900 pv 2g2f 8c8d",
+    "info depth 5 multipv 3 score cp -300 nodes 900 pv 5g5f 3c3d",
+    "info depth 6 multipv 1 score cp 150 lowerbound nodes 1200 pv 7g7f",
+    "info depth 5 multipv 4 score mate -3 nodes 900 pv 9g9f 8b2b",
+  ];
+  const c = parseCandidates(lines);
+  eq(
+    "候補手の読み取り（lowerbound は捨てる・詰まされる手は最後）",
+    c.map((x) => [x.move, x.score]),
+    [
+      ["7g7f", 120],
+      ["2g2f", 40],
+      ["5g5f", -300],
+      ["9g9f", -29997],
+    ],
+  );
+  eq("幅 0 なら最善", pick("7g7f", c, { margin: 0 }), "7g7f");
+  // 幅 100: 120 と 40 の 2 つから選ぶ（乱数で両方とも出る・-300 と詰まされる手は出ない）
+  const got = new Set();
+  for (let i = 0; i < 50; i++)
+    got.add(pick("7g7f", c, { margin: 100 }, () => i / 50));
+  eq("幅 100 で選ばれる手", [...got].sort(), ["2g2f", "7g7f"]);
+  eq(
+    "詰ます手があれば幅があっても選ぶ",
+    pick(
+      "1a1b",
+      [
+        { move: "1a1b", score: 29995 },
+        { move: "2a2b", score: 500 },
+      ],
+      { margin: 800 },
+    ),
+    "1a1b",
+  );
+  eq("投了はそのまま", pick("resign", c, { margin: 800 }), "resign");
+}
+
 // 5. エンジン: 開いて、どの段階でも初形と途中の局面で合法手を返す
 {
   const { LEVELS } = await import(new URL("js/levels.js", game).href);

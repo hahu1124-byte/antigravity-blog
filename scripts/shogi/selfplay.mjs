@@ -15,8 +15,21 @@ const { openEngine, engineHolder, thinkSafely } = await import(
 );
 
 const [a, b, n = "10"] = process.argv.slice(2);
-const levelA = LEVELS.find((l) => l.id === Number(a));
-const levelB = LEVELS.find((l) => l.id === Number(b));
+// 段階は levels.js の番号か、「局面数:候補数:点差」で直接書く（段階を決める前の試し用）
+const levelOf = (arg) => {
+  if (!arg?.includes(":")) return LEVELS.find((l) => l.id === Number(arg));
+  const [nodes, multiPv, margin] = arg.split(":").map(Number);
+  return {
+    id: arg,
+    name: `局面${nodes}・候補${multiPv}・幅${margin}`,
+    nodes,
+    multiPv,
+    margin,
+    byoyomi: 3000,
+  };
+};
+const levelA = levelOf(a);
+const levelB = levelOf(b);
 if (!levelA || !levelB) {
   console.log(
     "使い方: node scripts/shogi/selfplay.mjs <段階A> <段階B> [序盤の数]",
