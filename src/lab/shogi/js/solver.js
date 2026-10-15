@@ -22,6 +22,13 @@ import {
 const INF = 100000000;
 // 無駄合の判定で「取った駒を使わずに詰むか」を調べる上限（局面数）
 const FUTILE_BUDGET = 20000;
+// 解説: ほかの王手 1 つを読む上限（局面数）。1 回目は全部の王手を少なめに、2 回目は読みきれなかったものを多めに
+const CHECK_BUDGETS = [500, 8000];
+// 時間が余ったら、「残りの手数では詰まない」王手がその先でも詰まないかを読む上限
+const CLASSIFY_BUDGET = 2000;
+// 紛れの並び: 余詰 → 逃れ手が少ない順（同じなら 不詰 → 残りの手数では詰まない → 遠回りなら詰む）→ 読みきれず
+const KIND_RANK = { yozume: 0, nomate: 1, notwithin: 1, longer: 1, unknown: 2 };
+const KIND_TIE = { nomate: 0, notwithin: 1, longer: 2 };
 const PROVED = { pn: 0, dn: INF };
 const DISPROVED = { pn: INF, dn: 0 };
 const REPEAT = DISPROVED; // 同じ局面に戻る手は詰まない扱い（連続王手の千日手は攻め方の負け）
@@ -72,6 +79,7 @@ export class Solver {
     this.deadline = performance.now() + this.timeLimitMs;
     this.futile = false;
     this.walkMemo = new Map();
+    this.futileMemo = new Map();
     let moves,
       approx = false;
     try {
@@ -142,10 +150,15 @@ export class Solver {
 
   // 読む局面数に上限を付けて prove。上限に届いたら null（分からない）
   proveLimited(pos, isOr, budget) {
+    return this.bounded(budget, () => this.prove(pos, isOr));
+  }
+
+  // fn を読む局面数の上限つきで回す。上限に届いたら null
+  bounded(budget, fn) {
     const save = this.localLimit;
     this.localLimit = Math.min(save, this.nodes + budget);
     try {
-      return this.prove(pos, isOr);
+      return fn();
     } catch (e) {
       // 外側の上限に届いた場合も、外側の次の tick でまた投げられるのでここでは null でよい
       if (e instanceof LocalAbort) return null;
@@ -335,8 +348,19 @@ export class Solver {
   }
 
   // 受け方の合駒 m が無駄合か: 攻め方がその駒を取り、取った駒を持ち駒から除いても詰むなら無駄合
+  // 結果は覚えておく（手順の取り出しと解説で同じ局面を何度も聞くため）
   isFutileDrop(pos, m) {
     if (!isDrop(m) || !this.isInterposition(pos, moveTo(m))) return false;
+    const mkey = `${pos.key()}:${m}`;
+    this.futileMemo ??= new Map();
+    const hit = this.futileMemo.get(mkey);
+    if (hit !== undefined) return hit;
+    const futile = this.isFutileDropRead(pos, m);
+    this.futileMemo.set(mkey, futile);
+    return futile;
+  }
+
+  isFutileDropRead(pos, m) {
     const to = moveTo(m),
       pt = dropType(m);
     const attacker = pos.side ^ 1;
@@ -397,6 +421,212 @@ export class Solver {
       c += dc;
     }
     return false;
+  }
+
+  // ---- 解説（紛れ・変化） ----
+  // 本筋 moves の各手について、ほかの手を読む。solve の後に同じインスタンスで呼ぶ（置換表を流用する）。
+  // 結果 { plies, partial }。plies[i] は i 手目（0 始まり）の { others: [...], partial }。
+  //   攻め方の手（紛れ）: { move, kind, n, line, escape, escapes, sure }
+  //     kind: "yozume" 余詰 / "nomate" 詰まない / "notwithin" 残りの手数では詰まない（その先は分からない）/
+  //           "longer" 残りの手数では詰まないが、手数をかければ詰む / "unknown" 読みきれず
+  //     「詰まない」「手数をかければ詰む」は、解いたときの置換表に答えがあるときだけ付ける
+  //     n: 余詰の手数（その王手から数える）、line: その王手の後の手順（分岐の再生用）
+  //     escape: 残りの手数で逃れる受けの 1 つ、escapes: その数、sure: 受けの手を全部確かめた
+  //   受け方の手（変化）: { move, n, line } / 無駄合 { move, futile: true } / 読みきれず { move, n: null, line: [] }
+  // partial: 時間切れで読みきれなかった手がある
+  explain(pos, moves, timeLimitMs = 5000) {
+    const end = performance.now() + timeLimitMs;
+    this.walkMemo ??= new Map();
+    const plies = [];
+    let partial = false;
+    for (let i = 0; i < moves.length; i++) {
+      const now = performance.now();
+      if (now >= end) {
+        partial = true;
+        break;
+      }
+      // 残りの時間を残りの手で等分する（前の手で余った時間は後ろへ回る）
+      this.deadline = now + (end - now) / (moves.length - i);
+      const L = moves.length - i;
+      const ply =
+        i % 2 === 0
+          ? this.explainCheck(pos, moves[i], L)
+          : this.explainReply(pos, moves[i], L);
+      if (ply.partial) partial = true;
+      plies.push(ply);
+      pos.doMove(moves[i]);
+    }
+    for (let j = plies.length - 1; j >= 0; j--) pos.undoMove(moves[j]);
+    return { plies, partial };
+  }
+
+  // fn を回し、時間切れ（Aborted）なら undefined
+  tryTimed(fn) {
+    try {
+      return fn();
+    } catch (e) {
+      if (e instanceof Aborted) return undefined;
+      throw e;
+    }
+  }
+
+  // 攻め方の番: 本筋 main 以外の王手を読む（L は本筋の残りの手数。この手を含む）
+  explainCheck(pos, main, L) {
+    const others = checkMoves(pos)
+      .filter((c) => c !== main)
+      .map((c) => ({ move: c, kind: "unknown", line: [] }));
+    let partial = false;
+    for (const budget of CHECK_BUDGETS) {
+      for (const o of others) {
+        if (o.kind !== "unknown") continue;
+        pos.doMove(o.move);
+        let r;
+        try {
+          r = this.tryTimed(() => this.judgeCheck(pos, L, budget));
+        } finally {
+          pos.undoMove(o.move);
+        }
+        if (r === undefined) {
+          partial = true;
+          break;
+        }
+        if (r) Object.assign(o, r);
+      }
+      if (partial) break;
+    }
+    // 時間が余ったら、その先でも詰まないか（手数をかければ詰むか）を読む。答えが出なくても解説は欠けない
+    for (const o of others) {
+      if (partial) break;
+      if (o.kind !== "notwithin") continue;
+      pos.doMove(o.move);
+      let r;
+      try {
+        r = this.tryTimed(() =>
+          this.bounded(CLASSIFY_BUDGET, () => this.prove(pos, false)),
+        );
+        // まったく詰まないなら、見せる逃れ手もその先まで詰まない受けにする
+        if (r && r.dn === 0) {
+          const full = this.fullEscape(pos);
+          if (full !== null) {
+            o.escape = full;
+            o.line = [full];
+          }
+        }
+      } finally {
+        pos.undoMove(o.move);
+      }
+      if (r === undefined) break;
+      if (r && r.dn === 0) o.kind = "nomate";
+      else if (r && r.pn === 0) o.kind = "longer";
+    }
+    others.sort(
+      (a, b) =>
+        KIND_RANK[a.kind] - KIND_RANK[b.kind] ||
+        (a.escapes ?? 0) - (b.escapes ?? 0) ||
+        (KIND_TIE[a.kind] ?? 0) - (KIND_TIE[b.kind] ?? 0),
+    );
+    return { others, partial };
+  }
+
+  // 王手を指した後（受け方の番）の局面: 本筋の残りの手数で詰むかを、局面数の上限つきで読む。読みきれなければ null
+  judgeCheck(pos, L, budget) {
+    const within = this.bounded(budget, () =>
+      this.mateWithin(pos, false, L - 1),
+    );
+    if (within === null) return null;
+    if (within) {
+      const n = this.bounded(budget, () => this.shortestAnd(pos, L - 1));
+      const w =
+        n === null || n < 0
+          ? null
+          : this.bounded(budget, () => this.walk(pos, false, n));
+      return {
+        kind: "yozume",
+        n: n === null || n < 0 ? null : n + 1,
+        line: w ? w.line : [],
+      };
+    }
+    // その先で詰むかは、解いたときの置換表に答えがあるときだけ書く（読み直さない）
+    const e = this.tt.get(pos.key());
+    const kind =
+      e && e.dn === 0 ? "nomate" : e && e.pn === 0 ? "longer" : "notwithin";
+    const esc = this.escapesInTable(pos, L - 2);
+    if (kind === "nomate") {
+      const full = this.fullEscape(pos);
+      if (full !== null) {
+        esc.escape = full;
+        esc.line = [full];
+      }
+    }
+    return { kind, ...esc };
+  }
+
+  // 受け方の番の局面で、その後まったく詰まない受けを置換表から拾う（無ければ null）
+  fullEscape(pos) {
+    for (const m of legalMoves(pos)) {
+      pos.doMove(m);
+      const e = this.tt.get(pos.key());
+      pos.undoMove(m);
+      if (e && e.dn === 0) return m;
+    }
+    return null;
+  }
+
+  // 受け方の番の局面で、cap 手以内の最短の詰み手数（無ければ -1）
+  shortestAnd(pos, cap) {
+    for (let n = 0; n <= cap; n += 2)
+      if (this.mateWithin(pos, false, n)) return n;
+    return -1;
+  }
+
+  // 受け方の番の局面で、その後 d 手以内に詰まない受け（逃れ手）を置換表から拾う（読み直さない）。
+  // 「残りの手数で詰まない」と分かった直後に呼ぶので、ふつうは 1 つ以上ある
+  escapesInTable(pos, d) {
+    let escapes = 0,
+      escape = null,
+      sure = true;
+    for (const m of legalMoves(pos)) {
+      pos.doMove(m);
+      const e = d < 1 ? DISPROVED : this.lookup(pos.key(), new Set(), d);
+      pos.undoMove(m);
+      if (e.dn === 0) {
+        escapes++;
+        escape ??= m;
+      } else if (e.pn !== 0) sure = false;
+    }
+    return { escape, escapes, sure, line: escape === null ? [] : [escape] };
+  }
+
+  // 受け方の番: 本筋 main 以外の応手ごとに、最短の詰み手数と手順を求める
+  explainReply(pos, main, L) {
+    const others = [];
+    let partial = false;
+    for (const m of legalMoves(pos)) {
+      if (m === main) continue;
+      const r = partial
+        ? undefined
+        : this.tryTimed(() => this.replyLine(pos, m, L));
+      if (r === undefined) {
+        partial = true;
+        others.push({ move: m, n: null, line: [] });
+      } else others.push({ move: m, ...r });
+    }
+    // 長く粘れる応手から（無駄合・読みきれずは最後）
+    const rank = (o) => (o.futile ? 1 : o.n === null ? 2 : 0);
+    others.sort((a, b) => rank(a) - rank(b) || (b.n ?? 0) - (a.n ?? 0));
+    return { others, partial };
+  }
+
+  replyLine(pos, m, L) {
+    if (this.isFutileDrop(pos, m)) return { futile: true };
+    pos.doMove(m);
+    try {
+      let n = 1;
+      while (n < L - 1 && !this.mateWithin(pos, true, n)) n += 2;
+      return { n: n + 1, line: this.walk(pos, true, n).line };
+    } finally {
+      pos.undoMove(m);
+    }
   }
 
   // 取り出しが時間切れのときの代わり: 詰みが分かっている手を順にたどる（最短・最長とは限らない）

@@ -180,6 +180,126 @@ function mateCounts(pos, moves) {
   }
 }
 
+// 4. 手筋のラベル（小さな局面で 1 つずつ）
+const { lineLabels } = await import(base + "tesuji.js");
+const { moveFromUsi } = core;
+// sfen から usi の手順を指し、各手のラベルを返す
+function labelsOf(sfen, usiLine) {
+  const pos = Position.fromSfen(sfen);
+  const p = pos.clone();
+  const moves = usiLine.split(" ").map((u) => {
+    const m = moveFromUsi(p, u);
+    if (m === null) throw new Error(`${usiLine}: ${u} が指せない`);
+    p.doMove(m);
+    return m;
+  });
+  return lineLabels(pos, moves);
+}
+const has = (name, labels, tag) =>
+  eq(`ラベル ${name}: ${tag}`, labels.includes(tag), true);
+has(
+  "飛車の前の銀をどける",
+  labelsOf("4k4/9/9/9/4S4/9/9/9/4R4 b - 1", "5e4d")[0],
+  "開き王手",
+);
+has(
+  "桂が跳ねて飛車と桂で王手",
+  labelsOf("4k4/9/9/9/4N4/9/9/9/4R4 b - 1", "5e4c")[0],
+  "両王手",
+);
+has(
+  "取られる金打",
+  labelsOf("4k4/9/9/9/9/9/9/9/9 b Gg 1", "G*5b 5a5b")[0],
+  "捨て駒",
+);
+has(
+  "玉の隣に合駒",
+  labelsOf("4k4/9/9/9/9/9/9/9/R8 b g 1", "9i5i G*5b")[1],
+  "合駒",
+);
+has(
+  "離れた所に合駒",
+  labelsOf("4k4/9/9/9/9/9/9/9/R8 b g 1", "9i5i G*5e")[1],
+  "中合",
+);
+
+// 5. 解説（紛れ・変化）: サンプルで、素朴な全探索を物差しに確かめる
+// 受け方の手で今の局面が詰んでいるか（指す手が無い）
+const mated = (pos) => legalMoves(pos).length === 0;
+{
+  const { Solver } = await import(base + "solver.js");
+  const { SAMPLES } = await import(base + "samples.js");
+  const sampleLabels = {
+    "1手詰 — 頭金": [0, "頭金"],
+    "5手詰 — 銀不成": [2, "不成"],
+    "3手詰 — 打ち歩詰めを避ける": [2, "打ち歩詰め回避"],
+  };
+  for (const s of SAMPLES) {
+    if (!s.answer) continue;
+    const pos = Position.fromSfen(s.sfen);
+    const solver = new Solver({ timeLimitMs: 20000 });
+    const r = solver.solve(pos);
+    const st = performance.now();
+    const ex = solver.explain(pos, r.moves);
+    const name = `${s.title}の解説（${Math.round(performance.now() - st)} ms）`;
+    eq(`${name} 最後の手まで作れた`, ex.partial, false);
+    if (sampleLabels[s.title]) {
+      const [ply, tag] = sampleLabels[s.title];
+      has(s.title, lineLabels(pos, r.moves)[ply], tag);
+    }
+    let bad = 0;
+    const p = pos.clone();
+    for (let i = 0; i < r.moves.length; i++) {
+      const L = r.moves.length - i;
+      for (const o of ex.plies[i].others) {
+        const q = p.clone();
+        q.doMove(o.move);
+        const what = `${i + 1} 手目 ${moveToUsi(o.move)} ${o.kind ?? ""}`;
+        if (i % 2 === 0) {
+          // 紛れ: サンプルは余詰が無い・読みきれないものも無い
+          if (o.kind === "yozume" || o.kind === "unknown") {
+            bad++;
+            ng(`${name} ${what}`);
+          }
+          if (o.escape === null || o.escape === undefined) {
+            bad++;
+            ng(`${name} ${what} に逃れ手が付いていない`);
+            continue;
+          }
+          // 逃れ手の後は、残りの手数以内に詰まない
+          {
+            q.doMove(o.escape);
+            if (orMate(q, L - 2, new Map())) {
+              bad++;
+              ng(`${name} ${what} 逃れ手 ${moveToUsi(o.escape)} の後に詰む`);
+            }
+            continue;
+          }
+        } else if (o.futile) continue;
+        // 詰みの手順: 最後が詰み・手数が n どおり
+        if (o.line && o.n) {
+          for (const m of o.line) q.doMove(m);
+          if (!mated(q) || o.line.length !== o.n - 1) {
+            bad++;
+            ng(`${name} ${what} の手順が詰みで終わらない`);
+          }
+        }
+        // 変化の手数を全探索でも確かめる（攻め方の番から n-1 手）
+        if (i % 2 === 1 && o.n - 1 <= 7) {
+          const v = p.clone();
+          v.doMove(o.move);
+          if (!orMate(v, o.n - 1, new Map())) {
+            bad++;
+            ng(`${name} ${what} が全探索で ${o.n - 1} 手で詰まない`);
+          }
+        }
+      }
+      p.doMove(r.moves[i]);
+    }
+    eq(`${name} 紛れ・変化の確かめ`, bad, 0);
+  }
+}
+
 const ms = Math.round(performance.now() - t0);
 console.log(fail ? `NG ${fail} 件（${ms} ms）` : `全部 OK（${ms} ms）`);
 process.exit(fail ? 1 : 0);

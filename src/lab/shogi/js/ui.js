@@ -1,4 +1,4 @@
-// 詰将棋ソルバーの画面: 盤の編集・解く・手順の再生
+// 詰将棋ソルバーの画面: 盤の編集・解く・手順の再生・解説（紛れ・変化）と分岐の再生
 import {
   Position,
   BLACK,
@@ -15,8 +15,11 @@ import {
   isDrop,
 } from "./core.js";
 import { SAMPLES } from "./samples.js";
+import { lineLabels } from "./tesuji.js";
 
 const $ = (id) => document.getElementById(id);
+// 解説で最初から見せるほかの手の数（残りは折りたたむ）
+const SHOW_ALTS = 5;
 const PROMOTABLE = [false, true, true, true, true, false, true, true];
 const PALETTE = [1, 2, 3, 4, 5, 6, 7, 8, 0]; // 0 は「消す」
 const unpromote = (a) => (a > 8 ? a - 8 : a);
@@ -26,7 +29,10 @@ let editPos = new Position();
 let tool = 1;
 let owner = BLACK;
 let mode = "edit"; // "edit" | "play"
-let play = null; // { start, moves, kif, idx }
+// { start, moves, kif, idx, labels, explain, explainError, branch }
+// explain: null（解説なし）| "pending"（作成中）| { plies, partial, ms }
+// branch: 本筋の at 手目の後から分かれた手順 { at, moves, kif, idx, title }
+let play = null;
 let worker = null;
 
 // ---- 盤と持ち駒の描画 ----
@@ -44,17 +50,45 @@ function buildBoard() {
   }
 }
 
+// 本筋の n 手目まで進めた局面
+function mainPosition(n) {
+  const pos = play.start.clone();
+  for (let i = 0; i < n; i++) pos.doMove(play.moves[i]);
+  return pos;
+}
+
 function shownPosition() {
   if (mode !== "play") return editPos;
-  const pos = play.start.clone();
-  for (let i = 0; i < play.idx; i++) pos.doMove(play.moves[i]);
+  const b = play.branch;
+  if (!b) return mainPosition(play.idx);
+  const pos = mainPosition(b.at);
+  for (let i = 0; i < b.idx; i++) pos.doMove(b.moves[i]);
   return pos;
+}
+
+// 盤に出ている局面の直前の手（無ければ null）
+function lastMove() {
+  if (mode !== "play") return null;
+  const b = play.branch;
+  if (b && b.idx > 0) return b.moves[b.idx - 1];
+  const n = b ? b.at : play.idx;
+  return n > 0 ? play.moves[n - 1] : null;
+}
+
+// moves を pos から指したときの棋譜（prevTo は直前の手の行き先）
+function kifOf(pos, moves, prevTo = -1) {
+  const p = pos.clone();
+  return moves.map((m) => {
+    const k = moveToKif(p, m, prevTo);
+    prevTo = moveTo(m);
+    p.doMove(m);
+    return k;
+  });
 }
 
 function render() {
   const pos = shownPosition();
-  const last =
-    mode === "play" && play.idx > 0 ? play.moves[play.idx - 1] : null;
+  const last = lastMove();
   for (let sq = 0; sq < 81; sq++) {
     const p = pos.board[sq];
     const el = squares[sq];
@@ -274,9 +308,31 @@ function solve() {
       return setStatus(
         `考え中… ${fmt(d.nodes)} 局面（${(d.ms / 1000).toFixed(1)} 秒）`,
       );
-    stopWorker();
-    if (d.type === "error") return setStatus(`エラー: ${d.message}`, true);
-    showResult(pos, d);
+    if (d.type === "explain") {
+      stopWorker();
+      if (play?.explain === "pending") {
+        play.explain = d;
+        render();
+      }
+      return;
+    }
+    if (d.type === "error") {
+      stopWorker();
+      // 解いた後の解説の段で落ちたときは、解は残して解説だけあきらめる
+      if (play?.explain === "pending") {
+        play.explain = null;
+        play.explainError = d.message;
+        return render();
+      }
+      return setStatus(`エラー: ${d.message}`, true);
+    }
+    // 詰んだら、Worker は続けて解説を作る（解説が届くまで止めない）
+    const explaining = d.status === "mate" && !d.approx;
+    if (explaining) {
+      $("sgSolve").disabled = false;
+      $("sgStop").hidden = true;
+    } else stopWorker();
+    showResult(pos, d, explaining);
   };
   worker.onerror = (e) => {
     stopWorker();
@@ -295,7 +351,7 @@ function stopWorker() {
   $("sgStop").hidden = true;
 }
 
-function showResult(start, r) {
+function showResult(start, r, explaining = false) {
   const stat = `${fmt(r.nodes)} 局面・${(r.ms / 1000).toFixed(2)} 秒`;
   if (r.status === "nomate") return setStatus(`詰みません（${stat}）`);
   if (r.status === "timeout")
@@ -304,15 +360,18 @@ function showResult(start, r) {
       true,
     );
   setStatus(`詰みました（${stat}）`);
-  const kif = [];
-  const p = start.clone();
-  let prev = -1;
-  for (const m of r.moves) {
-    kif.push(moveToKif(p, m, prev));
-    prev = moveTo(m);
-    p.doMove(m);
-  }
-  play = { start, moves: r.moves, kif, idx: 0 };
+  const kif = kifOf(start, r.moves);
+  const labels = lineLabels(start, r.moves);
+  play = {
+    start,
+    moves: r.moves,
+    kif,
+    idx: 0,
+    labels,
+    explain: explaining ? "pending" : null,
+    explainError: null,
+    branch: null,
+  };
   mode = "play";
   $("sgEditCard").hidden = true;
   $("sgResultCard").hidden = false;
@@ -327,33 +386,156 @@ function showResult(start, r) {
   $("sgMoves").innerHTML = kif
     .map(
       (k, i) =>
-        `<li><button type="button" data-idx="${i + 1}">${i + 1}. ${k}</button></li>`,
+        `<li><button type="button" data-idx="${i + 1}">${i + 1}. ${k}${tagsHtml(labels[i])}</button></li>`,
     )
     .join("");
   render();
 }
 
+const tagsHtml = (labels) =>
+  labels.map((t) => `<span class="sg-tag">${t}</span>`).join("");
+
 function renderPlay() {
-  $("sgPly").textContent =
-    play.idx === 0 ? "初形" : `${play.idx} / ${play.moves.length} 手目`;
+  const b = play.branch;
+  $("sgPly").textContent = b
+    ? `変化 ${b.idx} / ${b.moves.length}`
+    : play.idx === 0
+      ? "初形"
+      : `${play.idx} / ${play.moves.length} 手目`;
   $("sgMoves")
     .querySelectorAll("button")
-    .forEach((b) =>
-      b.classList.toggle("sg-current", Number(b.dataset.idx) === play.idx),
+    .forEach((el) =>
+      el.classList.toggle(
+        "sg-current",
+        Number(el.dataset.idx) === (b ? b.at : play.idx),
+      ),
     );
+  renderExplain();
+}
+
+// ---- 解説 ----
+// 盤に出ている手（idx 手目）について、ほかの手を選んだらどうなるかを出す
+function renderExplain() {
+  const el = $("sgExplain");
+  const b = play.branch;
+  if (b) {
+    el.innerHTML =
+      `<div class="sg-branch-head"><span>変化: ${b.title}</span>` +
+      `<button type="button" class="sg-btn" data-act="main">本筋に戻る</button></div>` +
+      `<ol class="sg-moves">${b.kif
+        .map(
+          (k, i) =>
+            `<li><button type="button" data-bidx="${i + 1}" class="${i + 1 === b.idx ? "sg-current" : ""}">${k}</button></li>`,
+        )
+        .join("")}</ol>`;
+    return;
+  }
+  const ex = play.explain;
+  const head = [];
+  if (ex === "pending") head.push("解説を作っています…");
+  if (play.explainError)
+    head.push(`解説を作れませんでした（${play.explainError}）`);
+  if (ex && ex !== "pending" && ex.partial)
+    head.push(
+      "時間内に読みきれなかった手があります（「読みきれませんでした」と出ます）。",
+    );
+  const headHtml = head.length
+    ? `<p class="sg-note">${head.join(" ")}</p>`
+    : "";
+  if (play.idx === 0) {
+    el.innerHTML =
+      `<p class="sg-note">手を進めると、その手の解説（ほかの手を選んだらどうなるか）が出ます。</p>` +
+      headHtml;
+    return;
+  }
+  const i = play.idx - 1;
+  const title = `<h3 class="sg-h3">${play.idx}. ${play.kif[i]}${tagsHtml(play.labels[i])}</h3>`;
+  const ply = ex && ex !== "pending" ? ex.plies[i] : null;
+  if (!ply) {
+    const msg =
+      ex && ex !== "pending"
+        ? `<p class="sg-note">この手の解説は時間内に作れませんでした。</p>`
+        : "";
+    el.innerHTML = title + headHtml + msg;
+    return;
+  }
+  const attack = i % 2 === 0;
+  const before = mainPosition(i);
+  const prevTo = i > 0 ? moveTo(play.moves[i - 1]) : -1;
+  const items = ply.others.map((o, j) => {
+    const [altKif, ...rest] = kifOf(
+      before,
+      [o.move, ...(o.line ?? [])],
+      prevTo,
+    );
+    const desc = attack ? checkText(o, rest) : replyText(o, rest);
+    return `<li><button type="button" data-alt="${j}"><b>${altKif}</b><span>${desc}</span></button></li>`;
+  });
+  const lead = attack
+    ? items.length
+      ? `ほかの王手（${items.length} 通り）`
+      : "王手はこの手しかありません。"
+    : items.length
+      ? `ほかの応手（${items.length} 通り）`
+      : "ほかに指せる手はありません。";
+  let list = "";
+  if (items.length) {
+    list = `<ul class="sg-alts">${items.slice(0, SHOW_ALTS).join("")}</ul>`;
+    if (items.length > SHOW_ALTS)
+      list += `<details class="sg-more"><summary>残り ${items.length - SHOW_ALTS} 通り</summary><ul class="sg-alts">${items.slice(SHOW_ALTS).join("")}</ul></details>`;
+  }
+  el.innerHTML =
+    title + headHtml + `<p class="sg-alts-lead">${lead}</p>` + list;
+}
+
+// 紛れ（攻め方のほかの王手）の説明。rest はその王手の後の手順の棋譜
+function checkText(o, rest) {
+  if (o.kind === "yozume")
+    return o.n
+      ? `余詰 — これでも ${o.n} 手で詰みます`
+      : "余詰 — これでも詰みます";
+  if (o.kind === "unknown") return "読みきれませんでした";
+  const head = o.kind === "nomate" ? "詰みません" : "この手数では詰みません";
+  const tail = o.kind === "longer" ? "（手数をかければ詰みます）" : "";
+  if (!rest.length) return head + tail;
+  const only = o.escapes === 1 && o.sure ? "（逃れる手はこれだけ）" : "";
+  return `${head} — ${rest[0]}で逃れます${only}${tail}`;
+}
+
+// 変化（受け方のほかの応手）の説明
+function replyText(o, rest) {
+  if (o.futile) return "無駄合（取られても詰みは変わらない）";
+  if (o.n === null) return "読みきれませんでした";
+  return `以下 ${rest.length} 手で詰み`;
+}
+
+function openBranch(j) {
+  const i = play.idx - 1;
+  const o = play.explain.plies[i].others[j];
+  const moves = [o.move, ...(o.line ?? [])];
+  const kif = kifOf(
+    mainPosition(i),
+    moves,
+    i > 0 ? moveTo(play.moves[i - 1]) : -1,
+  );
+  const desc =
+    i % 2 === 0 ? checkText(o, kif.slice(1)) : replyText(o, kif.slice(1));
+  play.branch = { at: i, moves, kif, idx: 1, title: `${kif[0]}（${desc}）` };
+  render();
 }
 
 function step(kind) {
   if (mode !== "play") return;
-  const n = play.moves.length;
-  play.idx =
+  const t = play.branch ?? play;
+  const n = t.moves.length;
+  t.idx =
     kind === "first"
       ? 0
       : kind === "last"
         ? n
         : kind === "prev"
-          ? Math.max(0, play.idx - 1)
-          : Math.min(n, play.idx + 1);
+          ? Math.max(0, t.idx - 1)
+          : Math.min(n, t.idx + 1);
   render();
 }
 
@@ -440,8 +622,24 @@ function init() {
   $("sgMoves").addEventListener("click", (ev) => {
     const b = ev.target.closest("button[data-idx]");
     if (!b) return;
+    play.branch = null;
     play.idx = Number(b.dataset.idx);
     render();
+  });
+  $("sgExplain").addEventListener("click", (ev) => {
+    if (mode !== "play") return;
+    const alt = ev.target.closest("button[data-alt]");
+    if (alt) return openBranch(Number(alt.dataset.alt));
+    const bi = ev.target.closest("button[data-bidx]");
+    if (bi && play.branch) {
+      play.branch.idx = Number(bi.dataset.bidx);
+      return render();
+    }
+    if (ev.target.closest('button[data-act="main"]')) {
+      play.idx = play.branch.at + 1;
+      play.branch = null;
+      render();
+    }
   });
   document.addEventListener("keydown", (ev) => {
     if (mode !== "play" || ev.target.closest("textarea, select, input")) return;

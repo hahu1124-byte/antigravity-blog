@@ -178,6 +178,7 @@
             </div>
             <ol id="sgMoves" class="sg-moves"></ol>
             <p id="sgResultNote" class="sg-note"></p>
+            <div id="sgExplain" class="sg-explain" aria-live="polite"></div>
             <div class="sg-buttons">
               <button type="button" id="sgBackEdit" class="sg-btn">
                 盤面の編集に戻る
@@ -199,7 +200,13 @@
                 無駄合（取られるだけの合駒）は、取った駒を使わなくても詰むものを数えない簡易判定です。
               </li>
               <li>
-                LAB の第 1 段です。紛れ・変化の解説や、対局できる CPU
+                解いた後に、各手で「ほかの王手ではなぜ詰まないか（紛れ・逃れる手）」と「受け方がほかの手を指したらどう詰むか（変化）」を読みます。押すとその手順を盤で再生できます。
+              </li>
+              <li>
+                手の横の札（捨て駒・不成・開き王手・頭金・打ち歩詰め回避・合駒など）は、盤面から機械的に判定できる手筋だけを付けています。
+              </li>
+              <li>
+                LAB の第 2 段です。解説の文章化や、対局できる CPU
                 は次の段で足していきます。
               </li>
             </ul>
