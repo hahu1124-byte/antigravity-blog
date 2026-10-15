@@ -137,6 +137,40 @@ eq("頭金で詰み", playLine("4k4/9/4P4/9/9/9/9/9/9 b G 1", "G*5b").result, {
   eq("投了はそのまま", pick("resign", c, { margin: 800 }), "resign");
 }
 
+// 4-3. レーティングと評価値の表示
+{
+  const { eloDiff, expected, updateRating, nearestLevel } = await import(
+    new URL("js/rating.js", game).href
+  );
+  const { toBlack, evalText, barRatio } = await import(
+    new URL("js/evalbar.js", game).href
+  );
+  const { LEVELS } = await import(new URL("js/levels.js", game).href);
+  eq("勝率 30% の差は約 -147", Math.round(eloDiff(0.3)), -147);
+  eq("同じ強さなら見込み 0.5", expected(1000, 1000), 0.5);
+  eq(
+    "最初の 10 局は K=48（同じ強さに勝って +24）",
+    updateRating({ rating: 800, games: 0 }, 800, 1),
+    { rating: 824, games: 1, delta: 24 },
+  );
+  eq(
+    "11 局目からは K=24（同じ強さに負けて -12）",
+    updateRating({ rating: 800, games: 10 }, 800, 0),
+    { rating: 788, games: 11, delta: -12 },
+  );
+  eq("いちばん近い段", nearestLevel(900, LEVELS).name, "初級 Lv2");
+  eq(
+    "段のレーティングは弱い順に上がる",
+    LEVELS.every((l, i) => i === 0 || l.rating > LEVELS[i - 1].rating),
+    true,
+  );
+  eq("後手番の評価値は向きを変える", toBlack(300, WHITE), -300);
+  eq("評価値の文言（互角）", evalText(150), "+150　互角");
+  eq("評価値の文言（後手有利）", evalText(-500), "−500　後手有利");
+  eq("評価値の文言（詰み）", evalText(30000 - 5), "先手の勝ち（詰み 5 手）");
+  eq("棒は互角で半分", barRatio(0), 0.5);
+}
+
 // 5. エンジン: 開いて、どの段階でも初形と途中の局面で合法手を返す
 {
   const { LEVELS } = await import(new URL("js/levels.js", game).href);

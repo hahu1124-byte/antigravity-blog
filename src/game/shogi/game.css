@@ -64,6 +64,86 @@
   overflow-y: auto;
   font-size: 0.85rem;
 }
+.gs-field {
+  margin-top: 0.6rem;
+}
+.gs-rating {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.2rem 0.8rem;
+  margin-top: 0.8rem;
+  font-size: 0.85rem;
+}
+.gs-rating p {
+  margin: 0;
+}
+.gs-link-btn {
+  font: inherit;
+  font-size: 0.75rem;
+  border: 0;
+  background: none;
+  color: var(--lab-text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+.gs-rating-note {
+  font-size: 0.85rem;
+  margin: 0 0 0.4rem;
+}
+/* 評価値: 棒（左が先手・右が後手）・数字・推移のグラフ */
+.gs-eval {
+  margin: 0.2rem 0 0.6rem;
+}
+.gs-eval[hidden] {
+  display: none;
+}
+.gs-eval-bar {
+  height: 10px;
+  border-radius: 5px;
+  background: #4a4a52;
+  overflow: hidden;
+}
+.gs-eval-fill {
+  height: 100%;
+  width: 50%;
+  background: #e8e2d0;
+  transition: width 0.4s ease;
+}
+.gs-eval-text {
+  font-size: 0.8rem;
+  margin: 0.25rem 0;
+  font-variant-numeric: tabular-nums;
+}
+.gs-graph {
+  display: block;
+  width: 100%;
+  height: 90px;
+  background: var(--lab-bg);
+  border: 1px solid var(--lab-border);
+  border-radius: var(--lab-radius-sm);
+}
+.gs-graph-axis {
+  stroke: var(--lab-border);
+  stroke-width: 1;
+}
+.gs-graph-line {
+  fill: none;
+  stroke: var(--lab-accent);
+  stroke-width: 2;
+}
+.gs-clock {
+  font-size: 0.8rem;
+  color: var(--lab-text-muted);
+  margin: 0 0 0.4rem;
+  font-variant-numeric: tabular-nums;
+}
+.gs-time {
+  margin-left: 0.25rem;
+  font-size: 0.72rem;
+  color: var(--lab-text-muted);
+}
 .gs-moves li.gs-current {
   color: var(--lab-accent);
   font-weight: 700;

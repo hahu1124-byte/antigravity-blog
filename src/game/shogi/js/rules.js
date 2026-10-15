@@ -69,8 +69,16 @@ function canPromote(pos, from, to) {
   return zone(from) || zone(to);
 }
 
-// KIF 形式の棋譜（平手）。endText は「投了」「詰み」など
-export function toKif(start, moves, { black, white, endText }) {
+// KIF の消費時間の欄「( 0:03/00:01:12)」（その手の時間／その側の合計）
+function kifTime(ms, totalMs) {
+  const s = Math.round(ms / 1000);
+  const t = Math.round(totalMs / 1000);
+  const two = (n) => String(n).padStart(2, "0");
+  return `(${String(Math.floor(s / 60)).padStart(2)}:${two(s % 60)}/${two(Math.floor(t / 3600))}:${two(Math.floor((t % 3600) / 60))}:${two(t % 60)})`;
+}
+
+// KIF 形式の棋譜（平手）。endText は「投了」「詰み」など。times（手ごとの ms）があれば消費時間も書く
+export function toKif(start, moves, { black, white, endText, times }) {
   const pos = start.clone();
   const lines = [
     "# KIF 形式棋譜ファイル",
@@ -80,8 +88,14 @@ export function toKif(start, moves, { black, white, endText }) {
     "手数----指手---------消費時間--",
   ];
   let prevTo = -1;
+  const total = [0, 0];
   moves.forEach((m, i) => {
-    lines.push(`${String(i + 1).padStart(4)} ${kifMove(pos, m, prevTo)}`);
+    let line = `${String(i + 1).padStart(4)} ${kifMove(pos, m, prevTo)}`;
+    if (times?.[i] !== undefined) {
+      total[i % 2] += times[i];
+      line += `   ${kifTime(times[i], total[i % 2])}`;
+    }
+    lines.push(line);
     prevTo = moveTo(m);
     pos.doMove(m);
   });

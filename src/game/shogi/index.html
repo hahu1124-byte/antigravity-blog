@@ -65,11 +65,34 @@
         <section class="sg-panel">
           <div class="sg-card" id="gsSetupCard">
             <h2 class="sg-h2">対局の準備</h2>
-            <label class="sg-field">
-              <span>CPU の強さ</span>
+            <div
+              class="sg-owner gs-side"
+              role="radiogroup"
+              aria-label="対局の形"
+            >
+              <label
+                ><input type="radio" name="gsMode" value="human" checked />
+                あなた 対 CPU</label
+              >
+              <label
+                ><input type="radio" name="gsMode" value="cpu" /> CPU 対
+                CPU</label
+              >
+            </div>
+            <label class="sg-field gs-field">
+              <span id="gsLevelLabel">CPU の強さ</span>
               <select id="gsLevel"></select>
             </label>
-            <div class="sg-owner gs-side" role="radiogroup" aria-label="手番">
+            <label class="sg-field gs-field" id="gsLevel2Field" hidden>
+              <span>後手 CPU の強さ</span>
+              <select id="gsLevel2"></select>
+            </label>
+            <div
+              class="sg-owner gs-side"
+              role="radiogroup"
+              aria-label="手番"
+              id="gsSideField"
+            >
               <label
                 ><input type="radio" name="gsSide" value="black" checked />
                 先手（▲）</label
@@ -83,9 +106,19 @@
                 振り駒</label
               >
             </div>
+            <label class="sg-check">
+              <input type="checkbox" id="gsShowEval" checked />
+              <span>評価値（どちらがどれだけ有利か）を表示する</span>
+            </label>
             <div class="sg-buttons">
               <button type="button" id="gsStart" class="sg-btn sg-btn-main">
                 対局開始
+              </button>
+            </div>
+            <div class="gs-rating">
+              <p id="gsRating"></p>
+              <button type="button" id="gsRatingReset" class="gs-link-btn">
+                記録を消す
               </button>
             </div>
           </div>
@@ -93,6 +126,15 @@
           <div class="sg-card" id="gsPlayCard" hidden>
             <h2 class="sg-h2" id="gsTitle"></h2>
             <p id="gsStatus" class="gs-status" aria-live="polite"></p>
+            <p id="gsRatingNote" class="gs-rating-note" hidden></p>
+            <p id="gsClock" class="gs-clock"></p>
+            <div id="gsEval" class="gs-eval">
+              <div class="gs-eval-bar" aria-hidden="true">
+                <div id="gsEvalFill" class="gs-eval-fill"></div>
+              </div>
+              <p id="gsEvalText" class="gs-eval-text"></p>
+              <div id="gsGraph"></div>
+            </div>
             <div id="gsPromote" class="gs-promote" hidden>
               <span>成りますか？</span>
               <button type="button" class="sg-btn sg-btn-main" data-promote="1">
@@ -105,6 +147,9 @@
             <div class="sg-buttons">
               <button type="button" id="gsUndo" class="sg-btn">待った</button>
               <button type="button" id="gsResign" class="sg-btn">投了</button>
+              <button type="button" id="gsPause" class="sg-btn" hidden>
+                一時停止
+              </button>
               <button type="button" id="gsNew" class="sg-btn">
                 新しく始める
               </button>

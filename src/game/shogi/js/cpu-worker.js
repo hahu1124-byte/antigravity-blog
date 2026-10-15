@@ -27,7 +27,8 @@ self.onmessage = async (ev) => {
       return;
     }
     const r = await thinkSafely(holder, d.position, d.level);
-    self.postMessage({ type: "move", id: d.id, ...r });
+    // position も返す（評価値の表示で、待ったの後の古い返事を見分けるため）
+    self.postMessage({ type: "move", id: d.id, position: d.position, ...r });
   } catch (e) {
     self.postMessage({ type: "error", id: d.id, message: e.message });
   }

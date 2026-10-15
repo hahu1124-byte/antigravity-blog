@@ -97,10 +97,13 @@ export function pick(best, candidates, level, rnd = Math.random) {
   if (!candidates.length || best === "resign" || best === "win") return best;
   const margin = level.margin ?? 0;
   const top = candidates[0].score;
-  // 自分が詰ます手があるときは、それを選ぶ（逃すと弱すぎて不自然なため）
-  if (top >= MATE - 1000 || margin <= 0) return candidates[0].move;
+  // mateRule（既定 true）: 詰ます手があれば必ず選び、詰まされる手は選ばない。
+  // いちばん弱い段階では false にして、詰みも見逃す・詰まされる手も指す
+  const mateRule = level.mateRule ?? true;
+  if (margin <= 0 || (mateRule && top >= MATE - 1000))
+    return candidates[0].move;
   const pool = candidates.filter(
-    (c) => c.score >= top - margin && c.score > -MATE + 1000,
+    (c) => c.score >= top - margin && (!mateRule || c.score > -MATE + 1000),
   );
   // どの手でも詰まされるときは、いちばん長く粘れる手
   if (!pool.length) return candidates[0].move;

@@ -14,17 +14,20 @@ const { openEngine, engineHolder, thinkSafely } = await import(
   new URL("js/cpu.js", game).href
 );
 
-const [a, b, n = "10"] = process.argv.slice(2);
-// 段階は levels.js の番号か、「局面数:候補数:点差」で直接書く（段階を決める前の試し用）
+// 4 つめの引数は、序盤の一巡を何回繰り返すか（手の選び方に乱数があるので、同じ序盤でも別の対局になる）
+const [a, b, n = "10", rounds = "1"] = process.argv.slice(2);
+// 段階は levels.js の番号か、「局面数:候補数:点差[:n]」で直接書く（段階を決める前の試し用。
+// 末尾の :n は mateRule: false＝詰みも見逃す）
 const levelOf = (arg) => {
   if (!arg?.includes(":")) return LEVELS.find((l) => l.id === Number(arg));
-  const [nodes, multiPv, margin] = arg.split(":").map(Number);
+  const [nodes, multiPv, margin, flag] = arg.split(":");
   return {
     id: arg,
-    name: `局面${nodes}・候補${multiPv}・幅${margin}`,
-    nodes,
-    multiPv,
-    margin,
+    name: `局面${nodes}・候補${multiPv}・幅${margin}${flag === "n" ? "・詰み無視" : ""}`,
+    nodes: Number(nodes),
+    multiPv: Number(multiPv),
+    margin: Number(margin),
+    mateRule: flag !== "n",
     byoyomi: 3000,
   };
 };
@@ -110,7 +113,7 @@ async function playGame(opening, levels) {
 
 const t0 = performance.now();
 const score = { win: 0, lose: 0, draw: 0 };
-for (const opening of OPENINGS) {
+for (const opening of Array(Number(rounds)).fill(OPENINGS).flat()) {
   for (const aFirst of [true, false]) {
     const levels = aFirst ? [levelA, levelB] : [levelB, levelA];
     const st = performance.now();
