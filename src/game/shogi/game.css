@@ -1,0 +1,70 @@
+/* 将棋 CPU 対局（盤・駒台の見た目は LAB の shogi.css を使い、対局用の分だけ足す） */
+.sg-sq.gs-sel {
+  background: rgba(80, 160, 255, 0.45);
+}
+.sg-sq.gs-dest::after {
+  content: "";
+  position: absolute;
+  width: 28%;
+  height: 28%;
+  border-radius: 50%;
+  background: rgba(30, 110, 220, 0.55);
+  pointer-events: none;
+}
+.sg-sq:disabled {
+  cursor: default;
+}
+.gs-hand-mine button {
+  font: inherit;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid var(--lab-border);
+  border-radius: var(--lab-radius-sm);
+  background: var(--lab-bg);
+  color: var(--lab-text);
+  cursor: pointer;
+}
+.gs-hand-mine button.gs-sel {
+  border-color: var(--lab-accent);
+  box-shadow: 0 0 0 1px var(--lab-accent) inset;
+  color: var(--lab-accent);
+}
+.gs-hand-mine button:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+.gs-side {
+  margin: 0.7rem 0 0;
+  flex-wrap: wrap;
+}
+.gs-status {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 0.4rem;
+}
+.gs-status.gs-end {
+  color: var(--lab-accent);
+}
+.gs-promote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.4rem 0;
+  font-size: 0.9rem;
+}
+.gs-moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.6rem;
+  list-style: none;
+  padding: 0;
+  margin: 0.8rem 0 0;
+  max-height: 12rem;
+  overflow-y: auto;
+  font-size: 0.85rem;
+}
+.gs-moves li.gs-current {
+  color: var(--lab-accent);
+  font-weight: 700;
+}

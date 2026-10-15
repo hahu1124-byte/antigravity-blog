@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>将棋 CPU 対局 — GAME | Gravity Portal</title>
+    <meta
+      name="description"
+      content="ブラウザの中で動く将棋 CPU（やねうら王）と対局。強さは入門から最強まで 5 段階。"
+    />
+    <meta property="og:title" content="☗ 将棋 CPU 対局 — GAME" />
+    <meta
+      property="og:description"
+      content="ブラウザの中で動く将棋 CPU と対局。強さは 5 段階。"
+    />
+    <meta
+      property="og:url"
+      content="https://antigravity-portal.com/game/shogi/"
+    />
+    <meta property="og:type" content="website" />
+    <link rel="stylesheet" href="../../lab/styles.css" />
+    <link rel="stylesheet" href="../../lab/shogi/shogi.css" />
+    <link rel="stylesheet" href="game.css" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("gp-theme");
+          if (t) document.documentElement.setAttribute("data-theme", t);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="gp-blog-header"></header>
+
+    <div class="sg-layout">
+      <header class="lab-header">
+        <a href="/game/" class="lab-back">← GAME に戻る</a>
+        <h1 class="lab-title">☗ 将棋 CPU 対局</h1>
+        <p class="lab-desc">
+          強さを選んで CPU と対局します。CPU
+          はこのブラウザの中で動きます（将棋エンジン「やねうら王」）。
+        </p>
+      </header>
+
+      <main class="sg-main">
+        <section class="sg-board-area" aria-label="盤">
+          <div class="sg-hand-row">
+            <span class="sg-hand-label" id="gsTopLabel">CPU の持ち駒</span>
+            <div id="gsHandTop" class="sg-hand"></div>
+          </div>
+          <div class="sg-board-wrap">
+            <div class="sg-files" id="gsFiles" aria-hidden="true"></div>
+            <div class="sg-board-row">
+              <div id="gsBoard" class="sg-board" role="grid"></div>
+              <div class="sg-ranks" id="gsRanks" aria-hidden="true"></div>
+            </div>
+          </div>
+          <div class="sg-hand-row">
+            <span class="sg-hand-label" id="gsBottomLabel">あなたの持ち駒</span>
+            <div id="gsHandBottom" class="sg-hand gs-hand-mine"></div>
+          </div>
+        </section>
+
+        <section class="sg-panel">
+          <div class="sg-card" id="gsSetupCard">
+            <h2 class="sg-h2">対局の準備</h2>
+            <label class="sg-field">
+              <span>CPU の強さ</span>
+              <select id="gsLevel"></select>
+            </label>
+            <div class="sg-owner gs-side" role="radiogroup" aria-label="手番">
+              <label
+                ><input type="radio" name="gsSide" value="black" checked />
+                先手（▲）</label
+              >
+              <label
+                ><input type="radio" name="gsSide" value="white" />
+                後手（△）</label
+              >
+              <label
+                ><input type="radio" name="gsSide" value="random" />
+                振り駒</label
+              >
+            </div>
+            <div class="sg-buttons">
+              <button type="button" id="gsStart" class="sg-btn sg-btn-main">
+                対局開始
+              </button>
+            </div>
+          </div>
+
+          <div class="sg-card" id="gsPlayCard" hidden>
+            <h2 class="sg-h2" id="gsTitle"></h2>
+            <p id="gsStatus" class="gs-status" aria-live="polite"></p>
+            <div id="gsPromote" class="gs-promote" hidden>
+              <span>成りますか？</span>
+              <button type="button" class="sg-btn sg-btn-main" data-promote="1">
+                成る
+              </button>
+              <button type="button" class="sg-btn" data-promote="0">
+                成らない
+              </button>
+            </div>
+            <div class="sg-buttons">
+              <button type="button" id="gsUndo" class="sg-btn">待った</button>
+              <button type="button" id="gsResign" class="sg-btn">投了</button>
+              <button type="button" id="gsNew" class="sg-btn">
+                新しく始める
+              </button>
+            </div>
+            <ol id="gsMoves" class="gs-moves"></ol>
+            <div class="sg-buttons">
+              <button type="button" id="gsCopyKif" class="sg-btn">
+                棋譜をコピー（KIF）
+              </button>
+            </div>
+          </div>
+
+          <div class="sg-card sg-about">
+            <h2 class="sg-h2">この対局について</h2>
+            <ul>
+              <li>
+                駒を押すと動ける升が光ります。光った升を押すと指します。持ち駒は下の駒台から押して打ちます。
+              </li>
+              <li>
+                強さは、CPU が 1 手に読む量と、わざと甘い手を混ぜる度合いで 5
+                段階にしています。段階の差は CPU 同士の対局で測りました。
+              </li>
+              <li>
+                CPU
+                は考え始めると途中で止められません。考えている間に「待った」を押すと、CPU
+                を読み込み直します。
+              </li>
+              <li>
+                対局エンジン:
+                <a
+                  href="https://github.com/yaneurao/YaneuraOu"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >やねうら王</a
+                >（WebAssembly 版は
+                <a
+                  href="https://github.com/shielune/YaneuraOu/releases/tag/v9.61.7"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >shielune/YaneuraOu v9.61.7</a
+                >）。評価関数: 水匠ぺてぃと（たややん氏、<a
+                  href="https://github.com/mizar/YaneuraOu/releases/tag/resource"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >配布元</a
+                >）。どちらも
+                <a href="engine/COPYING.txt">GNU GPL v3</a>
+                で、このページのソースは
+                <a
+                  href="https://github.com/hahu1124-byte/antigravity-blog/tree/main/src/game/shogi"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >GitHub</a
+                >
+                で公開しています。
+              </li>
+            </ul>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="module" src="js/game.js"></script>
+  </body>
+</html>
