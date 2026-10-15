@@ -345,6 +345,19 @@
 .sg-explain:empty {
   display: none;
 }
+.sg-comment {
+  font-size: 0.88rem;
+  line-height: 1.75;
+  margin: 0.3rem 0 0.5rem;
+}
+.sg-comment-all {
+  margin-top: 0.6rem;
+}
+.sg-comment-text p {
+  font-size: 0.85rem;
+  line-height: 1.75;
+  margin: 0 0 0.5rem;
+}
 .sg-h3 {
   font-size: 0.95rem;
   margin: 0 0 0.3rem;

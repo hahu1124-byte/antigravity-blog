@@ -9,13 +9,13 @@ import {
   BOARD_CHAR,
   KIF_NAME,
   fillDefenderHand,
-  moveToKif,
   moveFrom,
   moveTo,
   isDrop,
 } from "./core.js";
 import { SAMPLES } from "./samples.js";
 import { lineLabels } from "./tesuji.js";
+import { commentary, kifOf } from "./commentary.js";
 
 const $ = (id) => document.getElementById(id);
 // 解説で最初から見せるほかの手の数（残りは折りたたむ）
@@ -29,8 +29,9 @@ let editPos = new Position();
 let tool = 1;
 let owner = BLACK;
 let mode = "edit"; // "edit" | "play"
-// { start, moves, kif, idx, labels, explain, explainError, branch }
+// { start, moves, kif, idx, labels, explain, explainError, branch, comment }
 // explain: null（解説なし）| "pending"（作成中）| { plies, partial, ms }
+// comment: 解説の文章（commentary.js）。解説が届いたら作り直す
 // branch: 本筋の at 手目の後から分かれた手順 { at, moves, kif, idx, title }
 let play = null;
 let worker = null;
@@ -73,17 +74,6 @@ function lastMove() {
   if (b && b.idx > 0) return b.moves[b.idx - 1];
   const n = b ? b.at : play.idx;
   return n > 0 ? play.moves[n - 1] : null;
-}
-
-// moves を pos から指したときの棋譜（prevTo は直前の手の行き先）
-function kifOf(pos, moves, prevTo = -1) {
-  const p = pos.clone();
-  return moves.map((m) => {
-    const k = moveToKif(p, m, prevTo);
-    prevTo = moveTo(m);
-    p.doMove(m);
-    return k;
-  });
 }
 
 function render() {
@@ -312,6 +302,7 @@ function solve() {
       stopWorker();
       if (play?.explain === "pending") {
         play.explain = d;
+        play.comment = commentary(play.start, play.moves, play.labels, d);
         render();
       }
       return;
@@ -369,6 +360,8 @@ function showResult(start, r, explaining = false) {
     idx: 0,
     labels,
     explain: explaining ? "pending" : null,
+    // 解説が届くまでは札の文だけ（届いたら作り直す）
+    comment: commentary(start, r.moves, labels),
     explainError: null,
     branch: null,
   };
@@ -411,6 +404,17 @@ function renderPlay() {
       ),
     );
   renderExplain();
+  renderCommentAll();
+}
+
+// 「解説を通して読む」: まとめと全部の手の段落
+function renderCommentAll() {
+  const c = play.comment;
+  $("sgCommentAll").hidden = !c;
+  if (!c) return;
+  $("sgCommentText").innerHTML =
+    `<p>${c.summary}</p>` +
+    c.plies.map((p, i) => `<p><b>${i + 1}. ${c.kifs[i]}</b> ${p}</p>`).join("");
 }
 
 // ---- 解説 ----
@@ -444,12 +448,16 @@ function renderExplain() {
     : "";
   if (play.idx === 0) {
     el.innerHTML =
+      `<p class="sg-comment">${play.comment.summary}</p>` +
       `<p class="sg-note">手を進めると、その手の解説（ほかの手を選んだらどうなるか）が出ます。</p>` +
       headHtml;
     return;
   }
   const i = play.idx - 1;
-  const title = `<h3 class="sg-h3">${play.idx}. ${play.kif[i]}${tagsHtml(play.labels[i])}</h3>`;
+  const para = play.comment.plies[i];
+  const title =
+    `<h3 class="sg-h3">${play.idx}. ${play.kif[i]}${tagsHtml(play.labels[i])}</h3>` +
+    (para ? `<p class="sg-comment">${para}</p>` : "");
   const ply = ex && ex !== "pending" ? ex.plies[i] : null;
   if (!ply) {
     const msg =
@@ -625,6 +633,13 @@ function init() {
     play.branch = null;
     play.idx = Number(b.dataset.idx);
     render();
+  });
+  $("sgCommentCopy").addEventListener("click", () => {
+    if (!play?.comment) return;
+    navigator.clipboard?.writeText(play.comment.text).then(
+      () => setStatus("解説の文章をコピーしました"),
+      () => setStatus("コピーできませんでした", true),
+    );
   });
   $("sgExplain").addEventListener("click", (ev) => {
     if (mode !== "play") return;

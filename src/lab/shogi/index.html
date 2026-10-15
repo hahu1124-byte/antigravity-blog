@@ -180,6 +180,13 @@
             <ol id="sgMoves" class="sg-moves"></ol>
             <p id="sgResultNote" class="sg-note"></p>
             <div id="sgExplain" class="sg-explain" aria-live="polite"></div>
+            <details id="sgCommentAll" class="sg-more sg-comment-all" hidden>
+              <summary>解説を通して読む</summary>
+              <div id="sgCommentText" class="sg-comment-text"></div>
+              <button type="button" id="sgCommentCopy" class="sg-btn">
+                文章をコピー
+              </button>
+            </details>
             <div class="sg-buttons">
               <button type="button" id="sgBackEdit" class="sg-btn">
                 盤面の編集に戻る
@@ -207,8 +214,11 @@
                 手の横の札（捨て駒・不成・開き王手・頭金・打ち歩詰め回避・合駒など）は、盤面から機械的に判定できる手筋だけを付けています。
               </li>
               <li>
-                LAB の第 2 段です。解説の文章化や、対局できる CPU
-                は次の段で足していきます。
+                解説の文章は、読んだ結果（紛れ・逃れる手・変化・手筋の札）から決まった型で組み立てています（AI
+                は使っていません）。
+              </li>
+              <li>
+                LAB の第 3 段です。対局できる CPU は次の段で足していきます。
               </li>
             </ul>
           </div>

@@ -223,6 +223,36 @@ has(
   "中合",
 );
 
+// 4-2. 札の文（解説の材料なしで、札だけから文が出る）
+{
+  const { commentary } = await import(base + "commentary.js");
+  const textOf = (sfen, usiLine) => {
+    const pos = Position.fromSfen(sfen);
+    const p = pos.clone();
+    const moves = usiLine.split(" ").map((u) => {
+      const m = moveFromUsi(p, u);
+      p.doMove(m);
+      return m;
+    });
+    return commentary(pos, moves, lineLabels(pos, moves)).plies;
+  };
+  const says = (name, text, word) =>
+    eq(`札の文 ${name}: 「${word}」`, text.includes(word), true);
+  says(
+    "開き王手",
+    textOf("4k4/9/9/9/4S4/9/9/9/4R4 b - 1", "5e4d")[0],
+    "後ろの飛車で王手をかける開き王手",
+  );
+  says("両王手", textOf("4k4/9/9/9/4N4/9/9/9/4R4 b - 1", "5e4c")[0], "両王手");
+  says(
+    "捨て駒",
+    textOf("4k4/9/9/9/9/9/9/9/9 b Gg 1", "G*5b 5a5b")[0],
+    "玉に取らせて呼び寄せる",
+  );
+  says("合駒", textOf("4k4/9/9/9/9/9/9/9/R8 b g 1", "9i5i G*5b")[1], "合駒");
+  says("中合", textOf("4k4/9/9/9/9/9/9/9/R8 b g 1", "9i5i G*5e")[1], "中合");
+}
+
 // 5. 解説（紛れ・変化）: サンプルで、素朴な全探索を物差しに確かめる
 // 受け方の手で今の局面が詰んでいるか（指す手が無い）
 const mated = (pos) => legalMoves(pos).length === 0;
@@ -233,6 +263,14 @@ const mated = (pos) => legalMoves(pos).length === 0;
     "1手詰 — 頭金": [0, "頭金"],
     "5手詰 — 銀不成": [2, "不成"],
     "3手詰 — 打ち歩詰めを避ける": [2, "打ち歩詰め回避"],
+  };
+  const { commentary } = await import(base + "commentary.js");
+  // 解説の文章に出てほしい言葉（手の番号は 0 始まり）
+  const sampleWords = {
+    "1手詰 — 頭金": [[0, "玉の頭に金を打って詰み"]],
+    "5手詰 — 銀不成": [[2, "と成ると△１二玉で逃れられてしまう"]],
+    "3手詰 — 打ち歩詰めを避ける": [[2, "打ち歩詰めの反則"]],
+    "7手詰 — 成銀で追い詰める": [[1, "いちばん長く粘れる"]],
   };
   for (const s of SAMPLES) {
     if (!s.answer) continue;
@@ -297,6 +335,25 @@ const mated = (pos) => legalMoves(pos).length === 0;
       p.doMove(r.moves[i]);
     }
     eq(`${name} 紛れ・変化の確かめ`, bad, 0);
+
+    // 解説の文章: 全部の手に段落があり、値の抜けが文に出ない。札の文は材料で裏付けられて出る
+    const c = commentary(pos, r.moves, lineLabels(pos, r.moves), ex);
+    eq(
+      `${name} 文章: 全部の手に段落`,
+      c.plies.length === r.moves.length && c.plies.every((p) => p.length > 0),
+      true,
+    );
+    eq(
+      `${name} 文章: 抜けた値が出ない`,
+      /undefined|null|NaN|\[object/.test(c.text),
+      false,
+    );
+    for (const [ply, word] of sampleWords[s.title] ?? [])
+      eq(
+        `${name} 文章: ${ply + 1} 手目に「${word}」`,
+        c.plies[ply].includes(word),
+        true,
+      );
   }
 }
 
