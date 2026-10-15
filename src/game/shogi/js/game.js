@@ -188,21 +188,30 @@ function askEval() {
   });
 }
 
+// 評価値は、あなた 対 CPU ではあなたから見た値（プラスがあなた有利。後手なら先手から見た値の符号を逆に）、
+// CPU 対 CPU では先手から見た値で出す。evals は先手から見た値のまま持つ
 function renderEval() {
   const box = $("gsEval");
   box.hidden = !showEval;
   if (!showEval) return;
+  const human = mode === "human";
+  const view = (s) =>
+    s === null || s === undefined ? null : viewSide() === BLACK ? s : -s;
+  const names = human
+    ? { plus: "あなた", minus: "CPU" }
+    : { plus: "先手", minus: "後手" };
   // まだ評価が来ていない手数は、前の値を見せる
   let s = null;
   for (let i = Math.min(moves.length, evals.length - 1); i >= 0; i--)
     if (evals[i] !== undefined) {
-      s = evals[i];
+      s = view(evals[i]);
       break;
     }
   $("gsEvalFill").style.width = `${(barRatio(s) * 100).toFixed(1)}%`;
-  $("gsEvalText").textContent = `評価値 ${evalText(s)}（左が先手・右が後手）`;
+  $("gsEvalText").textContent =
+    `評価値 ${evalText(s, names)}（左が${names.plus}・右が${names.minus}）`;
   const scores = [];
-  for (let i = 0; i <= moves.length; i++) scores.push(evals[i] ?? null);
+  for (let i = 0; i <= moves.length; i++) scores.push(view(evals[i]));
   $("gsGraph").innerHTML = graphSvg(scores);
 }
 

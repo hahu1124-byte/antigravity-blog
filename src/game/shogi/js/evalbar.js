@@ -12,9 +12,10 @@ export const toBlack = (score, sideToMove) =>
 const isMate = (s) => Math.abs(s) >= MATE - 1000;
 
 // 「+350 先手有利」「互角」「先手の勝ち（詰み 5 手）」
-export function evalText(s) {
+// names: プラス側・マイナス側の呼び方（あなた 対 CPU では { plus: "あなた", minus: "CPU" } で、s もあなたから見た値）
+export function evalText(s, names = { plus: "先手", minus: "後手" }) {
   if (s === null || s === undefined) return "評価中…";
-  const side = s > 0 ? "先手" : "後手";
+  const side = s > 0 ? names.plus : names.minus;
   if (isMate(s)) return `${side}の勝ち（詰み ${MATE - Math.abs(s)} 手）`;
   const a = Math.abs(s);
   const sign = s > 0 ? "+" : s < 0 ? "−" : "±";
