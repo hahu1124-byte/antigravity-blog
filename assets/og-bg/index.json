@@ -1,0 +1,2042 @@
+{
+  "spring_cloudy_01": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "orig"
+  },
+  "spring_cloudy_13": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "moto"
+  },
+  "spring_cloudy_25": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "car"
+  },
+  "spring_cloudy_02": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "orig"
+  },
+  "spring_cloudy_14": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "car"
+  },
+  "spring_cloudy_26": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "walk"
+  },
+  "spring_cloudy_03": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "orig"
+  },
+  "spring_cloudy_15": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "walk"
+  },
+  "spring_cloudy_27": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "moto"
+  },
+  "spring_cloudy_04": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "orig"
+  },
+  "spring_cloudy_16": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "moto"
+  },
+  "spring_cloudy_28": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "car"
+  },
+  "spring_cloudy_05": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "orig"
+  },
+  "spring_cloudy_17": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "moto"
+  },
+  "spring_cloudy_06": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "orig"
+  },
+  "spring_cloudy_18": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "walk"
+  },
+  "spring_cloudy_30": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "moto"
+  },
+  "spring_cloudy_07": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "orig"
+  },
+  "spring_cloudy_19": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "moto"
+  },
+  "spring_cloudy_31": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "car"
+  },
+  "spring_cloudy_08": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "orig"
+  },
+  "spring_cloudy_20": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "car"
+  },
+  "spring_cloudy_32": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "walk"
+  },
+  "spring_cloudy_09": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "orig"
+  },
+  "spring_cloudy_21": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "walk"
+  },
+  "spring_cloudy_33": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "moto"
+  },
+  "spring_cloudy_10": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "orig"
+  },
+  "spring_cloudy_22": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "moto"
+  },
+  "spring_cloudy_34": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "car"
+  },
+  "spring_cloudy_11": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "orig"
+  },
+  "spring_cloudy_23": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "car"
+  },
+  "spring_cloudy_35": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "walk"
+  },
+  "spring_cloudy_12": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "orig"
+  },
+  "spring_cloudy_24": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "walk"
+  },
+  "spring_cloudy_36": {
+    "season": "spring",
+    "group": "spring_cloudy",
+    "subject": "moto"
+  },
+  "spring_rainy_01": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "orig"
+  },
+  "spring_rainy_10": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "moto"
+  },
+  "spring_rainy_19": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "walk"
+  },
+  "spring_rainy_02": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "orig"
+  },
+  "spring_rainy_11": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "car"
+  },
+  "spring_rainy_20": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "walk"
+  },
+  "spring_rainy_03": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "orig"
+  },
+  "spring_rainy_12": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "moto"
+  },
+  "spring_rainy_04": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "orig"
+  },
+  "spring_rainy_13": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "moto"
+  },
+  "spring_rainy_22": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "car"
+  },
+  "spring_rainy_05": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "orig"
+  },
+  "spring_rainy_14": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "car"
+  },
+  "spring_rainy_23": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "walk"
+  },
+  "spring_rainy_06": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "orig"
+  },
+  "spring_rainy_15": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "walk"
+  },
+  "spring_rainy_24": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "moto"
+  },
+  "spring_rainy_07": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "orig"
+  },
+  "spring_rainy_16": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "moto"
+  },
+  "spring_rainy_25": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "car"
+  },
+  "spring_rainy_08": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "orig"
+  },
+  "spring_rainy_17": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "car"
+  },
+  "spring_rainy_26": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "walk"
+  },
+  "spring_rainy_09": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "orig"
+  },
+  "spring_rainy_18": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "moto"
+  },
+  "spring_rainy_27": {
+    "season": "spring",
+    "group": "spring_rainy",
+    "subject": "walk"
+  },
+  "spring_sunny_01": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "orig"
+  },
+  "spring_sunny_09": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "moto"
+  },
+  "spring_sunny_17": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "car"
+  },
+  "spring_sunny_02": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "orig"
+  },
+  "spring_sunny_10": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "car"
+  },
+  "spring_sunny_18": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "walk"
+  },
+  "spring_sunny_03": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "orig"
+  },
+  "spring_sunny_11": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "walk"
+  },
+  "spring_sunny_19": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "bike"
+  },
+  "spring_sunny_04": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "orig"
+  },
+  "spring_sunny_12": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "moto"
+  },
+  "spring_sunny_20": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "car"
+  },
+  "spring_sunny_05": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "orig"
+  },
+  "spring_sunny_13": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "car"
+  },
+  "spring_sunny_21": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "walk"
+  },
+  "spring_sunny_06": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "orig"
+  },
+  "spring_sunny_14": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "walk"
+  },
+  "spring_sunny_22": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "moto"
+  },
+  "spring_sunny_07": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "orig"
+  },
+  "spring_sunny_15": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "moto"
+  },
+  "spring_sunny_23": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "car"
+  },
+  "spring_sunny_08": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "orig"
+  },
+  "spring_sunny_16": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "car"
+  },
+  "spring_sunny_24": {
+    "season": "spring",
+    "group": "spring_sunny",
+    "subject": "walk"
+  },
+  "summer_cloudy_01": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "orig"
+  },
+  "summer_cloudy_13": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "moto"
+  },
+  "summer_cloudy_25": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "car"
+  },
+  "summer_cloudy_02": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "orig"
+  },
+  "summer_cloudy_14": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "car"
+  },
+  "summer_cloudy_26": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "walk"
+  },
+  "summer_cloudy_03": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "orig"
+  },
+  "summer_cloudy_15": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "walk"
+  },
+  "summer_cloudy_27": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "moto"
+  },
+  "summer_cloudy_04": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "orig"
+  },
+  "summer_cloudy_16": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "moto"
+  },
+  "summer_cloudy_28": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "car"
+  },
+  "summer_cloudy_05": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "orig"
+  },
+  "summer_cloudy_17": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "moto"
+  },
+  "summer_cloudy_06": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "orig"
+  },
+  "summer_cloudy_18": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "walk"
+  },
+  "summer_cloudy_30": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "moto"
+  },
+  "summer_cloudy_07": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "orig"
+  },
+  "summer_cloudy_19": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "moto"
+  },
+  "summer_cloudy_31": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "car"
+  },
+  "summer_cloudy_08": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "orig"
+  },
+  "summer_cloudy_20": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "car"
+  },
+  "summer_cloudy_32": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "walk"
+  },
+  "summer_cloudy_09": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "orig"
+  },
+  "summer_cloudy_21": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "walk"
+  },
+  "summer_cloudy_33": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "moto"
+  },
+  "summer_cloudy_10": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "orig"
+  },
+  "summer_cloudy_22": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "moto"
+  },
+  "summer_cloudy_34": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "car"
+  },
+  "summer_cloudy_11": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "orig"
+  },
+  "summer_cloudy_23": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "car"
+  },
+  "summer_cloudy_35": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "walk"
+  },
+  "summer_cloudy_12": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "orig"
+  },
+  "summer_cloudy_24": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "walk"
+  },
+  "summer_cloudy_36": {
+    "season": "summer",
+    "group": "summer_cloudy",
+    "subject": "moto"
+  },
+  "summer_rainy_01": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "orig"
+  },
+  "summer_rainy_10": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "moto"
+  },
+  "summer_rainy_19": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "walk"
+  },
+  "summer_rainy_02": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "orig"
+  },
+  "summer_rainy_11": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "car"
+  },
+  "summer_rainy_20": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "walk"
+  },
+  "summer_rainy_03": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "orig"
+  },
+  "summer_rainy_12": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "moto"
+  },
+  "summer_rainy_04": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "orig"
+  },
+  "summer_rainy_13": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "moto"
+  },
+  "summer_rainy_22": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "car"
+  },
+  "summer_rainy_05": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "orig"
+  },
+  "summer_rainy_14": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "car"
+  },
+  "summer_rainy_23": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "walk"
+  },
+  "summer_rainy_06": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "orig"
+  },
+  "summer_rainy_15": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "walk"
+  },
+  "summer_rainy_24": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "moto"
+  },
+  "summer_rainy_07": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "orig"
+  },
+  "summer_rainy_16": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "moto"
+  },
+  "summer_rainy_25": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "car"
+  },
+  "summer_rainy_08": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "orig"
+  },
+  "summer_rainy_17": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "car"
+  },
+  "summer_rainy_26": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "walk"
+  },
+  "summer_rainy_09": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "orig"
+  },
+  "summer_rainy_18": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "moto"
+  },
+  "summer_rainy_27": {
+    "season": "summer",
+    "group": "summer_rainy",
+    "subject": "walk"
+  },
+  "summer_sunny_01": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "orig"
+  },
+  "summer_sunny_09": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "moto"
+  },
+  "summer_sunny_17": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "car"
+  },
+  "summer_sunny_02": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "orig"
+  },
+  "summer_sunny_10": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "car"
+  },
+  "summer_sunny_18": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "walk"
+  },
+  "summer_sunny_03": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "orig"
+  },
+  "summer_sunny_11": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "walk"
+  },
+  "summer_sunny_19": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "bike"
+  },
+  "summer_sunny_04": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "orig"
+  },
+  "summer_sunny_12": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "moto"
+  },
+  "summer_sunny_20": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "car"
+  },
+  "summer_sunny_05": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "orig"
+  },
+  "summer_sunny_13": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "car"
+  },
+  "summer_sunny_21": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "walk"
+  },
+  "summer_sunny_06": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "orig"
+  },
+  "summer_sunny_14": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "walk"
+  },
+  "summer_sunny_22": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "moto"
+  },
+  "summer_sunny_07": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "orig"
+  },
+  "summer_sunny_15": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "moto"
+  },
+  "summer_sunny_23": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "car"
+  },
+  "summer_sunny_08": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "orig"
+  },
+  "summer_sunny_16": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "car"
+  },
+  "summer_sunny_24": {
+    "season": "summer",
+    "group": "summer_sunny",
+    "subject": "walk"
+  },
+  "autumn_cloudy_01": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "orig"
+  },
+  "autumn_cloudy_13": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "moto"
+  },
+  "autumn_cloudy_25": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "car"
+  },
+  "autumn_cloudy_02": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "orig"
+  },
+  "autumn_cloudy_14": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "car"
+  },
+  "autumn_cloudy_26": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "walk"
+  },
+  "autumn_cloudy_03": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "orig"
+  },
+  "autumn_cloudy_15": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "walk"
+  },
+  "autumn_cloudy_27": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "moto"
+  },
+  "autumn_cloudy_04": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "orig"
+  },
+  "autumn_cloudy_16": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "moto"
+  },
+  "autumn_cloudy_28": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "car"
+  },
+  "autumn_cloudy_05": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "orig"
+  },
+  "autumn_cloudy_17": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "moto"
+  },
+  "autumn_cloudy_06": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "orig"
+  },
+  "autumn_cloudy_18": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "walk"
+  },
+  "autumn_cloudy_30": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "moto"
+  },
+  "autumn_cloudy_07": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "orig"
+  },
+  "autumn_cloudy_19": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "moto"
+  },
+  "autumn_cloudy_31": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "car"
+  },
+  "autumn_cloudy_08": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "orig"
+  },
+  "autumn_cloudy_20": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "car"
+  },
+  "autumn_cloudy_32": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "walk"
+  },
+  "autumn_cloudy_09": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "orig"
+  },
+  "autumn_cloudy_21": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "walk"
+  },
+  "autumn_cloudy_33": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "moto"
+  },
+  "autumn_cloudy_10": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "orig"
+  },
+  "autumn_cloudy_22": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "moto"
+  },
+  "autumn_cloudy_34": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "car"
+  },
+  "autumn_cloudy_11": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "orig"
+  },
+  "autumn_cloudy_23": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "car"
+  },
+  "autumn_cloudy_35": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "walk"
+  },
+  "autumn_cloudy_12": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "orig"
+  },
+  "autumn_cloudy_24": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "walk"
+  },
+  "autumn_cloudy_36": {
+    "season": "autumn",
+    "group": "autumn_cloudy",
+    "subject": "moto"
+  },
+  "autumn_rainy_01": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "orig"
+  },
+  "autumn_rainy_10": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "moto"
+  },
+  "autumn_rainy_19": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "walk"
+  },
+  "autumn_rainy_02": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "orig"
+  },
+  "autumn_rainy_11": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "car"
+  },
+  "autumn_rainy_20": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "walk"
+  },
+  "autumn_rainy_03": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "orig"
+  },
+  "autumn_rainy_12": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "moto"
+  },
+  "autumn_rainy_04": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "orig"
+  },
+  "autumn_rainy_13": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "moto"
+  },
+  "autumn_rainy_22": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "car"
+  },
+  "autumn_rainy_05": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "orig"
+  },
+  "autumn_rainy_14": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "car"
+  },
+  "autumn_rainy_23": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "walk"
+  },
+  "autumn_rainy_06": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "orig"
+  },
+  "autumn_rainy_15": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "walk"
+  },
+  "autumn_rainy_24": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "moto"
+  },
+  "autumn_rainy_07": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "orig"
+  },
+  "autumn_rainy_16": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "moto"
+  },
+  "autumn_rainy_25": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "car"
+  },
+  "autumn_rainy_08": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "orig"
+  },
+  "autumn_rainy_17": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "car"
+  },
+  "autumn_rainy_26": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "walk"
+  },
+  "autumn_rainy_09": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "orig"
+  },
+  "autumn_rainy_18": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "moto"
+  },
+  "autumn_rainy_27": {
+    "season": "autumn",
+    "group": "autumn_rainy",
+    "subject": "walk"
+  },
+  "autumn_sunny_01": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "orig"
+  },
+  "autumn_sunny_09": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "moto"
+  },
+  "autumn_sunny_17": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "car"
+  },
+  "autumn_sunny_02": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "orig"
+  },
+  "autumn_sunny_10": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "car"
+  },
+  "autumn_sunny_18": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "walk"
+  },
+  "autumn_sunny_03": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "orig"
+  },
+  "autumn_sunny_11": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "walk"
+  },
+  "autumn_sunny_19": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "bike"
+  },
+  "autumn_sunny_04": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "orig"
+  },
+  "autumn_sunny_12": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "moto"
+  },
+  "autumn_sunny_20": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "car"
+  },
+  "autumn_sunny_05": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "orig"
+  },
+  "autumn_sunny_13": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "car"
+  },
+  "autumn_sunny_21": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "walk"
+  },
+  "autumn_sunny_06": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "orig"
+  },
+  "autumn_sunny_14": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "walk"
+  },
+  "autumn_sunny_22": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "moto"
+  },
+  "autumn_sunny_07": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "orig"
+  },
+  "autumn_sunny_15": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "moto"
+  },
+  "autumn_sunny_23": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "car"
+  },
+  "autumn_sunny_08": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "orig"
+  },
+  "autumn_sunny_16": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "car"
+  },
+  "autumn_sunny_24": {
+    "season": "autumn",
+    "group": "autumn_sunny",
+    "subject": "walk"
+  },
+  "winter_cloudy_01": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "orig"
+  },
+  "winter_cloudy_13": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "moto"
+  },
+  "winter_cloudy_25": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "car"
+  },
+  "winter_cloudy_02": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "orig"
+  },
+  "winter_cloudy_14": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "car"
+  },
+  "winter_cloudy_26": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "walk"
+  },
+  "winter_cloudy_03": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "orig"
+  },
+  "winter_cloudy_15": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "walk"
+  },
+  "winter_cloudy_27": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "moto"
+  },
+  "winter_cloudy_04": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "orig"
+  },
+  "winter_cloudy_16": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "moto"
+  },
+  "winter_cloudy_28": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "car"
+  },
+  "winter_cloudy_05": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "orig"
+  },
+  "winter_cloudy_17": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "moto"
+  },
+  "winter_cloudy_06": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "orig"
+  },
+  "winter_cloudy_18": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "walk"
+  },
+  "winter_cloudy_30": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "moto"
+  },
+  "winter_cloudy_07": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "orig"
+  },
+  "winter_cloudy_19": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "moto"
+  },
+  "winter_cloudy_31": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "car"
+  },
+  "winter_cloudy_08": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "orig"
+  },
+  "winter_cloudy_20": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "car"
+  },
+  "winter_cloudy_32": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "walk"
+  },
+  "winter_cloudy_09": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "orig"
+  },
+  "winter_cloudy_21": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "walk"
+  },
+  "winter_cloudy_33": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "moto"
+  },
+  "winter_cloudy_10": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "orig"
+  },
+  "winter_cloudy_22": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "moto"
+  },
+  "winter_cloudy_34": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "car"
+  },
+  "winter_cloudy_11": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "orig"
+  },
+  "winter_cloudy_23": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "car"
+  },
+  "winter_cloudy_35": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "walk"
+  },
+  "winter_cloudy_12": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "orig"
+  },
+  "winter_cloudy_24": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "walk"
+  },
+  "winter_cloudy_36": {
+    "season": "winter",
+    "group": "winter_cloudy",
+    "subject": "moto"
+  },
+  "winter_rainy_01": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "orig"
+  },
+  "winter_rainy_10": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "moto"
+  },
+  "winter_rainy_19": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "walk"
+  },
+  "winter_rainy_02": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "orig"
+  },
+  "winter_rainy_11": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "car"
+  },
+  "winter_rainy_20": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "walk"
+  },
+  "winter_rainy_03": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "orig"
+  },
+  "winter_rainy_12": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "moto"
+  },
+  "winter_rainy_04": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "orig"
+  },
+  "winter_rainy_13": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "moto"
+  },
+  "winter_rainy_22": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "car"
+  },
+  "winter_rainy_05": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "orig"
+  },
+  "winter_rainy_14": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "car"
+  },
+  "winter_rainy_23": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "walk"
+  },
+  "winter_rainy_06": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "orig"
+  },
+  "winter_rainy_15": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "walk"
+  },
+  "winter_rainy_24": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "moto"
+  },
+  "winter_rainy_07": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "orig"
+  },
+  "winter_rainy_16": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "moto"
+  },
+  "winter_rainy_25": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "car"
+  },
+  "winter_rainy_08": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "orig"
+  },
+  "winter_rainy_17": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "car"
+  },
+  "winter_rainy_26": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "walk"
+  },
+  "winter_rainy_09": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "orig"
+  },
+  "winter_rainy_18": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "moto"
+  },
+  "winter_rainy_27": {
+    "season": "winter",
+    "group": "winter_rainy",
+    "subject": "walk"
+  },
+  "winter_sunny_01": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "orig"
+  },
+  "winter_sunny_09": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "moto"
+  },
+  "winter_sunny_17": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "car"
+  },
+  "winter_sunny_02": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "orig"
+  },
+  "winter_sunny_10": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "car"
+  },
+  "winter_sunny_18": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "walk"
+  },
+  "winter_sunny_03": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "orig"
+  },
+  "winter_sunny_11": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "walk"
+  },
+  "winter_sunny_19": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "bike"
+  },
+  "winter_sunny_04": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "orig"
+  },
+  "winter_sunny_12": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "moto"
+  },
+  "winter_sunny_20": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "car"
+  },
+  "winter_sunny_05": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "orig"
+  },
+  "winter_sunny_13": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "car"
+  },
+  "winter_sunny_21": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "walk"
+  },
+  "winter_sunny_06": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "orig"
+  },
+  "winter_sunny_14": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "walk"
+  },
+  "winter_sunny_22": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "moto"
+  },
+  "winter_sunny_07": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "orig"
+  },
+  "winter_sunny_15": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "moto"
+  },
+  "winter_sunny_23": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "car"
+  },
+  "winter_sunny_08": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "orig"
+  },
+  "winter_sunny_16": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "car"
+  },
+  "winter_sunny_24": {
+    "season": "winter",
+    "group": "winter_sunny",
+    "subject": "walk"
+  },
+  "summer_hot_01": {
+    "season": "summer",
+    "group": "summer_hot",
+    "subject": "orig"
+  },
+  "summer_hot_07": {
+    "season": "summer",
+    "group": "summer_hot",
+    "subject": "moto"
+  },
+  "summer_hot_02": {
+    "season": "summer",
+    "group": "summer_hot",
+    "subject": "orig"
+  },
+  "summer_hot_08": {
+    "season": "summer",
+    "group": "summer_hot",
+    "subject": "walk"
+  },
+  "summer_hot_03": {
+    "season": "summer",
+    "group": "summer_hot",
+    "subject": "orig"
+  },
+  "summer_hot_09": {
+    "season": "summer",
+    "group": "summer_hot",
+    "subject": "walk"
+  },
+  "summer_hot_04": {
+    "season": "summer",
+    "group": "summer_hot",
+    "subject": "orig"
+  },
+  "summer_hot_10": {
+    "season": "summer",
+    "group": "summer_hot",
+    "subject": "moto"
+  },
+  "summer_hot_05": {
+    "season": "summer",
+    "group": "summer_hot",
+    "subject": "orig"
+  },
+  "summer_hot_11": {
+    "season": "summer",
+    "group": "summer_hot",
+    "subject": "car"
+  },
+  "summer_hot_06": {
+    "season": "summer",
+    "group": "summer_hot",
+    "subject": "orig"
+  },
+  "summer_hot_12": {
+    "season": "summer",
+    "group": "summer_hot",
+    "subject": "walk"
+  },
+  "winter_snow_01": {
+    "season": "winter",
+    "group": "winter_snow",
+    "subject": "orig"
+  },
+  "winter_snow_07": {
+    "season": "winter",
+    "group": "winter_snow",
+    "subject": "moto"
+  },
+  "winter_snow_02": {
+    "season": "winter",
+    "group": "winter_snow",
+    "subject": "orig"
+  },
+  "winter_snow_08": {
+    "season": "winter",
+    "group": "winter_snow",
+    "subject": "walk"
+  },
+  "winter_snow_03": {
+    "season": "winter",
+    "group": "winter_snow",
+    "subject": "orig"
+  },
+  "winter_snow_09": {
+    "season": "winter",
+    "group": "winter_snow",
+    "subject": "walk"
+  },
+  "winter_snow_04": {
+    "season": "winter",
+    "group": "winter_snow",
+    "subject": "orig"
+  },
+  "winter_snow_10": {
+    "season": "winter",
+    "group": "winter_snow",
+    "subject": "moto"
+  },
+  "winter_snow_05": {
+    "season": "winter",
+    "group": "winter_snow",
+    "subject": "orig"
+  },
+  "winter_snow_11": {
+    "season": "winter",
+    "group": "winter_snow",
+    "subject": "car"
+  },
+  "winter_snow_06": {
+    "season": "winter",
+    "group": "winter_snow",
+    "subject": "orig"
+  },
+  "winter_snow_12": {
+    "season": "winter",
+    "group": "winter_snow",
+    "subject": "walk"
+  },
+  "winter_cold_01": {
+    "season": "winter",
+    "group": "winter_cold",
+    "subject": "orig"
+  },
+  "winter_cold_05": {
+    "season": "winter",
+    "group": "winter_cold",
+    "subject": "moto"
+  },
+  "winter_cold_02": {
+    "season": "winter",
+    "group": "winter_cold",
+    "subject": "orig"
+  },
+  "winter_cold_06": {
+    "season": "winter",
+    "group": "winter_cold",
+    "subject": "car"
+  },
+  "winter_cold_03": {
+    "season": "winter",
+    "group": "winter_cold",
+    "subject": "orig"
+  },
+  "winter_cold_07": {
+    "season": "winter",
+    "group": "winter_cold",
+    "subject": "moto"
+  },
+  "winter_cold_04": {
+    "season": "winter",
+    "group": "winter_cold",
+    "subject": "orig"
+  },
+  "winter_cold_08": {
+    "season": "winter",
+    "group": "winter_cold",
+    "subject": "walk"
+  },
+  "any_heavyrain_01": {
+    "season": "any",
+    "group": "any_heavyrain",
+    "subject": "orig"
+  },
+  "any_heavyrain_05": {
+    "season": "any",
+    "group": "any_heavyrain",
+    "subject": "moto"
+  },
+  "any_heavyrain_02": {
+    "season": "any",
+    "group": "any_heavyrain",
+    "subject": "orig"
+  },
+  "any_heavyrain_06": {
+    "season": "any",
+    "group": "any_heavyrain",
+    "subject": "walk"
+  },
+  "any_heavyrain_03": {
+    "season": "any",
+    "group": "any_heavyrain",
+    "subject": "orig"
+  },
+  "any_heavyrain_07": {
+    "season": "any",
+    "group": "any_heavyrain",
+    "subject": "moto"
+  },
+  "any_heavyrain_04": {
+    "season": "any",
+    "group": "any_heavyrain",
+    "subject": "orig"
+  },
+  "any_heavyrain_08": {
+    "season": "any",
+    "group": "any_heavyrain",
+    "subject": "bike"
+  },
+  "any_thunder_01": {
+    "season": "any",
+    "group": "any_thunder",
+    "subject": "orig"
+  },
+  "any_thunder_05": {
+    "season": "any",
+    "group": "any_thunder",
+    "subject": "moto"
+  },
+  "any_thunder_02": {
+    "season": "any",
+    "group": "any_thunder",
+    "subject": "orig"
+  },
+  "any_thunder_06": {
+    "season": "any",
+    "group": "any_thunder",
+    "subject": "car"
+  },
+  "any_thunder_03": {
+    "season": "any",
+    "group": "any_thunder",
+    "subject": "orig"
+  },
+  "any_thunder_07": {
+    "season": "any",
+    "group": "any_thunder",
+    "subject": "walk"
+  },
+  "any_thunder_04": {
+    "season": "any",
+    "group": "any_thunder",
+    "subject": "orig"
+  },
+  "any_thunder_08": {
+    "season": "any",
+    "group": "any_thunder",
+    "subject": "moto"
+  },
+  "any_typhoon_01": {
+    "season": "any",
+    "group": "any_typhoon",
+    "subject": "orig"
+  },
+  "any_typhoon_05": {
+    "season": "any",
+    "group": "any_typhoon",
+    "subject": "moto"
+  },
+  "any_typhoon_02": {
+    "season": "any",
+    "group": "any_typhoon",
+    "subject": "orig"
+  },
+  "any_typhoon_06": {
+    "season": "any",
+    "group": "any_typhoon",
+    "subject": "car"
+  },
+  "any_typhoon_03": {
+    "season": "any",
+    "group": "any_typhoon",
+    "subject": "orig"
+  },
+  "any_typhoon_07": {
+    "season": "any",
+    "group": "any_typhoon",
+    "subject": "moto"
+  },
+  "any_typhoon_04": {
+    "season": "any",
+    "group": "any_typhoon",
+    "subject": "orig"
+  },
+  "any_typhoon_08": {
+    "season": "any",
+    "group": "any_typhoon",
+    "subject": "walk"
+  },
+  "tech_01": {
+    "season": "tech",
+    "group": "tech",
+    "subject": "orig"
+  },
+  "tech_02": {
+    "season": "tech",
+    "group": "tech",
+    "subject": "orig"
+  },
+  "tech_03": {
+    "season": "tech",
+    "group": "tech",
+    "subject": "orig"
+  },
+  "tech_04": {
+    "season": "tech",
+    "group": "tech",
+    "subject": "orig"
+  },
+  "tech_05": {
+    "season": "tech",
+    "group": "tech",
+    "subject": "orig"
+  },
+  "tech_06": {
+    "season": "tech",
+    "group": "tech",
+    "subject": "orig"
+  },
+  "tech_07": {
+    "season": "tech",
+    "group": "tech",
+    "subject": "orig"
+  },
+  "tech_08": {
+    "season": "tech",
+    "group": "tech",
+    "subject": "orig"
+  },
+  "tech_09": {
+    "season": "tech",
+    "group": "tech",
+    "subject": "orig"
+  },
+  "tech_10": {
+    "season": "tech",
+    "group": "tech",
+    "subject": "orig"
+  },
+  "tech_11": {
+    "season": "tech",
+    "group": "tech",
+    "subject": "orig"
+  },
+  "tech_12": {
+    "season": "tech",
+    "group": "tech",
+    "subject": "orig"
+  }
+}

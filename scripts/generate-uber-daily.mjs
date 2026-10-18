@@ -14,6 +14,12 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { renderOgCard } from "./lib/og-image.mjs";
+import {
+  bgGroups,
+  dailyCardText,
+  maxRainPercent,
+  renderAutoPhotoOg,
+} from "./lib/og-bg.mjs";
 import { stringifyFrontmatter } from "./lib/frontmatter.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -652,19 +658,49 @@ async function main() {
   const title = generateTitle(weather);
   const commentText = generateComment(weather, predictions);
 
-  // 2.5 OGP画像生成（LLM/外部API不使用、フォント欠落時は null → DEFAULT_OG_IMAGE にフォールバック）
+  // 2.5 OGP画像生成（LLM/外部API不使用）。作り置きの AI の絵（assets/og-bg）に見出しを重ねる。
+  // 背景が無い・合成に失敗したら文字だけのカード、フォント欠落時は null → DEFAULT_OG_IMAGE にフォールバック
   const slug = `${YYYYMM}/${DATE_STR}_uber_daily`;
   let ogImageRel = null;
   if (!DRY_RUN) {
-    const fullTitle = `🚴 ${CONFIG.blog.tag}情報 ${title}`;
-    ogImageRel = await renderOgCard({
-      title: fullTitle,
-      date: DATE_DISPLAY,
-      tags: [CONFIG.blog.tag],
+    const todayFc = weather?.forecasts?.[0];
+    const weatherType = getWeatherType(todayFc?.telop, todayFc?.tempMax);
+    ogImageRel = await renderAutoPhotoOg({
+      projectDir: ROOT,
       slug,
+      date: DATE_DISPLAY,
+      groups: bgGroups({
+        weatherType,
+        telop: todayFc?.telop,
+        rainMax: maxRainPercent(todayFc?.chanceOfRain),
+        month: Number(MM),
+      }),
+      text: dailyCardText({
+        date: DATE_DISPLAY,
+        weatherType,
+        telop: todayFc?.telop,
+        tempMax: todayFc?.tempMax,
+        tempMin: todayFc?.tempMin,
+        gasRegular: gasPrice?.regular,
+        multiplier: predictions.length
+          ? Math.max(...predictions.map((p) => p.multiplier))
+          : 1,
+        titleTemplates: CONFIG.titleTemplates,
+      }),
       imagesDir: path.join(ROOT, "src/images"),
       config: OG_CONFIG,
     });
+    if (!ogImageRel) {
+      const fullTitle = `🚴 ${CONFIG.blog.tag}情報 ${title}`;
+      ogImageRel = await renderOgCard({
+        title: fullTitle,
+        date: DATE_DISPLAY,
+        tags: [CONFIG.blog.tag],
+        slug,
+        imagesDir: path.join(ROOT, "src/images"),
+        config: OG_CONFIG,
+      });
+    }
   }
 
   // 3. 各セクションHTML生成

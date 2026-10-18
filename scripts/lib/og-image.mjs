@@ -188,9 +188,14 @@ export async function assertCjkFont(config) {
   if (process.platform === "linux") {
     try {
       const { execSync } = await import("child_process");
-      const list = execSync("fc-list :lang=ja", { encoding: "utf-8", timeout: 3000 });
+      const list = execSync("fc-list :lang=ja", {
+        encoding: "utf-8",
+        timeout: 3000,
+      });
       if (!list || list.trim().length === 0) {
-        console.warn("⚠️ Linux環境で日本語フォント（fc-list :lang=ja）が見つかりません");
+        console.warn(
+          "⚠️ Linux環境で日本語フォント（fc-list :lang=ja）が見つかりません",
+        );
         return false;
       }
     } catch (e) {
@@ -263,6 +268,140 @@ export async function renderOgCard({
   } catch (err) {
     console.warn(
       `⚠️ OGP画像生成に失敗（フォールバックします）: ${slug} — ${err.message}`,
+    );
+    return null;
+  }
+}
+
+// ===== AI の絵＋見出しのカード（自動投稿用。手で書く記事の見出しの合成と同じ作り） =====
+// E:/create-images/scripts/overlay.mjs（1600×900）を 1200×630 に移したもの。
+// 文字は 700 まで: Actions の fonts-noto-cjk は Regular/Bold だけで、900 は黙って 700 になる。
+// 手元（Noto Sans JP）でも同じ太さにして、見本と本番の見た目をそろえる。
+
+// 天気・種類ごとの色（見出しのグラデーションとバッジ）
+export const PHOTO_THEMES = {
+  sunny: ["#fde047", "#fb923c", "#f97316"],
+  cloudy: ["#e2e8f0", "#93c5fd", "#60a5fa"],
+  rainy: ["#a5f3fc", "#38bdf8", "#6366f1"],
+  storm: ["#fde68a", "#f87171", "#a855f7"],
+  snow: ["#ffffff", "#bae6fd", "#7dd3fc"],
+  hot: ["#fef08a", "#f97316", "#ef4444"],
+  cold: ["#e0f2fe", "#7dd3fc", "#818cf8"],
+  tech: ["#67e8f9", "#818cf8", "#c084fc"],
+};
+
+/** 背景の上に重ねる見出しの SVG（左を暗くする・バッジ・見出し・副題・情報の行・GRAVITY PORTAL） */
+export function buildPhotoSvg({
+  theme,
+  badge,
+  title,
+  subtitle,
+  lines = [],
+  config,
+}) {
+  const { width: W, height: H } = config.size;
+  const font = escapeXml(config.font.family);
+  const [c1, c2, c3] = PHOTO_THEMES[theme] ?? PHOTO_THEMES.tech;
+  const clean = stripEmoji(title);
+  // 見出しは左 590px に収める（全角 1 文字 ≒ フォントサイズ）
+  const titleSize = Math.min(
+    88,
+    Math.floor(590 / Math.max(1, displayWidth(clean))),
+  );
+  // 17px・字間 3 の英大文字は 1 文字 ≒ 14px
+  const badgeW = 60 + badge.length * 14;
+  const titleY = 200 + titleSize;
+  const lineSvg = lines
+    .map(
+      (t, i) =>
+        `<text x="16" y="${24 + i * 34}" font-family="${font}" font-size="${i === 0 ? 23 : 20}" font-weight="${i === 0 ? 700 : 400}" fill="${i === 0 ? "#e2e8f0" : "#cbd5e1"}">${escapeXml(t)}</text>`,
+    )
+    .join("\n    ");
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="shadeX" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#020617" stop-opacity="0.92"/>
+      <stop offset="40%" stop-color="#020617" stop-opacity="0.72"/>
+      <stop offset="65%" stop-color="#020617" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#020617" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="shadeY" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#020617" stop-opacity="0.35"/>
+      <stop offset="30%" stop-color="#020617" stop-opacity="0"/>
+      <stop offset="75%" stop-color="#020617" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#020617" stop-opacity="0.55"/>
+    </linearGradient>
+    <linearGradient id="titleGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="${c1}"/>
+      <stop offset="55%" stop-color="${c2}"/>
+      <stop offset="100%" stop-color="${c3}"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="${c2}"/>
+      <stop offset="100%" stop-color="${c3}"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-20%" width="120%" height="140%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#000" flood-opacity="0.85"/>
+    </filter>
+  </defs>
+  <rect width="${W}" height="${H}" fill="url(#shadeX)"/>
+  <rect width="${W}" height="${H}" fill="url(#shadeY)"/>
+  <line x1="72" y1="105" x2="${W - 72}" y2="105" stroke="${c2}" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="6,6"/>
+  <line x1="72" y1="${H - 84}" x2="${W - 72}" y2="${H - 84}" stroke="${c2}" stroke-opacity="0.35" stroke-width="1.5" stroke-dasharray="6,6"/>
+  <g transform="translate(72, 140)">
+    <rect x="0" y="0" width="${badgeW}" height="38" rx="19" fill="#020617" fill-opacity="0.55" stroke="${c2}" stroke-width="2"/>
+    <circle cx="21" cy="19" r="5" fill="${c2}"/>
+    <text x="38" y="25" font-family="${font}" font-size="17" font-weight="700" fill="#f1f5f9" letter-spacing="3">${escapeXml(badge)}</text>
+  </g>
+  <text x="72" y="${titleY}" font-family="${font}" font-size="${titleSize}" font-weight="700" fill="url(#titleGrad)" filter="url(#shadow)">${escapeXml(clean)}</text>
+  <text x="72" y="${titleY + 58}" font-family="${font}" font-size="36" font-weight="700" fill="#ffffff" filter="url(#shadow)">${escapeXml(subtitle)}</text>
+  <g transform="translate(72, ${titleY + 92})">
+    <rect x="0" y="0" width="4" height="${lines.length * 34 + 2}" rx="2" fill="url(#accent)"/>
+    ${lineSvg}
+  </g>
+  <g transform="translate(72, ${H - 46})">
+    <text x="0" y="0" font-family="${font}" font-size="17" font-weight="700" fill="#cbd5e1" fill-opacity="0.85" letter-spacing="4">GRAVITY PORTAL</text>
+    <rect x="0" y="11" width="160" height="3" rx="1.5" fill="url(#accent)"/>
+  </g>
+</svg>`;
+}
+
+/**
+ * 背景の絵（bgPath）に見出しを重ねて imagesDir/og/<slug>.webp に書き出す。
+ * 戻り値は renderOgCard と同じ相対パス。フォント欠落・背景の読み込み失敗時は null
+ * （呼び出し側は renderOgCard の文字だけのカードに落とすこと）。
+ */
+export async function renderOgPhotoCard({
+  bgPath,
+  theme,
+  badge,
+  title,
+  subtitle,
+  lines,
+  slug,
+  imagesDir,
+  config,
+  skipFontCheck,
+}) {
+  try {
+    if (!skipFontCheck) {
+      const ok = await assertCjkFont(config);
+      if (!ok) return null;
+    }
+    const { width, height } = config.size;
+    const svg = buildPhotoSvg({ theme, badge, title, subtitle, lines, config });
+    const webp = await sharp(bgPath)
+      .resize(width, height, { fit: "cover" })
+      .composite([{ input: Buffer.from(svg), top: 0, left: 0 }])
+      .webp({ quality: config.photoQuality ?? 82, smartSubsample: true })
+      .toBuffer();
+    const outPath = join(imagesDir, "og", `${slug}.webp`);
+    mkdirSync(dirname(outPath), { recursive: true });
+    writeFileSync(outPath, webp);
+    return ogImageRelPath(slug);
+  } catch (err) {
+    console.warn(
+      `⚠️ 背景つきOGP画像の生成に失敗（文字だけのカードにします）: ${slug} — ${err.message}`,
     );
     return null;
   }

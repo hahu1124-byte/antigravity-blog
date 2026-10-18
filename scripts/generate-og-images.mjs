@@ -9,6 +9,11 @@
  *   node scripts/generate-og-images.mjs --dry-run               対象一覧を表示するだけ（--missing と併用）
  *   node scripts/generate-og-images.mjs --preview --title "..." --tags a,b --date YYYY-MM-DD --out path.webp
  *                                                                blog-data.json を触らずプレビュー画像だけ出力
+ *   node scripts/generate-og-images.mjs --preview --bg-sample --out <フォルダ>
+ *                                                                背景つきカードの見本（天気 8 種＋週刊）をフォルダに出す（記録しない）
+ *
+ * タグに「テック」がある記事（週刊テックトレンド）は、作り置きの AI の絵（assets/og-bg の tech）に見出しを重ねる。
+ * 背景が使えないときと、それ以外の記事は文字だけのカード。
  */
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
 import { dirname, join } from "path";
@@ -20,6 +25,12 @@ import {
   renderOgCard,
 } from "./lib/og-image.mjs";
 import { parseFrontmatter, stringifyFrontmatter } from "./lib/frontmatter.mjs";
+import {
+  bgGroups,
+  dailyCardText,
+  renderAutoPhotoOg,
+  weeklyCardText,
+} from "./lib/og-bg.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PROJECT_DIR = dirname(__dirname);
@@ -48,6 +59,154 @@ function parseArgs(argv) {
     }
   }
   return args;
+}
+
+/** 記事 1 件の OGP を作る。テックの記事は背景つき、使えなければ文字だけのカード */
+async function renderForPost(post, { skipFontCheck } = {}) {
+  if ((post.tags || []).includes("テック")) {
+    const rel = await renderAutoPhotoOg({
+      projectDir: PROJECT_DIR,
+      slug: post.slug,
+      date: post.date,
+      groups: bgGroups({ kind: "tech" }),
+      text: weeklyCardText(post),
+      imagesDir: IMAGES_DIR,
+      config,
+    });
+    if (rel) return rel;
+  }
+  return renderOgCard({
+    title: post.title,
+    date: post.date,
+    tags: post.tags,
+    slug: post.slug,
+    imagesDir: IMAGES_DIR,
+    config,
+    skipFontCheck,
+  });
+}
+
+// 見本: 天気ごとの代表的な日と週刊（日付・気温・ガソリンは見本用の値）
+const BG_SAMPLES = [
+  {
+    name: "sunny",
+    month: 10,
+    weatherType: "sunny",
+    telop: "晴れ",
+    tempMax: 24,
+    tempMin: 15,
+    multiplier: 1,
+  },
+  {
+    name: "cloudy",
+    month: 10,
+    weatherType: "cloudy",
+    telop: "曇り",
+    tempMax: 21,
+    tempMin: 16,
+    multiplier: 1,
+  },
+  {
+    name: "rainy",
+    month: 6,
+    weatherType: "rainy",
+    telop: "雨",
+    tempMax: 25,
+    tempMin: 20,
+    multiplier: 1.3,
+    rainMax: 60,
+  },
+  {
+    name: "heavyrain",
+    month: 7,
+    weatherType: "rainy",
+    telop: "雨",
+    tempMax: 27,
+    tempMin: 23,
+    multiplier: 1.3,
+    rainMax: 90,
+  },
+  {
+    name: "storm",
+    month: 9,
+    weatherType: "storm",
+    telop: "暴風雨",
+    tempMax: 26,
+    tempMin: 22,
+    multiplier: 1.3,
+  },
+  {
+    name: "snow",
+    month: 1,
+    weatherType: "snow",
+    telop: "雪",
+    tempMax: 3,
+    tempMin: -1,
+    multiplier: 1.3,
+  },
+  {
+    name: "hot",
+    month: 8,
+    weatherType: "hot",
+    telop: "晴れ",
+    tempMax: 36,
+    tempMin: 27,
+    multiplier: 1.2,
+  },
+  {
+    name: "cold",
+    month: 1,
+    weatherType: "cold",
+    telop: "晴れ",
+    tempMax: 4,
+    tempMin: -2,
+    multiplier: 1.2,
+  },
+];
+
+async function runBgSample(args) {
+  const outDir = args.out
+    ? join(PROJECT_DIR, args.out)
+    : join(PROJECT_DIR, "tmp", "og-bg-sample");
+  const titleTemplates = JSON.parse(
+    readFileSync(join(__dirname, "uber-daily-config.json"), "utf-8"),
+  ).titleTemplates;
+  const t0 = Date.now();
+  for (const s of BG_SAMPLES) {
+    const date = `2026-${String(s.month).padStart(2, "0")}-18`;
+    await renderAutoPhotoOg({
+      projectDir: PROJECT_DIR,
+      slug: `sample_${s.name}`,
+      date,
+      groups: bgGroups({
+        weatherType: s.weatherType,
+        telop: s.telop,
+        rainMax: s.rainMax || 0,
+        month: s.month,
+      }),
+      text: dailyCardText({ ...s, date, gasRegular: "163.8", titleTemplates }),
+      imagesDir: outDir,
+      config,
+      record: false,
+    });
+  }
+  await renderAutoPhotoOg({
+    projectDir: PROJECT_DIR,
+    slug: "sample_weekly",
+    date: "2026-10-11",
+    groups: bgGroups({ kind: "tech" }),
+    text: weeklyCardText({
+      title: "📰 週刊テックトレンド #41（10/05〜10/11）",
+      excerpt:
+        "今週（10/05〜10/11）のWebデザイン・技術・AI・個人開発トレンド 206件から注目記事をピックアップ。",
+    }),
+    imagesDir: outDir,
+    config,
+    record: false,
+  });
+  console.log(
+    `✅ 見本 ${BG_SAMPLES.length + 1} 枚を書き出しました: ${join(outDir, "og")}（${Date.now() - t0}ms）`,
+  );
 }
 
 function hasHeroImage(post) {
@@ -139,15 +298,7 @@ async function runMissing(args) {
 
   let generated = 0;
   for (const post of targets) {
-    const relPath = await renderOgCard({
-      title: post.title,
-      date: post.date,
-      tags: post.tags,
-      slug: post.slug,
-      imagesDir: IMAGES_DIR,
-      config,
-      skipFontCheck: true,
-    });
+    const relPath = await renderForPost(post, { skipFontCheck: true });
     if (relPath) {
       post.ogImage = relPath;
       generated++;
@@ -158,7 +309,11 @@ async function runMissing(args) {
         const raw = readFileSync(articlePath, "utf-8");
         const { metadata, content } = parseFrontmatter(raw);
         metadata.ogImage = relPath;
-        writeFileSync(articlePath, stringifyFrontmatter(metadata, content), "utf-8");
+        writeFileSync(
+          articlePath,
+          stringifyFrontmatter(metadata, content),
+          "utf-8",
+        );
       }
     }
   }
@@ -179,14 +334,7 @@ async function runSlug(args) {
     return;
   }
 
-  const relPath = await renderOgCard({
-    title: post.title,
-    date: post.date,
-    tags: post.tags,
-    slug: post.slug,
-    imagesDir: IMAGES_DIR,
-    config,
-  });
+  const relPath = await renderForPost(post);
 
   if (!relPath) {
     console.error("❌ 生成に失敗しました（フォント欠落の可能性）");
@@ -203,7 +351,11 @@ async function runSlug(args) {
     const raw = readFileSync(articlePath, "utf-8");
     const { metadata, content } = parseFrontmatter(raw);
     metadata.ogImage = relPath;
-    writeFileSync(articlePath, stringifyFrontmatter(metadata, content), "utf-8");
+    writeFileSync(
+      articlePath,
+      stringifyFrontmatter(metadata, content),
+      "utf-8",
+    );
   }
 
   console.log(`✅ 生成しました: ${relPath}`);
@@ -213,6 +365,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
 
   if (args["check-font"]) return runCheckFont();
+  if (args.preview && args["bg-sample"]) return runBgSample(args);
   if (args.preview) return runPreview(args);
   if (args.slug) return runSlug(args);
   if (args.missing || args["dry-run"]) return runMissing(args);
