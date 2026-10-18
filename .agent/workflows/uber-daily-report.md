@@ -101,7 +101,7 @@ bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node
   - 晴れ・曇り・雨は `{季節}_sunny/_cloudy/_rainy`、猛暑 `summer_hot`、寒さ `winter_cold`、雪 `winter_snow`、荒天は「暴風」なら `any_typhoon`・それ以外 `any_thunder`、雨で降水確率 80% 以上は `any_heavyrain`。週刊テックトレンドは `tech`
   - **直近 30 日（週刊は直近 8 回）に使った絵は選ばない**。群で使い切ったら同じ季節の近い天気 → となりの季節の同じ天気から借りる。同じ日にやり直しても同じ絵になる
   - 使った絵は `src/og-bg-history.json`（`src/blog-data.json` はビルドが作り直すのでそこには残せない）。ログに「🖼️ OGP背景: キー（群）」が出る
-- 背景が使えないときは今の文字だけのカード（`renderOgCard`）。文字の太さは 700（Actions の `fonts-noto-cjk` に 900 が無いため）
+- 背景が使えないときは今の文字だけのカード（`renderOgCard`）。文字の太さは見本どおり（見出し 900・副題 800）。`fonts-noto-cjk` は Regular/Bold だけなので、Actions（この日次と GP の `weekly-trend-post.yml`）で `fonts-noto-cjk-extra` を別の手順で入れる（失敗しても止めない。入らなければ 700 で描かれる）。ログの「日本語フォントの太さを追加」に Black が出ていれば入っている
 - 見本を出す: `bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/generate-og-images.mjs --preview --bg-sample --out ../../archive/scratch/ogbg/sample`（天気 8 種＋週刊、記録しない）
 - 背景を作り直したら `node E:\create-images\scripts\export-ogbg.mjs` で WebP と `index.json` を書き出し直す
 

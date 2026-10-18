@@ -37,6 +37,16 @@ jobs:
           fc-cache -f -v
           fc-list :lang=ja | head -n 5
 
+      # アイキャッチの見出しの極太（Black 900）・Medium。fonts-noto-cjk は Regular/Bold だけ。
+      # 入らなくても 700 で描けるので、別の手順にして失敗しても止めない
+      - name: 日本語フォントの太さを追加（アイキャッチの見出し用）
+        continue-on-error: true
+        timeout-minutes: 8
+        run: |
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk-extra
+          fc-cache -f
+          fc-list :lang=ja style | grep -i "Noto Sans CJK JP" | grep -iE "black|medium" | head -n 3
+
       - name: Generate daily report
         run: node scripts/generate-uber-daily.mjs
 

@@ -275,8 +275,8 @@ export async function renderOgCard({
 
 // ===== AI の絵＋見出しのカード（自動投稿用。手で書く記事の見出しの合成と同じ作り） =====
 // E:/create-images/scripts/overlay.mjs（1600×900）を 1200×630 に移したもの。
-// 文字は 700 まで: Actions の fonts-noto-cjk は Regular/Bold だけで、900 は黙って 700 になる。
-// 手元（Noto Sans JP）でも同じ太さにして、見本と本番の見た目をそろえる。
+// 文字の太さは見本どおり（見出し 900・副題 800・情報の 2 行目 500）。fonts-noto-cjk は Regular/Bold だけで
+// 900 が黙って 700 になるので、Actions（日次・GP の週刊）で fonts-noto-cjk-extra（Black・Medium 入り）も入れる。
 
 // 天気・種類ごとの色（見出しのグラデーションとバッジ）
 export const PHOTO_THEMES = {
@@ -314,7 +314,7 @@ export function buildPhotoSvg({
   const lineSvg = lines
     .map(
       (t, i) =>
-        `<text x="16" y="${24 + i * 34}" font-family="${font}" font-size="${i === 0 ? 23 : 20}" font-weight="${i === 0 ? 700 : 400}" fill="${i === 0 ? "#e2e8f0" : "#cbd5e1"}">${escapeXml(t)}</text>`,
+        `<text x="16" y="${24 + i * 34}" font-family="${font}" font-size="${i === 0 ? 23 : 20}" font-weight="${i === 0 ? 700 : 500}" fill="${i === 0 ? "#e2e8f0" : "#cbd5e1"}">${escapeXml(t)}</text>`,
     )
     .join("\n    ");
   return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
@@ -353,8 +353,8 @@ export function buildPhotoSvg({
     <circle cx="21" cy="19" r="5" fill="${c2}"/>
     <text x="38" y="25" font-family="${font}" font-size="17" font-weight="700" fill="#f1f5f9" letter-spacing="3">${escapeXml(badge)}</text>
   </g>
-  <text x="72" y="${titleY}" font-family="${font}" font-size="${titleSize}" font-weight="700" fill="url(#titleGrad)" filter="url(#shadow)">${escapeXml(clean)}</text>
-  <text x="72" y="${titleY + 58}" font-family="${font}" font-size="36" font-weight="700" fill="#ffffff" filter="url(#shadow)">${escapeXml(subtitle)}</text>
+  <text x="72" y="${titleY}" font-family="${font}" font-size="${titleSize}" font-weight="900" fill="url(#titleGrad)" filter="url(#shadow)">${escapeXml(clean)}</text>
+  <text x="72" y="${titleY + 58}" font-family="${font}" font-size="36" font-weight="800" fill="#ffffff" filter="url(#shadow)">${escapeXml(subtitle)}</text>
   <g transform="translate(72, ${titleY + 92})">
     <rect x="0" y="0" width="4" height="${lines.length * 34 + 2}" rx="2" fill="url(#accent)"/>
     ${lineSvg}
