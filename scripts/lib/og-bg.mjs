@@ -276,7 +276,8 @@ export function weeklyCardText({ title, excerpt, date }) {
 
 /**
  * 背景を選んで見出しを重ね、imagesDir/og/<slug>.webp に書く。使った絵は src/og-bg-history.json に残す。
- * 背景の一覧が無い・合成に失敗したら null（呼び出し側は renderOgCard の文字だけのカードに落とす）。
+ * 背景の一覧が無い・選べない・合成に失敗したら null（呼び出し側は renderOgCard の文字だけのカードに落とす）。
+ * 何が起きても投げない（朝の日次レポートを止めない）。記録だけ失敗したときは画像を使う。
  * record: false のときは記録しない（見本づくり用）。
  */
 export async function renderAutoPhotoOg({
@@ -289,36 +290,48 @@ export async function renderAutoPhotoOg({
   config,
   record = true,
 }) {
-  const assetsDir = join(projectDir, "assets", "og-bg");
-  const historyPath = join(projectDir, "src", "og-bg-history.json");
-  let index;
   try {
-    index = loadBgIndex(assetsDir);
-  } catch (err) {
-    console.warn(
-      `⚠️ OGP背景の一覧を読めません（文字だけのカードにします）: ${err.message}`,
-    );
-    return null;
-  }
-  const history = loadBgHistory(historyPath);
-  const bg = pickBackground({ assetsDir, index, history, slug, date, groups });
-  if (!bg) {
-    console.warn(`⚠️ OGP背景が見つかりません（${groups.join(" → ")}）`);
-    return null;
-  }
-  const rel = await renderOgPhotoCard({
-    bgPath: bg.path,
-    ...text,
-    slug,
-    imagesDir,
-    config,
-  });
-  if (rel) {
-    if (record)
-      recordBackground(historyPath, history, { date, slug, key: bg.key });
+    const assetsDir = join(projectDir, "assets", "og-bg");
+    const historyPath = join(projectDir, "src", "og-bg-history.json");
+    const index = loadBgIndex(assetsDir);
+    const history = loadBgHistory(historyPath);
+    const bg = pickBackground({
+      assetsDir,
+      index,
+      history,
+      slug,
+      date,
+      groups,
+    });
+    if (!bg) {
+      console.warn(`⚠️ OGP背景が見つかりません（${groups.join(" → ")}）`);
+      return null;
+    }
+    const rel = await renderOgPhotoCard({
+      bgPath: bg.path,
+      ...text,
+      slug,
+      imagesDir,
+      config,
+    });
+    if (!rel) return null;
+    if (record) {
+      try {
+        recordBackground(historyPath, history, { date, slug, key: bg.key });
+      } catch (err) {
+        console.warn(
+          `⚠️ OGP背景の記録に失敗（画像はそのまま使います）: ${err.message}`,
+        );
+      }
+    }
     console.log(
       `🖼️ OGP背景: ${bg.key}（${bg.group}${bg.borrowed ? `・本来は ${groups[0]} から借用` : ""}）`,
     );
+    return rel;
+  } catch (err) {
+    console.warn(
+      `⚠️ 背景つきOGP画像を作れません（文字だけのカードにします）: ${slug} — ${err.message}`,
+    );
+    return null;
   }
-  return rel;
 }
