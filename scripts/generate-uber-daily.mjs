@@ -681,7 +681,6 @@ async function main() {
         telop: todayFc?.telop,
         tempMax: todayFc?.tempMax,
         tempMin: todayFc?.tempMin,
-        gasRegular: gasPrice?.regular,
         multiplier: predictions.length
           ? Math.max(...predictions.map((p) => p.multiplier))
           : 1,

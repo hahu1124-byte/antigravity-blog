@@ -86,7 +86,7 @@ async function renderForPost(post, { skipFontCheck } = {}) {
   });
 }
 
-// 見本: 天気ごとの代表的な日と週刊（日付・気温・ガソリンは見本用の値）
+// 見本: 天気ごとの代表的な日と週刊（日付・気温は見本用の値）
 const BG_SAMPLES = [
   {
     name: "sunny",
@@ -184,7 +184,7 @@ async function runBgSample(args) {
         rainMax: s.rainMax || 0,
         month: s.month,
       }),
-      text: dailyCardText({ ...s, date, gasRegular: "163.8", titleTemplates }),
+      text: dailyCardText({ ...s, date, titleTemplates }),
       imagesDir: outDir,
       config,
       record: false,

@@ -220,14 +220,16 @@ export function recordBackground(historyPath, history, { date, slug, key }) {
 
 const DAY_NAMES = ["日", "月", "火", "水", "木", "金", "土"];
 
-/** 日次レポートの見出し。titleTemplates は uber-daily-config.json の同名の設定 */
+/**
+ * 日次レポートの見出し。titleTemplates は uber-daily-config.json の同名の設定。
+ * ガソリン価格は載せない（ユーザー指示 2026-10-18「燃料の料金は別にいれなくていい」）
+ */
 export function dailyCardText({
   date,
   weatherType,
   telop,
   tempMax,
   tempMin,
-  gasRegular,
   multiplier,
   titleTemplates,
 }) {
@@ -247,12 +249,7 @@ export function dailyCardText({
     badge: "FOOD DELIVERY DAILY",
     title: tmpl.text,
     subtitle: `${mo}月${d}日（${dow}）のデリバリー情報`,
-    lines: [
-      [telop, temp].filter(Boolean).join("　"),
-      [gasRegular ? `レギュラー ${gasRegular}円` : "", demand]
-        .filter(Boolean)
-        .join(" ／ "),
-    ].filter(Boolean),
+    lines: [[telop, temp].filter(Boolean).join("　"), demand].filter(Boolean),
   };
 }
 
