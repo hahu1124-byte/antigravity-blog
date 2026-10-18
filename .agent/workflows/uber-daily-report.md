@@ -104,6 +104,7 @@ bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node
 - 背景が使えないときは今の文字だけのカード（`renderOgCard`）。文字の太さは見本どおり（見出し 900・副題 800）。`fonts-noto-cjk` は Regular/Bold だけなので、Actions（この日次と GP の `weekly-trend-post.yml`）で `fonts-noto-cjk-extra` を別の手順で入れる（失敗しても止めない。入らなければ 700 で描かれる）。ログの「日本語フォントの太さを追加」に Black が出ていれば入っている
 - 見本を出す: `bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/generate-og-images.mjs --preview --bg-sample --out ../../archive/scratch/ogbg/sample`（天気 8 種＋週刊、記録しない）
 - 背景を作り直したら `node E:\create-images\scripts\export-ogbg.mjs` で WebP と `index.json` を書き出し直す
+- 選び方（`og-bg.mjs`）を変えたら `bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/test-og-bg.mjs` で、架空の日々で 30 日以内の重複・週刊の直近 8 回の重複が 0 か確かめる（記録は一時フォルダ）
 
 ---
 
