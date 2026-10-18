@@ -91,6 +91,19 @@ bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node
 | イベント情報 | Walker Plus リンク | 固定 |
 | ガソリン価格 | gas-price-cache.json（週次ワークフローがcurl_cffiで自動取得） | 自動 |
 | Amazon アフィリエイト | uber-daily-config.json | 固定 |
+| アイキャッチ（OGP） | 作り置きの AI の絵（assets/og-bg）＋見出し | 自動 |
+
+---
+
+## アイキャッチ（OGP）（2026-10-18 から）
+
+- 作り置きの背景 408 枚（`assets/og-bg/<季節>/<キー>.webp`、1200×630、元は `E:\create-images\ogbg\gemini-anime\`）から、季節（月）と天気（`getWeatherType()` の 7 種）で選んで見出しを重ねる（`scripts/lib/og-bg.mjs` の `renderAutoPhotoOg` → `og-image.mjs` の `renderOgPhotoCard`）
+  - 晴れ・曇り・雨は `{季節}_sunny/_cloudy/_rainy`、猛暑 `summer_hot`、寒さ `winter_cold`、雪 `winter_snow`、荒天は「暴風」なら `any_typhoon`・それ以外 `any_thunder`、雨で降水確率 80% 以上は `any_heavyrain`。週刊テックトレンドは `tech`
+  - **直近 30 日（週刊は直近 8 回）に使った絵は選ばない**。群で使い切ったら同じ季節の近い天気 → となりの季節の同じ天気から借りる。同じ日にやり直しても同じ絵になる
+  - 使った絵は `src/og-bg-history.json`（`src/blog-data.json` はビルドが作り直すのでそこには残せない）。ログに「🖼️ OGP背景: キー（群）」が出る
+- 背景が使えないときは今の文字だけのカード（`renderOgCard`）。文字の太さは 700（Actions の `fonts-noto-cjk` に 900 が無いため）
+- 見本を出す: `bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/generate-og-images.mjs --preview --bg-sample --out ../../archive/scratch/ogbg/sample`（天気 8 種＋週刊、記録しない）
+- 背景を作り直したら `node E:\create-images\scripts\export-ogbg.mjs` で WebP と `index.json` を書き出し直す
 
 ---
 
@@ -138,6 +151,9 @@ bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node
 | `scripts/generate-uber-daily.mjs` | メイン生成スクリプト |
 | `scripts/uber-daily-config.json` | ルール・キーワード・テンプレート設定 |
 | `scripts/gas-price-cache.json` | ガソリン価格キャッシュ |
+| `scripts/lib/og-bg.mjs` | アイキャッチの背景選び・見出しの中身・使った絵の記録 |
+| `assets/og-bg/` | アイキャッチの背景 408 枚＋`index.json`（公開物にはコピーされない） |
+| `src/og-bg-history.json` | 使った背景の記録（40 日分、週刊は直近 8 回分） |
 | `scripts/update-gas-price.cjs` | fetch-gas-price.py呼び出し＋xlsxパース→キャッシュ更新（GitHub Actions側） |
 | `scripts/local-gas-archive.cjs` | fetch-gas-price.py呼び出し＋xlsx実体をG:\マイドライブ\gas\へ保存（ローカルタスクスケジューラ側、cache.json更新なし） |
 | `scripts/fetch-gas-price.py` | curl_cffiでAWS WAFを回避しxlsxを直接取得 |

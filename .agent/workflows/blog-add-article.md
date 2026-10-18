@@ -70,7 +70,7 @@ tags: [タグ1, タグ2]
 
 ### 3. OGP画像の自動生成（自動投稿の記事だけ）
 
-Uber日次レポート・週刊テックトレンドなど**自動投稿の記事だけ**、sharpによる自動生成CLI（`scripts/generate-og-images.mjs`）を使う。**手で書く記事には使わない**（§2）:
+Uber日次レポート・週刊テックトレンドなど**自動投稿の記事だけ**、sharpによる自動生成CLI（`scripts/generate-og-images.mjs`）を使う。**手で書く記事には使わない**（§2）。2026-10-18 から、日次と週刊（タグ「テック」）は作り置きの AI の絵（`assets/og-bg`）に見出しを重ねる（→ `uber-daily-report.md`「アイキャッチ（OGP）」）。それ以外のタグの記事は文字だけのカードのまま:
 
 ```bash
 bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/generate-og-images.mjs --slug YYYYMM/記事スラッグ
