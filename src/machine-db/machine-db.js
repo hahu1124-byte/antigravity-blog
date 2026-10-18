@@ -31,15 +31,24 @@
     // お気に入り管理
     let favoriteNames = new Set();
 
-    function isFavorite(name) {
-        return favoriteNames.has(name);
+    // お気に入りに入っている名前（改名前の名前で入っていればその旧名）。無ければ null
+    // お気に入りは親フレームの localStorage に機種名で残るので、改名後も旧名で引けるようにする
+    function favoriteKey(machine) {
+        if (!machine) return null;
+        if (favoriteNames.has(machine.name)) return machine.name;
+        return (machine.formerNames || []).find(n => favoriteNames.has(n)) || null;
+    }
+
+    function isFavorite(machine) {
+        return favoriteKey(machine) !== null;
     }
 
     function toggleFavorite(machine) {
         parent.postMessage({
             type: 'favorite-toggle',
             machine: {
-                name: machine.name,
+                // 旧名で登録済みなら旧名で送る（親フレームは名前の一致で外すため）
+                name: favoriteKey(machine) || machine.name,
                 type: machine.type,
                 prob: machine.prob,
                 baseProbability: machine.baseProbability,
@@ -75,7 +84,7 @@
     function updateFavoriteStars() {
         document.querySelectorAll('.fav-btn').forEach(btn => {
             const name = btn.dataset.name;
-            const active = favoriteNames.has(name);
+            const active = isFavorite(allMachines.find(m => m.name === name));
             btn.textContent = active ? '★' : '☆';
             btn.classList.toggle('fav-active', active);
         });
@@ -157,7 +166,8 @@
     async function loadData() {
         try {
             const PAGE = 1000;
-            const SELECT = 'name,type,prob,base_probability,border_equiv,rb,yutime_trigger,yutime_spins,avg_chain,avg_acquired,entry_rate,real_cont_rate,rush_rate,aliases,release_date,maker,source_url,updated_at,created_at';
+            // formerNames: 改名前の名前（extra_data.formerNames）。お気に入りを旧名でも引くために読む
+            const SELECT = 'name,type,prob,base_probability,border_equiv,rb,yutime_trigger,yutime_spins,avg_chain,avg_acquired,entry_rate,real_cont_rate,rush_rate,aliases,release_date,maker,source_url,updated_at,created_at,formerNames:extra_data->formerNames';
             const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` };
             const allRows = [];
             for (let offset = 0; ; offset += PAGE) {
@@ -184,6 +194,7 @@
                 realContRate: Number(row.real_cont_rate) || 0,
                 rushRate: Number(row.rush_rate) || 0,
                 aliases: Array.isArray(row.aliases) ? row.aliases : [],
+                formerNames: Array.isArray(row.formerNames) ? row.formerNames : [],
                 releaseDate: row.release_date || null,
                 maker: row.maker || '',
                 sourceUrl: row.source_url || '',
@@ -251,8 +262,8 @@
             let cmp = 0;
             switch (sortKey) {
                 case 'fav': {
-                    const aFav = favoriteNames.has(a.name) ? 1 : 0;
-                    const bFav = favoriteNames.has(b.name) ? 1 : 0;
+                    const aFav = isFavorite(a) ? 1 : 0;
+                    const bFav = isFavorite(b) ? 1 : 0;
                     cmp = bFav - aFav;
                     break;
                 }
@@ -400,8 +411,8 @@
         const v = columnVisibility;
         const html = pageData.map((m, i) => {
             const globalIdx = start + i;
-            const favClass = isFavorite(m.name) ? 'fav-active' : '';
-            const favStar = isFavorite(m.name) ? '★' : '☆';
+            const favClass = isFavorite(m) ? 'fav-active' : '';
+            const favStar = isFavorite(m) ? '★' : '☆';
             let cells = `<td class="fav-cell"><button class="fav-btn ${favClass}" data-name="${esc(m.name)}" title="お気に入り">${favStar}</button></td>`;
             const newBadge = isNewMachine(m.createdAt) ? '<span class="new-badge">NEW</span>' : '';
             cells += `<td class="machine-name" title="${esc(m.name)}">${newBadge}${esc(m.name)}</td>`;

@@ -9,6 +9,7 @@ import { join } from "path";
 import { BUILD_STAMP, OUTPUT_DIR, PROJECT_DIR } from "./context.mjs";
 import { SITE_URL, escapeHtml } from "./html.mjs";
 import { gpHeaderBlock } from "./gp-header.mjs";
+import { assignSlugs, planRedirects } from "./machine-slugs.mjs";
 
 // ==========================================
 // 機種SEO個別ページ生成 (/machine-db/[slug]/index.html)
@@ -23,18 +24,6 @@ export function buildMachinePages() {
 
   const mData = JSON.parse(readFileSync(MACHINES_PATH, "utf-8"));
   const machines = (mData.machines || []).filter((m) => m.prob > 0 && m.name);
-
-  function toSlug(name) {
-    return name
-      .replace(/[【】「」『』（）()〈〉《》<>]/g, "")
-      .replace(/[～〜]/g, "-")
-      .replace(/[！!？?・：:＆&＋+／/＊*＃#|"]/g, "")
-      .replace(/[\s　]+/g, "-")
-      .replace(/[\\]/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "")
-      .toLowerCase();
-  }
 
   function mTypeBadge(type) {
     const map = {
@@ -201,6 +190,26 @@ ${m.yutimeTrigger > 0 ? `<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回�
 </html>`;
   }
 
+  // 改名前の URL に置く転送ページ（新しい URL へ即転送・検索結果には出さない）
+  function redirectPageHtml({ from, to, name }) {
+    const url = `${SITE_URL}/machine-db/${to}/`;
+    return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${escapeHtml(name)} | 機種データベース</title>
+<meta name="robots" content="noindex, follow">
+<link rel="canonical" href="${url}">
+<meta http-equiv="refresh" content="0; url=${url}">
+<script>location.replace(${JSON.stringify(`/machine-db/${to}/`)});</script>
+</head>
+<body>
+<p>この機種のページは <a href="${url}">${escapeHtml(name)}</a> に移動しました。</p>
+<!-- 旧 URL: /machine-db/${escapeHtml(from)}/ -->
+</body>
+</html>`;
+  }
+
   // 既存の machine-db ページスラッグを事前収集（差分表示用）
   const machineDbDistDir = join(OUTPUT_DIR, "machine-db");
   const existingMachineSlugs = new Set(
@@ -211,23 +220,35 @@ ${m.yutimeTrigger > 0 ? `<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回�
       : [],
   );
 
-  // 生成
+  // 生成（slug の付番は machine-slugs.mjs。並び順で -1, -2 … が決まる）
   const slugMap = new Map();
-  let generated = 0,
-    dupes = 0;
-  for (const m of machines) {
-    let slug = toSlug(m.name) || `machine-${generated}`;
-    if (slugMap.has(slug)) {
-      dupes++;
-      slug = `${slug}-${dupes}`;
-    }
+  let generated = 0;
+  const { slugs, dupes } = assignSlugs(machines);
+  machines.forEach((m, i) => {
+    const slug = slugs[i];
     slugMap.set(slug, m.name);
     m.slug = slug; // 機種データにスラッグを直接追加
     const dir = join(OUTPUT_DIR, "machine-db", slug);
     mkdirSync(dir, { recursive: true });
     writeFileSync(join(dir, "index.html"), machinePageHtml(m, slug), "utf-8");
     generated++;
+  });
+
+  // 改名した機種（formerNames / formerSlugs を持つ機種）の旧 URL に転送ページを置く。
+  // 旧 URL は検索エンジン・外部リンクに残っているので、404 にせず新しい URL へ送る。
+  // 転送ページは slugMap に入れない（サイトマップ・slug-map.json・allSlugs・件数に出さない）
+  const { redirects, skipped } = planRedirects(machines, slugs);
+  for (const r of redirects) {
+    const dir = join(OUTPUT_DIR, "machine-db", r.from);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, "index.html"), redirectPageHtml(r), "utf-8");
   }
+  if (redirects.length > 0)
+    console.log(`↪️  改名した機種の転送ページ: ${redirects.length}件`);
+  for (const s of skipped)
+    console.log(
+      `⚠️  転送しない: ${s.from} → ${s.to}（${s.name}: ${s.reason}）`,
+    );
 
   // machines.json にスラッグ付きで書き戻し（machine-db.js が m.slug を参照）
   const mDataWithSlugs = JSON.parse(readFileSync(MACHINES_PATH, "utf-8"));
@@ -288,8 +309,10 @@ ${m.yutimeTrigger > 0 ? `<tr><th>発動回転数</th><td>${m.yutimeTrigger} 回�
   const newSlugs = [...slugMap.keys()].filter(
     (s) => !existingMachineSlugs.has(s),
   );
+  const redirectSlugs = new Set(redirects.map((r) => r.from));
   const removedSlugs = [...existingMachineSlugs].filter(
-    (s) => !slugMap.has(s) && s !== "sitemap-machines.txt",
+    (s) =>
+      !slugMap.has(s) && !redirectSlugs.has(s) && s !== "sitemap-machines.txt",
   );
   if (newSlugs.length > 0 || removedSlugs.length > 0) {
     const preview = (arr) =>
