@@ -4,6 +4,9 @@
 //   margin: 最善との点差（評価値）がこの幅に入る候補から選ぶ（0 は常に最善）
 //   mateRule: false なら詰みも見逃し、詰まされる手も指す（既定 true）
 //   byoyomi: エンジンが 1 手に読む時間の上限（ms）。画面で待つ時間は game.js の思考時間の演出
+//   time: 持ち時間で考える段（最強）。main は 1 局の持ち時間、byoyomi は 1 手の最低時間（ms）。
+//     やねうら王が局面に応じて配分する（2026-10-21 の試し: 5 分＋2 秒で 1 手 6〜9 秒、使い切ると 2 秒）
+//   bookPlies: 定跡（book.js）を使う手数（この手数より前の局面だけ引く）
 //   rating: あなたの強さの判定に使う、その段のレーティング（rating.js）
 //
 // 決め方（2026-10-15・scripts/shogi/selfplay.mjs）: ユーザー指示「となりの Lv どうしで弱い側の勝率 30% ほど
@@ -13,6 +16,9 @@
 // 決めた段での弱い側の勝率（となり 100 局ずつ）: 29・36・26・34・38・28・29・27%、
 // 入門Lv1 対 初級Lv1 3%・初級Lv1 対 上級Lv1 5%（40 局）、上級Lv3 対 最強 0%（10 局）。
 // rating は入門Lv1 を 300 とし、上の勝率の Elo の差を足し上げた値（最強は上級Lv3 から +600 の推定）
+// 定跡を使う手数（2026-10-21）: 強い段ほど長く定跡どおりに指す
+const BOOK_PLIES = { 入門: 4, 初級: 8, 上級: 12, 最強: 16 };
+
 export const LEVELS = [
   {
     id: 1,
@@ -103,10 +109,12 @@ export const LEVELS = [
     multiPv: 1,
     margin: 0,
     byoyomi: 2000,
+    time: { main: 300000, byoyomi: 2000 },
     rating: 2028,
   },
 ].map((l) => ({
   byoyomi: 3000,
+  bookPlies: BOOK_PLIES[l.group],
   ...l,
   name: l.lv ? `${l.group} Lv${l.lv}` : l.group,
 }));

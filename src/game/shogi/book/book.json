@@ -1,0 +1,75 @@
+{
+  "about": "将棋 CPU の定跡（手書き）。lines は初形からの USI 手順で、black / white はその手順での先手・後手の戦型（ibisha 居飛車 / furibisha 振り飛車）。weight は選ばれやすさ。skeletons は定跡を外れた後も戦型を続けるための自分の手の並び（先頭の 1 文字は動かす駒: P 歩・S 銀・G 金・R 飛・K 玉）。読み込みと引き方は js/book.js",
+  "lines": [
+    {
+      "name": "角換わり",
+      "black": "ibisha",
+      "white": "ibisha",
+      "weight": 2,
+      "moves": "2g2f 8c8d 7g7f 4a3b 6i7h 8d8e 8h7g 3c3d 7i6h 2b7g+ 6h7g 3a2b 3i4h 7a6b 4g4f 5a4b 4h4g"
+    },
+    {
+      "name": "矢倉",
+      "black": "ibisha",
+      "white": "ibisha",
+      "weight": 2,
+      "moves": "7g7f 8c8d 7i6h 3c3d 6g6f 7a6b 5g5f 5c5d 3i4h 3a4b 4i5h 4a3b 6i7h 5a4a 5h6g 6a5b 6h7g"
+    },
+    {
+      "name": "横歩取り",
+      "black": "ibisha",
+      "white": "ibisha",
+      "weight": 1,
+      "moves": "7g7f 3c3d 2g2f 8c8d 2f2e 8d8e 6i7h 4a3b 2e2d 2c2d 2h2d 8e8f 8g8f 8b8f 2d3d 2b3c"
+    },
+    {
+      "name": "居飛車 対 後手四間飛車",
+      "black": "ibisha",
+      "white": "furibisha",
+      "weight": 2,
+      "moves": "7g7f 3c3d 2g2f 4c4d 2f2e 2b3c 3i4h 8b4b 5i6h 5a6b 6h7h 6b7b 5g5f 7b8b 4i5h 7a7b"
+    },
+    {
+      "name": "居飛車（2五歩早め） 対 後手四間飛車",
+      "black": "ibisha",
+      "white": "furibisha",
+      "weight": 1,
+      "moves": "2g2f 3c3d 2f2e 2b3c 7g7f 4c4d 3i4h 8b4b 5i6h 5a6b 6h7h 6b7b 5g5f 7b8b 4i5h 7a7b"
+    },
+    {
+      "name": "居飛車 対 後手三間飛車",
+      "black": "ibisha",
+      "white": "furibisha",
+      "weight": 1,
+      "moves": "7g7f 3c3d 2g2f 4c4d 2f2e 2b3c 3i4h 8b3b 5i6h 5a6b 6h7h 6b7b 5g5f 7b8b 4i5h 7a7b"
+    },
+    {
+      "name": "先手四間飛車 対 居飛車",
+      "black": "furibisha",
+      "white": "ibisha",
+      "weight": 2,
+      "moves": "7g7f 8c8d 6g6f 8d8e 8h7g 3c3d 2h6h 7a6b 5i4h 5a4b 4h3h 4b3b 3h2h 6c6d 3i3h 6b6c 6i5h"
+    },
+    {
+      "name": "先手三間飛車 対 居飛車",
+      "black": "furibisha",
+      "white": "ibisha",
+      "weight": 1,
+      "moves": "7g7f 3c3d 6g6f 8c8d 2h7h 8d8e 8h7g 7a6b 5i4h 5a4b 4h3h 4b3b 3h2h 5c5d 3i3h"
+    }
+  ],
+  "skeletons": {
+    "ibisha": {
+      "black": ["P2g2f", "P2f2e"],
+      "white": ["P8c8d", "P8d8e"]
+    },
+    "shiken": {
+      "black": ["P7g7f", "P6g6f", "R2h6h", "K5i4h", "K4h3h", "K3h2h", "S3i3h", "G6i5h", "P1g1f"],
+      "white": ["P3c3d", "P4c4d", "R8b4b", "K5a6b", "K6b7b", "K7b8b", "S7a7b", "G4a5b", "P9c9d"]
+    },
+    "sanken": {
+      "black": ["P7g7f", "R2h7h", "K5i4h", "K4h3h", "K3h2h", "S3i3h", "G6i5h", "P6g6f"],
+      "white": ["P3c3d", "R8b3b", "K5a6b", "K6b7b", "K7b8b", "S7a7b", "G4a5b", "P4c4d"]
+    }
+  }
+}

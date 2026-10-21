@@ -31,6 +31,8 @@ const ZEN = "０１２３４５６７８９";
 const KAN = "〇一二三四五六七八九";
 const LEVEL_KEY = "gp-shogi-level";
 const EVAL_KEY = "gp-shogi-eval";
+const STYLE_KEY = "gp-shogi-style";
+const STYLE_NAME = { auto: "", ibisha: "居飛車", furibisha: "振り飛車" };
 // 初めての人のレーティング（入門 Lv3 と同じ）
 const START_RATING = LEVELS.find(
   (l) => l.group === "入門" && l.lv === 3,
@@ -43,7 +45,8 @@ let kifs = []; // 手ごとの表記（▲７六歩 など）
 let history = []; // 終局判定用 { key, check, side }
 let mode = "human"; // "human"（あなた 対 CPU）| "cpu"（CPU 対 CPU）
 let userSide = BLACK; // あなたの手番（CPU 対 CPU では盤の下に先手）
-let cpuLevels = [null, null]; // 手番ごとの CPU の段階（人の手番は null）
+let cpuLevels = [null, null]; // 手番ごとの CPU の段階（人の手番は null。定跡・戦型も乗せる）
+let cpuClock = [0, 0]; // 持ち時間で考える段（最強）の残りの持ち時間（ms）
 let over = null; // 終局 { kind, winner }
 let sel = null; // 選んだ駒 { sq } または持ち駒 { drop: 駒 }
 let pending = null; // 成る／成らないの選択待ち { promote, plain }
@@ -80,6 +83,9 @@ function createWorker() {
       if (!list.length) return render();
       return play(list[Math.floor(Math.random() * list.length)]);
     }
+    // 持ち時間で考える段は、エンジンが考えた時間を残りから引く（定跡の手は 0 秒）
+    if (cpuLevels[pos.side]?.time && d.ms)
+      cpuClock[pos.side] = Math.max(0, cpuClock[pos.side] - d.ms);
     // どの強さでも考えている感じを出すため、決めた思考時間までは待ってから指す
     const id = d.id;
     const wait = cpuDelay - (performance.now() - turnStart);
@@ -126,11 +132,12 @@ function askCpu() {
   thinking = true;
   thinkingId++;
   cpuDelay = thinkTarget();
+  const level = cpuLevels[pos.side];
   worker.postMessage({
     type: "think",
     id: thinkingId,
     position: positionText(),
-    level: cpuLevels[pos.side],
+    level: level.time ? { ...level, remain: cpuClock[pos.side] } : level,
   });
   render();
 }
@@ -507,12 +514,31 @@ function renderRating() {
 }
 
 // ---- 操作 ----
+// 段階に定跡と戦型を乗せる。振り飛車の骨格（四間・三間）は対局ごとに選ぶ
+function withStyle(level, style) {
+  const skeleton =
+    style === "ibisha"
+      ? "ibisha"
+      : style === "furibisha"
+        ? Math.random() < 0.5
+          ? "shiken"
+          : "sanken"
+        : null;
+  const label = STYLE_NAME[style]
+    ? `${level.name}・${STYLE_NAME[style]}`
+    : level.name;
+  return { ...level, book: true, style, skeleton, label };
+}
+
 function startGame() {
   mode = document.querySelector('input[name="gsMode"]:checked').value;
-  const l1 = LEVELS[Number($("gsLevel").value)];
-  const l2 = LEVELS[Number($("gsLevel2").value)];
+  const s1 = $("gsStyle").value;
+  const s2 = $("gsStyle2").value;
+  const l1 = withStyle(LEVELS[Number($("gsLevel").value)], s1);
+  const l2 = withStyle(LEVELS[Number($("gsLevel2").value)], s2);
   try {
     localStorage.setItem(LEVEL_KEY, String(l1.id));
+    localStorage.setItem(STYLE_KEY, s1);
   } catch (e) {}
   if (mode === "human") {
     const choice = document.querySelector('input[name="gsSide"]:checked').value;
@@ -530,6 +556,7 @@ function startGame() {
     userSide = BLACK;
     cpuLevels = [l1, l2];
   }
+  cpuClock = cpuLevels.map((l) => l?.time?.main ?? 0);
   if (thinking) resetWorker();
   start = Position.fromSfen(START);
   times = [];
@@ -545,8 +572,8 @@ function startGame() {
   $("gsPlayCard").hidden = false;
   $("gsTitle").textContent =
     mode === "human"
-      ? `あなた（${userSide === BLACK ? "▲先手" : "△後手"}） 対 CPU（${l1.name}）`
-      : `▲${l1.name} 対 △${l2.name}`;
+      ? `あなた（${userSide === BLACK ? "▲先手" : "△後手"}） 対 CPU（${l1.label}）`
+      : `▲${l1.label} 対 △${l2.label}`;
   askEval();
   render();
   nextTurn();
@@ -596,7 +623,7 @@ function copyKif() {
   const name = (s) =>
     mode === "human" && s === userSide
       ? "あなた"
-      : `CPU（${cpuLevels[s].name}）`;
+      : `CPU（${cpuLevels[s].label}）`;
   const endText = over
     ? ({
         mate: "詰み",
@@ -622,7 +649,9 @@ function renderSetup() {
   const cpuMode =
     document.querySelector('input[name="gsMode"]:checked').value === "cpu";
   $("gsLevelLabel").textContent = cpuMode ? "先手 CPU の強さ" : "CPU の強さ";
+  $("gsStyleLabel").textContent = cpuMode ? "先手 CPU の戦型" : "CPU の戦型";
   $("gsLevel2Field").hidden = !cpuMode;
+  $("gsStyle2Field").hidden = !cpuMode;
   $("gsSideField").hidden = cpuMode;
 }
 
@@ -643,10 +672,14 @@ function init() {
   $("gsLevel").innerHTML = levelOptions();
   $("gsLevel2").innerHTML = levelOptions();
   let saved = 2;
+  let style = "auto";
   try {
     saved = Number(localStorage.getItem(LEVEL_KEY)) || 2;
     showEval = localStorage.getItem(EVAL_KEY) !== "0";
+    const s = localStorage.getItem(STYLE_KEY);
+    if (s in STYLE_NAME) style = s;
   } catch (e) {}
+  $("gsStyle").value = style;
   const idx = Math.max(
     0,
     LEVELS.findIndex((l) => l.id === saved),

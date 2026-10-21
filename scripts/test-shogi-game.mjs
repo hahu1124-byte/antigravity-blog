@@ -176,6 +176,86 @@ eq("頭金で詰み", playLine("4k4/9/4P4/9/9/9/9/9/9 b G 1", "G*5b").result, {
   eq("棒は互角で半分", barRatio(0), 0.5);
 }
 
+// 4-4. 定跡と戦型の骨格（book.js）
+const { buildBook, parsePosition, bookMove, skeletonMove } = await import(
+  new URL("js/book.js", game).href
+);
+const bookData = JSON.parse(
+  await fs.readFile(new URL("book/book.json", game), "utf8"),
+);
+// 定跡の手順はすべて指せる（指せなければ buildBook が投げる）
+const book = buildBook(bookData);
+{
+  const { EVAL_LEVEL } = await import(new URL("js/levels.js", game).href);
+  const at = (line) => parsePosition(line ? `${START} moves ${line}` : START);
+  const lv = (style, bookPlies = 16, skeleton = null) => ({
+    book: true,
+    style,
+    bookPlies,
+    skeleton,
+  });
+  eq(
+    "骨格の手は駒の文字＋指せる形",
+    Object.values(book.skeletons)
+      .flatMap((s) => [...s.black, ...s.white])
+      .every((s) => /^[PLNSGBRK][1-9][a-i][1-9][a-i]$/.test(s)),
+    true,
+  );
+  const firsts = (style) => {
+    const got = new Set();
+    for (let i = 0; i < 40; i++)
+      got.add(bookMove(book, at(""), lv(style), () => i / 40));
+    return [...got].sort();
+  };
+  eq("初手: 振り飛車は 7六歩だけ", firsts("furibisha"), ["7g7f"]);
+  eq("初手: 居飛車は 2六歩か 7六歩", firsts("ibisha"), ["2g2f", "7g7f"]);
+  eq(
+    "後手の振り飛車: 7六歩には 3四歩",
+    bookMove(book, at("7g7f"), lv("furibisha")),
+    "3c3d",
+  );
+  eq(
+    "手順前後でも引ける（2六歩→3四歩→7六歩 は 7六歩→3四歩→2六歩 と同じ局面）",
+    bookMove(book, at("2g2f 3c3d 7g7f"), lv("furibisha")),
+    "4c4d",
+  );
+  eq(
+    "定跡を使う手数を過ぎたら引かない",
+    bookMove(book, at("7g7f 3c3d"), lv("auto", 2)),
+    null,
+  );
+  eq(
+    "評価値用の読みは定跡を引かない",
+    bookMove(book, at(""), EVAL_LEVEL),
+    null,
+  );
+  eq(
+    "表に無い局面は引かない",
+    bookMove(book, at("9g9f 1c1d"), lv("auto")),
+    null,
+  );
+  eq(
+    "骨格: 四間飛車の先手は 7六歩・3四歩の後に 6六歩",
+    skeletonMove(book, at("7g7f 3c3d"), lv("furibisha", 16, "shiken")),
+    "6g6f",
+  );
+  // 銀が先に 3八 に来ていたら、玉の 3八→2八 の手で銀を動かさない（駒の文字で見分ける）
+  eq(
+    "骨格: 決めた駒でない手は飛ばす",
+    skeletonMove(
+      book,
+      at("7g7f 3c3d 6g6f 8c8d 2h6h 8d8e 5i4h 7a6b 3i3h 5a4b"),
+      lv("furibisha", 16, "shiken"),
+    ),
+    "6i5h",
+  );
+  eq(
+    "骨格: 後手の三間飛車は 3四歩の後に 3二飛",
+    skeletonMove(book, at("2g2f 3c3d 2f2e"), lv("furibisha", 16, "sanken")),
+    "8b3b",
+  );
+}
+
 // 5. エンジン: 開いて、どの段階でも初形と途中の局面で合法手を返す
 {
   const { LEVELS } = await import(new URL("js/levels.js", game).href);
@@ -192,6 +272,48 @@ eq("頭金で詰み", playLine("4k4/9/4P4/9/9/9/9/9/9 b G 1", "G*5b").result, {
     eq(
       `エンジン ${level.name} が合法手を返す`,
       legalMoves(pos).some((m) => moveToUsi(m) === r.move),
+      true,
+    );
+  }
+  // 定跡の手はエンジンに聞かずに返す
+  const rb = await think(
+    engine,
+    START,
+    { ...LEVELS[0], book: true, style: "furibisha" },
+    book,
+  );
+  eq(
+    "定跡の手（振り飛車の初手）",
+    [rb.move, rb.book, rb.score],
+    ["7g7f", true, null],
+  );
+  // 骨格を使う段も合法手を返す（定跡を外れた局面）
+  {
+    const line = "9g9f 1c1d";
+    const pos = Position.fromSfen(START);
+    for (const u of line.split(" ")) pos.doMove(moveFromUsi(pos, u));
+    const r = await think(
+      engine,
+      `${START} moves ${line}`,
+      { ...LEVELS[3], book: true, style: "furibisha", skeleton: "shiken" },
+      book,
+    );
+    eq(
+      "骨格を使う段が合法手を返す",
+      legalMoves(pos).some((m) => moveToUsi(m) === r.move),
+      true,
+    );
+  }
+  // 最強: 持ち時間を使い切っていても 1 手 2 秒は考える
+  {
+    const strongest = LEVELS.find((l) => l.time);
+    const r = await think(engine, `${START} moves ${line}`, {
+      ...strongest,
+      remain: 0,
+    });
+    eq(
+      `最強は持ち時間 0 でも 2 秒前後考える（${r.ms} ms）`,
+      r.ms >= 1900 && r.ms <= 4000,
       true,
     );
   }

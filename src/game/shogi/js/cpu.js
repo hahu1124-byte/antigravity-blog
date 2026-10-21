@@ -4,10 +4,17 @@
 //
 // 強さの調整: この版のやねうら王（TOURNAMENT ビルド）には SkillLevel が無いので、
 // 上位の候補手を複数出させ（MultiPV）、最善との点差が段階ごとの幅（margin）に入る手から選ぶ
+// 序盤: 定跡（book.js）にある局面ではエンジンに聞かずに定跡から選び、外れた後は戦型の骨格の手を
+// エンジンの点数で悪くならない範囲で指す
 import factory from "../engine/yaneuraou.js";
+import { parsePosition, bookMove, skeletonMove } from "./book.js";
 
 const MATE = 30000; // 詰みの評価値を点数に直すときの大きさ
 const READY_TIMEOUT = 30000;
+// 骨格の手は、最善との点差がこの幅に入るときだけ指す
+export const SKELETON_MARGIN = 150;
+// 骨格の手が候補に無いとき、その手の点数を測る読みの量（局面数の上限が無い段で使う）
+const SKELETON_NODES = 200000;
 
 // エンジンを開く。wasmBinary・evalBin は呼ぶ側で読み込んで渡す（ブラウザは fetch、node は fs）
 export async function openEngine({ wasmBinary, evalBin }) {
@@ -29,6 +36,9 @@ export async function openEngine({ wasmBinary, evalBin }) {
   send("setoption name Threads value 1");
   send("setoption name USI_Hash value 16");
   send("setoption name EvalDir value /eval");
+  // 通信の遅れの見込みを 0 にする（既定だと持ち時間 0・秒読み 2 秒で 0.9 秒しか考えない）
+  send("setoption name NetworkDelay value 0");
+  send("setoption name NetworkDelay2 value 0");
   const ready = async () => {
     lines.length = 0;
     send("isready");
@@ -45,29 +55,80 @@ export async function openEngine({ wasmBinary, evalBin }) {
 }
 
 // position: 「初期局面の SFEN moves 指し手 …」（千日手をエンジンが分かるように手順ごと渡す）
-// level: { nodes, multiPv, margin, byoyomi }（levels.js）
-// 結果 { move: USI の手 | "resign" | "win", score, nodes, candidates }
-export async function think(engine, position, level) {
+// level: { nodes, multiPv, margin, byoyomi, time, remain, book, bookPlies, style, skeleton }（levels.js・game.js）
+//   time: { main, byoyomi } がある段は持ち時間で考える（remain は残りの持ち時間 ms。配分はエンジンに任せる）
+// book: buildBook の結果（無ければ定跡も骨格も使わない）
+// 結果 { move: USI の手 | "resign" | "win", score, nodes, candidates, ms（考えた時間）, book（定跡の手なら true） }
+export async function think(engine, position, level, book = null) {
+  const t0 = Date.now();
+  const at = book && level.book ? parsePosition(position) : null;
+  const fromBook = at && bookMove(book, at, level);
+  if (fromBook)
+    return {
+      move: fromBook,
+      score: null,
+      nodes: null,
+      candidates: [],
+      ms: 0,
+      book: true,
+    };
+  const { best, candidates } = await search(engine, position, level);
+  let move = pick(best, candidates, level);
+  const skel = at && skeletonMove(book, at, level);
+  const over = best === "resign" || best === "win";
+  if (skel && move !== skel && candidates.length && !over) {
+    const top = candidates[0].score;
+    const s = await scoreOf(engine, position, skel, candidates, level);
+    if (top < MATE - 1000 && s !== null && top - s <= SKELETON_MARGIN)
+      move = skel;
+  }
+  return {
+    move,
+    score: candidates[0]?.score ?? null,
+    nodes: candidates[0]?.nodes ?? null,
+    candidates,
+    ms: Date.now() - t0,
+  };
+}
+
+// エンジンに読ませて、bestmove と候補（点数の高い順）を返す
+async function search(engine, position, level) {
   const { lines, send, until, ready } = engine;
   send(`setoption name MultiPV value ${level.multiPv ?? 1}`);
   send(`setoption name NodesLimit value ${level.nodes ?? 0}`);
   await ready();
   send(`position sfen ${position}`);
-  const movetime = level.byoyomi ?? 3000;
-  send(`go movetime ${movetime}`);
+  let limit;
+  if (level.time) {
+    const remain = Math.max(0, Math.round(level.remain ?? level.time.main));
+    send(`go btime ${remain} wtime ${remain} byoyomi ${level.time.byoyomi}`);
+    limit = remain + level.time.byoyomi;
+  } else {
+    limit = level.byoyomi ?? 3000;
+    send(`go movetime ${limit}`);
+  }
   await until(
     () => lines.some((l) => l.startsWith("bestmove")),
-    movetime + 20000,
+    limit + 20000,
     "go",
   );
   const best = lines.find((l) => l.startsWith("bestmove")).split(/\s+/)[1];
-  const candidates = parseCandidates(lines);
-  return {
-    move: pick(best, candidates, level),
-    score: candidates[0]?.score ?? null,
-    nodes: candidates[0]?.nodes ?? null,
-    candidates,
-  };
+  return { best, candidates: parseCandidates(lines) };
+}
+
+// 手 usi を指したときの点数（指す側から見て）。候補にあればその点数、無ければ指した後の局面を読ませる
+async function scoreOf(engine, position, usi, candidates, level) {
+  const c = candidates.find((x) => x.move === usi);
+  if (c) return c.score;
+  const after = position.includes(" moves ")
+    ? `${position} ${usi}`
+    : `${position} moves ${usi}`;
+  const r = await search(engine, after, {
+    nodes: level.nodes || SKELETON_NODES,
+    multiPv: 1,
+    byoyomi: 3000,
+  });
+  return r.candidates.length ? -r.candidates[0].score : null;
 }
 
 // info 行から、候補ごと（multipv の番号ごと）の最後の読みを取り出す。点数の高い順
@@ -140,10 +201,16 @@ export function engineHolder(open) {
 
 // エンジンはまれに内部で止まる（WASM の abort。2026-10-15 の自動対戦で 20 局に 0〜17 回。原因は未調査）。
 // そのときは開き直して同じ局面を考え直す（3 回まで）。結果に restarted: true を付ける
-export async function thinkSafely(holder, position, level, tries = 3) {
+export async function thinkSafely(
+  holder,
+  position,
+  level,
+  book = null,
+  tries = 3,
+) {
   for (let i = 0; ; i++) {
     try {
-      const r = await think(await holder.get(), position, level);
+      const r = await think(await holder.get(), position, level, book);
       return i ? { ...r, restarted: true } : r;
     } catch (e) {
       holder.reset();

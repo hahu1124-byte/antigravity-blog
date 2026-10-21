@@ -2,6 +2,8 @@
 // 使い方: node scripts/shogi/selfplay.mjs <段階A> <段階B> [序盤の数=10]
 //   序盤の決まった手順を 1 つずつ、先手・後手を入れ替えて 2 局ずつ指す（同じ手順を繰り返さないため）
 //   出力: 1 局ごとの結果と、A から見た勝ち・負け・引き分け、かかった時間
+//   --book: 定跡（book/book.json）を使う（画面と同じ）。--style=A:B で戦型（auto / ibisha / furibisha）を決める
+//   持ち時間で考える段（最強）は、1 局ごとに持ち時間を数える（画面と同じ）
 import fs from "node:fs/promises";
 
 const game = new URL("../../src/game/shogi/", import.meta.url);
@@ -14,8 +16,38 @@ const { openEngine, engineHolder, thinkSafely } = await import(
   new URL("js/cpu.js", game).href
 );
 
+const { buildBook } = await import(new URL("js/book.js", game).href);
+
 // 4 つめの引数は、序盤の一巡を何回繰り返すか（手の選び方に乱数があるので、同じ序盤でも別の対局になる）
-const [a, b, n = "10", rounds = "1"] = process.argv.slice(2);
+const args = process.argv.slice(2);
+const flags = args.filter((x) => x.startsWith("--"));
+const [a, b, n = "10", rounds = "1"] = args.filter((x) => !x.startsWith("--"));
+const useBook = flags.includes("--book");
+const styles = (
+  flags.find((x) => x.startsWith("--style="))?.slice(8) ?? "auto:auto"
+).split(":");
+const book = useBook
+  ? buildBook(
+      JSON.parse(await fs.readFile(new URL("book/book.json", game), "utf8")),
+    )
+  : null;
+// 画面の withStyle（game.js）と同じ: 振り飛車の骨格は四間・三間を 1 局ごとに選ぶ
+const withStyle = (level, style) =>
+  useBook
+    ? {
+        ...level,
+        book: true,
+        style,
+        skeleton:
+          style === "ibisha"
+            ? "ibisha"
+            : style === "furibisha"
+              ? Math.random() < 0.5
+                ? "shiken"
+                : "sanken"
+              : null,
+      }
+    : level;
 // 段階は levels.js の番号か、「局面数:候補数:点差[:n]」で直接書く（段階を決める前の試し用。
 // 末尾の :n は mateRule: false＝詰みも見逃す）
 const levelOf = (arg) => {
@@ -80,12 +112,17 @@ async function playGame(opening, levels) {
   };
   for (const u of opening.split(" "))
     if (!play(u)) throw new Error(`序盤の手順が指せない: ${opening} の ${u}`);
+  const clock = levels.map((l) => l.time?.main ?? 0);
   while (usi.length < MAX_PLIES) {
     const side = usi.length % 2;
     const position = `${START} moves ${usi.join(" ")}`;
+    const level = levels[side].time
+      ? { ...levels[side], remain: clock[side] }
+      : levels[side];
     let r;
     try {
-      r = await thinkSafely(engines[side], position, levels[side]);
+      r = await thinkSafely(engines[side], position, level, book);
+      if (levels[side].time) clock[side] = Math.max(0, clock[side] - r.ms);
     } catch (e) {
       // 開き直しても落ちたときは、局面と段階を残して止める（原因を調べるため）
       console.log(`エンジンが落ちた: ${e.message}`);
@@ -115,7 +152,9 @@ const t0 = performance.now();
 const score = { win: 0, lose: 0, draw: 0 };
 for (const opening of Array(Number(rounds)).fill(OPENINGS).flat()) {
   for (const aFirst of [true, false]) {
-    const levels = aFirst ? [levelA, levelB] : [levelB, levelA];
+    const la = withStyle(levelA, styles[0]);
+    const lb = withStyle(levelB, styles[1] ?? styles[0]);
+    const levels = aFirst ? [la, lb] : [lb, la];
     const st = performance.now();
     const r = await playGame(opening, levels);
     const aSide = aFirst ? 0 : 1;

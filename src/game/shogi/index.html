@@ -83,9 +83,25 @@
               <span id="gsLevelLabel">CPU の強さ</span>
               <select id="gsLevel"></select>
             </label>
+            <label class="sg-field gs-field">
+              <span id="gsStyleLabel">CPU の戦型</span>
+              <select id="gsStyle">
+                <option value="auto">おまかせ</option>
+                <option value="ibisha">居飛車</option>
+                <option value="furibisha">振り飛車</option>
+              </select>
+            </label>
             <label class="sg-field gs-field" id="gsLevel2Field" hidden>
               <span>後手 CPU の強さ</span>
               <select id="gsLevel2"></select>
+            </label>
+            <label class="sg-field gs-field" id="gsStyle2Field" hidden>
+              <span>後手 CPU の戦型</span>
+              <select id="gsStyle2">
+                <option value="auto">おまかせ</option>
+                <option value="ibisha">居飛車</option>
+                <option value="furibisha">振り飛車</option>
+              </select>
             </label>
             <div
               class="sg-owner gs-side"
@@ -174,8 +190,13 @@
                 3 割ほど勝てるように CPU 同士の対局で測って決めました。
               </li>
               <li>
-                CPU
-                はどの段でも数秒は考えてから指します。棋譜の各手と下の合計に、使った時間が出ます。
+                CPU はどの段でも数秒は考えてから指します。最強は 1 局 5
+                分の持ち時間の中で、難しい局面ほど長く考えます（1 手 2
+                秒以上）。棋譜の各手と下の合計に、使った時間が出ます。
+              </li>
+              <li>
+                序盤は定跡（よく指される手順）から指します。強い段ほど長く定跡どおりに進みます。戦型で「居飛車」「振り飛車」を選ぶと、CPU
+                はその戦型の定跡と駒組みを選びます（形勢を損ねる手は指さないので、相手の指し方によっては別の形になります）。
               </li>
               <li>
                 評価値は、強さの段とは別に CPU
