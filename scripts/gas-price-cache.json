@@ -1,14 +1,14 @@
 {
-  "fetchDate": "2026-10-21",
+  "fetchDate": "2026-10-28",
   "region": "愛知",
   "source": "経済産業省 石油製品価格調査（週次）",
   "regular": "164",
   "premium": "175.4",
-  "diesel": "154.1",
-  "kerosene": "2532",
-  "regularPrev": "163.7",
-  "premiumPrev": "175.2",
-  "dieselPrev": "153.8",
-  "kerosenePrev": "2521",
+  "diesel": "154.3",
+  "kerosene": "2545",
+  "regularPrev": "164",
+  "premiumPrev": "175.4",
+  "dieselPrev": "154.1",
+  "kerosenePrev": "2532",
   "note": "灯油は18L店頭価格。毎週水曜に経産省が発表するxlsxから自動取得。前週値はxlsx内の前週列を利用（追加取得不要）。"
 }
