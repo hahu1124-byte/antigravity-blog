@@ -32,11 +32,45 @@ const OG_CONFIG = JSON.parse(
 );
 const DRY_RUN = process.argv.includes("--dry-run");
 
+// 引数の値（--name=value / --name value の両方）。無ければ null
+function argValue(name) {
+  const i = process.argv.findIndex(
+    (a) => a === name || a.startsWith(`${name}=`),
+  );
+  if (i < 0) return null;
+  const a = process.argv[i];
+  return a.includes("=") ? a.slice(a.indexOf("=") + 1) : process.argv[i + 1];
+}
+
+// --date YYYYMMDD: Actions が失敗して抜けた日を後から作る（2026-11-09 追加）。
+// 過去の予報・ニュースは取れないので、天気・ニュースは取らず「後から作成」と書く。
+// --gas-cache <file>: その日時点の gas-price-cache.json（git の履歴から書き出したもの）
+const BACKFILL_DATE = argValue("--date");
+const BACKFILL = Boolean(BACKFILL_DATE);
+if (BACKFILL && !/^\d{8}$/.test(BACKFILL_DATE)) {
+  console.error(`[uber-daily] ❌ --date は YYYYMMDD: ${BACKFILL_DATE}`);
+  process.exit(1);
+}
+const GAS_CACHE_OVERRIDE = argValue("--gas-cache");
+const BACKFILL_NOTE =
+  '<p class="section-note">この記事は自動生成に失敗した日の分を後から作成したため、当日の天気予報・ニュースはありません。</p>';
+
 // ===== ユーティリティ =====
 
 // GitHub Actions は UTC で実行されるため、JST (+9h) に変換して日本時間基準にする
+// （後から作る日はその日の 6:00 JST とする。getUTC* で読むので UTC 06:00 として持つ）
 const now = new Date();
-const today = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+const today = BACKFILL
+  ? new Date(
+      Date.UTC(
+        +BACKFILL_DATE.slice(0, 4),
+        +BACKFILL_DATE.slice(4, 6) - 1,
+        +BACKFILL_DATE.slice(6, 8),
+        6,
+        0,
+      ),
+    )
+  : new Date(now.getTime() + 9 * 60 * 60 * 1000);
 const YYYY = today.getUTCFullYear();
 const MM = String(today.getUTCMonth() + 1).padStart(2, "0");
 const DD = String(today.getUTCDate()).padStart(2, "0");
@@ -199,6 +233,8 @@ function getWeatherType(telop, tempMax) {
 }
 
 function renderWeatherSection(weather) {
+  if (BACKFILL)
+    return `<p>天気予報はありません。</p>${BACKFILL_NOTE}<p class="section-note">当日の実際の天気は<a href="https://www.data.jma.go.jp/stats/etrn/" target="_blank" rel="noopener">気象庁の過去の気象データ</a>で確認できます。</p>`;
   if (!weather)
     return '<p>天気予報の取得に失敗しました。<a href="https://www.jma.go.jp/bosai/forecast/#area_type=offices&area_code=230000" target="_blank">気象庁ページ</a>をご確認ください。</p>';
 
@@ -303,6 +339,7 @@ async function getNews() {
 }
 
 function renderNewsSection(news) {
+  if (BACKFILL) return `<p>特に無し</p>${BACKFILL_NOTE}`;
   if (!news || news.length === 0) {
     return '<p>特に無し</p><p class="section-note">配達に大きな影響がありそうなニュースは見つかりませんでした。</p>';
   }
@@ -320,7 +357,9 @@ function renderNewsSection(news) {
 // ガソリン価格は独立した週次ワークフロー (update-gas-price.yml) がキャッシュを更新する。
 // このスクリプトはキャッシュを読むだけで、外部の経産省サイトへは一切アクセスしない。
 function getGasPriceCache() {
-  const cachePath = path.join(ROOT, CONFIG.gasoline.cacheFile);
+  const cachePath = GAS_CACHE_OVERRIDE
+    ? path.resolve(GAS_CACHE_OVERRIDE)
+    : path.join(ROOT, CONFIG.gasoline.cacheFile);
   try {
     const data = JSON.parse(fs.readFileSync(cachePath, "utf8"));
     const cacheDate = new Date(data.fetchDate);
@@ -460,6 +499,7 @@ function getHeatAdvice(weather) {
 }
 
 function renderHeatSection(advice) {
+  if (BACKFILL) return "<p>気温の予報が無いため、アドバイスはありません。</p>";
   if (!advice) return "<p>気温情報を取得できませんでした。</p>";
 
   return `<div class="heat-advice">
@@ -513,6 +553,7 @@ function generateComment(weather, predictions) {
 // ===== タイトル生成 =====
 
 function generateTitle(weather) {
+  if (BACKFILL) return `📅 ${DATE_STR} 曜日の傾向と需要`;
   const todayFc = weather?.forecasts?.[0];
   const type = getWeatherType(todayFc?.telop, todayFc?.tempMax);
   const tmpl = CONFIG.titleTemplates[type] || CONFIG.titleTemplates.sunny;
@@ -580,6 +621,12 @@ function buildFragment({
 // src/articles/<YYYYMM>/<DATE_STR>_uber_daily.html へ常に上書きする
 // （同日再実行時も最新データで更新される。build.mjs 側が dist へのHTML組み立てを担う）
 
+function articleExcerpt() {
+  return BACKFILL
+    ? `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ${DATE_DISPLAY}の情報。曜日別の傾向・需要予測・ガソリン価格をチェック！（天気予報・ニュースは無し）`
+    : `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`;
+}
+
 function writeFragment(html, title, ogImageRel) {
   const dir = path.join(ROOT, "src/articles", YYYYMM);
   fs.mkdirSync(dir, { recursive: true });
@@ -589,7 +636,7 @@ function writeFragment(html, title, ogImageRel) {
   const metadata = {
     title: fullTitle,
     date: DATE_DISPLAY_WITH_TIME,
-    excerpt: `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`,
+    excerpt: articleExcerpt(),
     tags: [blogTag],
     ...(ogImageRel ? { ogImage: ogImageRel } : {}),
   };
@@ -615,7 +662,7 @@ function updateBlogData(title, ogImageRel) {
     slug,
     title: fullTitle,
     date: DATE_DISPLAY_WITH_TIME,
-    excerpt: `名古屋のフードデリバリー配達（Uber Eats・出前館・ロケットナウ・menu）に役立つ${DATE_DISPLAY}の情報。天気・交通・ニュース・ガソリン価格・需要予測をチェック！`,
+    excerpt: articleExcerpt(),
     tags: [blogTag],
     ...(ogImageRel ? { ogImage: ogImageRel } : {}),
   };
@@ -644,11 +691,15 @@ async function main() {
     `🚴 ${CONFIG.blog.tag}デイリーレポート生成開始 — ${DATE_DISPLAY}（${DAY_NAMES[DAY_OF_WEEK]}）`,
   );
   if (DRY_RUN) log("⚠️ ドライランモード: ファイル出力なし");
+  if (BACKFILL)
+    log(
+      `📅 後から作成（天気・ニュースは取らない）${GAS_CACHE_OVERRIDE ? ` ガソリン価格: ${GAS_CACHE_OVERRIDE}` : ""}`,
+    );
 
-  // 1. データ収集（並列）
+  // 1. データ収集（並列）。後から作る日は当日の予報・ニュースが無いので取らない
   const [weather, news, gasPrice] = await Promise.all([
-    getWeather(),
-    getNews(),
+    BACKFILL ? null : getWeather(),
+    BACKFILL ? [] : getNews(),
     getGasPrice(),
   ]);
 
@@ -665,6 +716,19 @@ async function main() {
   if (!DRY_RUN) {
     const todayFc = weather?.forecasts?.[0];
     const weatherType = getWeatherType(todayFc?.telop, todayFc?.tempMax);
+    const cardText = dailyCardText({
+      date: DATE_DISPLAY,
+      weatherType,
+      telop: todayFc?.telop,
+      tempMax: todayFc?.tempMax,
+      tempMin: todayFc?.tempMin,
+      multiplier: predictions.length
+        ? Math.max(...predictions.map((p) => p.multiplier))
+        : 1,
+      titleTemplates: CONFIG.titleTemplates,
+    });
+    // 後から作る日は天気が分からないので、見出しに天気の言葉（配達日和など）を出さない
+    if (BACKFILL) cardText.title = "曜日の傾向と需要";
     ogImageRel = await renderAutoPhotoOg({
       projectDir: ROOT,
       slug,
@@ -675,17 +739,7 @@ async function main() {
         rainMax: maxRainPercent(todayFc?.chanceOfRain),
         month: Number(MM),
       }),
-      text: dailyCardText({
-        date: DATE_DISPLAY,
-        weatherType,
-        telop: todayFc?.telop,
-        tempMax: todayFc?.tempMax,
-        tempMin: todayFc?.tempMin,
-        multiplier: predictions.length
-          ? Math.max(...predictions.map((p) => p.multiplier))
-          : 1,
-        titleTemplates: CONFIG.titleTemplates,
-      }),
+      text: cardText,
       imagesDir: path.join(ROOT, "src/images"),
       config: OG_CONFIG,
     });

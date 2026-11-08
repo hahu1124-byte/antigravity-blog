@@ -147,12 +147,10 @@ export function pickBackground({
           .sort((a, b) => dayNumber(b.date) - dayNumber(a.date))
           .slice(0, TECH_AVOID_COUNT)
           .map((h) => h.key)
-      : others
-          .filter(
-            (h) =>
-              today - dayNumber(h.date) < AVOID_DAYS &&
-              today - dayNumber(h.date) >= 0,
-          )
+      : // 前後 30 日。ふだんは先の日の記録が無いので前 30 日と同じ。
+        // 抜けた日を後から作るとき（generate-uber-daily.mjs --date）に後ろの日の絵と重ねないため
+        others
+          .filter((h) => Math.abs(today - dayNumber(h.date)) < AVOID_DAYS)
           .map((h) => h.key),
   );
   const keysOf = (group) =>

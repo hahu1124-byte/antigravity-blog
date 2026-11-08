@@ -2,7 +2,7 @@ name: Generate Uber Daily Report
 
 on:
   schedule:
-    # JST 6:00 = UTC 21:00 (前日)
+    # JST 6:00 = UTC 21:00 (前日)。実際は数時間遅れるので保険（ふだんは手元のタスクが 6:00 に起動する）
     - cron: '0 21 * * *'
   workflow_dispatch:
 
@@ -14,7 +14,33 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  # 毎朝 6:00 は手元のタスクスケジューラ（AntigravityBlog_UberDailyDispatch → workflow_dispatch）が起動する。
+  # schedule は数時間遅れるので PC が止まっていた朝の保険。その日の記事がもうあれば作り直さない
+  # （手で起動した workflow_dispatch はいつでも作り直す）
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.exists.outputs.skip }}
+    steps:
+      - name: その日の記事がもうあるか
+        id: exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "skip=false" >> $GITHUB_OUTPUT; exit 0
+          fi
+          D=$(TZ=Asia/Tokyo date +%Y%m%d)
+          if gh api "repos/${{ github.repository }}/contents/src/articles/${D:0:6}/${D}_uber_daily.html" --silent; then
+            echo "${D} の記事はもうある（手元から起動済み）ので作らない"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
   generate:
+    needs: check
+    if: needs.check.outputs.skip != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

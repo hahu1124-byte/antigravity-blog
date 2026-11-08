@@ -7,8 +7,13 @@ description: Uber配達デイリーレポートの手動生成・ガソリン価
 
 ## 自動実行
 
-- GitHub Actions `uber-daily-report.yml` が **毎朝 JST 6:00**（UTC 21:00）に自動実行
-  - （2026-11-09 追記）cron は 6:00 だが、GitHub の schedule は混んでいると遅れる。実際の開始は 9/30〜11/8 で JST 7:39〜11:42（10/15〜10/25 は 7〜8 時台、10/27 以降は 9〜11 時台）。cron の設定ではなく GitHub 側の待ち
+- **毎朝 JST 6:00 に手元の PC のタスクスケジューラ `AntigravityBlog_UberDailyDispatch` が `uber-daily-report.yml` を起動する**（2026-11-09 から）
+  - 中身: `wscript //B silent_uber_dispatch.vbs` → `hrun.sh ... node scripts/local-uber-dispatch.cjs`。その日の記事がリモートにあれば何もせず、無ければ `gh workflow run`。ネットワークが無ければ 60 秒おきに 5 回まで
+  - `StartWhenAvailable`: 6:00 に PC が止まっていたら次に起動したときに動く
+  - ログ: `H:/gravity/.agent/tmp/uber-daily-dispatch.log`。判定だけ試す: `node scripts/local-uber-dispatch.cjs --dry-run`
+  - 登録し直す: `pwsh -NoProfile -File H:\gravity\.agent\scripts\register_uber_dispatch_task.ps1`（管理者不要）
+- Actions の schedule（cron `0 21 * * *` = JST 6:00）は**保険**として残してある。check ジョブがその日の記事がもうあれば generate を飛ばす（手で Run workflow したときは常に作り直す）
+  - （2026-11-09 追記）cron は 6:00 だが、GitHub の schedule は混んでいると遅れる。実際の開始は 9/30〜11/8 で JST 7:39〜11:42（10/15〜10/25 は 7〜8 時台、10/27 以降は 9〜11 時台）。cron の設定ではなく GitHub 側の待ちなので、手元から起動する形にした
 - `main` ブランチに push → `deploy.yml` が GitHub Pages にデプロイ
 - 日本語フォント（fonts-noto-cjk・-extra・ipafont-gothic）は Actions のキャッシュ（キー `fonts-noto-cjk-sans-ipag-v1`、中身は NotoSansCJK-*.ttc と ipag*.ttf）から戻す。キャッシュが無い日だけ apt で入れ、太さ（extra）まで入ったら保存する（2026-11-09 から。前は毎回 apt で 61MB を落とし、10/26・11/7 は 5 分の時間切れで記事が作られなかった）
 
@@ -20,6 +25,15 @@ description: Uber配達デイリーレポートの手動生成・ガソリン価
 ```bash
 bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/generate-uber-daily.mjs
 ```
+
+- 失敗して抜けた日を後から作る（天気予報・ニュースなし、「後から作成」と書く。ガソリン価格はその日時点の値を git の履歴から書き出して渡す）
+```bash
+bash h:/gravity/.agent/scripts/hgit.sh h:/gravity/projects/antigravity-blog log --format="%h %ad %s" --date=iso -3 --until=YYYY-MM-DDT06:00+09:00 -- scripts/gas-price-cache.json
+# → 一番上のコミットの gas-price-cache.json を scratch に保存（hgit.sh の表示行が混ざるので中身だけ書く）
+bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node scripts/generate-uber-daily.mjs --date YYYYMMDD --gas-cache ../../archive/scratch/uber-backfill/gas-YYYYMMDD.json
+```
+- 時刻はその日の 6:00、タイトル・アイキャッチの見出しは「曜日の傾向と需要」、需要予測は曜日の条件だけ。背景は前後 30 日に使った絵を避ける（`og-bg.mjs` の `pickBackground`）。天気の履歴（`weather-history.json`）には何も足さない
+- 2026-11-09 に 10/26・11/7 をこれで作った
 
 2. dry-run で内容確認（ファイル出力なし）
 ```bash
@@ -163,4 +177,7 @@ bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node
 | `scripts/local-gas-archive.cjs` | fetch-gas-price.py呼び出し＋xlsx実体をG:\マイドライブ\gas\へ保存（ローカルタスクスケジューラ側、cache.json更新なし） |
 | `scripts/fetch-gas-price.py` | curl_cffiでAWS WAFを回避しxlsxを直接取得 |
 | `.github/workflows/uber-daily-report.yml` | 毎朝自動実行ワークフロー（記事生成） |
+| `scripts/local-uber-dispatch.cjs` | 毎朝 6:00 に手元から上のワークフローを起動（その日の記事があれば何もしない） |
+| `scripts/silent_uber_dispatch.vbs` | タスク `AntigravityBlog_UberDailyDispatch` から窓を出さずに上を呼ぶ |
+| `H:\gravity\.agent\scripts\register_uber_dispatch_task.ps1` | そのタスクの登録（毎日 6:00・StartWhenAvailable・管理者不要） |
 | `.github/workflows/update-gas-price.yml` | 毎週水・木自動実行ワークフロー（ガソリン価格キャッシュ更新のみ。xlsx実体のクラウド保存は機能しない） |
