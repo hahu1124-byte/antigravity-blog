@@ -67,8 +67,12 @@ jobs:
     permissions:
       contents: write
     steps:
+      # 起動したときのコミットではなく最新の main を取る。続けてデプロイが走ると、
+      # ひとつ前の notify が push した posted-items.json が見えずに同じ記事を二重投稿していた（2026-11-09）
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
