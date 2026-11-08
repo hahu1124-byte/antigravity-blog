@@ -29,23 +29,58 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: 日本語フォント導入（OGP画像の豆腐化対策）
-        timeout-minutes: 5
+      # 日本語フォント（OGP画像の豆腐化対策）は Actions のキャッシュから戻す。
+      # 毎回 apt で 61MB を落とすと Azure のミラーが遅い日に 5 分を超えて落ちていた（2026-10-26・11-07）
+      - name: 日本語フォントをキャッシュから戻す
+        id: fontcache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/cjk-fonts
+          key: fonts-noto-cjk-sans-ipag-v1
+
+      - name: 日本語フォント導入（キャッシュが無いときだけ）
+        if: steps.fontcache.outputs.cache-hit != 'true'
+        timeout-minutes: 15
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends fonts-noto-cjk fonts-ipafont-gothic
-          fc-cache -f -v
-          fc-list :lang=ja | head -n 5
+          sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 fonts-noto-cjk fonts-ipafont-gothic
 
       # アイキャッチの見出しの極太（Black 900）・Medium。fonts-noto-cjk は Regular/Bold だけ。
       # 入らなくても 700 で描けるので、別の手順にして失敗しても止めない
-      - name: 日本語フォントの太さを追加（アイキャッチの見出し用）
+      - name: 日本語フォントの太さを追加（キャッシュが無いときだけ）
+        id: fontextra
+        if: steps.fontcache.outputs.cache-hit != 'true'
         continue-on-error: true
-        timeout-minutes: 8
+        timeout-minutes: 15
+        run: sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 fonts-noto-cjk-extra
+
+      # 太さまで全部そろった日だけ保存する（欠けたまま保存すると以後ずっと 700 になるため）
+      - name: 入れたフォントをキャッシュ用に写す
+        if: steps.fontcache.outputs.cache-hit != 'true' && steps.fontextra.outcome == 'success'
         run: |
-          sudo apt-get install -y --no-install-recommends fonts-noto-cjk-extra
+          mkdir -p ~/cjk-fonts
+          dpkg -L fonts-noto-cjk fonts-noto-cjk-extra fonts-ipafont-gothic \
+            | grep -E '/NotoSansCJK-[^/]*\.ttc$|/ipag[^/]*\.ttf$' \
+            | xargs -r cp -L -t ~/cjk-fonts/
+          ls -la ~/cjk-fonts
+
+      - name: フォントをキャッシュに保存
+        if: steps.fontcache.outputs.cache-hit != 'true' && steps.fontextra.outcome == 'success'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/cjk-fonts
+          key: fonts-noto-cjk-sans-ipag-v1
+
+      - name: フォントを登録
+        run: |
+          if [ "${{ steps.fontcache.outputs.cache-hit }}" = "true" ]; then
+            mkdir -p ~/.local/share/fonts
+            cp -r ~/cjk-fonts ~/.local/share/fonts/
+          fi
           fc-cache -f
-          fc-list :lang=ja style | grep -i "Noto Sans CJK JP" | grep -iE "black|medium" | head -n 3
+          [ -n "$(fc-list :lang=ja)" ] || { echo "::error::日本語フォントが見つかりません"; exit 1; }
+          fc-list :lang=ja | head -n 5
+          fc-list :lang=ja style | grep -i "Noto Sans CJK JP" | grep -iE "black|medium" | head -n 3 || true
 
       - name: Generate daily report
         run: node scripts/generate-uber-daily.mjs

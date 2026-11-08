@@ -8,7 +8,9 @@ description: Uber配達デイリーレポートの手動生成・ガソリン価
 ## 自動実行
 
 - GitHub Actions `uber-daily-report.yml` が **毎朝 JST 6:00**（UTC 21:00）に自動実行
+  - （2026-11-09 追記）cron は 6:00 だが、GitHub の schedule は混んでいると遅れる。実際の開始は 9/30〜11/8 で JST 7:39〜11:42（10/15〜10/25 は 7〜8 時台、10/27 以降は 9〜11 時台）。cron の設定ではなく GitHub 側の待ち
 - `main` ブランチに push → `deploy.yml` が GitHub Pages にデプロイ
+- 日本語フォント（fonts-noto-cjk・-extra・ipafont-gothic）は Actions のキャッシュ（キー `fonts-noto-cjk-sans-ipag-v1`、中身は NotoSansCJK-*.ttc と ipag*.ttf）から戻す。キャッシュが無い日だけ apt で入れ、太さ（extra）まで入ったら保存する（2026-11-09 から。前は毎回 apt で 61MB を落とし、10/26・11/7 は 5 分の時間切れで記事が作られなかった）
 
 ---
 
@@ -125,6 +127,8 @@ bash h:/gravity/.agent/scripts/hrun.sh h:/gravity/projects/antigravity-blog node
 
 - `.github/workflows/uber-daily-report.yml` の cron 設定を確認
 - Actions タブ → 「Generate Uber Daily Report」→ 「Run workflow」で手動実行テスト
+- 失敗した日の調べ方: `gh -R hahu1124-byte/antigravity-blog run list --workflow uber-daily-report.yml --limit 40` で `failure` を探し、`gh -R hahu1124-byte/antigravity-blog run view <ID> --log-failed` で止まった手順を見る
+- 「日本語フォント導入」で `has timed out` → apt のミラーが遅い日。キャッシュが消えた（7 日使われないと消える）か、キーを変えた直後だけ起きる。もう一度 Run workflow すればよい
 
 ### 記事が重複した
 
