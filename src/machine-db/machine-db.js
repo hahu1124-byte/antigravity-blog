@@ -167,7 +167,8 @@
         try {
             const PAGE = 1000;
             // formerNames: 改名前の名前（extra_data.formerNames）。お気に入りを旧名でも引くために読む
-            const SELECT = 'name,type,prob,base_probability,border_equiv,rb,yutime_trigger,yutime_spins,avg_chain,avg_acquired,entry_rate,real_cont_rate,rush_rate,aliases,release_date,maker,source_url,updated_at,created_at,formerNames:extra_data->formerNames';
+            // name_kana: 機種名の読み（カタカナ・空白なし）。漢字の機種名をひらがなで引くために読む
+            const SELECT = 'name,type,prob,base_probability,border_equiv,rb,yutime_trigger,yutime_spins,avg_chain,avg_acquired,entry_rate,real_cont_rate,rush_rate,aliases,name_kana,release_date,maker,source_url,updated_at,created_at,formerNames:extra_data->formerNames';
             const HEADERS = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` };
             const allRows = [];
             for (let offset = 0; ; offset += PAGE) {
@@ -199,8 +200,9 @@
                 maker: row.maker || '',
                 sourceUrl: row.source_url || '',
                 createdAt: row.created_at || null,
-                // 機種名と別名を正規化して 1 本につないだ検索キー（入力のたびに作り直さない）
-                searchKey: [row.name, ...(Array.isArray(row.aliases) ? row.aliases : [])].map(normalizeSearch).join('\n'),
+                // 機種名と別名・読みを正規化して 1 本につないだ検索キー（入力のたびに作り直さない）
+                searchKey: [row.name, ...(Array.isArray(row.aliases) ? row.aliases : []), row.name_kana || ''].map(normalizeSearch).join('\n'),
+                kanaKey: normalizeSearch(row.name_kana || ''),
             }));
             // 最終更新日時（updated_atの最大値）
             const maxUpdated = allRows.reduce((max, r) => (!r.updated_at ? max : (!max || r.updated_at > max ? r.updated_at : max)), null);
@@ -233,10 +235,12 @@
 
     function applyFilters() {
         const search = normalizeSearch(searchInput.value.trim());
+        // 読み（name_kana）は空白を除いて持っているので、空白入りの入力（「いっき とうせん」）は空白を除いた形でも読みと比べる
+        const searchNoSpace = search.replace(/\s+/g, '');
         const type = typeFilter.value;
         const yutime = yutimeFilter.value;
         filteredMachines = allMachines.filter(m => {
-            if (search && !m.searchKey.includes(search)) return false;
+            if (search && !m.searchKey.includes(search) && !(searchNoSpace && m.kanaKey.includes(searchNoSpace))) return false;
             if (type !== 'all') {
                 if (type === 'その他') {
                     if (['ハイミドル', 'ミドル', 'ライトミドル', 'ライト(甘デジ)'].includes(m.type)) return false;
